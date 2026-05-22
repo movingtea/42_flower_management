@@ -1,0 +1,175 @@
+<!-- pages/index/index.wxml — 植物工作室首页 -->
+<scroll-view class="page-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+
+  <!-- 公告栏 -->
+  <view wx:if="{{notice.enabled && notice.text}}" class="notice-bar">
+    <swiper
+      class="notice-swiper"
+      vertical
+      autoplay
+      circular
+      interval="3500"
+      duration="500"
+    >
+      <swiper-item>
+        <view class="notice-inner flex-center">
+          <text class="notice-tag">公告</text>
+          <text class="notice-text text-ellipsis">{{notice.text}}</text>
+        </view>
+      </swiper-item>
+    </swiper>
+  </view>
+
+  <!-- 轮播图 -->
+  <swiper
+    wx:if="{{banners.length}}"
+    class="banner-swiper"
+    indicator-dots
+    indicator-color="rgba(255,255,255,0.5)"
+    indicator-active-color="#ffffff"
+    autoplay
+    circular
+    interval="4500"
+  >
+    <swiper-item wx:for="{{banners}}" wx:key="id">
+      <image
+        class="banner-image"
+        src="{{item.imageUrl}}"
+        mode="aspectFill"
+        bindtap="onBannerTap"
+        data-product-id="{{item.productId}}"
+      />
+    </swiper-item>
+  </swiper>
+  <view wx:else class="banner-placeholder flex-center">
+    <text class="text-muted">暂无轮播内容</text>
+  </view>
+
+  <!-- 金刚区 -->
+  <view class="kingkong-section">
+    <view class="kingkong-grid">
+      <view
+        class="kingkong-card"
+        bindtap="onKingkongTap"
+        data-type="pickup"
+      >
+        <text class="kingkong-icon">🌿</text>
+        <text class="kingkong-title">到店自提</text>
+      </view>
+      <view
+        class="kingkong-card"
+        bindtap="onKingkongTap"
+        data-type="romance"
+      >
+        <text class="kingkong-icon">💐</text>
+        <text class="kingkong-title">浪漫告白</text>
+      </view>
+      <view
+        class="kingkong-card"
+        bindtap="onKingkongTap"
+        data-type="business"
+      >
+        <text class="kingkong-icon">✨</text>
+        <text class="kingkong-title">商务定制</text>
+      </view>
+      <view
+        class="kingkong-card"
+        bindtap="onKingkongTap"
+        data-type="guide"
+      >
+        <text class="kingkong-icon">📖</text>
+        <text class="kingkong-title">养护指南</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 动态分类 Tab -->
+  <scroll-view
+    class="category-scroll"
+    scroll-x
+    enhanced
+    show-scrollbar="{{false}}"
+    wx:if="{{categories.length}}"
+  >
+    <view class="category-tabs">
+      <view
+        wx:for="{{categories}}"
+        wx:key="id"
+        class="category-tab {{currentTabId === item.id ? 'category-tab--active' : ''}}"
+        bindtap="onCategoryTabTap"
+        data-tab-id="{{item.id}}"
+      >
+        <text>{{item.label}}</text>
+        <view wx:if="{{currentTabId === item.id}}" class="category-tab-line"></view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 商品双列瀑布流 -->
+  <view class="product-section">
+    <view wx:if="{{loading}}" class="loading-hint flex-center">
+      <text class="text-muted">正在加载花艺好物…</text>
+    </view>
+
+    <view wx:elif="{{filteredProducts.length}}" class="product-grid">
+      <view
+        wx:for="{{filteredProducts}}"
+        wx:key="id"
+        class="product-card"
+        bindtap="onProductTap"
+        data-id="{{item.id}}"
+        data-out-of-stock="{{item.isOutOfStock}}"
+      >
+        <view class="product-image-wrap">
+          <image
+            class="product-image"
+            src="{{item.imageUrl}}"
+            mode="aspectFill"
+            lazy-load
+          />
+          <view
+            wx:if="{{item.isOutOfStock}}"
+            class="out-of-stock-mask flex-center"
+          >
+            <text class="out-of-stock-text">今日售罄 · 可预约明日</text>
+          </view>
+        </view>
+        <view class="product-info">
+          <text class="product-name text-ellipsis">{{item.name}}</text>
+          <text
+            wx:if="{{item.subtitle}}"
+            class="product-subtitle text-ellipsis text-muted"
+          >{{item.subtitle}}</text>
+          <text class="price-text">¥{{item.price}}</text>
+        </view>
+      </view>
+    </view>
+
+    <view wx:else class="empty-hint flex-center">
+      <text class="text-muted">该分类暂无商品，敬请期待</text>
+    </view>
+  </view>
+
+  <view class="page-footer safe-area-bottom"></view>
+</scroll-view>
+
+<!-- 运营弹窗 -->
+<view
+  wx:if="{{popupVisible && popup.enabled}}"
+  class="popup-mask flex-center"
+  catchtap="onClosePopup"
+>
+  <view class="popup-card" catchtap="onPopupCardTap">
+    <image
+      wx:if="{{popup.imageUrl}}"
+      class="popup-image"
+      src="{{popup.imageUrl}}"
+      mode="aspectFill"
+    />
+    <view class="popup-body">
+      <text wx:if="{{popup.title}}" class="popup-title">{{popup.title}}</text>
+      <text wx:if="{{popup.content}}" class="popup-content text-muted">{{popup.content}}</text>
+    </view>
+    <view class="popup-close flex-center" catchtap="onClosePopup">知道了</view>
+  </view>
+</view>

@@ -1,0 +1,36 @@
+# WeChat Mini Program Frontend Project Rules
+
+You are an expert developer specializing in WeChat Native Mini Programs using TypeScript. You must adhere to the following strict technical, architectural, and encoding guidelines for this project.
+
+## 1. Encoding & Language Guardrails (CRITICAL)
+- **NO UNICODE ESCAPING:** You must write all Chinese characters as raw, literal, human-readable text (e.g., use "鲜花" or "确认入库"). **NEVER** convert Chinese strings or comments into Unicode escape sequences (like `\u7e6a\u5236`).
+- **FILE ENCODING:** Always save and output files using the standard UTF-8 encoding.
+- **PATCHING DISCIPLINE:** When generating or refactoring files that are brand new or contain heavy text/configuration changes, prefer outputting the **whole file content** instead of incremental chunks to avoid "patch not assignable" errors.
+
+## 2. Architecture & Backend Integration Constraints
+- **NO WECHAT CLOUD DEVELOPMENT (云开发):** This project **DOES NOT** use WeChat CloudBase, Cloud Functions, or Cloud Databases.
+- **SELF-HOSTED BACKEND:** All data features interact with our self-hosted Next.js full-stack backend via HTTPS network requests.
+- **API ROUTE STANDARDS:** Always utilize the encapsulated network utility in `utils/request.ts` to fetch data.
+  - Base URL maps to the Next.js service: `http://localhost:3000/api/wechat` (or LAN IP for physical device testing).
+  - Main endpoints include: `/homepage` (Banners & categories combo), `/products` (Filtered active items), and `/orders` (FIFO locking & status checking).
+
+## 3. WeChat Native TypeScript Coding Standards
+- **FILE STRUCTURE:** Every page or component must strictly consist of four parallel files with matching names:
+  - `.wxml` (Structure - raw XML tags like `<view>`, `<text>`, `<image>`, `<scroll-view>`)
+  - `.wxss` (Styles - native utility classes or standard CSS)
+  - `.json` (Configuration - explicit definitions for `usingComponents`, `navigationBarTitleText`, etc.)
+  - `.ts` (Logic - strict TypeScript typing using official WeChat Mini Program type definitions)
+- **PAGE & COMPONENT INITIALIZATION:**
+  - Initialize pages using `Page({...})` and components using `Component({...})`.
+  - Always enforce explicit Type Casting for events and datasets if needed.
+  - Implement standard lifecycle methods accurately (`onLoad`, `onShow`, `onReady` for pages).
+- **DATA BINDING:** Use `this.setData({ ... })` synchronously to trigger UI rerenders. Never mutate `this.data` directly.
+
+## 4. Specific Business Logic Guidelines (Flower Studio)
+- **DYNAMIC CATEGORIES:** Category lists on the homepage or navigation pages must be loaded dynamically from `request({ url: '/homepage' })`. Do not hardcode any product categories in the frontend.
+- **MULTIPLE CATEGORIES PROCESSING:** Expect `product.category` from the backend to arrive as an array of strings (`string[]`). Ensure UI rendering accounts for products belonging to multiple categories concurrently.
+- **OUT OF STOCK HANDLING:** Always inspect `product.isOutOfStock` or total stock counters. If a product is out of stock, render a elegant, blurred overlay mask (`今日售罄 / 可预约明日`) and disable the immediate purchase buttons.
+- **LOGISTICS & DELIVERY FORM:** Checkout page requires specialized fields: `deliveryTime` (Picker component for date/time), `receiverName`, `receiverPhone`, `deliveryAddress`, and a custom text area for `greetingCard` (贺卡祝福语).
+
+## 5. UI & Aesthetics
+- Maintain a premium, high-end floral studio visual style. Use minimalist layouts, generous white spaces, low-saturation elegant color schemes, and large high-definition images.

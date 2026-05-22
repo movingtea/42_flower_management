@@ -1,0 +1,32 @@
+export const mockAdminOrders = [
+  {
+    id: "ord-001",
+    orderNo: "FL20250522001",
+    customerName: "张女士",
+    status: "PREPARING",
+    lockStatus: "已锁库",
+    totalAmount: 198,
+    createdAt: "2025-05-22T10:30:00",
+    items: ["经典红玫瑰束 × 1"],
+  },
+  {
+    id: "ord-002",
+    orderNo: "FL20250522002",
+    customerName: "李先生",
+    status: "PAID",
+    lockStatus: "已锁库",
+    totalAmount: 426,
+    createdAt: "2025-05-22T11:05:00",
+    items: ["向日葵花篮 × 1", "粉百合礼盒 × 1"],
+  },
+  {
+    id: "ord-003",
+    orderNo: "FL20250522003",
+    customerName: "王小姐",
+    status: "PENDING",
+    lockStatus: "待锁库",
+    totalAmount: 88,
+    createdAt: "2025-05-22T11:20:00",
+    items: ["迷你满天星束 × 1"],
+  },
+];

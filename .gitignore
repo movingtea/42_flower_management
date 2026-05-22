@@ -1,0 +1,25 @@
+# 🌲 日志与依赖
+node_modules/
+.pnpm-store/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 📦 Next.js 后端与中台打包缓存
+.next/
+out/
+build/
+.env*.local
+.env
+
+# 📱 微信小程序临时编译文件
+wechat-mini-program/miniprogram_npm/
+wechat-mini-program/.sourcemap/
+wechat-mini-program/project.private.config.json
+
+# 🛠️ IDE 与系统残留
+.DS_Store
+*.local
+.idea/
+.vscode/
+

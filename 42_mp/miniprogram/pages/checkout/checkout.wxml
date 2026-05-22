@@ -1,0 +1,130 @@
+<!-- pages/checkout/checkout.wxml — 结算与履约表单骨架 -->
+<view class="checkout-page">
+
+  <!-- 版块一：履约方式 -->
+  <view class="section">
+    <view class="section-title">履约方式</view>
+    <view class="fulfillment-row">
+      <button
+        class="fulfillment-btn {{fulfillmentMethod === 'DELIVERY' ? 'fulfillment-btn--active' : ''}}"
+        bindtap="onFulfillmentChange"
+        data-method="DELIVERY"
+      >同城闪送</button>
+      <button
+        class="fulfillment-btn {{fulfillmentMethod === 'PICKUP' ? 'fulfillment-btn--active' : ''}}"
+        bindtap="onFulfillmentChange"
+        data-method="PICKUP"
+      >到店自提</button>
+    </view>
+  </view>
+
+  <!-- 版块二：收货人信息（同城闪送） -->
+  <view class="section" wx:if="{{fulfillmentMethod === 'DELIVERY'}}">
+    <view class="section-title">收货人信息</view>
+    <view class="form-row">
+      <text class="form-label">收件人姓名</text>
+      <input
+        class="form-input"
+        placeholder="请输入收件人姓名"
+        value="{{receiverName}}"
+        bindinput="onReceiverNameInput"
+      />
+    </view>
+    <view class="form-row">
+      <text class="form-label">联系电话</text>
+      <input
+        class="form-input"
+        type="number"
+        maxlength="11"
+        placeholder="请输入手机号"
+        value="{{receiverPhone}}"
+        bindinput="onReceiverPhoneInput"
+      />
+    </view>
+    <view class="form-row">
+      <text class="form-label">详细地址</text>
+      <input
+        class="form-input"
+        placeholder="请输入详细收货地址"
+        value="{{deliveryAddress}}"
+        bindinput="onDeliveryAddressInput"
+      />
+    </view>
+  </view>
+
+  <!-- 版块三：鲜花行业履约字段 -->
+  <view class="section">
+    <view class="section-title">配送与贺卡</view>
+
+    <view class="form-row picker-row">
+      <text class="form-label">期望送达日期</text>
+      <picker mode="date" value="{{deliveryDate}}" start="{{minDeliveryDate}}" bindchange="onDeliveryDateChange">
+        <view class="picker-value">{{deliveryDate || '请选择日期'}}</view>
+      </picker>
+    </view>
+
+    <view class="form-row picker-row">
+      <text class="form-label">期望送达时段</text>
+      <picker
+        mode="selector"
+        range="{{timeBuckets}}"
+        value="{{deliveryTimeBucketIndex}}"
+        bindchange="onDeliveryTimeBucketChange"
+      >
+        <view class="picker-value">{{deliveryTimeBucket}}</view>
+      </picker>
+    </view>
+
+    <view class="form-row form-row--column">
+      <text class="form-label">贺卡祝福语</text>
+      <textarea
+        class="form-textarea"
+        placeholder="可填写手写贺卡内容，留空则不需要贺卡"
+        value="{{greetingCard}}"
+        maxlength="200"
+        bindinput="onGreetingCardInput"
+      />
+    </view>
+
+    <checkbox-group class="form-row checkbox-row" bindchange="onAnonymousChange">
+      <label class="checkbox-label-wrap">
+        <checkbox value="anonymous" checked="{{isAnonymous}}" color="#8fa89b" />
+        <text class="checkbox-label">匿名送花（不向收花人展示订购人信息）</text>
+      </label>
+    </checkbox-group>
+  </view>
+
+  <!-- 商品明细（联调展示） -->
+  <view class="section">
+    <view class="section-title">商品明细</view>
+    <view class="order-item" wx:for="{{orderItems}}" wx:key="productId">
+      <text class="order-item-name">{{item.name}}</text>
+      <text class="order-item-meta">x{{item.quantity}}</text>
+      <text class="order-item-price">¥{{item.price}}</text>
+    </view>
+  </view>
+
+  <!-- 版块四：结算与下单 -->
+  <view class="section section--summary">
+    <view class="summary-row">
+      <text>商品总价</text>
+      <text>¥{{productTotal}}</text>
+    </view>
+    <view class="summary-row">
+      <text>配送费</text>
+      <text>¥{{shippingFee}}</text>
+    </view>
+    <view class="summary-row summary-row--total">
+      <text>应付合计</text>
+      <text class="price-text">¥{{payableTotal}}</text>
+    </view>
+    <button
+      class="submit-btn"
+      type="primary"
+      loading="{{submitting}}"
+      disabled="{{submitting}}"
+      bindtap="onSubmitOrder"
+    >提交订单并支付</button>
+  </view>
+
+</view>
