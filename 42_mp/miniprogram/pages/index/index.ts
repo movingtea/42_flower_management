@@ -1,17 +1,15 @@
 // pages/index/index.ts — 首页：/homepage + /products 联调
+import { baseUrl } from '../../config/index';
+import { toRelativeImagePath } from '../../utils/image';
 import { request } from '../../utils/request';
+import { addPayloadToCart } from '../../utils/cart-add';
+import { updateCartTabBarBadge } from '../../utils/cart';
 import {
-  readCartFromStorage,
-  updateCartTabBarBadge,
-  writeCartToStorage,
-} from '../../utils/cart';
-
-/** 与 Next.js jsonSuccess 一致：业务数据在 data 内 */
-interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-}
+  normalizeWechatProduct,
+  pickDefaultSku,
+  type WechatProductItem,
+  type WechatProductRaw,
+} from '../../utils/product';
 
 interface NoticeConfig {
   enabled: boolean;
@@ -54,35 +52,23 @@ interface HomepageData {
   categories?: CategorySourceItem[];
 }
 
-interface ProductRaw {
-  id: string;
-  sku?: string;
-  name: string;
-  subtitle?: string;
-  price?: number | string;
-  sellPrice?: string;
-  shippingFee?: number;
-  imageUrl?: string;
-  images?: string[];
-  category: string[];
-  isOutOfStock?: boolean;
-}
-
 interface ProductsData {
-  products?: ProductRaw[];
-  list?: ProductRaw[];
+  products?: WechatProductRaw[];
+  list?: WechatProductRaw[];
 }
 
-interface ProductItem {
-  id: string;
-  sku?: string;
-  name: string;
-  subtitle?: string;
-  price: number | string;
-  shippingFee: number;
-  imageUrl: string;
+type ProductItem = WechatProductItem & {
   category: string[];
-  isOutOfStock?: boolean;
+};
+
+function normalizeProduct(item: WechatProductRaw & { category?: string[] }): ProductItem {
+  const base = normalizeWechatProduct(item);
+  return {
+    ...base,
+    category: Array.isArray(item.category)
+      ? item.category.map((c) => String(c).trim()).filter(Boolean)
+      : [],
+  };
 }
 
 function normalizeCategoryTabs(items: CategorySourceItem[]): CategoryTab[] {
@@ -98,28 +84,6 @@ function normalizeCategoryTabs(items: CategorySourceItem[]): CategoryTab[] {
     .filter((tab): tab is CategoryTab => tab !== null);
 }
 
-function normalizeProduct(item: ProductRaw): ProductItem {
-  const price = item.price ?? item.sellPrice ?? '0';
-  const imageUrl =
-    item.imageUrl ?? (item.images && item.images.length > 0 ? item.images[0] : '');
-
-  const shippingFee = Math.max(0, Number(item.shippingFee) || 0);
-
-  return {
-    id: item.id,
-    sku: item.sku,
-    name: item.name,
-    subtitle: item.subtitle,
-    price,
-    shippingFee,
-    imageUrl,
-    category: Array.isArray(item.category)
-      ? item.category.map((c) => String(c).trim()).filter(Boolean)
-      : [],
-    isOutOfStock: item.isOutOfStock,
-  };
-}
-
 Page({
   data: {
     banners: [] as BannerItem[],
@@ -131,6 +95,9 @@ Page({
     allProducts: [] as ProductItem[],
     filteredProducts: [] as ProductItem[],
     loading: true,
+    specPickerVisible: false,
+    specPickerProduct: null as ProductItem | null,
+    baseUrl,
   },
 
   onLoad() {
@@ -163,13 +130,11 @@ Page({
   },
 
   fetchHomepage() {
-    return request<ApiResponse<HomepageData>>({ url: '/homepage' }).then((res) => {
-      if (!res?.success || !res.data) {
-        console.warn('首页配置接口未返回有效 data', res);
+    return request<HomepageData>({ url: '/homepage' }).then((homepageData) => {
+      if (!homepageData) {
+        console.warn('首页配置接口未返回有效数据', homepageData);
         return;
       }
-
-      const homepageData = res.data;
       const categories = normalizeCategoryTabs(homepageData.categories ?? []);
       const prevTabId = this.data.currentTabId;
       const currentTabId =
@@ -177,10 +142,21 @@ Page({
           ? prevTabId
           : categories[0]?.id ?? '';
 
-      const popup = homepageData.popup ?? {};
+      const popupRaw = homepageData.popup ?? {};
+      const popup = {
+        ...popupRaw,
+        imageUrl: popupRaw.imageUrl
+          ? toRelativeImagePath(popupRaw.imageUrl)
+          : undefined,
+      };
+
+      const banners = (homepageData.banners ?? []).map((item) => ({
+        ...item,
+        imageUrl: toRelativeImagePath(item.imageUrl),
+      }));
 
       this.setData({
-        banners: homepageData.banners ?? [],
+        banners,
         notice: homepageData.notice ?? { enabled: false, text: '' },
         popup,
         categories,
@@ -191,13 +167,13 @@ Page({
   },
 
   fetchProducts() {
-    return request<ApiResponse<ProductsData>>({ url: '/products' }).then((res) => {
-      if (!res?.success || !res.data) {
-        console.warn('商品列表接口未返回有效 data', res);
+    return request<ProductsData>({ url: '/products' }).then((data) => {
+      if (!data) {
+        console.warn('商品列表接口未返回有效数据', data);
         return;
       }
 
-      const rawList = res.data.products ?? res.data.list ?? [];
+      const rawList = data.products ?? data.list ?? [];
       const allProducts = rawList.map(normalizeProduct);
       this.setData({ allProducts });
     });
@@ -256,7 +232,7 @@ Page({
 
   onAddCart(e: WechatMiniprogram.TouchEvent) {
     const product = e.currentTarget.dataset.product as ProductItem | undefined;
-    if (!product || !product.id) {
+    if (!product?.id) {
       wx.showToast({ title: '商品信息无效', icon: 'none' });
       return;
     }
@@ -266,25 +242,59 @@ Page({
       return;
     }
 
-    const cart = readCartFromStorage();
-    const index = cart.findIndex((row) => row.id === product.id);
-
-    if (index >= 0) {
-      cart[index].quantity += 1;
-    } else {
-      cart.push({
-        id: product.id,
-        sku: product.sku,
-        name: product.name,
-        price: product.price,
-        imageUrl: product.imageUrl,
-        quantity: 1,
-        shippingFee: product.shippingFee,
+    if (product.skus.length > 1) {
+      this.setData({
+        specPickerVisible: true,
+        specPickerProduct: product,
       });
+      return;
     }
 
-    writeCartToStorage(cart);
-    updateCartTabBarBadge(cart);
+    const sku = pickDefaultSku(product);
+    if (!sku) {
+      wx.showToast({ title: '暂无可售款式', icon: 'none' });
+      return;
+    }
+
+    addPayloadToCart({
+      spuId: product.id,
+      skuId: sku.id,
+      skuCode: sku.skuCode,
+      specName: sku.specName,
+      name: product.name,
+      price: sku.price,
+      imageUrl: sku.imageUrl || product.imageUrl,
+      shippingFee: product.shippingFee,
+    });
+    wx.showToast({ title: '已加入购物车', icon: 'success' });
+  },
+
+  onSpecPickerClose() {
+    this.setData({ specPickerVisible: false, specPickerProduct: null });
+  },
+
+  onSpecPickerConfirm(e: WechatMiniprogram.CustomEvent) {
+    const detail = e.detail as {
+      spuId: string;
+      skuId: string;
+      skuCode: string;
+      specName: string;
+      name: string;
+      price: string;
+      imageUrl: string;
+      shippingFee: number;
+    };
+    addPayloadToCart({
+      spuId: detail.spuId,
+      skuId: detail.skuId,
+      skuCode: detail.skuCode,
+      specName: detail.specName,
+      name: detail.name,
+      price: detail.price,
+      imageUrl: detail.imageUrl,
+      shippingFee: detail.shippingFee,
+    });
+    this.setData({ specPickerVisible: false, specPickerProduct: null });
     wx.showToast({ title: '已加入购物车', icon: 'success' });
   },
 

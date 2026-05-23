@@ -1,5 +1,9 @@
 // pages/checkout/checkout.ts — 结算履约与下单闭环
+import { baseUrl } from '../../config/index';
+import { toRelativeImagePath } from '../../utils/image';
+import { getOpenId, isLoggedIn } from '../../utils/auth';
 import { request } from '../../utils/request';
+import { fetchUserProfile, patchUserProfile } from '../../utils/user-api';
 import {
   CHECKOUT_PRODUCTS_KEY,
   parseCartPrice,
@@ -34,17 +38,13 @@ interface WechatCreateOrderPayload {
   }>;
 }
 
-interface CreateOrderApiResponse {
-  success: boolean;
-  data?: {
-    message?: string;
-    order?: {
-      id: string;
-      orderNo: string;
-      status: string;
-    };
+interface CreateOrderResult {
+  message?: string;
+  order?: {
+    id: string;
+    orderNo: string;
+    status: string;
   };
-  error?: string;
 }
 
 const TIME_BUCKETS = ['上午', '下午', '晚上'];
@@ -83,7 +83,7 @@ function cartRowsToDisplay(items: CartItem[]): CheckoutDisplayItem[] {
       shippingFeeLabel:
         shippingFee > 0 ? `¥${formatMoney(shippingFee)}` : '免运费',
       lineSubtotal: formatMoney(lineSubtotal),
-      imageUrl: row.imageUrl || '',
+      imageUrl: toRelativeImagePath(row.imageUrl),
     };
   });
 }
@@ -106,14 +106,83 @@ Page({
     payableTotal: '0.00',
     submitting: false,
     emptyCheckout: true,
+    baseUrl,
   },
 
   onLoad() {
     this.loadCheckoutProducts();
+    void this.prefillDefaultAddress();
   },
 
   onShow() {
     this.loadCheckoutProducts();
+    void this.prefillDefaultAddress();
+  },
+
+  /** 拉取用户默认收货信息回填 */
+  async prefillDefaultAddress() {
+    if (!isLoggedIn()) return;
+    try {
+      const data = await fetchUserProfile();
+      const user = data?.user;
+      if (!user) return;
+
+      const patch: Record<string, string> = {};
+      if (!this.data.receiverName && user.defaultReceiverName) {
+        patch.receiverName = user.defaultReceiverName;
+      }
+      if (!this.data.receiverPhone && user.defaultReceiverPhone) {
+        patch.receiverPhone = user.defaultReceiverPhone;
+      }
+      if (!this.data.deliveryAddress && user.defaultAddress) {
+        patch.deliveryAddress = user.defaultAddress;
+      }
+
+      if (Object.keys(patch).length) {
+        this.setData(patch);
+      }
+    } catch {
+      /* 忽略 */
+    }
+  },
+
+  /** 微信收货地址一键导入 */
+  onChooseWechatAddress() {
+    wx.chooseAddress({
+      success: (res) => {
+        const receiverName = res.userName || '';
+        const receiverPhone = res.telNumber || '';
+        const deliveryAddress = [
+          res.provinceName,
+          res.cityName,
+          res.countyName,
+          res.detailInfo,
+        ]
+          .filter(Boolean)
+          .join('');
+
+        this.setData({
+          receiverName,
+          receiverPhone,
+          deliveryAddress,
+        });
+
+        void patchUserProfile({
+          defaultReceiverName: receiverName,
+          defaultReceiverPhone: receiverPhone,
+          defaultAddress: deliveryAddress,
+        }).catch(() => {
+          /* 本地已回填，同步失败不阻断 */
+        });
+
+        wx.showToast({ title: '地址已导入', icon: 'success' });
+      },
+      fail: (err) => {
+        const msg = (err as { errMsg?: string }).errMsg ?? '';
+        if (msg.includes('cancel')) return;
+        wx.showToast({ title: '未能获取微信地址', icon: 'none' });
+      },
+    });
   },
 
   /** 从购物车勾选缓存加载待结算商品 */
@@ -294,8 +363,8 @@ Page({
   onSubmitOrder() {
     if (this.data.submitting) return;
 
-    const wechatOpenId = wx.getStorageSync('token');
-    if (!wechatOpenId || typeof wechatOpenId !== 'string' || !String(wechatOpenId).trim()) {
+    const wechatOpenId = getOpenId();
+    if (!wechatOpenId || !String(wechatOpenId).trim()) {
       wx.showModal({
         title: '登录态失效',
         content:
@@ -316,15 +385,15 @@ Page({
     this.setData({ submitting: true });
     wx.showLoading({ title: '正在提交订单...', mask: true });
 
-    request<CreateOrderApiResponse>({
+    request<CreateOrderResult>({
       url: '/orders',
       method: 'POST',
-      data: orderData,
+      data: orderData as WechatMiniprogram.IAnyObject,
     })
-      .then((res) => {
+      .then((data) => {
         wx.hideLoading();
-        if (res?.success && res.data) {
-          const orderNo = res.data.order?.orderNo;
+        if (data?.order) {
+          const orderNo = data.order.orderNo;
           wx.showToast({
             title: orderNo ? `下单成功 ${orderNo}` : '下单成功',
             icon: 'success',
@@ -333,7 +402,7 @@ Page({
         } else {
           wx.showModal({
             title: '下单失败',
-            content: res?.error || '未知错误',
+            content: data?.message || '未知错误',
             showCancel: false,
           });
         }

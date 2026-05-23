@@ -73,13 +73,13 @@ model ProductCategory {
 
 model ProductCategoryRelation {
   id                String @id @default(uuid())
-  productId         String @map("product_id")
+  spuId             String @map("product_id")
   productCategoryId String @map("product_category_id")
 
-  product         Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  spu             ProductSpu      @relation(fields: [spuId], references: [id], onDelete: Cascade)
   productCategory ProductCategory @relation(fields: [productCategoryId], references: [id], onDelete: Cascade)
 
-  @@unique([productId, productCategoryId])
+  @@unique([spuId, productCategoryId])
   @@index([productCategoryId])
   @@map("product_categories")
 }
@@ -121,36 +121,51 @@ model MaterialCategoryRelation {
 }
 
 // ---------------------------------------------------------------------------
-// Product — 前台成品花束 / 礼盒
+// ProductSpu / ProductSku — 一维单款式（SPU 公用信息 + SKU 款式）
 // ---------------------------------------------------------------------------
 
-model Product {
-  id              String   @id @default(uuid())
-  sku             String   @unique
-  name            String
-  price           Decimal  @db.Decimal(10, 2)
-  costPrice       Decimal? @db.Decimal(10, 2)
-  subtitle        String?
-  images          String[] @default([])
-  detailContent   String?  @db.Text
-  status          String   @default("DRAFT")
-  quantity        Int      @default(0)
-  isOutOfStock    Boolean  @default(false)
-  allowPreOrder   Boolean  @default(true)
-  productionTime  Int      @default(30)
-  shippingFee     Float    @default(0)
-  isDeleted       Boolean  @default(false) @map("is_deleted")
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+model ProductSpu {
+  id               String   @id @default(uuid())
+  name             String
+  description      String?  @db.Text
+  maintenanceGuide String?  @map("maintenance_guide") @db.Text
+  isActive         Boolean  @default(false) @map("is_active")
+  isDeleted        Boolean  @default(false) @map("is_deleted")
+  shippingFee      Float    @default(0) @map("shipping_fee")
+  allowPreOrder    Boolean  @default(true) @map("allow_pre_order")
+  productionTime   Int      @default(30) @map("production_time")
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
+  skus       ProductSku[]
   categories ProductCategoryRelation[]
   bomItems   ProductBOM[]
   orderItems OrderItem[]
   banners    Banner[]
 
-  @@index([status])
+  @@index([isActive])
   @@index([isDeleted])
-  @@map("products")
+  @@map("product_spus")
+}
+
+model ProductSku {
+  id          String   @id @default(uuid())
+  spuId       String   @map("spu_id")
+  skuCode     String   @unique @map("sku_code")
+  specName    String   @map("spec_name")
+  price       Decimal  @db.Decimal(10, 2)
+  stock       Int      @default(0)
+  imageUrl    String?  @map("image_url")
+  isMainImage Boolean  @default(false) @map("is_main_image")
+  sortOrder   Int      @default(0) @map("sort_order")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  spu ProductSpu @relation(fields: [spuId], references: [id], onDelete: Cascade)
+
+  @@index([spuId])
+  @@index([spuId, isMainImage])
+  @@map("product_skus")
 }
 
 // ---------------------------------------------------------------------------
@@ -168,7 +183,7 @@ model Banner {
   createdAt   DateTime         @default(now())
   updatedAt   DateTime         @updatedAt
 
-  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  spu ProductSpu? @relation(fields: [productId], references: [id], onDelete: SetNull)
 
   @@index([sortOrder])
   @@index([isActive])
@@ -203,14 +218,14 @@ model Material {
 
 model ProductBOM {
   id             String @id @default(uuid())
-  productId      String
+  spuId          String @map("productId")
   materialId     String
   quantityNeeded Int
 
-  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  material Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  spu      ProductSpu @relation(fields: [spuId], references: [id], onDelete: Cascade)
+  material Material   @relation(fields: [materialId], references: [id], onDelete: Cascade)
 
-  @@unique([productId, materialId])
+  @@unique([spuId, materialId])
   @@index([materialId])
   @@map("product_bom")
 }
@@ -275,6 +290,26 @@ model StockLog {
 }
 
 // ---------------------------------------------------------------------------
+// User — 小程序用户（OpenID 主键体系）
+// ---------------------------------------------------------------------------
+
+model User {
+  id                   String   @id @default(uuid())
+  openId               String   @unique @map("open_id")
+  nickName             String?  @map("nick_name")
+  avatarUrl            String?  @map("avatar_url")
+  defaultReceiverName  String?  @map("default_receiver_name")
+  defaultReceiverPhone String?  @map("default_receiver_phone")
+  defaultAddress       String?  @map("default_address") @db.Text
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  orders Order[]
+
+  @@map("users")
+}
+
+// ---------------------------------------------------------------------------
 // Order / OrderItem
 // ---------------------------------------------------------------------------
 
@@ -282,6 +317,7 @@ model Order {
   id                  String      @id @default(cuid())
   orderNo             String      @unique
   status              OrderStatus @default(PENDING)
+  userId              String?     @map("user_id")
   wechatOpenId        String?
   customerName        String?
   customerPhone       String?
@@ -297,10 +333,12 @@ model Order {
   createdAt           DateTime    @default(now())
   updatedAt           DateTime    @updatedAt
 
+  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
   items     OrderItem[]
   stockLogs StockLog[]
 
   @@index([status, createdAt])
+  @@index([userId])
   @@index([wechatOpenId])
   @@index([orderNo])
   @@map("orders")
@@ -319,7 +357,7 @@ model OrderItem {
   createdAt            DateTime @default(now())
 
   order     Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  product   Product    @relation(fields: [productId], references: [id], onDelete: Restrict)
+  spu       ProductSpu @relation(fields: [productId], references: [id], onDelete: Restrict)
   stockLogs StockLog[]
 
   @@index([orderId])

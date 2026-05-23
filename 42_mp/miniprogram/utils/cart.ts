@@ -1,7 +1,12 @@
+import { toRelativeImagePath } from './image';
+
 /** 购物车本地缓存条目（wx.setStorageSync('cart')） */
 export interface CartItem {
+  /** SPU id */
   id: string;
+  skuId?: string;
   sku?: string;
+  specName?: string;
   name: string;
   price: number | string;
   imageUrl: string;
@@ -12,6 +17,8 @@ export interface CartItem {
 
 /** 页面展示用：在 CartItem 上扩展勾选状态（不写入本地缓存） */
 export interface CartListItem extends CartItem {
+  /** 列表行唯一键（SPU + SKU） */
+  lineKey: string;
   selected: boolean;
   /** 商品已软删除或未上架时为 true */
   isInvalid?: boolean;
@@ -57,10 +64,14 @@ export function readCartFromStorage(): CartItem[] {
     )
     .map((row) => ({
       id: row.id,
+      skuId: typeof row.skuId === 'string' ? row.skuId : undefined,
       sku: row.sku,
+      specName: typeof row.specName === 'string' ? row.specName : undefined,
       name: row.name,
       price: row.price ?? '0',
-      imageUrl: typeof row.imageUrl === 'string' ? row.imageUrl : '',
+      imageUrl: toRelativeImagePath(
+        typeof row.imageUrl === 'string' ? row.imageUrl : ''
+      ),
       quantity: Math.max(1, Math.floor(Number(row.quantity)) || 1),
       shippingFee: Math.max(0, Number((row as CartItem).shippingFee) || 0),
     }));
@@ -80,10 +91,22 @@ export function parseCartPrice(price: number | string): number {
   return Number.isFinite(n) ? n : 0;
 }
 
+/** 购物车行唯一键：同一 SPU 的不同 SKU 分开展示 */
+export function cartLineKey(item: Pick<CartItem, 'id' | 'skuId'>): string {
+  return item.skuId ? `${item.id}:${item.skuId}` : item.id;
+}
+
+export function findCartLineIndex(cart: CartItem[], spuId: string, skuId?: string): number {
+  const key = cartLineKey({ id: spuId, skuId });
+  return cart.findIndex((row) => cartLineKey(row) === key);
+}
+
 export function cartItemsToStorage(list: CartListItem[]): CartItem[] {
-  return list.map(({ id, sku, name, price, imageUrl, quantity, shippingFee }) => ({
+  return list.map(({ id, skuId, sku, specName, name, price, imageUrl, quantity, shippingFee }) => ({
     id,
+    skuId,
     sku,
+    specName,
     name,
     price,
     imageUrl,
@@ -100,15 +123,17 @@ export function selectedToCheckoutProducts(list: CartListItem[]): CartItem[] {
 export function storageToCartList(
   cart: CartItem[],
   prevSelected?: Record<string, boolean>,
-  invalidById?: Record<string, boolean>
+  invalidByKey?: Record<string, boolean>
 ): CartListItem[] {
   return cart.map((item) => {
-    const isInvalid = invalidById?.[item.id] === true;
+    const key = cartLineKey(item);
+    const isInvalid = invalidByKey?.[key] === true;
     return {
       ...item,
+      lineKey: key,
       isInvalid,
       invalidReason: isInvalid ? '已下架' : null,
-      selected: isInvalid ? false : (prevSelected?.[item.id] ?? true),
+      selected: isInvalid ? false : (prevSelected?.[key] ?? true),
     };
   });
 }

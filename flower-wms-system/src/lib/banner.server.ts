@@ -10,8 +10,12 @@ import {
   type BannerWriteItem,
   type WechatBannerPayload,
 } from "@/lib/banner";
-import { activeProductWhere } from "@/lib/product-query";
-import { PRODUCT_STATUS_PUBLISHED } from "@/lib/product-status";
+import { activeSpuWhere } from "@/lib/product-query";
+import {
+  productSpuInclude,
+  resolveSpuCardImageUrl,
+  resolveSpuMinPrice,
+} from "@/lib/product-spu";
 import { prisma } from "@/lib/prisma";
 
 export type BannerRow = {
@@ -22,12 +26,11 @@ export type BannerRow = {
   targetParam: string | null;
   productId: string | null;
   isActive: boolean;
-  product?: {
+  spu?: {
     id: string;
     name: string;
-    sku: string;
     isDeleted: boolean;
-    status: string;
+    isActive: boolean;
   } | null;
 };
 
@@ -65,13 +68,12 @@ export async function loadActiveBanners(): Promise<BannerRow[]> {
     where: { isActive: true },
     orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
     include: {
-      product: {
+      spu: {
         select: {
           id: true,
           name: true,
-          sku: true,
           isDeleted: true,
-          status: true,
+          isActive: true,
         },
       },
     },
@@ -116,8 +118,8 @@ export function resolveWechatBanners(
       const p = productMap.get(productId);
       const productInvalid =
         !p ||
-        row.product?.isDeleted === true ||
-        row.product?.status !== PRODUCT_STATUS_PUBLISHED;
+        row.spu?.isDeleted === true ||
+        row.spu?.isActive !== true;
 
       if (productInvalid) {
         targetType = "NONE";
@@ -160,26 +162,37 @@ export async function loadWechatHomeBanners(): Promise<WechatBannerPayload[]> {
     ),
   ];
 
-  const products =
+  const spus =
     productIds.length > 0
-      ? await prisma.product.findMany({
+      ? await prisma.productSpu.findMany({
           where: {
-            ...activeProductWhere,
+            ...activeSpuWhere,
+            isActive: true,
             id: { in: productIds },
-            status: PRODUCT_STATUS_PUBLISHED,
-            isOutOfStock: false,
+            skus: { some: { stock: { gt: 0 } } },
           },
-          select: {
-            id: true,
-            name: true,
-            sku: true,
-            price: true,
-            images: true,
-          },
+          include: productSpuInclude,
         })
       : [];
 
-  const productMap = new Map(products.map((p) => [p.id, p]));
+  const productMap = new Map<string, ProductPick>(
+    spus.map((spu) => {
+      const skus = spu.skus;
+      const imageUrl = resolveSpuCardImageUrl(skus);
+      const firstSku = skus[0];
+      return [
+        spu.id,
+        {
+          id: spu.id,
+          name: spu.name,
+          sku: firstSku?.skuCode ?? "",
+          price: { toString: () => resolveSpuMinPrice(skus).toFixed(2) },
+          images: imageUrl ? [imageUrl] : [],
+        },
+      ];
+    })
+  );
+
   return resolveWechatBanners(rows, productMap);
 }
 

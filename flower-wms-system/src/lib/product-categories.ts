@@ -1,25 +1,23 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import type { ProductSpuWithRelations } from "@/lib/product-spu";
+import { productSpuInclude } from "@/lib/product-spu";
 
-/** Prisma 查询商品时附带商品分类的标准 include */
-export const productCategoriesInclude = {
-  categories: { include: { productCategory: true } },
-} as const;
+/** Prisma 查询商品 SPU 时附带分类与 SKU 的标准 include */
+export const productCategoriesInclude = productSpuInclude;
 
-export type ProductWithCategories = Prisma.ProductGetPayload<{
-  include: typeof productCategoriesInclude;
-}>;
+export type ProductWithCategories = ProductSpuWithRelations;
 
-/** 从已 include 的商品记录提取商品分类 id 列表 */
+/** 从已 include 的 SPU 记录提取商品分类 id 列表 */
 export function categoryIdsFromProduct(
-  product: ProductWithCategories
+  product: ProductSpuWithRelations
 ): string[] {
   return product.categories.map((pc) => pc.productCategoryId);
 }
 
 /** @deprecated 请使用 categoryIdsFromProduct */
 export function categoryKeysFromProduct(
-  product: ProductWithCategories
+  product: ProductSpuWithRelations
 ): string[] {
   return categoryIdsFromProduct(product);
 }
@@ -54,7 +52,6 @@ export async function ensureProductCategoryIds(
 
 /**
  * 保存商品前解析分类：店长勾选的 id + 子分类自动追溯的父分类 id（去重）。
- * 前端只需提交实际勾选的 category / categoryIds，父级由服务端补齐。
  */
 export async function resolveProductCategoryIdsForSave(
   categoryIds: string[],
@@ -91,9 +88,6 @@ export async function resolveProductCategoryIdsForSave(
   return Array.from(finalIds);
 }
 
-/**
- * 编辑页回显：若子分类已选且父分类因自动关联存在，则不在 UI 中勾选父级（保存时仍会由服务端补齐）。
- */
 export function filterEditorDisplayCategoryIds(
   linkedIds: string[],
   rows: { id: string; parentId: string | null }[]
@@ -113,9 +107,9 @@ export function filterEditorDisplayCategoryIds(
 /** @deprecated 请使用 ensureProductCategoryIds */
 export const ensureCategoryIds = ensureProductCategoryIds;
 
-/** 替换商品与商品分类的多对多关联（product_categories 中间表） */
+/** 替换 SPU 与商品分类的多对多关联 */
 export async function syncProductCategoryLinks(
-  productId: string,
+  spuId: string,
   categoryIds: string[],
   options?: { tx?: Tx }
 ): Promise<void> {
@@ -124,13 +118,13 @@ export async function syncProductCategoryLinks(
     tx: options?.tx,
   });
 
-  await client.productCategoryRelation.deleteMany({ where: { productId } });
+  await client.productCategoryRelation.deleteMany({ where: { spuId } });
 
   if (ids.length === 0) return;
 
   await client.productCategoryRelation.createMany({
     data: ids.map((productCategoryId) => ({
-      productId,
+      spuId,
       productCategoryId,
     })),
     skipDuplicates: true,

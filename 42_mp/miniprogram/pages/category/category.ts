@@ -1,16 +1,14 @@
 // pages/category/category.ts — 商品分类：树形导航 + 搜索 + 商品列表
+import { baseUrl } from '../../config/index';
 import { request } from '../../utils/request';
+import { addPayloadToCart } from '../../utils/cart-add';
+import { updateCartTabBarBadge } from '../../utils/cart';
 import {
-  readCartFromStorage,
-  updateCartTabBarBadge,
-  writeCartToStorage,
-} from '../../utils/cart';
-
-interface ApiResponse<T> {
-  success: boolean;
-  data?: T;
-  error?: string;
-}
+  normalizeWechatProduct,
+  pickDefaultSku,
+  type WechatProductItem,
+  type WechatProductRaw,
+} from '../../utils/product';
 
 interface CategoryNode {
   id: string;
@@ -21,29 +19,7 @@ interface CategoryNode {
   children: CategoryNode[];
 }
 
-interface ProductRaw {
-  id: string;
-  sku?: string;
-  name: string;
-  subtitle?: string;
-  price?: number | string;
-  sellPrice?: string;
-  shippingFee?: number;
-  imageUrl?: string;
-  images?: string[];
-  isOutOfStock?: boolean;
-}
-
-interface ProductItem {
-  id: string;
-  sku?: string;
-  name: string;
-  subtitle?: string;
-  price: number | string;
-  shippingFee: number;
-  imageUrl: string;
-  isOutOfStock?: boolean;
-}
+type ProductItem = WechatProductItem;
 
 /** 左侧导航扁平列表（便于 WXML 渲染展开态） */
 interface NavDisplayItem {
@@ -56,21 +32,8 @@ interface NavDisplayItem {
 
 const SEARCH_DEBOUNCE_MS = 500;
 
-function normalizeProduct(item: ProductRaw): ProductItem {
-  const price = item.price ?? item.sellPrice ?? '0';
-  const imageUrl =
-    item.imageUrl ?? (item.images && item.images.length > 0 ? item.images[0] : '');
-
-  return {
-    id: item.id,
-    sku: item.sku,
-    name: item.name,
-    subtitle: item.subtitle,
-    price,
-    shippingFee: Math.max(0, Number(item.shippingFee) || 0),
-    imageUrl,
-    isOutOfStock: item.isOutOfStock,
-  };
+function normalizeProduct(item: WechatProductRaw): ProductItem {
+  return normalizeWechatProduct(item);
 }
 
 function buildNavList(
@@ -125,6 +88,9 @@ Page({
     products: [] as ProductItem[],
     loadingCategories: true,
     loadingProducts: false,
+    specPickerVisible: false,
+    specPickerProduct: null as ProductItem | null,
+    baseUrl,
   },
 
   searchTimer: null as ReturnType<typeof setTimeout> | null,
@@ -152,15 +118,18 @@ Page({
   async loadCategories() {
     this.setData({ loadingCategories: true });
     try {
-      const res = await request<ApiResponse<{ categories?: CategoryNode[]; tree?: CategoryNode[] }>>({
+      const data = await request<{
+        categories?: CategoryNode[];
+        tree?: CategoryNode[];
+      }>({
         url: '/product-categories',
       });
 
-      if (!res?.success || !res.data) {
+      if (!data) {
         throw new Error('分类数据无效');
       }
 
-      const categories = res.data.categories ?? res.data.tree ?? [];
+      const categories = data.categories ?? data.tree ?? [];
       const firstId = this.pickFirstCategoryId(categories);
       const activeCategoryId =
         this.data.activeCategoryId &&
@@ -229,7 +198,10 @@ Page({
 
     try {
       const query = buildProductsQuery(activeCategoryId, keyword);
-      const res = await request<ApiResponse<{ list?: ProductRaw[]; products?: ProductRaw[] }>>({
+      const data = await request<{
+        list?: WechatProductRaw[];
+        products?: WechatProductRaw[];
+      }>({
         url: `/products${query}`,
       });
 
@@ -237,11 +209,11 @@ Page({
         return;
       }
 
-      if (!res?.success || !res.data) {
+      if (!data) {
         throw new Error('商品数据无效');
       }
 
-      const rawList = res.data.products ?? res.data.list ?? [];
+      const rawList = data.products ?? data.list ?? [];
       const products = rawList.map(normalizeProduct);
 
       this.setData({ products, loadingProducts: false });
@@ -307,7 +279,7 @@ Page({
 
   onAddCart(e: WechatMiniprogram.TouchEvent) {
     const product = e.currentTarget.dataset.product as ProductItem | undefined;
-    if (!product || !product.id) {
+    if (!product?.id) {
       wx.showToast({ title: '商品信息无效', icon: 'none' });
       return;
     }
@@ -317,25 +289,59 @@ Page({
       return;
     }
 
-    const cart = readCartFromStorage();
-    const index = cart.findIndex((row) => row.id === product.id);
-
-    if (index >= 0) {
-      cart[index].quantity += 1;
-    } else {
-      cart.push({
-        id: product.id,
-        sku: product.sku,
-        name: product.name,
-        price: product.price,
-        imageUrl: product.imageUrl,
-        quantity: 1,
-        shippingFee: product.shippingFee,
+    if (product.skus.length > 1) {
+      this.setData({
+        specPickerVisible: true,
+        specPickerProduct: product,
       });
+      return;
     }
 
-    writeCartToStorage(cart);
-    updateCartTabBarBadge(cart);
+    const sku = pickDefaultSku(product);
+    if (!sku) {
+      wx.showToast({ title: '暂无可售款式', icon: 'none' });
+      return;
+    }
+
+    addPayloadToCart({
+      spuId: product.id,
+      skuId: sku.id,
+      skuCode: sku.skuCode,
+      specName: sku.specName,
+      name: product.name,
+      price: sku.price,
+      imageUrl: sku.imageUrl || product.imageUrl,
+      shippingFee: product.shippingFee,
+    });
+    wx.showToast({ title: '已加入购物车', icon: 'success' });
+  },
+
+  onSpecPickerClose() {
+    this.setData({ specPickerVisible: false, specPickerProduct: null });
+  },
+
+  onSpecPickerConfirm(e: WechatMiniprogram.CustomEvent) {
+    const detail = e.detail as {
+      spuId: string;
+      skuId: string;
+      skuCode: string;
+      specName: string;
+      name: string;
+      price: string;
+      imageUrl: string;
+      shippingFee: number;
+    };
+    addPayloadToCart({
+      spuId: detail.spuId,
+      skuId: detail.skuId,
+      skuCode: detail.skuCode,
+      specName: detail.specName,
+      name: detail.name,
+      price: detail.price,
+      imageUrl: detail.imageUrl,
+      shippingFee: detail.shippingFee,
+    });
+    this.setData({ specPickerVisible: false, specPickerProduct: null });
     wx.showToast({ title: '已加入购物车', icon: 'success' });
   },
 

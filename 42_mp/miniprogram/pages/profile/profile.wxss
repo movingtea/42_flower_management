@@ -1,0 +1,79 @@
+.profile-page {
+  min-height: 100vh;
+  padding: 32rpx;
+  background: #fcfcfc;
+}
+
+.profile-card {
+  background: #fff;
+  border-radius: 20rpx;
+  padding: 32rpx;
+  box-shadow: 0 8rpx 32rpx rgba(0, 0, 0, 0.04);
+}
+
+.profile-hint {
+  display: block;
+  font-size: 24rpx;
+  margin-bottom: 32rpx;
+}
+
+.avatar-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 40rpx;
+}
+
+.avatar-btn {
+  padding: 0;
+  margin: 0;
+  background: transparent;
+  border: none;
+  line-height: 1;
+}
+
+.avatar-btn::after {
+  border: none;
+}
+
+.avatar-image,
+.avatar-placeholder {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  overflow: hidden;
+}
+
+.avatar-placeholder {
+  background: #f3f3f3;
+  border: 2rpx dashed #ddd;
+}
+
+.avatar-placeholder-text {
+  font-size: 22rpx;
+  color: #999;
+}
+
+.avatar-tip {
+  margin-top: 16rpx;
+  font-size: 24rpx;
+}
+
+.nickname-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.form-label {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.nickname-input {
+  height: 80rpx;
+  padding: 0 24rpx;
+  background: #f8f8f8;
+  border-radius: 12rpx;
+  font-size: 28rpx;
+}

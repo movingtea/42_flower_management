@@ -8,30 +8,43 @@ import {
   categoryIdsFromProduct,
   productCategoriesInclude,
 } from "@/lib/product-categories";
-import { activeProductWhere } from "@/lib/product-query";
+import { activeSpuWhere } from "@/lib/product-query";
+import {
+  formatMinPriceLabel,
+  resolveSpuMinPrice,
+} from "@/lib/product-spu";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function CmsProductsPage() {
-  const [products, categoryConfig] = await Promise.all([
-    prisma.product.findMany({
-      where: activeProductWhere,
+  const [spus, categoryConfig] = await Promise.all([
+    prisma.productSpu.findMany({
+      where: activeSpuWhere,
       orderBy: { updatedAt: "desc" },
       include: productCategoriesInclude,
     }),
     loadCmsProductCategories(),
   ]);
 
-  const rows: CmsProductListRow[] = products.map((p) => ({
-    id: p.id,
-    name: p.name,
-    sku: p.sku,
-    priceLabel: p.price ? `¥${p.price}` : "¥0",
-    quantity: p.quantity,
-    status: p.status,
-    categoryIds: categoryIdsFromProduct(p),
-  }));
+  const rows: CmsProductListRow[] = spus.map((spu) => {
+    const minPrice = resolveSpuMinPrice(spu.skus);
+    const { displayPrice, priceSuffix } = formatMinPriceLabel(
+      minPrice,
+      spu.skus.length
+    );
+    const firstSku = spu.skus[0];
+
+    return {
+      id: spu.id,
+      name: spu.name,
+      sku: firstSku?.skuCode ?? "—",
+      priceLabel: `¥${displayPrice}${priceSuffix}`,
+      quantity: spu.skus.reduce((sum, s) => sum + s.stock, 0),
+      status: spu.isActive ? "PUBLISHED" : "DRAFT",
+      categoryIds: categoryIdsFromProduct(spu),
+    };
+  });
 
   return (
     <div>
@@ -39,7 +52,7 @@ export default async function CmsProductsPage() {
         <div>
           <h2 className="text-2xl font-semibold text-rose-900">商品列表</h2>
           <p className="mt-1 text-sm text-zinc-500">
-            用于管理商品信息。删除为软删除，历史订单数据不受影响。
+            SPU 公用信息 + 多款式 SKU。删除为软删除，历史订单不受影响。
           </p>
         </div>
         <Link

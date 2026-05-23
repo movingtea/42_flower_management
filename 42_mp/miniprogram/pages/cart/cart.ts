@@ -1,6 +1,9 @@
 // pages/cart/cart.ts — 购物车：勾选、改量、结算与 TabBar 角标
+import { baseUrl } from '../../config/index';
+import { toRelativeImagePath } from '../../utils/image';
 import {
   CHECKOUT_PRODUCTS_KEY,
+  cartLineKey,
   computeCartSummary,
   readCartFromStorage,
   selectedToCheckoutProducts,
@@ -11,11 +14,6 @@ import {
   type CartListItem,
 } from '../../utils/cart';
 import { request } from '../../utils/request';
-
-interface ApiResponse<T> {
-  success?: boolean;
-  data?: T;
-}
 
 interface CartSyncLine {
   productId: string;
@@ -39,6 +37,7 @@ Page({
     totalPrice: '0.00',
     totalCount: 0,
     scrollHeight: 600,
+    baseUrl,
   },
 
   onLoad() {
@@ -74,7 +73,7 @@ Page({
     const prevMap: Record<string, boolean> = {};
     prevList.forEach((row) => {
       if (row && row.id) {
-        prevMap[row.id] = !!row.selected;
+        prevMap[cartLineKey(row)] = !!row.selected;
       }
     });
 
@@ -83,46 +82,58 @@ Page({
       return;
     }
 
-    request<ApiResponse<{ list: CartSyncLine[] }>>({
+    request<{ list: CartSyncLine[] }>({
       url: '/cart',
       method: 'POST',
       data: {
         items: stored.map((row) => ({
           productId: row.id,
+          skuId: row.skuId,
           quantity: row.quantity,
         })),
       },
     })
       .then((res) => {
-        const lines = res?.data?.list ?? [];
-        const invalidById: Record<string, boolean> = {};
-        const lineMap = new Map(lines.map((line) => [line.productId, line]));
+        const lines = res?.list ?? [];
+        const invalidByKey: Record<string, boolean> = {};
+        const lineMap = new Map(
+          lines.map((line) => [
+            cartLineKey({
+              id: line.productId,
+              skuId: line.skuId ?? undefined,
+            }),
+            line,
+          ])
+        );
 
         const mergedStored = stored.map((row) => {
-          const line = lineMap.get(row.id);
+          const key = cartLineKey(row);
+          const line = lineMap.get(key);
           if (line?.isInvalid) {
-            invalidById[row.id] = true;
+            invalidByKey[key] = true;
           }
           if (line?.product) {
             return {
               ...row,
               name: line.product.name || row.name,
               price: line.product.sellPrice ?? row.price,
-              imageUrl: line.product.imageUrl || row.imageUrl,
+              imageUrl: toRelativeImagePath(
+                line.product.imageUrl || row.imageUrl
+              ),
               shippingFee: line.product.shippingFee ?? row.shippingFee,
             };
           }
           if (!line) {
-            invalidById[row.id] = true;
+            invalidByKey[key] = true;
           }
           return row;
         });
 
         writeCartToStorage(mergedStored);
 
-        const cartList = storageToCartList(mergedStored, prevMap, invalidById).map(
+        const cartList = storageToCartList(mergedStored, prevMap, invalidByKey).map(
           (item) => {
-            const line = lineMap.get(item.id);
+            const line = lineMap.get(cartLineKey(item));
             return {
               ...item,
               invalidReason: line?.invalidReason ?? item.invalidReason,
@@ -171,9 +182,9 @@ Page({
     this.applyCartList(safeList);
   },
 
-  findItemIndex(id: string): number {
+  findItemIndex(lineKey: string): number {
     const list = Array.isArray(this.data.cartList) ? this.data.cartList : [];
-    return list.findIndex((row) => row.id === id);
+    return list.findIndex((row) => cartLineKey(row) === lineKey);
   },
 
   getCartListSafe(): CartListItem[] {
@@ -181,8 +192,8 @@ Page({
   },
 
   onToggleItemSelect(e: WechatMiniprogram.TouchEvent) {
-    const id = e.currentTarget.dataset.id as string;
-    const index = this.findItemIndex(id);
+    const lineKey = e.currentTarget.dataset.lineKey as string;
+    const index = this.findItemIndex(lineKey);
     if (index < 0) return;
 
     const cartList = [...this.getCartListSafe()];
@@ -207,8 +218,8 @@ Page({
   },
 
   onQuantityMinus(e: WechatMiniprogram.TouchEvent) {
-    const id = e.currentTarget.dataset.id as string;
-    const index = this.findItemIndex(id);
+    const lineKey = e.currentTarget.dataset.lineKey as string;
+    const index = this.findItemIndex(lineKey);
     if (index < 0) return;
     if (this.getCartListSafe()[index].isInvalid) return;
 
@@ -224,8 +235,8 @@ Page({
   },
 
   onQuantityPlus(e: WechatMiniprogram.TouchEvent) {
-    const id = e.currentTarget.dataset.id as string;
-    const index = this.findItemIndex(id);
+    const lineKey = e.currentTarget.dataset.lineKey as string;
+    const index = this.findItemIndex(lineKey);
     if (index < 0) return;
     if (this.getCartListSafe()[index].isInvalid) return;
 
@@ -238,8 +249,8 @@ Page({
   },
 
   onDeleteItem(e: WechatMiniprogram.TouchEvent) {
-    const id = e.currentTarget.dataset.id as string;
-    const index = this.findItemIndex(id);
+    const lineKey = e.currentTarget.dataset.lineKey as string;
+    const index = this.findItemIndex(lineKey);
     if (index < 0) return;
 
     wx.showModal({

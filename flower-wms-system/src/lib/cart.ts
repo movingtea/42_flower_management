@@ -1,45 +1,48 @@
-import { PRODUCT_STATUS_PUBLISHED } from "@/lib/product-status";
+import { isSpuOutOfStock } from "@/lib/product-spu";
 
 export type CartClientItem = {
   productId: string;
+  skuId?: string;
   quantity: number;
 };
 
 export type CartProductSnapshot = {
-  id: string;
+  spuId: string;
+  skuId: string | null;
   name: string;
-  sku: string;
+  specName: string | null;
+  skuCode: string | null;
   sellPrice: string;
   imageUrl: string | null;
   shippingFee: number;
-  status: string;
   isDeleted: boolean;
+  isActive: boolean;
   isOutOfStock: boolean;
-  quantity: number;
+  stock: number;
 };
 
 export type CartLineResponse = {
   productId: string;
+  skuId: string | null;
   quantity: number;
   isInvalid: boolean;
   invalidReason: string | null;
   product: CartProductSnapshot | null;
 };
 
-/** 商品是否应对购物车展示为失效（软删除或未上架） */
-export function isCartProductInvalid(product: {
+export function isCartSpuInvalid(spu: {
   isDeleted: boolean;
-  status: string;
+  isActive: boolean;
 }): boolean {
-  if (product.isDeleted) return true;
-  return product.status !== PRODUCT_STATUS_PUBLISHED;
+  if (spu.isDeleted) return true;
+  return !spu.isActive;
 }
 
-export function cartInvalidReason(product: {
+export function cartInvalidReason(spu: {
   isDeleted: boolean;
-  status: string;
+  isActive: boolean;
 }): string {
-  if (product.isDeleted) return "已下架";
-  if (product.status !== PRODUCT_STATUS_PUBLISHED) return "已下架";
+  if (spu.isDeleted) return "已下架";
+  if (!spu.isActive) return "已下架";
   return "已失效";
 }

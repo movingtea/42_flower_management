@@ -1,9 +1,10 @@
 import {
   cartInvalidReason,
-  isCartProductInvalid,
+  isCartSpuInvalid,
   type CartClientItem,
   type CartLineResponse,
 } from "@/lib/cart";
+import { isSpuOutOfStock, productSpuInclude } from "@/lib/product-spu";
 import { prisma } from "@/lib/prisma";
 
 export function parseCartClientItems(raw: unknown): CartClientItem[] {
@@ -22,9 +23,13 @@ export function parseCartClientItems(raw: unknown): CartClientItem[] {
     const productId =
       typeof r.productId === "string"
         ? r.productId.trim()
-        : typeof r.id === "string"
-          ? r.id.trim()
-          : "";
+        : typeof r.spuId === "string"
+          ? r.spuId.trim()
+          : typeof r.id === "string"
+            ? r.id.trim()
+            : "";
+    const skuId =
+      typeof r.skuId === "string" && r.skuId.trim() ? r.skuId.trim() : undefined;
     const quantity = Number(r.quantity);
 
     if (!productId) {
@@ -34,13 +39,13 @@ export function parseCartClientItems(raw: unknown): CartClientItem[] {
       throw new Error(`items[${i}].quantity 须为正整数`);
     }
 
-    items.push({ productId, quantity });
+    items.push({ productId, skuId, quantity });
   }
 
   return items;
 }
 
-/** 根据客户端购物车条目查询商品并计算 isInvalid */
+/** 根据客户端购物车条目查询 SPU/SKU 并计算 isInvalid */
 export async function buildCartLines(
   clientItems: CartClientItem[]
 ): Promise<CartLineResponse[]> {
@@ -48,32 +53,22 @@ export async function buildCartLines(
     return [];
   }
 
-  const productIds = [...new Set(clientItems.map((i) => i.productId))];
+  const spuIds = [...new Set(clientItems.map((i) => i.productId))];
 
-  const products = await prisma.product.findMany({
-    where: { id: { in: productIds } },
-    select: {
-      id: true,
-      name: true,
-      sku: true,
-      price: true,
-      images: true,
-      shippingFee: true,
-      status: true,
-      isDeleted: true,
-      isOutOfStock: true,
-      quantity: true,
-    },
+  const spus = await prisma.productSpu.findMany({
+    where: { id: { in: spuIds } },
+    include: productSpuInclude,
   });
 
-  const productMap = new Map(products.map((p) => [p.id, p]));
+  const spuMap = new Map(spus.map((s) => [s.id, s]));
 
   return clientItems.map((item) => {
-    const product = productMap.get(item.productId);
+    const spu = spuMap.get(item.productId);
 
-    if (!product) {
+    if (!spu) {
       return {
         productId: item.productId,
+        skuId: item.skuId ?? null,
         quantity: item.quantity,
         isInvalid: true,
         invalidReason: "已下架",
@@ -81,24 +76,55 @@ export async function buildCartLines(
       };
     }
 
-    const invalid = isCartProductInvalid(product);
+    const sku = item.skuId
+      ? spu.skus.find((s) => s.id === item.skuId)
+      : spu.skus.length === 1
+        ? spu.skus[0]
+        : undefined;
+
+    let invalid = isCartSpuInvalid(spu);
+    let invalidReasonText: string | null = invalid
+      ? cartInvalidReason(spu)
+      : null;
+
+    if (!invalid && spu.skus.length > 1 && !sku) {
+      invalid = true;
+      invalidReasonText = "请选择款式";
+    }
+
+    if (!invalid && sku && sku.stock < item.quantity) {
+      invalid = true;
+      invalidReasonText = "库存不足";
+    }
+
+    if (!invalid && isSpuOutOfStock(spu.skus)) {
+      invalid = true;
+      invalidReasonText = "已下架";
+    }
+
+    const displayName = sku
+      ? `${spu.name}（${sku.specName}）`
+      : spu.name;
 
     return {
       productId: item.productId,
+      skuId: sku?.id ?? null,
       quantity: item.quantity,
       isInvalid: invalid,
-      invalidReason: invalid ? cartInvalidReason(product) : null,
+      invalidReason: invalidReasonText,
       product: {
-        id: product.id,
-        name: product.name,
-        sku: product.sku,
-        sellPrice: product.price.toString(),
-        imageUrl: product.images[0] ?? null,
-        shippingFee: Number(product.shippingFee ?? 0),
-        status: product.status,
-        isDeleted: product.isDeleted,
-        isOutOfStock: product.isOutOfStock,
-        quantity: product.quantity,
+        spuId: spu.id,
+        skuId: sku?.id ?? null,
+        name: displayName,
+        specName: sku?.specName ?? null,
+        skuCode: sku?.skuCode ?? null,
+        sellPrice: sku ? sku.price.toString() : "0",
+        imageUrl: sku?.imageUrl ?? null,
+        shippingFee: Number(spu.shippingFee ?? 0),
+        isDeleted: spu.isDeleted,
+        isActive: spu.isActive,
+        isOutOfStock: sku ? sku.stock <= 0 : isSpuOutOfStock(spu.skus),
+        stock: sku?.stock ?? 0,
       },
     };
   });

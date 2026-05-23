@@ -7,23 +7,32 @@ import {
   productCategoriesInclude,
 } from "@/lib/product-categories";
 import { loadAllProductCategoriesFlat } from "@/lib/product-category.server";
-import { activeProductWhere } from "@/lib/product-query";
+import { activeSpuWhere } from "@/lib/product-query";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 const EMPTY: ProductEditorInitial = {
-  sku: "",
   name: "",
   category: [],
-  sellPrice: "",
-  quantity: 0,
+  description: "",
+  maintenanceGuide: "",
   isActive: true,
   needsShipping: false,
   shippingFee: "",
-  description: "",
-  careTips: "",
-  imageUrl: "",
+  skus: [
+    {
+      specName: "标准款",
+      price: "",
+      stock: 0,
+      imageUrl: "",
+      isMainImage: true,
+      sortOrder: 0,
+    },
+  ],
+  displaySku: "",
+  displayImageUrl: "",
+  displayMinPrice: "0.00",
 };
 
 export default async function CmsProductEditPage({
@@ -35,30 +44,26 @@ export default async function CmsProductEditPage({
   const isNew = id === "new";
 
   if (isNew) {
-    return (
-      <ProductEditor productId="new" isNew initial={EMPTY} />
-    );
+    return <ProductEditor productId="new" isNew initial={EMPTY} />;
   }
 
-  const [product, categoryFlat] = await Promise.all([
-    prisma.product.findFirst({
-      where: { id, ...activeProductWhere },
+  const [spu, categoryFlat] = await Promise.all([
+    prisma.productSpu.findFirst({
+      where: { id, ...activeSpuWhere },
       include: productCategoriesInclude,
     }),
     loadAllProductCategoriesFlat(),
   ]);
 
-  if (!product) {
+  if (!spu) {
     notFound();
   }
 
   const initial = productToEditorInitial(
-    product,
-    categoryIdsFromProduct(product),
+    spu,
+    categoryIdsFromProduct(spu),
     categoryFlat
   );
 
-  return (
-    <ProductEditor productId={id} isNew={false} initial={initial} />
-  );
+  return <ProductEditor productId={id} isNew={false} initial={initial} />;
 }

@@ -17,7 +17,10 @@
 
     <!-- 收货人信息 -->
     <view class="section">
-      <view class="section-title">收货人信息</view>
+      <view class="section-title-row">
+        <text class="section-title">收货人信息</text>
+        <button class="address-import-btn" bindtap="onChooseWechatAddress">微信地址</button>
+      </view>
       <view class="form-row">
         <text class="form-label">收件人姓名</text>
         <input
@@ -103,7 +106,7 @@
         <image
           wx:if="{{item.imageUrl}}"
           class="checkout-line-image"
-          src="{{item.imageUrl}}"
+          src="{{baseUrl}}{{item.imageUrl}}"
           mode="aspectFill"
           lazy-load
         />

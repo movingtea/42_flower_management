@@ -1,24 +1,23 @@
 import { jsonError } from "@/lib/api";
 import { jsonWechatSuccess } from "@/lib/wechat-api";
-import { categoryIdsFromProduct, productCategoriesInclude } from "@/lib/product-categories";
-import { PRODUCT_STATUS_PUBLISHED } from "@/lib/product-status";
-import { activeProductWhere } from "@/lib/product-query";
+import { activeSpuWhere } from "@/lib/product-query";
+import { productSpuInclude } from "@/lib/product-spu";
+import { mapSpuToWechatListItem } from "@/lib/wechat-product-mapper";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-/** GET：小程序商品列表（?category=<分类 id> 筛选） */
+/** GET：小程序商品列表（?category= &keyword=） */
 export async function GET(request: Request) {
   try {
     const params = new URL(request.url).searchParams;
     const categoryFilter = params.get("category")?.trim();
     const keyword = params.get("keyword")?.trim();
 
-    const products = await prisma.product.findMany({
+    const spus = await prisma.productSpu.findMany({
       where: {
-        ...activeProductWhere,
-        status: PRODUCT_STATUS_PUBLISHED,
-        isOutOfStock: false,
+        ...activeSpuWhere,
+        isActive: true,
         ...(categoryFilter
           ? {
               categories: {
@@ -30,36 +29,26 @@ export async function GET(request: Request) {
           ? {
               OR: [
                 { name: { contains: keyword, mode: "insensitive" } },
-                { subtitle: { contains: keyword, mode: "insensitive" } },
-                { sku: { contains: keyword, mode: "insensitive" } },
+                { description: { contains: keyword, mode: "insensitive" } },
+                {
+                  skus: {
+                    some: {
+                      OR: [
+                        { specName: { contains: keyword, mode: "insensitive" } },
+                        { skuCode: { contains: keyword, mode: "insensitive" } },
+                      ],
+                    },
+                  },
+                },
               ],
             }
           : {}),
       },
-      include: productCategoriesInclude,
+      include: productSpuInclude,
       orderBy: { name: "asc" },
     });
 
-    const list = products.map((p) => {
-      const sellableQty = p.quantity;
-      return {
-        id: p.id,
-        sku: p.sku,
-        name: p.name,
-        category: categoryIdsFromProduct(p),
-        subtitle: p.subtitle,
-        images: p.images,
-        detailContent: p.detailContent,
-        sellPrice: p.price.toString(),
-        quantity: sellableQty,
-        allowPreOrder: p.allowPreOrder,
-        productionTime: p.productionTime,
-        shippingFee: Number(p.shippingFee ?? 0),
-        totalStock: sellableQty,
-        isOutOfStock: p.isOutOfStock || sellableQty <= 0,
-      };
-    });
-
+    const list = spus.map(mapSpuToWechatListItem);
     const inStock = list.filter((p) => !p.isOutOfStock);
 
     return jsonWechatSuccess({

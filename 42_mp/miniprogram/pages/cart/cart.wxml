@@ -11,13 +11,13 @@
         wx:for="{{cartList}}"
         wx:for-item="item"
         wx:for-index="index"
-        wx:key="id"
+        wx:key="lineKey"
         class="cart-row {{item.isInvalid ? 'cart-row--invalid' : ''}}"
       >
         <view
           class="cart-check-wrap"
           catchtap="onToggleItemSelect"
-          data-id="{{item.id}}"
+          data-line-key="{{item.lineKey}}"
         >
           <view class="checkbox {{item.selected && !item.isInvalid ? 'checkbox--checked' : ''}} {{item.isInvalid ? 'checkbox--disabled' : ''}}">
             <text wx:if="{{item.selected}}" class="checkbox-tick">✓</text>
@@ -26,7 +26,7 @@
 
         <image
           class="cart-row-image"
-          src="{{item.imageUrl}}"
+          src="{{baseUrl}}{{item.imageUrl}}"
           mode="aspectFill"
           lazy-load
         />
@@ -43,19 +43,19 @@
               <view
                 class="stepper-btn flex-center"
                 catchtap="onQuantityMinus"
-                data-id="{{item.id}}"
+                data-line-key="{{item.lineKey}}"
               >−</view>
               <text class="stepper-qty">{{item.quantity}}</text>
               <view
                 class="stepper-btn flex-center"
                 catchtap="onQuantityPlus"
-                data-id="{{item.id}}"
+                data-line-key="{{item.lineKey}}"
               >+</view>
             </view>
             <text
               class="cart-delete"
               catchtap="onDeleteItem"
-              data-id="{{item.id}}"
+              data-line-key="{{item.lineKey}}"
             >删除</text>
           </view>
         </view>

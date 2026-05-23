@@ -35,13 +35,16 @@ export async function cancelWechatOrderAndReleaseStock(orderId: string) {
 
     const orderItems = await tx.orderItem.findMany({
       where: { orderId: order.id },
-      select: { productId: true, quantity: true },
+      select: { productId: true, productSku: true, quantity: true },
     });
 
     for (const line of orderItems) {
-      await tx.product.update({
-        where: { id: line.productId },
-        data: { quantity: { increment: line.quantity } },
+      await tx.productSku.updateMany({
+        where: {
+          spuId: line.productId,
+          skuCode: line.productSku,
+        },
+        data: { stock: { increment: line.quantity } },
       });
     }
 

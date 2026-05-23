@@ -1,15 +1,26 @@
+export type ProductSkuEditorRow = {
+  id?: string;
+  skuCode?: string;
+  specName: string;
+  price: string;
+  stock: number;
+  imageUrl: string;
+  isMainImage: boolean;
+  sortOrder?: number;
+};
+
 export type ProductEditorInitial = {
-  sku: string;
   name: string;
   category: string[];
-  sellPrice: string;
-  quantity: number;
+  description: string;
+  maintenanceGuide: string;
   isActive: boolean;
   needsShipping: boolean;
   shippingFee: string;
-  description: string;
-  careTips: string;
-  imageUrl: string;
+  skus: ProductSkuEditorRow[];
+  displaySku: string;
+  displayImageUrl: string;
+  displayMinPrice: string;
 };
 
 export type ProductEditorProps = {

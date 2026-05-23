@@ -1,22 +1,20 @@
-// app.ts — 应用入口：静默登录打通 Next.js 后端
+// app.ts — 应用入口：静默登录
+import { baseUrl } from './config/index';
 import { request } from './utils/request';
-
-/** 后端 /login 接口返回结构 */
-interface LoginResponse {
-  token: string;
-  userInfo: AppGlobalUser;
-}
+import { setOpenId, setStoredUser, setToken } from './utils/auth';
+import type { WechatUserProfile } from './utils/user';
 
 App<IAppOption>({
   globalData: {
     userInfo: undefined,
+    baseUrl,
   },
 
   onLaunch() {
     this.performSilentLogin();
   },
 
-  /** 无感登录：wx.login 换取 code，POST 至 Next.js 后端 */
+  /** 无感登录：wx.login → /auth/login → 缓存 token 与 openId */
   performSilentLogin() {
     wx.login({
       success: (loginRes) => {
@@ -25,18 +23,27 @@ App<IAppOption>({
           return;
         }
 
-        request<LoginResponse>({
-          url: '/login',
+        request<{ token: string; user: WechatUserProfile }>({
+          url: '/auth/login',
           method: 'POST',
           data: { code: loginRes.code },
         })
-          .then((res) => {
-            if (res.token) {
-              wx.setStorageSync('token', res.token);
+          .then((data) => {
+            if (!data?.token || !data?.user?.openId) {
+              console.warn('登录响应缺少 token 或 openId');
+              return;
             }
-            if (res.userInfo) {
-              this.globalData.userInfo = res.userInfo;
-            }
+
+            setToken(data.token);
+            setOpenId(data.user.openId);
+            setStoredUser(data.user);
+
+            const userInfo: AppGlobalUser = {
+              openId: data.user.openId,
+              nickName: data.user.nickName ?? undefined,
+              avatarUrl: data.user.avatarUrl ?? undefined,
+            };
+            this.globalData.userInfo = userInfo;
           })
           .catch((err) => {
             console.error('静默登录失败', err);

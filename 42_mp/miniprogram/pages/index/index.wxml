@@ -34,7 +34,7 @@
     <swiper-item wx:for="{{banners}}" wx:key="id">
       <image
         class="banner-image"
-        src="{{item.imageUrl}}"
+        src="{{baseUrl}}{{item.imageUrl}}"
         mode="aspectFill"
         bindtap="onBannerTap"
         data-target-type="{{item.targetType}}"
@@ -48,7 +48,7 @@
   </view>
 
   <!-- 金刚区 -->
-  <view class="kingkong-section">
+  <!-- <view class="kingkong-section">
     <view class="kingkong-grid">
       <view
         class="kingkong-card"
@@ -83,7 +83,7 @@
         <text class="kingkong-title">养护指南</text>
       </view>
     </view>
-  </view>
+  </view> -->
 
   <!-- 动态分类 Tab -->
   <scroll-view
@@ -125,7 +125,7 @@
         <view class="product-image-wrap">
           <image
             class="product-image"
-            src="{{item.imageUrl}}"
+            src="{{baseUrl}}{{item.imageUrl}}"
             mode="aspectFill"
             lazy-load
           />
@@ -143,7 +143,7 @@
             class="product-subtitle text-ellipsis text-muted"
           >{{item.subtitle}}</text>
           <view class="product-info-bottom">
-            <text class="price-text">¥{{item.price}}</text>
+            <text class="price-text">¥{{item.price}}{{item.priceSuffix}}</text>
             <view
               class="cart-add-btn flex-center"
               catchtap="onAddCart"
@@ -174,7 +174,7 @@
     <image
       wx:if="{{popup.imageUrl}}"
       class="popup-image"
-      src="{{popup.imageUrl}}"
+      src="{{baseUrl}}{{popup.imageUrl}}"
       mode="aspectFill"
     />
     <view class="popup-body">
@@ -184,3 +184,11 @@
     <view class="popup-close flex-center" catchtap="onClosePopup">知道了</view>
   </view>
 </view>
+
+<spec-picker
+  visible="{{specPickerVisible}}"
+  product="{{specPickerProduct}}"
+  base-url="{{baseUrl}}"
+  bind:close="onSpecPickerClose"
+  bind:confirm="onSpecPickerConfirm"
+/>

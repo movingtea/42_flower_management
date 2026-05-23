@@ -26,19 +26,19 @@ export type AggregateProductCategoryRelation = {
 
 export type ProductCategoryRelationMinAggregateOutputType = {
   id: string | null
-  productId: string | null
+  spuId: string | null
   productCategoryId: string | null
 }
 
 export type ProductCategoryRelationMaxAggregateOutputType = {
   id: string | null
-  productId: string | null
+  spuId: string | null
   productCategoryId: string | null
 }
 
 export type ProductCategoryRelationCountAggregateOutputType = {
   id: number
-  productId: number
+  spuId: number
   productCategoryId: number
   _all: number
 }
@@ -46,19 +46,19 @@ export type ProductCategoryRelationCountAggregateOutputType = {
 
 export type ProductCategoryRelationMinAggregateInputType = {
   id?: true
-  productId?: true
+  spuId?: true
   productCategoryId?: true
 }
 
 export type ProductCategoryRelationMaxAggregateInputType = {
   id?: true
-  productId?: true
+  spuId?: true
   productCategoryId?: true
 }
 
 export type ProductCategoryRelationCountAggregateInputType = {
   id?: true
-  productId?: true
+  spuId?: true
   productCategoryId?: true
   _all?: true
 }
@@ -137,7 +137,7 @@ export type ProductCategoryRelationGroupByArgs<ExtArgs extends runtime.Types.Ext
 
 export type ProductCategoryRelationGroupByOutputType = {
   id: string
-  productId: string
+  spuId: string
   productCategoryId: string
   _count: ProductCategoryRelationCountAggregateOutputType | null
   _min: ProductCategoryRelationMinAggregateOutputType | null
@@ -164,35 +164,35 @@ export type ProductCategoryRelationWhereInput = {
   OR?: Prisma.ProductCategoryRelationWhereInput[]
   NOT?: Prisma.ProductCategoryRelationWhereInput | Prisma.ProductCategoryRelationWhereInput[]
   id?: Prisma.StringFilter<"ProductCategoryRelation"> | string
-  productId?: Prisma.StringFilter<"ProductCategoryRelation"> | string
+  spuId?: Prisma.StringFilter<"ProductCategoryRelation"> | string
   productCategoryId?: Prisma.StringFilter<"ProductCategoryRelation"> | string
-  product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
+  spu?: Prisma.XOR<Prisma.ProductSpuScalarRelationFilter, Prisma.ProductSpuWhereInput>
   productCategory?: Prisma.XOR<Prisma.ProductCategoryScalarRelationFilter, Prisma.ProductCategoryWhereInput>
 }
 
 export type ProductCategoryRelationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  productId?: Prisma.SortOrder
+  spuId?: Prisma.SortOrder
   productCategoryId?: Prisma.SortOrder
-  product?: Prisma.ProductOrderByWithRelationInput
+  spu?: Prisma.ProductSpuOrderByWithRelationInput
   productCategory?: Prisma.ProductCategoryOrderByWithRelationInput
 }
 
 export type ProductCategoryRelationWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  productId_productCategoryId?: Prisma.ProductCategoryRelationProductIdProductCategoryIdCompoundUniqueInput
+  spuId_productCategoryId?: Prisma.ProductCategoryRelationSpuIdProductCategoryIdCompoundUniqueInput
   AND?: Prisma.ProductCategoryRelationWhereInput | Prisma.ProductCategoryRelationWhereInput[]
   OR?: Prisma.ProductCategoryRelationWhereInput[]
   NOT?: Prisma.ProductCategoryRelationWhereInput | Prisma.ProductCategoryRelationWhereInput[]
-  productId?: Prisma.StringFilter<"ProductCategoryRelation"> | string
+  spuId?: Prisma.StringFilter<"ProductCategoryRelation"> | string
   productCategoryId?: Prisma.StringFilter<"ProductCategoryRelation"> | string
-  product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
+  spu?: Prisma.XOR<Prisma.ProductSpuScalarRelationFilter, Prisma.ProductSpuWhereInput>
   productCategory?: Prisma.XOR<Prisma.ProductCategoryScalarRelationFilter, Prisma.ProductCategoryWhereInput>
-}, "id" | "productId_productCategoryId">
+}, "id" | "spuId_productCategoryId">
 
 export type ProductCategoryRelationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  productId?: Prisma.SortOrder
+  spuId?: Prisma.SortOrder
   productCategoryId?: Prisma.SortOrder
   _count?: Prisma.ProductCategoryRelationCountOrderByAggregateInput
   _max?: Prisma.ProductCategoryRelationMaxOrderByAggregateInput
@@ -204,37 +204,37 @@ export type ProductCategoryRelationScalarWhereWithAggregatesInput = {
   OR?: Prisma.ProductCategoryRelationScalarWhereWithAggregatesInput[]
   NOT?: Prisma.ProductCategoryRelationScalarWhereWithAggregatesInput | Prisma.ProductCategoryRelationScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"ProductCategoryRelation"> | string
-  productId?: Prisma.StringWithAggregatesFilter<"ProductCategoryRelation"> | string
+  spuId?: Prisma.StringWithAggregatesFilter<"ProductCategoryRelation"> | string
   productCategoryId?: Prisma.StringWithAggregatesFilter<"ProductCategoryRelation"> | string
 }
 
 export type ProductCategoryRelationCreateInput = {
   id?: string
-  product: Prisma.ProductCreateNestedOneWithoutCategoriesInput
+  spu: Prisma.ProductSpuCreateNestedOneWithoutCategoriesInput
   productCategory: Prisma.ProductCategoryCreateNestedOneWithoutProductsInput
 }
 
 export type ProductCategoryRelationUncheckedCreateInput = {
   id?: string
-  productId: string
+  spuId: string
   productCategoryId: string
 }
 
 export type ProductCategoryRelationUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  product?: Prisma.ProductUpdateOneRequiredWithoutCategoriesNestedInput
+  spu?: Prisma.ProductSpuUpdateOneRequiredWithoutCategoriesNestedInput
   productCategory?: Prisma.ProductCategoryUpdateOneRequiredWithoutProductsNestedInput
 }
 
 export type ProductCategoryRelationUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  productId?: Prisma.StringFieldUpdateOperationsInput | string
+  spuId?: Prisma.StringFieldUpdateOperationsInput | string
   productCategoryId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ProductCategoryRelationCreateManyInput = {
   id?: string
-  productId: string
+  spuId: string
   productCategoryId: string
 }
 
@@ -244,7 +244,7 @@ export type ProductCategoryRelationUpdateManyMutationInput = {
 
 export type ProductCategoryRelationUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  productId?: Prisma.StringFieldUpdateOperationsInput | string
+  spuId?: Prisma.StringFieldUpdateOperationsInput | string
   productCategoryId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
@@ -258,26 +258,26 @@ export type ProductCategoryRelationOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type ProductCategoryRelationProductIdProductCategoryIdCompoundUniqueInput = {
-  productId: string
+export type ProductCategoryRelationSpuIdProductCategoryIdCompoundUniqueInput = {
+  spuId: string
   productCategoryId: string
 }
 
 export type ProductCategoryRelationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  productId?: Prisma.SortOrder
+  spuId?: Prisma.SortOrder
   productCategoryId?: Prisma.SortOrder
 }
 
 export type ProductCategoryRelationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  productId?: Prisma.SortOrder
+  spuId?: Prisma.SortOrder
   productCategoryId?: Prisma.SortOrder
 }
 
 export type ProductCategoryRelationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  productId?: Prisma.SortOrder
+  spuId?: Prisma.SortOrder
   productCategoryId?: Prisma.SortOrder
 }
 
@@ -323,56 +323,56 @@ export type ProductCategoryRelationUncheckedUpdateManyWithoutProductCategoryNest
   deleteMany?: Prisma.ProductCategoryRelationScalarWhereInput | Prisma.ProductCategoryRelationScalarWhereInput[]
 }
 
-export type ProductCategoryRelationCreateNestedManyWithoutProductInput = {
-  create?: Prisma.XOR<Prisma.ProductCategoryRelationCreateWithoutProductInput, Prisma.ProductCategoryRelationUncheckedCreateWithoutProductInput> | Prisma.ProductCategoryRelationCreateWithoutProductInput[] | Prisma.ProductCategoryRelationUncheckedCreateWithoutProductInput[]
-  connectOrCreate?: Prisma.ProductCategoryRelationCreateOrConnectWithoutProductInput | Prisma.ProductCategoryRelationCreateOrConnectWithoutProductInput[]
-  createMany?: Prisma.ProductCategoryRelationCreateManyProductInputEnvelope
+export type ProductCategoryRelationCreateNestedManyWithoutSpuInput = {
+  create?: Prisma.XOR<Prisma.ProductCategoryRelationCreateWithoutSpuInput, Prisma.ProductCategoryRelationUncheckedCreateWithoutSpuInput> | Prisma.ProductCategoryRelationCreateWithoutSpuInput[] | Prisma.ProductCategoryRelationUncheckedCreateWithoutSpuInput[]
+  connectOrCreate?: Prisma.ProductCategoryRelationCreateOrConnectWithoutSpuInput | Prisma.ProductCategoryRelationCreateOrConnectWithoutSpuInput[]
+  createMany?: Prisma.ProductCategoryRelationCreateManySpuInputEnvelope
   connect?: Prisma.ProductCategoryRelationWhereUniqueInput | Prisma.ProductCategoryRelationWhereUniqueInput[]
 }
 
-export type ProductCategoryRelationUncheckedCreateNestedManyWithoutProductInput = {
-  create?: Prisma.XOR<Prisma.ProductCategoryRelationCreateWithoutProductInput, Prisma.ProductCategoryRelationUncheckedCreateWithoutProductInput> | Prisma.ProductCategoryRelationCreateWithoutProductInput[] | Prisma.ProductCategoryRelationUncheckedCreateWithoutProductInput[]
-  connectOrCreate?: Prisma.ProductCategoryRelationCreateOrConnectWithoutProductInput | Prisma.ProductCategoryRelationCreateOrConnectWithoutProductInput[]
-  createMany?: Prisma.ProductCategoryRelationCreateManyProductInputEnvelope
+export type ProductCategoryRelationUncheckedCreateNestedManyWithoutSpuInput = {
+  create?: Prisma.XOR<Prisma.ProductCategoryRelationCreateWithoutSpuInput, Prisma.ProductCategoryRelationUncheckedCreateWithoutSpuInput> | Prisma.ProductCategoryRelationCreateWithoutSpuInput[] | Prisma.ProductCategoryRelationUncheckedCreateWithoutSpuInput[]
+  connectOrCreate?: Prisma.ProductCategoryRelationCreateOrConnectWithoutSpuInput | Prisma.ProductCategoryRelationCreateOrConnectWithoutSpuInput[]
+  createMany?: Prisma.ProductCategoryRelationCreateManySpuInputEnvelope
   connect?: Prisma.ProductCategoryRelationWhereUniqueInput | Prisma.ProductCategoryRelationWhereUniqueInput[]
 }
 
-export type ProductCategoryRelationUpdateManyWithoutProductNestedInput = {
-  create?: Prisma.XOR<Prisma.ProductCategoryRelationCreateWithoutProductInput, Prisma.ProductCategoryRelationUncheckedCreateWithoutProductInput> | Prisma.ProductCategoryRelationCreateWithoutProductInput[] | Prisma.ProductCategoryRelationUncheckedCreateWithoutProductInput[]
-  connectOrCreate?: Prisma.ProductCategoryRelationCreateOrConnectWithoutProductInput | Prisma.ProductCategoryRelationCreateOrConnectWithoutProductInput[]
-  upsert?: Prisma.ProductCategoryRelationUpsertWithWhereUniqueWithoutProductInput | Prisma.ProductCategoryRelationUpsertWithWhereUniqueWithoutProductInput[]
-  createMany?: Prisma.ProductCategoryRelationCreateManyProductInputEnvelope
+export type ProductCategoryRelationUpdateManyWithoutSpuNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductCategoryRelationCreateWithoutSpuInput, Prisma.ProductCategoryRelationUncheckedCreateWithoutSpuInput> | Prisma.ProductCategoryRelationCreateWithoutSpuInput[] | Prisma.ProductCategoryRelationUncheckedCreateWithoutSpuInput[]
+  connectOrCreate?: Prisma.ProductCategoryRelationCreateOrConnectWithoutSpuInput | Prisma.ProductCategoryRelationCreateOrConnectWithoutSpuInput[]
+  upsert?: Prisma.ProductCategoryRelationUpsertWithWhereUniqueWithoutSpuInput | Prisma.ProductCategoryRelationUpsertWithWhereUniqueWithoutSpuInput[]
+  createMany?: Prisma.ProductCategoryRelationCreateManySpuInputEnvelope
   set?: Prisma.ProductCategoryRelationWhereUniqueInput | Prisma.ProductCategoryRelationWhereUniqueInput[]
   disconnect?: Prisma.ProductCategoryRelationWhereUniqueInput | Prisma.ProductCategoryRelationWhereUniqueInput[]
   delete?: Prisma.ProductCategoryRelationWhereUniqueInput | Prisma.ProductCategoryRelationWhereUniqueInput[]
   connect?: Prisma.ProductCategoryRelationWhereUniqueInput | Prisma.ProductCategoryRelationWhereUniqueInput[]
-  update?: Prisma.ProductCategoryRelationUpdateWithWhereUniqueWithoutProductInput | Prisma.ProductCategoryRelationUpdateWithWhereUniqueWithoutProductInput[]
-  updateMany?: Prisma.ProductCategoryRelationUpdateManyWithWhereWithoutProductInput | Prisma.ProductCategoryRelationUpdateManyWithWhereWithoutProductInput[]
+  update?: Prisma.ProductCategoryRelationUpdateWithWhereUniqueWithoutSpuInput | Prisma.ProductCategoryRelationUpdateWithWhereUniqueWithoutSpuInput[]
+  updateMany?: Prisma.ProductCategoryRelationUpdateManyWithWhereWithoutSpuInput | Prisma.ProductCategoryRelationUpdateManyWithWhereWithoutSpuInput[]
   deleteMany?: Prisma.ProductCategoryRelationScalarWhereInput | Prisma.ProductCategoryRelationScalarWhereInput[]
 }
 
-export type ProductCategoryRelationUncheckedUpdateManyWithoutProductNestedInput = {
-  create?: Prisma.XOR<Prisma.ProductCategoryRelationCreateWithoutProductInput, Prisma.ProductCategoryRelationUncheckedCreateWithoutProductInput> | Prisma.ProductCategoryRelationCreateWithoutProductInput[] | Prisma.ProductCategoryRelationUncheckedCreateWithoutProductInput[]
-  connectOrCreate?: Prisma.ProductCategoryRelationCreateOrConnectWithoutProductInput | Prisma.ProductCategoryRelationCreateOrConnectWithoutProductInput[]
-  upsert?: Prisma.ProductCategoryRelationUpsertWithWhereUniqueWithoutProductInput | Prisma.ProductCategoryRelationUpsertWithWhereUniqueWithoutProductInput[]
-  createMany?: Prisma.ProductCategoryRelationCreateManyProductInputEnvelope
+export type ProductCategoryRelationUncheckedUpdateManyWithoutSpuNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductCategoryRelationCreateWithoutSpuInput, Prisma.ProductCategoryRelationUncheckedCreateWithoutSpuInput> | Prisma.ProductCategoryRelationCreateWithoutSpuInput[] | Prisma.ProductCategoryRelationUncheckedCreateWithoutSpuInput[]
+  connectOrCreate?: Prisma.ProductCategoryRelationCreateOrConnectWithoutSpuInput | Prisma.ProductCategoryRelationCreateOrConnectWithoutSpuInput[]
+  upsert?: Prisma.ProductCategoryRelationUpsertWithWhereUniqueWithoutSpuInput | Prisma.ProductCategoryRelationUpsertWithWhereUniqueWithoutSpuInput[]
+  createMany?: Prisma.ProductCategoryRelationCreateManySpuInputEnvelope
   set?: Prisma.ProductCategoryRelationWhereUniqueInput | Prisma.ProductCategoryRelationWhereUniqueInput[]
   disconnect?: Prisma.ProductCategoryRelationWhereUniqueInput | Prisma.ProductCategoryRelationWhereUniqueInput[]
   delete?: Prisma.ProductCategoryRelationWhereUniqueInput | Prisma.ProductCategoryRelationWhereUniqueInput[]
   connect?: Prisma.ProductCategoryRelationWhereUniqueInput | Prisma.ProductCategoryRelationWhereUniqueInput[]
-  update?: Prisma.ProductCategoryRelationUpdateWithWhereUniqueWithoutProductInput | Prisma.ProductCategoryRelationUpdateWithWhereUniqueWithoutProductInput[]
-  updateMany?: Prisma.ProductCategoryRelationUpdateManyWithWhereWithoutProductInput | Prisma.ProductCategoryRelationUpdateManyWithWhereWithoutProductInput[]
+  update?: Prisma.ProductCategoryRelationUpdateWithWhereUniqueWithoutSpuInput | Prisma.ProductCategoryRelationUpdateWithWhereUniqueWithoutSpuInput[]
+  updateMany?: Prisma.ProductCategoryRelationUpdateManyWithWhereWithoutSpuInput | Prisma.ProductCategoryRelationUpdateManyWithWhereWithoutSpuInput[]
   deleteMany?: Prisma.ProductCategoryRelationScalarWhereInput | Prisma.ProductCategoryRelationScalarWhereInput[]
 }
 
 export type ProductCategoryRelationCreateWithoutProductCategoryInput = {
   id?: string
-  product: Prisma.ProductCreateNestedOneWithoutCategoriesInput
+  spu: Prisma.ProductSpuCreateNestedOneWithoutCategoriesInput
 }
 
 export type ProductCategoryRelationUncheckedCreateWithoutProductCategoryInput = {
   id?: string
-  productId: string
+  spuId: string
 }
 
 export type ProductCategoryRelationCreateOrConnectWithoutProductCategoryInput = {
@@ -406,82 +406,82 @@ export type ProductCategoryRelationScalarWhereInput = {
   OR?: Prisma.ProductCategoryRelationScalarWhereInput[]
   NOT?: Prisma.ProductCategoryRelationScalarWhereInput | Prisma.ProductCategoryRelationScalarWhereInput[]
   id?: Prisma.StringFilter<"ProductCategoryRelation"> | string
-  productId?: Prisma.StringFilter<"ProductCategoryRelation"> | string
+  spuId?: Prisma.StringFilter<"ProductCategoryRelation"> | string
   productCategoryId?: Prisma.StringFilter<"ProductCategoryRelation"> | string
 }
 
-export type ProductCategoryRelationCreateWithoutProductInput = {
+export type ProductCategoryRelationCreateWithoutSpuInput = {
   id?: string
   productCategory: Prisma.ProductCategoryCreateNestedOneWithoutProductsInput
 }
 
-export type ProductCategoryRelationUncheckedCreateWithoutProductInput = {
+export type ProductCategoryRelationUncheckedCreateWithoutSpuInput = {
   id?: string
   productCategoryId: string
 }
 
-export type ProductCategoryRelationCreateOrConnectWithoutProductInput = {
+export type ProductCategoryRelationCreateOrConnectWithoutSpuInput = {
   where: Prisma.ProductCategoryRelationWhereUniqueInput
-  create: Prisma.XOR<Prisma.ProductCategoryRelationCreateWithoutProductInput, Prisma.ProductCategoryRelationUncheckedCreateWithoutProductInput>
+  create: Prisma.XOR<Prisma.ProductCategoryRelationCreateWithoutSpuInput, Prisma.ProductCategoryRelationUncheckedCreateWithoutSpuInput>
 }
 
-export type ProductCategoryRelationCreateManyProductInputEnvelope = {
-  data: Prisma.ProductCategoryRelationCreateManyProductInput | Prisma.ProductCategoryRelationCreateManyProductInput[]
+export type ProductCategoryRelationCreateManySpuInputEnvelope = {
+  data: Prisma.ProductCategoryRelationCreateManySpuInput | Prisma.ProductCategoryRelationCreateManySpuInput[]
   skipDuplicates?: boolean
 }
 
-export type ProductCategoryRelationUpsertWithWhereUniqueWithoutProductInput = {
+export type ProductCategoryRelationUpsertWithWhereUniqueWithoutSpuInput = {
   where: Prisma.ProductCategoryRelationWhereUniqueInput
-  update: Prisma.XOR<Prisma.ProductCategoryRelationUpdateWithoutProductInput, Prisma.ProductCategoryRelationUncheckedUpdateWithoutProductInput>
-  create: Prisma.XOR<Prisma.ProductCategoryRelationCreateWithoutProductInput, Prisma.ProductCategoryRelationUncheckedCreateWithoutProductInput>
+  update: Prisma.XOR<Prisma.ProductCategoryRelationUpdateWithoutSpuInput, Prisma.ProductCategoryRelationUncheckedUpdateWithoutSpuInput>
+  create: Prisma.XOR<Prisma.ProductCategoryRelationCreateWithoutSpuInput, Prisma.ProductCategoryRelationUncheckedCreateWithoutSpuInput>
 }
 
-export type ProductCategoryRelationUpdateWithWhereUniqueWithoutProductInput = {
+export type ProductCategoryRelationUpdateWithWhereUniqueWithoutSpuInput = {
   where: Prisma.ProductCategoryRelationWhereUniqueInput
-  data: Prisma.XOR<Prisma.ProductCategoryRelationUpdateWithoutProductInput, Prisma.ProductCategoryRelationUncheckedUpdateWithoutProductInput>
+  data: Prisma.XOR<Prisma.ProductCategoryRelationUpdateWithoutSpuInput, Prisma.ProductCategoryRelationUncheckedUpdateWithoutSpuInput>
 }
 
-export type ProductCategoryRelationUpdateManyWithWhereWithoutProductInput = {
+export type ProductCategoryRelationUpdateManyWithWhereWithoutSpuInput = {
   where: Prisma.ProductCategoryRelationScalarWhereInput
-  data: Prisma.XOR<Prisma.ProductCategoryRelationUpdateManyMutationInput, Prisma.ProductCategoryRelationUncheckedUpdateManyWithoutProductInput>
+  data: Prisma.XOR<Prisma.ProductCategoryRelationUpdateManyMutationInput, Prisma.ProductCategoryRelationUncheckedUpdateManyWithoutSpuInput>
 }
 
 export type ProductCategoryRelationCreateManyProductCategoryInput = {
   id?: string
-  productId: string
+  spuId: string
 }
 
 export type ProductCategoryRelationUpdateWithoutProductCategoryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  product?: Prisma.ProductUpdateOneRequiredWithoutCategoriesNestedInput
+  spu?: Prisma.ProductSpuUpdateOneRequiredWithoutCategoriesNestedInput
 }
 
 export type ProductCategoryRelationUncheckedUpdateWithoutProductCategoryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  productId?: Prisma.StringFieldUpdateOperationsInput | string
+  spuId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
 export type ProductCategoryRelationUncheckedUpdateManyWithoutProductCategoryInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  productId?: Prisma.StringFieldUpdateOperationsInput | string
+  spuId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
-export type ProductCategoryRelationCreateManyProductInput = {
+export type ProductCategoryRelationCreateManySpuInput = {
   id?: string
   productCategoryId: string
 }
 
-export type ProductCategoryRelationUpdateWithoutProductInput = {
+export type ProductCategoryRelationUpdateWithoutSpuInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   productCategory?: Prisma.ProductCategoryUpdateOneRequiredWithoutProductsNestedInput
 }
 
-export type ProductCategoryRelationUncheckedUpdateWithoutProductInput = {
+export type ProductCategoryRelationUncheckedUpdateWithoutSpuInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   productCategoryId?: Prisma.StringFieldUpdateOperationsInput | string
 }
 
-export type ProductCategoryRelationUncheckedUpdateManyWithoutProductInput = {
+export type ProductCategoryRelationUncheckedUpdateManyWithoutSpuInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   productCategoryId?: Prisma.StringFieldUpdateOperationsInput | string
 }
@@ -490,57 +490,57 @@ export type ProductCategoryRelationUncheckedUpdateManyWithoutProductInput = {
 
 export type ProductCategoryRelationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  productId?: boolean
+  spuId?: boolean
   productCategoryId?: boolean
-  product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
   productCategory?: boolean | Prisma.ProductCategoryDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["productCategoryRelation"]>
 
 export type ProductCategoryRelationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  productId?: boolean
+  spuId?: boolean
   productCategoryId?: boolean
-  product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
   productCategory?: boolean | Prisma.ProductCategoryDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["productCategoryRelation"]>
 
 export type ProductCategoryRelationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  productId?: boolean
+  spuId?: boolean
   productCategoryId?: boolean
-  product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
   productCategory?: boolean | Prisma.ProductCategoryDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["productCategoryRelation"]>
 
 export type ProductCategoryRelationSelectScalar = {
   id?: boolean
-  productId?: boolean
+  spuId?: boolean
   productCategoryId?: boolean
 }
 
-export type ProductCategoryRelationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "productId" | "productCategoryId", ExtArgs["result"]["productCategoryRelation"]>
+export type ProductCategoryRelationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "spuId" | "productCategoryId", ExtArgs["result"]["productCategoryRelation"]>
 export type ProductCategoryRelationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
   productCategory?: boolean | Prisma.ProductCategoryDefaultArgs<ExtArgs>
 }
 export type ProductCategoryRelationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
   productCategory?: boolean | Prisma.ProductCategoryDefaultArgs<ExtArgs>
 }
 export type ProductCategoryRelationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
   productCategory?: boolean | Prisma.ProductCategoryDefaultArgs<ExtArgs>
 }
 
 export type $ProductCategoryRelationPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ProductCategoryRelation"
   objects: {
-    product: Prisma.$ProductPayload<ExtArgs>
+    spu: Prisma.$ProductSpuPayload<ExtArgs>
     productCategory: Prisma.$ProductCategoryPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    productId: string
+    spuId: string
     productCategoryId: string
   }, ExtArgs["result"]["productCategoryRelation"]>
   composites: {}
@@ -936,7 +936,7 @@ readonly fields: ProductCategoryRelationFieldRefs;
  */
 export interface Prisma__ProductCategoryRelationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  product<T extends Prisma.ProductDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductDefaultArgs<ExtArgs>>): Prisma.Prisma__ProductClient<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  spu<T extends Prisma.ProductSpuDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductSpuDefaultArgs<ExtArgs>>): Prisma.Prisma__ProductSpuClient<runtime.Types.Result.GetResult<Prisma.$ProductSpuPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   productCategory<T extends Prisma.ProductCategoryDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductCategoryDefaultArgs<ExtArgs>>): Prisma.Prisma__ProductCategoryClient<runtime.Types.Result.GetResult<Prisma.$ProductCategoryPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -968,7 +968,7 @@ export interface Prisma__ProductCategoryRelationClient<T, Null = never, ExtArgs 
  */
 export interface ProductCategoryRelationFieldRefs {
   readonly id: Prisma.FieldRef<"ProductCategoryRelation", 'String'>
-  readonly productId: Prisma.FieldRef<"ProductCategoryRelation", 'String'>
+  readonly spuId: Prisma.FieldRef<"ProductCategoryRelation", 'String'>
   readonly productCategoryId: Prisma.FieldRef<"ProductCategoryRelation", 'String'>
 }
     

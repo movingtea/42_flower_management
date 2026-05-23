@@ -4,12 +4,14 @@ import {
   productBomInclude,
   productCategoriesInclude,
 } from "@/lib/product-categories";
-import { PRODUCT_STATUS_PUBLISHED } from "@/lib/product-status";
-import { activeProductWhere } from "@/lib/product-query";
+import { activeSpuWhere } from "@/lib/product-query";
+import { productSpuInclude } from "@/lib/product-spu";
 import { prisma } from "@/lib/prisma";
 
 export type WechatOrderItemInput = {
+  /** SPU id */
   productId: string;
+  skuId?: string;
   quantity: number;
   price: number;
 };
@@ -113,32 +115,44 @@ export async function createWechatOrderWithFifoLock(
   payload: WechatCreateOrderPayload
 ) {
   const orderNo = generateWechatOrderNo();
+  const linkedUser = await prisma.user.findUnique({
+    where: { openId: payload.wechatOpenId },
+    select: { id: true },
+  });
 
   return prisma.$transaction(
     async (tx) => {
-      const productIds = [...new Set(payload.items.map((i) => i.productId))];
-      const products = await tx.product.findMany({
+      const spuIds = [...new Set(payload.items.map((i) => i.productId))];
+      const spus = await tx.productSpu.findMany({
         where: {
-          ...activeProductWhere,
-          id: { in: productIds },
-          status: PRODUCT_STATUS_PUBLISHED,
-          isOutOfStock: false,
+          ...activeSpuWhere,
+          isActive: true,
+          id: { in: spuIds },
         },
         include: {
           ...productCategoriesInclude,
           ...productBomInclude,
+          ...productSpuInclude,
         },
       });
-      const productMap = new Map(products.map((p) => [p.id, p]));
+      const spuMap = new Map(spus.map((p) => [p.id, p]));
 
       for (const item of payload.items) {
-        const product = productMap.get(item.productId);
-        if (!product) {
+        const spu = spuMap.get(item.productId);
+        if (!spu) {
           throw new Error(`商品不存在或已下架: ${item.productId}`);
         }
-        if (product.quantity < item.quantity) {
+        const sku = item.skuId
+          ? spu.skus.find((s) => s.id === item.skuId)
+          : spu.skus.length === 1
+            ? spu.skus[0]
+            : undefined;
+        if (!sku) {
+          throw new Error(`请选择商品款式: ${spu.name}`);
+        }
+        if (sku.stock < item.quantity) {
           throw new Error(
-            `商品「${product.name}」可售数量不足，当前剩余 ${product.quantity} 件`
+            `「${sku.specName}」可售数量不足，当前剩余 ${sku.stock} 件`
           );
         }
       }
@@ -147,6 +161,7 @@ export async function createWechatOrderWithFifoLock(
         data: {
           orderNo,
           status: OrderStatus.PENDING,
+          userId: linkedUser?.id,
           wechatOpenId: payload.wechatOpenId,
           totalAmount: payload.totalAmount,
           receiverName: payload.receiverName,
@@ -166,31 +181,31 @@ export async function createWechatOrderWithFifoLock(
       }[] = [];
 
       for (const item of payload.items) {
-        const product = productMap.get(item.productId)!;
+        const spu = spuMap.get(item.productId)!;
+        const sku = item.skuId
+          ? spu.skus.find((s) => s.id === item.skuId)!
+          : spu.skus[0]!;
         const lineTotal = item.price * item.quantity;
 
-        const stockDec = await tx.product.updateMany({
+        const stockDec = await tx.productSku.updateMany({
           where: {
-            id: item.productId,
-            quantity: { gte: item.quantity },
-            isOutOfStock: false,
-            isDeleted: false,
-            status: PRODUCT_STATUS_PUBLISHED,
+            id: sku.id,
+            stock: { gte: item.quantity },
           },
-          data: { quantity: { decrement: item.quantity } },
+          data: { stock: { decrement: item.quantity } },
         });
 
         if (stockDec.count !== 1) {
-          throw new Error(`商品「${product.name}」可售数量不足，请刷新后重试`);
+          throw new Error(`「${sku.specName}」可售数量不足，请刷新后重试`);
         }
 
         const orderItem = await tx.orderItem.create({
           data: {
             orderId: order.id,
-            productId: item.productId,
-            productName: product.name,
-            productSku: product.sku,
-            snapshotProductImage: product.images[0] ?? null,
+            productId: spu.id,
+            productName: `${spu.name}（${sku.specName}）`,
+            productSku: sku.skuCode,
+            snapshotProductImage: sku.imageUrl,
             quantity: item.quantity,
             unitPrice: item.price,
             lineTotal,
@@ -199,8 +214,8 @@ export async function createWechatOrderWithFifoLock(
 
         const deductions: BatchDeduction[] = [];
 
-        if (product.bomItems.length > 0) {
-          for (const bom of product.bomItems) {
+        if (spu.bomItems.length > 0) {
+          for (const bom of spu.bomItems) {
             const need = bom.quantityNeeded * item.quantity;
             const part = await lockFifoForMaterial(tx, {
               materialId: bom.materialId,
@@ -215,7 +230,7 @@ export async function createWechatOrderWithFifoLock(
 
         lockSummary.push({
           orderItemId: orderItem.id,
-          productId: item.productId,
+          productId: spu.id,
           deductions,
         });
       }

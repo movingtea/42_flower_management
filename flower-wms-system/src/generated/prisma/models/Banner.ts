@@ -248,7 +248,7 @@ export type BannerWhereInput = {
   isActive?: Prisma.BoolFilter<"Banner"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Banner"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Banner"> | Date | string
-  product?: Prisma.XOR<Prisma.ProductNullableScalarRelationFilter, Prisma.ProductWhereInput> | null
+  spu?: Prisma.XOR<Prisma.ProductSpuNullableScalarRelationFilter, Prisma.ProductSpuWhereInput> | null
 }
 
 export type BannerOrderByWithRelationInput = {
@@ -261,7 +261,7 @@ export type BannerOrderByWithRelationInput = {
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-  product?: Prisma.ProductOrderByWithRelationInput
+  spu?: Prisma.ProductSpuOrderByWithRelationInput
 }
 
 export type BannerWhereUniqueInput = Prisma.AtLeast<{
@@ -277,7 +277,7 @@ export type BannerWhereUniqueInput = Prisma.AtLeast<{
   isActive?: Prisma.BoolFilter<"Banner"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Banner"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Banner"> | Date | string
-  product?: Prisma.XOR<Prisma.ProductNullableScalarRelationFilter, Prisma.ProductWhereInput> | null
+  spu?: Prisma.XOR<Prisma.ProductSpuNullableScalarRelationFilter, Prisma.ProductSpuWhereInput> | null
 }, "id">
 
 export type BannerOrderByWithAggregationInput = {
@@ -321,7 +321,7 @@ export type BannerCreateInput = {
   isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
-  product?: Prisma.ProductCreateNestedOneWithoutBannersInput
+  spu?: Prisma.ProductSpuCreateNestedOneWithoutBannersInput
 }
 
 export type BannerUncheckedCreateInput = {
@@ -345,7 +345,7 @@ export type BannerUpdateInput = {
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  product?: Prisma.ProductUpdateOneWithoutBannersNestedInput
+  spu?: Prisma.ProductSpuUpdateOneWithoutBannersNestedInput
 }
 
 export type BannerUncheckedUpdateInput = {
@@ -449,45 +449,45 @@ export type BannerSumOrderByAggregateInput = {
   sortOrder?: Prisma.SortOrder
 }
 
-export type BannerCreateNestedManyWithoutProductInput = {
-  create?: Prisma.XOR<Prisma.BannerCreateWithoutProductInput, Prisma.BannerUncheckedCreateWithoutProductInput> | Prisma.BannerCreateWithoutProductInput[] | Prisma.BannerUncheckedCreateWithoutProductInput[]
-  connectOrCreate?: Prisma.BannerCreateOrConnectWithoutProductInput | Prisma.BannerCreateOrConnectWithoutProductInput[]
-  createMany?: Prisma.BannerCreateManyProductInputEnvelope
+export type BannerCreateNestedManyWithoutSpuInput = {
+  create?: Prisma.XOR<Prisma.BannerCreateWithoutSpuInput, Prisma.BannerUncheckedCreateWithoutSpuInput> | Prisma.BannerCreateWithoutSpuInput[] | Prisma.BannerUncheckedCreateWithoutSpuInput[]
+  connectOrCreate?: Prisma.BannerCreateOrConnectWithoutSpuInput | Prisma.BannerCreateOrConnectWithoutSpuInput[]
+  createMany?: Prisma.BannerCreateManySpuInputEnvelope
   connect?: Prisma.BannerWhereUniqueInput | Prisma.BannerWhereUniqueInput[]
 }
 
-export type BannerUncheckedCreateNestedManyWithoutProductInput = {
-  create?: Prisma.XOR<Prisma.BannerCreateWithoutProductInput, Prisma.BannerUncheckedCreateWithoutProductInput> | Prisma.BannerCreateWithoutProductInput[] | Prisma.BannerUncheckedCreateWithoutProductInput[]
-  connectOrCreate?: Prisma.BannerCreateOrConnectWithoutProductInput | Prisma.BannerCreateOrConnectWithoutProductInput[]
-  createMany?: Prisma.BannerCreateManyProductInputEnvelope
+export type BannerUncheckedCreateNestedManyWithoutSpuInput = {
+  create?: Prisma.XOR<Prisma.BannerCreateWithoutSpuInput, Prisma.BannerUncheckedCreateWithoutSpuInput> | Prisma.BannerCreateWithoutSpuInput[] | Prisma.BannerUncheckedCreateWithoutSpuInput[]
+  connectOrCreate?: Prisma.BannerCreateOrConnectWithoutSpuInput | Prisma.BannerCreateOrConnectWithoutSpuInput[]
+  createMany?: Prisma.BannerCreateManySpuInputEnvelope
   connect?: Prisma.BannerWhereUniqueInput | Prisma.BannerWhereUniqueInput[]
 }
 
-export type BannerUpdateManyWithoutProductNestedInput = {
-  create?: Prisma.XOR<Prisma.BannerCreateWithoutProductInput, Prisma.BannerUncheckedCreateWithoutProductInput> | Prisma.BannerCreateWithoutProductInput[] | Prisma.BannerUncheckedCreateWithoutProductInput[]
-  connectOrCreate?: Prisma.BannerCreateOrConnectWithoutProductInput | Prisma.BannerCreateOrConnectWithoutProductInput[]
-  upsert?: Prisma.BannerUpsertWithWhereUniqueWithoutProductInput | Prisma.BannerUpsertWithWhereUniqueWithoutProductInput[]
-  createMany?: Prisma.BannerCreateManyProductInputEnvelope
+export type BannerUpdateManyWithoutSpuNestedInput = {
+  create?: Prisma.XOR<Prisma.BannerCreateWithoutSpuInput, Prisma.BannerUncheckedCreateWithoutSpuInput> | Prisma.BannerCreateWithoutSpuInput[] | Prisma.BannerUncheckedCreateWithoutSpuInput[]
+  connectOrCreate?: Prisma.BannerCreateOrConnectWithoutSpuInput | Prisma.BannerCreateOrConnectWithoutSpuInput[]
+  upsert?: Prisma.BannerUpsertWithWhereUniqueWithoutSpuInput | Prisma.BannerUpsertWithWhereUniqueWithoutSpuInput[]
+  createMany?: Prisma.BannerCreateManySpuInputEnvelope
   set?: Prisma.BannerWhereUniqueInput | Prisma.BannerWhereUniqueInput[]
   disconnect?: Prisma.BannerWhereUniqueInput | Prisma.BannerWhereUniqueInput[]
   delete?: Prisma.BannerWhereUniqueInput | Prisma.BannerWhereUniqueInput[]
   connect?: Prisma.BannerWhereUniqueInput | Prisma.BannerWhereUniqueInput[]
-  update?: Prisma.BannerUpdateWithWhereUniqueWithoutProductInput | Prisma.BannerUpdateWithWhereUniqueWithoutProductInput[]
-  updateMany?: Prisma.BannerUpdateManyWithWhereWithoutProductInput | Prisma.BannerUpdateManyWithWhereWithoutProductInput[]
+  update?: Prisma.BannerUpdateWithWhereUniqueWithoutSpuInput | Prisma.BannerUpdateWithWhereUniqueWithoutSpuInput[]
+  updateMany?: Prisma.BannerUpdateManyWithWhereWithoutSpuInput | Prisma.BannerUpdateManyWithWhereWithoutSpuInput[]
   deleteMany?: Prisma.BannerScalarWhereInput | Prisma.BannerScalarWhereInput[]
 }
 
-export type BannerUncheckedUpdateManyWithoutProductNestedInput = {
-  create?: Prisma.XOR<Prisma.BannerCreateWithoutProductInput, Prisma.BannerUncheckedCreateWithoutProductInput> | Prisma.BannerCreateWithoutProductInput[] | Prisma.BannerUncheckedCreateWithoutProductInput[]
-  connectOrCreate?: Prisma.BannerCreateOrConnectWithoutProductInput | Prisma.BannerCreateOrConnectWithoutProductInput[]
-  upsert?: Prisma.BannerUpsertWithWhereUniqueWithoutProductInput | Prisma.BannerUpsertWithWhereUniqueWithoutProductInput[]
-  createMany?: Prisma.BannerCreateManyProductInputEnvelope
+export type BannerUncheckedUpdateManyWithoutSpuNestedInput = {
+  create?: Prisma.XOR<Prisma.BannerCreateWithoutSpuInput, Prisma.BannerUncheckedCreateWithoutSpuInput> | Prisma.BannerCreateWithoutSpuInput[] | Prisma.BannerUncheckedCreateWithoutSpuInput[]
+  connectOrCreate?: Prisma.BannerCreateOrConnectWithoutSpuInput | Prisma.BannerCreateOrConnectWithoutSpuInput[]
+  upsert?: Prisma.BannerUpsertWithWhereUniqueWithoutSpuInput | Prisma.BannerUpsertWithWhereUniqueWithoutSpuInput[]
+  createMany?: Prisma.BannerCreateManySpuInputEnvelope
   set?: Prisma.BannerWhereUniqueInput | Prisma.BannerWhereUniqueInput[]
   disconnect?: Prisma.BannerWhereUniqueInput | Prisma.BannerWhereUniqueInput[]
   delete?: Prisma.BannerWhereUniqueInput | Prisma.BannerWhereUniqueInput[]
   connect?: Prisma.BannerWhereUniqueInput | Prisma.BannerWhereUniqueInput[]
-  update?: Prisma.BannerUpdateWithWhereUniqueWithoutProductInput | Prisma.BannerUpdateWithWhereUniqueWithoutProductInput[]
-  updateMany?: Prisma.BannerUpdateManyWithWhereWithoutProductInput | Prisma.BannerUpdateManyWithWhereWithoutProductInput[]
+  update?: Prisma.BannerUpdateWithWhereUniqueWithoutSpuInput | Prisma.BannerUpdateWithWhereUniqueWithoutSpuInput[]
+  updateMany?: Prisma.BannerUpdateManyWithWhereWithoutSpuInput | Prisma.BannerUpdateManyWithWhereWithoutSpuInput[]
   deleteMany?: Prisma.BannerScalarWhereInput | Prisma.BannerScalarWhereInput[]
 }
 
@@ -495,7 +495,7 @@ export type EnumBannerTargetTypeFieldUpdateOperationsInput = {
   set?: $Enums.BannerTargetType
 }
 
-export type BannerCreateWithoutProductInput = {
+export type BannerCreateWithoutSpuInput = {
   id?: string
   imageUrl: string
   sortOrder?: number
@@ -506,7 +506,7 @@ export type BannerCreateWithoutProductInput = {
   updatedAt?: Date | string
 }
 
-export type BannerUncheckedCreateWithoutProductInput = {
+export type BannerUncheckedCreateWithoutSpuInput = {
   id?: string
   imageUrl: string
   sortOrder?: number
@@ -517,30 +517,30 @@ export type BannerUncheckedCreateWithoutProductInput = {
   updatedAt?: Date | string
 }
 
-export type BannerCreateOrConnectWithoutProductInput = {
+export type BannerCreateOrConnectWithoutSpuInput = {
   where: Prisma.BannerWhereUniqueInput
-  create: Prisma.XOR<Prisma.BannerCreateWithoutProductInput, Prisma.BannerUncheckedCreateWithoutProductInput>
+  create: Prisma.XOR<Prisma.BannerCreateWithoutSpuInput, Prisma.BannerUncheckedCreateWithoutSpuInput>
 }
 
-export type BannerCreateManyProductInputEnvelope = {
-  data: Prisma.BannerCreateManyProductInput | Prisma.BannerCreateManyProductInput[]
+export type BannerCreateManySpuInputEnvelope = {
+  data: Prisma.BannerCreateManySpuInput | Prisma.BannerCreateManySpuInput[]
   skipDuplicates?: boolean
 }
 
-export type BannerUpsertWithWhereUniqueWithoutProductInput = {
+export type BannerUpsertWithWhereUniqueWithoutSpuInput = {
   where: Prisma.BannerWhereUniqueInput
-  update: Prisma.XOR<Prisma.BannerUpdateWithoutProductInput, Prisma.BannerUncheckedUpdateWithoutProductInput>
-  create: Prisma.XOR<Prisma.BannerCreateWithoutProductInput, Prisma.BannerUncheckedCreateWithoutProductInput>
+  update: Prisma.XOR<Prisma.BannerUpdateWithoutSpuInput, Prisma.BannerUncheckedUpdateWithoutSpuInput>
+  create: Prisma.XOR<Prisma.BannerCreateWithoutSpuInput, Prisma.BannerUncheckedCreateWithoutSpuInput>
 }
 
-export type BannerUpdateWithWhereUniqueWithoutProductInput = {
+export type BannerUpdateWithWhereUniqueWithoutSpuInput = {
   where: Prisma.BannerWhereUniqueInput
-  data: Prisma.XOR<Prisma.BannerUpdateWithoutProductInput, Prisma.BannerUncheckedUpdateWithoutProductInput>
+  data: Prisma.XOR<Prisma.BannerUpdateWithoutSpuInput, Prisma.BannerUncheckedUpdateWithoutSpuInput>
 }
 
-export type BannerUpdateManyWithWhereWithoutProductInput = {
+export type BannerUpdateManyWithWhereWithoutSpuInput = {
   where: Prisma.BannerScalarWhereInput
-  data: Prisma.XOR<Prisma.BannerUpdateManyMutationInput, Prisma.BannerUncheckedUpdateManyWithoutProductInput>
+  data: Prisma.XOR<Prisma.BannerUpdateManyMutationInput, Prisma.BannerUncheckedUpdateManyWithoutSpuInput>
 }
 
 export type BannerScalarWhereInput = {
@@ -558,7 +558,7 @@ export type BannerScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Banner"> | Date | string
 }
 
-export type BannerCreateManyProductInput = {
+export type BannerCreateManySpuInput = {
   id?: string
   imageUrl: string
   sortOrder?: number
@@ -569,7 +569,7 @@ export type BannerCreateManyProductInput = {
   updatedAt?: Date | string
 }
 
-export type BannerUpdateWithoutProductInput = {
+export type BannerUpdateWithoutSpuInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.StringFieldUpdateOperationsInput | string
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
@@ -580,7 +580,7 @@ export type BannerUpdateWithoutProductInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type BannerUncheckedUpdateWithoutProductInput = {
+export type BannerUncheckedUpdateWithoutSpuInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.StringFieldUpdateOperationsInput | string
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
@@ -591,7 +591,7 @@ export type BannerUncheckedUpdateWithoutProductInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type BannerUncheckedUpdateManyWithoutProductInput = {
+export type BannerUncheckedUpdateManyWithoutSpuInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   imageUrl?: Prisma.StringFieldUpdateOperationsInput | string
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
@@ -614,7 +614,7 @@ export type BannerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  product?: boolean | Prisma.Banner$productArgs<ExtArgs>
+  spu?: boolean | Prisma.Banner$spuArgs<ExtArgs>
 }, ExtArgs["result"]["banner"]>
 
 export type BannerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -627,7 +627,7 @@ export type BannerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  product?: boolean | Prisma.Banner$productArgs<ExtArgs>
+  spu?: boolean | Prisma.Banner$spuArgs<ExtArgs>
 }, ExtArgs["result"]["banner"]>
 
 export type BannerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -640,7 +640,7 @@ export type BannerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
-  product?: boolean | Prisma.Banner$productArgs<ExtArgs>
+  spu?: boolean | Prisma.Banner$spuArgs<ExtArgs>
 }, ExtArgs["result"]["banner"]>
 
 export type BannerSelectScalar = {
@@ -657,19 +657,19 @@ export type BannerSelectScalar = {
 
 export type BannerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "imageUrl" | "sortOrder" | "targetType" | "targetParam" | "productId" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["banner"]>
 export type BannerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  product?: boolean | Prisma.Banner$productArgs<ExtArgs>
+  spu?: boolean | Prisma.Banner$spuArgs<ExtArgs>
 }
 export type BannerIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  product?: boolean | Prisma.Banner$productArgs<ExtArgs>
+  spu?: boolean | Prisma.Banner$spuArgs<ExtArgs>
 }
 export type BannerIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  product?: boolean | Prisma.Banner$productArgs<ExtArgs>
+  spu?: boolean | Prisma.Banner$spuArgs<ExtArgs>
 }
 
 export type $BannerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Banner"
   objects: {
-    product: Prisma.$ProductPayload<ExtArgs> | null
+    spu: Prisma.$ProductSpuPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1075,7 +1075,7 @@ readonly fields: BannerFieldRefs;
  */
 export interface Prisma__BannerClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  product<T extends Prisma.Banner$productArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Banner$productArgs<ExtArgs>>): Prisma.Prisma__ProductClient<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  spu<T extends Prisma.Banner$spuArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Banner$spuArgs<ExtArgs>>): Prisma.Prisma__ProductSpuClient<runtime.Types.Result.GetResult<Prisma.$ProductSpuPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1515,22 +1515,22 @@ export type BannerDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Intern
 }
 
 /**
- * Banner.product
+ * Banner.spu
  */
-export type Banner$productArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type Banner$spuArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the Product
+   * Select specific fields to fetch from the ProductSpu
    */
-  select?: Prisma.ProductSelect<ExtArgs> | null
+  select?: Prisma.ProductSpuSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the Product
+   * Omit specific fields from the ProductSpu
    */
-  omit?: Prisma.ProductOmit<ExtArgs> | null
+  omit?: Prisma.ProductSpuOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.ProductInclude<ExtArgs> | null
-  where?: Prisma.ProductWhereInput
+  include?: Prisma.ProductSpuInclude<ExtArgs> | null
+  where?: Prisma.ProductSpuWhereInput
 }
 
 /**

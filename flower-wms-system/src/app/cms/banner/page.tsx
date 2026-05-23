@@ -9,21 +9,24 @@ export const dynamic = "force-dynamic";
 export default async function CmsBannerPage() {
   const [bannerRows, products] = await Promise.all([
     loadActiveBanners(),
-    prisma.product.findMany({
+    prisma.productSpu.findMany({
       where: {
         ...activeProductWhere,
-        status: PRODUCT_STATUS_PUBLISHED,
-        isOutOfStock: false,
+        isActive: true,
       },
       orderBy: { name: "asc" },
-      select: { id: true, name: true, sku: true },
+      select: { id: true, name: true, skus: { select: { skuCode: true } } },
     }),
   ]);
 
   return (
     <BannerManager
       initialItems={bannerRows.map(bannerRowToWriteItem)}
-      products={products}
+      products={products.map((p) => ({
+        id: p.id,
+        name: p.name,
+        sku: p.skus[0]?.skuCode ?? "—",
+      }))}
     />
   );
 }

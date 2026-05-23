@@ -4,7 +4,6 @@ import {
   parseProductCategoryPayload,
 } from "@/lib/cms-product-categories";
 
-/** 运费金额：非负，最多两位小数 */
 const SHIPPING_FEE_PATTERN = /^[0-9]+(\.[0-9]{1,2})?$/;
 
 export function parseShippingFeeValue(
@@ -27,9 +26,7 @@ export function parseShippingFeeValue(
   }
 
   if (!SHIPPING_FEE_PATTERN.test(text)) {
-    throw new Error(
-      "请输入正确的运费金额，最多支持两位小数"
-    );
+    throw new Error("请输入正确的运费金额，最多支持两位小数");
   }
 
   const amount = Number(text);
@@ -40,25 +37,96 @@ export function parseShippingFeeValue(
   return amount;
 }
 
+export type CmsProductSkuInput = {
+  id?: string;
+  skuCode?: string;
+  specName: string;
+  price: number;
+  stock: number;
+  imageUrl: string | null;
+  isMainImage: boolean;
+  sortOrder?: number;
+};
+
 export type CmsProductBody = {
-  /** 仅编辑回显用；创建时由服务端自动生成，可不传 */
-  sku?: string;
   name: string;
   category: string[];
-  sellPrice?: number | null;
-  costPrice?: number | null;
-  quantity: number;
+  description?: string | null;
+  maintenanceGuide?: string | null;
   isActive: boolean;
-  isOutOfStock?: boolean;
-  allowPreOrder?: boolean;
-  productionTime?: number;
-  /** 是否需要运费（关闭时 shippingFee 归零） */
   needsShipping: boolean;
   shippingFee: number;
-  description?: string | null;
-  careTips?: string | null;
-  imageUrl?: string | null;
+  allowPreOrder?: boolean;
+  productionTime?: number;
+  skus: CmsProductSkuInput[];
 };
+
+function parseSkuRows(raw: unknown): CmsProductSkuInput[] {
+  if (!Array.isArray(raw) || raw.length === 0) {
+    throw new Error("请至少添加一个商品款式");
+  }
+
+  const rows: CmsProductSkuInput[] = [];
+
+  for (let i = 0; i < raw.length; i++) {
+    const row = raw[i];
+    if (!row || typeof row !== "object") {
+      throw new Error(`款式第 ${i + 1} 行格式无效`);
+    }
+    const r = row as Record<string, unknown>;
+    const specName = typeof r.specName === "string" ? r.specName.trim() : "";
+    if (!specName) {
+      throw new Error(`款式第 ${i + 1} 行须填写款式品名`);
+    }
+
+    const price = Number(r.price);
+    if (!Number.isFinite(price) || price < 0) {
+      throw new Error(`款式第 ${i + 1} 行价格无效`);
+    }
+
+    const stock = Number(r.stock ?? 0);
+    if (!Number.isInteger(stock) || stock < 0) {
+      throw new Error(`款式第 ${i + 1} 行库存须为非负整数`);
+    }
+
+    const imageUrl =
+      typeof r.imageUrl === "string" && r.imageUrl.trim()
+        ? r.imageUrl.trim()
+        : null;
+
+    rows.push({
+      id: typeof r.id === "string" && r.id.trim() ? r.id.trim() : undefined,
+      skuCode:
+        typeof r.skuCode === "string" && r.skuCode.trim()
+          ? r.skuCode.trim()
+          : undefined,
+      specName,
+      price,
+      stock,
+      imageUrl,
+      isMainImage: Boolean(r.isMainImage),
+      sortOrder: Number.isFinite(Number(r.sortOrder))
+        ? Math.round(Number(r.sortOrder))
+        : i * 10,
+    });
+  }
+
+  const mainCount = rows.filter((r) => r.isMainImage).length;
+  if (mainCount === 0) {
+    rows[0].isMainImage = true;
+  } else if (mainCount > 1) {
+    let picked = false;
+    for (const row of rows) {
+      if (row.isMainImage && !picked) {
+        picked = true;
+      } else {
+        row.isMainImage = false;
+      }
+    }
+  }
+
+  return rows;
+}
 
 export function parseCmsProductBody(
   raw: unknown,
@@ -69,8 +137,6 @@ export function parseCmsProductBody(
   }
 
   const b = raw as Record<string, unknown>;
-  const sku =
-    typeof b.sku === "string" && b.sku.trim() ? b.sku.trim() : undefined;
   const name = typeof b.name === "string" ? b.name.trim() : "";
   if (!name) throw new Error("name 不能为空");
 
@@ -79,26 +145,7 @@ export function parseCmsProductBody(
     b.categoryIds !== undefined ? b.categoryIds : b.category;
   const category = parseProductCategoryPayload(rawCategoryIds, allowed);
 
-  let sellPrice: number | null = null;
-  if (b.sellPrice != null && b.sellPrice !== "") {
-    sellPrice = Number(b.sellPrice);
-    if (!Number.isFinite(sellPrice) || sellPrice < 0) {
-      throw new Error("sellPrice 无效");
-    }
-  }
-
-  const quantity = Number(b.quantity ?? 0);
-  if (!Number.isInteger(quantity) || quantity < 0) {
-    throw new Error("quantity 须为非负整数");
-  }
-
-  let costPrice: number | null = null;
-  if (b.costPrice != null && b.costPrice !== "") {
-    costPrice = Number(b.costPrice);
-    if (!Number.isFinite(costPrice) || costPrice < 0) {
-      throw new Error("costPrice 无效");
-    }
-  }
+  const skus = parseSkuRows(b.skus);
 
   const productionTime = Number(b.productionTime ?? 30);
   if (!Number.isInteger(productionTime) || productionTime < 0) {
@@ -109,21 +156,21 @@ export function parseCmsProductBody(
   const shippingFee = parseShippingFeeValue(b.shippingFee, needsShipping);
 
   return {
-    sku,
     name,
     category,
-    sellPrice,
-    costPrice,
-    quantity,
+    description:
+      typeof b.description === "string" ? b.description.trim() || null : null,
+    maintenanceGuide:
+      typeof b.maintenanceGuide === "string"
+        ? b.maintenanceGuide.trim() || null
+        : typeof b.careTips === "string"
+          ? b.careTips.trim() || null
+          : null,
     isActive: Boolean(b.isActive),
-    isOutOfStock: Boolean(b.isOutOfStock),
     allowPreOrder: b.allowPreOrder !== false,
     productionTime,
     needsShipping,
     shippingFee,
-    description:
-      typeof b.description === "string" ? b.description.trim() || null : null,
-    careTips: typeof b.careTips === "string" ? b.careTips.trim() || null : null,
-    imageUrl: typeof b.imageUrl === "string" ? b.imageUrl.trim() || null : null,
+    skus,
   };
 }

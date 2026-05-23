@@ -1,13 +1,14 @@
 import { Prisma } from "@/generated/prisma/client";
 import { jsonError, jsonSuccess } from "@/lib/api";
-import { cmsProductUpdateData } from "@/lib/cms-product-write";
+import { cmsSpuUpdateData, syncProductSkus } from "@/lib/cms-product-write";
 import { loadCmsProductCategories } from "@/lib/cms-product-categories.server";
 import { parseCmsProductBody } from "@/lib/cms-products";
 import {
   productCategoriesInclude,
   syncProductCategoryLinks,
 } from "@/lib/product-categories";
-import { activeProductWhere } from "@/lib/product-query";
+import { activeSpuWhere } from "@/lib/product-query";
+import { productSpuInclude } from "@/lib/product-spu";
 import { softDeleteProduct } from "@/lib/product-soft-delete";
 import { prisma } from "@/lib/prisma";
 
@@ -15,7 +16,7 @@ export const dynamic = "force-dynamic";
 
 function mapError(err: unknown): { message: string; status: number } {
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    if (err.code === "P2002") return { message: "SKU 已存在", status: 409 };
+    if (err.code === "P2002") return { message: "款式编码已存在", status: 409 };
     if (err.code === "P2025") return { message: "商品不存在", status: 404 };
   }
   if (err instanceof Error) {
@@ -26,7 +27,8 @@ function mapError(err: unknown): { message: string; status: number } {
     if (
       msg.includes("不能为空") ||
       msg.includes("无效") ||
-      msg.includes("至少")
+      msg.includes("至少") ||
+      msg.includes("须")
     ) {
       return { message: msg, status: 400 };
     }
@@ -35,7 +37,7 @@ function mapError(err: unknown): { message: string; status: number } {
   return { message: "更新失败", status: 500 };
 }
 
-/** PUT：更新 CMS 成品商品 */
+/** PUT：更新 CMS 商品（SPU + SKU） */
 export async function PUT(
   request: Request,
   context: { params: Promise<{ id: string }> }
@@ -45,26 +47,27 @@ export async function PUT(
     const categoryConfig = await loadCmsProductCategories();
     const body = parseCmsProductBody(await request.json(), categoryConfig);
 
-    const existing = await prisma.product.findFirst({
-      where: { id, ...activeProductWhere },
+    const existing = await prisma.productSpu.findFirst({
+      where: { id, ...activeSpuWhere },
     });
     if (!existing) {
-      return jsonError("成品商品不存在", 404);
+      return jsonError("商品不存在", 404);
     }
 
     const product = await prisma.$transaction(async (tx) => {
       await syncProductCategoryLinks(id, body.category, { tx });
+      await syncProductSkus(id, body, tx);
 
-      return tx.product.update({
+      return tx.productSpu.update({
         where: { id },
-        data: cmsProductUpdateData(body),
-        include: productCategoriesInclude,
+        data: cmsSpuUpdateData(body),
+        include: productSpuInclude,
       });
     });
 
     return jsonSuccess({
       message: "商品已更新",
-      product: { id: product.id, sku: product.sku },
+      product: { id: product.id, name: product.name },
     });
   } catch (err) {
     const { message, status } = mapError(err);
@@ -72,7 +75,7 @@ export async function PUT(
   }
 }
 
-/** DELETE：软删除 CMS 成品商品 */
+/** DELETE：软删除商品 SPU */
 export async function DELETE(
   _request: Request,
   context: { params: Promise<{ id: string }> }
@@ -82,7 +85,7 @@ export async function DELETE(
     const product = await softDeleteProduct(id);
     return jsonSuccess({
       message: "商品删除成功",
-      product: { id: product.id, sku: product.sku },
+      product: { id: product.id },
     });
   } catch (err) {
     const { message, status } = mapError(err);

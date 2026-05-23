@@ -1,0 +1,90 @@
+<!-- 规格选择弹窗 + 全屏大图预览 -->
+<view wx:if="{{visible}}" class="spec-picker-root">
+  <view class="spec-mask" catchtap="onMaskTap"></view>
+
+  <view class="spec-sheet" catchtap="onSheetTap">
+    <view class="spec-sheet-header">
+      <image
+        class="spec-header-thumb"
+        src="{{baseUrl}}{{product.imageUrl}}"
+        mode="aspectFill"
+      />
+      <view class="spec-header-info">
+        <text class="spec-header-name">{{product.name}}</text>
+        <text class="spec-header-price">¥{{product.price}}{{product.priceSuffix}}</text>
+      </view>
+      <view class="spec-close-btn flex-center" catchtap="onClose">×</view>
+    </view>
+
+    <scroll-view class="spec-sku-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+      <text class="spec-section-label">选择款式</text>
+      <view class="spec-sku-grid">
+        <view
+          wx:for="{{product.skus}}"
+          wx:key="id"
+          class="spec-sku-item {{selectedSkuId === item.id ? 'spec-sku-item--active' : ''}} {{item.stock <= 0 ? 'spec-sku-item--disabled' : ''}}"
+          bindtap="onSelectSku"
+          data-id="{{item.id}}"
+        >
+          <view class="spec-sku-image-wrap">
+            <image
+              class="spec-sku-image"
+              src="{{baseUrl}}{{item.imageUrl || product.imageUrl}}"
+              mode="aspectFill"
+            />
+            <view
+              wx:if="{{item.stock <= 0}}"
+              class="spec-sku-soldout flex-center"
+            >
+              <text>缺货</text>
+            </view>
+            <view
+              class="spec-zoom-btn flex-center"
+              catchtap="onPreviewSkuImage"
+              data-id="{{item.id}}"
+            >
+              <text class="spec-zoom-icon">⌕</text>
+            </view>
+          </view>
+          <text class="spec-sku-name text-ellipsis">{{item.specName}}</text>
+          <text class="spec-sku-price">¥{{item.price}}</text>
+        </view>
+      </view>
+    </scroll-view>
+
+    <view class="spec-footer safe-area-bottom">
+      <view class="spec-confirm-btn flex-center" bindtap="onConfirm">加入购物车</view>
+    </view>
+  </view>
+</view>
+
+<!-- 全屏高清预览层 -->
+<view
+  wx:if="{{isPreviewShow}}"
+  class="preview-overlay"
+  catchtap="onPreviewMaskTap"
+>
+  <view
+    class="preview-close-wrap"
+    style="padding-top: {{statusBarHeight}}px;"
+    catchtap="onClosePreview"
+  >
+    <view class="preview-close-btn flex-center">
+      <text class="preview-close-icon">×</text>
+    </view>
+  </view>
+
+  <view class="preview-image-stage" catchtap="onPreviewImageTap">
+    <image
+      class="preview-image"
+      src="{{baseUrl}}{{previewImageUrl}}"
+      mode="aspectFit"
+      show-menu-by-longpress="{{true}}"
+    />
+  </view>
+
+  <view class="preview-info-card" catchtap="onPreviewInfoTap">
+    <text class="preview-spec-name">{{previewSpecName}}</text>
+    <text class="preview-spec-price">¥{{previewPrice}}</text>
+  </view>
+</view>
