@@ -257,20 +257,21 @@ export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof User
 export const OrderScalarFieldEnum = {
   id: 'id',
   orderNo: 'orderNo',
-  status: 'status',
   userId: 'userId',
-  wechatOpenId: 'wechatOpenId',
-  customerName: 'customerName',
-  customerPhone: 'customerPhone',
-  wechatTransactionId: 'wechatTransactionId',
   totalAmount: 'totalAmount',
+  deliveryFee: 'deliveryFee',
+  payAmount: 'payAmount',
   receiverName: 'receiverName',
   receiverPhone: 'receiverPhone',
   deliveryAddress: 'deliveryAddress',
-  deliveryTime: 'deliveryTime',
+  deliveryDate: 'deliveryDate',
+  greetingCard: 'greetingCard',
+  deliveryInfo: 'deliveryInfo',
+  status: 'status',
   paidAt: 'paidAt',
-  deliveredAt: 'deliveredAt',
-  remark: 'remark',
+  refundAmount: 'refundAmount',
+  refundTime: 'refundTime',
+  cancelSource: 'cancelSource',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -281,13 +282,12 @@ export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof Or
 export const OrderItemScalarFieldEnum = {
   id: 'id',
   orderId: 'orderId',
-  productId: 'productId',
-  productName: 'productName',
-  productSku: 'productSku',
-  snapshotProductImage: 'snapshotProductImage',
+  skuId: 'skuId',
   quantity: 'quantity',
-  unitPrice: 'unitPrice',
-  lineTotal: 'lineTotal',
+  snapshotProductName: 'snapshotProductName',
+  snapshotSpecName: 'snapshotSpecName',
+  snapshotPrice: 'snapshotPrice',
+  snapshotImageUrl: 'snapshotImageUrl',
   createdAt: 'createdAt'
 } as const
 

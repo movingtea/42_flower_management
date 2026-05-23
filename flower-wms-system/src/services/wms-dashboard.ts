@@ -95,8 +95,9 @@ export async function loadWmsDashboardData(): Promise<WmsDashboardData> {
         status: {
           in: [
             OrderStatus.PAID,
-            OrderStatus.PREPARING,
-            OrderStatus.DELIVERED,
+            OrderStatus.PRODUCTION,
+            OrderStatus.DELIVERING,
+            OrderStatus.COMPLETED,
           ],
         },
       },
@@ -110,7 +111,6 @@ export async function loadWmsDashboardData(): Promise<WmsDashboardData> {
         orderNo: true,
         status: true,
         totalAmount: true,
-        customerName: true,
         receiverName: true,
       },
     }),
@@ -157,7 +157,7 @@ export async function loadWmsDashboardData(): Promise<WmsDashboardData> {
     recentOrders: recentOrders.map((o) => ({
       id: o.id,
       orderNo: o.orderNo,
-      customer: o.customerName || o.receiverName || "微信顾客",
+      customer: o.receiverName || "微信顾客",
       amount: Number(o.totalAmount).toFixed(2),
       status: o.status,
     })),

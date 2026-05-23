@@ -1,50 +1,34 @@
-// pages/checkout/checkout.ts — 结算履约与下单闭环
+// pages/checkout/checkout.ts — 结算与模拟支付闭环
 import { baseUrl } from '../../config/index';
 import { toRelativeImagePath } from '../../utils/image';
-import { getOpenId, isLoggedIn } from '../../utils/auth';
-import { request } from '../../utils/request';
-import { fetchUserProfile, patchUserProfile } from '../../utils/user-api';
+import { isLoggedIn } from '../../utils/auth';
 import {
   CHECKOUT_PRODUCTS_KEY,
+  clearCheckoutStorageOnly,
+  removePurchasedSkusFromCart,
   parseCartPrice,
   type CartItem,
 } from '../../utils/cart';
+import { fetchUserProfile, patchUserProfile } from '../../utils/user-api';
+import {
+  calcDeliveryFee,
+  createOrder,
+  mockPayOrder,
+  FREE_SHIPPING_THRESHOLD,
+  DEFAULT_DELIVERY_FEE,
+} from '../../utils/order-api';
 
-/** 结算页展示行 */
 interface CheckoutDisplayItem {
-  id: string;
+  lineKey: string;
+  spuId: string;
+  skuId: string;
   name: string;
+  specName: string;
   price: number;
   priceText: string;
   quantity: number;
-  shippingFee: number;
-  shippingFeeLabel: string;
   lineSubtotal: string;
   imageUrl: string;
-}
-
-/** 与后端 POST /api/wechat/orders 的 parseOrderBody 字段一一对应 */
-interface WechatCreateOrderPayload {
-  wechatOpenId: string;
-  totalAmount: number;
-  receiverName: string;
-  receiverPhone: string;
-  deliveryAddress: string;
-  deliveryTime?: string;
-  items: Array<{
-    productId: string;
-    quantity: number;
-    price: number;
-  }>;
-}
-
-interface CreateOrderResult {
-  message?: string;
-  order?: {
-    id: string;
-    orderNo: string;
-    status: string;
-  };
 }
 
 const TIME_BUCKETS = ['上午', '下午', '晚上'];
@@ -60,29 +44,22 @@ function formatMoney(n: number): string {
   return Number(n.toFixed(2)).toFixed(2);
 }
 
-/** 整单运费：勾选商品中单件运费的最大值 */
-function calcOrderShippingFee(items: CheckoutDisplayItem[]): number {
-  if (!items.length) return 0;
-  return Math.max(...items.map((row) => row.shippingFee));
-}
-
 function cartRowsToDisplay(items: CartItem[]): CheckoutDisplayItem[] {
   return items.map((row) => {
     const price = parseCartPrice(row.price);
     const qty = Math.max(1, Math.floor(Number(row.quantity)) || 1);
-    const shippingFee = Math.max(0, Number(row.shippingFee) || 0);
-    const lineSubtotal = price * qty;
+    const skuId = row.skuId?.trim() ?? '';
 
     return {
-      id: row.id,
+      lineKey: row.skuId ? `${row.id}:${row.skuId}` : row.id,
+      spuId: row.id,
+      skuId,
       name: row.name,
+      specName: row.specName ?? row.sku ?? '默认款式',
       price,
       priceText: formatMoney(price),
       quantity: qty,
-      shippingFee,
-      shippingFeeLabel:
-        shippingFee > 0 ? `¥${formatMoney(shippingFee)}` : '免运费',
-      lineSubtotal: formatMoney(lineSubtotal),
+      lineSubtotal: formatMoney(price * qty),
       imageUrl: toRelativeImagePath(row.imageUrl),
     };
   });
@@ -99,14 +76,17 @@ Page({
     deliveryTimeBucketIndex: 0,
     deliveryTimeBucket: TIME_BUCKETS[0],
     greetingCard: '',
-    isAnonymous: false,
     checkoutItems: [] as CheckoutDisplayItem[],
+    checkoutSourceItems: [] as CartItem[],
     productTotal: '0.00',
     shippingFee: '0.00',
+    shippingHint: '',
     payableTotal: '0.00',
     submitting: false,
     emptyCheckout: true,
     baseUrl,
+    freeShippingThreshold: FREE_SHIPPING_THRESHOLD,
+    defaultDeliveryFee: DEFAULT_DELIVERY_FEE,
   },
 
   onLoad() {
@@ -119,7 +99,6 @@ Page({
     void this.prefillDefaultAddress();
   },
 
-  /** 拉取用户默认收货信息回填 */
   async prefillDefaultAddress() {
     if (!isLoggedIn()) return;
     try {
@@ -146,7 +125,6 @@ Page({
     }
   },
 
-  /** 微信收货地址一键导入 */
   onChooseWechatAddress() {
     wx.chooseAddress({
       success: (res) => {
@@ -171,9 +149,7 @@ Page({
           defaultReceiverName: receiverName,
           defaultReceiverPhone: receiverPhone,
           defaultAddress: deliveryAddress,
-        }).catch(() => {
-          /* 本地已回填，同步失败不阻断 */
-        });
+        }).catch(() => {});
 
         wx.showToast({ title: '地址已导入', icon: 'success' });
       },
@@ -185,19 +161,18 @@ Page({
     });
   },
 
-  /** 从购物车勾选缓存加载待结算商品 */
   loadCheckoutProducts() {
     let raw: unknown;
     try {
       raw = wx.getStorageSync(CHECKOUT_PRODUCTS_KEY);
-    } catch (err) {
-      console.warn('读取结算缓存失败', err);
+    } catch {
       raw = null;
     }
 
     if (!Array.isArray(raw) || raw.length === 0) {
       this.setData({
         checkoutItems: [],
+        checkoutSourceItems: [],
         emptyCheckout: true,
       });
       this.recalcAmounts([]);
@@ -215,6 +190,7 @@ Page({
     const checkoutItems = cartRowsToDisplay(rows);
     this.setData({
       checkoutItems,
+      checkoutSourceItems: rows,
       emptyCheckout: checkoutItems.length === 0,
     });
     this.recalcAmounts(checkoutItems);
@@ -226,26 +202,56 @@ Page({
       (sum, row) => sum + row.price * row.quantity,
       0
     );
-    const shippingFeeNum = calcOrderShippingFee(list);
+    const shippingFeeNum = calcDeliveryFee(productTotalNum);
     const payableTotalNum = productTotalNum + shippingFeeNum;
+
+    const shippingHint =
+      shippingFeeNum === 0
+        ? `已满 ${FREE_SHIPPING_THRESHOLD} 元，免运费`
+        : `满 ${FREE_SHIPPING_THRESHOLD} 元包邮，当前运费 ¥${formatMoney(shippingFeeNum)}`;
 
     this.setData({
       productTotal: formatMoney(productTotalNum),
       shippingFee: formatMoney(shippingFeeNum),
       payableTotal: formatMoney(payableTotalNum),
+      shippingHint,
     });
   },
 
-  onReceiverNameInput(e: WechatMiniprogram.Input) {
-    this.setData({ receiverName: e.detail.value });
+  onGoCart() {
+    wx.switchTab({ url: '/pages/cart/cart' });
   },
 
-  onReceiverPhoneInput(e: WechatMiniprogram.Input) {
-    this.setData({ receiverPhone: e.detail.value });
+  validateForm(): string | null {
+    const { receiverName, receiverPhone, deliveryAddress, checkoutItems, emptyCheckout } =
+      this.data;
+
+    if (emptyCheckout || !checkoutItems.length) {
+      return '暂无待结算商品，请返回购物车勾选';
+    }
+
+    if (!receiverName.trim()) return '请先选择收货地址';
+    if (!receiverPhone.trim()) return '请先选择收货地址';
+    if (!deliveryAddress.trim()) return '请先选择收货地址';
+    if (!this.data.deliveryDate) return '请选择配送日期';
+    if (!this.data.deliveryTimeBucket) return '请选择配送时段';
+
+    for (const item of checkoutItems) {
+      if (!item.skuId) {
+        return '商品规格信息缺失，请返回重新选购';
+      }
+      if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
+        return '商品数量无效';
+      }
+    }
+
+    return null;
   },
 
-  onDeliveryAddressInput(e: WechatMiniprogram.Input) {
-    this.setData({ deliveryAddress: e.detail.value });
+  buildDeliveryDateLabel(): string {
+    const { deliveryDate, deliveryTimeBucket } = this.data;
+    if (!deliveryDate) return '';
+    return `${deliveryDate} ${deliveryTimeBucket}`;
   },
 
   onDeliveryDateChange(e: WechatMiniprogram.PickerChange) {
@@ -264,111 +270,107 @@ Page({
     this.setData({ greetingCard: e.detail.value });
   },
 
-  onAnonymousChange(e: WechatMiniprogram.CheckboxGroupChange) {
-    const checked = (e.detail.value as string[]).includes('anonymous');
-    this.setData({ isAnonymous: checked });
-  },
-
-  onGoCart() {
-    wx.switchTab({ url: '/pages/cart/cart' });
-  },
-
-  validateForm(): string | null {
+  buildCreatePayload() {
     const {
       receiverName,
       receiverPhone,
       deliveryAddress,
-      deliveryDate,
-      deliveryTimeBucket,
+      greetingCard,
       checkoutItems,
-      emptyCheckout,
     } = this.data;
 
-    if (emptyCheckout || !checkoutItems.length) {
-      return '暂无待结算商品，请返回购物车勾选';
-    }
-
-    if (!receiverName.trim()) return '请填写收件人姓名';
-    if (!receiverPhone.trim()) return '请填写联系电话';
-    if (!/^1\d{10}$/.test(receiverPhone.trim())) return '请填写正确的手机号';
-    if (!deliveryAddress.trim()) return '请填写详细收货地址';
-    if (!deliveryDate) return '请选择期望送达日期';
-    if (!deliveryTimeBucket) return '请选择期望送达时段';
-
-    for (const item of checkoutItems) {
-      if (!item.id || !item.id.trim()) {
-        return '商品信息不完整，请返回重新选购';
-      }
-      if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
-        return '商品数量无效';
-      }
-      if (!Number.isFinite(item.price) || item.price < 0) {
-        return '商品价格无效';
-      }
-    }
-
-    return null;
-  },
-
-  buildDeliveryTimeIso(): string | undefined {
-    const { deliveryDate, deliveryTimeBucket } = this.data;
-    if (!deliveryDate) return undefined;
-
-    const hourMap: Record<string, number> = {
-      上午: 10,
-      下午: 14,
-      晚上: 18,
-    };
-    const hour = hourMap[deliveryTimeBucket] ?? 12;
-    const iso = new Date(`${deliveryDate}T${String(hour).padStart(2, '0')}:00:00`);
-    if (Number.isNaN(iso.getTime())) return undefined;
-    return iso.toISOString();
-  },
-
-  /**
-   * 组装与后端 WechatCreateOrderPayload 对齐的请求体。
-   * totalAmount 仅含商品行合计（不含运费），与历史接口约定一致。
-   */
-  buildOrderPayload(wechatOpenId: string): WechatCreateOrderPayload {
-    const { receiverName, receiverPhone, deliveryAddress, checkoutItems } =
-      this.data;
-
-    const items = checkoutItems.map((item) => ({
-      productId: String(item.id).trim(),
-      quantity: item.quantity,
-      price: Number(item.price.toFixed(2)),
-    }));
-
     const totalAmount = Number(
-      items.reduce((sum, row) => sum + row.price * row.quantity, 0).toFixed(2)
+      checkoutItems
+        .reduce((sum, row) => sum + row.price * row.quantity, 0)
+        .toFixed(2)
     );
+    const deliveryFee = calcDeliveryFee(totalAmount);
+    const payAmount = Number((totalAmount + deliveryFee).toFixed(2));
 
-    const payload: WechatCreateOrderPayload = {
-      wechatOpenId: String(wechatOpenId).trim(),
-      totalAmount,
+    const payload: {
+      receiverName: string;
+      receiverPhone: string;
+      deliveryAddress: string;
+      deliveryDate: string;
+      greetingCard?: string;
+      totalAmount: number;
+      deliveryFee: number;
+      payAmount: number;
+      items: { skuId: string; quantity: number }[];
+    } = {
       receiverName: receiverName.trim(),
       receiverPhone: receiverPhone.trim(),
       deliveryAddress: deliveryAddress.trim(),
-      items,
+      deliveryDate: this.buildDeliveryDateLabel(),
+      totalAmount,
+      deliveryFee,
+      payAmount,
+      items: checkoutItems.map((row) => ({
+        skuId: row.skuId,
+        quantity: row.quantity,
+      })),
     };
 
-    const deliveryTime = this.buildDeliveryTimeIso();
-    if (deliveryTime) {
-      payload.deliveryTime = deliveryTime;
-    }
+    const card = greetingCard.trim();
+    if (card) payload.greetingCard = card;
 
     return payload;
+  },
+
+  finishCheckout(purchasedSkuIds: string[] | null) {
+    clearCheckoutStorageOnly();
+    if (purchasedSkuIds?.length) {
+      removePurchasedSkusFromCart(purchasedSkuIds);
+    }
+    wx.redirectTo({ url: '/pages/order-list/order-list' });
+  },
+
+  showMockPayModal(orderId: string, orderNo: string) {
+    wx.showModal({
+      title: '模拟支付',
+      content:
+        '提示：当前处于开发测试环境，点击【确认支付】将模拟完成资金扣款。',
+      confirmText: '确认支付',
+      cancelText: '暂不支付',
+      success: (res) => {
+        if (res.confirm) {
+          wx.showLoading({ title: '支付处理中...', mask: true });
+          const purchasedSkuIds = this.data.checkoutItems.map((r) => r.skuId);
+          mockPayOrder(orderId)
+            .then(() => {
+              wx.hideLoading();
+              wx.showToast({ title: '支付成功', icon: 'success' });
+              setTimeout(() => this.finishCheckout(purchasedSkuIds), 800);
+            })
+            .catch(() => {
+              wx.hideLoading();
+              wx.showModal({
+                title: '支付失败',
+                content: '模拟支付未完成，可在订单列表中继续支付',
+                showCancel: false,
+                success: () => this.finishCheckout(null),
+              });
+            });
+          return;
+        }
+
+        wx.showToast({
+          title: '订单已保存至待支付列表',
+          icon: 'none',
+          duration: 2000,
+        });
+        setTimeout(() => this.finishCheckout(null), 600);
+      },
+    });
   },
 
   onSubmitOrder() {
     if (this.data.submitting) return;
 
-    const wechatOpenId = getOpenId();
-    if (!wechatOpenId || !String(wechatOpenId).trim()) {
+    if (!isLoggedIn()) {
       wx.showModal({
-        title: '登录态失效',
-        content:
-          '本地未找到身份凭证，请尝试在开发者工具中「清除缓存」并重新编译小程序。',
+        title: '请先登录',
+        content: '提交订单需要微信登录，请重新打开小程序后再试。',
         showCancel: false,
       });
       return;
@@ -380,48 +382,33 @@ Page({
       return;
     }
 
-    const orderData = this.buildOrderPayload(wechatOpenId);
+    const payload = this.buildCreatePayload();
 
     this.setData({ submitting: true });
-    wx.showLoading({ title: '正在提交订单...', mask: true });
+    wx.showLoading({ title: '正在创建订单...', mask: true });
 
-    request<CreateOrderResult>({
-      url: '/orders',
-      method: 'POST',
-      data: orderData as WechatMiniprogram.IAnyObject,
-    })
+    createOrder(payload)
       .then((data) => {
         wx.hideLoading();
-        if (data?.order) {
-          const orderNo = data.order.orderNo;
-          wx.showToast({
-            title: orderNo ? `下单成功 ${orderNo}` : '下单成功',
-            icon: 'success',
-            duration: 2000,
-          });
-        } else {
-          wx.showModal({
-            title: '下单失败',
-            content: data?.message || '未知错误',
-            showCancel: false,
-          });
+        if (!data?.orderId) {
+          wx.showToast({ title: '创建订单失败', icon: 'none' });
+          return;
         }
+        this.showMockPayModal(data.orderId, data.orderNo);
       })
       .catch((err) => {
         wx.hideLoading();
-        console.error('下单请求失败：', err);
+        console.error('创建订单失败', err);
         const errMsg =
-          err?.data?.error ||
-          (typeof err?.data === 'object' && err.data && 'error' in err.data
-            ? String((err.data as { error?: string }).error)
+          (err as { error?: string })?.error ||
+          (typeof err === 'object' && err && 'message' in err
+            ? String((err as { message?: string }).message)
             : '');
-        if (errMsg) {
-          wx.showModal({
-            title: '下单失败',
-            content: errMsg,
-            showCancel: false,
-          });
-        }
+        wx.showModal({
+          title: '下单失败',
+          content: errMsg || '请稍后重试',
+          showCancel: false,
+        });
       })
       .finally(() => {
         this.setData({ submitting: false });

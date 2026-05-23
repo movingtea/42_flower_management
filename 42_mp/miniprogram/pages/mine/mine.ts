@@ -31,4 +31,8 @@ Page({
   onGoProfile() {
     wx.navigateTo({ url: '/pages/profile/profile' });
   },
+
+  onGoOrders() {
+    wx.navigateTo({ url: '/pages/order-list/order-list' });
+  },
 });

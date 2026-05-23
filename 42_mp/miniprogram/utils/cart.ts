@@ -173,6 +173,48 @@ export function computeCartSummary(list: CartListItem[]): CartSummary {
  * 刷新底部 TabBar 购物车角标（总件数，非勾选数）。
  * 总件数为 0 时移除角标。
  */
+/** 从购物车移除已结算行（按 SPU+SKU 行键） */
+export function removeCartLinesByKeys(keys: string[]): void {
+  if (!keys.length) return;
+  const keySet = new Set(keys);
+  const cart = readCartFromStorage().filter(
+    (row) => !keySet.has(cartLineKey(row))
+  );
+  writeCartToStorage(cart);
+  updateCartTabBarBadge(cart);
+}
+
+/** 仅清除结算页临时缓存，不动购物车 */
+export function clearCheckoutStorageOnly(): void {
+  try {
+    wx.removeStorageSync(CHECKOUT_PRODUCTS_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+/**
+ * 支付成功后精准清洗：仅移除本次下单涉及的 skuId 对应条目。
+ */
+export function removePurchasedSkusFromCart(skuIds: string[]): void {
+  const idSet = new Set(skuIds.filter(Boolean));
+  if (!idSet.size) return;
+
+  const cart = readCartFromStorage().filter(
+    (row) => !row.skuId || !idSet.has(row.skuId)
+  );
+  writeCartToStorage(cart);
+  updateCartTabBarBadge(cart);
+}
+
+/** @deprecated 请使用 removePurchasedSkusFromCart + clearCheckoutStorageOnly */
+export function clearCheckoutAndCartLines(items: CartItem[]): void {
+  clearCheckoutStorageOnly();
+  removePurchasedSkusFromCart(
+    items.map((row) => row.skuId).filter((id): id is string => !!id)
+  );
+}
+
 export function updateCartTabBarBadge(cart?: CartItem[]): void {
   const items = cart ?? readCartFromStorage();
   const total = getCartTotalPieceCount(items);

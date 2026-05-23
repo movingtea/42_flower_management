@@ -1,221 +1,300 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
-import type { KanbanColumnId, KanbanOrder } from "@/app/wms/orders/types";
-import type { FulfillmentPhase } from "@/services/order-status";
-
-const COLUMNS: {
-  id: KanbanColumnId;
-  phase: FulfillmentPhase;
-  title: string;
-  subtitle: string;
-  actionLabel: string;
-  nextStatus: string;
-}[] = [
-  {
-    id: "PAID",
-    phase: "PAID",
-    title: "待制作",
-    subtitle: "已付款，等待花艺师开工",
-    actionLabel: "开始制作",
-    nextStatus: "MAKING",
-  },
-  {
-    id: "MAKING",
-    phase: "MAKING",
-    title: "花艺制作中",
-    subtitle: "包装与质检",
-    actionLabel: "发货配送",
-    nextStatus: "DELIVERING",
-  },
-  {
-    id: "DELIVERING",
-    phase: "DELIVERING",
-    title: "配送中",
-    subtitle: "骑手 / 店员配送途中",
-    actionLabel: "确认送达",
-    nextStatus: "COMPLETED",
-  },
-];
-
-function formatDeliveryTime(iso: string | null) {
-  if (!iso) return "未指定送达时间";
-  return new Date(iso).toLocaleString("zh-CN", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-function OrderCard({
-  order,
-  actionLabel,
-  loading,
-  onAction,
-}: {
-  order: KanbanOrder;
-  actionLabel: string;
-  loading: boolean;
-  onAction: () => void;
-}) {
-  return (
-    <article className="rounded-xl border border-rose-100 bg-white p-4 shadow-sm">
-      <div className="flex items-start justify-between gap-2">
-        <p className="font-semibold text-zinc-900">{order.orderNo}</p>
-        <span className="shrink-0 text-sm font-medium text-rose-600">
-          {"\u00a5"}
-          {order.totalAmount}
-        </span>
-      </div>
-
-      <p
-        className={`mt-2 text-sm font-medium ${
-          order.isOverdue
-            ? "animate-pulse text-red-600"
-            : order.isUrgent
-              ? "text-red-600"
-              : "text-zinc-600"
-        }`}
-      >
-        {"\u9001\u8fbe"} {formatDeliveryTime(order.deliveryTime)}
-        {order.isOverdue && " \u00b7 \u5df2\u8d85\u65f6"}
-        {order.isUrgent && !order.isOverdue && " \u00b7 \u52a0\u6025"}
-      </p>
-
-      <div className="mt-3 rounded-lg bg-rose-50/40 px-3 py-2 text-sm text-zinc-700">
-        <p className="font-medium">{order.receiverName ?? "\u2014"}</p>
-        <p>{order.receiverPhone ?? "\u2014"}</p>
-        <p className="mt-1 text-xs leading-relaxed text-zinc-500">
-          {order.deliveryAddress ?? "\u2014"}
-        </p>
-      </div>
-
-      <ul className="mt-3 space-y-1 text-sm text-zinc-600">
-        {order.items.map((line, i) => (
-          <li key={i}>
-            {"\u00b7"} {line.label} {"\u00d7"} {line.quantity}
-          </li>
-        ))}
-      </ul>
-
-      <Button
-        type="button"
-        className="mt-4 w-full"
-        disabled={loading}
-        onClick={onAction}
-      >
-        {loading ? "处理中…" : actionLabel}
-      </Button>
-    </article>
-  );
-}
+import { OrderKanbanCard } from "@/app/wms/orders/OrderKanbanCard";
+import {
+  columnIndex,
+  KANBAN_COLUMNS,
+} from "@/app/wms/orders/kanban-config";
+import type { DragPayload, KanbanOrder } from "@/app/wms/orders/types";
 
 type Props = {
-  orders: KanbanOrder[];
-  pendingPayCount: number;
+  initialOrders: KanbanOrder[];
 };
 
-export function OrdersKanban({ orders, pendingPayCount }: Props) {
-  const router = useRouter();
+function ordersInColumn(orders: KanbanOrder[], columnId: string): KanbanOrder[] {
+  const col = KANBAN_COLUMNS.find((c) => c.id === columnId);
+  if (!col) return [];
+  if (col.isArchive) {
+    return orders.filter(
+      (o) => o.status === "COMPLETED" || o.status === "CANCELLED"
+    );
+  }
+  return orders.filter((o) => o.status === col.status);
+}
+
+export function OrdersKanban({ initialOrders }: Props) {
+  const [orders, setOrders] = useState(initialOrders);
   const [loadingId, setLoadingId] = useState<string | null>(null);
-  const [toast, setToast] = useState<{
-    message: string;
-    type: "success" | "error";
+  const [error, setError] = useState<string | null>(null);
+  const [dragPayload, setDragPayload] = useState<DragPayload | null>(null);
+  const [dropHighlight, setDropHighlight] = useState<string | null>(null);
+  const [refundModal, setRefundModal] = useState<{
+    order: KanbanOrder;
+    rollbackStock: boolean;
+  } | null>(null);
+  const [shipModal, setShipModal] = useState<{
+    order: KanbanOrder;
+    deliveryInfo: string;
   } | null>(null);
 
-  const showToast = useCallback(
-    (message: string, type: "success" | "error") => {
-      setToast({ message, type });
-      window.setTimeout(() => setToast(null), 2800);
-    },
-    []
-  );
+  const counts = useMemo(() => {
+    const map: Record<string, number> = {};
+    for (const col of KANBAN_COLUMNS) {
+      map[col.id] = ordersInColumn(orders, col.id).length;
+    }
+    return map;
+  }, [orders]);
 
-  async function patchStatus(orderId: string, nextStatus: string) {
+  const upsertOrder = useCallback((next: KanbanOrder) => {
+    setOrders((prev) => {
+      const idx = prev.findIndex((o) => o.id === next.id);
+      if (idx === -1) return [next, ...prev];
+      const copy = [...prev];
+      copy[idx] = next;
+      return copy;
+    });
+  }, []);
+
+  async function postJson<T>(url: string, body?: unknown): Promise<T> {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: body != null ? JSON.stringify(body) : undefined,
+    });
+    const json = (await res.json()) as {
+      success?: boolean;
+      error?: string;
+      data?: T;
+    };
+    if (!res.ok || json.success === false) {
+      throw new Error(json.error || "操作失败");
+    }
+    return json.data as T;
+  }
+
+  async function patchTransition(
+    orderId: string,
+    nextStatus: string,
+    deliveryInfo?: string
+  ) {
+    const res = await fetch("/api/admin/orders", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ orderId, nextStatus, deliveryInfo }),
+    });
+    const json = (await res.json()) as {
+      success?: boolean;
+      error?: string;
+    };
+    if (!res.ok || json.success === false) {
+      throw new Error(json.error || "状态更新失败");
+    }
+  }
+
+  async function runAction(orderId: string, fn: () => Promise<void>) {
     setLoadingId(orderId);
+    setError(null);
     try {
-      const res = await fetch("/api/admin/orders", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderId, nextStatus }),
-      });
-      const json = (await res.json()) as {
-        success: boolean;
-        error?: string;
-        data?: { message?: string };
-      };
+      await fn();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "操作失败");
+    } finally {
+      setLoadingId(null);
+      setRefundModal(null);
+      setShipModal(null);
+    }
+  }
 
-      if (!res.ok || !json.success) {
-        showToast(json.error ?? "操作失败", "error");
+  async function syncOrderFromPatch(
+    orderId: string,
+    nextStatus: string,
+    deliveryInfo?: string
+  ) {
+    await patchTransition(orderId, nextStatus, deliveryInfo);
+    const prev = orders.find((o) => o.id === orderId);
+    if (!prev) return;
+    let status = nextStatus;
+    if (nextStatus === "PAID") status = "PAID";
+    if (nextStatus === "PRODUCTION") status = "PRODUCTION";
+    if (nextStatus === "DELIVERING") status = "DELIVERING";
+    if (nextStatus === "COMPLETED") status = "COMPLETED";
+    upsertOrder({
+      ...prev,
+      status,
+      statusLabel:
+        status === "PAID"
+          ? "已支付"
+          : status === "PRODUCTION"
+            ? "制作中"
+            : status === "DELIVERING"
+              ? "配送中"
+              : status === "COMPLETED"
+                ? "已完成"
+                : prev.statusLabel,
+      deliveryInfo: deliveryInfo ?? prev.deliveryInfo,
+    });
+  }
+
+  async function handleDrop(targetColumnId: string) {
+    setDropHighlight(null);
+    if (!dragPayload) return;
+
+    const { orderId, fromColumnId } = dragPayload;
+    setDragPayload(null);
+
+    if (fromColumnId === "archive") {
+      setError("归档列订单不可拖出");
+      return;
+    }
+
+    const fromIdx = columnIndex(fromColumnId);
+    const toIdx = columnIndex(targetColumnId);
+    if (toIdx !== fromIdx + 1) {
+      setError("仅允许向右相邻列拖拽流转");
+      return;
+    }
+
+    const order = orders.find((o) => o.id === orderId);
+    if (!order) return;
+
+    try {
+      setLoadingId(orderId);
+      if (fromColumnId === "pending" && targetColumnId === "paid") {
+        await syncOrderFromPatch(orderId, "PAID");
+      } else if (fromColumnId === "paid" && targetColumnId === "production") {
+        await syncOrderFromPatch(orderId, "PRODUCTION");
+      } else if (
+        fromColumnId === "production" &&
+        targetColumnId === "delivering"
+      ) {
+        setShipModal({ order, deliveryInfo: "" });
+        setLoadingId(null);
         return;
+      } else if (
+        fromColumnId === "delivering" &&
+        targetColumnId === "archive"
+      ) {
+        await syncOrderFromPatch(orderId, "COMPLETED");
       }
-
-      showToast(json.data?.message ?? "状态已更新", "success");
-      router.refresh();
-    } catch {
-      showToast("网络异常，请重试", "error");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "拖拽流转失败");
     } finally {
       setLoadingId(null);
     }
   }
 
-  const byPhase = (phase: FulfillmentPhase) =>
-    orders.filter((o) => o.phase === phase);
+  function handleDragOverColumn(
+    e: React.DragEvent,
+    columnId: string
+  ) {
+    e.preventDefault();
+    if (!dragPayload) return;
+
+    if (dragPayload.fromColumnId === "archive") {
+      e.dataTransfer.dropEffect = "none";
+      return;
+    }
+
+    const fromIdx = columnIndex(dragPayload.fromColumnId);
+    const toIdx = columnIndex(columnId);
+    if (toIdx === fromIdx + 1) {
+      e.dataTransfer.dropEffect = "move";
+      setDropHighlight(columnId);
+    } else {
+      e.dataTransfer.dropEffect = "none";
+    }
+  }
 
   return (
-    <div className="relative">
-      {toast && (
-        <div
-          role="status"
-          className={`fixed right-6 top-6 z-50 rounded-lg px-4 py-3 text-sm font-medium shadow-lg ${
-            toast.type === "success"
-              ? "bg-emerald-600 text-white"
-              : "bg-red-600 text-white"
-          }`}
-        >
-          {toast.message}
-        </div>
-      )}
-
-      {pendingPayCount > 0 && (
-        <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-           "另有 " + {pendingPayCount}
-            " 笔待付款订单未显示在看板中（需支付后进入履约流程）"
+    <div className="space-y-4">
+      {error && (
+        <p className="rounded-lg border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-800">
+          {error}
+          <button
+            type="button"
+            className="ml-3 text-rose-600 underline"
+            onClick={() => setError(null)}
+          >
+            知道了
+          </button>
         </p>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        {COLUMNS.map((col) => {
-          const list = byPhase(col.phase);
+      <div className="flex gap-3 overflow-x-auto pb-4">
+        {KANBAN_COLUMNS.map((column) => {
+          const columnOrders = ordersInColumn(orders, column.id);
+          const isDropTarget = dropHighlight === column.id;
+
           return (
             <section
-              key={col.id}
-              className="flex min-h-[320px] flex-col rounded-xl border border-zinc-200 bg-zinc-50/80"
+              key={column.id}
+              className={`flex w-[min(100%,17.5rem)] shrink-0 flex-col rounded-xl border-2 transition-colors ${column.accentClass} ${
+                isDropTarget ? "ring-2 ring-rose-400 ring-offset-2" : ""
+              }`}
+              onDragOver={(e) => handleDragOverColumn(e, column.id)}
+              onDragLeave={() => setDropHighlight(null)}
+              onDrop={(e) => {
+                e.preventDefault();
+                void handleDrop(column.id);
+              }}
             >
-              <header className="rounded-t-xl border-b border-zinc-200 bg-white px-4 py-4">
-                <h3 className="font-semibold text-zinc-900">{col.title}</h3>
-                <p className="mt-0.5 text-xs text-zinc-500">{col.subtitle}</p>
-                <span className="mt-2 inline-block rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-medium text-rose-800">
-                  {list.length} {"单"}
+              <header className="flex items-center justify-between gap-2 border-b border-black/5 px-3 py-3">
+                <h3 className="text-sm font-semibold text-zinc-900">
+                  {column.title}
+                </h3>
+                <span
+                  className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${column.badgeClass}`}
+                >
+                  {counts[column.id] ?? 0}
                 </span>
               </header>
 
-              <div className="flex flex-1 flex-col gap-3 p-3">
-                {list.length === 0 ? (
-                  <p className="py-8 text-center text-sm text-zinc-400">
-                    {"暂无订单"}
+              <div className="flex max-h-[calc(100vh-11rem)] min-h-[12rem] flex-1 flex-col gap-3 overflow-y-auto p-2">
+                {columnOrders.length === 0 ? (
+                  <p className="py-8 text-center text-xs text-zinc-400">
+                    暂无订单
                   </p>
                 ) : (
-                  list.map((order) => (
-                    <OrderCard
+                  columnOrders.map((order) => (
+                    <OrderKanbanCard
                       key={order.id}
                       order={order}
-                      actionLabel={col.actionLabel}
+                      column={column}
                       loading={loadingId === order.id}
-                      onAction={() => patchStatus(order.id, col.nextStatus)}
+                      onDragStart={(o, colId) =>
+                        setDragPayload({ orderId: o.id, fromColumnId: colId })
+                      }
+                      onCloseOrder={(o) =>
+                        void runAction(o.id, async () => {
+                          await postJson<unknown>(
+                            `/api/admin/orders/${o.id}/cancel-or-close`
+                          );
+                          const prev = orders.find((x) => x.id === o.id)!;
+                          upsertOrder({
+                            ...prev,
+                            status: "CANCELLED",
+                            cancelSource: "ADMIN",
+                            refundAmount: null,
+                            statusLabel: "已取消",
+                          });
+                        })
+                      }
+                      onStartProduction={(o) =>
+                        void runAction(o.id, () =>
+                          syncOrderFromPatch(o.id, "PRODUCTION")
+                        )
+                      }
+                      onShip={(o) => setShipModal({ order: o, deliveryInfo: "" })}
+                      onRefund={(o) =>
+                        setRefundModal({ order: o, rollbackStock: true })
+                      }
+                      onMarkCompleted={(o) =>
+                        void runAction(o.id, () =>
+                          syncOrderFromPatch(o.id, "COMPLETED")
+                        )
+                      }
                     />
                   ))
                 )}
@@ -224,6 +303,115 @@ export function OrdersKanban({ orders, pendingPayCount }: Props) {
           );
         })}
       </div>
+
+      {shipModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-zinc-900">发货配送</h3>
+            <p className="mt-1 text-sm text-zinc-500">
+              订单 {shipModal.order.orderNo}
+            </p>
+            <label className="mt-4 block text-sm text-zinc-700">
+              配送单号 / 配送员电话
+              <input
+                className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm"
+                value={shipModal.deliveryInfo}
+                onChange={(e) =>
+                  setShipModal((m) =>
+                    m ? { ...m, deliveryInfo: e.target.value } : m
+                  )
+                }
+                placeholder="例如：顺丰 SF1234567890"
+              />
+            </label>
+            <div className="mt-6 flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setShipModal(null)}
+              >
+                取消
+              </Button>
+              <Button
+                type="button"
+                disabled={loadingId === shipModal.order.id}
+                onClick={() =>
+                  void runAction(shipModal.order.id, () =>
+                    syncOrderFromPatch(
+                      shipModal.order.id,
+                      "DELIVERING",
+                      shipModal.deliveryInfo
+                    )
+                  )
+                }
+              >
+                确认发货
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {refundModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+          <div className="w-full max-w-md rounded-xl bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-zinc-900">退款并取消</h3>
+            <p className="mt-2 text-sm text-zinc-600">
+              订单 {refundModal.order.orderNo}，实付 ¥{refundModal.order.payAmount}
+            </p>
+            <label className="mt-4 flex cursor-pointer items-center gap-2 text-sm">
+              <input
+                type="checkbox"
+                checked={refundModal.rollbackStock}
+                onChange={(e) =>
+                  setRefundModal((m) =>
+                    m ? { ...m, rollbackStock: e.target.checked } : m
+                  )
+                }
+              />
+              花材未损耗，退回 SKU 可售库存
+            </label>
+            <div className="mt-6 flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => setRefundModal(null)}
+              >
+                取消
+              </Button>
+              <Button
+                type="button"
+                className="bg-rose-700 hover:bg-rose-800"
+                disabled={loadingId === refundModal.order.id}
+                onClick={() =>
+                  void runAction(refundModal.order.id, async () => {
+                    const data = await postJson<{
+                      order: {
+                        refundAmount?: number;
+                      };
+                    }>(`/api/admin/orders/${refundModal.order.id}/refund`, {
+                      rollbackStock: refundModal.rollbackStock,
+                    });
+                    const prev = orders.find(
+                      (x) => x.id === refundModal.order.id
+                    )!;
+                    upsertOrder({
+                      ...prev,
+                      status: "CANCELLED",
+                      cancelSource: "REFUND",
+                      refundAmount:
+                        data.order?.refundAmount ?? Number(prev.payAmount),
+                      statusLabel: "已取消",
+                    });
+                  })
+                }
+              >
+                确认退款
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

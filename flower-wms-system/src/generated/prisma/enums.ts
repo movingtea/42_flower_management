@@ -21,14 +21,24 @@ export type StockLogType = (typeof StockLogType)[keyof typeof StockLogType]
 
 
 export const OrderStatus = {
-  PENDING: 'PENDING',
+  PENDING_PAYMENT: 'PENDING_PAYMENT',
   PAID: 'PAID',
-  PREPARING: 'PREPARING',
-  DELIVERED: 'DELIVERED',
+  PRODUCTION: 'PRODUCTION',
+  DELIVERING: 'DELIVERING',
+  COMPLETED: 'COMPLETED',
   CANCELLED: 'CANCELLED'
 } as const
 
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]
+
+
+export const OrderCancelSource = {
+  CUSTOMER: 'CUSTOMER',
+  ADMIN: 'ADMIN',
+  REFUND: 'REFUND'
+} as const
+
+export type OrderCancelSource = (typeof OrderCancelSource)[keyof typeof OrderCancelSource]
 
 
 export const BannerTargetType = {

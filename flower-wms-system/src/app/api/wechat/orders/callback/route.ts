@@ -1,18 +1,20 @@
 import { jsonError } from "@/lib/api";
 import { jsonWechatSuccess } from "@/lib/wechat-api";
 import { prisma } from "@/lib/prisma";
-import type { WechatPayCallbackInput } from "@/types";
 import { OrderStatus } from "@/generated/prisma/enums";
 
 export const dynamic = "force-dynamic";
 
 /**
- * POST：微信支付成功回调。
- * 库存在下单 POST /api/wechat/orders 时已 FIFO 锁定，此处仅更新订单为已付款。
+ * 微信支付回调占位（个人主体不可用）。
+ * 库存在创建订单时已扣减 SKU，此处仅将待支付订单标记为已支付。
  */
 export async function POST(request: Request) {
   try {
-    const body = (await request.json()) as WechatPayCallbackInput;
+    const body = (await request.json()) as {
+      orderNo?: string;
+      wechatTransactionId?: string;
+    };
 
     if (!body.orderNo || !body.wechatTransactionId) {
       return jsonError("缺少 orderNo 或 wechatTransactionId", 400);
@@ -26,7 +28,7 @@ export async function POST(request: Request) {
       return jsonError("订单不存在", 404);
     }
 
-    if (order.status !== OrderStatus.PENDING) {
+    if (order.status !== OrderStatus.PENDING_PAYMENT) {
       return jsonError(`订单状态不可支付: ${order.status}`, 400);
     }
 
@@ -34,17 +36,15 @@ export async function POST(request: Request) {
       where: { id: order.id },
       data: {
         status: OrderStatus.PAID,
-        wechatTransactionId: body.wechatTransactionId,
         paidAt: new Date(),
       },
     });
 
     return jsonWechatSuccess({
       orderNo: updated.orderNo,
-      status: OrderStatus.PAID,
+      status: updated.status,
     });
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "支付回调处理失败";
-    return jsonError(message, 500);
+  } catch {
+    return jsonError("回调处理失败", 500);
   }
 }

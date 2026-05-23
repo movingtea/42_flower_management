@@ -1,0 +1,52 @@
+<view class="order-list-page">
+  <view wx:if="{{loading}}" class="order-list-hint">加载中...</view>
+
+  <view wx:elif="{{!orders.length}}" class="order-list-empty">
+    <text class="order-list-empty-title">暂无订单</text>
+    <text class="order-list-empty-desc">去首页逛逛，选一束花吧</text>
+    <button class="order-list-empty-btn" bindtap="onGoHome">去逛逛</button>
+  </view>
+
+  <view wx:else class="order-cards">
+    <view class="order-card" wx:for="{{orders}}" wx:key="id">
+      <view class="order-card-head">
+        <text class="order-no">{{item.orderNo}}</text>
+        <text class="order-status order-status--{{item.status}}">{{item.statusLabel}}</text>
+      </view>
+      <view wx:if="{{item.deliveryDate}}" class="order-delivery">
+        <text>配送时间：{{item.deliveryDate}}</text>
+      </view>
+      <view wx:if="{{item.greetingCard}}" class="order-greeting">
+        <text>贺卡：{{item.greetingCard}}</text>
+      </view>
+      <view
+        class="order-line"
+        wx:for="{{item.items}}"
+        wx:for-item="line"
+        wx:key="id"
+      >
+        <image
+          wx:if="{{line.imageUrl}}"
+          class="order-line-image"
+          src="{{baseUrl}}{{line.imageUrl}}"
+          mode="aspectFill"
+        />
+        <view class="order-line-body">
+          <text class="order-line-name">{{line.snapshotProductName}}</text>
+          <text class="order-line-spec">{{line.snapshotSpecName}}</text>
+          <text class="order-line-meta">x{{line.quantity}} · ¥{{line.snapshotPrice}}</text>
+        </view>
+      </view>
+      <view class="order-card-foot">
+        <text>实付 ¥{{item.payAmountText}}</text>
+        <text class="order-time">{{item.createdAtText}}</text>
+      </view>
+      <button
+        wx:if="{{item.status === 'DELIVERING'}}"
+        class="order-confirm-btn"
+        data-id="{{item.id}}"
+        bindtap="onConfirmReceipt"
+      >确认收货</button>
+    </view>
+  </view>
+</view>

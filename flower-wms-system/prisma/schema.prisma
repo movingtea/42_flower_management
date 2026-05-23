@@ -26,13 +26,21 @@ enum StockLogType {
   IN_CANCEL /// 订单取消释放库存（对冲下单锁库）
 }
 
-/// 微信订单状态
+/// 微信订单履约状态机
 enum OrderStatus {
-  PENDING /// 待付款（已锁库计划，未正式扣减）
-  PAID /// 已付款
-  PREPARING /// 制作中
-  DELIVERED /// 已送达
+  PENDING_PAYMENT /// 待支付
+  PAID /// 已支付 / 待制作
+  PRODUCTION /// 制作中
+  DELIVERING /// 配送中
+  COMPLETED /// 已完成
   CANCELLED /// 已取消
+}
+
+/// 取消来源（归档色彩语义）
+enum OrderCancelSource {
+  CUSTOMER /// 顾客在待支付阶段取消
+  ADMIN /// 店长关闭待支付订单
+  REFUND /// 已付/制作中退款取消
 }
 
 /// 首页轮播跳转类型
@@ -140,7 +148,6 @@ model ProductSpu {
   skus       ProductSku[]
   categories ProductCategoryRelation[]
   bomItems   ProductBOM[]
-  orderItems OrderItem[]
   banners    Banner[]
 
   @@index([isActive])
@@ -161,7 +168,8 @@ model ProductSku {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  spu ProductSpu @relation(fields: [spuId], references: [id], onDelete: Cascade)
+  spu        ProductSpu  @relation(fields: [spuId], references: [id], onDelete: Cascade)
+  orderItems OrderItem[]
 
   @@index([spuId])
   @@index([spuId, isMainImage])
@@ -314,54 +322,53 @@ model User {
 // ---------------------------------------------------------------------------
 
 model Order {
-  id                  String      @id @default(cuid())
-  orderNo             String      @unique
-  status              OrderStatus @default(PENDING)
-  userId              String?     @map("user_id")
-  wechatOpenId        String?
-  customerName        String?
-  customerPhone       String?
-  wechatTransactionId String?
-  totalAmount         Decimal     @db.Decimal(10, 2)
-  receiverName        String?
-  receiverPhone       String?
-  deliveryAddress     String?     @db.Text
-  deliveryTime        DateTime?
-  paidAt              DateTime?
-  deliveredAt         DateTime?
-  remark              String?     @db.Text
-  createdAt           DateTime    @default(now())
-  updatedAt           DateTime    @updatedAt
+  id              String      @id @default(uuid())
+  orderNo         String      @unique @map("order_no")
+  userId          String      @map("user_id")
+  totalAmount     Float       @map("total_amount")
+  deliveryFee     Float       @default(0) @map("delivery_fee")
+  payAmount       Float       @map("pay_amount")
+  receiverName    String      @map("receiver_name")
+  receiverPhone   String      @map("receiver_phone")
+  deliveryAddress String      @map("delivery_address") @db.Text
+  deliveryDate    String      @map("delivery_date")
+  greetingCard    String?     @map("greeting_card") @db.Text
+  deliveryInfo    String?     @map("delivery_info") @db.Text
+  status          OrderStatus @default(PENDING_PAYMENT)
+  paidAt          DateTime?   @map("paid_at")
+  refundAmount    Float?           @map("refund_amount")
+  refundTime      DateTime?        @map("refund_time")
+  cancelSource    OrderCancelSource? @map("cancel_source")
+  createdAt       DateTime         @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
 
-  user      User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+  user      User        @relation(fields: [userId], references: [id], onDelete: Restrict)
   items     OrderItem[]
   stockLogs StockLog[]
 
   @@index([status, createdAt])
   @@index([userId])
-  @@index([wechatOpenId])
   @@index([orderNo])
   @@map("orders")
 }
 
 model OrderItem {
-  id                   String   @id @default(cuid())
-  orderId              String
-  productId            String
-  productName          String
-  productSku           String
-  snapshotProductImage String?  @map("snapshot_product_image")
+  id                   String   @id @default(uuid())
+  orderId              String   @map("order_id")
+  skuId                String   @map("sku_id")
   quantity             Int
-  unitPrice            Decimal  @db.Decimal(10, 2)
-  lineTotal            Decimal  @db.Decimal(10, 2)
-  createdAt            DateTime @default(now())
+  snapshotProductName  String   @map("snapshot_product_name")
+  snapshotSpecName     String   @map("snapshot_spec_name")
+  snapshotPrice        Float    @map("snapshot_price")
+  snapshotImageUrl     String   @map("snapshot_image_url")
+  createdAt            DateTime @default(now()) @map("created_at")
 
   order     Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  spu       ProductSpu @relation(fields: [productId], references: [id], onDelete: Restrict)
+  sku       ProductSku @relation(fields: [skuId], references: [id], onDelete: Restrict)
   stockLogs StockLog[]
 
   @@index([orderId])
-  @@index([productId])
+  @@index([skuId])
   @@map("order_items")
 }
 

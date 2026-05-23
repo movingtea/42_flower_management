@@ -9,10 +9,11 @@ const orderStatusMap: Record<
   OrderStatus,
   { label: string; variant: "default" | "success" | "warning" | "info" }
 > = {
-  PENDING: { label: "待付款", variant: "warning" },
-  PAID: { label: "已付款", variant: "info" },
-  PREPARING: { label: "制作中", variant: "default" },
-  DELIVERED: { label: "已送达", variant: "success" },
+  PENDING_PAYMENT: { label: "待支付", variant: "warning" },
+  PAID: { label: "已支付", variant: "info" },
+  PRODUCTION: { label: "制作中", variant: "default" },
+  DELIVERING: { label: "配送中", variant: "info" },
+  COMPLETED: { label: "已完成", variant: "success" },
   CANCELLED: { label: "已取消", variant: "default" },
 };
 
