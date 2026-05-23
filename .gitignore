@@ -10,7 +10,7 @@ yarn-error.log*
 out/
 build/
 .env*.local
-.env
+**/.env
 
 # 📱 微信小程序临时编译文件
 wechat-mini-program/miniprogram_npm/
@@ -23,3 +23,6 @@ wechat-mini-program/project.private.config.json
 .idea/
 .vscode/
 
+**/package-lock.json
+
+flower-wms-system/.env
