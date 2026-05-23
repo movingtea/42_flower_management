@@ -9,18 +9,38 @@ const IMAGE_STRING_KEYS = new Set([
   "detailImage",
   "mainImage",
   "picUrl",
+  "snapshotProductImage",
 ]);
 
 /** 图片 URL 字符串数组字段名 */
-const IMAGE_ARRAY_KEYS = new Set(["images", "imageList", "gallery"]);
+const IMAGE_ARRAY_KEYS = new Set([
+  "images",
+  "imageList",
+  "gallery",
+  "bannerImages",
+]);
 
-/** 获取 API 对外基址（用于拼接 /uploads 等相对路径） */
-export function getWechatApiBaseUrl(): string {
-  const fromEnv = process.env.NEXT_PUBLIC_API_URL?.trim();
-  if (fromEnv) {
-    return fromEnv.replace(/\/+$/, "");
+/** 静态资源对外基址（用于拼接 /uploads，不含 /api/wechat） */
+export function getAssetBaseUrl(): string {
+  const asset = process.env.NEXT_PUBLIC_ASSET_BASE_URL?.trim();
+  if (asset) {
+    return asset.replace(/\/+$/, "");
   }
+
+  const api = process.env.NEXT_PUBLIC_API_URL?.trim();
+  if (api) {
+    return api
+      .replace(/\/+$/, "")
+      .replace(/\/api\/wechat$/i, "")
+      .replace(/\/api$/i, "");
+  }
+
   return "http://localhost:3000";
+}
+
+/** @deprecated 请使用 getAssetBaseUrl */
+export function getWechatApiBaseUrl(): string {
+  return getAssetBaseUrl();
 }
 
 /**
@@ -42,7 +62,7 @@ export function resolveImageUrl(
   }
 
   if (trimmed.startsWith("/")) {
-    return `${getWechatApiBaseUrl()}${trimmed}`;
+    return `${getAssetBaseUrl()}${trimmed}`;
   }
 
   return trimmed;

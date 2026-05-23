@@ -1,7 +1,7 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
 
-export type SkuEntityKind = "product" | "material";
+export type SkuEntityKind = "product" | "productSku" | "material";
 
 const MAX_ATTEMPTS = 10;
 
@@ -23,9 +23,9 @@ export async function generateUniqueSku(
   for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
     const code = randomSevenDigitCode();
 
-    if (kind === "product") {
-      const existing = await client.product.findUnique({
-        where: { sku: code },
+    if (kind === "product" || kind === "productSku") {
+      const existing = await client.productSku.findUnique({
+        where: { skuCode: code },
         select: { id: true },
       });
       if (!existing) return code;

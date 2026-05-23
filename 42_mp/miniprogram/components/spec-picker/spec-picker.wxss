@@ -1,0 +1,248 @@
+.spec-picker-root {
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+}
+
+.spec-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.spec-sheet {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  max-height: 78vh;
+  background: #fff;
+  border-radius: 24rpx 24rpx 0 0;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 -8rpx 40rpx rgba(0, 0, 0, 0.08);
+}
+
+.spec-sheet-header {
+  display: flex;
+  align-items: center;
+  padding: 28rpx 32rpx 20rpx;
+  gap: 20rpx;
+  position: relative;
+}
+
+.spec-header-thumb {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 16rpx;
+  background: #f5f5f5;
+  flex-shrink: 0;
+}
+
+.spec-header-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  padding-right: 56rpx;
+}
+
+.spec-header-name {
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #222;
+}
+
+.spec-header-price {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: #c45c5c;
+}
+
+.spec-close-btn {
+  position: absolute;
+  top: 20rpx;
+  right: 24rpx;
+  width: 56rpx;
+  height: 56rpx;
+  font-size: 40rpx;
+  color: #999;
+  line-height: 1;
+}
+
+.spec-sku-scroll {
+  flex: 1;
+  min-height: 0;
+  padding: 0 32rpx 16rpx;
+  box-sizing: border-box;
+}
+
+.spec-section-label {
+  display: block;
+  font-size: 26rpx;
+  color: #666;
+  margin-bottom: 20rpx;
+}
+
+.spec-sku-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20rpx;
+}
+
+.spec-sku-item {
+  width: calc(33.333% - 14rpx);
+  box-sizing: border-box;
+}
+
+.spec-sku-item--active .spec-sku-image-wrap {
+  border-color: #8fa89b;
+  box-shadow: 0 0 0 2rpx #8fa89b;
+}
+
+.spec-sku-item--disabled {
+  opacity: 0.55;
+}
+
+.spec-sku-image-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 16rpx;
+  overflow: hidden;
+  border: 2rpx solid #eee;
+  background: #f8f8f8;
+}
+
+.spec-sku-image {
+  width: 100%;
+  height: 100%;
+}
+
+.spec-sku-soldout {
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.72);
+  font-size: 22rpx;
+  color: #888;
+}
+
+.spec-zoom-btn {
+  position: absolute;
+  right: 8rpx;
+  bottom: 8rpx;
+  width: 44rpx;
+  height: 44rpx;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(4px);
+}
+
+.spec-zoom-icon {
+  font-size: 26rpx;
+  color: #fff;
+  line-height: 1;
+  transform: scaleX(-1);
+}
+
+.spec-sku-name {
+  display: block;
+  margin-top: 10rpx;
+  font-size: 24rpx;
+  color: #333;
+}
+
+.spec-sku-price {
+  display: block;
+  font-size: 24rpx;
+  color: #c45c5c;
+  margin-top: 4rpx;
+}
+
+.spec-footer {
+  padding: 16rpx 32rpx 24rpx;
+  border-top: 1rpx solid #f0f0f0;
+}
+
+.spec-confirm-btn {
+  height: 88rpx;
+  border-radius: 44rpx;
+  background: linear-gradient(135deg, #9bb5a8, #8fa89b);
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+/* 全屏预览 */
+.preview-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 999;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  flex-direction: column;
+}
+
+.preview-close-wrap {
+  position: relative;
+  z-index: 2;
+  padding-left: 24rpx;
+  padding-bottom: 8rpx;
+}
+
+.preview-close-btn {
+  width: 72rpx;
+  height: 72rpx;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.14);
+  border: 1rpx solid rgba(255, 255, 255, 0.28);
+}
+
+.preview-close-icon {
+  font-size: 44rpx;
+  color: #fff;
+  line-height: 1;
+  font-weight: 300;
+}
+
+.preview-image-stage {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24rpx 32rpx;
+  min-height: 0;
+}
+
+.preview-image {
+  width: 100%;
+  max-height: 100%;
+}
+
+.preview-info-card {
+  margin: 0 32rpx 48rpx;
+  padding: 28rpx 32rpx;
+  border-radius: 20rpx;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(20px);
+  border: 1rpx solid rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 24rpx;
+}
+
+.preview-spec-name {
+  flex: 1;
+  font-size: 30rpx;
+  color: #fff;
+  font-weight: 500;
+}
+
+.preview-spec-price {
+  font-size: 36rpx;
+  color: #f5d0d0;
+  font-weight: 700;
+  flex-shrink: 0;
+}

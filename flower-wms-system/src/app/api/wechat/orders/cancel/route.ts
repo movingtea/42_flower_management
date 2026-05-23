@@ -1,7 +1,8 @@
 import { Prisma } from "@/generated/prisma/client";
 import { jsonError } from "@/lib/api";
+import { requireUserFromRequest } from "@/lib/wechat-auth-request";
 import { jsonWechatSuccess } from "@/lib/wechat-api";
-import { cancelWechatOrderAndReleaseStock } from "@/services/wechat-order-cancel";
+import { closePendingOrder, ORDER_STATUS_LABEL } from "@/services/order-lifecycle";
 
 export const dynamic = "force-dynamic";
 
@@ -25,11 +26,14 @@ function mapErrorStatus(err: unknown): { message: string; status: number } {
     const msg = err.message;
     if (
       msg.includes("不存在") ||
-      msg.includes("仅待付款") ||
-      msg.includes("未找到") ||
-      msg.includes("不能为空")
+      msg.includes("待支付") ||
+      msg.includes("不能为空") ||
+      msg.includes("未登录")
     ) {
-      return { message: msg, status: 400 };
+      return {
+        message: msg,
+        status: msg.includes("未登录") ? 401 : 400,
+      };
     }
   }
 
@@ -49,26 +53,27 @@ function mapErrorStatus(err: unknown): { message: string; status: number } {
 
 export async function POST(request: Request) {
   try {
+    const user = await requireUserFromRequest(request);
+
     let raw: unknown;
     try {
       raw = await request.json();
     } catch {
-      return jsonError("无法解析请求体 JSON", 400);
+      return jsonError("无法解析请求体", 400);
     }
 
     const { orderId } = parseBody(raw);
-    const result = await cancelWechatOrderAndReleaseStock(orderId);
+    const order = await closePendingOrder(orderId, user.id);
 
     return jsonWechatSuccess({
-      message: "订单已取消，库存已释放",
+      message: "订单已取消，库存已归还",
       order: {
-        id: result.order.id,
-        orderNo: result.order.orderNo,
-        status: "CANCELLED",
-        dbStatus: result.order.status,
-        updatedAt: result.order.updatedAt,
+        id: order.id,
+        orderNo: order.orderNo,
+        status: order.status,
+        statusLabel: ORDER_STATUS_LABEL[order.status],
+        updatedAt: order.updatedAt,
       },
-      released: result.released,
     });
   } catch (err) {
     const { message, status } = mapErrorStatus(err);

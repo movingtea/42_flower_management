@@ -1,5 +1,7 @@
 {
   "navigationBarTitleText": "植物工作室",
   "enablePullDownRefresh": true,
-  "usingComponents": {}
+  "usingComponents": {
+    "spec-picker": "/components/spec-picker/spec-picker"
+  }
 }

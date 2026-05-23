@@ -15,7 +15,7 @@ export const mockWechatOrders: MockWechatOrder[] = [
     id: "ord-001",
     orderNo: "FL20250522001",
     customerName: "张女士",
-    status: "preparing",
+    status: "paid",
     totalAmount: 198,
     items: [{ productName: "经典红玫瑰束", quantity: 1, price: 198 }],
     createdAt: "2025-05-22T10:30:00",

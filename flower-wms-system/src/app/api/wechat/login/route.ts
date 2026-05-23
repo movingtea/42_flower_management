@@ -1,26 +1,22 @@
-import { NextResponse } from 'next/server';
+import { jsonError } from "@/lib/api";
 
-export const dynamic = "force-dynamic"; // 严格遵循防缓存规范
+export const dynamic = "force-dynamic";
 
-// 💡 必须是全大写的 POST 函数！
+/** @deprecated 请使用 POST /api/wechat/auth/login */
 export async function POST(request: Request) {
+  const url = new URL(request.url);
+  const target = `${url.origin}/api/wechat/auth/login`;
+
   try {
-    const body = await request.json();
-    const { code } = body;
-
-    if (!code) {
-      return NextResponse.json({ success: false, error: 'Code is required' }, { status: 400 });
-    }
-
-    // 这里是你的微信 auth.code2Session 换取 OpenID 逻辑...
-    // 假装返回成功
-    return NextResponse.json({ 
-      success: true, 
-      token: 'mock-jwt-token-xyz',
-      userInfo: { name: '微信用户' }
+    const body = await request.text();
+    const res = await fetch(target, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body,
     });
-
-  } catch (error) {
-    return NextResponse.json({ success: false, error: 'Internal Server Error' }, { status: 500 });
+    const data = await res.json();
+    return Response.json(data, { status: res.status });
+  } catch {
+    return jsonError("登录转发失败", 500);
   }
 }

@@ -55,11 +55,14 @@ export const ModelName = {
   ProductCategoryRelation: 'ProductCategoryRelation',
   MaterialCategory: 'MaterialCategory',
   MaterialCategoryRelation: 'MaterialCategoryRelation',
-  Product: 'Product',
+  ProductSpu: 'ProductSpu',
+  ProductSku: 'ProductSku',
+  Banner: 'Banner',
   Material: 'Material',
   ProductBOM: 'ProductBOM',
   Batch: 'Batch',
   StockLog: 'StockLog',
+  User: 'User',
   Order: 'Order',
   OrderItem: 'OrderItem',
   AppConfig: 'AppConfig'
@@ -98,7 +101,7 @@ export type ProductCategoryScalarFieldEnum = (typeof ProductCategoryScalarFieldE
 
 export const ProductCategoryRelationScalarFieldEnum = {
   id: 'id',
-  productId: 'productId',
+  spuId: 'spuId',
   productCategoryId: 'productCategoryId'
 } as const
 
@@ -127,26 +130,53 @@ export const MaterialCategoryRelationScalarFieldEnum = {
 export type MaterialCategoryRelationScalarFieldEnum = (typeof MaterialCategoryRelationScalarFieldEnum)[keyof typeof MaterialCategoryRelationScalarFieldEnum]
 
 
-export const ProductScalarFieldEnum = {
+export const ProductSpuScalarFieldEnum = {
   id: 'id',
-  sku: 'sku',
   name: 'name',
-  price: 'price',
-  costPrice: 'costPrice',
-  subtitle: 'subtitle',
-  images: 'images',
-  detailContent: 'detailContent',
-  status: 'status',
-  quantity: 'quantity',
-  isOutOfStock: 'isOutOfStock',
+  description: 'description',
+  maintenanceGuide: 'maintenanceGuide',
+  isActive: 'isActive',
+  isDeleted: 'isDeleted',
+  shippingFee: 'shippingFee',
   allowPreOrder: 'allowPreOrder',
   productionTime: 'productionTime',
-  shippingFee: 'shippingFee',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
-export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+export type ProductSpuScalarFieldEnum = (typeof ProductSpuScalarFieldEnum)[keyof typeof ProductSpuScalarFieldEnum]
+
+
+export const ProductSkuScalarFieldEnum = {
+  id: 'id',
+  spuId: 'spuId',
+  skuCode: 'skuCode',
+  specName: 'specName',
+  price: 'price',
+  stock: 'stock',
+  imageUrl: 'imageUrl',
+  isMainImage: 'isMainImage',
+  sortOrder: 'sortOrder',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProductSkuScalarFieldEnum = (typeof ProductSkuScalarFieldEnum)[keyof typeof ProductSkuScalarFieldEnum]
+
+
+export const BannerScalarFieldEnum = {
+  id: 'id',
+  imageUrl: 'imageUrl',
+  sortOrder: 'sortOrder',
+  targetType: 'targetType',
+  targetParam: 'targetParam',
+  productId: 'productId',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BannerScalarFieldEnum = (typeof BannerScalarFieldEnum)[keyof typeof BannerScalarFieldEnum]
 
 
 export const MaterialScalarFieldEnum = {
@@ -164,7 +194,7 @@ export type MaterialScalarFieldEnum = (typeof MaterialScalarFieldEnum)[keyof typ
 
 export const ProductBOMScalarFieldEnum = {
   id: 'id',
-  productId: 'productId',
+  spuId: 'spuId',
   materialId: 'materialId',
   quantityNeeded: 'quantityNeeded'
 } as const
@@ -209,22 +239,39 @@ export const StockLogScalarFieldEnum = {
 export type StockLogScalarFieldEnum = (typeof StockLogScalarFieldEnum)[keyof typeof StockLogScalarFieldEnum]
 
 
+export const UserScalarFieldEnum = {
+  id: 'id',
+  openId: 'openId',
+  nickName: 'nickName',
+  avatarUrl: 'avatarUrl',
+  defaultReceiverName: 'defaultReceiverName',
+  defaultReceiverPhone: 'defaultReceiverPhone',
+  defaultAddress: 'defaultAddress',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
 export const OrderScalarFieldEnum = {
   id: 'id',
   orderNo: 'orderNo',
-  status: 'status',
-  wechatOpenId: 'wechatOpenId',
-  customerName: 'customerName',
-  customerPhone: 'customerPhone',
-  wechatTransactionId: 'wechatTransactionId',
+  userId: 'userId',
   totalAmount: 'totalAmount',
+  deliveryFee: 'deliveryFee',
+  payAmount: 'payAmount',
   receiverName: 'receiverName',
   receiverPhone: 'receiverPhone',
   deliveryAddress: 'deliveryAddress',
-  deliveryTime: 'deliveryTime',
+  deliveryDate: 'deliveryDate',
+  greetingCard: 'greetingCard',
+  deliveryInfo: 'deliveryInfo',
+  status: 'status',
   paidAt: 'paidAt',
-  deliveredAt: 'deliveredAt',
-  remark: 'remark',
+  refundAmount: 'refundAmount',
+  refundTime: 'refundTime',
+  cancelSource: 'cancelSource',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -235,12 +282,12 @@ export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof Or
 export const OrderItemScalarFieldEnum = {
   id: 'id',
   orderId: 'orderId',
-  productId: 'productId',
-  productName: 'productName',
-  productSku: 'productSku',
+  skuId: 'skuId',
   quantity: 'quantity',
-  unitPrice: 'unitPrice',
-  lineTotal: 'lineTotal',
+  snapshotProductName: 'snapshotProductName',
+  snapshotSpecName: 'snapshotSpecName',
+  snapshotPrice: 'snapshotPrice',
+  snapshotImageUrl: 'snapshotImageUrl',
   createdAt: 'createdAt'
 } as const
 

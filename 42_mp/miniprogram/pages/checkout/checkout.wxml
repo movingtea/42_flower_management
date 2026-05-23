@@ -1,4 +1,4 @@
-<!-- pages/checkout/checkout.wxml — 结算与履约（默认快递寄送） -->
+<!-- pages/checkout/checkout.wxml — 结算与模拟支付 -->
 <view class="checkout-page">
 
   <view wx:if="{{emptyCheckout}}" class="checkout-empty">
@@ -8,45 +8,22 @@
   </view>
 
   <view wx:if="{{!emptyCheckout}}">
-    <!-- 履约方式：仅快递寄送 -->
-    <view class="section">
-      <view class="section-title">配送方式</view>
-      <view class="delivery-badge">快递寄送</view>
-      <text class="delivery-hint">订单运费按所选商品中单件运费的最高值计算</text>
-    </view>
-
-    <!-- 收货人信息 -->
-    <view class="section">
-      <view class="section-title">收货人信息</view>
-      <view class="form-row">
-        <text class="form-label">收件人姓名</text>
-        <input
-          class="form-input"
-          placeholder="请输入收件人姓名"
-          value="{{receiverName}}"
-          bindinput="onReceiverNameInput"
-        />
+    <!-- 收货地址 -->
+    <view class="section section--address" bindtap="onChooseWechatAddress">
+      <view class="address-main">
+        <view wx:if="{{receiverName && deliveryAddress}}" class="address-filled">
+          <view class="address-row">
+            <text class="address-name">{{receiverName}}</text>
+            <text class="address-phone">{{receiverPhone}}</text>
+          </view>
+          <text class="address-detail">{{deliveryAddress}}</text>
+        </view>
+        <view wx:else class="address-empty">
+          <text class="address-empty-title">点击选择微信收货地址</text>
+          <text class="address-empty-desc">一键导入收件人、电话与详细地址</text>
+        </view>
       </view>
-      <view class="form-row">
-        <text class="form-label">联系电话</text>
-        <input
-          class="form-input"
-          type="number"
-          maxlength="11"
-          placeholder="请输入手机号"
-          value="{{receiverPhone}}"
-          bindinput="onReceiverPhoneInput"
-        />
-      </view>
-      <view class="form-row">
-        <text class="form-label">详细地址</text>
-        <input
-          class="form-input"
-          placeholder="请输入详细收货地址"
-          value="{{deliveryAddress}}"
-          bindinput="onDeliveryAddressInput"
-        />
-      </view>
+      <text class="address-arrow">›</text>
     </view>
 
     <!-- 配送与贺卡 -->
@@ -54,14 +31,14 @@
       <view class="section-title">配送与贺卡</view>
 
       <view class="form-row picker-row">
-        <text class="form-label">期望送达日期</text>
+        <text class="form-label">配送日期</text>
         <picker mode="date" value="{{deliveryDate}}" start="{{minDeliveryDate}}" bindchange="onDeliveryDateChange">
           <view class="picker-value">{{deliveryDate || '请选择日期'}}</view>
         </picker>
       </view>
 
       <view class="form-row picker-row">
-        <text class="form-label">期望送达时段</text>
+        <text class="form-label">配送时段</text>
         <picker
           mode="selector"
           range="{{timeBuckets}}"
@@ -73,7 +50,7 @@
       </view>
 
       <view class="form-row form-row--column">
-        <text class="form-label">贺卡祝福语</text>
+        <text class="form-label">贺卡留言</text>
         <textarea
           class="form-textarea"
           placeholder="可填写手写贺卡内容，留空则不需要贺卡"
@@ -82,13 +59,6 @@
           bindinput="onGreetingCardInput"
         />
       </view>
-
-      <checkbox-group class="form-row checkbox-row" bindchange="onAnonymousChange">
-        <label class="checkbox-label-wrap">
-          <checkbox value="anonymous" checked="{{isAnonymous}}" color="#8fa89b" />
-          <text class="checkbox-label">匿名送花（不向收花人展示订购人信息）</text>
-        </label>
-      </checkbox-group>
     </view>
 
     <!-- 商品清单 -->
@@ -98,24 +68,21 @@
         class="checkout-line"
         wx:for="{{checkoutItems}}"
         wx:for-item="item"
-        wx:key="id"
+        wx:key="lineKey"
       >
         <image
           wx:if="{{item.imageUrl}}"
           class="checkout-line-image"
-          src="{{item.imageUrl}}"
+          src="{{baseUrl}}{{item.imageUrl}}"
           mode="aspectFill"
           lazy-load
         />
         <view class="checkout-line-body">
           <text class="checkout-line-name">{{item.name}}</text>
-          <view class="checkout-line-meta">
-            <text>单价 ¥{{item.priceText}}</text>
-            <text>运费 {{item.shippingFeeLabel}}</text>
-          </view>
+          <text class="checkout-line-spec">{{item.specName}}</text>
           <view class="checkout-line-bottom">
             <text class="checkout-line-qty">x{{item.quantity}}</text>
-            <text class="checkout-line-subtotal">小计 ¥{{item.lineSubtotal}}</text>
+            <text class="checkout-line-subtotal">¥{{item.lineSubtotal}}</text>
           </view>
         </view>
       </view>
@@ -128,9 +95,10 @@
         <text>¥{{productTotal}}</text>
       </view>
       <view class="summary-row">
-        <text>订单运费</text>
+        <text>运费</text>
         <text>¥{{shippingFee}}</text>
       </view>
+      <text class="shipping-hint">{{shippingHint}}</text>
       <view class="summary-row summary-row--total">
         <text>实付款</text>
         <text class="price-text">¥{{payableTotal}}</text>
@@ -141,7 +109,7 @@
         loading="{{submitting}}"
         disabled="{{submitting}}"
         bindtap="onSubmitOrder"
-      >提交订单并支付</button>
+      >提交订单</button>
     </view>
   </view>
 

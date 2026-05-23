@@ -1,0 +1,36 @@
+<!-- pages/profile/profile.wxml — 头像昵称自愿填写 -->
+<view class="profile-page">
+  <view class="profile-card">
+    <text class="profile-hint text-muted">头像与昵称仅用于订单展示，您可自愿填写</text>
+
+    <view class="avatar-row">
+      <button
+        class="avatar-btn"
+        open-type="chooseAvatar"
+        bindchooseavatar="onChooseAvatar"
+      >
+        <image
+          wx:if="{{avatarDisplay}}"
+          class="avatar-image"
+          src="{{avatarDisplay}}"
+          mode="aspectFill"
+        />
+        <view wx:else class="avatar-placeholder flex-center">
+          <text class="avatar-placeholder-text">点击选择头像</text>
+        </view>
+      </button>
+      <text class="avatar-tip text-muted">点击头像，使用微信头像</text>
+    </view>
+
+    <view class="nickname-row">
+      <text class="form-label">昵称</text>
+      <input
+        class="nickname-input"
+        type="nickname"
+        placeholder="请输入昵称"
+        value="{{nickName}}"
+        bindblur="onNickNameBlur"
+      />
+    </view>
+  </view>
+</view>

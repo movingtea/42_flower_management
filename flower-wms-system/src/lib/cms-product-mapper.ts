@@ -1,67 +1,68 @@
 import type { Prisma } from "@/generated/prisma/client";
 import type { CmsProductBody } from "@/lib/cms-products";
-import {
-  PRODUCT_STATUS_PUBLISHED,
-  productStatusFromIsActive,
-} from "@/lib/product-status";
-import type { ProductWithCategories } from "@/lib/product-categories";
 import type { ProductEditorInitial } from "@/app/cms/products/types";
+import type { ProductCategoryFlatRow } from "@/lib/product-category";
+import {
+  filterEditorDisplayCategoryIds,
+  type ProductWithCategories,
+} from "@/lib/product-categories";
+import {
+  resolveSpuCardImageUrl,
+  resolveSpuMinPrice,
+} from "@/lib/product-spu";
 
-/** CMS 请求体 → Prisma Product 写入字段 */
-export function cmsBodyToProductData(
+export function cmsBodyToSpuData(
   body: CmsProductBody
-): Omit<Prisma.ProductUncheckedCreateInput, "sku"> {
-  const images: string[] = [];
-  if (body.imageUrl?.trim()) {
-    images.push(body.imageUrl.trim());
-  }
-
+): Omit<Prisma.ProductSpuUncheckedCreateInput, "id"> {
   return {
     name: body.name,
-    price: body.sellPrice ?? 0,
-    costPrice: body.costPrice ?? null,
-    subtitle: body.description?.trim()
-      ? body.description.trim().slice(0, 500)
-      : null,
-    images,
-    detailContent: [body.description, body.careTips]
-      .filter((s): s is string => Boolean(s?.trim()))
-      .join("\n\n")
-      .trim() || null,
-    status: productStatusFromIsActive(body.isActive),
-    quantity: body.quantity,
-    isOutOfStock: body.isOutOfStock ?? false,
+    description: body.description,
+    maintenanceGuide: body.maintenanceGuide,
+    isActive: body.isActive,
+    isDeleted: false,
+    shippingFee: body.shippingFee,
     allowPreOrder: body.allowPreOrder ?? true,
     productionTime: body.productionTime ?? 30,
-    shippingFee: body.shippingFee,
   };
 }
 
-/** 数据库 Product → CMS 编辑器初始值 */
 export function productToEditorInitial(
-  product: ProductWithCategories,
-  categoryIds: string[]
+  spu: ProductWithCategories,
+  categoryIds: string[],
+  categoryFlatRows?: ProductCategoryFlatRow[]
 ): ProductEditorInitial {
-  const detail = product.detailContent ?? "";
-  const subtitle = product.subtitle ?? "";
-  const description =
-    detail && subtitle && detail.startsWith(subtitle)
-      ? detail
-      : [subtitle, detail].filter(Boolean).join("\n\n");
+  const categoryForEditor = categoryFlatRows
+    ? filterEditorDisplayCategoryIds(categoryIds, categoryFlatRows)
+    : categoryIds;
 
-  const fee = Number(product.shippingFee ?? 0);
+  const skus = spu.skus.map((sku) => ({
+    id: sku.id,
+    skuCode: sku.skuCode,
+    specName: sku.specName,
+    price: sku.price.toString(),
+    stock: sku.stock,
+    imageUrl: sku.imageUrl ?? "",
+    isMainImage: sku.isMainImage,
+    sortOrder: sku.sortOrder,
+  }));
+
+  const cardImage = resolveSpuCardImageUrl(spu.skus);
+  const minPrice = resolveSpuMinPrice(spu.skus);
 
   return {
-    sku: product.sku,
-    name: product.name,
-    category: categoryIds,
-    sellPrice: product.price.toString(),
-    quantity: product.quantity,
-    isActive: product.status === PRODUCT_STATUS_PUBLISHED,
-    needsShipping: fee > 0,
-    shippingFee: fee > 0 ? fee.toFixed(2) : "",
-    description,
-    careTips: "",
-    imageUrl: product.images[0] ?? "",
+    name: spu.name,
+    category: categoryForEditor,
+    description: spu.description ?? "",
+    maintenanceGuide: spu.maintenanceGuide ?? "",
+    isActive: spu.isActive,
+    needsShipping: Number(spu.shippingFee ?? 0) > 0,
+    shippingFee:
+      Number(spu.shippingFee ?? 0) > 0
+        ? Number(spu.shippingFee).toFixed(2)
+        : "",
+    skus,
+    displaySku: skus[0]?.skuCode ?? "",
+    displayImageUrl: cardImage,
+    displayMinPrice: minPrice.toFixed(2),
   };
 }

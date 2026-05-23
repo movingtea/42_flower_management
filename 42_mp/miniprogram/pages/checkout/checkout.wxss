@@ -15,11 +15,101 @@
   margin-bottom: 24rpx;
 }
 
+.section-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
 .section-title {
   font-size: 30rpx;
   color: #222222;
   font-weight: 600;
-  margin-bottom: 20rpx;
+  margin-bottom: 16rpx;
+}
+
+.section--address {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  padding: 28rpx 24rpx;
+}
+
+.address-main {
+  flex: 1;
+  min-width: 0;
+}
+
+.address-filled .address-row {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin-bottom: 12rpx;
+}
+
+.address-name {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: #222222;
+}
+
+.address-phone {
+  font-size: 28rpx;
+  color: #555555;
+}
+
+.address-detail {
+  font-size: 26rpx;
+  color: #666666;
+  line-height: 1.5;
+}
+
+.address-empty-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: #8fa89b;
+}
+
+.address-empty-desc {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: #999999;
+}
+
+.address-arrow {
+  font-size: 40rpx;
+  color: #cccccc;
+  flex-shrink: 0;
+}
+
+.checkout-line-spec {
+  font-size: 24rpx;
+  color: #888888;
+}
+
+.shipping-hint {
+  display: block;
+  font-size: 24rpx;
+  color: #8fa89b;
+  margin-bottom: 8rpx;
+}
+
+.address-import-btn {
+  margin: 0;
+  padding: 0 24rpx;
+  height: 56rpx;
+  line-height: 56rpx;
+  font-size: 24rpx;
+  color: #8fa89b;
+  background: rgba(143, 168, 155, 0.12);
+  border-radius: 28rpx;
+}
+
+.address-import-btn::after {
+  border: none;
 }
 
 .delivery-badge {

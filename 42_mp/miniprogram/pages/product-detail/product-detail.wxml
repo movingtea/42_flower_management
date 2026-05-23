@@ -1,0 +1,109 @@
+<!-- pages/product-detail/product-detail.wxml — 商品详情 -->
+<view class="detail-page">
+  <view wx:if="{{loading}}" class="detail-loading flex-center">
+    <text class="text-muted">正在加载商品详情…</text>
+  </view>
+
+  <block wx:else>
+    <scroll-view class="detail-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+      <!-- 款式多图轮播 4:3 -->
+      <view class="banner-wrap">
+        <swiper
+          wx:if="{{bannerImages.length}}"
+          class="detail-banner"
+          indicator-dots="{{bannerImages.length > 1}}"
+          indicator-color="rgba(255,255,255,0.45)"
+          indicator-active-color="#ffffff"
+          circular="{{bannerImages.length > 1}}"
+          bindchange="onBannerChange"
+        >
+          <swiper-item wx:for="{{bannerImages}}" wx:key="*this">
+            <image class="detail-banner-image" src="{{baseUrl}}{{item}}" mode="aspectFill" />
+          </swiper-item>
+        </swiper>
+        <view wx:else class="detail-banner detail-banner--placeholder flex-center">
+          <text class="text-muted">暂无商品图片</text>
+        </view>
+        <view
+          wx:if="{{bannerImages.length > 1}}"
+          class="banner-indicator"
+        >{{bannerCurrent + 1}} / {{bannerImages.length}}</view>
+      </view>
+
+      <!-- 名称与价格区间 -->
+      <view class="detail-head">
+        <text class="detail-name">{{product.name}}</text>
+        <text class="detail-price">{{priceLabel}}</text>
+        <text wx:if="{{product.isOutOfStock}}" class="detail-stock-tag">今日售罄</text>
+      </view>
+
+      <!-- 推荐商品（描述上方） -->
+      <view wx:if="{{recommendList.length}}" class="recommend-section">
+        <view class="section-title-row">
+          <text class="section-title">推荐商品</text>
+          <text class="section-sub text-muted">为你精选</text>
+        </view>
+        <scroll-view class="recommend-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+          <view class="recommend-track">
+            <view
+              wx:for="{{recommendList}}"
+              wx:key="id"
+              class="recommend-card"
+              bindtap="onRecommendTap"
+              data-id="{{item.id}}"
+            >
+              <image
+                class="recommend-image"
+                src="{{baseUrl}}{{item.imageUrl}}"
+                mode="aspectFill"
+                lazy-load
+              />
+              <text class="recommend-name text-ellipsis">{{item.name}}</text>
+              <text class="recommend-price">¥{{item.price}}{{item.priceSuffix}}</text>
+            </view>
+          </view>
+        </scroll-view>
+      </view>
+
+      <!-- 商品描述 -->
+      <view wx:if="{{descriptionHtml}}" class="rich-section">
+        <text class="section-title">商品描述</text>
+        <rich-text class="rich-body" nodes="{{descriptionHtml}}"></rich-text>
+      </view>
+
+      <!-- 花艺养护指南 -->
+      <view wx:if="{{maintenanceHtml}}" class="rich-section">
+        <text class="section-title">花艺养护指南</text>
+        <rich-text class="rich-body" nodes="{{maintenanceHtml}}"></rich-text>
+      </view>
+
+      <view class="detail-scroll-spacer safe-area-bottom"></view>
+    </scroll-view>
+
+    <!-- 底部操作栏 -->
+    <view class="detail-footer safe-area-bottom">
+      <view class="footer-icon-btn flex-center" bindtap="onGoCart">
+        <text class="footer-icon">🛒</text>
+        <text class="footer-icon-label">购物车</text>
+      </view>
+      <view class="footer-actions">
+        <view
+          class="footer-btn footer-btn--cart flex-center"
+          bindtap="onOpenSpecPicker"
+        >加入购物车</view>
+        <view
+          class="footer-btn footer-btn--buy flex-center"
+          bindtap="onOpenSpecPicker"
+        >选规格</view>
+      </view>
+    </view>
+  </block>
+</view>
+
+<spec-picker
+  visible="{{specPickerVisible}}"
+  product="{{product}}"
+  base-url="{{baseUrl}}"
+  bind:close="onSpecPickerClose"
+  bind:confirm="onSpecPickerConfirm"
+/>

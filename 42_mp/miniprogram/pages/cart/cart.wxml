@@ -11,28 +11,31 @@
         wx:for="{{cartList}}"
         wx:for-item="item"
         wx:for-index="index"
-        wx:key="id"
-        class="cart-row"
+        wx:key="lineKey"
+        class="cart-row {{item.isInvalid ? 'cart-row--invalid' : ''}}"
       >
         <view
           class="cart-check-wrap"
           catchtap="onToggleItemSelect"
-          data-id="{{item.id}}"
+          data-line-key="{{item.lineKey}}"
         >
-          <view class="checkbox {{item.selected ? 'checkbox--checked' : ''}}">
+          <view class="checkbox {{item.selected && !item.isInvalid ? 'checkbox--checked' : ''}} {{item.isInvalid ? 'checkbox--disabled' : ''}}">
             <text wx:if="{{item.selected}}" class="checkbox-tick">✓</text>
           </view>
         </view>
 
         <image
           class="cart-row-image"
-          src="{{item.imageUrl}}"
+          src="{{baseUrl}}{{item.imageUrl}}"
           mode="aspectFill"
           lazy-load
         />
 
         <view class="cart-row-body">
-          <text class="cart-row-name text-ellipsis">{{item.name}}</text>
+          <view class="cart-row-title-row">
+            <text class="cart-row-name text-ellipsis">{{item.name}}</text>
+            <text wx:if="{{item.isInvalid}}" class="cart-invalid-tag">已下架</text>
+          </view>
           <text class="cart-row-price">¥{{item.price}}</text>
 
           <view class="cart-row-actions">
@@ -40,19 +43,19 @@
               <view
                 class="stepper-btn flex-center"
                 catchtap="onQuantityMinus"
-                data-id="{{item.id}}"
+                data-line-key="{{item.lineKey}}"
               >−</view>
               <text class="stepper-qty">{{item.quantity}}</text>
               <view
                 class="stepper-btn flex-center"
                 catchtap="onQuantityPlus"
-                data-id="{{item.id}}"
+                data-line-key="{{item.lineKey}}"
               >+</view>
             </view>
             <text
               class="cart-delete"
               catchtap="onDeleteItem"
-              data-id="{{item.id}}"
+              data-line-key="{{item.lineKey}}"
             >删除</text>
           </view>
         </view>

@@ -36,21 +36,21 @@ export type ProductBOMSumAggregateOutputType = {
 
 export type ProductBOMMinAggregateOutputType = {
   id: string | null
-  productId: string | null
+  spuId: string | null
   materialId: string | null
   quantityNeeded: number | null
 }
 
 export type ProductBOMMaxAggregateOutputType = {
   id: string | null
-  productId: string | null
+  spuId: string | null
   materialId: string | null
   quantityNeeded: number | null
 }
 
 export type ProductBOMCountAggregateOutputType = {
   id: number
-  productId: number
+  spuId: number
   materialId: number
   quantityNeeded: number
   _all: number
@@ -67,21 +67,21 @@ export type ProductBOMSumAggregateInputType = {
 
 export type ProductBOMMinAggregateInputType = {
   id?: true
-  productId?: true
+  spuId?: true
   materialId?: true
   quantityNeeded?: true
 }
 
 export type ProductBOMMaxAggregateInputType = {
   id?: true
-  productId?: true
+  spuId?: true
   materialId?: true
   quantityNeeded?: true
 }
 
 export type ProductBOMCountAggregateInputType = {
   id?: true
-  productId?: true
+  spuId?: true
   materialId?: true
   quantityNeeded?: true
   _all?: true
@@ -175,7 +175,7 @@ export type ProductBOMGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
 
 export type ProductBOMGroupByOutputType = {
   id: string
-  productId: string
+  spuId: string
   materialId: string
   quantityNeeded: number
   _count: ProductBOMCountAggregateOutputType | null
@@ -205,38 +205,38 @@ export type ProductBOMWhereInput = {
   OR?: Prisma.ProductBOMWhereInput[]
   NOT?: Prisma.ProductBOMWhereInput | Prisma.ProductBOMWhereInput[]
   id?: Prisma.StringFilter<"ProductBOM"> | string
-  productId?: Prisma.StringFilter<"ProductBOM"> | string
+  spuId?: Prisma.StringFilter<"ProductBOM"> | string
   materialId?: Prisma.StringFilter<"ProductBOM"> | string
   quantityNeeded?: Prisma.IntFilter<"ProductBOM"> | number
-  product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
+  spu?: Prisma.XOR<Prisma.ProductSpuScalarRelationFilter, Prisma.ProductSpuWhereInput>
   material?: Prisma.XOR<Prisma.MaterialScalarRelationFilter, Prisma.MaterialWhereInput>
 }
 
 export type ProductBOMOrderByWithRelationInput = {
   id?: Prisma.SortOrder
-  productId?: Prisma.SortOrder
+  spuId?: Prisma.SortOrder
   materialId?: Prisma.SortOrder
   quantityNeeded?: Prisma.SortOrder
-  product?: Prisma.ProductOrderByWithRelationInput
+  spu?: Prisma.ProductSpuOrderByWithRelationInput
   material?: Prisma.MaterialOrderByWithRelationInput
 }
 
 export type ProductBOMWhereUniqueInput = Prisma.AtLeast<{
   id?: string
-  productId_materialId?: Prisma.ProductBOMProductIdMaterialIdCompoundUniqueInput
+  spuId_materialId?: Prisma.ProductBOMSpuIdMaterialIdCompoundUniqueInput
   AND?: Prisma.ProductBOMWhereInput | Prisma.ProductBOMWhereInput[]
   OR?: Prisma.ProductBOMWhereInput[]
   NOT?: Prisma.ProductBOMWhereInput | Prisma.ProductBOMWhereInput[]
-  productId?: Prisma.StringFilter<"ProductBOM"> | string
+  spuId?: Prisma.StringFilter<"ProductBOM"> | string
   materialId?: Prisma.StringFilter<"ProductBOM"> | string
   quantityNeeded?: Prisma.IntFilter<"ProductBOM"> | number
-  product?: Prisma.XOR<Prisma.ProductScalarRelationFilter, Prisma.ProductWhereInput>
+  spu?: Prisma.XOR<Prisma.ProductSpuScalarRelationFilter, Prisma.ProductSpuWhereInput>
   material?: Prisma.XOR<Prisma.MaterialScalarRelationFilter, Prisma.MaterialWhereInput>
-}, "id" | "productId_materialId">
+}, "id" | "spuId_materialId">
 
 export type ProductBOMOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
-  productId?: Prisma.SortOrder
+  spuId?: Prisma.SortOrder
   materialId?: Prisma.SortOrder
   quantityNeeded?: Prisma.SortOrder
   _count?: Prisma.ProductBOMCountOrderByAggregateInput
@@ -251,7 +251,7 @@ export type ProductBOMScalarWhereWithAggregatesInput = {
   OR?: Prisma.ProductBOMScalarWhereWithAggregatesInput[]
   NOT?: Prisma.ProductBOMScalarWhereWithAggregatesInput | Prisma.ProductBOMScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"ProductBOM"> | string
-  productId?: Prisma.StringWithAggregatesFilter<"ProductBOM"> | string
+  spuId?: Prisma.StringWithAggregatesFilter<"ProductBOM"> | string
   materialId?: Prisma.StringWithAggregatesFilter<"ProductBOM"> | string
   quantityNeeded?: Prisma.IntWithAggregatesFilter<"ProductBOM"> | number
 }
@@ -259,13 +259,13 @@ export type ProductBOMScalarWhereWithAggregatesInput = {
 export type ProductBOMCreateInput = {
   id?: string
   quantityNeeded: number
-  product: Prisma.ProductCreateNestedOneWithoutBomItemsInput
+  spu: Prisma.ProductSpuCreateNestedOneWithoutBomItemsInput
   material: Prisma.MaterialCreateNestedOneWithoutBomLinesInput
 }
 
 export type ProductBOMUncheckedCreateInput = {
   id?: string
-  productId: string
+  spuId: string
   materialId: string
   quantityNeeded: number
 }
@@ -273,20 +273,20 @@ export type ProductBOMUncheckedCreateInput = {
 export type ProductBOMUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantityNeeded?: Prisma.IntFieldUpdateOperationsInput | number
-  product?: Prisma.ProductUpdateOneRequiredWithoutBomItemsNestedInput
+  spu?: Prisma.ProductSpuUpdateOneRequiredWithoutBomItemsNestedInput
   material?: Prisma.MaterialUpdateOneRequiredWithoutBomLinesNestedInput
 }
 
 export type ProductBOMUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  productId?: Prisma.StringFieldUpdateOperationsInput | string
+  spuId?: Prisma.StringFieldUpdateOperationsInput | string
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   quantityNeeded?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type ProductBOMCreateManyInput = {
   id?: string
-  productId: string
+  spuId: string
   materialId: string
   quantityNeeded: number
 }
@@ -298,7 +298,7 @@ export type ProductBOMUpdateManyMutationInput = {
 
 export type ProductBOMUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  productId?: Prisma.StringFieldUpdateOperationsInput | string
+  spuId?: Prisma.StringFieldUpdateOperationsInput | string
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   quantityNeeded?: Prisma.IntFieldUpdateOperationsInput | number
 }
@@ -313,14 +313,14 @@ export type ProductBOMOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
 }
 
-export type ProductBOMProductIdMaterialIdCompoundUniqueInput = {
-  productId: string
+export type ProductBOMSpuIdMaterialIdCompoundUniqueInput = {
+  spuId: string
   materialId: string
 }
 
 export type ProductBOMCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  productId?: Prisma.SortOrder
+  spuId?: Prisma.SortOrder
   materialId?: Prisma.SortOrder
   quantityNeeded?: Prisma.SortOrder
 }
@@ -331,14 +331,14 @@ export type ProductBOMAvgOrderByAggregateInput = {
 
 export type ProductBOMMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  productId?: Prisma.SortOrder
+  spuId?: Prisma.SortOrder
   materialId?: Prisma.SortOrder
   quantityNeeded?: Prisma.SortOrder
 }
 
 export type ProductBOMMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
-  productId?: Prisma.SortOrder
+  spuId?: Prisma.SortOrder
   materialId?: Prisma.SortOrder
   quantityNeeded?: Prisma.SortOrder
 }
@@ -347,45 +347,45 @@ export type ProductBOMSumOrderByAggregateInput = {
   quantityNeeded?: Prisma.SortOrder
 }
 
-export type ProductBOMCreateNestedManyWithoutProductInput = {
-  create?: Prisma.XOR<Prisma.ProductBOMCreateWithoutProductInput, Prisma.ProductBOMUncheckedCreateWithoutProductInput> | Prisma.ProductBOMCreateWithoutProductInput[] | Prisma.ProductBOMUncheckedCreateWithoutProductInput[]
-  connectOrCreate?: Prisma.ProductBOMCreateOrConnectWithoutProductInput | Prisma.ProductBOMCreateOrConnectWithoutProductInput[]
-  createMany?: Prisma.ProductBOMCreateManyProductInputEnvelope
+export type ProductBOMCreateNestedManyWithoutSpuInput = {
+  create?: Prisma.XOR<Prisma.ProductBOMCreateWithoutSpuInput, Prisma.ProductBOMUncheckedCreateWithoutSpuInput> | Prisma.ProductBOMCreateWithoutSpuInput[] | Prisma.ProductBOMUncheckedCreateWithoutSpuInput[]
+  connectOrCreate?: Prisma.ProductBOMCreateOrConnectWithoutSpuInput | Prisma.ProductBOMCreateOrConnectWithoutSpuInput[]
+  createMany?: Prisma.ProductBOMCreateManySpuInputEnvelope
   connect?: Prisma.ProductBOMWhereUniqueInput | Prisma.ProductBOMWhereUniqueInput[]
 }
 
-export type ProductBOMUncheckedCreateNestedManyWithoutProductInput = {
-  create?: Prisma.XOR<Prisma.ProductBOMCreateWithoutProductInput, Prisma.ProductBOMUncheckedCreateWithoutProductInput> | Prisma.ProductBOMCreateWithoutProductInput[] | Prisma.ProductBOMUncheckedCreateWithoutProductInput[]
-  connectOrCreate?: Prisma.ProductBOMCreateOrConnectWithoutProductInput | Prisma.ProductBOMCreateOrConnectWithoutProductInput[]
-  createMany?: Prisma.ProductBOMCreateManyProductInputEnvelope
+export type ProductBOMUncheckedCreateNestedManyWithoutSpuInput = {
+  create?: Prisma.XOR<Prisma.ProductBOMCreateWithoutSpuInput, Prisma.ProductBOMUncheckedCreateWithoutSpuInput> | Prisma.ProductBOMCreateWithoutSpuInput[] | Prisma.ProductBOMUncheckedCreateWithoutSpuInput[]
+  connectOrCreate?: Prisma.ProductBOMCreateOrConnectWithoutSpuInput | Prisma.ProductBOMCreateOrConnectWithoutSpuInput[]
+  createMany?: Prisma.ProductBOMCreateManySpuInputEnvelope
   connect?: Prisma.ProductBOMWhereUniqueInput | Prisma.ProductBOMWhereUniqueInput[]
 }
 
-export type ProductBOMUpdateManyWithoutProductNestedInput = {
-  create?: Prisma.XOR<Prisma.ProductBOMCreateWithoutProductInput, Prisma.ProductBOMUncheckedCreateWithoutProductInput> | Prisma.ProductBOMCreateWithoutProductInput[] | Prisma.ProductBOMUncheckedCreateWithoutProductInput[]
-  connectOrCreate?: Prisma.ProductBOMCreateOrConnectWithoutProductInput | Prisma.ProductBOMCreateOrConnectWithoutProductInput[]
-  upsert?: Prisma.ProductBOMUpsertWithWhereUniqueWithoutProductInput | Prisma.ProductBOMUpsertWithWhereUniqueWithoutProductInput[]
-  createMany?: Prisma.ProductBOMCreateManyProductInputEnvelope
+export type ProductBOMUpdateManyWithoutSpuNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductBOMCreateWithoutSpuInput, Prisma.ProductBOMUncheckedCreateWithoutSpuInput> | Prisma.ProductBOMCreateWithoutSpuInput[] | Prisma.ProductBOMUncheckedCreateWithoutSpuInput[]
+  connectOrCreate?: Prisma.ProductBOMCreateOrConnectWithoutSpuInput | Prisma.ProductBOMCreateOrConnectWithoutSpuInput[]
+  upsert?: Prisma.ProductBOMUpsertWithWhereUniqueWithoutSpuInput | Prisma.ProductBOMUpsertWithWhereUniqueWithoutSpuInput[]
+  createMany?: Prisma.ProductBOMCreateManySpuInputEnvelope
   set?: Prisma.ProductBOMWhereUniqueInput | Prisma.ProductBOMWhereUniqueInput[]
   disconnect?: Prisma.ProductBOMWhereUniqueInput | Prisma.ProductBOMWhereUniqueInput[]
   delete?: Prisma.ProductBOMWhereUniqueInput | Prisma.ProductBOMWhereUniqueInput[]
   connect?: Prisma.ProductBOMWhereUniqueInput | Prisma.ProductBOMWhereUniqueInput[]
-  update?: Prisma.ProductBOMUpdateWithWhereUniqueWithoutProductInput | Prisma.ProductBOMUpdateWithWhereUniqueWithoutProductInput[]
-  updateMany?: Prisma.ProductBOMUpdateManyWithWhereWithoutProductInput | Prisma.ProductBOMUpdateManyWithWhereWithoutProductInput[]
+  update?: Prisma.ProductBOMUpdateWithWhereUniqueWithoutSpuInput | Prisma.ProductBOMUpdateWithWhereUniqueWithoutSpuInput[]
+  updateMany?: Prisma.ProductBOMUpdateManyWithWhereWithoutSpuInput | Prisma.ProductBOMUpdateManyWithWhereWithoutSpuInput[]
   deleteMany?: Prisma.ProductBOMScalarWhereInput | Prisma.ProductBOMScalarWhereInput[]
 }
 
-export type ProductBOMUncheckedUpdateManyWithoutProductNestedInput = {
-  create?: Prisma.XOR<Prisma.ProductBOMCreateWithoutProductInput, Prisma.ProductBOMUncheckedCreateWithoutProductInput> | Prisma.ProductBOMCreateWithoutProductInput[] | Prisma.ProductBOMUncheckedCreateWithoutProductInput[]
-  connectOrCreate?: Prisma.ProductBOMCreateOrConnectWithoutProductInput | Prisma.ProductBOMCreateOrConnectWithoutProductInput[]
-  upsert?: Prisma.ProductBOMUpsertWithWhereUniqueWithoutProductInput | Prisma.ProductBOMUpsertWithWhereUniqueWithoutProductInput[]
-  createMany?: Prisma.ProductBOMCreateManyProductInputEnvelope
+export type ProductBOMUncheckedUpdateManyWithoutSpuNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductBOMCreateWithoutSpuInput, Prisma.ProductBOMUncheckedCreateWithoutSpuInput> | Prisma.ProductBOMCreateWithoutSpuInput[] | Prisma.ProductBOMUncheckedCreateWithoutSpuInput[]
+  connectOrCreate?: Prisma.ProductBOMCreateOrConnectWithoutSpuInput | Prisma.ProductBOMCreateOrConnectWithoutSpuInput[]
+  upsert?: Prisma.ProductBOMUpsertWithWhereUniqueWithoutSpuInput | Prisma.ProductBOMUpsertWithWhereUniqueWithoutSpuInput[]
+  createMany?: Prisma.ProductBOMCreateManySpuInputEnvelope
   set?: Prisma.ProductBOMWhereUniqueInput | Prisma.ProductBOMWhereUniqueInput[]
   disconnect?: Prisma.ProductBOMWhereUniqueInput | Prisma.ProductBOMWhereUniqueInput[]
   delete?: Prisma.ProductBOMWhereUniqueInput | Prisma.ProductBOMWhereUniqueInput[]
   connect?: Prisma.ProductBOMWhereUniqueInput | Prisma.ProductBOMWhereUniqueInput[]
-  update?: Prisma.ProductBOMUpdateWithWhereUniqueWithoutProductInput | Prisma.ProductBOMUpdateWithWhereUniqueWithoutProductInput[]
-  updateMany?: Prisma.ProductBOMUpdateManyWithWhereWithoutProductInput | Prisma.ProductBOMUpdateManyWithWhereWithoutProductInput[]
+  update?: Prisma.ProductBOMUpdateWithWhereUniqueWithoutSpuInput | Prisma.ProductBOMUpdateWithWhereUniqueWithoutSpuInput[]
+  updateMany?: Prisma.ProductBOMUpdateManyWithWhereWithoutSpuInput | Prisma.ProductBOMUpdateManyWithWhereWithoutSpuInput[]
   deleteMany?: Prisma.ProductBOMScalarWhereInput | Prisma.ProductBOMScalarWhereInput[]
 }
 
@@ -431,42 +431,42 @@ export type ProductBOMUncheckedUpdateManyWithoutMaterialNestedInput = {
   deleteMany?: Prisma.ProductBOMScalarWhereInput | Prisma.ProductBOMScalarWhereInput[]
 }
 
-export type ProductBOMCreateWithoutProductInput = {
+export type ProductBOMCreateWithoutSpuInput = {
   id?: string
   quantityNeeded: number
   material: Prisma.MaterialCreateNestedOneWithoutBomLinesInput
 }
 
-export type ProductBOMUncheckedCreateWithoutProductInput = {
+export type ProductBOMUncheckedCreateWithoutSpuInput = {
   id?: string
   materialId: string
   quantityNeeded: number
 }
 
-export type ProductBOMCreateOrConnectWithoutProductInput = {
+export type ProductBOMCreateOrConnectWithoutSpuInput = {
   where: Prisma.ProductBOMWhereUniqueInput
-  create: Prisma.XOR<Prisma.ProductBOMCreateWithoutProductInput, Prisma.ProductBOMUncheckedCreateWithoutProductInput>
+  create: Prisma.XOR<Prisma.ProductBOMCreateWithoutSpuInput, Prisma.ProductBOMUncheckedCreateWithoutSpuInput>
 }
 
-export type ProductBOMCreateManyProductInputEnvelope = {
-  data: Prisma.ProductBOMCreateManyProductInput | Prisma.ProductBOMCreateManyProductInput[]
+export type ProductBOMCreateManySpuInputEnvelope = {
+  data: Prisma.ProductBOMCreateManySpuInput | Prisma.ProductBOMCreateManySpuInput[]
   skipDuplicates?: boolean
 }
 
-export type ProductBOMUpsertWithWhereUniqueWithoutProductInput = {
+export type ProductBOMUpsertWithWhereUniqueWithoutSpuInput = {
   where: Prisma.ProductBOMWhereUniqueInput
-  update: Prisma.XOR<Prisma.ProductBOMUpdateWithoutProductInput, Prisma.ProductBOMUncheckedUpdateWithoutProductInput>
-  create: Prisma.XOR<Prisma.ProductBOMCreateWithoutProductInput, Prisma.ProductBOMUncheckedCreateWithoutProductInput>
+  update: Prisma.XOR<Prisma.ProductBOMUpdateWithoutSpuInput, Prisma.ProductBOMUncheckedUpdateWithoutSpuInput>
+  create: Prisma.XOR<Prisma.ProductBOMCreateWithoutSpuInput, Prisma.ProductBOMUncheckedCreateWithoutSpuInput>
 }
 
-export type ProductBOMUpdateWithWhereUniqueWithoutProductInput = {
+export type ProductBOMUpdateWithWhereUniqueWithoutSpuInput = {
   where: Prisma.ProductBOMWhereUniqueInput
-  data: Prisma.XOR<Prisma.ProductBOMUpdateWithoutProductInput, Prisma.ProductBOMUncheckedUpdateWithoutProductInput>
+  data: Prisma.XOR<Prisma.ProductBOMUpdateWithoutSpuInput, Prisma.ProductBOMUncheckedUpdateWithoutSpuInput>
 }
 
-export type ProductBOMUpdateManyWithWhereWithoutProductInput = {
+export type ProductBOMUpdateManyWithWhereWithoutSpuInput = {
   where: Prisma.ProductBOMScalarWhereInput
-  data: Prisma.XOR<Prisma.ProductBOMUpdateManyMutationInput, Prisma.ProductBOMUncheckedUpdateManyWithoutProductInput>
+  data: Prisma.XOR<Prisma.ProductBOMUpdateManyMutationInput, Prisma.ProductBOMUncheckedUpdateManyWithoutSpuInput>
 }
 
 export type ProductBOMScalarWhereInput = {
@@ -474,7 +474,7 @@ export type ProductBOMScalarWhereInput = {
   OR?: Prisma.ProductBOMScalarWhereInput[]
   NOT?: Prisma.ProductBOMScalarWhereInput | Prisma.ProductBOMScalarWhereInput[]
   id?: Prisma.StringFilter<"ProductBOM"> | string
-  productId?: Prisma.StringFilter<"ProductBOM"> | string
+  spuId?: Prisma.StringFilter<"ProductBOM"> | string
   materialId?: Prisma.StringFilter<"ProductBOM"> | string
   quantityNeeded?: Prisma.IntFilter<"ProductBOM"> | number
 }
@@ -482,12 +482,12 @@ export type ProductBOMScalarWhereInput = {
 export type ProductBOMCreateWithoutMaterialInput = {
   id?: string
   quantityNeeded: number
-  product: Prisma.ProductCreateNestedOneWithoutBomItemsInput
+  spu: Prisma.ProductSpuCreateNestedOneWithoutBomItemsInput
 }
 
 export type ProductBOMUncheckedCreateWithoutMaterialInput = {
   id?: string
-  productId: string
+  spuId: string
   quantityNeeded: number
 }
 
@@ -517,25 +517,25 @@ export type ProductBOMUpdateManyWithWhereWithoutMaterialInput = {
   data: Prisma.XOR<Prisma.ProductBOMUpdateManyMutationInput, Prisma.ProductBOMUncheckedUpdateManyWithoutMaterialInput>
 }
 
-export type ProductBOMCreateManyProductInput = {
+export type ProductBOMCreateManySpuInput = {
   id?: string
   materialId: string
   quantityNeeded: number
 }
 
-export type ProductBOMUpdateWithoutProductInput = {
+export type ProductBOMUpdateWithoutSpuInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantityNeeded?: Prisma.IntFieldUpdateOperationsInput | number
   material?: Prisma.MaterialUpdateOneRequiredWithoutBomLinesNestedInput
 }
 
-export type ProductBOMUncheckedUpdateWithoutProductInput = {
+export type ProductBOMUncheckedUpdateWithoutSpuInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   quantityNeeded?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
-export type ProductBOMUncheckedUpdateManyWithoutProductInput = {
+export type ProductBOMUncheckedUpdateManyWithoutSpuInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   quantityNeeded?: Prisma.IntFieldUpdateOperationsInput | number
@@ -543,25 +543,25 @@ export type ProductBOMUncheckedUpdateManyWithoutProductInput = {
 
 export type ProductBOMCreateManyMaterialInput = {
   id?: string
-  productId: string
+  spuId: string
   quantityNeeded: number
 }
 
 export type ProductBOMUpdateWithoutMaterialInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantityNeeded?: Prisma.IntFieldUpdateOperationsInput | number
-  product?: Prisma.ProductUpdateOneRequiredWithoutBomItemsNestedInput
+  spu?: Prisma.ProductSpuUpdateOneRequiredWithoutBomItemsNestedInput
 }
 
 export type ProductBOMUncheckedUpdateWithoutMaterialInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  productId?: Prisma.StringFieldUpdateOperationsInput | string
+  spuId?: Prisma.StringFieldUpdateOperationsInput | string
   quantityNeeded?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
 export type ProductBOMUncheckedUpdateManyWithoutMaterialInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  productId?: Prisma.StringFieldUpdateOperationsInput | string
+  spuId?: Prisma.StringFieldUpdateOperationsInput | string
   quantityNeeded?: Prisma.IntFieldUpdateOperationsInput | number
 }
 
@@ -569,61 +569,61 @@ export type ProductBOMUncheckedUpdateManyWithoutMaterialInput = {
 
 export type ProductBOMSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  productId?: boolean
+  spuId?: boolean
   materialId?: boolean
   quantityNeeded?: boolean
-  product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
   material?: boolean | Prisma.MaterialDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["productBOM"]>
 
 export type ProductBOMSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  productId?: boolean
+  spuId?: boolean
   materialId?: boolean
   quantityNeeded?: boolean
-  product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
   material?: boolean | Prisma.MaterialDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["productBOM"]>
 
 export type ProductBOMSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
-  productId?: boolean
+  spuId?: boolean
   materialId?: boolean
   quantityNeeded?: boolean
-  product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
   material?: boolean | Prisma.MaterialDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["productBOM"]>
 
 export type ProductBOMSelectScalar = {
   id?: boolean
-  productId?: boolean
+  spuId?: boolean
   materialId?: boolean
   quantityNeeded?: boolean
 }
 
-export type ProductBOMOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "productId" | "materialId" | "quantityNeeded", ExtArgs["result"]["productBOM"]>
+export type ProductBOMOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "spuId" | "materialId" | "quantityNeeded", ExtArgs["result"]["productBOM"]>
 export type ProductBOMInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
   material?: boolean | Prisma.MaterialDefaultArgs<ExtArgs>
 }
 export type ProductBOMIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
   material?: boolean | Prisma.MaterialDefaultArgs<ExtArgs>
 }
 export type ProductBOMIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
+  spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
   material?: boolean | Prisma.MaterialDefaultArgs<ExtArgs>
 }
 
 export type $ProductBOMPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ProductBOM"
   objects: {
-    product: Prisma.$ProductPayload<ExtArgs>
+    spu: Prisma.$ProductSpuPayload<ExtArgs>
     material: Prisma.$MaterialPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    productId: string
+    spuId: string
     materialId: string
     quantityNeeded: number
   }, ExtArgs["result"]["productBOM"]>
@@ -1020,7 +1020,7 @@ readonly fields: ProductBOMFieldRefs;
  */
 export interface Prisma__ProductBOMClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
-  product<T extends Prisma.ProductDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductDefaultArgs<ExtArgs>>): Prisma.Prisma__ProductClient<runtime.Types.Result.GetResult<Prisma.$ProductPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  spu<T extends Prisma.ProductSpuDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductSpuDefaultArgs<ExtArgs>>): Prisma.Prisma__ProductSpuClient<runtime.Types.Result.GetResult<Prisma.$ProductSpuPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   material<T extends Prisma.MaterialDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MaterialDefaultArgs<ExtArgs>>): Prisma.Prisma__MaterialClient<runtime.Types.Result.GetResult<Prisma.$MaterialPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1052,7 +1052,7 @@ export interface Prisma__ProductBOMClient<T, Null = never, ExtArgs extends runti
  */
 export interface ProductBOMFieldRefs {
   readonly id: Prisma.FieldRef<"ProductBOM", 'String'>
-  readonly productId: Prisma.FieldRef<"ProductBOM", 'String'>
+  readonly spuId: Prisma.FieldRef<"ProductBOM", 'String'>
   readonly materialId: Prisma.FieldRef<"ProductBOM", 'String'>
   readonly quantityNeeded: Prisma.FieldRef<"ProductBOM", 'Int'>
 }

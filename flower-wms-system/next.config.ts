@@ -1,6 +1,7 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  allowedDevOrigins: ["192.168.31.200", "localhost:3000"],
   async redirects() {
     return [
       { source: "/admin/dashboard", destination: "/wms/dashboard", permanent: true },

@@ -38,10 +38,20 @@ export type MaterialCategory = Prisma.MaterialCategoryModel
  */
 export type MaterialCategoryRelation = Prisma.MaterialCategoryRelationModel
 /**
- * Model Product
+ * Model ProductSpu
  * 
  */
-export type Product = Prisma.ProductModel
+export type ProductSpu = Prisma.ProductSpuModel
+/**
+ * Model ProductSku
+ * 
+ */
+export type ProductSku = Prisma.ProductSkuModel
+/**
+ * Model Banner
+ * 
+ */
+export type Banner = Prisma.BannerModel
 /**
  * Model Material
  * 
@@ -62,6 +72,11 @@ export type Batch = Prisma.BatchModel
  * 
  */
 export type StockLog = Prisma.StockLogModel
+/**
+ * Model User
+ * 
+ */
+export type User = Prisma.UserModel
 /**
  * Model Order
  * 

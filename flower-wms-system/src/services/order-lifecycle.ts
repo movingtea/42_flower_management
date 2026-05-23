@@ -1,0 +1,415 @@
+import { Prisma } from "@/generated/prisma/client";
+import { OrderCancelSource, OrderStatus } from "@/generated/prisma/enums";
+import { prisma } from "@/lib/prisma";
+
+export const STOCK_SOLD_OUT_MESSAGE = "手慢了，花材库存已被抢光！";
+
+export const FREE_SHIPPING_THRESHOLD = 99;
+export const DEFAULT_DELIVERY_FEE = 15;
+
+export type CreateOrderLineInput = {
+  skuId: string;
+  quantity: number;
+};
+
+export type CreateWechatOrderPayload = {
+  receiverName: string;
+  receiverPhone: string;
+  deliveryAddress: string;
+  deliveryDate: string;
+  greetingCard?: string;
+  totalAmount: number;
+  deliveryFee: number;
+  payAmount: number;
+  items: CreateOrderLineInput[];
+};
+
+/** ORD-yyyyMMdd-随机流水 */
+export function generateWechatOrderNo(): string {
+  const d = new Date();
+  const date = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+  const suffix = Math.random().toString(36).slice(2, 8).toUpperCase();
+  return `ORD-${date}-${suffix}`;
+}
+
+export function calcDeliveryFee(productTotal: number): number {
+  return productTotal >= FREE_SHIPPING_THRESHOLD ? 0 : DEFAULT_DELIVERY_FEE;
+}
+
+function roundMoney(n: number): number {
+  return Number(n.toFixed(2));
+}
+
+export function isStockSoldOutError(err: unknown): boolean {
+  return err instanceof Error && err.message === STOCK_SOLD_OUT_MESSAGE;
+}
+
+/** 事务内将订单行对应 SKU 库存归还 */
+export async function restoreOrderSkuStock(
+  tx: Prisma.TransactionClient,
+  orderId: string
+) {
+  const lines = await tx.orderItem.findMany({
+    where: { orderId },
+    select: { skuId: true, quantity: true },
+  });
+
+  for (const line of lines) {
+    await tx.productSku.update({
+      where: { id: line.skuId },
+      data: { stock: { increment: line.quantity } },
+    });
+  }
+}
+
+/**
+ * 原子扣减 SKU 库存（禁止先查后改）；影响行数为 0 则熔断超卖。
+ */
+async function atomicDecrementSkuStock(
+  tx: Prisma.TransactionClient,
+  skuId: string,
+  quantity: number
+) {
+  const result = await tx.productSku.updateMany({
+    where: {
+      id: skuId,
+      stock: { gte: quantity },
+    },
+    data: { stock: { decrement: quantity } },
+  });
+
+  if (result.count !== 1) {
+    throw new Error(STOCK_SOLD_OUT_MESSAGE);
+  }
+}
+
+/**
+ * 创建待支付订单：Serializable 事务 + 原子锁库存 + 快照落库。
+ */
+export async function createWechatOrder(
+  userId: string,
+  payload: CreateWechatOrderPayload
+) {
+  const orderNo = generateWechatOrderNo();
+  const expectedPay = roundMoney(payload.totalAmount + payload.deliveryFee);
+
+  if (Math.abs(expectedPay - payload.payAmount) > 0.01) {
+    throw new Error("实付金额与商品总额加运费不一致");
+  }
+
+  if (!payload.deliveryDate.trim()) {
+    throw new Error("请选择配送时间");
+  }
+
+  if (!payload.items.length) {
+    throw new Error("结算商品不能为空");
+  }
+
+  return prisma.$transaction(
+    async (tx) => {
+      const skuIds = [...new Set(payload.items.map((i) => i.skuId))];
+      const skus = await tx.productSku.findMany({
+        where: { id: { in: skuIds } },
+        include: {
+          spu: {
+            select: {
+              id: true,
+              name: true,
+              isActive: true,
+              isDeleted: true,
+            },
+          },
+        },
+      });
+      const skuMap = new Map(skus.map((s) => [s.id, s]));
+
+      let linesTotal = 0;
+
+      for (const line of payload.items) {
+        const sku = skuMap.get(line.skuId);
+        if (!sku) {
+          throw new Error(`商品款式不存在: ${line.skuId}`);
+        }
+        const spu = sku.spu;
+        if (!spu || spu.isDeleted || !spu.isActive) {
+          throw new Error(`商品已下架: ${sku.specName}`);
+        }
+        if (!Number.isInteger(line.quantity) || line.quantity <= 0) {
+          throw new Error("商品数量无效");
+        }
+        linesTotal += Number(sku.price) * line.quantity;
+      }
+
+      linesTotal = roundMoney(linesTotal);
+      if (Math.abs(linesTotal - payload.totalAmount) > 0.01) {
+        throw new Error(
+          `商品总额不一致：明细合计 ${linesTotal.toFixed(2)}，提交 ${payload.totalAmount.toFixed(2)}`
+        );
+      }
+
+      for (const line of payload.items) {
+        await atomicDecrementSkuStock(tx, line.skuId, line.quantity);
+      }
+
+      const order = await tx.order.create({
+        data: {
+          orderNo,
+          userId,
+          totalAmount: payload.totalAmount,
+          deliveryFee: payload.deliveryFee,
+          payAmount: payload.payAmount,
+          receiverName: payload.receiverName,
+          receiverPhone: payload.receiverPhone,
+          deliveryAddress: payload.deliveryAddress,
+          deliveryDate: payload.deliveryDate.trim(),
+          greetingCard: payload.greetingCard?.trim() || null,
+          status: OrderStatus.PENDING_PAYMENT,
+        },
+      });
+
+      for (const line of payload.items) {
+        const sku = skuMap.get(line.skuId)!;
+        const spu = sku.spu!;
+
+        await tx.orderItem.create({
+          data: {
+            orderId: order.id,
+            skuId: sku.id,
+            quantity: line.quantity,
+            snapshotProductName: spu.name,
+            snapshotSpecName: sku.specName,
+            snapshotPrice: Number(sku.price),
+            snapshotImageUrl: sku.imageUrl ?? "",
+          },
+        });
+      }
+
+      return order;
+    },
+    {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 10000,
+      timeout: 30000,
+    }
+  );
+}
+
+/** 模拟支付：前置状态必须为待支付 */
+export async function mockPayWechatOrder(userId: string, orderId: string) {
+  const updated = await prisma.order.updateMany({
+    where: {
+      id: orderId,
+      userId,
+      status: OrderStatus.PENDING_PAYMENT,
+    },
+    data: {
+      status: OrderStatus.PAID,
+      paidAt: new Date(),
+    },
+  });
+
+  if (updated.count !== 1) {
+    const order = await prisma.order.findFirst({
+      where: { id: orderId, userId },
+    });
+    if (!order) throw new Error("订单不存在");
+    if (order.status === OrderStatus.PAID) return order;
+    throw new Error("当前订单状态不可支付");
+  }
+
+  return prisma.order.findUniqueOrThrow({ where: { id: orderId } });
+}
+
+/** 用户确认收货：仅配送中可完成 */
+export async function confirmWechatOrderReceipt(userId: string, orderId: string) {
+  const updated = await prisma.order.updateMany({
+    where: {
+      id: orderId,
+      userId,
+      status: OrderStatus.DELIVERING,
+    },
+    data: { status: OrderStatus.COMPLETED },
+  });
+
+  if (updated.count !== 1) {
+    throw new Error("仅配送中的订单可确认收货");
+  }
+
+  return prisma.order.findUniqueOrThrow({ where: { id: orderId } });
+}
+
+/** 关闭待支付订单并归还库存 */
+export async function closePendingOrder(orderId: string, userId?: string) {
+  return prisma.$transaction(async (tx) => {
+    const updated = await tx.order.updateMany({
+      where: {
+        id: orderId,
+        status: OrderStatus.PENDING_PAYMENT,
+        ...(userId ? { userId } : {}),
+      },
+      data: {
+        status: OrderStatus.CANCELLED,
+        cancelSource: userId
+          ? OrderCancelSource.CUSTOMER
+          : OrderCancelSource.ADMIN,
+      },
+    });
+
+    if (updated.count !== 1) {
+      throw new Error("仅待支付订单可关闭");
+    }
+
+    await restoreOrderSkuStock(tx, orderId);
+
+    return tx.order.findUniqueOrThrow({ where: { id: orderId } });
+  });
+}
+
+/** 已付订单退款取消：可选是否回滚 SKU 库存 */
+export async function refundPaidOrder(
+  orderId: string,
+  options: { rollbackStock: boolean; refundAmount?: number }
+) {
+  return prisma.$transaction(async (tx) => {
+    const order = await tx.order.findUnique({ where: { id: orderId } });
+    if (!order) throw new Error("订单不存在");
+
+    if (
+      order.status !== OrderStatus.PAID &&
+      order.status !== OrderStatus.PRODUCTION
+    ) {
+      throw new Error("仅已支付或制作中订单可退款取消");
+    }
+
+    const refundAmount =
+      options.refundAmount ?? order.payAmount;
+
+    const updated = await tx.order.updateMany({
+      where: {
+        id: orderId,
+        status: order.status,
+      },
+      data: {
+        status: OrderStatus.CANCELLED,
+        refundAmount,
+        refundTime: new Date(),
+        cancelSource: OrderCancelSource.REFUND,
+      },
+    });
+
+    if (updated.count !== 1) {
+      throw new Error("订单状态已变更，请刷新后重试");
+    }
+
+    if (options.rollbackStock) {
+      await restoreOrderSkuStock(tx, orderId);
+    }
+
+    return tx.order.findUniqueOrThrow({ where: { id: orderId } });
+  });
+}
+
+/** 店长将待支付标记为已支付（看板拖拽 1→2） */
+export async function adminMarkOrderPaid(orderId: string) {
+  const updated = await prisma.order.updateMany({
+    where: { id: orderId, status: OrderStatus.PENDING_PAYMENT },
+    data: {
+      status: OrderStatus.PAID,
+      paidAt: new Date(),
+    },
+  });
+  if (updated.count !== 1) {
+    throw new Error("仅待支付订单可标记为已支付");
+  }
+  return prisma.order.findUniqueOrThrow({ where: { id: orderId } });
+}
+
+export type AdminTransition =
+  | "PRODUCTION"
+  | "DELIVERING"
+  | "COMPLETED";
+
+/** 后台履约流转（带前置状态校验） */
+export async function adminTransitionOrder(
+  orderId: string,
+  next: AdminTransition,
+  extra?: { deliveryInfo?: string }
+) {
+  if (next === "PRODUCTION") {
+    const updated = await prisma.order.updateMany({
+      where: { id: orderId, status: OrderStatus.PAID },
+      data: { status: OrderStatus.PRODUCTION },
+    });
+    if (updated.count !== 1) {
+      throw new Error("仅已支付订单可开始制作");
+    }
+  } else if (next === "DELIVERING") {
+    const info = extra?.deliveryInfo?.trim();
+    if (!info) throw new Error("请填写配送单号或配送电话");
+    const updated = await prisma.order.updateMany({
+      where: { id: orderId, status: OrderStatus.PRODUCTION },
+      data: {
+        status: OrderStatus.DELIVERING,
+        deliveryInfo: info,
+      },
+    });
+    if (updated.count !== 1) {
+      throw new Error("仅制作中订单可发货配送");
+    }
+  } else if (next === "COMPLETED") {
+    const updated = await prisma.order.updateMany({
+      where: { id: orderId, status: OrderStatus.DELIVERING },
+      data: { status: OrderStatus.COMPLETED },
+    });
+    if (updated.count !== 1) {
+      throw new Error("仅配送中订单可标记完成");
+    }
+  }
+
+  return prisma.order.findUniqueOrThrow({ where: { id: orderId } });
+}
+
+export async function listWechatOrdersForUser(userId: string) {
+  return prisma.order.findMany({
+    where: { userId },
+    orderBy: { createdAt: "desc" },
+    include: {
+      items: {
+        select: {
+          id: true,
+          skuId: true,
+          quantity: true,
+          snapshotProductName: true,
+          snapshotSpecName: true,
+          snapshotPrice: true,
+          snapshotImageUrl: true,
+        },
+      },
+    },
+  });
+}
+
+export async function listKanbanOrders() {
+  return prisma.order.findMany({
+    include: {
+      items: {
+        select: {
+          snapshotProductName: true,
+          snapshotSpecName: true,
+          quantity: true,
+        },
+      },
+    },
+    orderBy: { updatedAt: "desc" },
+    take: 300,
+  });
+}
+
+export const ORDER_STATUS_LABEL: Record<OrderStatus, string> = {
+  [OrderStatus.PENDING_PAYMENT]: "待支付",
+  [OrderStatus.PAID]: "已支付",
+  [OrderStatus.PRODUCTION]: "制作中",
+  [OrderStatus.DELIVERING]: "配送中",
+  [OrderStatus.COMPLETED]: "已完成",
+  [OrderStatus.CANCELLED]: "已取消",
+};

@@ -2,27 +2,37 @@ import { notFound } from "next/navigation";
 import { ProductEditor } from "@/app/cms/products/ProductEditor";
 import type { ProductEditorInitial } from "@/app/cms/products/types";
 import { productToEditorInitial } from "@/lib/cms-product-mapper";
-import { loadCmsProductCategories } from "@/lib/cms-product-categories.server";
 import {
   categoryIdsFromProduct,
   productCategoriesInclude,
 } from "@/lib/product-categories";
+import { loadAllProductCategoriesFlat } from "@/lib/product-category.server";
+import { activeSpuWhere } from "@/lib/product-query";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 const EMPTY: ProductEditorInitial = {
-  sku: "",
   name: "",
   category: [],
-  sellPrice: "",
-  quantity: 0,
+  description: "",
+  maintenanceGuide: "",
   isActive: true,
   needsShipping: false,
   shippingFee: "",
-  description: "",
-  careTips: "",
-  imageUrl: "",
+  skus: [
+    {
+      specName: "标准款",
+      price: "",
+      stock: 0,
+      imageUrl: "",
+      isMainImage: true,
+      sortOrder: 0,
+    },
+  ],
+  displaySku: "",
+  displayImageUrl: "",
+  displayMinPrice: "0.00",
 };
 
 export default async function CmsProductEditPage({
@@ -32,39 +42,28 @@ export default async function CmsProductEditPage({
 }) {
   const { id } = await params;
   const isNew = id === "new";
-  const categoryOptions = await loadCmsProductCategories();
 
   if (isNew) {
-    return (
-      <ProductEditor
-        productId="new"
-        isNew
-        initial={EMPTY}
-        categoryOptions={categoryOptions}
-      />
-    );
+    return <ProductEditor productId="new" isNew initial={EMPTY} />;
   }
 
-  const product = await prisma.product.findUnique({
-    where: { id },
-    include: productCategoriesInclude,
-  });
+  const [spu, categoryFlat] = await Promise.all([
+    prisma.productSpu.findFirst({
+      where: { id, ...activeSpuWhere },
+      include: productCategoriesInclude,
+    }),
+    loadAllProductCategoriesFlat(),
+  ]);
 
-  if (!product) {
+  if (!spu) {
     notFound();
   }
 
   const initial = productToEditorInitial(
-    product,
-    categoryIdsFromProduct(product)
+    spu,
+    categoryIdsFromProduct(spu),
+    categoryFlat
   );
 
-  return (
-    <ProductEditor
-      productId={id}
-      isNew={false}
-      initial={initial}
-      categoryOptions={categoryOptions}
-    />
-  );
+  return <ProductEditor productId={id} isNew={false} initial={initial} />;
 }

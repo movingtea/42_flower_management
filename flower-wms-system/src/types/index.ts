@@ -60,15 +60,20 @@ export interface StocktakeInput {
   operator?: string;
 }
 
-/** 小程序下单 POST /api/wechat/orders */
+/** 小程序下单 POST /api/wechat/orders/create */
 export interface WechatCreateOrderInput {
-  wechatOpenId: string;
-  totalAmount: number;
   receiverName: string;
   receiverPhone: string;
   deliveryAddress: string;
-  deliveryTime?: string;
-  items: { productId: string; quantity: number; price: number }[];
+  totalAmount: number;
+  deliveryFee: number;
+  payAmount: number;
+  items: { skuId: string; quantity: number }[];
+}
+
+/** 模拟支付 POST /api/wechat/orders/mock-pay */
+export interface WechatMockPayBody {
+  orderId: string;
 }
 
 /** 微信支付回调 payload（简化） */
