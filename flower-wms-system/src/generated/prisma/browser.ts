@@ -43,6 +43,11 @@ export type MaterialCategoryRelation = Prisma.MaterialCategoryRelationModel
  */
 export type Product = Prisma.ProductModel
 /**
+ * Model Banner
+ * 
+ */
+export type Banner = Prisma.BannerModel
+/**
  * Model Material
  * 
  */

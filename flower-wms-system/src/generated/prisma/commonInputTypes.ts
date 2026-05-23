@@ -231,6 +231,23 @@ export type FloatWithAggregatesFilter<$PrismaModel = never> = {
   _max?: Prisma.NestedFloatFilter<$PrismaModel>
 }
 
+export type EnumBannerTargetTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.BannerTargetType | Prisma.EnumBannerTargetTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.BannerTargetType[] | Prisma.ListEnumBannerTargetTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BannerTargetType[] | Prisma.ListEnumBannerTargetTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBannerTargetTypeFilter<$PrismaModel> | $Enums.BannerTargetType
+}
+
+export type EnumBannerTargetTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BannerTargetType | Prisma.EnumBannerTargetTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.BannerTargetType[] | Prisma.ListEnumBannerTargetTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BannerTargetType[] | Prisma.ListEnumBannerTargetTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBannerTargetTypeWithAggregatesFilter<$PrismaModel> | $Enums.BannerTargetType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBannerTargetTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBannerTargetTypeFilter<$PrismaModel>
+}
+
 export type DateTimeNullableFilter<$PrismaModel = never> = {
   equals?: Date | string | Prisma.DateTimeFieldRefInput<$PrismaModel> | null
   in?: Date[] | string[] | Prisma.ListDateTimeFieldRefInput<$PrismaModel> | null
@@ -558,6 +575,23 @@ export type NestedFloatWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedFloatFilter<$PrismaModel>
   _min?: Prisma.NestedFloatFilter<$PrismaModel>
   _max?: Prisma.NestedFloatFilter<$PrismaModel>
+}
+
+export type NestedEnumBannerTargetTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.BannerTargetType | Prisma.EnumBannerTargetTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.BannerTargetType[] | Prisma.ListEnumBannerTargetTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BannerTargetType[] | Prisma.ListEnumBannerTargetTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBannerTargetTypeFilter<$PrismaModel> | $Enums.BannerTargetType
+}
+
+export type NestedEnumBannerTargetTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.BannerTargetType | Prisma.EnumBannerTargetTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.BannerTargetType[] | Prisma.ListEnumBannerTargetTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.BannerTargetType[] | Prisma.ListEnumBannerTargetTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumBannerTargetTypeWithAggregatesFilter<$PrismaModel> | $Enums.BannerTargetType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumBannerTargetTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumBannerTargetTypeFilter<$PrismaModel>
 }
 
 export type NestedDateTimeNullableFilter<$PrismaModel = never> = {

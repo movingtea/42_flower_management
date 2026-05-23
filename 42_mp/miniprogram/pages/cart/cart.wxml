@@ -12,14 +12,14 @@
         wx:for-item="item"
         wx:for-index="index"
         wx:key="id"
-        class="cart-row"
+        class="cart-row {{item.isInvalid ? 'cart-row--invalid' : ''}}"
       >
         <view
           class="cart-check-wrap"
           catchtap="onToggleItemSelect"
           data-id="{{item.id}}"
         >
-          <view class="checkbox {{item.selected ? 'checkbox--checked' : ''}}">
+          <view class="checkbox {{item.selected && !item.isInvalid ? 'checkbox--checked' : ''}} {{item.isInvalid ? 'checkbox--disabled' : ''}}">
             <text wx:if="{{item.selected}}" class="checkbox-tick">✓</text>
           </view>
         </view>
@@ -32,7 +32,10 @@
         />
 
         <view class="cart-row-body">
-          <text class="cart-row-name text-ellipsis">{{item.name}}</text>
+          <view class="cart-row-title-row">
+            <text class="cart-row-name text-ellipsis">{{item.name}}</text>
+            <text wx:if="{{item.isInvalid}}" class="cart-invalid-tag">已下架</text>
+          </view>
           <text class="cart-row-price">¥{{item.price}}</text>
 
           <view class="cart-row-actions">

@@ -28,7 +28,10 @@ interface PopupConfig {
 interface BannerItem {
   id: string;
   imageUrl: string;
-  productId?: string;
+  sort?: number;
+  targetType?: 'PRODUCT' | 'ACTIVITY' | 'COUPON' | 'NONE';
+  targetParam?: string | null;
+  productId?: string | null;
 }
 
 /** CMS 分类项（homepage 返回 value/label；兼容 id 字段） */
@@ -222,9 +225,32 @@ Page({
   },
 
   onBannerTap(e: WechatMiniprogram.TouchEvent) {
-    const productId = e.currentTarget.dataset.productId as string | undefined;
-    if (productId) {
+    const ds = e.currentTarget.dataset;
+    const targetType = (ds.targetType as string | undefined) || 'NONE';
+    const productId = ds.productId as string | undefined;
+    const targetParam = ds.targetParam as string | undefined;
+
+    if (targetType === 'PRODUCT' && productId) {
       this.navigateToProductDetail(productId);
+      return;
+    }
+
+    if (targetType === 'ACTIVITY' && targetParam) {
+      const path = targetParam.startsWith('/') ? targetParam : `/${targetParam}`;
+      wx.navigateTo({
+        url: path,
+        fail: () => {
+          wx.showToast({ title: '活动页暂未开放', icon: 'none' });
+        },
+      });
+      return;
+    }
+
+    if (targetType === 'COUPON') {
+      wx.showToast({
+        title: targetParam ? `优惠券：${targetParam}` : '优惠券活动',
+        icon: 'none',
+      });
     }
   },
 

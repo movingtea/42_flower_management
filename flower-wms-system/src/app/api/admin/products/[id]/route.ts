@@ -7,6 +7,8 @@ import {
   productCategoriesInclude,
   syncProductCategoryLinks,
 } from "@/lib/product-categories";
+import { activeProductWhere } from "@/lib/product-query";
+import { softDeleteProduct } from "@/lib/product-soft-delete";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -18,6 +20,9 @@ function mapError(err: unknown): { message: string; status: number } {
   }
   if (err instanceof Error) {
     const msg = err.message;
+    if (msg.includes("不存在") || msg.includes("已删除")) {
+      return { message: msg, status: 404 };
+    }
     if (
       msg.includes("不能为空") ||
       msg.includes("无效") ||
@@ -40,7 +45,9 @@ export async function PUT(
     const categoryConfig = await loadCmsProductCategories();
     const body = parseCmsProductBody(await request.json(), categoryConfig);
 
-    const existing = await prisma.product.findUnique({ where: { id } });
+    const existing = await prisma.product.findFirst({
+      where: { id, ...activeProductWhere },
+    });
     if (!existing) {
       return jsonError("成品商品不存在", 404);
     }
@@ -57,6 +64,24 @@ export async function PUT(
 
     return jsonSuccess({
       message: "商品已更新",
+      product: { id: product.id, sku: product.sku },
+    });
+  } catch (err) {
+    const { message, status } = mapError(err);
+    return jsonError(message, status);
+  }
+}
+
+/** DELETE：软删除成品商品（兼容旧路径，请优先使用 /api/cms/products/[id]） */
+export async function DELETE(
+  _request: Request,
+  context: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await context.params;
+    const product = await softDeleteProduct(id);
+    return jsonSuccess({
+      message: "商品删除成功",
       product: { id: product.id, sku: product.sku },
     });
   } catch (err) {

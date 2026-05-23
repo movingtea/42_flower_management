@@ -75,7 +75,9 @@ export function parseCmsProductBody(
   if (!name) throw new Error("name 不能为空");
 
   const allowed = cmsCategoryIdSet(categoryConfig);
-  const category = parseProductCategoryPayload(b.category, allowed);
+  const rawCategoryIds =
+    b.categoryIds !== undefined ? b.categoryIds : b.category;
+  const category = parseProductCategoryPayload(rawCategoryIds, allowed);
 
   let sellPrice: number | null = null;
   if (b.sellPrice != null && b.sellPrice !== "") {

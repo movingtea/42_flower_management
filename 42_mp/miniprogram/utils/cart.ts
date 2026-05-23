@@ -13,6 +13,9 @@ export interface CartItem {
 /** 页面展示用：在 CartItem 上扩展勾选状态（不写入本地缓存） */
 export interface CartListItem extends CartItem {
   selected: boolean;
+  /** 商品已软删除或未上架时为 true */
+  isInvalid?: boolean;
+  invalidReason?: string | null;
 }
 
 export const CART_STORAGE_KEY = 'cart';
@@ -96,12 +99,18 @@ export function selectedToCheckoutProducts(list: CartListItem[]): CartItem[] {
 
 export function storageToCartList(
   cart: CartItem[],
-  prevSelected?: Record<string, boolean>
+  prevSelected?: Record<string, boolean>,
+  invalidById?: Record<string, boolean>
 ): CartListItem[] {
-  return cart.map((item) => ({
-    ...item,
-    selected: prevSelected?.[item.id] ?? true,
-  }));
+  return cart.map((item) => {
+    const isInvalid = invalidById?.[item.id] === true;
+    return {
+      ...item,
+      isInvalid,
+      invalidReason: isInvalid ? '已下架' : null,
+      selected: isInvalid ? false : (prevSelected?.[item.id] ?? true),
+    };
+  });
 }
 
 export type CartSummary = {
@@ -115,15 +124,18 @@ export function computeCartSummary(list: CartListItem[]): CartSummary {
   let totalPrice = 0;
   let totalCount = 0;
 
+  const selectable = list.filter((item) => !item.isInvalid);
+
   for (const item of list) {
-    if (item.selected) {
+    if (item.selected && !item.isInvalid) {
       totalCount += item.quantity;
       totalPrice += parseCartPrice(item.price) * item.quantity;
     }
   }
 
   const isAllSelected =
-    list.length > 0 && list.every((item) => item.selected);
+    selectable.length > 0 &&
+    selectable.every((item) => item.selected);
 
   return {
     isAllSelected,

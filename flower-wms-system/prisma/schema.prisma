@@ -35,6 +35,14 @@ enum OrderStatus {
   CANCELLED /// 已取消
 }
 
+/// 首页轮播跳转类型
+enum BannerTargetType {
+  PRODUCT /// 跳转商城商品详情
+  ACTIVITY /// 跳转活动页（targetParam 为路径或页面标识）
+  COUPON /// 跳转优惠券（targetParam 为券 ID 或活动码）
+  NONE /// 仅展示，不跳转
+}
+
 // ---------------------------------------------------------------------------
 // ProductCategory — 商城商品分类（二级树，CMS / 小程序）
 // ---------------------------------------------------------------------------
@@ -131,15 +139,41 @@ model Product {
   allowPreOrder   Boolean  @default(true)
   productionTime  Int      @default(30)
   shippingFee     Float    @default(0)
+  isDeleted       Boolean  @default(false) @map("is_deleted")
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
   categories ProductCategoryRelation[]
   bomItems   ProductBOM[]
   orderItems OrderItem[]
+  banners    Banner[]
 
   @@index([status])
+  @@index([isDeleted])
   @@map("products")
+}
+
+// ---------------------------------------------------------------------------
+// Banner — 首页轮播（与商品解耦，支持多场景跳转）
+// ---------------------------------------------------------------------------
+
+model Banner {
+  id          String           @id @default(uuid())
+  imageUrl    String           @map("image_url")
+  sortOrder   Int              @default(100) @map("sort_order")
+  targetType  BannerTargetType @default(NONE) @map("target_type")
+  targetParam String?          @map("target_param")
+  productId   String?          @map("product_id")
+  isActive    Boolean          @default(true) @map("is_active")
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+
+  product Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+
+  @@index([sortOrder])
+  @@index([isActive])
+  @@index([targetType])
+  @@map("banners")
 }
 
 // ---------------------------------------------------------------------------
@@ -273,15 +307,16 @@ model Order {
 }
 
 model OrderItem {
-  id          String   @id @default(cuid())
-  orderId     String
-  productId   String
-  productName String
-  productSku  String
-  quantity    Int
-  unitPrice   Decimal  @db.Decimal(10, 2)
-  lineTotal   Decimal  @db.Decimal(10, 2)
-  createdAt   DateTime @default(now())
+  id                   String   @id @default(cuid())
+  orderId              String
+  productId            String
+  productName          String
+  productSku           String
+  snapshotProductImage String?  @map("snapshot_product_image")
+  quantity             Int
+  unitPrice            Decimal  @db.Decimal(10, 2)
+  lineTotal            Decimal  @db.Decimal(10, 2)
+  createdAt            DateTime @default(now())
 
   order     Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
   product   Product    @relation(fields: [productId], references: [id], onDelete: Restrict)

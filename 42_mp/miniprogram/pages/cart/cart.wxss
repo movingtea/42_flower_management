@@ -34,6 +34,32 @@
   box-shadow: 0 8rpx 28rpx rgba(0, 0, 0, 0.05);
 }
 
+.cart-row--invalid {
+  opacity: 0.55;
+  background-color: #f5f5f5;
+}
+
+.cart-row-title-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  min-width: 0;
+}
+
+.cart-invalid-tag {
+  flex-shrink: 0;
+  font-size: 22rpx;
+  color: #b45309;
+  background-color: #fef3c7;
+  padding: 2rpx 12rpx;
+  border-radius: 8rpx;
+}
+
+.checkbox--disabled {
+  border-color: #e5e5e5;
+  background-color: #f0f0f0;
+}
+
 .cart-check-wrap {
   flex-shrink: 0;
   padding-top: 8rpx;

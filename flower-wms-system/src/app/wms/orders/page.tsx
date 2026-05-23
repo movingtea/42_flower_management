@@ -39,8 +39,12 @@ export default async function WmsOrdersPage() {
     },
     include: {
       items: {
-        include: {
-          product: { select: { name: true } },
+        select: {
+          productName: true,
+          productSku: true,
+          snapshotProductImage: true,
+          quantity: true,
+          unitPrice: true,
         },
       },
     },
@@ -75,7 +79,7 @@ export default async function WmsOrdersPage() {
       deliveryAddress: order.deliveryAddress,
       totalAmount: order.totalAmount.toString(),
       items: order.items.map((line) => ({
-        label: line.productName || line.product.name,
+        label: line.productName,
         quantity: line.quantity,
       })),
     });

@@ -3,11 +3,14 @@ export const HOME_BANNER_KEY = "HOME_BANNER";
 
 export const HOME_BANNER_NAME = "小程序首页轮播";
 
+/** @deprecated 旧 AppConfig JSON 结构，仅用于迁移 */
 export type HomeBannerItem = {
   id: string;
   imageUrl: string;
   sort: number;
   productId: string;
+  targetType?: string;
+  targetParam?: string | null;
 };
 
 export function createBannerId(): string {

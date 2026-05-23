@@ -6,12 +6,12 @@ import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  HOME_BANNER_KEY,
-  HOME_BANNER_NAME,
-  createBannerId,
-  sortHomeBannerItems,
-  type HomeBannerItem,
-} from "@/lib/home-banner";
+  BANNER_TARGET_TYPE_LABELS,
+  BANNER_TARGET_TYPES,
+  type BannerTargetTypeValue,
+  type BannerWriteItem,
+} from "@/lib/banner";
+import { createBannerId } from "@/lib/home-banner";
 
 export type ProductOption = {
   id: string;
@@ -20,44 +20,52 @@ export type ProductOption = {
 };
 
 type Props = {
-  initialItems: HomeBannerItem[];
+  initialItems: BannerWriteItem[];
   products: ProductOption[];
-  updatedAt: string | null;
 };
 
-const emptyDraft = (): HomeBannerItem => ({
+const emptyDraft = (): BannerWriteItem => ({
   id: createBannerId(),
   imageUrl: "",
-  sort: 100,
-  productId: "",
+  sortOrder: 100,
+  targetType: "NONE",
+  targetParam: null,
+  productId: null,
+  isActive: true,
 });
 
-export function BannerManager({
-  initialItems,
-  products,
-  updatedAt: initialUpdatedAt,
-}: Props) {
+function targetTypeLabel(type: BannerTargetTypeValue): string {
+  return BANNER_TARGET_TYPE_LABELS[type] ?? type;
+}
+
+export function BannerManager({ initialItems, products }: Props) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [items, setItems] = useState<HomeBannerItem[]>(() =>
-    sortHomeBannerItems(initialItems)
+  const [items, setItems] = useState<BannerWriteItem[]>(() =>
+    [...initialItems].sort((a, b) => a.sortOrder - b.sortOrder)
   );
-  const [updatedAt, setUpdatedAt] = useState(initialUpdatedAt);
   const [saving, setSaving] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [draft, setDraft] = useState<HomeBannerItem>(emptyDraft);
+  const [draft, setDraft] = useState<BannerWriteItem>(emptyDraft);
   const [uploading, setUploading] = useState(false);
+  const [toast, setToast] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
 
   const productMap = useMemo(
     () => new Map(products.map((p) => [p.id, p])),
     [products]
   );
 
-  const sortedItems = useMemo(() => sortHomeBannerItems(items), [items]);
+  function showToast(message: string, type: "success" | "error") {
+    setToast({ message, type });
+    window.setTimeout(() => setToast(null), 3200);
+  }
 
   function openAddModal() {
-    const maxSort = items.reduce((m, i) => Math.max(m, i.sort), 0);
-    setDraft({ ...emptyDraft(), sort: maxSort + 10 });
+    const maxSort = items.reduce((m, i) => Math.max(m, i.sortOrder), 0);
+    setDraft({ ...emptyDraft(), sortOrder: maxSort + 10 });
     setModalOpen(true);
   }
 
@@ -94,12 +102,22 @@ export function BannerManager({
       alert("请上传轮播海报");
       return;
     }
-    if (!draft.productId) {
+    if (draft.targetType === "PRODUCT" && !draft.productId) {
       alert("请选择跳转商品");
       return;
     }
+    if (
+      (draft.targetType === "ACTIVITY" || draft.targetType === "COUPON") &&
+      !draft.targetParam?.trim()
+    ) {
+      alert("请填写跳转参数");
+      return;
+    }
+
     setItems((prev) =>
-      sortHomeBannerItems([...prev, { ...draft, imageUrl: draft.imageUrl.trim() }])
+      [...prev, { ...draft, imageUrl: draft.imageUrl.trim() }].sort(
+        (a, b) => a.sortOrder - b.sortOrder
+      )
     );
     closeModal();
   }
@@ -109,76 +127,117 @@ export function BannerManager({
     setItems((prev) => prev.filter((i) => i.id !== id));
   }
 
-  function updateSort(id: string, sort: number) {
+  function updateSort(id: string, sortOrder: number) {
     setItems((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, sort: Math.round(sort) } : i))
+      prev
+        .map((i) => (i.id === id ? { ...i, sortOrder: Math.round(sortOrder) } : i))
+        .sort((a, b) => a.sortOrder - b.sortOrder)
+    );
+  }
+
+  function renderJumpSummary(item: BannerWriteItem) {
+    if (item.targetType === "PRODUCT") {
+      const product = item.productId
+        ? productMap.get(item.productId)
+        : undefined;
+      return product ? (
+        <>
+          <p className="font-medium text-zinc-900">{product.name}</p>
+          <p className="text-xs text-zinc-500">{product.sku}</p>
+        </>
+      ) : (
+        <span className="text-amber-600">商品已下架或不存在</span>
+      );
+    }
+    if (item.targetType === "NONE") {
+      return <span className="text-zinc-500">不跳转</span>;
+    }
+    return (
+      <>
+        <p className="font-medium text-zinc-800">
+          {targetTypeLabel(item.targetType)}
+        </p>
+        <p className="text-xs text-zinc-500">{item.targetParam || "—"}</p>
+      </>
     );
   }
 
   async function handlePublish() {
     for (const item of items) {
-      if (!item.imageUrl || !item.productId) {
-        alert("存在未完整的轮播项，请检查图片与跳转商品");
+      if (!item.imageUrl) {
+        alert("存在未上传海报的轮播项");
+        return;
+      }
+      if (item.targetType === "PRODUCT" && !item.productId) {
+        alert("存在未选择商品的轮播项");
+        return;
+      }
+      if (
+        (item.targetType === "ACTIVITY" || item.targetType === "COUPON") &&
+        !item.targetParam?.trim()
+      ) {
+        alert("存在未填写跳转参数的轮播项");
         return;
       }
     }
 
     setSaving(true);
     try {
-      const payload = sortHomeBannerItems(items);
-      const res = await fetch("/api/admin/app-config", {
+      const res = await fetch("/api/admin/banners", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          key: HOME_BANNER_KEY,
-          name: HOME_BANNER_NAME,
-          value: payload,
-        }),
+        body: JSON.stringify({ banners: items }),
       });
 
       const json = (await res.json()) as {
         success: boolean;
         error?: string;
-        data?: { message?: string; items?: HomeBannerItem[]; updatedAt?: string };
+        data?: { message?: string; banners?: BannerWriteItem[] };
       };
 
       if (!res.ok || !json.success) {
-        alert(json.error ?? "发布失败");
-        return;
+        throw new Error(json.error ?? "发布失败");
       }
 
-      const next = json.data?.items ?? payload;
-      setItems(sortHomeBannerItems(next));
-      if (json.data?.updatedAt) setUpdatedAt(json.data.updatedAt);
-      alert(json.data?.message ?? "已发布");
+      const next = json.data?.banners ?? items;
+      setItems(next);
+      showToast(json.data?.message ?? "轮播已保存", "success");
       router.refresh();
-    } catch {
-      alert("网络异常，请重试");
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "发布失败", "error");
     } finally {
       setSaving(false);
     }
   }
 
   return (
-    <div>
+    <div className="relative">
+      {toast ? (
+        <div
+          role="status"
+          className={`fixed right-6 top-6 z-50 rounded-lg px-4 py-3 text-sm font-medium shadow-lg ${
+            toast.type === "success"
+              ? "bg-emerald-600 text-white"
+              : "bg-red-600 text-white"
+          }`}
+        >
+          {toast.message}
+        </div>
+      ) : null}
+
       <header className="mb-6 flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-semibold text-rose-900">首页轮播图</h2>
           <p className="mt-1 text-sm text-zinc-500">
-            配置 key={HOME_BANNER_KEY}，控制小程序首页 Banner 与跳转商品
+            支持跳转商品、活动页、优惠券或仅展示；商品软删除后前台自动不跳转。
           </p>
-          {updatedAt && (
-            <p className="mt-1 text-xs text-zinc-400">
-              上次发布：{new Date(updatedAt).toLocaleString("zh-CN")}
-            </p>
-          )}
         </div>
         <div className="flex flex-wrap gap-2">
           <Button type="button" variant="secondary" onClick={openAddModal}>
             + 新增轮播图
           </Button>
           <Button type="button" onClick={handlePublish} disabled={saving}>
-            {saving ? "发布中…" : "保存发布"}
+            {saving ? "保存中…" : "保存发布"}
           </Button>
         </div>
       </header>
@@ -189,13 +248,13 @@ export function BannerManager({
             <tr>
               <th className="px-4 py-3 font-medium text-zinc-600">海报</th>
               <th className="px-4 py-3 font-medium text-zinc-600">排序</th>
-              <th className="px-4 py-3 font-medium text-zinc-600">跳转商品</th>
-              <th className="px-4 py-3 font-medium text-zinc-600">商品 ID</th>
+              <th className="px-4 py-3 font-medium text-zinc-600">跳转类型</th>
+              <th className="px-4 py-3 font-medium text-zinc-600">跳转目标</th>
               <th className="px-4 py-3 font-medium text-zinc-600">操作</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100">
-            {sortedItems.length === 0 ? (
+            {items.length === 0 ? (
               <tr>
                 <td
                   colSpan={5}
@@ -205,66 +264,52 @@ export function BannerManager({
                 </td>
               </tr>
             ) : (
-              sortedItems.map((item) => {
-                const product = productMap.get(item.productId);
-                return (
-                  <tr key={item.id} className="hover:bg-zinc-50/50">
-                    <td className="px-4 py-3">
-                      <div className="relative h-16 w-28 overflow-hidden rounded-lg border border-rose-100 bg-zinc-50">
-                        {item.imageUrl ? (
-                          <Image
-                            src={item.imageUrl}
-                            alt="轮播海报"
-                            fill
-                            className="object-cover"
-                            unoptimized
-                          />
-                        ) : (
-                          <span className="flex h-full items-center justify-center text-xs text-zinc-400">
-                            无图
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="px-4 py-3">
-                      <input
-                        type="number"
-                        className="w-20 rounded-lg border border-zinc-200 px-2 py-1"
-                        value={item.sort}
-                        onChange={(e) =>
-                          updateSort(item.id, Number(e.target.value))
-                        }
-                      />
-                      <p className="mt-0.5 text-xs text-zinc-400">越小越靠前</p>
-                    </td>
-                    <td className="px-4 py-3">
-                      {product ? (
-                        <>
-                          <p className="font-medium text-zinc-900">
-                            {product.name}
-                          </p>
-                          <p className="text-xs text-zinc-500">{product.sku}</p>
-                        </>
+              items.map((item) => (
+                <tr key={item.id} className="hover:bg-zinc-50/50">
+                  <td className="px-4 py-3">
+                    <div className="relative h-16 w-28 overflow-hidden rounded-lg border border-rose-100 bg-zinc-50">
+                      {item.imageUrl ? (
+                        <Image
+                          src={item.imageUrl}
+                          alt="轮播海报"
+                          fill
+                          className="object-cover"
+                          unoptimized
+                        />
                       ) : (
-                        <span className="text-amber-600">商品已下架或不存在</span>
+                        <span className="flex h-full items-center justify-center text-xs text-zinc-400">
+                          无图
+                        </span>
                       )}
-                    </td>
-                    <td className="px-4 py-3 font-mono text-xs text-zinc-600">
-                      {item.productId}
-                    </td>
-                    <td className="px-4 py-3">
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        className="text-red-600 hover:bg-red-50"
-                        onClick={() => removeItem(item.id)}
-                      >
-                        移除
-                      </Button>
-                    </td>
-                  </tr>
-                );
-              })
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <input
+                      type="number"
+                      className="w-20 rounded-lg border border-zinc-200 px-2 py-1"
+                      value={item.sortOrder}
+                      onChange={(e) =>
+                        updateSort(item.id!, Number(e.target.value))
+                      }
+                    />
+                    <p className="mt-0.5 text-xs text-zinc-400">越小越靠前</p>
+                  </td>
+                  <td className="px-4 py-3">
+                    {targetTypeLabel(item.targetType)}
+                  </td>
+                  <td className="px-4 py-3">{renderJumpSummary(item)}</td>
+                  <td className="px-4 py-3">
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      className="text-red-600 hover:bg-red-50"
+                      onClick={() => item.id && removeItem(item.id)}
+                    >
+                      移除
+                    </Button>
+                  </td>
+                </tr>
+              ))
             )}
           </tbody>
         </table>
@@ -275,17 +320,11 @@ export function BannerManager({
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
           role="dialog"
           aria-modal="true"
-          aria-labelledby="banner-modal-title"
         >
           <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
-            <h3
-              id="banner-modal-title"
-              className="text-lg font-semibold text-rose-900"
-            >
-              新增轮播图
-            </h3>
+            <h3 className="text-lg font-semibold text-rose-900">新增轮播图</h3>
             <p className="mt-1 text-sm text-zinc-500">
-              上传海报并选择点击后跳转的商城商品
+              配置海报与点击后的跳转行为
             </p>
 
             <div className="mt-6 space-y-4">
@@ -339,31 +378,89 @@ export function BannerManager({
               <Input
                 label="排序权重"
                 type="number"
-                value={String(draft.sort)}
+                value={String(draft.sortOrder)}
                 onChange={(e) =>
-                  setDraft((d) => ({ ...d, sort: Number(e.target.value) }))
+                  setDraft((d) => ({ ...d, sortOrder: Number(e.target.value) }))
                 }
               />
 
               <label className="block text-sm">
                 <span className="mb-1 block font-medium text-zinc-700">
-                  跳转商品
+                  跳转类型
                 </span>
                 <select
-                  value={draft.productId}
-                  onChange={(e) =>
-                    setDraft((d) => ({ ...d, productId: e.target.value }))
-                  }
+                  value={draft.targetType}
+                  onChange={(e) => {
+                    const targetType = e.target
+                      .value as BannerTargetTypeValue;
+                    setDraft((d) => ({
+                      ...d,
+                      targetType,
+                      productId:
+                        targetType === "PRODUCT" ? d.productId : null,
+                      targetParam:
+                        targetType === "ACTIVITY" || targetType === "COUPON"
+                          ? d.targetParam
+                          : null,
+                    }));
+                  }}
                   className="w-full rounded-lg border border-zinc-200 px-3 py-2"
                 >
-                  <option value="">请选择成品商品</option>
-                  {products.map((p) => (
-                    <option key={p.id} value={p.id}>
-                      {p.name}（{p.sku}）
+                  {BANNER_TARGET_TYPES.map((t) => (
+                    <option key={t} value={t}>
+                      {BANNER_TARGET_TYPE_LABELS[t]}
                     </option>
                   ))}
                 </select>
               </label>
+
+              {draft.targetType === "PRODUCT" && (
+                <label className="block text-sm">
+                  <span className="mb-1 block font-medium text-zinc-700">
+                    跳转商品
+                  </span>
+                  <select
+                    value={draft.productId ?? ""}
+                    onChange={(e) =>
+                      setDraft((d) => ({
+                        ...d,
+                        productId: e.target.value || null,
+                      }))
+                    }
+                    className="w-full rounded-lg border border-zinc-200 px-3 py-2"
+                  >
+                    <option value="">请选择成品商品</option>
+                    {products.map((p) => (
+                      <option key={p.id} value={p.id}>
+                        {p.name}（{p.sku}）
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              )}
+
+              {(draft.targetType === "ACTIVITY" ||
+                draft.targetType === "COUPON") && (
+                <Input
+                  label={
+                    draft.targetType === "ACTIVITY"
+                      ? "活动页路径或标识"
+                      : "优惠券 ID 或活动码"
+                  }
+                  value={draft.targetParam ?? ""}
+                  onChange={(e) =>
+                    setDraft((d) => ({
+                      ...d,
+                      targetParam: e.target.value,
+                    }))
+                  }
+                  placeholder={
+                    draft.targetType === "ACTIVITY"
+                      ? "例如 /pages/activity/spring"
+                      : "例如 COUPON_2026_SPRING"
+                  }
+                />
+              )}
             </div>
 
             <div className="mt-6 flex justify-end gap-2">

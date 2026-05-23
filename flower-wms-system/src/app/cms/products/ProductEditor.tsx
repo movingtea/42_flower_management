@@ -4,6 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { ProductCategoryTreeSelect } from "@/components/cms/ProductCategoryTreeSelect";
+import { RichTextEditorLazy } from "@/components/cms/RichTextEditorLazy";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/Switch";
@@ -13,12 +15,7 @@ const SHIPPING_FEE_PATTERN = /^[0-9]+(\.[0-9]{1,2})?$/;
 const SHIPPING_FEE_ERROR_MSG =
   "请输入正确的运费金额，最多支持两位小数";
 
-export function ProductEditor({
-  productId,
-  isNew,
-  initial,
-  categoryOptions,
-}: ProductEditorProps) {
+export function ProductEditor({ productId, isNew, initial }: ProductEditorProps) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -33,23 +30,13 @@ export function ProductEditor({
   const [quantity, setQuantity] = useState(String(initial.quantity));
   const [isPublished, setIsPublished] = useState(initial.isActive);
   const [description, setDescription] = useState(initial.description);
-  const [careTips, setCareTips] = useState(initial.careTips);
+  const [maintenanceGuideline, setMaintenanceGuideline] = useState(
+    initial.careTips
+  );
   const [imageUrl, setImageUrl] = useState(initial.imageUrl);
   const [needsShipping, setNeedsShipping] = useState(initial.needsShipping);
   const [shippingFee, setShippingFee] = useState(initial.shippingFee);
   const [shippingFeeError, setShippingFeeError] = useState("");
-
-  function toggleCategory(value: string) {
-    setSelectedCategories((prev) =>
-      prev.includes(value)
-        ? prev.filter((v) => v !== value)
-        : [...prev, value]
-    );
-  }
-
-  function removeCategory(value: string) {
-    setSelectedCategories((prev) => prev.filter((v) => v !== value));
-  }
 
   async function handleUpload(file: File) {
     setUploading(true);
@@ -60,13 +47,14 @@ export function ProductEditor({
       const json = (await res.json()) as {
         success: boolean;
         error?: string;
-        data?: { url?: string };
+        data?: { url?: string; path?: string };
       };
-      if (!res.ok || !json.success || !json.data?.url) {
+      const url = json.data?.url ?? json.data?.path;
+      if (!res.ok || !json.success || !url) {
         alert(json.error ?? "上传失败，请稍后重试");
         return;
       }
-      setImageUrl(json.data.url);
+      setImageUrl(url);
     } catch {
       alert("网络异常，请检查连接后重试");
     } finally {
@@ -113,7 +101,7 @@ export function ProductEditor({
     e.preventDefault();
 
     if (selectedCategories.length === 0) {
-      alert("请选择至少一个分类");
+      alert("请至少选择一个商品分类");
       return;
     }
 
@@ -130,7 +118,7 @@ export function ProductEditor({
       needsShipping,
       shippingFee: needsShipping ? Number(shippingFee.trim()) : 0,
       description: description.trim() || null,
-      careTips: careTips.trim() || null,
+      careTips: maintenanceGuideline.trim() || null,
       imageUrl: imageUrl.trim() || null,
     };
 
@@ -178,19 +166,18 @@ export function ProductEditor({
     }
   }
 
-  const labelById = new Map(
-    categoryOptions.map((c) => [c.id, c.label])
-  );
-
   return (
-    <form onSubmit={handleSubmit} className="mx-auto max-w-3xl space-y-8">
-      <div className="flex items-center justify-between">
+    <form
+      onSubmit={handleSubmit}
+      className="relative mx-auto flex min-h-[calc(100vh-4rem)] max-w-7xl flex-col pb-28"
+    >
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-semibold text-rose-900">
             {isNew ? "新增商品" : "编辑商品"}
           </h2>
           <p className="mt-1 text-sm text-zinc-500">
-            用于管理商品信息。
+            左侧编辑详情与养护说明，右侧填写基础信息与分类。
           </p>
         </div>
         <Link
@@ -201,245 +188,210 @@ export function ProductEditor({
         </Link>
       </div>
 
-      <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <h3 className="text-sm font-semibold text-zinc-900">商品信息</h3>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <Input
-            label="SKU"
-            value={displaySku}
-            readOnly
-            disabled
-            placeholder="系统自动生成"
-            className="cursor-not-allowed bg-gray-100 text-gray-400"
-            title={isNew ? "保存后由系统自动分配" : displaySku}
+      <div className="flex flex-1 flex-col gap-6 lg:flex-row">
+        <div className="w-full space-y-6 lg:w-2/3">
+          <RichTextEditorLazy
+            label="商品描述"
+            value={description}
+            onChange={setDescription}
+            placeholder="请输入商品描述，支持图文排版"
+            minHeight={420}
           />
-          <Input
-            label="商品名称"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            required
+          <RichTextEditorLazy
+            label="养护指南"
+            value={maintenanceGuideline}
+            onChange={setMaintenanceGuideline}
+            placeholder="请输入养护指南，支持图文排版"
+            minHeight={400}
           />
-        </div>
 
-        <div>
-          <span className="mb-2 block text-sm font-medium text-zinc-700">
-            分类
-          </span>
-          {categoryOptions.length === 0 ? (
-            <p className="text-sm text-amber-700">
-              暂无分类，请先创建分类。
-              <Link href="/cms/product-categories" className="mx-1 text-rose-600 underline">
-                商品分类管理
-              </Link>
-              并关联到商品。
-            </p>
-          ) : (
-            <div className="grid gap-2 sm:grid-cols-2">
-              {categoryOptions.map((opt) => {
-                const checked = selectedCategories.includes(opt.id);
-                return (
-                  <label
-                    key={opt.id}
-                    className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-colors ${
-                      checked
-                        ? "border-rose-300 bg-rose-50"
-                        : "border-zinc-200 hover:border-rose-200"
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleCategory(opt.id)}
-                      className="h-4 w-4 accent-rose-600"
-                    />
-                    <span className="block text-sm font-medium text-zinc-900">
-                      {opt.label}
-                    </span>
-                  </label>
-                );
-              })}
-            </div>
-          )}
+          <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+            <h3 className="text-sm font-semibold text-zinc-900">商品图片</h3>
+            <input
+              ref={fileRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/gif"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) void handleUpload(file);
+                e.target.value = "";
+              }}
+            />
 
-          {selectedCategories.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {selectedCategories.map((cid) => (
-                <span
-                  key={cid}
-                  className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-3 py-1 text-xs font-medium text-rose-800"
+            {imageUrl ? (
+              <div className="relative inline-block">
+                <div className="relative h-48 w-48 overflow-hidden rounded-xl border border-rose-100">
+                  <Image
+                    src={imageUrl}
+                    alt="商品图片"
+                    fill
+                    className="object-cover"
+                    unoptimized
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setImageUrl("")}
+                  className="mt-2 text-sm text-red-600 hover:underline"
                 >
-                  {labelById.get(cid) ?? cid}
-                  <button
-                    type="button"
-                    onClick={() => removeCategory(cid)}
-                    className="ml-1 rounded-full hover:bg-rose-200 px-1"
-                    aria-label="移除已选分类"
-                  >
-                    删除
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
+                  删除图片
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+                className="flex h-40 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-rose-200 bg-rose-50/30 text-sm text-rose-700 transition-colors hover:border-rose-300 hover:bg-rose-50"
+              >
+                {uploading ? "上传中…" : "上传商品图片（JPG / PNG / WebP）"}
+              </button>
+            )}
+
+            {imageUrl ? (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={() => fileRef.current?.click()}
+                disabled={uploading}
+              >
+                {uploading ? "上传中…" : "更换图片"}
+              </Button>
+            ) : null}
+          </section>
         </div>
 
-      </section>
+        <aside className="w-full space-y-4 lg:sticky lg:top-4 lg:w-1/3 lg:self-start">
+          <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+            <h3 className="text-sm font-semibold text-zinc-900">基础信息</h3>
 
-      <section className="space-y-4 rounded-xl border border-rose-100 bg-white p-6 shadow-sm">
-        <h3 className="text-sm font-semibold text-rose-900">商品价格</h3>
-        <Input
-          label="零售价"
-          type="number"
-          min={0}
-          step={0.01}
-          value={sellPrice}
-          onChange={(e) => setSellPrice(e.target.value)}
-          placeholder="198"
-        />
+            <Input
+              label="商品名称"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+              placeholder="请输入商品名称"
+            />
 
-        <Input
-          label="可售数量"
-          type="number"
-          min={0}
-          step={1}
-          value={quantity}
-          onChange={(e) => setQuantity(e.target.value)}
-          placeholder="0"
-        />
+            <Input
+              label="SKU"
+              value={displaySku}
+              readOnly
+              disabled
+              placeholder="保存后由系统自动生成"
+              className="cursor-not-allowed bg-gray-100 text-gray-400"
+              title={isNew ? "保存后由系统自动分配" : displaySku}
+            />
 
-        <div className="rounded-lg border border-zinc-200 px-4 py-4">
-          <Switch
-            label="是否需要运费"
-            checked={needsShipping}
-            onChange={onNeedsShippingChange}
-          />
-          <p className="mt-2 text-xs text-zinc-500">
-            关闭时视为免运费；开启后须填写单件商品运费金额。
-          </p>
-          {needsShipping && (
-            <div className="mt-4">
-              <Input
-                label="运费金额（元）"
-                type="text"
-                inputMode="decimal"
-                value={shippingFee}
-                onChange={(e) => {
-                  setShippingFee(e.target.value);
-                  if (shippingFeeError) setShippingFeeError("");
-                }}
-                placeholder="例如 15.00"
+            <Input
+              label="零售价（元）"
+              type="number"
+              min={0}
+              step={0.01}
+              value={sellPrice}
+              onChange={(e) => setSellPrice(e.target.value)}
+              placeholder="例如 198"
+            />
+
+            <div className="rounded-lg border border-zinc-200 px-4 py-4">
+              <Switch
+                label="是否需要运费"
+                checked={needsShipping}
+                onChange={onNeedsShippingChange}
               />
-              {shippingFeeError ? (
-                <p className="mt-2 text-sm text-red-600" role="alert">
-                  {shippingFeeError}
-                </p>
+              <p className="mt-2 text-xs text-zinc-500">
+                关闭视为免运费；开启后须填写单件运费金额。
+              </p>
+              {needsShipping ? (
+                <div className="mt-4">
+                  <Input
+                    label="运费金额（元）"
+                    type="text"
+                    inputMode="decimal"
+                    value={shippingFee}
+                    onChange={(e) => {
+                      setShippingFee(e.target.value);
+                      if (shippingFeeError) setShippingFeeError("");
+                    }}
+                    placeholder="例如 15.00"
+                  />
+                  {shippingFeeError ? (
+                    <p className="mt-2 text-sm text-red-600" role="alert">
+                      {shippingFeeError}
+                    </p>
+                  ) : null}
+                </div>
               ) : null}
             </div>
-          )}
-        </div>
 
-        <label className="flex cursor-pointer items-center justify-between rounded-lg border border-zinc-200 px-4 py-3">
-          <div>
-            <span className="font-medium text-zinc-800">上架状态</span>
-            <p className="text-xs text-zinc-500">上架状态</p>
-          </div>
-          <input
-            type="checkbox"
-            checked={isPublished}
-            onChange={(e) => setIsPublished(e.target.checked)}
-            className="h-5 w-5 accent-rose-600"
-          />
-        </label>
+            <ProductCategoryTreeSelect
+              value={selectedCategories}
+              onChange={setSelectedCategories}
+            />
 
-        <label className="block text-sm">
-          <span className="mb-1 block font-medium text-zinc-700">商品描述</span>
-          <textarea
-            rows={4}
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            className="w-full rounded-lg border border-zinc-200 px-3 py-2"
-            placeholder="请输入商品描述"
-          />
-        </label>
+            <p className="text-xs text-zinc-500">
+              只需勾选实际分类；保存时系统将自动关联所选子分类的上级分类。
+            </p>
+            <p className="text-xs text-zinc-500">
+              尚无分类？
+              <Link
+                href="/cms/product-categories"
+                className="mx-1 text-rose-600 underline"
+              >
+                前往商品分类管理
+              </Link>
+            </p>
+          </section>
 
-        <label className="block text-sm">
-          <span className="mb-1 block font-medium text-zinc-700">养护指南</span>
-          <textarea
-            rows={3}
-            value={careTips}
-            onChange={(e) => setCareTips(e.target.value)}
-            className="w-full rounded-lg border border-zinc-200 px-3 py-2"
-            placeholder="请输入养护指南"
-          />
-        </label>
-      </section>
+          <section className="space-y-4 rounded-xl border border-rose-100 bg-white p-5 shadow-sm">
+            <h3 className="text-sm font-semibold text-rose-900">库存与上架</h3>
 
-      <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <h3 className="text-sm font-semibold text-zinc-900">商品图片</h3>
-        <input
-          ref={fileRef}
-          type="file"
-          accept="image/jpeg,image/png,image/webp,image/gif"
-          className="hidden"
-          onChange={(e) => {
-            const file = e.target.files?.[0];
-            if (file) void handleUpload(file);
-            e.target.value = "";
-          }}
-        />
+            <Input
+              label="可售数量"
+              type="number"
+              min={0}
+              step={1}
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              placeholder="0"
+            />
 
-        {imageUrl ? (
-          <div className="relative inline-block">
-            <div className="relative h-48 w-48 overflow-hidden rounded-xl border border-rose-100">
-              <Image
-                src={imageUrl}
-                alt="商品图片"
-                fill
-                className="object-cover"
-                unoptimized
+            <label className="flex cursor-pointer items-center justify-between rounded-lg border border-zinc-200 px-4 py-3">
+              <div>
+                <span className="font-medium text-zinc-800">上架状态</span>
+                <p className="text-xs text-zinc-500">
+                  开启后商品将在前台展示
+                </p>
+              </div>
+              <input
+                type="checkbox"
+                checked={isPublished}
+                onChange={(e) => setIsPublished(e.target.checked)}
+                className="h-5 w-5 accent-rose-600"
               />
-            </div>
-            <button
-              type="button"
-              onClick={() => setImageUrl("")}
-              className="mt-2 text-sm text-red-600 hover:underline"
+            </label>
+          </section>
+        </aside>
+      </div>
+
+      <div className="sticky bottom-0 z-10 -mx-4 mt-8 border-t border-zinc-200 bg-white/95 px-4 py-4 shadow-[0_-4px_24px_rgba(0,0,0,0.06)] backdrop-blur-sm pb-safe lg:-mx-0 lg:rounded-xl lg:border lg:px-6">
+        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+          <p className="hidden text-sm text-zinc-500 sm:block">
+            修改后请点击保存，未保存离开将丢失编辑内容。
+          </p>
+          <div className="flex w-full flex-wrap justify-end gap-3 sm:w-auto">
+            <Link
+              href="/cms/products"
+              className="inline-flex items-center rounded-lg border border-zinc-200 bg-white px-5 py-2.5 text-sm font-medium text-zinc-700 hover:bg-zinc-50"
             >
-              删除图片
-            </button>
+              取消
+            </Link>
+            <Button type="submit" disabled={submitting || uploading}>
+              {submitting ? "保存中…" : isNew ? "创建商品" : "保存商品"}
+            </Button>
           </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-            className="flex h-40 w-full max-w-md flex-col items-center justify-center rounded-xl border-2 border-dashed border-rose-200 bg-rose-50/30 text-sm text-rose-700 transition-colors hover:border-rose-300 hover:bg-rose-50"
-          >
-            {uploading ? "上传中..." : "上传商品图片（JPG / PNG / WebP）"}
-          </button>
-        )}
-
-        {imageUrl && (
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => fileRef.current?.click()}
-            disabled={uploading}
-          >
-            {uploading ? "上传中..." : "上传商品图片"}
-          </Button>
-        )}
-      </section>
-
-      <div className="flex gap-3 pb-8">
-        <Button type="submit" disabled={submitting || uploading}>
-          {submitting ? "保存中..." : isNew ? "新增商品" : "保存商品"}
-        </Button>
-        <Link
-          href="/cms/products"
-          className="inline-flex items-center rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100"
-        >
-          返回商品列表
-        </Link>
+        </div>
       </div>
     </form>
   );

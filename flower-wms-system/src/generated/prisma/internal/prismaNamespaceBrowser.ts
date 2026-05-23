@@ -56,6 +56,7 @@ export const ModelName = {
   MaterialCategory: 'MaterialCategory',
   MaterialCategoryRelation: 'MaterialCategoryRelation',
   Product: 'Product',
+  Banner: 'Banner',
   Material: 'Material',
   ProductBOM: 'ProductBOM',
   Batch: 'Batch',
@@ -142,11 +143,27 @@ export const ProductScalarFieldEnum = {
   allowPreOrder: 'allowPreOrder',
   productionTime: 'productionTime',
   shippingFee: 'shippingFee',
+  isDeleted: 'isDeleted',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+export const BannerScalarFieldEnum = {
+  id: 'id',
+  imageUrl: 'imageUrl',
+  sortOrder: 'sortOrder',
+  targetType: 'targetType',
+  targetParam: 'targetParam',
+  productId: 'productId',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BannerScalarFieldEnum = (typeof BannerScalarFieldEnum)[keyof typeof BannerScalarFieldEnum]
 
 
 export const MaterialScalarFieldEnum = {
@@ -238,6 +255,7 @@ export const OrderItemScalarFieldEnum = {
   productId: 'productId',
   productName: 'productName',
   productSku: 'productSku',
+  snapshotProductImage: 'snapshotProductImage',
   quantity: 'quantity',
   unitPrice: 'unitPrice',
   lineTotal: 'lineTotal',

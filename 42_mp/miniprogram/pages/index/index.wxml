@@ -37,6 +37,8 @@
         src="{{item.imageUrl}}"
         mode="aspectFill"
         bindtap="onBannerTap"
+        data-target-type="{{item.targetType}}"
+        data-target-param="{{item.targetParam}}"
         data-product-id="{{item.productId}}"
       />
     </swiper-item>

@@ -5,6 +5,7 @@ import {
   productCategoriesInclude,
 } from "@/lib/product-categories";
 import { PRODUCT_STATUS_PUBLISHED } from "@/lib/product-status";
+import { activeProductWhere } from "@/lib/product-query";
 import { prisma } from "@/lib/prisma";
 
 export type WechatOrderItemInput = {
@@ -118,6 +119,7 @@ export async function createWechatOrderWithFifoLock(
       const productIds = [...new Set(payload.items.map((i) => i.productId))];
       const products = await tx.product.findMany({
         where: {
+          ...activeProductWhere,
           id: { in: productIds },
           status: PRODUCT_STATUS_PUBLISHED,
           isOutOfStock: false,
@@ -172,6 +174,7 @@ export async function createWechatOrderWithFifoLock(
             id: item.productId,
             quantity: { gte: item.quantity },
             isOutOfStock: false,
+            isDeleted: false,
             status: PRODUCT_STATUS_PUBLISHED,
           },
           data: { quantity: { decrement: item.quantity } },
@@ -187,6 +190,7 @@ export async function createWechatOrderWithFifoLock(
             productId: item.productId,
             productName: product.name,
             productSku: product.sku,
+            snapshotProductImage: product.images[0] ?? null,
             quantity: item.quantity,
             unitPrice: item.price,
             lineTotal,

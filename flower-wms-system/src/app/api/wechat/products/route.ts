@@ -2,6 +2,7 @@ import { jsonError } from "@/lib/api";
 import { jsonWechatSuccess } from "@/lib/wechat-api";
 import { categoryIdsFromProduct, productCategoriesInclude } from "@/lib/product-categories";
 import { PRODUCT_STATUS_PUBLISHED } from "@/lib/product-status";
+import { activeProductWhere } from "@/lib/product-query";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -9,12 +10,13 @@ export const dynamic = "force-dynamic";
 /** GET：小程序商品列表（?category=<分类 id> 筛选） */
 export async function GET(request: Request) {
   try {
-    const categoryFilter = new URL(request.url).searchParams
-      .get("category")
-      ?.trim();
+    const params = new URL(request.url).searchParams;
+    const categoryFilter = params.get("category")?.trim();
+    const keyword = params.get("keyword")?.trim();
 
     const products = await prisma.product.findMany({
       where: {
+        ...activeProductWhere,
         status: PRODUCT_STATUS_PUBLISHED,
         isOutOfStock: false,
         ...(categoryFilter
@@ -22,6 +24,15 @@ export async function GET(request: Request) {
               categories: {
                 some: { productCategoryId: categoryFilter },
               },
+            }
+          : {}),
+        ...(keyword
+          ? {
+              OR: [
+                { name: { contains: keyword, mode: "insensitive" } },
+                { subtitle: { contains: keyword, mode: "insensitive" } },
+                { sku: { contains: keyword, mode: "insensitive" } },
+              ],
             }
           : {}),
       },
@@ -58,6 +69,7 @@ export async function GET(request: Request) {
       total: list.length,
       inStockCount: inStock.length,
       filterCategory: categoryFilter ?? null,
+      keyword: keyword ?? null,
     });
   } catch (err) {
     const message =

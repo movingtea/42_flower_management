@@ -29,3 +29,13 @@ export const OrderStatus = {
 } as const
 
 export type OrderStatus = (typeof OrderStatus)[keyof typeof OrderStatus]
+
+
+export const BannerTargetType = {
+  PRODUCT: 'PRODUCT',
+  ACTIVITY: 'ACTIVITY',
+  COUPON: 'COUPON',
+  NONE: 'NONE'
+} as const
+
+export type BannerTargetType = (typeof BannerTargetType)[keyof typeof BannerTargetType]

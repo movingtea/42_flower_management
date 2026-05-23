@@ -389,6 +389,7 @@ export const ModelName = {
   MaterialCategory: 'MaterialCategory',
   MaterialCategoryRelation: 'MaterialCategoryRelation',
   Product: 'Product',
+  Banner: 'Banner',
   Material: 'Material',
   ProductBOM: 'ProductBOM',
   Batch: 'Batch',
@@ -411,7 +412,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "productCategory" | "productCategoryRelation" | "materialCategory" | "materialCategoryRelation" | "product" | "material" | "productBOM" | "batch" | "stockLog" | "order" | "orderItem" | "appConfig"
+    modelProps: "productCategory" | "productCategoryRelation" | "materialCategory" | "materialCategoryRelation" | "product" | "banner" | "material" | "productBOM" | "batch" | "stockLog" | "order" | "orderItem" | "appConfig"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -782,6 +783,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ProductCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ProductCountAggregateOutputType> | number
+        }
+      }
+    }
+    Banner: {
+      payload: Prisma.$BannerPayload<ExtArgs>
+      fields: Prisma.BannerFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.BannerFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BannerPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.BannerFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BannerPayload>
+        }
+        findFirst: {
+          args: Prisma.BannerFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BannerPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.BannerFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BannerPayload>
+        }
+        findMany: {
+          args: Prisma.BannerFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BannerPayload>[]
+        }
+        create: {
+          args: Prisma.BannerCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BannerPayload>
+        }
+        createMany: {
+          args: Prisma.BannerCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.BannerCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BannerPayload>[]
+        }
+        delete: {
+          args: Prisma.BannerDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BannerPayload>
+        }
+        update: {
+          args: Prisma.BannerUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BannerPayload>
+        }
+        deleteMany: {
+          args: Prisma.BannerDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.BannerUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.BannerUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BannerPayload>[]
+        }
+        upsert: {
+          args: Prisma.BannerUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$BannerPayload>
+        }
+        aggregate: {
+          args: Prisma.BannerAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateBanner>
+        }
+        groupBy: {
+          args: Prisma.BannerGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BannerGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.BannerCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.BannerCountAggregateOutputType> | number
         }
       }
     }
@@ -1403,11 +1478,27 @@ export const ProductScalarFieldEnum = {
   allowPreOrder: 'allowPreOrder',
   productionTime: 'productionTime',
   shippingFee: 'shippingFee',
+  isDeleted: 'isDeleted',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type ProductScalarFieldEnum = (typeof ProductScalarFieldEnum)[keyof typeof ProductScalarFieldEnum]
+
+
+export const BannerScalarFieldEnum = {
+  id: 'id',
+  imageUrl: 'imageUrl',
+  sortOrder: 'sortOrder',
+  targetType: 'targetType',
+  targetParam: 'targetParam',
+  productId: 'productId',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type BannerScalarFieldEnum = (typeof BannerScalarFieldEnum)[keyof typeof BannerScalarFieldEnum]
 
 
 export const MaterialScalarFieldEnum = {
@@ -1499,6 +1590,7 @@ export const OrderItemScalarFieldEnum = {
   productId: 'productId',
   productName: 'productName',
   productSku: 'productSku',
+  snapshotProductImage: 'snapshotProductImage',
   quantity: 'quantity',
   unitPrice: 'unitPrice',
   lineTotal: 'lineTotal',
@@ -1640,6 +1732,20 @@ export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, '
  * Reference to a field of type 'Float[]'
  */
 export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
+    
+
+
+/**
+ * Reference to a field of type 'BannerTargetType'
+ */
+export type EnumBannerTargetTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BannerTargetType'>
+    
+
+
+/**
+ * Reference to a field of type 'BannerTargetType[]'
+ */
+export type ListEnumBannerTargetTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BannerTargetType[]'>
     
 
 
@@ -1799,6 +1905,7 @@ export type GlobalOmitConfig = {
   materialCategory?: Prisma.MaterialCategoryOmit
   materialCategoryRelation?: Prisma.MaterialCategoryRelationOmit
   product?: Prisma.ProductOmit
+  banner?: Prisma.BannerOmit
   material?: Prisma.MaterialOmit
   productBOM?: Prisma.ProductBOMOmit
   batch?: Prisma.BatchOmit
