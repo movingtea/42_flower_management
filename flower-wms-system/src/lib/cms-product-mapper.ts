@@ -33,13 +33,14 @@ export function cmsBodyToProductData(
     isOutOfStock: body.isOutOfStock ?? false,
     allowPreOrder: body.allowPreOrder ?? true,
     productionTime: body.productionTime ?? 30,
+    shippingFee: body.shippingFee,
   };
 }
 
 /** 数据库 Product → CMS 编辑器初始值 */
 export function productToEditorInitial(
   product: ProductWithCategories,
-  categoryKeys: string[]
+  categoryIds: string[]
 ): ProductEditorInitial {
   const detail = product.detailContent ?? "";
   const subtitle = product.subtitle ?? "";
@@ -48,13 +49,17 @@ export function productToEditorInitial(
       ? detail
       : [subtitle, detail].filter(Boolean).join("\n\n");
 
+  const fee = Number(product.shippingFee ?? 0);
+
   return {
     sku: product.sku,
     name: product.name,
-    category: categoryKeys,
+    category: categoryIds,
     sellPrice: product.price.toString(),
     quantity: product.quantity,
     isActive: product.status === PRODUCT_STATUS_PUBLISHED,
+    needsShipping: fee > 0,
+    shippingFee: fee > 0 ? fee.toFixed(2) : "",
     description,
     careTips: "",
     imageUrl: product.images[0] ?? "",

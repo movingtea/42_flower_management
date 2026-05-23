@@ -1,9 +1,12 @@
 import { InboundForm } from "@/app/wms/batches/InboundForm";
+import { loadMaterialCategories } from "@/lib/material-category.server";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function BatchesPage() {
+  const materialCategories = await loadMaterialCategories({ activeOnly: true });
+
   const recentInbound = await prisma.batch.findMany({
     orderBy: { inboundAt: "desc" },
     take: 10,
@@ -23,7 +26,7 @@ export default async function BatchesPage() {
         </p>
       </header>
 
-      <InboundForm />
+      <InboundForm materialCategories={materialCategories} />
 
       <section>
         <h3 className="mb-4 text-sm font-semibold text-zinc-900">

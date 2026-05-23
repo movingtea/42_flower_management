@@ -8,8 +8,10 @@
  *
  * 🟢 You can import this file directly.
  */
-export type * from './models/Category'
 export type * from './models/ProductCategory'
+export type * from './models/ProductCategoryRelation'
+export type * from './models/MaterialCategory'
+export type * from './models/MaterialCategoryRelation'
 export type * from './models/Product'
 export type * from './models/Material'
 export type * from './models/ProductBOM'

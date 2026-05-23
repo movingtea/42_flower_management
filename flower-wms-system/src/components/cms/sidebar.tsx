@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 const navItems = [
   { href: "/cms/products", label: "商城商品", icon: "🌸" },
-  { href: "/cms/categories", label: "商品分类", icon: "🏷️" },
+  { href: "/cms/product-categories", label: "商品分类", icon: "🏷️" },
   { href: "/cms/banner", label: "首页轮播", icon: "🖼️" },
   { href: "/cms/marketing", label: "营销配置", icon: "✨" },
 ];

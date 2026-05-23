@@ -4,14 +4,21 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { WMS_CATEGORY_OPTIONS, WmsCategory } from "@/lib/constants";
+import type { MaterialCategoryRow } from "@/lib/material-category";
 
 const READONLY_CODE_CLASS =
   "cursor-not-allowed bg-gray-100 text-gray-400";
 
-export function InboundForm() {
+type Props = {
+  materialCategories: MaterialCategoryRow[];
+};
+
+export function InboundForm({ materialCategories }: Props) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(
+    materialCategories[0]?.id ?? ""
+  );
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -19,7 +26,6 @@ export function InboundForm() {
     const fd = new FormData(form);
 
     const name = String(fd.get("name") ?? "").trim();
-    const category = String(fd.get("category") ?? "");
     const receivedQty = Number(fd.get("receivedQty"));
     const costPrice = Number(fd.get("costPrice"));
     const safetyStockThreshold = Number(fd.get("safetyStockThreshold"));
@@ -28,6 +34,10 @@ export function InboundForm() {
 
     if (!name) {
       alert("请填写花材名称");
+      return;
+    }
+    if (!selectedCategoryId) {
+      alert("请选择原材料分类");
       return;
     }
     if (!Number.isInteger(receivedQty) || receivedQty <= 0) {
@@ -53,7 +63,7 @@ export function InboundForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name,
-          category,
+          materialCategoryIds: [selectedCategoryId],
           receivedQty,
           costPrice,
           safetyStockThreshold,
@@ -118,19 +128,31 @@ export function InboundForm() {
       />
 
       <label className="block text-sm">
-        <span className="mb-1 block font-medium text-zinc-700">分类</span>
-        <select
-          name="category"
-          required
-          defaultValue={WmsCategory.FLOWER}
-          className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-zinc-900"
-        >
-          {WMS_CATEGORY_OPTIONS.map((opt) => (
-            <option key={opt.value} value={opt.value}>
-              {opt.label}
-            </option>
-          ))}
-        </select>
+        <span className="mb-1 block font-medium text-zinc-700">
+          原材料分类
+        </span>
+        {materialCategories.length === 0 ? (
+          <p className="text-sm text-amber-700">
+            暂无原材料分类，请先在
+            <a href="/wms/material-categories" className="mx-1 text-rose-600 underline">
+              原材料分类管理
+            </a>
+            中创建。
+          </p>
+        ) : (
+          <select
+            required
+            value={selectedCategoryId}
+            onChange={(e) => setSelectedCategoryId(e.target.value)}
+            className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-zinc-900"
+          >
+            {materialCategories.map((opt) => (
+              <option key={opt.id} value={opt.id}>
+                {opt.name}
+              </option>
+            ))}
+          </select>
+        )}
       </label>
 
       <div>
@@ -167,18 +189,10 @@ export function InboundForm() {
         placeholder="2.50"
         required
       />
-      <Input
-        name="supplierName"
-        label="供应商"
-        placeholder="选填"
-      />
-      <Input
-        name="expiryDate"
-        label="瓶插期截止"
-        type="date"
-      />
+      <Input name="supplierName" label="供应商" placeholder="选填" />
+      <Input name="expiryDate" label="瓶插期截止" type="date" />
 
-      <Button type="submit" disabled={submitting}>
+      <Button type="submit" disabled={submitting || materialCategories.length === 0}>
         {submitting ? "提交中…" : "确认入库"}
       </Button>
     </form>

@@ -4,7 +4,7 @@ import type { ProductEditorInitial } from "@/app/cms/products/types";
 import { productToEditorInitial } from "@/lib/cms-product-mapper";
 import { loadCmsProductCategories } from "@/lib/cms-product-categories.server";
 import {
-  categoryKeysFromProduct,
+  categoryIdsFromProduct,
   productCategoriesInclude,
 } from "@/lib/product-categories";
 import { prisma } from "@/lib/prisma";
@@ -18,6 +18,8 @@ const EMPTY: ProductEditorInitial = {
   sellPrice: "",
   quantity: 0,
   isActive: true,
+  needsShipping: false,
+  shippingFee: "",
   description: "",
   careTips: "",
   imageUrl: "",
@@ -54,7 +56,7 @@ export default async function CmsProductEditPage({
 
   const initial = productToEditorInitial(
     product,
-    categoryKeysFromProduct(product)
+    categoryIdsFromProduct(product)
   );
 
   return (

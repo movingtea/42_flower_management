@@ -1,6 +1,7 @@
 // =============================================================================
 // Flower WMS — 花店仓库管理与微信小程序订单
 // 架构：Product（前台成品）↔ ProductBOM ↔ Material（仓储原材料）+ Batch FIFO
+// 商品分类与原材料分类完全解耦，各自独立表与中间表
 // =============================================================================
 
 generator client {
@@ -35,61 +36,105 @@ enum OrderStatus {
 }
 
 // ---------------------------------------------------------------------------
-// Category — 前台商品分类（营销维度）
-// ---------------------------------------------------------------------------
-
-model Category {
-  id        String   @id @default(uuid())
-  key       String   @unique /// 分类键，如 bouquet、qixi
-  name      String /// 展示名称，如「经典手捧」「七夕专区」
-  sortOrder Int      @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  products ProductCategory[]
-
-  @@map("categories")
-}
-
-// ---------------------------------------------------------------------------
-// ProductCategory — 商品与分类多对多纽带
+// ProductCategory — 商城商品分类（二级树，CMS / 小程序）
 // ---------------------------------------------------------------------------
 
 model ProductCategory {
-  productId  String
-  categoryId String
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  imageUrl    String?
+  sortOrder   Int      @default(0)
+  parentId    String?  @map("parent_id")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
 
-  product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
-  category Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  parent    ProductCategory?  @relation("ProdCategoryToSub", fields: [parentId], references: [id], onDelete: Cascade)
+  children  ProductCategory[] @relation("ProdCategoryToSub")
+  products  ProductCategoryRelation[]
 
-  @@id([productId, categoryId])
-  @@index([categoryId])
+  @@index([parentId])
+  @@index([sortOrder])
+  @@map("product_categories_list")
+}
+
+// ---------------------------------------------------------------------------
+// ProductCategoryRelation — 商品 ↔ 商品分类（复用原 product_categories 表）
+// ---------------------------------------------------------------------------
+
+model ProductCategoryRelation {
+  id                String @id @default(uuid())
+  productId         String @map("product_id")
+  productCategoryId String @map("product_category_id")
+
+  product         Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productCategory ProductCategory @relation(fields: [productCategoryId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, productCategoryId])
+  @@index([productCategoryId])
   @@map("product_categories")
 }
 
 // ---------------------------------------------------------------------------
-// Product — 前台成品花束 / 礼盒（营销与订单核心，不含仓储批次）
+// MaterialCategory — WMS 原材料大类（单层扁平，无 parentId）
+// ---------------------------------------------------------------------------
+
+model MaterialCategory {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  materials MaterialCategoryRelation[]
+
+  @@index([sortOrder])
+  @@map("material_categories")
+}
+
+// ---------------------------------------------------------------------------
+// MaterialCategoryRelation — 原材料 ↔ 原材料分类
+// ---------------------------------------------------------------------------
+
+model MaterialCategoryRelation {
+  id                 String @id @default(uuid())
+  materialId         String @map("material_id")
+  materialCategoryId String @map("material_category_id")
+
+  material         Material         @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  materialCategory MaterialCategory @relation(fields: [materialCategoryId], references: [id], onDelete: Cascade)
+
+  @@unique([materialId, materialCategoryId])
+  @@index([materialCategoryId])
+  @@map("material_category_relations")
+}
+
+// ---------------------------------------------------------------------------
+// Product — 前台成品花束 / 礼盒
 // ---------------------------------------------------------------------------
 
 model Product {
   id              String   @id @default(uuid())
-  sku             String   @unique /// 物料编码，如 BOUQUET-ROSE-11
+  sku             String   @unique
   name            String
-  price           Decimal  @db.Decimal(10, 2) /// 标准零售价
-  costPrice       Decimal? @db.Decimal(10, 2) /// 参考成本价
-  subtitle        String? /// 前台一句话情话
-  images          String[] @default([]) /// 主图 / 轮播图
-  detailContent   String?  @db.Text /// 富文本 / 长图介绍
-  /// 状态：DRAFT | PUBLISHED | ARCHIVED
+  price           Decimal  @db.Decimal(10, 2)
+  costPrice       Decimal? @db.Decimal(10, 2)
+  subtitle        String?
+  images          String[] @default([])
+  detailContent   String?  @db.Text
   status          String   @default("DRAFT")
-  quantity        Int      @default(0) /// 可售数量（前台展示与下单扣减）
-  isOutOfStock    Boolean  @default(false) /// 人工一键售罄
-  allowPreOrder   Boolean  @default(true) /// 今日售罄后是否允许预约明日
-  productionTime  Int      @default(30) /// 预计手工制作耗时（分钟）
+  quantity        Int      @default(0)
+  isOutOfStock    Boolean  @default(false)
+  allowPreOrder   Boolean  @default(true)
+  productionTime  Int      @default(30)
+  shippingFee     Float    @default(0)
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 
-  categories ProductCategory[]
+  categories ProductCategoryRelation[]
   bomItems   ProductBOM[]
   orderItems OrderItem[]
 
@@ -98,34 +143,35 @@ model Product {
 }
 
 // ---------------------------------------------------------------------------
-// Material — 仓储原材料（花材、包装、辅料），不含营销字段
+// Material — 仓储原材料
 // ---------------------------------------------------------------------------
 
 model Material {
   id                   String   @id @default(uuid())
-  materialCode         String   @unique /// 原材料编码，如 MAT-ROSE-RED
+  materialCode         String   @unique
   name                 String
-  unit                 String /// 计量单位：枝、张、卷
-  safetyStockThreshold Int      @default(0) /// 安全库存预警阈值
+  unit                 String
+  safetyStockThreshold Int      @default(0)
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
-  batches   Batch[]
-  stockLogs StockLog[]
-  bomLines  ProductBOM[]
+  batches             Batch[]
+  stockLogs           StockLog[]
+  bomLines            ProductBOM[]
+  categoryRelations   MaterialCategoryRelation[]
 
   @@map("materials")
 }
 
 // ---------------------------------------------------------------------------
-// ProductBOM — 成品配方：一束商品由哪些原材料及用量组成
+// ProductBOM — 成品配方
 // ---------------------------------------------------------------------------
 
 model ProductBOM {
   id             String @id @default(uuid())
   productId      String
   materialId     String
-  quantityNeeded Int /// 单件成品所需原材料数量
+  quantityNeeded Int
 
   product  Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   material Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
@@ -136,20 +182,20 @@ model ProductBOM {
 }
 
 // ---------------------------------------------------------------------------
-// Batch — 原材料库存批次（FIFO 核心，仅挂在 Material）
+// Batch — 原材料库存批次（FIFO）
 // ---------------------------------------------------------------------------
 
 model Batch {
   id              String    @id @default(cuid())
   materialId      String
-  batchNo         String?   @unique /// 批次号，如 PO-20260522-001
-  inboundAt       DateTime  @default(now()) /// 入库时间，FIFO 排序依据
-  originalQty     Int /// 采购入库原始数量
-  remainingQty    Int /// 当前可用剩余数量（出库递减，≥ 0）
-  unitCost        Decimal   @db.Decimal(12, 4) /// 进货单价（按批次核算成本）
-  expiresAt       DateTime? /// 瓶插期 / 预计枯萎截止日
-  storageLocation String? /// 库位，如 冷库 A-01
-  supplier        String? /// 供应商
+  batchNo         String?   @unique
+  inboundAt       DateTime  @default(now())
+  originalQty     Int
+  remainingQty    Int
+  unitCost        Decimal   @db.Decimal(12, 4)
+  expiresAt       DateTime?
+  storageLocation String?
+  supplier        String?
   note            String?   @db.Text
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
@@ -157,7 +203,6 @@ model Batch {
   material  Material   @relation(fields: [materialId], references: [id], onDelete: Restrict)
   stockLogs StockLog[]
 
-  /// FIFO: WHERE materialId = ? AND remainingQty > 0 ORDER BY inboundAt ASC
   @@index([materialId, inboundAt])
   @@index([materialId, remainingQty])
   @@index([expiresAt])
@@ -165,7 +210,7 @@ model Batch {
 }
 
 // ---------------------------------------------------------------------------
-// StockLog — 库存变动流水（绑定原材料批次）
+// StockLog — 库存变动流水
 // ---------------------------------------------------------------------------
 
 model StockLog {
@@ -173,15 +218,13 @@ model StockLog {
   materialId    String
   batchId       String
   type          StockLogType
-  /// 变动量：入库/盘盈为正，销售/损耗/盘亏为负
   delta         Int
-  /// 本条流水绝对数量（展示用，恒为正）
   quantity      Int
-  orderId       String? /// 销售出库关联订单
-  orderItemId   String? /// 销售出库关联订单行
-  wastageReason String? /// 损耗原因
+  orderId       String?
+  orderItemId   String?
+  wastageReason String?
   remark        String?      @db.Text
-  operator      String? /// 操作人 / system
+  operator      String?
   createdAt     DateTime     @default(now())
 
   material  Material   @relation(fields: [materialId], references: [id], onDelete: Restrict)
@@ -198,23 +241,22 @@ model StockLog {
 }
 
 // ---------------------------------------------------------------------------
-// Order / OrderItem — 微信小程序订单（行项目指向 Product）
+// Order / OrderItem
 // ---------------------------------------------------------------------------
 
 model Order {
   id                  String      @id @default(cuid())
-  orderNo             String      @unique /// 业务单号，如 FL20260522001
+  orderNo             String      @unique
   status              OrderStatus @default(PENDING)
   wechatOpenId        String?
   customerName        String?
   customerPhone       String?
-  wechatTransactionId String? /// 微信支付单号
+  wechatTransactionId String?
   totalAmount         Decimal     @db.Decimal(10, 2)
-  /// 配送信息
   receiverName        String?
   receiverPhone       String?
   deliveryAddress     String?     @db.Text
-  deliveryTime        DateTime? /// 顾客预约送达时间
+  deliveryTime        DateTime?
   paidAt              DateTime?
   deliveredAt         DateTime?
   remark              String?     @db.Text
@@ -234,7 +276,6 @@ model OrderItem {
   id          String   @id @default(cuid())
   orderId     String
   productId   String
-  /// 下单快照，避免后续改名影响历史订单
   productName String
   productSku  String
   quantity    Int
@@ -252,14 +293,14 @@ model OrderItem {
 }
 
 // ---------------------------------------------------------------------------
-// AppConfig — 小程序运营配置（轮播、营销等，value 为 JSON）
+// AppConfig
 // ---------------------------------------------------------------------------
 
 model AppConfig {
   id        String   @id @default(cuid())
-  key       String   @unique /// 如 HOME_BANNER
-  name      String /// 后台展示名称
-  value     Json /// 配置载荷，如轮播图数组
+  key       String   @unique
+  name      String
+  value     Json
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

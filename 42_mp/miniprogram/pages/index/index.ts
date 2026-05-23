@@ -1,5 +1,10 @@
 // pages/index/index.ts — 首页：/homepage + /products 联调
 import { request } from '../../utils/request';
+import {
+  readCartFromStorage,
+  updateCartTabBarBadge,
+  writeCartToStorage,
+} from '../../utils/cart';
 
 /** 与 Next.js jsonSuccess 一致：业务数据在 data 内 */
 interface ApiResponse<T> {
@@ -48,10 +53,12 @@ interface HomepageData {
 
 interface ProductRaw {
   id: string;
+  sku?: string;
   name: string;
   subtitle?: string;
   price?: number | string;
   sellPrice?: string;
+  shippingFee?: number;
   imageUrl?: string;
   images?: string[];
   category: string[];
@@ -65,22 +72,27 @@ interface ProductsData {
 
 interface ProductItem {
   id: string;
+  sku?: string;
   name: string;
   subtitle?: string;
   price: number | string;
+  shippingFee: number;
   imageUrl: string;
   category: string[];
   isOutOfStock?: boolean;
 }
 
 function normalizeCategoryTabs(items: CategorySourceItem[]): CategoryTab[] {
-  return items.map((item) => {
-    const id = (item.id ?? item.value ?? item.label).trim().toLowerCase();
-    return {
-      id,
-      label: item.label || item.value || id,
-    };
-  });
+  return items
+    .map((item) => {
+      const id = (item.id ?? item.value ?? "").trim();
+      if (!id) return null;
+      return {
+        id,
+        label: item.label || id,
+      };
+    })
+    .filter((tab): tab is CategoryTab => tab !== null);
 }
 
 function normalizeProduct(item: ProductRaw): ProductItem {
@@ -88,14 +100,18 @@ function normalizeProduct(item: ProductRaw): ProductItem {
   const imageUrl =
     item.imageUrl ?? (item.images && item.images.length > 0 ? item.images[0] : '');
 
+  const shippingFee = Math.max(0, Number(item.shippingFee) || 0);
+
   return {
     id: item.id,
+    sku: item.sku,
     name: item.name,
     subtitle: item.subtitle,
     price,
+    shippingFee,
     imageUrl,
     category: Array.isArray(item.category)
-      ? item.category.map((c) => String(c).toLowerCase())
+      ? item.category.map((c) => String(c).trim()).filter(Boolean)
       : [],
     isOutOfStock: item.isOutOfStock,
   };
@@ -116,6 +132,10 @@ Page({
 
   onLoad() {
     this.loadPageData();
+  },
+
+  onShow() {
+    updateCartTabBarBadge();
   },
 
   onPullDownRefresh() {
@@ -147,7 +167,6 @@ Page({
       }
 
       const homepageData = res.data;
-      console.log(homepageData);
       const categories = normalizeCategoryTabs(homepageData.categories ?? []);
       const prevTabId = this.data.currentTabId;
       const currentTabId =
@@ -181,7 +200,7 @@ Page({
     });
   },
 
-  /** 按分类 id（与商品 category 数组中的 key 对齐）过滤 */
+  /** 按分类 id（与商品 category 数组中的分类 id 对齐）过滤 */
   applyCategoryFilter() {
     const { allProducts, currentTabId } = this.data;
     if (!currentTabId) {
@@ -207,6 +226,40 @@ Page({
     if (productId) {
       this.navigateToProductDetail(productId);
     }
+  },
+
+  onAddCart(e: WechatMiniprogram.TouchEvent) {
+    const product = e.currentTarget.dataset.product as ProductItem | undefined;
+    if (!product || !product.id) {
+      wx.showToast({ title: '商品信息无效', icon: 'none' });
+      return;
+    }
+
+    if (product.isOutOfStock) {
+      wx.showToast({ title: '今日售罄，可预约明日', icon: 'none' });
+      return;
+    }
+
+    const cart = readCartFromStorage();
+    const index = cart.findIndex((row) => row.id === product.id);
+
+    if (index >= 0) {
+      cart[index].quantity += 1;
+    } else {
+      cart.push({
+        id: product.id,
+        sku: product.sku,
+        name: product.name,
+        price: product.price,
+        imageUrl: product.imageUrl,
+        quantity: 1,
+        shippingFee: product.shippingFee,
+      });
+    }
+
+    writeCartToStorage(cart);
+    updateCartTabBarBadge(cart);
+    wx.showToast({ title: '已加入购物车', icon: 'success' });
   },
 
   onProductTap(e: WechatMiniprogram.TouchEvent) {

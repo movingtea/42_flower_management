@@ -51,8 +51,10 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  Category: 'Category',
   ProductCategory: 'ProductCategory',
+  ProductCategoryRelation: 'ProductCategoryRelation',
+  MaterialCategory: 'MaterialCategory',
+  MaterialCategoryRelation: 'MaterialCategoryRelation',
   Product: 'Product',
   Material: 'Material',
   ProductBOM: 'ProductBOM',
@@ -79,24 +81,50 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const CategoryScalarFieldEnum = {
+export const ProductCategoryScalarFieldEnum = {
   id: 'id',
-  key: 'key',
   name: 'name',
+  description: 'description',
+  isActive: 'isActive',
+  imageUrl: 'imageUrl',
+  sortOrder: 'sortOrder',
+  parentId: 'parentId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProductCategoryScalarFieldEnum = (typeof ProductCategoryScalarFieldEnum)[keyof typeof ProductCategoryScalarFieldEnum]
+
+
+export const ProductCategoryRelationScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  productCategoryId: 'productCategoryId'
+} as const
+
+export type ProductCategoryRelationScalarFieldEnum = (typeof ProductCategoryRelationScalarFieldEnum)[keyof typeof ProductCategoryRelationScalarFieldEnum]
+
+
+export const MaterialCategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  isActive: 'isActive',
   sortOrder: 'sortOrder',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
-export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
+export type MaterialCategoryScalarFieldEnum = (typeof MaterialCategoryScalarFieldEnum)[keyof typeof MaterialCategoryScalarFieldEnum]
 
 
-export const ProductCategoryScalarFieldEnum = {
-  productId: 'productId',
-  categoryId: 'categoryId'
+export const MaterialCategoryRelationScalarFieldEnum = {
+  id: 'id',
+  materialId: 'materialId',
+  materialCategoryId: 'materialCategoryId'
 } as const
 
-export type ProductCategoryScalarFieldEnum = (typeof ProductCategoryScalarFieldEnum)[keyof typeof ProductCategoryScalarFieldEnum]
+export type MaterialCategoryRelationScalarFieldEnum = (typeof MaterialCategoryRelationScalarFieldEnum)[keyof typeof MaterialCategoryRelationScalarFieldEnum]
 
 
 export const ProductScalarFieldEnum = {
@@ -113,6 +141,7 @@ export const ProductScalarFieldEnum = {
   isOutOfStock: 'isOutOfStock',
   allowPreOrder: 'allowPreOrder',
   productionTime: 'productionTime',
+  shippingFee: 'shippingFee',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

@@ -1,10 +1,27 @@
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
-import {
-  mockBatchHistory,
-  mockFifoFlow,
-  mockProductDetail,
-} from "@/lib/mock/inventory-detail";
+import { StockLogType } from "@/generated/prisma/enums";
+import { loadMaterialInventoryDetail } from "@/services/wms-inventory-detail";
+
+export const dynamic = "force-dynamic";
+
+function flowBadgeVariant(
+  type: StockLogType
+): "default" | "success" | "warning" | "info" | "danger" {
+  switch (type) {
+    case StockLogType.INBOUND:
+      return "success";
+    case StockLogType.WASTAGE_OUT:
+      return "danger";
+    case StockLogType.SALE_OUT:
+      return "info";
+    case StockLogType.ADJUSTMENT:
+      return "warning";
+    default:
+      return "default";
+  }
+}
 
 export default async function InventoryDetailPage({
   params,
@@ -12,7 +29,11 @@ export default async function InventoryDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const product = mockProductDetail(id);
+  const product = await loadMaterialInventoryDetail(id);
+
+  if (!product) {
+    notFound();
+  }
 
   return (
     <div>
@@ -26,8 +47,8 @@ export default async function InventoryDetailPage({
       <header className="mb-8 mt-4">
         <h2 className="text-2xl font-semibold text-zinc-900">{product.name}</h2>
         <p className="mt-1 text-sm text-zinc-500">
-          SKU {product.sku} · 合计 {product.totalQty} {product.unit} · 安全库存{" "}
-          {product.safetyThreshold}
+          编码 {product.materialCode} · 合计 {product.totalQty} {product.unit}{" "}
+          · 安全库存 {product.safetyThreshold} {product.unit}
         </p>
       </header>
 
@@ -40,60 +61,75 @@ export default async function InventoryDetailPage({
                 <th className="px-4 py-3">批次号</th>
                 <th className="px-4 py-3">入库时间</th>
                 <th className="px-4 py-3">原始 / 剩余</th>
-                <th className="px-4 py-3">保质期</th>
+                <th className="px-4 py-3">瓶插期</th>
                 <th className="px-4 py-3">库位</th>
               </tr>
             </thead>
             <tbody className="divide-y">
-              {mockBatchHistory.map((b) => (
-                <tr key={b.id}>
-                  <td className="px-4 py-3 font-medium">{b.batchNo}</td>
-                  <td className="px-4 py-3 text-zinc-600">
-                    {new Date(b.inboundAt).toLocaleString("zh-CN")}
+              {product.batches.length === 0 ? (
+                <tr>
+                  <td
+                    colSpan={5}
+                    className="px-4 py-8 text-center text-zinc-500"
+                  >
+                    暂无批次记录
                   </td>
-                  <td className="px-4 py-3">
-                    {b.originalQty} / {b.remainingQty}
-                  </td>
-                  <td className="px-4 py-3">{b.expiresAt}</td>
-                  <td className="px-4 py-3">{b.storageLocation}</td>
                 </tr>
-              ))}
+              ) : (
+                product.batches.map((b) => (
+                  <tr key={b.id}>
+                    <td className="px-4 py-3 font-medium">{b.batchNo}</td>
+                    <td className="px-4 py-3 text-zinc-600">
+                      {new Date(b.inboundAt).toLocaleString("zh-CN")}
+                    </td>
+                    <td className="px-4 py-3">
+                      {b.originalQty} / {b.remainingQty}
+                    </td>
+                    <td className="px-4 py-3">{b.expiresAt}</td>
+                    <td className="px-4 py-3">{b.storageLocation}</td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
       </section>
 
       <section>
-        <h3 className="mb-4 text-sm font-semibold text-zinc-900">FIFO 流向</h3>
-        <ul className="space-y-3">
-          {mockFifoFlow.map((flow, i) => (
-            <li
-              key={i}
-              className="flex items-center justify-between rounded-xl border bg-white px-4 py-3 shadow-sm"
-            >
-              <div>
-                <p className="font-medium text-zinc-900">{flow.ref}</p>
-                <p className="text-sm text-zinc-500">
-                  批次 {flow.batchNo} · {flow.at}
-                </p>
-              </div>
-              <div className="flex items-center gap-2">
-                <Badge
-                  variant={
-                    flow.type === "INBOUND"
-                      ? "success"
-                      : flow.type === "WASTAGE_OUT"
-                        ? "danger"
-                        : "info"
-                  }
-                >
-                  {flow.type}
-                </Badge>
-                <span className="font-medium">{flow.qty}</span>
-              </div>
-            </li>
-          ))}
-        </ul>
+        <h3 className="mb-4 text-sm font-semibold text-zinc-900">
+          库存流水（FIFO 追踪）
+        </h3>
+        <p className="mb-3 text-xs text-zinc-500">
+          按时间倒序展示本原材料关联批次的出入库流水；销售扣减的批次分配逻辑见
+          services/fifo.ts。
+        </p>
+        {product.fifoFlows.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-zinc-200 bg-white px-4 py-8 text-center text-sm text-zinc-500">
+            暂无库存流水
+          </p>
+        ) : (
+          <ul className="space-y-3">
+            {product.fifoFlows.map((flow, i) => (
+              <li
+                key={`${flow.batchNo}-${flow.at}-${i}`}
+                className="flex items-center justify-between rounded-xl border bg-white px-4 py-3 shadow-sm"
+              >
+                <div>
+                  <p className="font-medium text-zinc-900">{flow.ref}</p>
+                  <p className="text-sm text-zinc-500">
+                    批次 {flow.batchNo} · {flow.at}
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant={flowBadgeVariant(flow.type)}>
+                    {flow.typeLabel}
+                  </Badge>
+                  <span className="font-medium">{flow.qty}</span>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
     </div>
   );

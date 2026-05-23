@@ -5,8 +5,7 @@ import { generateUniqueSku } from "@/utils/skuGenerator";
 import { loadCmsProductCategories } from "@/lib/cms-product-categories.server";
 import { parseCmsProductBody } from "@/lib/cms-products";
 import {
-  cmsLabelByKey,
-  ensureCategoryIdsByKeys,
+  ensureCategoryIds,
   productCategoriesInclude,
 } from "@/lib/product-categories";
 import { prisma } from "@/lib/prisma";
@@ -39,10 +38,7 @@ export async function POST(request: Request) {
     const categoryConfig = await loadCmsProductCategories();
     const body = parseCmsProductBody(await request.json(), categoryConfig);
 
-    const labelByKey = cmsLabelByKey(categoryConfig);
-    const categoryIds = await ensureCategoryIdsByKeys(body.category, {
-      labelByKey,
-    });
+    const categoryIds = await ensureCategoryIds(body.category);
 
     const sku = await generateUniqueSku("product");
 
@@ -50,7 +46,9 @@ export async function POST(request: Request) {
       data: {
         ...cmsProductCreateData(body, sku),
         categories: {
-          create: categoryIds.map((categoryId) => ({ categoryId })),
+          create: categoryIds.map((productCategoryId) => ({
+            productCategoryId,
+          })),
         },
       },
       include: productCategoriesInclude,

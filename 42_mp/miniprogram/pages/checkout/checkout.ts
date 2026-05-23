@@ -1,14 +1,22 @@
 // pages/checkout/checkout.ts — 结算履约与下单闭环
 import { request } from '../../utils/request';
+import {
+  CHECKOUT_PRODUCTS_KEY,
+  parseCartPrice,
+  type CartItem,
+} from '../../utils/cart';
 
-type FulfillmentMethod = 'DELIVERY' | 'PICKUP';
-
-interface OrderItem {
-  productId: string;
-  skuId?: string;
+/** 结算页展示行 */
+interface CheckoutDisplayItem {
+  id: string;
   name: string;
-  quantity: number;
   price: number;
+  priceText: string;
+  quantity: number;
+  shippingFee: number;
+  shippingFeeLabel: string;
+  lineSubtotal: string;
+  imageUrl: string;
 }
 
 /** 与后端 POST /api/wechat/orders 的 parseOrderBody 字段一一对应 */
@@ -40,9 +48,7 @@ interface CreateOrderApiResponse {
 }
 
 const TIME_BUCKETS = ['上午', '下午', '晚上'];
-const DEFAULT_SHIPPING_FEE = 15;
 
-/** 今日 YYYY-MM-DD，供 date picker 的 start */
 function todayString(): string {
   const d = new Date();
   const m = `${d.getMonth() + 1}`.padStart(2, '0');
@@ -50,9 +56,40 @@ function todayString(): string {
   return `${d.getFullYear()}-${m}-${day}`;
 }
 
+function formatMoney(n: number): string {
+  return Number(n.toFixed(2)).toFixed(2);
+}
+
+/** 整单运费：勾选商品中单件运费的最大值 */
+function calcOrderShippingFee(items: CheckoutDisplayItem[]): number {
+  if (!items.length) return 0;
+  return Math.max(...items.map((row) => row.shippingFee));
+}
+
+function cartRowsToDisplay(items: CartItem[]): CheckoutDisplayItem[] {
+  return items.map((row) => {
+    const price = parseCartPrice(row.price);
+    const qty = Math.max(1, Math.floor(Number(row.quantity)) || 1);
+    const shippingFee = Math.max(0, Number(row.shippingFee) || 0);
+    const lineSubtotal = price * qty;
+
+    return {
+      id: row.id,
+      name: row.name,
+      price,
+      priceText: formatMoney(price),
+      quantity: qty,
+      shippingFee,
+      shippingFeeLabel:
+        shippingFee > 0 ? `¥${formatMoney(shippingFee)}` : '免运费',
+      lineSubtotal: formatMoney(lineSubtotal),
+      imageUrl: row.imageUrl || '',
+    };
+  });
+}
+
 Page({
   data: {
-    fulfillmentMethod: 'DELIVERY' as FulfillmentMethod,
     receiverName: '',
     receiverPhone: '',
     deliveryAddress: '',
@@ -63,64 +100,70 @@ Page({
     deliveryTimeBucket: TIME_BUCKETS[0],
     greetingCard: '',
     isAnonymous: false,
-    orderItems: [] as OrderItem[],
-    productTotal: 0,
-    shippingFee: DEFAULT_SHIPPING_FEE,
-    payableTotal: 0,
+    checkoutItems: [] as CheckoutDisplayItem[],
+    productTotal: '0.00',
+    shippingFee: '0.00',
+    payableTotal: '0.00',
     submitting: false,
+    emptyCheckout: true,
   },
 
-  onLoad(options: Record<string, string | undefined>) {
-    this.initOrderItems(options);
-    this.recalcAmounts();
+  onLoad() {
+    this.loadCheckoutProducts();
   },
 
-  /** 优先使用页面跳转参数，否则使用模拟商品便于联调 */
-  initOrderItems(options: Record<string, string | undefined>) {
-    const productId = options.productId || 'cmpgl54ob0000jwvwz0f1b8mu';
-    const name = options.name ? decodeURIComponent(options.name) : '春日限定花束（联调）';
-    const quantity = Math.max(1, parseInt(options.quantity || '1', 10) || 1);
-    const price = parseFloat(options.price || '199') || 199;
-    const skuId = options.skuId;
-
-    const orderItems: OrderItem[] = [
-      {
-        productId,
-        skuId,
-        name,
-        quantity,
-        price,
-      },
-    ];
-
-    const shippingFee =
-      options.shippingFee !== undefined
-        ? parseFloat(options.shippingFee) || 0
-        : DEFAULT_SHIPPING_FEE;
-
-    this.setData({ orderItems, shippingFee });
+  onShow() {
+    this.loadCheckoutProducts();
   },
 
-  recalcAmounts() {
-    const { orderItems, fulfillmentMethod, shippingFee } = this.data;
-    const productTotal = orderItems.reduce(
-      (sum, item) => sum + item.price * item.quantity,
+  /** 从购物车勾选缓存加载待结算商品 */
+  loadCheckoutProducts() {
+    let raw: unknown;
+    try {
+      raw = wx.getStorageSync(CHECKOUT_PRODUCTS_KEY);
+    } catch (err) {
+      console.warn('读取结算缓存失败', err);
+      raw = null;
+    }
+
+    if (!Array.isArray(raw) || raw.length === 0) {
+      this.setData({
+        checkoutItems: [],
+        emptyCheckout: true,
+      });
+      this.recalcAmounts([]);
+      return;
+    }
+
+    const rows = raw.filter(
+      (row): row is CartItem =>
+        !!row &&
+        typeof row === 'object' &&
+        typeof (row as CartItem).id === 'string' &&
+        typeof (row as CartItem).name === 'string'
+    );
+
+    const checkoutItems = cartRowsToDisplay(rows);
+    this.setData({
+      checkoutItems,
+      emptyCheckout: checkoutItems.length === 0,
+    });
+    this.recalcAmounts(checkoutItems);
+  },
+
+  recalcAmounts(items?: CheckoutDisplayItem[]) {
+    const list = items ?? this.data.checkoutItems;
+    const productTotalNum = list.reduce(
+      (sum, row) => sum + row.price * row.quantity,
       0
     );
-    const fee = fulfillmentMethod === 'DELIVERY' ? shippingFee : 0;
-    const payableTotal = productTotal + fee;
-    this.setData({
-      productTotal: Number(productTotal.toFixed(2)),
-      shippingFee: fee,
-      payableTotal: Number(payableTotal.toFixed(2)),
-    });
-  },
+    const shippingFeeNum = calcOrderShippingFee(list);
+    const payableTotalNum = productTotalNum + shippingFeeNum;
 
-  onFulfillmentChange(e: WechatMiniprogram.TouchEvent) {
-    const method = e.currentTarget.dataset.method as FulfillmentMethod;
-    if (method === this.data.fulfillmentMethod) return;
-    this.setData({ fulfillmentMethod: method }, () => {
-      this.recalcAmounts();
+    this.setData({
+      productTotal: formatMoney(productTotalNum),
+      shippingFee: formatMoney(shippingFeeNum),
+      payableTotal: formatMoney(payableTotalNum),
     });
   },
 
@@ -157,43 +200,40 @@ Page({
     this.setData({ isAnonymous: checked });
   },
 
+  onGoCart() {
+    wx.switchTab({ url: '/pages/cart/cart' });
+  },
+
   validateForm(): string | null {
     const {
-      fulfillmentMethod,
       receiverName,
       receiverPhone,
       deliveryAddress,
       deliveryDate,
       deliveryTimeBucket,
-      orderItems,
+      checkoutItems,
+      emptyCheckout,
     } = this.data;
 
-    if (!orderItems.length) {
-      return '暂无待结算商品';
+    if (emptyCheckout || !checkoutItems.length) {
+      return '暂无待结算商品，请返回购物车勾选';
     }
 
-    const nameLabel = fulfillmentMethod === 'DELIVERY' ? '收件人' : '联系人';
-    if (!receiverName.trim()) return `请填写${nameLabel}姓名`;
+    if (!receiverName.trim()) return '请填写收件人姓名';
     if (!receiverPhone.trim()) return '请填写联系电话';
     if (!/^1\d{10}$/.test(receiverPhone.trim())) return '请填写正确的手机号';
-
-    if (fulfillmentMethod === 'DELIVERY') {
-      if (!deliveryAddress.trim()) return '请填写详细收货地址';
-    }
-
+    if (!deliveryAddress.trim()) return '请填写详细收货地址';
     if (!deliveryDate) return '请选择期望送达日期';
     if (!deliveryTimeBucket) return '请选择期望送达时段';
 
-    for (const item of orderItems) {
-      if (!item.productId || !item.productId.trim()) {
+    for (const item of checkoutItems) {
+      if (!item.id || !item.id.trim()) {
         return '商品信息不完整，请返回重新选购';
       }
-      const qty = Math.floor(Number(item.quantity));
-      if (!Number.isInteger(qty) || qty <= 0) {
+      if (!Number.isInteger(item.quantity) || item.quantity <= 0) {
         return '商品数量无效';
       }
-      const price = Number(item.price);
-      if (!Number.isFinite(price) || price < 0) {
+      if (!Number.isFinite(item.price) || item.price < 0) {
         return '商品价格无效';
       }
     }
@@ -201,7 +241,6 @@ Page({
     return null;
   },
 
-  /** 将日期 + 时段拼成后端可解析的 ISO 时间（对应 parseOrderBody 的 deliveryTime） */
   buildDeliveryTimeIso(): string | undefined {
     const { deliveryDate, deliveryTimeBucket } = this.data;
     if (!deliveryDate) return undefined;
@@ -218,22 +257,17 @@ Page({
   },
 
   /**
-   * 组装与后端 WechatCreateOrderPayload 完全对齐的请求体。
-   * totalAmount 仅含商品行合计（与 items[].price * quantity 之和一致），不含配送费。
+   * 组装与后端 WechatCreateOrderPayload 对齐的请求体。
+   * totalAmount 仅含商品行合计（不含运费），与历史接口约定一致。
    */
   buildOrderPayload(wechatOpenId: string): WechatCreateOrderPayload {
-    const {
-      fulfillmentMethod,
-      receiverName,
-      receiverPhone,
-      deliveryAddress,
-      orderItems,
-    } = this.data;
+    const { receiverName, receiverPhone, deliveryAddress, checkoutItems } =
+      this.data;
 
-    const items = orderItems.map((item) => ({
-      productId: String(item.productId).trim(),
-      quantity: Math.floor(Number(item.quantity)),
-      price: Number(Number(item.price).toFixed(2)),
+    const items = checkoutItems.map((item) => ({
+      productId: String(item.id).trim(),
+      quantity: item.quantity,
+      price: Number(item.price.toFixed(2)),
     }));
 
     const totalAmount = Number(
@@ -245,10 +279,7 @@ Page({
       totalAmount,
       receiverName: receiverName.trim(),
       receiverPhone: receiverPhone.trim(),
-      deliveryAddress:
-        fulfillmentMethod === 'DELIVERY'
-          ? deliveryAddress.trim()
-          : '到店自提',
+      deliveryAddress: deliveryAddress.trim(),
       items,
     };
 

@@ -140,7 +140,16 @@
             wx:if="{{item.subtitle}}"
             class="product-subtitle text-ellipsis text-muted"
           >{{item.subtitle}}</text>
-          <text class="price-text">¥{{item.price}}</text>
+          <view class="product-info-bottom">
+            <text class="price-text">¥{{item.price}}</text>
+            <view
+              class="cart-add-btn flex-center"
+              catchtap="onAddCart"
+              data-product="{{item}}"
+            >
+              <text class="cart-add-icon">+</text>
+            </view>
+          </view>
         </view>
       </view>
     </view>

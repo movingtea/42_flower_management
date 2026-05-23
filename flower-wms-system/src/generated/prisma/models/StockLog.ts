@@ -1264,30 +1264,12 @@ export type $StockLogPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     materialId: string
     batchId: string
     type: $Enums.StockLogType
-    /**
-     * 变动量：入库/盘盈为正，销售/损耗/盘亏为负
-     */
     delta: number
-    /**
-     * 本条流水绝对数量（展示用，恒为正）
-     */
     quantity: number
-    /**
-     * 销售出库关联订单
-     */
     orderId: string | null
-    /**
-     * 销售出库关联订单行
-     */
     orderItemId: string | null
-    /**
-     * 损耗原因
-     */
     wastageReason: string | null
     remark: string | null
-    /**
-     * 操作人 / system
-     */
     operator: string | null
     createdAt: Date
   }, ExtArgs["result"]["stockLog"]>

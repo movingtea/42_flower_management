@@ -1,12 +1,12 @@
 import { Prisma } from "@/generated/prisma/client";
 import { StockLogType } from "@/generated/prisma/enums";
-import type { WmsCategory } from "@/lib/constants";
+import { syncMaterialCategoryLinks } from "@/lib/material-categories";
 import { prisma } from "@/lib/prisma";
 import { generateUniqueSku } from "@/utils/skuGenerator";
 
 export type PurchaseInboundPayload = {
   name: string;
-  category: WmsCategory;
+  materialCategoryIds: string[];
   safetyStockThreshold: number;
   receivedQty: number;
   costPrice: number;
@@ -63,6 +63,10 @@ export async function runPurchaseInboundTransaction(body: PurchaseInboundPayload
       });
     }
 
+    await syncMaterialCategoryLinks(material.id, body.materialCategoryIds, {
+      tx,
+    });
+
     const batchNo = await generateBatchNo(tx);
     const batch = await tx.batch.create({
       data: {
@@ -83,7 +87,7 @@ export async function runPurchaseInboundTransaction(body: PurchaseInboundPayload
         type: StockLogType.INBOUND,
         delta: body.receivedQty,
         quantity: body.receivedQty,
-        remark: `采购入库（${body.category}）`,
+        remark: "采购入库",
         operator: "system",
       },
     });

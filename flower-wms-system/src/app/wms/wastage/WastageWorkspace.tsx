@@ -7,7 +7,7 @@ import { WastageForm } from "./WastageForm";
 import type { WastageBatchRow } from "./types";
 
 function formatExpiry(iso: string | null) {
-  if (!iso) return "??????";
+  if (!iso) return "未设置瓶插期";
   return new Date(iso).toLocaleString("zh-CN", {
     year: "numeric",
     month: "2-digit",
