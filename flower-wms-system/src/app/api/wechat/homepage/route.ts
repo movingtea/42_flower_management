@@ -8,20 +8,14 @@ import {
   parseGlobalNoticeValue,
   parseHomePopupValue,
 } from "@/lib/app-marketing";
-import { CMS_PRODUCT_CATEGORIES_KEY } from "@/lib/cms-product-categories";
-import { loadCmsProductCategories } from "@/lib/cms-product-categories.server";
+import { loadWechatHomeProductCategories } from "@/lib/product-category.server";
 import { HOME_BANNER_KEY, parseHomeBannerValue } from "@/lib/home-banner";
 import { PRODUCT_STATUS_PUBLISHED } from "@/lib/product-status";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-const CONFIG_KEYS = [
-  HOME_BANNER_KEY,
-  GLOBAL_NOTICE_KEY,
-  HOME_POPUP_KEY,
-  CMS_PRODUCT_CATEGORIES_KEY,
-] as const;
+const CONFIG_KEYS = [HOME_BANNER_KEY, GLOBAL_NOTICE_KEY, HOME_POPUP_KEY] as const;
 
 /** GET：小程序首页超级接口（轮播 + 公告 + 弹窗 + 分类） */
 export async function GET() {
@@ -30,7 +24,7 @@ export async function GET() {
       prisma.appConfig.findMany({
         where: { key: { in: [...CONFIG_KEYS] } },
       }),
-      loadCmsProductCategories(),
+      loadWechatHomeProductCategories(),
     ]);
 
     const valueByKey = new Map(rows.map((r) => [r.key, r.value]));

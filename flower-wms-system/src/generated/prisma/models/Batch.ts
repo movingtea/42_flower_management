@@ -962,37 +962,13 @@ export type $BatchPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     materialId: string
-    /**
-     * 批次号，如 PO-20260522-001
-     */
     batchNo: string | null
-    /**
-     * 入库时间，FIFO 排序依据
-     */
     inboundAt: Date
-    /**
-     * 采购入库原始数量
-     */
     originalQty: number
-    /**
-     * 当前可用剩余数量（出库递减，≥ 0）
-     */
     remainingQty: number
-    /**
-     * 进货单价（按批次核算成本）
-     */
     unitCost: runtime.Decimal
-    /**
-     * 瓶插期 / 预计枯萎截止日
-     */
     expiresAt: Date | null
-    /**
-     * 库位，如 冷库 A-01
-     */
     storageLocation: string | null
-    /**
-     * 供应商
-     */
     supplier: string | null
     note: string | null
     createdAt: Date

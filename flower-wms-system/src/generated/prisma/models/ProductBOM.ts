@@ -625,9 +625,6 @@ export type $ProductBOMPayload<ExtArgs extends runtime.Types.Extensions.Internal
     id: string
     productId: string
     materialId: string
-    /**
-     * 单件成品所需原材料数量
-     */
     quantityNeeded: number
   }, ExtArgs["result"]["productBOM"]>
   composites: {}

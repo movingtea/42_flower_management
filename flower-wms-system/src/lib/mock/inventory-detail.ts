@@ -1,3 +1,6 @@
+/**
+ * @deprecated 库存详情已改为 Prisma（见 services/wms-inventory-detail.ts）。
+ */
 export const mockProductDetail = (id: string) => ({
   id,
   name: id === "inv-001" ? "红玫瑰" : "花材",

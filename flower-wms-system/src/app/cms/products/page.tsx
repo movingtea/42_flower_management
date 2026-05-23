@@ -3,7 +3,7 @@ import { Badge } from "@/components/ui/Badge";
 import { formatCmsCategoryLabels } from "@/lib/cms-product-categories";
 import { loadCmsProductCategories } from "@/lib/cms-product-categories.server";
 import {
-  categoryKeysFromProduct,
+  categoryIdsFromProduct,
   productCategoriesInclude,
 } from "@/lib/product-categories";
 import { prisma } from "@/lib/prisma";
@@ -60,7 +60,7 @@ export default async function CmsProductsPage() {
               </tr>
             ) : (
               products.map((p) => {
-                const codes = categoryKeysFromProduct(p);
+                const categoryIds = categoryIdsFromProduct(p);
                 return (
                   <tr key={p.id} className="hover:bg-zinc-50/50">
                     <td className="px-4 py-3">
@@ -69,15 +69,15 @@ export default async function CmsProductsPage() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex flex-wrap gap-1">
-                        {codes.length === 0 ? (
+                        {categoryIds.length === 0 ? (
                           <span className="text-zinc-400">无分类</span>
                         ) : (
-                          codes.map((code) => (
+                          categoryIds.map((cid) => (
                             <span
-                              key={code}
+                              key={cid}
                               className="rounded-full bg-rose-50 px-2 py-0.5 text-xs text-rose-700"
                             >
-                              {formatCmsCategoryLabels([code], categoryConfig)}
+                              {formatCmsCategoryLabels([cid], categoryConfig)}
                             </span>
                           ))
                         )}

@@ -1011,28 +1011,16 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    /**
-     * 业务单号，如 FL20260522001
-     */
     orderNo: string
     status: $Enums.OrderStatus
     wechatOpenId: string | null
     customerName: string | null
     customerPhone: string | null
-    /**
-     * 微信支付单号
-     */
     wechatTransactionId: string | null
     totalAmount: runtime.Decimal
-    /**
-     * 配送信息
-     */
     receiverName: string | null
     receiverPhone: string | null
     deliveryAddress: string | null
-    /**
-     * 顾客预约送达时间
-     */
     deliveryTime: Date | null
     paidAt: Date | null
     deliveredAt: Date | null

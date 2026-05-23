@@ -384,8 +384,10 @@ type FieldRefInputType<Model, FieldType> = Model extends never ? never : FieldRe
 
 
 export const ModelName = {
-  Category: 'Category',
   ProductCategory: 'ProductCategory',
+  ProductCategoryRelation: 'ProductCategoryRelation',
+  MaterialCategory: 'MaterialCategory',
+  MaterialCategoryRelation: 'MaterialCategoryRelation',
   Product: 'Product',
   Material: 'Material',
   ProductBOM: 'ProductBOM',
@@ -409,84 +411,10 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "category" | "productCategory" | "product" | "material" | "productBOM" | "batch" | "stockLog" | "order" | "orderItem" | "appConfig"
+    modelProps: "productCategory" | "productCategoryRelation" | "materialCategory" | "materialCategoryRelation" | "product" | "material" | "productBOM" | "batch" | "stockLog" | "order" | "orderItem" | "appConfig"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
-    Category: {
-      payload: Prisma.$CategoryPayload<ExtArgs>
-      fields: Prisma.CategoryFieldRefs
-      operations: {
-        findUnique: {
-          args: Prisma.CategoryFindUniqueArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryPayload> | null
-        }
-        findUniqueOrThrow: {
-          args: Prisma.CategoryFindUniqueOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryPayload>
-        }
-        findFirst: {
-          args: Prisma.CategoryFindFirstArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryPayload> | null
-        }
-        findFirstOrThrow: {
-          args: Prisma.CategoryFindFirstOrThrowArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryPayload>
-        }
-        findMany: {
-          args: Prisma.CategoryFindManyArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryPayload>[]
-        }
-        create: {
-          args: Prisma.CategoryCreateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryPayload>
-        }
-        createMany: {
-          args: Prisma.CategoryCreateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        createManyAndReturn: {
-          args: Prisma.CategoryCreateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryPayload>[]
-        }
-        delete: {
-          args: Prisma.CategoryDeleteArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryPayload>
-        }
-        update: {
-          args: Prisma.CategoryUpdateArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryPayload>
-        }
-        deleteMany: {
-          args: Prisma.CategoryDeleteManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateMany: {
-          args: Prisma.CategoryUpdateManyArgs<ExtArgs>
-          result: BatchPayload
-        }
-        updateManyAndReturn: {
-          args: Prisma.CategoryUpdateManyAndReturnArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryPayload>[]
-        }
-        upsert: {
-          args: Prisma.CategoryUpsertArgs<ExtArgs>
-          result: runtime.Types.Utils.PayloadToResult<Prisma.$CategoryPayload>
-        }
-        aggregate: {
-          args: Prisma.CategoryAggregateArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.AggregateCategory>
-        }
-        groupBy: {
-          args: Prisma.CategoryGroupByArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.CategoryGroupByOutputType>[]
-        }
-        count: {
-          args: Prisma.CategoryCountArgs<ExtArgs>
-          result: runtime.Types.Utils.Optional<Prisma.CategoryCountAggregateOutputType> | number
-        }
-      }
-    }
     ProductCategory: {
       payload: Prisma.$ProductCategoryPayload<ExtArgs>
       fields: Prisma.ProductCategoryFieldRefs
@@ -558,6 +486,228 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ProductCategoryCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ProductCategoryCountAggregateOutputType> | number
+        }
+      }
+    }
+    ProductCategoryRelation: {
+      payload: Prisma.$ProductCategoryRelationPayload<ExtArgs>
+      fields: Prisma.ProductCategoryRelationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.ProductCategoryRelationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductCategoryRelationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.ProductCategoryRelationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductCategoryRelationPayload>
+        }
+        findFirst: {
+          args: Prisma.ProductCategoryRelationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductCategoryRelationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.ProductCategoryRelationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductCategoryRelationPayload>
+        }
+        findMany: {
+          args: Prisma.ProductCategoryRelationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductCategoryRelationPayload>[]
+        }
+        create: {
+          args: Prisma.ProductCategoryRelationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductCategoryRelationPayload>
+        }
+        createMany: {
+          args: Prisma.ProductCategoryRelationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.ProductCategoryRelationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductCategoryRelationPayload>[]
+        }
+        delete: {
+          args: Prisma.ProductCategoryRelationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductCategoryRelationPayload>
+        }
+        update: {
+          args: Prisma.ProductCategoryRelationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductCategoryRelationPayload>
+        }
+        deleteMany: {
+          args: Prisma.ProductCategoryRelationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.ProductCategoryRelationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.ProductCategoryRelationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductCategoryRelationPayload>[]
+        }
+        upsert: {
+          args: Prisma.ProductCategoryRelationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$ProductCategoryRelationPayload>
+        }
+        aggregate: {
+          args: Prisma.ProductCategoryRelationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateProductCategoryRelation>
+        }
+        groupBy: {
+          args: Prisma.ProductCategoryRelationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProductCategoryRelationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.ProductCategoryRelationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.ProductCategoryRelationCountAggregateOutputType> | number
+        }
+      }
+    }
+    MaterialCategory: {
+      payload: Prisma.$MaterialCategoryPayload<ExtArgs>
+      fields: Prisma.MaterialCategoryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MaterialCategoryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MaterialCategoryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryPayload>
+        }
+        findFirst: {
+          args: Prisma.MaterialCategoryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MaterialCategoryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryPayload>
+        }
+        findMany: {
+          args: Prisma.MaterialCategoryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryPayload>[]
+        }
+        create: {
+          args: Prisma.MaterialCategoryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryPayload>
+        }
+        createMany: {
+          args: Prisma.MaterialCategoryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MaterialCategoryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryPayload>[]
+        }
+        delete: {
+          args: Prisma.MaterialCategoryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryPayload>
+        }
+        update: {
+          args: Prisma.MaterialCategoryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryPayload>
+        }
+        deleteMany: {
+          args: Prisma.MaterialCategoryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MaterialCategoryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MaterialCategoryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryPayload>[]
+        }
+        upsert: {
+          args: Prisma.MaterialCategoryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryPayload>
+        }
+        aggregate: {
+          args: Prisma.MaterialCategoryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMaterialCategory>
+        }
+        groupBy: {
+          args: Prisma.MaterialCategoryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MaterialCategoryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MaterialCategoryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MaterialCategoryCountAggregateOutputType> | number
+        }
+      }
+    }
+    MaterialCategoryRelation: {
+      payload: Prisma.$MaterialCategoryRelationPayload<ExtArgs>
+      fields: Prisma.MaterialCategoryRelationFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MaterialCategoryRelationFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryRelationPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MaterialCategoryRelationFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryRelationPayload>
+        }
+        findFirst: {
+          args: Prisma.MaterialCategoryRelationFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryRelationPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MaterialCategoryRelationFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryRelationPayload>
+        }
+        findMany: {
+          args: Prisma.MaterialCategoryRelationFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryRelationPayload>[]
+        }
+        create: {
+          args: Prisma.MaterialCategoryRelationCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryRelationPayload>
+        }
+        createMany: {
+          args: Prisma.MaterialCategoryRelationCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MaterialCategoryRelationCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryRelationPayload>[]
+        }
+        delete: {
+          args: Prisma.MaterialCategoryRelationDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryRelationPayload>
+        }
+        update: {
+          args: Prisma.MaterialCategoryRelationUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryRelationPayload>
+        }
+        deleteMany: {
+          args: Prisma.MaterialCategoryRelationDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MaterialCategoryRelationUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MaterialCategoryRelationUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryRelationPayload>[]
+        }
+        upsert: {
+          args: Prisma.MaterialCategoryRelationUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MaterialCategoryRelationPayload>
+        }
+        aggregate: {
+          args: Prisma.MaterialCategoryRelationAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMaterialCategoryRelation>
+        }
+        groupBy: {
+          args: Prisma.MaterialCategoryRelationGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MaterialCategoryRelationGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MaterialCategoryRelationCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MaterialCategoryRelationCountAggregateOutputType> | number
         }
       }
     }
@@ -1192,24 +1342,50 @@ export const TransactionIsolationLevel = runtime.makeStrictEnum({
 export type TransactionIsolationLevel = (typeof TransactionIsolationLevel)[keyof typeof TransactionIsolationLevel]
 
 
-export const CategoryScalarFieldEnum = {
+export const ProductCategoryScalarFieldEnum = {
   id: 'id',
-  key: 'key',
   name: 'name',
+  description: 'description',
+  isActive: 'isActive',
+  imageUrl: 'imageUrl',
+  sortOrder: 'sortOrder',
+  parentId: 'parentId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type ProductCategoryScalarFieldEnum = (typeof ProductCategoryScalarFieldEnum)[keyof typeof ProductCategoryScalarFieldEnum]
+
+
+export const ProductCategoryRelationScalarFieldEnum = {
+  id: 'id',
+  productId: 'productId',
+  productCategoryId: 'productCategoryId'
+} as const
+
+export type ProductCategoryRelationScalarFieldEnum = (typeof ProductCategoryRelationScalarFieldEnum)[keyof typeof ProductCategoryRelationScalarFieldEnum]
+
+
+export const MaterialCategoryScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  isActive: 'isActive',
   sortOrder: 'sortOrder',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
-export type CategoryScalarFieldEnum = (typeof CategoryScalarFieldEnum)[keyof typeof CategoryScalarFieldEnum]
+export type MaterialCategoryScalarFieldEnum = (typeof MaterialCategoryScalarFieldEnum)[keyof typeof MaterialCategoryScalarFieldEnum]
 
 
-export const ProductCategoryScalarFieldEnum = {
-  productId: 'productId',
-  categoryId: 'categoryId'
+export const MaterialCategoryRelationScalarFieldEnum = {
+  id: 'id',
+  materialId: 'materialId',
+  materialCategoryId: 'materialCategoryId'
 } as const
 
-export type ProductCategoryScalarFieldEnum = (typeof ProductCategoryScalarFieldEnum)[keyof typeof ProductCategoryScalarFieldEnum]
+export type MaterialCategoryRelationScalarFieldEnum = (typeof MaterialCategoryRelationScalarFieldEnum)[keyof typeof MaterialCategoryRelationScalarFieldEnum]
 
 
 export const ProductScalarFieldEnum = {
@@ -1226,6 +1402,7 @@ export const ProductScalarFieldEnum = {
   isOutOfStock: 'isOutOfStock',
   allowPreOrder: 'allowPreOrder',
   productionTime: 'productionTime',
+  shippingFee: 'shippingFee',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1404,6 +1581,13 @@ export type ListStringFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMod
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'Int'
  */
 export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int'>
@@ -1446,9 +1630,16 @@ export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMo
 
 
 /**
- * Reference to a field of type 'Boolean'
+ * Reference to a field of type 'Float'
  */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
+    
+
+
+/**
+ * Reference to a field of type 'Float[]'
+ */
+export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
 
@@ -1491,20 +1682,6 @@ export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'J
  * Reference to a field of type 'QueryMode'
  */
 export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
-    
-
-
-/**
- * Reference to a field of type 'Float'
- */
-export type FloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float'>
-    
-
-
-/**
- * Reference to a field of type 'Float[]'
- */
-export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
     
 
 /**
@@ -1617,8 +1794,10 @@ export type PrismaClientOptions = ({
   queryPlanCacheMaxSize?: number
 }
 export type GlobalOmitConfig = {
-  category?: Prisma.CategoryOmit
   productCategory?: Prisma.ProductCategoryOmit
+  productCategoryRelation?: Prisma.ProductCategoryRelationOmit
+  materialCategory?: Prisma.MaterialCategoryOmit
+  materialCategoryRelation?: Prisma.MaterialCategoryRelationOmit
   product?: Prisma.ProductOmit
   material?: Prisma.MaterialOmit
   productBOM?: Prisma.ProductBOMOmit

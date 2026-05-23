@@ -16,10 +16,10 @@ import {
   CMS_PRODUCT_CATEGORIES_KEY,
   CMS_PRODUCT_CATEGORIES_NAME,
   parseCmsProductCategoriesValue,
-  sortCmsProductCategories,
   validateCmsProductCategories,
-  type CmsProductCategoryItem,
+  type LegacyCmsCategoryConfigItem,
 } from "@/lib/cms-product-categories";
+import { loadAllProductCategoriesFlat } from "@/lib/product-category.server";
 import {
   HOME_BANNER_KEY,
   HOME_BANNER_NAME,
@@ -57,7 +57,7 @@ function parseValueForKey(
   | HomeBannerItem[]
   | GlobalNoticeConfig
   | HomePopupConfig
-  | CmsProductCategoryItem[] {
+  | LegacyCmsCategoryConfigItem[] {
   if (key === HOME_BANNER_KEY) return parseHomeBannerValue(value);
   if (key === GLOBAL_NOTICE_KEY) return parseGlobalNoticeValue(value);
   if (key === HOME_POPUP_KEY) return parseHomePopupValue(value);
@@ -73,6 +73,22 @@ export async function GET(request: Request) {
     const key = new URL(request.url).searchParams.get("key")?.trim();
     if (!key) {
       return jsonError("请提供 key 查询参数", 400);
+    }
+
+    if (key === CMS_PRODUCT_CATEGORIES_KEY) {
+      const flat = await loadAllProductCategoriesFlat();
+      const value = flat.map((c) => ({
+        value: c.id,
+        label: c.name,
+        sortOrder: c.sortOrder,
+      }));
+      return jsonSuccess({
+        id: null,
+        key,
+        name: CMS_PRODUCT_CATEGORIES_NAME,
+        value,
+        updatedAt: null,
+      });
     }
 
     const row = await prisma.appConfig.findUnique({ where: { key } });
@@ -143,11 +159,9 @@ function normalizePutValue(
   }
 
   if (key === CMS_PRODUCT_CATEGORIES_KEY) {
-    let items = parseCmsProductCategoriesValue(value);
-    const validationError = validateCmsProductCategories(items);
+    const validationError = validateCmsProductCategories([]);
     if (validationError) throw new Error(validationError);
-    items = sortCmsProductCategories(items);
-    return items as Prisma.InputJsonValue;
+    return [] as Prisma.InputJsonValue;
   }
 
   return value as Prisma.InputJsonValue;

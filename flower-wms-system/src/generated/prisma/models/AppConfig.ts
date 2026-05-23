@@ -366,17 +366,8 @@ export type $AppConfigPayload<ExtArgs extends runtime.Types.Extensions.InternalA
   objects: {}
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
-    /**
-     * 如 HOME_BANNER
-     */
     key: string
-    /**
-     * 后台展示名称
-     */
     name: string
-    /**
-     * 配置载荷，如轮播图数组
-     */
     value: runtime.JsonValue
     createdAt: Date
     updatedAt: Date

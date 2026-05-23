@@ -960,9 +960,6 @@ export type $OrderItemPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     id: string
     orderId: string
     productId: string
-    /**
-     * 下单快照，避免后续改名影响历史订单
-     */
     productName: string
     productSku: string
     quantity: number

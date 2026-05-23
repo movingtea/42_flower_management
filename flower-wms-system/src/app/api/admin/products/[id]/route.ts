@@ -4,7 +4,6 @@ import { cmsProductUpdateData } from "@/lib/cms-product-write";
 import { loadCmsProductCategories } from "@/lib/cms-product-categories.server";
 import { parseCmsProductBody } from "@/lib/cms-products";
 import {
-  cmsLabelByKey,
   productCategoriesInclude,
   syncProductCategoryLinks,
 } from "@/lib/product-categories";
@@ -47,10 +46,7 @@ export async function PUT(
     }
 
     const product = await prisma.$transaction(async (tx) => {
-      await syncProductCategoryLinks(id, body.category, {
-        labelByKey: cmsLabelByKey(categoryConfig),
-        tx,
-      });
+      await syncProductCategoryLinks(id, body.category, { tx });
 
       return tx.product.update({
         where: { id },

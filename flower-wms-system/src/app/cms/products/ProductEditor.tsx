@@ -6,7 +6,12 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/Switch";
 import type { ProductEditorProps } from "@/app/cms/products/types";
+
+const SHIPPING_FEE_PATTERN = /^[0-9]+(\.[0-9]{1,2})?$/;
+const SHIPPING_FEE_ERROR_MSG =
+  "请输入正确的运费金额，最多支持两位小数";
 
 export function ProductEditor({
   productId,
@@ -30,6 +35,9 @@ export function ProductEditor({
   const [description, setDescription] = useState(initial.description);
   const [careTips, setCareTips] = useState(initial.careTips);
   const [imageUrl, setImageUrl] = useState(initial.imageUrl);
+  const [needsShipping, setNeedsShipping] = useState(initial.needsShipping);
+  const [shippingFee, setShippingFee] = useState(initial.shippingFee);
+  const [shippingFeeError, setShippingFeeError] = useState("");
 
   function toggleCategory(value: string) {
     setSelectedCategories((prev) =>
@@ -66,11 +74,50 @@ export function ProductEditor({
     }
   }
 
+  function validateShippingFeeInput(): boolean {
+    if (!needsShipping) {
+      setShippingFeeError("");
+      return true;
+    }
+
+    const text = shippingFee.trim();
+    if (!text) {
+      setShippingFeeError(SHIPPING_FEE_ERROR_MSG);
+      return false;
+    }
+
+    if (!SHIPPING_FEE_PATTERN.test(text)) {
+      setShippingFeeError(SHIPPING_FEE_ERROR_MSG);
+      return false;
+    }
+
+    const amount = Number(text);
+    if (!Number.isFinite(amount) || amount <= 0) {
+      setShippingFeeError(SHIPPING_FEE_ERROR_MSG);
+      return false;
+    }
+
+    setShippingFeeError("");
+    return true;
+  }
+
+  function onNeedsShippingChange(checked: boolean) {
+    setNeedsShipping(checked);
+    setShippingFeeError("");
+    if (!checked) {
+      setShippingFee("");
+    }
+  }
+
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
 
     if (selectedCategories.length === 0) {
       alert("请选择至少一个分类");
+      return;
+    }
+
+    if (!validateShippingFeeInput()) {
       return;
     }
 
@@ -80,6 +127,8 @@ export function ProductEditor({
       sellPrice: sellPrice === "" ? null : Number(sellPrice),
       quantity: Number(quantity),
       isActive: isPublished,
+      needsShipping,
+      shippingFee: needsShipping ? Number(shippingFee.trim()) : 0,
       description: description.trim() || null,
       careTips: careTips.trim() || null,
       imageUrl: imageUrl.trim() || null,
@@ -129,8 +178,8 @@ export function ProductEditor({
     }
   }
 
-  const labelByValue = new Map(
-    categoryOptions.map((c) => [c.value, c.label])
+  const labelById = new Map(
+    categoryOptions.map((c) => [c.id, c.label])
   );
 
   return (
@@ -179,18 +228,18 @@ export function ProductEditor({
           {categoryOptions.length === 0 ? (
             <p className="text-sm text-amber-700">
               暂无分类，请先创建分类。
-              <Link href="/cms/categories" className="mx-1 text-rose-600 underline">
-                创建分类
+              <Link href="/cms/product-categories" className="mx-1 text-rose-600 underline">
+                商品分类管理
               </Link>
               并关联到商品。
             </p>
           ) : (
             <div className="grid gap-2 sm:grid-cols-2">
               {categoryOptions.map((opt) => {
-                const checked = selectedCategories.includes(opt.value);
+                const checked = selectedCategories.includes(opt.id);
                 return (
                   <label
-                    key={opt.value}
+                    key={opt.id}
                     className={`flex cursor-pointer items-center gap-3 rounded-lg border px-4 py-3 transition-colors ${
                       checked
                         ? "border-rose-300 bg-rose-50"
@@ -200,14 +249,11 @@ export function ProductEditor({
                     <input
                       type="checkbox"
                       checked={checked}
-                      onChange={() => toggleCategory(opt.value)}
+                      onChange={() => toggleCategory(opt.id)}
                       className="h-4 w-4 accent-rose-600"
                     />
-                    <span>
-                      <span className="block text-sm font-medium text-zinc-900">
-                        {opt.label}
-                      </span>
-                      <span className="text-xs text-zinc-500">{opt.value}</span>
+                    <span className="block text-sm font-medium text-zinc-900">
+                      {opt.label}
                     </span>
                   </label>
                 );
@@ -217,17 +263,17 @@ export function ProductEditor({
 
           {selectedCategories.length > 0 && (
             <div className="mt-3 flex flex-wrap gap-2">
-              {selectedCategories.map((value) => (
+              {selectedCategories.map((cid) => (
                 <span
-                  key={value}
+                  key={cid}
                   className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-3 py-1 text-xs font-medium text-rose-800"
                 >
-                  {labelByValue.get(value) ?? value}
+                  {labelById.get(cid) ?? cid}
                   <button
                     type="button"
-                    onClick={() => removeCategory(value)}
+                    onClick={() => removeCategory(cid)}
                     className="ml-1 rounded-full hover:bg-rose-200 px-1"
-                    aria-label={`删除分类 ${value}`}
+                    aria-label="移除已选分类"
                   >
                     删除
                   </button>
@@ -260,6 +306,37 @@ export function ProductEditor({
           onChange={(e) => setQuantity(e.target.value)}
           placeholder="0"
         />
+
+        <div className="rounded-lg border border-zinc-200 px-4 py-4">
+          <Switch
+            label="是否需要运费"
+            checked={needsShipping}
+            onChange={onNeedsShippingChange}
+          />
+          <p className="mt-2 text-xs text-zinc-500">
+            关闭时视为免运费；开启后须填写单件商品运费金额。
+          </p>
+          {needsShipping && (
+            <div className="mt-4">
+              <Input
+                label="运费金额（元）"
+                type="text"
+                inputMode="decimal"
+                value={shippingFee}
+                onChange={(e) => {
+                  setShippingFee(e.target.value);
+                  if (shippingFeeError) setShippingFeeError("");
+                }}
+                placeholder="例如 15.00"
+              />
+              {shippingFeeError ? (
+                <p className="mt-2 text-sm text-red-600" role="alert">
+                  {shippingFeeError}
+                </p>
+              ) : null}
+            </div>
+          )}
+        </div>
 
         <label className="flex cursor-pointer items-center justify-between rounded-lg border border-zinc-200 px-4 py-3">
           <div>

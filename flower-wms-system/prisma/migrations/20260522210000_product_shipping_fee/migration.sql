@@ -1,0 +1,2 @@
+-- 商品运费字段：0 表示免运费
+ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "shippingFee" DOUBLE PRECISION NOT NULL DEFAULT 0;

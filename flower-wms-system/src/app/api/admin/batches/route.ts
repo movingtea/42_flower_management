@@ -1,6 +1,5 @@
 import { Prisma } from "@/generated/prisma/client";
 import { jsonError, jsonSuccess } from "@/lib/api";
-import { parseWmsCategory, WmsCategory } from "@/lib/constants";
 import {
   runPurchaseInboundTransaction,
   type PurchaseInboundPayload,
@@ -8,8 +7,21 @@ import {
 
 export const dynamic = "force-dynamic";
 
-function parseCategory(value: unknown): WmsCategory | null {
-  return parseWmsCategory(value);
+function parseMaterialCategoryIds(raw: unknown): string[] {
+  if (Array.isArray(raw)) {
+    return [
+      ...new Set(
+        raw
+          .filter((v): v is string => typeof v === "string")
+          .map((v) => v.trim())
+          .filter(Boolean)
+      ),
+    ];
+  }
+  if (typeof raw === "string" && raw.trim()) {
+    return [raw.trim()];
+  }
+  return [];
 }
 
 function parseInboundBody(raw: unknown): PurchaseInboundPayload {
@@ -22,11 +34,11 @@ function parseInboundBody(raw: unknown): PurchaseInboundPayload {
   const name = typeof b.name === "string" ? b.name.trim() : "";
   if (!name) throw new Error("name 不能为空");
 
-  const category = parseCategory(b.category);
-  if (!category) {
-    throw new Error(
-      `category 无效，允许值：${Object.values(WmsCategory).join(", ")}`
-    );
+  const materialCategoryIds = parseMaterialCategoryIds(
+    b.materialCategoryIds ?? b.categoryId ?? b.category
+  );
+  if (materialCategoryIds.length === 0) {
+    throw new Error("请至少选择一个原材料分类");
   }
 
   const receivedQty = Number(b.receivedQty);
@@ -58,7 +70,7 @@ function parseInboundBody(raw: unknown): PurchaseInboundPayload {
 
   return {
     name,
-    category,
+    materialCategoryIds,
     safetyStockThreshold,
     receivedQty,
     costPrice,

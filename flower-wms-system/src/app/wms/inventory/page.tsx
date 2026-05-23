@@ -145,23 +145,23 @@ export default async function InventoryPage() {
                     </td>
                     <td className="px-4 py-3 text-zinc-600">
                       {locations.length > 0
-                        ? locations.join("\u3001")
+                        ? locations.join("、")
                         : "暂无存储位置"}
                     </td>
                     <td className="px-4 py-3">
                       {isLowStock ? (
-                        <Badge variant="danger">{"低库存"}</Badge>
+                        <Badge variant="danger">低库存</Badge>
                       ) : hasExpiring ? (
                         <Badge variant="warning">
-                          {"即将过期" + expiringBatches.length}
+                          即将过期 {expiringBatches.length} 批
                         </Badge>
                       ) : (
-                        <Badge variant="success">{"正常库存"}</Badge>
+                        <Badge variant="success">正常库存</Badge>
                       )}
                     </td>
                     <td className="px-4 py-3">
                       {expiringBatches.length === 0 ? (
-                        <span className="text-zinc-400">{"暂无即将过期批次"}</span>
+                        <span className="text-zinc-400">暂无即将过期批次</span>
                       ) : (
                         <ul className="space-y-1">
                           {expiringBatches.map((b) => {
@@ -175,12 +175,9 @@ export default async function InventoryPage() {
                               <li key={b.id}>
                                 <span className="inline-flex flex-wrap items-center gap-1 rounded-md bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-900">
                                   {b.batchNo ?? b.id.slice(0, 8)}
-                                  {" \u00b7 剩余数量 "}
-                                  {b.remainingQty}
+                                  · 剩余 {b.remainingQty}
                                   {material.unit}
-                                  {" \u00b7 "}
-                                  {daysLeft}
-                                  {"? \u00b7 天 "}
+                                  · {daysLeft} 天内到期
                                 </span>
                               </li>
                             );
@@ -193,7 +190,7 @@ export default async function InventoryPage() {
                         href={`/wms/inventory/${material.id}`}
                         className="text-rose-600 hover:underline"
                       >
-                        {"库存详情 / FIFO"}
+                        库存详情 / FIFO
                       </Link>
                     </td>
                   </tr>

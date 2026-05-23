@@ -22,22 +22,105 @@
   margin-bottom: 20rpx;
 }
 
-.fulfillment-row {
-  display: flex;
-  gap: 16rpx;
+.delivery-badge {
+  display: inline-block;
+  padding: 12rpx 28rpx;
+  font-size: 28rpx;
+  color: #ffffff;
+  background-color: #8fa89b;
+  border-radius: 999rpx;
 }
 
-.fulfillment-btn {
-  flex: 1;
-  font-size: 28rpx;
-  margin: 0;
-  background-color: #f5f5f5;
+.delivery-hint {
+  display: block;
+  margin-top: 16rpx;
+  font-size: 24rpx;
+  color: #777777;
+  line-height: 1.5;
+}
+
+.checkout-empty {
+  padding: 120rpx 48rpx;
+  text-align: center;
+}
+
+.checkout-empty-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 600;
   color: #333333;
 }
 
-.fulfillment-btn--active {
+.checkout-empty-desc {
+  display: block;
+  margin-top: 16rpx;
+  font-size: 26rpx;
+  color: #777777;
+}
+
+.checkout-empty-btn {
+  margin-top: 40rpx;
   background-color: #8fa89b;
   color: #ffffff;
+  font-size: 28rpx;
+}
+
+.checkout-line {
+  display: flex;
+  gap: 20rpx;
+  padding: 20rpx 0;
+  border-bottom: 1rpx solid rgba(0, 0, 0, 0.06);
+}
+
+.checkout-line:last-child {
+  border-bottom: none;
+}
+
+.checkout-line-image {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 12rpx;
+  flex-shrink: 0;
+  background-color: #f5f5f5;
+}
+
+.checkout-line-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.checkout-line-name {
+  font-size: 28rpx;
+  color: #222222;
+  font-weight: 500;
+}
+
+.checkout-line-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+  font-size: 24rpx;
+  color: #777777;
+}
+
+.checkout-line-bottom {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.checkout-line-qty {
+  font-size: 26rpx;
+  color: #555555;
+}
+
+.checkout-line-subtotal {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #dca597;
 }
 
 .form-row {

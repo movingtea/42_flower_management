@@ -1,3 +1,7 @@
+/**
+ * @deprecated WMS 仪表盘已改为 Server Component + Prisma（见 services/wms-dashboard.ts）。
+ * 本文件仅保留类型参考，请勿在新代码中引用。
+ */
 import type { DashboardMetrics } from "@/types";
 
 export const mockDashboardMetrics: DashboardMetrics = {

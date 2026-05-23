@@ -7,6 +7,8 @@ export type ProductEditorInitial = {
   sellPrice: string;
   quantity: number;
   isActive: boolean;
+  needsShipping: boolean;
+  shippingFee: string;
   description: string;
   careTips: string;
   imageUrl: string;
