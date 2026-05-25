@@ -3,6 +3,13 @@ export type KanbanOrderItem = {
   quantity: number;
 };
 
+export type KanbanBomMaterial = {
+  chineseName: string;
+  englishName: string;
+  quantityNeeded: number;
+  maintenance: string | null;
+};
+
 export type ArchiveCardVariant =
   | "completed"
   | "customer_cancel"
@@ -35,6 +42,7 @@ export type KanbanOrder = {
   cancelSource: string | null;
   createdAt: string;
   items: KanbanOrderItem[];
+  bomMaterials?: KanbanBomMaterial[];
 };
 
 export type DragPayload = {

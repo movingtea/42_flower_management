@@ -1,5 +1,6 @@
 "use client";
 
+import { WikiHoverCard } from "@/components/wms/WikiHoverCard";
 import { Button } from "@/components/ui/button";
 import {
   getArchiveCardStyles,
@@ -114,6 +115,23 @@ export function OrderKanbanCard({
           </li>
         ))}
       </ul>
+
+      {order.status === "PRODUCTION" && order.bomMaterials && order.bomMaterials.length > 0 && (
+        <div className="mb-3 rounded-lg border border-violet-100 bg-violet-50/60 p-2 text-xs">
+          <p className="mb-1 font-medium text-violet-900">配方抓料</p>
+          <ul className="space-y-1">
+            {order.bomMaterials.map((m, i) => (
+              <li key={`${order.id}-bom-${i}`}>
+                <WikiHoverCard
+                  label={`${m.chineseName} × ${m.quantityNeeded}`}
+                  englishName={m.englishName}
+                  maintenance={m.maintenance}
+                />
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {!isArchive && (
         <div

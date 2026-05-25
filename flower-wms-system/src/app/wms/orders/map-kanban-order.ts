@@ -1,5 +1,6 @@
-import type { KanbanOrder } from "@/app/wms/orders/types";
+import type { KanbanBomMaterial, KanbanOrder } from "@/app/wms/orders/types";
 import { ORDER_STATUS_LABEL } from "@/services/order-lifecycle";
+import type { BomHintLine } from "@/services/kanban-bom";
 import type { Order, OrderItem, OrderStatus } from "@/generated/prisma/client";
 
 type OrderWithItems = Order & {
@@ -9,7 +10,10 @@ type OrderWithItems = Order & {
   >[];
 };
 
-export function mapPrismaOrderToKanban(order: OrderWithItems): KanbanOrder {
+export function mapPrismaOrderToKanban(
+  order: OrderWithItems,
+  bomMaterials?: BomHintLine[]
+): KanbanOrder {
   return {
     id: order.id,
     orderNo: order.orderNo,
@@ -29,5 +33,13 @@ export function mapPrismaOrderToKanban(order: OrderWithItems): KanbanOrder {
       label: `${line.snapshotProductName}（${line.snapshotSpecName}）`,
       quantity: line.quantity,
     })),
+    bomMaterials: bomMaterials?.map(
+      (m): KanbanBomMaterial => ({
+        chineseName: m.chineseName,
+        englishName: m.englishName,
+        quantityNeeded: m.quantityNeeded,
+        maintenance: m.maintenance,
+      })
+    ),
   };
 }

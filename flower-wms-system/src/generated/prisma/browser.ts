@@ -53,6 +53,11 @@ export type ProductSku = Prisma.ProductSkuModel
  */
 export type Banner = Prisma.BannerModel
 /**
+ * Model FlowerWiki
+ * 
+ */
+export type FlowerWiki = Prisma.FlowerWikiModel
+/**
  * Model Material
  * 
  */

@@ -43,6 +43,14 @@ enum OrderCancelSource {
   REFUND /// 已付/制作中退款取消
 }
 
+/// 花艺核心角色
+enum FloralRole {
+  MAIN /// 主花
+  FILLER /// 配花
+  LINE /// 线条花
+  FOLIAGE /// 叶材
+}
+
 /// 首页轮播跳转类型
 enum BannerTargetType {
   PRODUCT /// 跳转商城商品详情
@@ -200,6 +208,31 @@ model Banner {
 }
 
 // ---------------------------------------------------------------------------
+// FlowerWiki — 基础物料母表 / 数字化智库
+// ---------------------------------------------------------------------------
+
+model FlowerWiki {
+  id           String     @id @default(uuid())
+  photo        String?
+  englishName  String     @unique @map("english_name")
+  chineseName  String     @map("chinese_name")
+  colorTags    String[]   @default([]) @map("color_tags")
+  morphology   String?    @db.Text
+  supplySeason String?    @map("supply_season")
+  floralRole   FloralRole @map("floral_role")
+  maintenance  String     @db.Text
+  aliasMap     Json       @default("{}") @map("alias_map")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  materials Material[]
+
+  @@index([chineseName])
+  @@index([floralRole])
+  @@map("flower_wikis")
+}
+
+// ---------------------------------------------------------------------------
 // Material — 仓储原材料
 // ---------------------------------------------------------------------------
 
@@ -209,14 +242,17 @@ model Material {
   name                 String
   unit                 String
   safetyStockThreshold Int      @default(0)
+  wikiId               String?  @map("wiki_id")
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
+  wiki                FlowerWiki?                @relation(fields: [wikiId], references: [id], onDelete: SetNull)
   batches             Batch[]
   stockLogs           StockLog[]
   bomLines            ProductBOM[]
   categoryRelations   MaterialCategoryRelation[]
 
+  @@index([wikiId])
   @@map("materials")
 }
 

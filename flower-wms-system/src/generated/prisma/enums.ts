@@ -41,6 +41,16 @@ export const OrderCancelSource = {
 export type OrderCancelSource = (typeof OrderCancelSource)[keyof typeof OrderCancelSource]
 
 
+export const FloralRole = {
+  MAIN: 'MAIN',
+  FILLER: 'FILLER',
+  LINE: 'LINE',
+  FOLIAGE: 'FOLIAGE'
+} as const
+
+export type FloralRole = (typeof FloralRole)[keyof typeof FloralRole]
+
+
 export const BannerTargetType = {
   PRODUCT: 'PRODUCT',
   ACTIVITY: 'ACTIVITY',

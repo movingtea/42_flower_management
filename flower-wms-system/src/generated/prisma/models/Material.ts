@@ -40,6 +40,7 @@ export type MaterialMinAggregateOutputType = {
   name: string | null
   unit: string | null
   safetyStockThreshold: number | null
+  wikiId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -50,6 +51,7 @@ export type MaterialMaxAggregateOutputType = {
   name: string | null
   unit: string | null
   safetyStockThreshold: number | null
+  wikiId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -60,6 +62,7 @@ export type MaterialCountAggregateOutputType = {
   name: number
   unit: number
   safetyStockThreshold: number
+  wikiId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -80,6 +83,7 @@ export type MaterialMinAggregateInputType = {
   name?: true
   unit?: true
   safetyStockThreshold?: true
+  wikiId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -90,6 +94,7 @@ export type MaterialMaxAggregateInputType = {
   name?: true
   unit?: true
   safetyStockThreshold?: true
+  wikiId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -100,6 +105,7 @@ export type MaterialCountAggregateInputType = {
   name?: true
   unit?: true
   safetyStockThreshold?: true
+  wikiId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -197,6 +203,7 @@ export type MaterialGroupByOutputType = {
   name: string
   unit: string
   safetyStockThreshold: number
+  wikiId: string | null
   createdAt: Date
   updatedAt: Date
   _count: MaterialCountAggregateOutputType | null
@@ -230,8 +237,10 @@ export type MaterialWhereInput = {
   name?: Prisma.StringFilter<"Material"> | string
   unit?: Prisma.StringFilter<"Material"> | string
   safetyStockThreshold?: Prisma.IntFilter<"Material"> | number
+  wikiId?: Prisma.StringNullableFilter<"Material"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Material"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Material"> | Date | string
+  wiki?: Prisma.XOR<Prisma.FlowerWikiNullableScalarRelationFilter, Prisma.FlowerWikiWhereInput> | null
   batches?: Prisma.BatchListRelationFilter
   stockLogs?: Prisma.StockLogListRelationFilter
   bomLines?: Prisma.ProductBOMListRelationFilter
@@ -244,8 +253,10 @@ export type MaterialOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   safetyStockThreshold?: Prisma.SortOrder
+  wikiId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
+  wiki?: Prisma.FlowerWikiOrderByWithRelationInput
   batches?: Prisma.BatchOrderByRelationAggregateInput
   stockLogs?: Prisma.StockLogOrderByRelationAggregateInput
   bomLines?: Prisma.ProductBOMOrderByRelationAggregateInput
@@ -261,8 +272,10 @@ export type MaterialWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Material"> | string
   unit?: Prisma.StringFilter<"Material"> | string
   safetyStockThreshold?: Prisma.IntFilter<"Material"> | number
+  wikiId?: Prisma.StringNullableFilter<"Material"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Material"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Material"> | Date | string
+  wiki?: Prisma.XOR<Prisma.FlowerWikiNullableScalarRelationFilter, Prisma.FlowerWikiWhereInput> | null
   batches?: Prisma.BatchListRelationFilter
   stockLogs?: Prisma.StockLogListRelationFilter
   bomLines?: Prisma.ProductBOMListRelationFilter
@@ -275,6 +288,7 @@ export type MaterialOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   safetyStockThreshold?: Prisma.SortOrder
+  wikiId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.MaterialCountOrderByAggregateInput
@@ -293,6 +307,7 @@ export type MaterialScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Material"> | string
   unit?: Prisma.StringWithAggregatesFilter<"Material"> | string
   safetyStockThreshold?: Prisma.IntWithAggregatesFilter<"Material"> | number
+  wikiId?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Material"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Material"> | Date | string
 }
@@ -305,6 +320,7 @@ export type MaterialCreateInput = {
   safetyStockThreshold?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  wiki?: Prisma.FlowerWikiCreateNestedOneWithoutMaterialsInput
   batches?: Prisma.BatchCreateNestedManyWithoutMaterialInput
   stockLogs?: Prisma.StockLogCreateNestedManyWithoutMaterialInput
   bomLines?: Prisma.ProductBOMCreateNestedManyWithoutMaterialInput
@@ -317,6 +333,7 @@ export type MaterialUncheckedCreateInput = {
   name: string
   unit: string
   safetyStockThreshold?: number
+  wikiId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   batches?: Prisma.BatchUncheckedCreateNestedManyWithoutMaterialInput
@@ -333,6 +350,7 @@ export type MaterialUpdateInput = {
   safetyStockThreshold?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  wiki?: Prisma.FlowerWikiUpdateOneWithoutMaterialsNestedInput
   batches?: Prisma.BatchUpdateManyWithoutMaterialNestedInput
   stockLogs?: Prisma.StockLogUpdateManyWithoutMaterialNestedInput
   bomLines?: Prisma.ProductBOMUpdateManyWithoutMaterialNestedInput
@@ -345,6 +363,7 @@ export type MaterialUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   safetyStockThreshold?: Prisma.IntFieldUpdateOperationsInput | number
+  wikiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   batches?: Prisma.BatchUncheckedUpdateManyWithoutMaterialNestedInput
@@ -359,6 +378,7 @@ export type MaterialCreateManyInput = {
   name: string
   unit: string
   safetyStockThreshold?: number
+  wikiId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -379,6 +399,7 @@ export type MaterialUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   safetyStockThreshold?: Prisma.IntFieldUpdateOperationsInput | number
+  wikiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -388,12 +409,23 @@ export type MaterialScalarRelationFilter = {
   isNot?: Prisma.MaterialWhereInput
 }
 
+export type MaterialListRelationFilter = {
+  every?: Prisma.MaterialWhereInput
+  some?: Prisma.MaterialWhereInput
+  none?: Prisma.MaterialWhereInput
+}
+
+export type MaterialOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
+}
+
 export type MaterialCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   materialCode?: Prisma.SortOrder
   name?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   safetyStockThreshold?: Prisma.SortOrder
+  wikiId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -408,6 +440,7 @@ export type MaterialMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   safetyStockThreshold?: Prisma.SortOrder
+  wikiId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -418,6 +451,7 @@ export type MaterialMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   unit?: Prisma.SortOrder
   safetyStockThreshold?: Prisma.SortOrder
+  wikiId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -438,6 +472,48 @@ export type MaterialUpdateOneRequiredWithoutCategoryRelationsNestedInput = {
   upsert?: Prisma.MaterialUpsertWithoutCategoryRelationsInput
   connect?: Prisma.MaterialWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.MaterialUpdateToOneWithWhereWithoutCategoryRelationsInput, Prisma.MaterialUpdateWithoutCategoryRelationsInput>, Prisma.MaterialUncheckedUpdateWithoutCategoryRelationsInput>
+}
+
+export type MaterialCreateNestedManyWithoutWikiInput = {
+  create?: Prisma.XOR<Prisma.MaterialCreateWithoutWikiInput, Prisma.MaterialUncheckedCreateWithoutWikiInput> | Prisma.MaterialCreateWithoutWikiInput[] | Prisma.MaterialUncheckedCreateWithoutWikiInput[]
+  connectOrCreate?: Prisma.MaterialCreateOrConnectWithoutWikiInput | Prisma.MaterialCreateOrConnectWithoutWikiInput[]
+  createMany?: Prisma.MaterialCreateManyWikiInputEnvelope
+  connect?: Prisma.MaterialWhereUniqueInput | Prisma.MaterialWhereUniqueInput[]
+}
+
+export type MaterialUncheckedCreateNestedManyWithoutWikiInput = {
+  create?: Prisma.XOR<Prisma.MaterialCreateWithoutWikiInput, Prisma.MaterialUncheckedCreateWithoutWikiInput> | Prisma.MaterialCreateWithoutWikiInput[] | Prisma.MaterialUncheckedCreateWithoutWikiInput[]
+  connectOrCreate?: Prisma.MaterialCreateOrConnectWithoutWikiInput | Prisma.MaterialCreateOrConnectWithoutWikiInput[]
+  createMany?: Prisma.MaterialCreateManyWikiInputEnvelope
+  connect?: Prisma.MaterialWhereUniqueInput | Prisma.MaterialWhereUniqueInput[]
+}
+
+export type MaterialUpdateManyWithoutWikiNestedInput = {
+  create?: Prisma.XOR<Prisma.MaterialCreateWithoutWikiInput, Prisma.MaterialUncheckedCreateWithoutWikiInput> | Prisma.MaterialCreateWithoutWikiInput[] | Prisma.MaterialUncheckedCreateWithoutWikiInput[]
+  connectOrCreate?: Prisma.MaterialCreateOrConnectWithoutWikiInput | Prisma.MaterialCreateOrConnectWithoutWikiInput[]
+  upsert?: Prisma.MaterialUpsertWithWhereUniqueWithoutWikiInput | Prisma.MaterialUpsertWithWhereUniqueWithoutWikiInput[]
+  createMany?: Prisma.MaterialCreateManyWikiInputEnvelope
+  set?: Prisma.MaterialWhereUniqueInput | Prisma.MaterialWhereUniqueInput[]
+  disconnect?: Prisma.MaterialWhereUniqueInput | Prisma.MaterialWhereUniqueInput[]
+  delete?: Prisma.MaterialWhereUniqueInput | Prisma.MaterialWhereUniqueInput[]
+  connect?: Prisma.MaterialWhereUniqueInput | Prisma.MaterialWhereUniqueInput[]
+  update?: Prisma.MaterialUpdateWithWhereUniqueWithoutWikiInput | Prisma.MaterialUpdateWithWhereUniqueWithoutWikiInput[]
+  updateMany?: Prisma.MaterialUpdateManyWithWhereWithoutWikiInput | Prisma.MaterialUpdateManyWithWhereWithoutWikiInput[]
+  deleteMany?: Prisma.MaterialScalarWhereInput | Prisma.MaterialScalarWhereInput[]
+}
+
+export type MaterialUncheckedUpdateManyWithoutWikiNestedInput = {
+  create?: Prisma.XOR<Prisma.MaterialCreateWithoutWikiInput, Prisma.MaterialUncheckedCreateWithoutWikiInput> | Prisma.MaterialCreateWithoutWikiInput[] | Prisma.MaterialUncheckedCreateWithoutWikiInput[]
+  connectOrCreate?: Prisma.MaterialCreateOrConnectWithoutWikiInput | Prisma.MaterialCreateOrConnectWithoutWikiInput[]
+  upsert?: Prisma.MaterialUpsertWithWhereUniqueWithoutWikiInput | Prisma.MaterialUpsertWithWhereUniqueWithoutWikiInput[]
+  createMany?: Prisma.MaterialCreateManyWikiInputEnvelope
+  set?: Prisma.MaterialWhereUniqueInput | Prisma.MaterialWhereUniqueInput[]
+  disconnect?: Prisma.MaterialWhereUniqueInput | Prisma.MaterialWhereUniqueInput[]
+  delete?: Prisma.MaterialWhereUniqueInput | Prisma.MaterialWhereUniqueInput[]
+  connect?: Prisma.MaterialWhereUniqueInput | Prisma.MaterialWhereUniqueInput[]
+  update?: Prisma.MaterialUpdateWithWhereUniqueWithoutWikiInput | Prisma.MaterialUpdateWithWhereUniqueWithoutWikiInput[]
+  updateMany?: Prisma.MaterialUpdateManyWithWhereWithoutWikiInput | Prisma.MaterialUpdateManyWithWhereWithoutWikiInput[]
+  deleteMany?: Prisma.MaterialScalarWhereInput | Prisma.MaterialScalarWhereInput[]
 }
 
 export type MaterialCreateNestedOneWithoutBomLinesInput = {
@@ -490,6 +566,7 @@ export type MaterialCreateWithoutCategoryRelationsInput = {
   safetyStockThreshold?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  wiki?: Prisma.FlowerWikiCreateNestedOneWithoutMaterialsInput
   batches?: Prisma.BatchCreateNestedManyWithoutMaterialInput
   stockLogs?: Prisma.StockLogCreateNestedManyWithoutMaterialInput
   bomLines?: Prisma.ProductBOMCreateNestedManyWithoutMaterialInput
@@ -501,6 +578,7 @@ export type MaterialUncheckedCreateWithoutCategoryRelationsInput = {
   name: string
   unit: string
   safetyStockThreshold?: number
+  wikiId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   batches?: Prisma.BatchUncheckedCreateNestedManyWithoutMaterialInput
@@ -532,6 +610,7 @@ export type MaterialUpdateWithoutCategoryRelationsInput = {
   safetyStockThreshold?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  wiki?: Prisma.FlowerWikiUpdateOneWithoutMaterialsNestedInput
   batches?: Prisma.BatchUpdateManyWithoutMaterialNestedInput
   stockLogs?: Prisma.StockLogUpdateManyWithoutMaterialNestedInput
   bomLines?: Prisma.ProductBOMUpdateManyWithoutMaterialNestedInput
@@ -543,11 +622,80 @@ export type MaterialUncheckedUpdateWithoutCategoryRelationsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   safetyStockThreshold?: Prisma.IntFieldUpdateOperationsInput | number
+  wikiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   batches?: Prisma.BatchUncheckedUpdateManyWithoutMaterialNestedInput
   stockLogs?: Prisma.StockLogUncheckedUpdateManyWithoutMaterialNestedInput
   bomLines?: Prisma.ProductBOMUncheckedUpdateManyWithoutMaterialNestedInput
+}
+
+export type MaterialCreateWithoutWikiInput = {
+  id?: string
+  materialCode: string
+  name: string
+  unit: string
+  safetyStockThreshold?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  batches?: Prisma.BatchCreateNestedManyWithoutMaterialInput
+  stockLogs?: Prisma.StockLogCreateNestedManyWithoutMaterialInput
+  bomLines?: Prisma.ProductBOMCreateNestedManyWithoutMaterialInput
+  categoryRelations?: Prisma.MaterialCategoryRelationCreateNestedManyWithoutMaterialInput
+}
+
+export type MaterialUncheckedCreateWithoutWikiInput = {
+  id?: string
+  materialCode: string
+  name: string
+  unit: string
+  safetyStockThreshold?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  batches?: Prisma.BatchUncheckedCreateNestedManyWithoutMaterialInput
+  stockLogs?: Prisma.StockLogUncheckedCreateNestedManyWithoutMaterialInput
+  bomLines?: Prisma.ProductBOMUncheckedCreateNestedManyWithoutMaterialInput
+  categoryRelations?: Prisma.MaterialCategoryRelationUncheckedCreateNestedManyWithoutMaterialInput
+}
+
+export type MaterialCreateOrConnectWithoutWikiInput = {
+  where: Prisma.MaterialWhereUniqueInput
+  create: Prisma.XOR<Prisma.MaterialCreateWithoutWikiInput, Prisma.MaterialUncheckedCreateWithoutWikiInput>
+}
+
+export type MaterialCreateManyWikiInputEnvelope = {
+  data: Prisma.MaterialCreateManyWikiInput | Prisma.MaterialCreateManyWikiInput[]
+  skipDuplicates?: boolean
+}
+
+export type MaterialUpsertWithWhereUniqueWithoutWikiInput = {
+  where: Prisma.MaterialWhereUniqueInput
+  update: Prisma.XOR<Prisma.MaterialUpdateWithoutWikiInput, Prisma.MaterialUncheckedUpdateWithoutWikiInput>
+  create: Prisma.XOR<Prisma.MaterialCreateWithoutWikiInput, Prisma.MaterialUncheckedCreateWithoutWikiInput>
+}
+
+export type MaterialUpdateWithWhereUniqueWithoutWikiInput = {
+  where: Prisma.MaterialWhereUniqueInput
+  data: Prisma.XOR<Prisma.MaterialUpdateWithoutWikiInput, Prisma.MaterialUncheckedUpdateWithoutWikiInput>
+}
+
+export type MaterialUpdateManyWithWhereWithoutWikiInput = {
+  where: Prisma.MaterialScalarWhereInput
+  data: Prisma.XOR<Prisma.MaterialUpdateManyMutationInput, Prisma.MaterialUncheckedUpdateManyWithoutWikiInput>
+}
+
+export type MaterialScalarWhereInput = {
+  AND?: Prisma.MaterialScalarWhereInput | Prisma.MaterialScalarWhereInput[]
+  OR?: Prisma.MaterialScalarWhereInput[]
+  NOT?: Prisma.MaterialScalarWhereInput | Prisma.MaterialScalarWhereInput[]
+  id?: Prisma.StringFilter<"Material"> | string
+  materialCode?: Prisma.StringFilter<"Material"> | string
+  name?: Prisma.StringFilter<"Material"> | string
+  unit?: Prisma.StringFilter<"Material"> | string
+  safetyStockThreshold?: Prisma.IntFilter<"Material"> | number
+  wikiId?: Prisma.StringNullableFilter<"Material"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"Material"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"Material"> | Date | string
 }
 
 export type MaterialCreateWithoutBomLinesInput = {
@@ -558,6 +706,7 @@ export type MaterialCreateWithoutBomLinesInput = {
   safetyStockThreshold?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  wiki?: Prisma.FlowerWikiCreateNestedOneWithoutMaterialsInput
   batches?: Prisma.BatchCreateNestedManyWithoutMaterialInput
   stockLogs?: Prisma.StockLogCreateNestedManyWithoutMaterialInput
   categoryRelations?: Prisma.MaterialCategoryRelationCreateNestedManyWithoutMaterialInput
@@ -569,6 +718,7 @@ export type MaterialUncheckedCreateWithoutBomLinesInput = {
   name: string
   unit: string
   safetyStockThreshold?: number
+  wikiId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   batches?: Prisma.BatchUncheckedCreateNestedManyWithoutMaterialInput
@@ -600,6 +750,7 @@ export type MaterialUpdateWithoutBomLinesInput = {
   safetyStockThreshold?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  wiki?: Prisma.FlowerWikiUpdateOneWithoutMaterialsNestedInput
   batches?: Prisma.BatchUpdateManyWithoutMaterialNestedInput
   stockLogs?: Prisma.StockLogUpdateManyWithoutMaterialNestedInput
   categoryRelations?: Prisma.MaterialCategoryRelationUpdateManyWithoutMaterialNestedInput
@@ -611,6 +762,7 @@ export type MaterialUncheckedUpdateWithoutBomLinesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   safetyStockThreshold?: Prisma.IntFieldUpdateOperationsInput | number
+  wikiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   batches?: Prisma.BatchUncheckedUpdateManyWithoutMaterialNestedInput
@@ -626,6 +778,7 @@ export type MaterialCreateWithoutBatchesInput = {
   safetyStockThreshold?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  wiki?: Prisma.FlowerWikiCreateNestedOneWithoutMaterialsInput
   stockLogs?: Prisma.StockLogCreateNestedManyWithoutMaterialInput
   bomLines?: Prisma.ProductBOMCreateNestedManyWithoutMaterialInput
   categoryRelations?: Prisma.MaterialCategoryRelationCreateNestedManyWithoutMaterialInput
@@ -637,6 +790,7 @@ export type MaterialUncheckedCreateWithoutBatchesInput = {
   name: string
   unit: string
   safetyStockThreshold?: number
+  wikiId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   stockLogs?: Prisma.StockLogUncheckedCreateNestedManyWithoutMaterialInput
@@ -668,6 +822,7 @@ export type MaterialUpdateWithoutBatchesInput = {
   safetyStockThreshold?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  wiki?: Prisma.FlowerWikiUpdateOneWithoutMaterialsNestedInput
   stockLogs?: Prisma.StockLogUpdateManyWithoutMaterialNestedInput
   bomLines?: Prisma.ProductBOMUpdateManyWithoutMaterialNestedInput
   categoryRelations?: Prisma.MaterialCategoryRelationUpdateManyWithoutMaterialNestedInput
@@ -679,6 +834,7 @@ export type MaterialUncheckedUpdateWithoutBatchesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   safetyStockThreshold?: Prisma.IntFieldUpdateOperationsInput | number
+  wikiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stockLogs?: Prisma.StockLogUncheckedUpdateManyWithoutMaterialNestedInput
@@ -694,6 +850,7 @@ export type MaterialCreateWithoutStockLogsInput = {
   safetyStockThreshold?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  wiki?: Prisma.FlowerWikiCreateNestedOneWithoutMaterialsInput
   batches?: Prisma.BatchCreateNestedManyWithoutMaterialInput
   bomLines?: Prisma.ProductBOMCreateNestedManyWithoutMaterialInput
   categoryRelations?: Prisma.MaterialCategoryRelationCreateNestedManyWithoutMaterialInput
@@ -705,6 +862,7 @@ export type MaterialUncheckedCreateWithoutStockLogsInput = {
   name: string
   unit: string
   safetyStockThreshold?: number
+  wikiId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   batches?: Prisma.BatchUncheckedCreateNestedManyWithoutMaterialInput
@@ -736,6 +894,7 @@ export type MaterialUpdateWithoutStockLogsInput = {
   safetyStockThreshold?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  wiki?: Prisma.FlowerWikiUpdateOneWithoutMaterialsNestedInput
   batches?: Prisma.BatchUpdateManyWithoutMaterialNestedInput
   bomLines?: Prisma.ProductBOMUpdateManyWithoutMaterialNestedInput
   categoryRelations?: Prisma.MaterialCategoryRelationUpdateManyWithoutMaterialNestedInput
@@ -747,11 +906,60 @@ export type MaterialUncheckedUpdateWithoutStockLogsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
   safetyStockThreshold?: Prisma.IntFieldUpdateOperationsInput | number
+  wikiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   batches?: Prisma.BatchUncheckedUpdateManyWithoutMaterialNestedInput
   bomLines?: Prisma.ProductBOMUncheckedUpdateManyWithoutMaterialNestedInput
   categoryRelations?: Prisma.MaterialCategoryRelationUncheckedUpdateManyWithoutMaterialNestedInput
+}
+
+export type MaterialCreateManyWikiInput = {
+  id?: string
+  materialCode: string
+  name: string
+  unit: string
+  safetyStockThreshold?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type MaterialUpdateWithoutWikiInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  materialCode?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  unit?: Prisma.StringFieldUpdateOperationsInput | string
+  safetyStockThreshold?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  batches?: Prisma.BatchUpdateManyWithoutMaterialNestedInput
+  stockLogs?: Prisma.StockLogUpdateManyWithoutMaterialNestedInput
+  bomLines?: Prisma.ProductBOMUpdateManyWithoutMaterialNestedInput
+  categoryRelations?: Prisma.MaterialCategoryRelationUpdateManyWithoutMaterialNestedInput
+}
+
+export type MaterialUncheckedUpdateWithoutWikiInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  materialCode?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  unit?: Prisma.StringFieldUpdateOperationsInput | string
+  safetyStockThreshold?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  batches?: Prisma.BatchUncheckedUpdateManyWithoutMaterialNestedInput
+  stockLogs?: Prisma.StockLogUncheckedUpdateManyWithoutMaterialNestedInput
+  bomLines?: Prisma.ProductBOMUncheckedUpdateManyWithoutMaterialNestedInput
+  categoryRelations?: Prisma.MaterialCategoryRelationUncheckedUpdateManyWithoutMaterialNestedInput
+}
+
+export type MaterialUncheckedUpdateManyWithoutWikiInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  materialCode?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  unit?: Prisma.StringFieldUpdateOperationsInput | string
+  safetyStockThreshold?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 
@@ -818,8 +1026,10 @@ export type MaterialSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   name?: boolean
   unit?: boolean
   safetyStockThreshold?: boolean
+  wikiId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  wiki?: boolean | Prisma.Material$wikiArgs<ExtArgs>
   batches?: boolean | Prisma.Material$batchesArgs<ExtArgs>
   stockLogs?: boolean | Prisma.Material$stockLogsArgs<ExtArgs>
   bomLines?: boolean | Prisma.Material$bomLinesArgs<ExtArgs>
@@ -833,8 +1043,10 @@ export type MaterialSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   name?: boolean
   unit?: boolean
   safetyStockThreshold?: boolean
+  wikiId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  wiki?: boolean | Prisma.Material$wikiArgs<ExtArgs>
 }, ExtArgs["result"]["material"]>
 
 export type MaterialSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -843,8 +1055,10 @@ export type MaterialSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   name?: boolean
   unit?: boolean
   safetyStockThreshold?: boolean
+  wikiId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  wiki?: boolean | Prisma.Material$wikiArgs<ExtArgs>
 }, ExtArgs["result"]["material"]>
 
 export type MaterialSelectScalar = {
@@ -853,24 +1067,31 @@ export type MaterialSelectScalar = {
   name?: boolean
   unit?: boolean
   safetyStockThreshold?: boolean
+  wikiId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type MaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "materialCode" | "name" | "unit" | "safetyStockThreshold" | "createdAt" | "updatedAt", ExtArgs["result"]["material"]>
+export type MaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "materialCode" | "name" | "unit" | "safetyStockThreshold" | "wikiId" | "createdAt" | "updatedAt", ExtArgs["result"]["material"]>
 export type MaterialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  wiki?: boolean | Prisma.Material$wikiArgs<ExtArgs>
   batches?: boolean | Prisma.Material$batchesArgs<ExtArgs>
   stockLogs?: boolean | Prisma.Material$stockLogsArgs<ExtArgs>
   bomLines?: boolean | Prisma.Material$bomLinesArgs<ExtArgs>
   categoryRelations?: boolean | Prisma.Material$categoryRelationsArgs<ExtArgs>
   _count?: boolean | Prisma.MaterialCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type MaterialIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type MaterialIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type MaterialIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  wiki?: boolean | Prisma.Material$wikiArgs<ExtArgs>
+}
+export type MaterialIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  wiki?: boolean | Prisma.Material$wikiArgs<ExtArgs>
+}
 
 export type $MaterialPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Material"
   objects: {
+    wiki: Prisma.$FlowerWikiPayload<ExtArgs> | null
     batches: Prisma.$BatchPayload<ExtArgs>[]
     stockLogs: Prisma.$StockLogPayload<ExtArgs>[]
     bomLines: Prisma.$ProductBOMPayload<ExtArgs>[]
@@ -882,6 +1103,7 @@ export type $MaterialPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     name: string
     unit: string
     safetyStockThreshold: number
+    wikiId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["material"]>
@@ -1278,6 +1500,7 @@ readonly fields: MaterialFieldRefs;
  */
 export interface Prisma__MaterialClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
+  wiki<T extends Prisma.Material$wikiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Material$wikiArgs<ExtArgs>>): Prisma.Prisma__FlowerWikiClient<runtime.Types.Result.GetResult<Prisma.$FlowerWikiPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   batches<T extends Prisma.Material$batchesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Material$batchesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   stockLogs<T extends Prisma.Material$stockLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Material$stockLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StockLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   bomLines<T extends Prisma.Material$bomLinesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Material$bomLinesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductBOMPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -1316,6 +1539,7 @@ export interface MaterialFieldRefs {
   readonly name: Prisma.FieldRef<"Material", 'String'>
   readonly unit: Prisma.FieldRef<"Material", 'String'>
   readonly safetyStockThreshold: Prisma.FieldRef<"Material", 'Int'>
+  readonly wikiId: Prisma.FieldRef<"Material", 'String'>
   readonly createdAt: Prisma.FieldRef<"Material", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Material", 'DateTime'>
 }
@@ -1572,6 +1796,10 @@ export type MaterialCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    */
   data: Prisma.MaterialCreateManyInput | Prisma.MaterialCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MaterialIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1642,6 +1870,10 @@ export type MaterialUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Extens
    * Limit how many Materials to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MaterialIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1708,6 +1940,25 @@ export type MaterialDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Limit how many Materials to delete.
    */
   limit?: number
+}
+
+/**
+ * Material.wiki
+ */
+export type Material$wikiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FlowerWiki
+   */
+  select?: Prisma.FlowerWikiSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FlowerWiki
+   */
+  omit?: Prisma.FlowerWikiOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FlowerWikiInclude<ExtArgs> | null
+  where?: Prisma.FlowerWikiWhereInput
 }
 
 /**

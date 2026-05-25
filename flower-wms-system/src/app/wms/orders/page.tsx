@@ -1,12 +1,19 @@
 import { OrdersKanban } from "./OrdersKanban";
 import { mapPrismaOrderToKanban } from "./map-kanban-order";
 import { listKanbanOrders } from "@/services/order-lifecycle";
+import { loadOrderBomHints } from "@/services/kanban-bom";
 
 export const dynamic = "force-dynamic";
 
 export default async function WmsOrdersPage() {
   const rawOrders = await listKanbanOrders();
-  const orders = rawOrders.map(mapPrismaOrderToKanban);
+  const productionIds = rawOrders
+    .filter((o) => o.status === "PRODUCTION")
+    .map((o) => o.id);
+  const bomHints = await loadOrderBomHints(productionIds);
+  const orders = rawOrders.map((o) =>
+    mapPrismaOrderToKanban(o, bomHints.get(o.id))
+  );
 
   return (
     <div className="min-w-0">

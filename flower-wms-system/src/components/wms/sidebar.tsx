@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 const navItems = [
   { href: "/wms/dashboard", label: "仪表盘", icon: "📊" },
+  { href: "/wms/wiki", label: "花材 Wiki", icon: "🌿" },
   { href: "/wms/inventory", label: "库存管理", icon: "📦" },
   { href: "/wms/batches", label: "采购入库", icon: "📥" },
   { href: "/wms/material-categories", label: "原材料分类", icon: "🏷️" },

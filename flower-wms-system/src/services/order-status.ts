@@ -5,6 +5,7 @@ import {
   ORDER_STATUS_LABEL,
   type AdminTransition,
 } from "@/services/order-lifecycle";
+import { triggerOrderProductionDeduction } from "@/services/order-bom-deduct";
 export { ORDER_STATUS_LABEL };
 
 export type FulfillmentPhase = OrderStatus;
@@ -38,6 +39,10 @@ export async function transitionOrderStatus(
     next === "PAID"
       ? await adminMarkOrderPaid(orderId)
       : await adminTransitionOrder(orderId, next, extra);
+
+  if (next === "PRODUCTION" && order.status === OrderStatus.PRODUCTION) {
+    triggerOrderProductionDeduction(orderId);
+  }
 
   return {
     order: {

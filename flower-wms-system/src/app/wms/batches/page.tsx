@@ -1,3 +1,4 @@
+import { AiInboundWorkspace } from "@/components/wms/AiInboundWorkspace";
 import { InboundForm } from "@/app/wms/batches/InboundForm";
 import { loadMaterialCategories } from "@/lib/material-category.server";
 import { prisma } from "@/lib/prisma";
@@ -26,6 +27,11 @@ export default async function BatchesPage() {
         </p>
       </header>
 
+      <AiInboundWorkspace />
+
+      <h3 className="mb-4 mt-10 text-sm font-semibold text-zinc-500">
+        传统手工入库（备用）
+      </h3>
       <InboundForm materialCategories={materialCategories} />
 
       <section>

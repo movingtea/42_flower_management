@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { BomDraftWorkspace } from "@/components/cms/BomDraftWorkspace";
 import { ProductCategoryTreeSelect } from "@/components/cms/ProductCategoryTreeSelect";
 import { RichTextEditorLazy } from "@/components/cms/RichTextEditorLazy";
 import { Button } from "@/components/ui/button";
@@ -405,6 +406,10 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
               </table>
             </div>
           </section>
+
+          {!isNew ? (
+            <BomDraftWorkspace spuId={productId} disabled={submitting} />
+          ) : null}
         </div>
 
         <aside className="w-full space-y-4 lg:sticky lg:top-4 lg:w-1/3 lg:self-start">

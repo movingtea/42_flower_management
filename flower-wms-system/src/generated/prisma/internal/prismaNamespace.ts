@@ -391,6 +391,7 @@ export const ModelName = {
   ProductSpu: 'ProductSpu',
   ProductSku: 'ProductSku',
   Banner: 'Banner',
+  FlowerWiki: 'FlowerWiki',
   Material: 'Material',
   ProductBOM: 'ProductBOM',
   Batch: 'Batch',
@@ -414,7 +415,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "productCategory" | "productCategoryRelation" | "materialCategory" | "materialCategoryRelation" | "productSpu" | "productSku" | "banner" | "material" | "productBOM" | "batch" | "stockLog" | "user" | "order" | "orderItem" | "appConfig"
+    modelProps: "productCategory" | "productCategoryRelation" | "materialCategory" | "materialCategoryRelation" | "productSpu" | "productSku" | "banner" | "flowerWiki" | "material" | "productBOM" | "batch" | "stockLog" | "user" | "order" | "orderItem" | "appConfig"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -933,6 +934,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.BannerCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.BannerCountAggregateOutputType> | number
+        }
+      }
+    }
+    FlowerWiki: {
+      payload: Prisma.$FlowerWikiPayload<ExtArgs>
+      fields: Prisma.FlowerWikiFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.FlowerWikiFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlowerWikiPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.FlowerWikiFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlowerWikiPayload>
+        }
+        findFirst: {
+          args: Prisma.FlowerWikiFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlowerWikiPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.FlowerWikiFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlowerWikiPayload>
+        }
+        findMany: {
+          args: Prisma.FlowerWikiFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlowerWikiPayload>[]
+        }
+        create: {
+          args: Prisma.FlowerWikiCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlowerWikiPayload>
+        }
+        createMany: {
+          args: Prisma.FlowerWikiCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.FlowerWikiCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlowerWikiPayload>[]
+        }
+        delete: {
+          args: Prisma.FlowerWikiDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlowerWikiPayload>
+        }
+        update: {
+          args: Prisma.FlowerWikiUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlowerWikiPayload>
+        }
+        deleteMany: {
+          args: Prisma.FlowerWikiDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.FlowerWikiUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.FlowerWikiUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlowerWikiPayload>[]
+        }
+        upsert: {
+          args: Prisma.FlowerWikiUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$FlowerWikiPayload>
+        }
+        aggregate: {
+          args: Prisma.FlowerWikiAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateFlowerWiki>
+        }
+        groupBy: {
+          args: Prisma.FlowerWikiGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FlowerWikiGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.FlowerWikiCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.FlowerWikiCountAggregateOutputType> | number
         }
       }
     }
@@ -1662,12 +1737,31 @@ export const BannerScalarFieldEnum = {
 export type BannerScalarFieldEnum = (typeof BannerScalarFieldEnum)[keyof typeof BannerScalarFieldEnum]
 
 
+export const FlowerWikiScalarFieldEnum = {
+  id: 'id',
+  photo: 'photo',
+  englishName: 'englishName',
+  chineseName: 'chineseName',
+  colorTags: 'colorTags',
+  morphology: 'morphology',
+  supplySeason: 'supplySeason',
+  floralRole: 'floralRole',
+  maintenance: 'maintenance',
+  aliasMap: 'aliasMap',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FlowerWikiScalarFieldEnum = (typeof FlowerWikiScalarFieldEnum)[keyof typeof FlowerWikiScalarFieldEnum]
+
+
 export const MaterialScalarFieldEnum = {
   id: 'id',
   materialCode: 'materialCode',
   name: 'name',
   unit: 'unit',
   safetyStockThreshold: 'safetyStockThreshold',
+  wikiId: 'wikiId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -1927,6 +2021,34 @@ export type ListEnumBannerTargetTypeFieldRefInput<$PrismaModel> = FieldRefInputT
 
 
 /**
+ * Reference to a field of type 'FloralRole'
+ */
+export type EnumFloralRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FloralRole'>
+    
+
+
+/**
+ * Reference to a field of type 'FloralRole[]'
+ */
+export type ListEnumFloralRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FloralRole[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
  * Reference to a field of type 'StockLogType'
  */
 export type EnumStockLogTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StockLogType'>
@@ -1965,20 +2087,6 @@ export type EnumOrderCancelSourceFieldRefInput<$PrismaModel> = FieldRefInputType
  * Reference to a field of type 'OrderCancelSource[]'
  */
 export type ListEnumOrderCancelSourceFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrderCancelSource[]'>
-    
-
-
-/**
- * Reference to a field of type 'Json'
- */
-export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-/**
- * Reference to a field of type 'QueryMode'
- */
-export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 /**
@@ -2098,6 +2206,7 @@ export type GlobalOmitConfig = {
   productSpu?: Prisma.ProductSpuOmit
   productSku?: Prisma.ProductSkuOmit
   banner?: Prisma.BannerOmit
+  flowerWiki?: Prisma.FlowerWikiOmit
   material?: Prisma.MaterialOmit
   productBOM?: Prisma.ProductBOMOmit
   batch?: Prisma.BatchOmit

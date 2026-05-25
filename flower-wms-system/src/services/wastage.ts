@@ -1,4 +1,5 @@
 import { StockLogType } from "@/generated/prisma/enums";
+import { applyFifoDeductions } from "@/services/fifo";
 import { prisma } from "@/lib/prisma";
 
 export type RegisterWastagePayload = {
@@ -93,4 +94,36 @@ export async function registerBatchWastage(
       },
     };
   });
+}
+
+export type MaterialFifoWastagePayload = {
+  materialId: string;
+  wastageQty: number;
+  reason: string;
+  operatorId: string;
+};
+
+/** 按物料 FIFO 从最早批次扣减损耗 */
+export async function registerMaterialFifoWastage(
+  payload: MaterialFifoWastagePayload
+) {
+  if (!Number.isInteger(payload.wastageQty) || payload.wastageQty <= 0) {
+    throw new Error("损耗数量须为正整数");
+  }
+
+  const material = await prisma.material.findUnique({
+    where: { id: payload.materialId },
+    select: { id: true, name: true },
+  });
+  if (!material) throw new Error("物料不存在");
+
+  const deductions = await applyFifoDeductions({
+    materialId: payload.materialId,
+    quantity: payload.wastageQty,
+    logType: StockLogType.WASTAGE_OUT,
+    wastageReason: payload.reason,
+    operator: payload.operatorId,
+  });
+
+  return { material, deductions };
 }

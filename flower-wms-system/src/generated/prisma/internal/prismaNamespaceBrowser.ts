@@ -58,6 +58,7 @@ export const ModelName = {
   ProductSpu: 'ProductSpu',
   ProductSku: 'ProductSku',
   Banner: 'Banner',
+  FlowerWiki: 'FlowerWiki',
   Material: 'Material',
   ProductBOM: 'ProductBOM',
   Batch: 'Batch',
@@ -179,12 +180,31 @@ export const BannerScalarFieldEnum = {
 export type BannerScalarFieldEnum = (typeof BannerScalarFieldEnum)[keyof typeof BannerScalarFieldEnum]
 
 
+export const FlowerWikiScalarFieldEnum = {
+  id: 'id',
+  photo: 'photo',
+  englishName: 'englishName',
+  chineseName: 'chineseName',
+  colorTags: 'colorTags',
+  morphology: 'morphology',
+  supplySeason: 'supplySeason',
+  floralRole: 'floralRole',
+  maintenance: 'maintenance',
+  aliasMap: 'aliasMap',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FlowerWikiScalarFieldEnum = (typeof FlowerWikiScalarFieldEnum)[keyof typeof FlowerWikiScalarFieldEnum]
+
+
 export const MaterialScalarFieldEnum = {
   id: 'id',
   materialCode: 'materialCode',
   name: 'name',
   unit: 'unit',
   safetyStockThreshold: 'safetyStockThreshold',
+  wikiId: 'wikiId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
