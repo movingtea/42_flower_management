@@ -82,10 +82,15 @@ export type Banner = Prisma.BannerModel
  */
 export type Material = Prisma.MaterialModel
 /**
- * Model ProductBOM
+ * Model Recipe
  * 
  */
-export type ProductBOM = Prisma.ProductBOMModel
+export type Recipe = Prisma.RecipeModel
+/**
+ * Model RecipeLine
+ * 
+ */
+export type RecipeLine = Prisma.RecipeLineModel
 /**
  * Model Batch
  * 
@@ -96,6 +101,11 @@ export type Batch = Prisma.BatchModel
  * 
  */
 export type StockLog = Prisma.StockLogModel
+/**
+ * Model StockLossRecord
+ * 
+ */
+export type StockLossRecord = Prisma.StockLossRecordModel
 /**
  * Model User
  * 
@@ -116,3 +126,8 @@ export type OrderItem = Prisma.OrderItemModel
  * 
  */
 export type AppConfig = Prisma.AppConfigModel
+/**
+ * Model FlowerWiki
+ * 
+ */
+export type FlowerWiki = Prisma.FlowerWikiModel

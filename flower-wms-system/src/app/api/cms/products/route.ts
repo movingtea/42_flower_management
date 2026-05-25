@@ -13,6 +13,7 @@ import {
 } from "@/lib/product-categories";
 import { productSpuInclude } from "@/lib/product-spu";
 import { prisma } from "@/lib/prisma";
+import { assertRecipeExists } from "@/services/recipe";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,7 @@ export async function POST(request: Request) {
   try {
     const categoryConfig = await loadCmsProductCategories();
     const body = parseCmsProductBody(await request.json(), categoryConfig);
+    if (body.recipeId) await assertRecipeExists(body.recipeId);
 
     const product = await prisma.$transaction(async (tx) => {
       const spu = await tx.productSpu.create({

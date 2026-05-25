@@ -6,9 +6,10 @@ import { usePathname } from "next/navigation";
 const navItems = [
   { href: "/wms/dashboard", label: "仪表盘", icon: "📊" },
   { href: "/wms/inventory", label: "库存管理", icon: "📦" },
-  { href: "/wms/batches", label: "采购入库", icon: "📥" },
+  { href: "/wms/operations", label: "仓储日常", icon: "📥" },
+  { href: "/wms/wiki", label: "物料母表", icon: "🌸" },
+  { href: "/wms/recipes", label: "标准配方", icon: "🧪" },
   { href: "/wms/material-categories", label: "原材料分类", icon: "🏷️" },
-  { href: "/wms/wastage", label: "损耗登记", icon: "🥀" },
   { href: "/wms/orders", label: "订单履约", icon: "📋" },
 ];
 

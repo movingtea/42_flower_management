@@ -131,6 +131,12 @@ export async function syncProductCategoryLinks(
   });
 }
 
-export const productBomInclude = {
-  bomItems: { include: { material: true } },
+export const productRecipeInclude = {
+  recipe: {
+    select: {
+      id: true,
+      recipeCode: true,
+      name: true,
+    },
+  },
 } as const;

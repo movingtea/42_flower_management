@@ -59,13 +59,16 @@ export const ModelName = {
   ProductSku: 'ProductSku',
   Banner: 'Banner',
   Material: 'Material',
-  ProductBOM: 'ProductBOM',
+  Recipe: 'Recipe',
+  RecipeLine: 'RecipeLine',
   Batch: 'Batch',
   StockLog: 'StockLog',
+  StockLossRecord: 'StockLossRecord',
   User: 'User',
   Order: 'Order',
   OrderItem: 'OrderItem',
-  AppConfig: 'AppConfig'
+  AppConfig: 'AppConfig',
+  FlowerWiki: 'FlowerWiki'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -140,6 +143,7 @@ export const ProductSpuScalarFieldEnum = {
   shippingFee: 'shippingFee',
   allowPreOrder: 'allowPreOrder',
   productionTime: 'productionTime',
+  recipeId: 'recipeId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -185,6 +189,7 @@ export const MaterialScalarFieldEnum = {
   name: 'name',
   unit: 'unit',
   safetyStockThreshold: 'safetyStockThreshold',
+  wikiId: 'wikiId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -192,14 +197,26 @@ export const MaterialScalarFieldEnum = {
 export type MaterialScalarFieldEnum = (typeof MaterialScalarFieldEnum)[keyof typeof MaterialScalarFieldEnum]
 
 
-export const ProductBOMScalarFieldEnum = {
+export const RecipeScalarFieldEnum = {
   id: 'id',
-  spuId: 'spuId',
-  materialId: 'materialId',
+  recipeCode: 'recipeCode',
+  name: 'name',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RecipeScalarFieldEnum = (typeof RecipeScalarFieldEnum)[keyof typeof RecipeScalarFieldEnum]
+
+
+export const RecipeLineScalarFieldEnum = {
+  id: 'id',
+  recipeId: 'recipeId',
+  flowerWikiId: 'flowerWikiId',
   quantityNeeded: 'quantityNeeded'
 } as const
 
-export type ProductBOMScalarFieldEnum = (typeof ProductBOMScalarFieldEnum)[keyof typeof ProductBOMScalarFieldEnum]
+export type RecipeLineScalarFieldEnum = (typeof RecipeLineScalarFieldEnum)[keyof typeof RecipeLineScalarFieldEnum]
 
 
 export const BatchScalarFieldEnum = {
@@ -237,6 +254,20 @@ export const StockLogScalarFieldEnum = {
 } as const
 
 export type StockLogScalarFieldEnum = (typeof StockLogScalarFieldEnum)[keyof typeof StockLogScalarFieldEnum]
+
+
+export const StockLossRecordScalarFieldEnum = {
+  id: 'id',
+  flowerWikiId: 'flowerWikiId',
+  batchId: 'batchId',
+  lossQuantity: 'lossQuantity',
+  reason: 'reason',
+  operator: 'operator',
+  stockLogId: 'stockLogId',
+  createdAt: 'createdAt'
+} as const
+
+export type StockLossRecordScalarFieldEnum = (typeof StockLossRecordScalarFieldEnum)[keyof typeof StockLossRecordScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {
@@ -304,6 +335,25 @@ export const AppConfigScalarFieldEnum = {
 } as const
 
 export type AppConfigScalarFieldEnum = (typeof AppConfigScalarFieldEnum)[keyof typeof AppConfigScalarFieldEnum]
+
+
+export const FlowerWikiScalarFieldEnum = {
+  id: 'id',
+  photo: 'photo',
+  englishName: 'englishName',
+  chineseName: 'chineseName',
+  pinyinIndex: 'pinyinIndex',
+  colorTags: 'colorTags',
+  morphology: 'morphology',
+  supplySeason: 'supplySeason',
+  floralRole: 'floralRole',
+  maintenance: 'maintenance',
+  aliasMap: 'aliasMap',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type FlowerWikiScalarFieldEnum = (typeof FlowerWikiScalarFieldEnum)[keyof typeof FlowerWikiScalarFieldEnum]
 
 
 export const SortOrder = {

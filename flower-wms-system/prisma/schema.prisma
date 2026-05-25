@@ -1,6 +1,6 @@
 // =============================================================================
 // Flower WMS — 花店仓库管理与微信小程序订单
-// 架构：Product（前台成品）↔ ProductBOM ↔ Material（仓储原材料）+ Batch FIFO
+// 架构：Recipe（WMS 标准配方）↔ ProductSpu；RecipeLine ↔ Material + Batch FIFO
 // 商品分类与原材料分类完全解耦，各自独立表与中间表
 // =============================================================================
 
@@ -49,6 +49,14 @@ enum BannerTargetType {
   ACTIVITY /// 跳转活动页（targetParam 为路径或页面标识）
   COUPON /// 跳转优惠券（targetParam 为券 ID 或活动码）
   NONE /// 仅展示，不跳转
+}
+
+/// 花艺核心角色
+enum FloralRole {
+  MAIN /// 主花
+  FILLER /// 配花
+  LINE /// 线条花
+  FOLIAGE /// 叶材
 }
 
 // ---------------------------------------------------------------------------
@@ -142,16 +150,18 @@ model ProductSpu {
   shippingFee      Float    @default(0) @map("shipping_fee")
   allowPreOrder    Boolean  @default(true) @map("allow_pre_order")
   productionTime   Int      @default(30) @map("production_time")
+  recipeId         String?  @map("recipe_id")
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   skus       ProductSku[]
   categories ProductCategoryRelation[]
-  bomItems   ProductBOM[]
+  recipe     Recipe?   @relation(fields: [recipeId], references: [id], onDelete: SetNull)
   banners    Banner[]
 
   @@index([isActive])
   @@index([isDeleted])
+  @@index([recipeId])
   @@map("product_spus")
 }
 
@@ -209,33 +219,50 @@ model Material {
   name                 String
   unit                 String
   safetyStockThreshold Int      @default(0)
+  wikiId               String?  @map("wiki_id")
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
+  wiki                FlowerWiki?                @relation(fields: [wikiId], references: [id])
   batches             Batch[]
   stockLogs           StockLog[]
-  bomLines            ProductBOM[]
   categoryRelations   MaterialCategoryRelation[]
 
+  @@index([wikiId])
   @@map("materials")
 }
 
 // ---------------------------------------------------------------------------
-// ProductBOM — 成品配方
+// Recipe — WMS 独立标准工艺配方（大仓黄金标准）
 // ---------------------------------------------------------------------------
 
-model ProductBOM {
+model Recipe {
+  id          String   @id @default(uuid())
+  recipeCode  String   @unique @map("recipe_code")
+  name        String
+  description String?  @db.Text
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  lines    RecipeLine[]
+  products ProductSpu[]
+
+  @@index([name])
+  @@map("recipes")
+}
+
+model RecipeLine {
   id             String @id @default(uuid())
-  spuId          String @map("productId")
-  materialId     String
-  quantityNeeded Int
+  recipeId       String @map("recipe_id")
+  flowerWikiId   String @map("flower_wiki_id")
+  quantityNeeded Int    @map("quantity_needed")
 
-  spu      ProductSpu @relation(fields: [spuId], references: [id], onDelete: Cascade)
-  material Material   @relation(fields: [materialId], references: [id], onDelete: Cascade)
+  recipe Recipe     @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  wiki   FlowerWiki @relation(fields: [flowerWikiId], references: [id], onDelete: Restrict)
 
-  @@unique([spuId, materialId])
-  @@index([materialId])
-  @@map("product_bom")
+  @@unique([recipeId, flowerWikiId])
+  @@index([flowerWikiId])
+  @@map("recipe_lines")
 }
 
 // ---------------------------------------------------------------------------
@@ -259,6 +286,7 @@ model Batch {
 
   material  Material   @relation(fields: [materialId], references: [id], onDelete: Restrict)
   stockLogs StockLog[]
+  stockLossRecords StockLossRecord[]
 
   @@index([materialId, inboundAt])
   @@index([materialId, remainingQty])
@@ -288,6 +316,7 @@ model StockLog {
   batch     Batch      @relation(fields: [batchId], references: [id], onDelete: Restrict)
   order     Order?     @relation(fields: [orderId], references: [id], onDelete: SetNull)
   orderItem OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+  stockLossRecord StockLossRecord?
 
   @@index([materialId, createdAt])
   @@index([batchId, createdAt])
@@ -295,6 +324,29 @@ model StockLog {
   @@index([orderId])
   @@index([orderItemId])
   @@map("stock_logs")
+}
+
+// ---------------------------------------------------------------------------
+// StockLossRecord — 大仓物理报损留痕（关联母表 + 指定批次）
+// ---------------------------------------------------------------------------
+
+model StockLossRecord {
+  id           String   @id @default(cuid())
+  flowerWikiId String   @map("flower_wiki_id")
+  batchId      String   @map("batch_id")
+  lossQuantity Int      @map("loss_quantity")
+  reason       String   @db.Text
+  operator     String?
+  stockLogId   String   @unique @map("stock_log_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  wiki     FlowerWiki @relation(fields: [flowerWikiId], references: [id], onDelete: Restrict)
+  batch    Batch      @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  stockLog StockLog   @relation(fields: [stockLogId], references: [id], onDelete: Restrict)
+
+  @@index([flowerWikiId, createdAt])
+  @@index([batchId, createdAt])
+  @@map("stock_loss_records")
 }
 
 // ---------------------------------------------------------------------------
@@ -385,4 +437,33 @@ model AppConfig {
   updatedAt DateTime @updatedAt
 
   @@map("app_configs")
+}
+
+// ---------------------------------------------------------------------------
+// FlowerWiki — 基础物料母表 / 数字化智库
+// ---------------------------------------------------------------------------
+
+model FlowerWiki {
+  id           String     @id @default(uuid())
+  photo        String?
+  englishName  String     @unique @map("english_name")
+  chineseName  String     @map("chinese_name")
+  pinyinIndex  String     @default("") @map("pinyin_index")
+  colorTags    String[]   @default([]) @map("color_tags")
+  morphology   String?
+  supplySeason String?    @map("supply_season")
+  floralRole   FloralRole @map("floral_role")
+  maintenance  String     @db.Text
+  aliasMap     Json       @default("{}") @map("alias_map")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  materials   Material[]
+  recipeLines RecipeLine[]
+  stockLossRecords StockLossRecord[]
+
+  @@index([chineseName])
+  @@index([floralRole])
+  @@index([pinyinIndex])
+  @@map("flower_wikis")
 }

@@ -25,6 +25,23 @@ export interface FifoDeduction {
   inboundAt: Date;
 }
 
+/** WMS 原料到货入库 POST /api/admin/wms/stock-in */
+export interface WmsStockInBody {
+  flowerWikiId: string;
+  quantity: number;
+  costPrice: number;
+  supplier?: string;
+}
+
+/** WMS 物理报损（指定批次） POST /api/admin/wms/stock-loss */
+export interface WmsStockLossBody {
+  flowerWikiId: string;
+  stockBatchId: string;
+  lossQuantity: number;
+  reason: string;
+  operator?: string;
+}
+
 /** 后台采购入库 POST /api/admin/batches */
 export interface AdminInboundBody {
   name: string;

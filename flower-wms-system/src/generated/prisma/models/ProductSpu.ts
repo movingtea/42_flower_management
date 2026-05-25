@@ -46,6 +46,7 @@ export type ProductSpuMinAggregateOutputType = {
   shippingFee: number | null
   allowPreOrder: boolean | null
   productionTime: number | null
+  recipeId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -60,6 +61,7 @@ export type ProductSpuMaxAggregateOutputType = {
   shippingFee: number | null
   allowPreOrder: boolean | null
   productionTime: number | null
+  recipeId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -74,6 +76,7 @@ export type ProductSpuCountAggregateOutputType = {
   shippingFee: number
   allowPreOrder: number
   productionTime: number
+  recipeId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -100,6 +103,7 @@ export type ProductSpuMinAggregateInputType = {
   shippingFee?: true
   allowPreOrder?: true
   productionTime?: true
+  recipeId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -114,6 +118,7 @@ export type ProductSpuMaxAggregateInputType = {
   shippingFee?: true
   allowPreOrder?: true
   productionTime?: true
+  recipeId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -128,6 +133,7 @@ export type ProductSpuCountAggregateInputType = {
   shippingFee?: true
   allowPreOrder?: true
   productionTime?: true
+  recipeId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -229,6 +235,7 @@ export type ProductSpuGroupByOutputType = {
   shippingFee: number
   allowPreOrder: boolean
   productionTime: number
+  recipeId: string | null
   createdAt: Date
   updatedAt: Date
   _count: ProductSpuCountAggregateOutputType | null
@@ -266,11 +273,12 @@ export type ProductSpuWhereInput = {
   shippingFee?: Prisma.FloatFilter<"ProductSpu"> | number
   allowPreOrder?: Prisma.BoolFilter<"ProductSpu"> | boolean
   productionTime?: Prisma.IntFilter<"ProductSpu"> | number
+  recipeId?: Prisma.StringNullableFilter<"ProductSpu"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ProductSpu"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProductSpu"> | Date | string
   skus?: Prisma.ProductSkuListRelationFilter
   categories?: Prisma.ProductCategoryRelationListRelationFilter
-  bomItems?: Prisma.ProductBOMListRelationFilter
+  recipe?: Prisma.XOR<Prisma.RecipeNullableScalarRelationFilter, Prisma.RecipeWhereInput> | null
   banners?: Prisma.BannerListRelationFilter
 }
 
@@ -284,11 +292,12 @@ export type ProductSpuOrderByWithRelationInput = {
   shippingFee?: Prisma.SortOrder
   allowPreOrder?: Prisma.SortOrder
   productionTime?: Prisma.SortOrder
+  recipeId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   skus?: Prisma.ProductSkuOrderByRelationAggregateInput
   categories?: Prisma.ProductCategoryRelationOrderByRelationAggregateInput
-  bomItems?: Prisma.ProductBOMOrderByRelationAggregateInput
+  recipe?: Prisma.RecipeOrderByWithRelationInput
   banners?: Prisma.BannerOrderByRelationAggregateInput
 }
 
@@ -305,11 +314,12 @@ export type ProductSpuWhereUniqueInput = Prisma.AtLeast<{
   shippingFee?: Prisma.FloatFilter<"ProductSpu"> | number
   allowPreOrder?: Prisma.BoolFilter<"ProductSpu"> | boolean
   productionTime?: Prisma.IntFilter<"ProductSpu"> | number
+  recipeId?: Prisma.StringNullableFilter<"ProductSpu"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ProductSpu"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProductSpu"> | Date | string
   skus?: Prisma.ProductSkuListRelationFilter
   categories?: Prisma.ProductCategoryRelationListRelationFilter
-  bomItems?: Prisma.ProductBOMListRelationFilter
+  recipe?: Prisma.XOR<Prisma.RecipeNullableScalarRelationFilter, Prisma.RecipeWhereInput> | null
   banners?: Prisma.BannerListRelationFilter
 }, "id">
 
@@ -323,6 +333,7 @@ export type ProductSpuOrderByWithAggregationInput = {
   shippingFee?: Prisma.SortOrder
   allowPreOrder?: Prisma.SortOrder
   productionTime?: Prisma.SortOrder
+  recipeId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ProductSpuCountOrderByAggregateInput
@@ -345,6 +356,7 @@ export type ProductSpuScalarWhereWithAggregatesInput = {
   shippingFee?: Prisma.FloatWithAggregatesFilter<"ProductSpu"> | number
   allowPreOrder?: Prisma.BoolWithAggregatesFilter<"ProductSpu"> | boolean
   productionTime?: Prisma.IntWithAggregatesFilter<"ProductSpu"> | number
+  recipeId?: Prisma.StringNullableWithAggregatesFilter<"ProductSpu"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ProductSpu"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ProductSpu"> | Date | string
 }
@@ -363,7 +375,7 @@ export type ProductSpuCreateInput = {
   updatedAt?: Date | string
   skus?: Prisma.ProductSkuCreateNestedManyWithoutSpuInput
   categories?: Prisma.ProductCategoryRelationCreateNestedManyWithoutSpuInput
-  bomItems?: Prisma.ProductBOMCreateNestedManyWithoutSpuInput
+  recipe?: Prisma.RecipeCreateNestedOneWithoutProductsInput
   banners?: Prisma.BannerCreateNestedManyWithoutSpuInput
 }
 
@@ -377,11 +389,11 @@ export type ProductSpuUncheckedCreateInput = {
   shippingFee?: number
   allowPreOrder?: boolean
   productionTime?: number
+  recipeId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   skus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSpuInput
   categories?: Prisma.ProductCategoryRelationUncheckedCreateNestedManyWithoutSpuInput
-  bomItems?: Prisma.ProductBOMUncheckedCreateNestedManyWithoutSpuInput
   banners?: Prisma.BannerUncheckedCreateNestedManyWithoutSpuInput
 }
 
@@ -399,7 +411,7 @@ export type ProductSpuUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skus?: Prisma.ProductSkuUpdateManyWithoutSpuNestedInput
   categories?: Prisma.ProductCategoryRelationUpdateManyWithoutSpuNestedInput
-  bomItems?: Prisma.ProductBOMUpdateManyWithoutSpuNestedInput
+  recipe?: Prisma.RecipeUpdateOneWithoutProductsNestedInput
   banners?: Prisma.BannerUpdateManyWithoutSpuNestedInput
 }
 
@@ -413,11 +425,11 @@ export type ProductSpuUncheckedUpdateInput = {
   shippingFee?: Prisma.FloatFieldUpdateOperationsInput | number
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
+  recipeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSpuNestedInput
   categories?: Prisma.ProductCategoryRelationUncheckedUpdateManyWithoutSpuNestedInput
-  bomItems?: Prisma.ProductBOMUncheckedUpdateManyWithoutSpuNestedInput
   banners?: Prisma.BannerUncheckedUpdateManyWithoutSpuNestedInput
 }
 
@@ -431,6 +443,7 @@ export type ProductSpuCreateManyInput = {
   shippingFee?: number
   allowPreOrder?: boolean
   productionTime?: number
+  recipeId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -459,6 +472,7 @@ export type ProductSpuUncheckedUpdateManyInput = {
   shippingFee?: Prisma.FloatFieldUpdateOperationsInput | number
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
+  recipeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -478,6 +492,7 @@ export type ProductSpuCountOrderByAggregateInput = {
   shippingFee?: Prisma.SortOrder
   allowPreOrder?: Prisma.SortOrder
   productionTime?: Prisma.SortOrder
+  recipeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -497,6 +512,7 @@ export type ProductSpuMaxOrderByAggregateInput = {
   shippingFee?: Prisma.SortOrder
   allowPreOrder?: Prisma.SortOrder
   productionTime?: Prisma.SortOrder
+  recipeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -511,6 +527,7 @@ export type ProductSpuMinOrderByAggregateInput = {
   shippingFee?: Prisma.SortOrder
   allowPreOrder?: Prisma.SortOrder
   productionTime?: Prisma.SortOrder
+  recipeId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -523,6 +540,16 @@ export type ProductSpuSumOrderByAggregateInput = {
 export type ProductSpuNullableScalarRelationFilter = {
   is?: Prisma.ProductSpuWhereInput | null
   isNot?: Prisma.ProductSpuWhereInput | null
+}
+
+export type ProductSpuListRelationFilter = {
+  every?: Prisma.ProductSpuWhereInput
+  some?: Prisma.ProductSpuWhereInput
+  none?: Prisma.ProductSpuWhereInput
+}
+
+export type ProductSpuOrderByRelationAggregateInput = {
+  _count?: Prisma.SortOrder
 }
 
 export type ProductSpuCreateNestedOneWithoutCategoriesInput = {
@@ -577,18 +604,46 @@ export type ProductSpuUpdateOneWithoutBannersNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProductSpuUpdateToOneWithWhereWithoutBannersInput, Prisma.ProductSpuUpdateWithoutBannersInput>, Prisma.ProductSpuUncheckedUpdateWithoutBannersInput>
 }
 
-export type ProductSpuCreateNestedOneWithoutBomItemsInput = {
-  create?: Prisma.XOR<Prisma.ProductSpuCreateWithoutBomItemsInput, Prisma.ProductSpuUncheckedCreateWithoutBomItemsInput>
-  connectOrCreate?: Prisma.ProductSpuCreateOrConnectWithoutBomItemsInput
-  connect?: Prisma.ProductSpuWhereUniqueInput
+export type ProductSpuCreateNestedManyWithoutRecipeInput = {
+  create?: Prisma.XOR<Prisma.ProductSpuCreateWithoutRecipeInput, Prisma.ProductSpuUncheckedCreateWithoutRecipeInput> | Prisma.ProductSpuCreateWithoutRecipeInput[] | Prisma.ProductSpuUncheckedCreateWithoutRecipeInput[]
+  connectOrCreate?: Prisma.ProductSpuCreateOrConnectWithoutRecipeInput | Prisma.ProductSpuCreateOrConnectWithoutRecipeInput[]
+  createMany?: Prisma.ProductSpuCreateManyRecipeInputEnvelope
+  connect?: Prisma.ProductSpuWhereUniqueInput | Prisma.ProductSpuWhereUniqueInput[]
 }
 
-export type ProductSpuUpdateOneRequiredWithoutBomItemsNestedInput = {
-  create?: Prisma.XOR<Prisma.ProductSpuCreateWithoutBomItemsInput, Prisma.ProductSpuUncheckedCreateWithoutBomItemsInput>
-  connectOrCreate?: Prisma.ProductSpuCreateOrConnectWithoutBomItemsInput
-  upsert?: Prisma.ProductSpuUpsertWithoutBomItemsInput
-  connect?: Prisma.ProductSpuWhereUniqueInput
-  update?: Prisma.XOR<Prisma.XOR<Prisma.ProductSpuUpdateToOneWithWhereWithoutBomItemsInput, Prisma.ProductSpuUpdateWithoutBomItemsInput>, Prisma.ProductSpuUncheckedUpdateWithoutBomItemsInput>
+export type ProductSpuUncheckedCreateNestedManyWithoutRecipeInput = {
+  create?: Prisma.XOR<Prisma.ProductSpuCreateWithoutRecipeInput, Prisma.ProductSpuUncheckedCreateWithoutRecipeInput> | Prisma.ProductSpuCreateWithoutRecipeInput[] | Prisma.ProductSpuUncheckedCreateWithoutRecipeInput[]
+  connectOrCreate?: Prisma.ProductSpuCreateOrConnectWithoutRecipeInput | Prisma.ProductSpuCreateOrConnectWithoutRecipeInput[]
+  createMany?: Prisma.ProductSpuCreateManyRecipeInputEnvelope
+  connect?: Prisma.ProductSpuWhereUniqueInput | Prisma.ProductSpuWhereUniqueInput[]
+}
+
+export type ProductSpuUpdateManyWithoutRecipeNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductSpuCreateWithoutRecipeInput, Prisma.ProductSpuUncheckedCreateWithoutRecipeInput> | Prisma.ProductSpuCreateWithoutRecipeInput[] | Prisma.ProductSpuUncheckedCreateWithoutRecipeInput[]
+  connectOrCreate?: Prisma.ProductSpuCreateOrConnectWithoutRecipeInput | Prisma.ProductSpuCreateOrConnectWithoutRecipeInput[]
+  upsert?: Prisma.ProductSpuUpsertWithWhereUniqueWithoutRecipeInput | Prisma.ProductSpuUpsertWithWhereUniqueWithoutRecipeInput[]
+  createMany?: Prisma.ProductSpuCreateManyRecipeInputEnvelope
+  set?: Prisma.ProductSpuWhereUniqueInput | Prisma.ProductSpuWhereUniqueInput[]
+  disconnect?: Prisma.ProductSpuWhereUniqueInput | Prisma.ProductSpuWhereUniqueInput[]
+  delete?: Prisma.ProductSpuWhereUniqueInput | Prisma.ProductSpuWhereUniqueInput[]
+  connect?: Prisma.ProductSpuWhereUniqueInput | Prisma.ProductSpuWhereUniqueInput[]
+  update?: Prisma.ProductSpuUpdateWithWhereUniqueWithoutRecipeInput | Prisma.ProductSpuUpdateWithWhereUniqueWithoutRecipeInput[]
+  updateMany?: Prisma.ProductSpuUpdateManyWithWhereWithoutRecipeInput | Prisma.ProductSpuUpdateManyWithWhereWithoutRecipeInput[]
+  deleteMany?: Prisma.ProductSpuScalarWhereInput | Prisma.ProductSpuScalarWhereInput[]
+}
+
+export type ProductSpuUncheckedUpdateManyWithoutRecipeNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductSpuCreateWithoutRecipeInput, Prisma.ProductSpuUncheckedCreateWithoutRecipeInput> | Prisma.ProductSpuCreateWithoutRecipeInput[] | Prisma.ProductSpuUncheckedCreateWithoutRecipeInput[]
+  connectOrCreate?: Prisma.ProductSpuCreateOrConnectWithoutRecipeInput | Prisma.ProductSpuCreateOrConnectWithoutRecipeInput[]
+  upsert?: Prisma.ProductSpuUpsertWithWhereUniqueWithoutRecipeInput | Prisma.ProductSpuUpsertWithWhereUniqueWithoutRecipeInput[]
+  createMany?: Prisma.ProductSpuCreateManyRecipeInputEnvelope
+  set?: Prisma.ProductSpuWhereUniqueInput | Prisma.ProductSpuWhereUniqueInput[]
+  disconnect?: Prisma.ProductSpuWhereUniqueInput | Prisma.ProductSpuWhereUniqueInput[]
+  delete?: Prisma.ProductSpuWhereUniqueInput | Prisma.ProductSpuWhereUniqueInput[]
+  connect?: Prisma.ProductSpuWhereUniqueInput | Prisma.ProductSpuWhereUniqueInput[]
+  update?: Prisma.ProductSpuUpdateWithWhereUniqueWithoutRecipeInput | Prisma.ProductSpuUpdateWithWhereUniqueWithoutRecipeInput[]
+  updateMany?: Prisma.ProductSpuUpdateManyWithWhereWithoutRecipeInput | Prisma.ProductSpuUpdateManyWithWhereWithoutRecipeInput[]
+  deleteMany?: Prisma.ProductSpuScalarWhereInput | Prisma.ProductSpuScalarWhereInput[]
 }
 
 export type ProductSpuCreateWithoutCategoriesInput = {
@@ -604,7 +659,7 @@ export type ProductSpuCreateWithoutCategoriesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   skus?: Prisma.ProductSkuCreateNestedManyWithoutSpuInput
-  bomItems?: Prisma.ProductBOMCreateNestedManyWithoutSpuInput
+  recipe?: Prisma.RecipeCreateNestedOneWithoutProductsInput
   banners?: Prisma.BannerCreateNestedManyWithoutSpuInput
 }
 
@@ -618,10 +673,10 @@ export type ProductSpuUncheckedCreateWithoutCategoriesInput = {
   shippingFee?: number
   allowPreOrder?: boolean
   productionTime?: number
+  recipeId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   skus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSpuInput
-  bomItems?: Prisma.ProductBOMUncheckedCreateNestedManyWithoutSpuInput
   banners?: Prisma.BannerUncheckedCreateNestedManyWithoutSpuInput
 }
 
@@ -654,7 +709,7 @@ export type ProductSpuUpdateWithoutCategoriesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skus?: Prisma.ProductSkuUpdateManyWithoutSpuNestedInput
-  bomItems?: Prisma.ProductBOMUpdateManyWithoutSpuNestedInput
+  recipe?: Prisma.RecipeUpdateOneWithoutProductsNestedInput
   banners?: Prisma.BannerUpdateManyWithoutSpuNestedInput
 }
 
@@ -668,10 +723,10 @@ export type ProductSpuUncheckedUpdateWithoutCategoriesInput = {
   shippingFee?: Prisma.FloatFieldUpdateOperationsInput | number
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
+  recipeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSpuNestedInput
-  bomItems?: Prisma.ProductBOMUncheckedUpdateManyWithoutSpuNestedInput
   banners?: Prisma.BannerUncheckedUpdateManyWithoutSpuNestedInput
 }
 
@@ -688,7 +743,7 @@ export type ProductSpuCreateWithoutSkusInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.ProductCategoryRelationCreateNestedManyWithoutSpuInput
-  bomItems?: Prisma.ProductBOMCreateNestedManyWithoutSpuInput
+  recipe?: Prisma.RecipeCreateNestedOneWithoutProductsInput
   banners?: Prisma.BannerCreateNestedManyWithoutSpuInput
 }
 
@@ -702,10 +757,10 @@ export type ProductSpuUncheckedCreateWithoutSkusInput = {
   shippingFee?: number
   allowPreOrder?: boolean
   productionTime?: number
+  recipeId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.ProductCategoryRelationUncheckedCreateNestedManyWithoutSpuInput
-  bomItems?: Prisma.ProductBOMUncheckedCreateNestedManyWithoutSpuInput
   banners?: Prisma.BannerUncheckedCreateNestedManyWithoutSpuInput
 }
 
@@ -738,7 +793,7 @@ export type ProductSpuUpdateWithoutSkusInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.ProductCategoryRelationUpdateManyWithoutSpuNestedInput
-  bomItems?: Prisma.ProductBOMUpdateManyWithoutSpuNestedInput
+  recipe?: Prisma.RecipeUpdateOneWithoutProductsNestedInput
   banners?: Prisma.BannerUpdateManyWithoutSpuNestedInput
 }
 
@@ -752,10 +807,10 @@ export type ProductSpuUncheckedUpdateWithoutSkusInput = {
   shippingFee?: Prisma.FloatFieldUpdateOperationsInput | number
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
+  recipeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.ProductCategoryRelationUncheckedUpdateManyWithoutSpuNestedInput
-  bomItems?: Prisma.ProductBOMUncheckedUpdateManyWithoutSpuNestedInput
   banners?: Prisma.BannerUncheckedUpdateManyWithoutSpuNestedInput
 }
 
@@ -773,7 +828,7 @@ export type ProductSpuCreateWithoutBannersInput = {
   updatedAt?: Date | string
   skus?: Prisma.ProductSkuCreateNestedManyWithoutSpuInput
   categories?: Prisma.ProductCategoryRelationCreateNestedManyWithoutSpuInput
-  bomItems?: Prisma.ProductBOMCreateNestedManyWithoutSpuInput
+  recipe?: Prisma.RecipeCreateNestedOneWithoutProductsInput
 }
 
 export type ProductSpuUncheckedCreateWithoutBannersInput = {
@@ -786,11 +841,11 @@ export type ProductSpuUncheckedCreateWithoutBannersInput = {
   shippingFee?: number
   allowPreOrder?: boolean
   productionTime?: number
+  recipeId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   skus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSpuInput
   categories?: Prisma.ProductCategoryRelationUncheckedCreateNestedManyWithoutSpuInput
-  bomItems?: Prisma.ProductBOMUncheckedCreateNestedManyWithoutSpuInput
 }
 
 export type ProductSpuCreateOrConnectWithoutBannersInput = {
@@ -823,7 +878,7 @@ export type ProductSpuUpdateWithoutBannersInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skus?: Prisma.ProductSkuUpdateManyWithoutSpuNestedInput
   categories?: Prisma.ProductCategoryRelationUpdateManyWithoutSpuNestedInput
-  bomItems?: Prisma.ProductBOMUpdateManyWithoutSpuNestedInput
+  recipe?: Prisma.RecipeUpdateOneWithoutProductsNestedInput
 }
 
 export type ProductSpuUncheckedUpdateWithoutBannersInput = {
@@ -836,14 +891,14 @@ export type ProductSpuUncheckedUpdateWithoutBannersInput = {
   shippingFee?: Prisma.FloatFieldUpdateOperationsInput | number
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
+  recipeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSpuNestedInput
   categories?: Prisma.ProductCategoryRelationUncheckedUpdateManyWithoutSpuNestedInput
-  bomItems?: Prisma.ProductBOMUncheckedUpdateManyWithoutSpuNestedInput
 }
 
-export type ProductSpuCreateWithoutBomItemsInput = {
+export type ProductSpuCreateWithoutRecipeInput = {
   id?: string
   name: string
   description?: string | null
@@ -860,7 +915,7 @@ export type ProductSpuCreateWithoutBomItemsInput = {
   banners?: Prisma.BannerCreateNestedManyWithoutSpuInput
 }
 
-export type ProductSpuUncheckedCreateWithoutBomItemsInput = {
+export type ProductSpuUncheckedCreateWithoutRecipeInput = {
   id?: string
   name: string
   description?: string | null
@@ -877,23 +932,65 @@ export type ProductSpuUncheckedCreateWithoutBomItemsInput = {
   banners?: Prisma.BannerUncheckedCreateNestedManyWithoutSpuInput
 }
 
-export type ProductSpuCreateOrConnectWithoutBomItemsInput = {
+export type ProductSpuCreateOrConnectWithoutRecipeInput = {
   where: Prisma.ProductSpuWhereUniqueInput
-  create: Prisma.XOR<Prisma.ProductSpuCreateWithoutBomItemsInput, Prisma.ProductSpuUncheckedCreateWithoutBomItemsInput>
+  create: Prisma.XOR<Prisma.ProductSpuCreateWithoutRecipeInput, Prisma.ProductSpuUncheckedCreateWithoutRecipeInput>
 }
 
-export type ProductSpuUpsertWithoutBomItemsInput = {
-  update: Prisma.XOR<Prisma.ProductSpuUpdateWithoutBomItemsInput, Prisma.ProductSpuUncheckedUpdateWithoutBomItemsInput>
-  create: Prisma.XOR<Prisma.ProductSpuCreateWithoutBomItemsInput, Prisma.ProductSpuUncheckedCreateWithoutBomItemsInput>
-  where?: Prisma.ProductSpuWhereInput
+export type ProductSpuCreateManyRecipeInputEnvelope = {
+  data: Prisma.ProductSpuCreateManyRecipeInput | Prisma.ProductSpuCreateManyRecipeInput[]
+  skipDuplicates?: boolean
 }
 
-export type ProductSpuUpdateToOneWithWhereWithoutBomItemsInput = {
-  where?: Prisma.ProductSpuWhereInput
-  data: Prisma.XOR<Prisma.ProductSpuUpdateWithoutBomItemsInput, Prisma.ProductSpuUncheckedUpdateWithoutBomItemsInput>
+export type ProductSpuUpsertWithWhereUniqueWithoutRecipeInput = {
+  where: Prisma.ProductSpuWhereUniqueInput
+  update: Prisma.XOR<Prisma.ProductSpuUpdateWithoutRecipeInput, Prisma.ProductSpuUncheckedUpdateWithoutRecipeInput>
+  create: Prisma.XOR<Prisma.ProductSpuCreateWithoutRecipeInput, Prisma.ProductSpuUncheckedCreateWithoutRecipeInput>
 }
 
-export type ProductSpuUpdateWithoutBomItemsInput = {
+export type ProductSpuUpdateWithWhereUniqueWithoutRecipeInput = {
+  where: Prisma.ProductSpuWhereUniqueInput
+  data: Prisma.XOR<Prisma.ProductSpuUpdateWithoutRecipeInput, Prisma.ProductSpuUncheckedUpdateWithoutRecipeInput>
+}
+
+export type ProductSpuUpdateManyWithWhereWithoutRecipeInput = {
+  where: Prisma.ProductSpuScalarWhereInput
+  data: Prisma.XOR<Prisma.ProductSpuUpdateManyMutationInput, Prisma.ProductSpuUncheckedUpdateManyWithoutRecipeInput>
+}
+
+export type ProductSpuScalarWhereInput = {
+  AND?: Prisma.ProductSpuScalarWhereInput | Prisma.ProductSpuScalarWhereInput[]
+  OR?: Prisma.ProductSpuScalarWhereInput[]
+  NOT?: Prisma.ProductSpuScalarWhereInput | Prisma.ProductSpuScalarWhereInput[]
+  id?: Prisma.StringFilter<"ProductSpu"> | string
+  name?: Prisma.StringFilter<"ProductSpu"> | string
+  description?: Prisma.StringNullableFilter<"ProductSpu"> | string | null
+  maintenanceGuide?: Prisma.StringNullableFilter<"ProductSpu"> | string | null
+  isActive?: Prisma.BoolFilter<"ProductSpu"> | boolean
+  isDeleted?: Prisma.BoolFilter<"ProductSpu"> | boolean
+  shippingFee?: Prisma.FloatFilter<"ProductSpu"> | number
+  allowPreOrder?: Prisma.BoolFilter<"ProductSpu"> | boolean
+  productionTime?: Prisma.IntFilter<"ProductSpu"> | number
+  recipeId?: Prisma.StringNullableFilter<"ProductSpu"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"ProductSpu"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"ProductSpu"> | Date | string
+}
+
+export type ProductSpuCreateManyRecipeInput = {
+  id?: string
+  name: string
+  description?: string | null
+  maintenanceGuide?: string | null
+  isActive?: boolean
+  isDeleted?: boolean
+  shippingFee?: number
+  allowPreOrder?: boolean
+  productionTime?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ProductSpuUpdateWithoutRecipeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -910,7 +1007,7 @@ export type ProductSpuUpdateWithoutBomItemsInput = {
   banners?: Prisma.BannerUpdateManyWithoutSpuNestedInput
 }
 
-export type ProductSpuUncheckedUpdateWithoutBomItemsInput = {
+export type ProductSpuUncheckedUpdateWithoutRecipeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -927,6 +1024,20 @@ export type ProductSpuUncheckedUpdateWithoutBomItemsInput = {
   banners?: Prisma.BannerUncheckedUpdateManyWithoutSpuNestedInput
 }
 
+export type ProductSpuUncheckedUpdateManyWithoutRecipeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceGuide?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shippingFee?: Prisma.FloatFieldUpdateOperationsInput | number
+  allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  productionTime?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 
 /**
  * Count Type ProductSpuCountOutputType
@@ -935,14 +1046,12 @@ export type ProductSpuUncheckedUpdateWithoutBomItemsInput = {
 export type ProductSpuCountOutputType = {
   skus: number
   categories: number
-  bomItems: number
   banners: number
 }
 
 export type ProductSpuCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   skus?: boolean | ProductSpuCountOutputTypeCountSkusArgs
   categories?: boolean | ProductSpuCountOutputTypeCountCategoriesArgs
-  bomItems?: boolean | ProductSpuCountOutputTypeCountBomItemsArgs
   banners?: boolean | ProductSpuCountOutputTypeCountBannersArgs
 }
 
@@ -973,13 +1082,6 @@ export type ProductSpuCountOutputTypeCountCategoriesArgs<ExtArgs extends runtime
 /**
  * ProductSpuCountOutputType without action
  */
-export type ProductSpuCountOutputTypeCountBomItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
-  where?: Prisma.ProductBOMWhereInput
-}
-
-/**
- * ProductSpuCountOutputType without action
- */
 export type ProductSpuCountOutputTypeCountBannersArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.BannerWhereInput
 }
@@ -995,11 +1097,12 @@ export type ProductSpuSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   shippingFee?: boolean
   allowPreOrder?: boolean
   productionTime?: boolean
+  recipeId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   skus?: boolean | Prisma.ProductSpu$skusArgs<ExtArgs>
   categories?: boolean | Prisma.ProductSpu$categoriesArgs<ExtArgs>
-  bomItems?: boolean | Prisma.ProductSpu$bomItemsArgs<ExtArgs>
+  recipe?: boolean | Prisma.ProductSpu$recipeArgs<ExtArgs>
   banners?: boolean | Prisma.ProductSpu$bannersArgs<ExtArgs>
   _count?: boolean | Prisma.ProductSpuCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["productSpu"]>
@@ -1014,8 +1117,10 @@ export type ProductSpuSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   shippingFee?: boolean
   allowPreOrder?: boolean
   productionTime?: boolean
+  recipeId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  recipe?: boolean | Prisma.ProductSpu$recipeArgs<ExtArgs>
 }, ExtArgs["result"]["productSpu"]>
 
 export type ProductSpuSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1028,8 +1133,10 @@ export type ProductSpuSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   shippingFee?: boolean
   allowPreOrder?: boolean
   productionTime?: boolean
+  recipeId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
+  recipe?: boolean | Prisma.ProductSpu$recipeArgs<ExtArgs>
 }, ExtArgs["result"]["productSpu"]>
 
 export type ProductSpuSelectScalar = {
@@ -1042,27 +1149,32 @@ export type ProductSpuSelectScalar = {
   shippingFee?: boolean
   allowPreOrder?: boolean
   productionTime?: boolean
+  recipeId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProductSpuOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "maintenanceGuide" | "isActive" | "isDeleted" | "shippingFee" | "allowPreOrder" | "productionTime" | "createdAt" | "updatedAt", ExtArgs["result"]["productSpu"]>
+export type ProductSpuOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "maintenanceGuide" | "isActive" | "isDeleted" | "shippingFee" | "allowPreOrder" | "productionTime" | "recipeId" | "createdAt" | "updatedAt", ExtArgs["result"]["productSpu"]>
 export type ProductSpuInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   skus?: boolean | Prisma.ProductSpu$skusArgs<ExtArgs>
   categories?: boolean | Prisma.ProductSpu$categoriesArgs<ExtArgs>
-  bomItems?: boolean | Prisma.ProductSpu$bomItemsArgs<ExtArgs>
+  recipe?: boolean | Prisma.ProductSpu$recipeArgs<ExtArgs>
   banners?: boolean | Prisma.ProductSpu$bannersArgs<ExtArgs>
   _count?: boolean | Prisma.ProductSpuCountOutputTypeDefaultArgs<ExtArgs>
 }
-export type ProductSpuIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
-export type ProductSpuIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
+export type ProductSpuIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  recipe?: boolean | Prisma.ProductSpu$recipeArgs<ExtArgs>
+}
+export type ProductSpuIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  recipe?: boolean | Prisma.ProductSpu$recipeArgs<ExtArgs>
+}
 
 export type $ProductSpuPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ProductSpu"
   objects: {
     skus: Prisma.$ProductSkuPayload<ExtArgs>[]
     categories: Prisma.$ProductCategoryRelationPayload<ExtArgs>[]
-    bomItems: Prisma.$ProductBOMPayload<ExtArgs>[]
+    recipe: Prisma.$RecipePayload<ExtArgs> | null
     banners: Prisma.$BannerPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -1075,6 +1187,7 @@ export type $ProductSpuPayload<ExtArgs extends runtime.Types.Extensions.Internal
     shippingFee: number
     allowPreOrder: boolean
     productionTime: number
+    recipeId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["productSpu"]>
@@ -1473,7 +1586,7 @@ export interface Prisma__ProductSpuClient<T, Null = never, ExtArgs extends runti
   readonly [Symbol.toStringTag]: "PrismaPromise"
   skus<T extends Prisma.ProductSpu$skusArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductSpu$skusArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductSkuPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   categories<T extends Prisma.ProductSpu$categoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductSpu$categoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductCategoryRelationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-  bomItems<T extends Prisma.ProductSpu$bomItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductSpu$bomItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductBOMPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  recipe<T extends Prisma.ProductSpu$recipeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductSpu$recipeArgs<ExtArgs>>): Prisma.Prisma__RecipeClient<runtime.Types.Result.GetResult<Prisma.$RecipePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   banners<T extends Prisma.ProductSpu$bannersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductSpu$bannersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BannerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1513,6 +1626,7 @@ export interface ProductSpuFieldRefs {
   readonly shippingFee: Prisma.FieldRef<"ProductSpu", 'Float'>
   readonly allowPreOrder: Prisma.FieldRef<"ProductSpu", 'Boolean'>
   readonly productionTime: Prisma.FieldRef<"ProductSpu", 'Int'>
+  readonly recipeId: Prisma.FieldRef<"ProductSpu", 'String'>
   readonly createdAt: Prisma.FieldRef<"ProductSpu", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ProductSpu", 'DateTime'>
 }
@@ -1769,6 +1883,10 @@ export type ProductSpuCreateManyAndReturnArgs<ExtArgs extends runtime.Types.Exte
    */
   data: Prisma.ProductSpuCreateManyInput | Prisma.ProductSpuCreateManyInput[]
   skipDuplicates?: boolean
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProductSpuIncludeCreateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1839,6 +1957,10 @@ export type ProductSpuUpdateManyAndReturnArgs<ExtArgs extends runtime.Types.Exte
    * Limit how many ProductSpus to update.
    */
   limit?: number
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.ProductSpuIncludeUpdateManyAndReturn<ExtArgs> | null
 }
 
 /**
@@ -1956,27 +2078,22 @@ export type ProductSpu$categoriesArgs<ExtArgs extends runtime.Types.Extensions.I
 }
 
 /**
- * ProductSpu.bomItems
+ * ProductSpu.recipe
  */
-export type ProductSpu$bomItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+export type ProductSpu$recipeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   /**
-   * Select specific fields to fetch from the ProductBOM
+   * Select specific fields to fetch from the Recipe
    */
-  select?: Prisma.ProductBOMSelect<ExtArgs> | null
+  select?: Prisma.RecipeSelect<ExtArgs> | null
   /**
-   * Omit specific fields from the ProductBOM
+   * Omit specific fields from the Recipe
    */
-  omit?: Prisma.ProductBOMOmit<ExtArgs> | null
+  omit?: Prisma.RecipeOmit<ExtArgs> | null
   /**
    * Choose, which related nodes to fetch as well
    */
-  include?: Prisma.ProductBOMInclude<ExtArgs> | null
-  where?: Prisma.ProductBOMWhereInput
-  orderBy?: Prisma.ProductBOMOrderByWithRelationInput | Prisma.ProductBOMOrderByWithRelationInput[]
-  cursor?: Prisma.ProductBOMWhereUniqueInput
-  take?: number
-  skip?: number
-  distinct?: Prisma.ProductBOMScalarFieldEnum | Prisma.ProductBOMScalarFieldEnum[]
+  include?: Prisma.RecipeInclude<ExtArgs> | null
+  where?: Prisma.RecipeWhereInput
 }
 
 /**

@@ -58,6 +58,7 @@ export type CmsProductBody = {
   shippingFee: number;
   allowPreOrder?: boolean;
   productionTime?: number;
+  recipeId?: string | null;
   skus: CmsProductSkuInput[];
 };
 
@@ -155,6 +156,11 @@ export function parseCmsProductBody(
   const needsShipping = Boolean(b.needsShipping);
   const shippingFee = parseShippingFeeValue(b.shippingFee, needsShipping);
 
+  const recipeId =
+    typeof b.recipeId === "string" && b.recipeId.trim()
+      ? b.recipeId.trim()
+      : null;
+
   return {
     name,
     category,
@@ -171,6 +177,7 @@ export function parseCmsProductBody(
     productionTime,
     needsShipping,
     shippingFee,
+    recipeId,
     skus,
   };
 }
