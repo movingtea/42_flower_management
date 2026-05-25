@@ -13,7 +13,7 @@ export default function WmsLayout({
   return (
     <div className="flex min-h-screen bg-zinc-50/80">
       <WmsSidebar />
-      <main className="flex-1 overflow-auto p-8">{children}</main>
+      <main className="flex-1 overflow-auto p-4 md:p-8">{children}</main>
     </div>
   );
 }

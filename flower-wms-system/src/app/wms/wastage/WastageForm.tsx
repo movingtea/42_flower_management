@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import { QuantityStepper } from "@/components/shared/QuantityStepper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { WastageBatchRow } from "./types";
@@ -16,11 +17,17 @@ type WastageFormProps = {
 export function WastageForm({ selected, onClearSelection }: WastageFormProps) {
   const router = useRouter();
   const [submitting, setSubmitting] = useState(false);
-  const [wastageQty, setWastageQty] = useState("");
+  const [wastageQty, setWastageQty] = useState(1);
 
   useEffect(() => {
-    setWastageQty("");
-  }, [selected?.id]);
+    if (!selected) {
+      setWastageQty(1);
+      return;
+    }
+    setWastageQty((prev) =>
+      Math.min(Math.max(1, prev), selected.remainingQty)
+    );
+  }, [selected?.id, selected?.remainingQty]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -32,7 +39,7 @@ export function WastageForm({ selected, onClearSelection }: WastageFormProps) {
 
     const form = e.currentTarget;
     const fd = new FormData(form);
-    const qty = Number(wastageQty || fd.get("wastageQty"));
+    const qty = wastageQty;
     const reason = String(fd.get("reason") ?? "");
     const note = String(fd.get("note") ?? "").trim();
     const operatorId = String(fd.get("operatorId") ?? "").trim();
@@ -84,7 +91,7 @@ export function WastageForm({ selected, onClearSelection }: WastageFormProps) {
 
       alert(json.data?.message ?? "损耗核销成功");
       form.reset();
-      setWastageQty("");
+      setWastageQty(1);
       onClearSelection();
       router.refresh();
     } catch {
@@ -121,22 +128,19 @@ export function WastageForm({ selected, onClearSelection }: WastageFormProps) {
         <input type="hidden" name="batchId" value={selected?.id ?? ""} readOnly />
       </div>
 
-      <label className="block text-sm">
-        <span className="mb-1 block font-medium text-zinc-700">{"损耗数量"}</span>
-        <input
-          name="wastageQty"
-          type="number"
-          min={1}
-          max={maxQty || undefined}
-          step={1}
+      <div>
+        <label className="mb-2 block text-sm font-medium text-zinc-700">
+          损耗数量
+        </label>
+        <QuantityStepper
           value={wastageQty}
-          onChange={(e) => setWastageQty(e.target.value)}
-          disabled={!selected}
-          placeholder="1"          
-          required
-          className="w-full rounded-lg border border-zinc-200 px-3 py-2 disabled:bg-zinc-50"
+          min={1}
+          max={maxQty > 0 ? maxQty : undefined}
+          onChange={setWastageQty}
+          disabled={!selected || submitting}
+          aria-label="损耗数量"
         />
-      </label>
+      </div>
 
       <label className="block text-sm">
         <span className="mb-1 block font-medium text-zinc-700">{"损耗原因"}</span>

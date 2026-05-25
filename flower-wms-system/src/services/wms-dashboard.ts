@@ -1,4 +1,5 @@
 import { OrderStatus, StockLogType } from "@/generated/prisma/enums";
+import { listMaterialsForLowStockCheck } from "@/lib/wms-inventory";
 import { prisma } from "@/lib/prisma";
 import type { DashboardMetrics } from "@/types";
 
@@ -63,15 +64,7 @@ export async function loadWmsDashboardData(): Promise<WmsDashboardData> {
         expiresAt: { gte: new Date(now), lte: expiringBefore },
       },
     }),
-    prisma.material.findMany({
-      include: {
-        batches: {
-          where: { remainingQty: { gt: 0 } },
-          select: { remainingQty: true },
-        },
-      },
-      orderBy: { name: "asc" },
-    }),
+    listMaterialsForLowStockCheck(),
     prisma.stockLog.aggregate({
       where: {
         type: StockLogType.WASTAGE_OUT,

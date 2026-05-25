@@ -21,6 +21,7 @@ export type ProductEditorInitial = {
   displaySku: string;
   displayImageUrl: string;
   displayMinPrice: string;
+  recipeId: string | null;
 };
 
 export type ProductEditorProps = {

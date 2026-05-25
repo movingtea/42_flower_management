@@ -2,6 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { QuantityStepper } from "@/components/shared/QuantityStepper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { MaterialCategoryRow } from "@/lib/material-category";
@@ -19,6 +20,8 @@ export function InboundForm({ materialCategories }: Props) {
   const [selectedCategoryId, setSelectedCategoryId] = useState(
     materialCategories[0]?.id ?? ""
   );
+  const [receivedQty, setReceivedQty] = useState(1);
+  const [safetyStockThreshold, setSafetyStockThreshold] = useState(20);
 
   async function handleSubmit(e: React.SubmitEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -26,9 +29,7 @@ export function InboundForm({ materialCategories }: Props) {
     const fd = new FormData(form);
 
     const name = String(fd.get("name") ?? "").trim();
-    const receivedQty = Number(fd.get("receivedQty"));
     const costPrice = Number(fd.get("costPrice"));
-    const safetyStockThreshold = Number(fd.get("safetyStockThreshold"));
     const expiryDate = String(fd.get("expiryDate") ?? "");
     const supplierName = String(fd.get("supplierName") ?? "").trim();
 
@@ -156,30 +157,33 @@ export function InboundForm({ materialCategories }: Props) {
       </label>
 
       <div>
-        <Input
-          name="safetyStockThreshold"
-          label="安全库存"
-          type="number"
+        <label className="mb-2 block text-sm font-medium text-zinc-700">
+          安全库存
+        </label>
+        <QuantityStepper
+          value={safetyStockThreshold}
           min={0}
-          step={1}
-          defaultValue={20}
-          placeholder="20"
-          required
+          onChange={setSafetyStockThreshold}
+          disabled={submitting}
+          aria-label="安全库存"
         />
         <p className="mt-1 text-xs text-zinc-500">
           当总库存低于此数值时，系统将触发低库存红色预警
         </p>
       </div>
 
-      <Input
-        name="receivedQty"
-        label="入库数量"
-        type="number"
-        min={1}
-        step={1}
-        placeholder="120"
-        required
-      />
+      <div>
+        <label className="mb-2 block text-sm font-medium text-zinc-700">
+          入库数量
+        </label>
+        <QuantityStepper
+          value={receivedQty}
+          min={1}
+          onChange={setReceivedQty}
+          disabled={submitting}
+          aria-label="入库数量"
+        />
+      </div>
       <Input
         name="costPrice"
         label="进货单价（元）"

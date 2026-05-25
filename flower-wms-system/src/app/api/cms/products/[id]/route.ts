@@ -11,6 +11,7 @@ import { activeSpuWhere } from "@/lib/product-query";
 import { productSpuInclude } from "@/lib/product-spu";
 import { softDeleteProduct } from "@/lib/product-soft-delete";
 import { prisma } from "@/lib/prisma";
+import { assertRecipeExists } from "@/services/recipe";
 
 export const dynamic = "force-dynamic";
 
@@ -46,6 +47,7 @@ export async function PUT(
     const { id } = await context.params;
     const categoryConfig = await loadCmsProductCategories();
     const body = parseCmsProductBody(await request.json(), categoryConfig);
+    if (body.recipeId) await assertRecipeExists(body.recipeId);
 
     const existing = await prisma.productSpu.findFirst({
       where: { id, ...activeSpuWhere },

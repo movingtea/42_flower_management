@@ -1,5 +1,6 @@
 import { StockLogType } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
+import { listStockLossHistoryByMaterialId } from "@/services/wms-stock";
 
 export type MaterialDetailView = {
   id: string;
@@ -24,6 +25,13 @@ export type MaterialDetailView = {
     batchNo: string;
     qty: number;
     ref: string;
+  }>;
+  lossHistory: Array<{
+    id: string;
+    at: string;
+    batchLabel: string;
+    lossQuantity: number;
+    reason: string;
   }>;
 };
 
@@ -98,6 +106,7 @@ export async function loadMaterialInventoryDetail(
   }
 
   const totalQty = material.batches.reduce((sum, b) => sum + b.remainingQty, 0);
+  const lossRows = await listStockLossHistoryByMaterialId(materialId);
 
   return {
     id: material.id,
@@ -129,6 +138,15 @@ export async function loadMaterialInventoryDetail(
         log.wastageReason,
         log.order?.orderNo
       ),
+    })),
+    lossHistory: lossRows.map((row) => ({
+      id: row.id,
+      at: formatDateTime(new Date(row.createdAt)),
+      batchLabel: row.batchNo
+        ? `${row.batchNo}（${new Date(row.batchCreatedAt).toLocaleDateString("zh-CN")}）`
+        : new Date(row.batchCreatedAt).toLocaleDateString("zh-CN"),
+      lossQuantity: row.lossQuantity,
+      reason: row.reason,
     })),
   };
 }

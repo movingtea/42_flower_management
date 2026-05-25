@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
-import { prisma } from "@/lib/prisma";
+import { listPhysicalInventoryMaterials } from "@/lib/wms-inventory";
 export const dynamic = "force-dynamic";
 
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
@@ -24,14 +24,7 @@ export default async function InventoryPage() {
   const now = Date.now();
   const updatedAt = new Date();
 
-  const materials = await prisma.material.findMany({
-    include: {
-      batches: {
-        orderBy: { inboundAt: "asc" },
-      },
-    },
-    orderBy: { name: "asc" },
-  });
+  const materials = await listPhysicalInventoryMaterials();
 
   return (
     <div>
@@ -40,7 +33,7 @@ export default async function InventoryPage() {
           库存管理
         </h2>
         <p className="mt-1 text-sm text-zinc-500">
-          库存管理，用于展示仓库的库存情况。
+          仅展示物理批次剩余量 &gt; 0 的在库花材，配方 BOM 不会出现在此列表。
         </p>
       </header>
 

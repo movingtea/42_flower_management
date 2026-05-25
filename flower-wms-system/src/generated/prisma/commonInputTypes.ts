@@ -375,6 +375,23 @@ export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
   _max?: Prisma.NestedJsonFilter<$PrismaModel>
 }
 
+export type EnumFloralRoleFilter<$PrismaModel = never> = {
+  equals?: $Enums.FloralRole | Prisma.EnumFloralRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.FloralRole[] | Prisma.ListEnumFloralRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FloralRole[] | Prisma.ListEnumFloralRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFloralRoleFilter<$PrismaModel> | $Enums.FloralRole
+}
+
+export type EnumFloralRoleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FloralRole | Prisma.EnumFloralRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.FloralRole[] | Prisma.ListEnumFloralRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FloralRole[] | Prisma.ListEnumFloralRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFloralRoleWithAggregatesFilter<$PrismaModel> | $Enums.FloralRole
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFloralRoleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFloralRoleFilter<$PrismaModel>
+}
+
 export type NestedStringFilter<$PrismaModel = never> = {
   equals?: string | Prisma.StringFieldRefInput<$PrismaModel>
   in?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
@@ -709,6 +726,23 @@ export type NestedJsonFilterBase<$PrismaModel = never> = {
   gt?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   gte?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
+}
+
+export type NestedEnumFloralRoleFilter<$PrismaModel = never> = {
+  equals?: $Enums.FloralRole | Prisma.EnumFloralRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.FloralRole[] | Prisma.ListEnumFloralRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FloralRole[] | Prisma.ListEnumFloralRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFloralRoleFilter<$PrismaModel> | $Enums.FloralRole
+}
+
+export type NestedEnumFloralRoleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.FloralRole | Prisma.EnumFloralRoleFieldRefInput<$PrismaModel>
+  in?: $Enums.FloralRole[] | Prisma.ListEnumFloralRoleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.FloralRole[] | Prisma.ListEnumFloralRoleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumFloralRoleWithAggregatesFilter<$PrismaModel> | $Enums.FloralRole
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumFloralRoleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumFloralRoleFilter<$PrismaModel>
 }
 
 

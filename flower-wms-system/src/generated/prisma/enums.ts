@@ -49,3 +49,13 @@ export const BannerTargetType = {
 } as const
 
 export type BannerTargetType = (typeof BannerTargetType)[keyof typeof BannerTargetType]
+
+
+export const FloralRole = {
+  MAIN: 'MAIN',
+  FILLER: 'FILLER',
+  LINE: 'LINE',
+  FOLIAGE: 'FOLIAGE'
+} as const
+
+export type FloralRole = (typeof FloralRole)[keyof typeof FloralRole]

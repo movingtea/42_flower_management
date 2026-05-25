@@ -95,12 +95,56 @@ export default async function InventoryDetailPage({
         </div>
       </section>
 
+      <section className="mb-8">
+        <h3 className="mb-4 text-sm font-semibold text-zinc-900">
+          📜 历史报损盘点日志
+        </h3>
+        {product.lossHistory.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-zinc-200 bg-white px-4 py-8 text-center text-sm text-zinc-500">
+            暂无报损记录
+          </p>
+        ) : (
+          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b bg-zinc-50">
+                <tr>
+                  <th className="px-4 py-3 font-medium text-zinc-600">
+                    报损时间
+                  </th>
+                  <th className="px-4 py-3 font-medium text-zinc-600">
+                    报损批次
+                  </th>
+                  <th className="px-4 py-3 font-medium text-zinc-600">
+                    损耗数量
+                  </th>
+                  <th className="px-4 py-3 font-medium text-zinc-600">
+                    损耗原因
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {product.lossHistory.map((row) => (
+                  <tr key={row.id}>
+                    <td className="px-4 py-3 text-zinc-600">{row.at}</td>
+                    <td className="px-4 py-3 font-medium">{row.batchLabel}</td>
+                    <td className="px-4 py-3 text-rose-700">
+                      {row.lossQuantity} {product.unit}
+                    </td>
+                    <td className="px-4 py-3 text-zinc-700">{row.reason}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </section>
+
       <section>
         <h3 className="mb-4 text-sm font-semibold text-zinc-900">
-          库存流水（FIFO 追踪）
+          库存流水
         </h3>
         <p className="mb-3 text-xs text-zinc-500">
-          按时间倒序展示本原材料关联批次的出入库流水；销售扣减的批次分配逻辑见
+          按时间倒序展示本原材料关联批次的出入库流水；销售出库的 FIFO 扣减见
           services/fifo.ts。
         </p>
         {product.fifoFlows.length === 0 ? (
