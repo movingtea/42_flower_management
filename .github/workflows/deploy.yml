@@ -10,11 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. 拉取源码（这里也对齐你的 SSH_KEY，实现你本人的物理特权拉取）
+      # 1. 拿着你现有的 SSH_KEY 去拉取私有库（这一步已经向我们证明了它是好用的！）
       - name: Checkout Source Code via Private SSH
         uses: actions/checkout@v4
         with:
-          ssh-key: ${{ secrets.SSH_KEY }} # 🚀 完美对齐你的 SSH_KEY
+          ssh-key: ${{ secrets.SSH_KEY }}
 
       # 2. 原生 Docker 编译
       - name: Build Application Image via Native Docker
@@ -27,39 +27,28 @@ jobs:
           mkdir -p /tmp
           docker save -o /tmp/flower-app.tar flower-app:latest
 
-      # 4. 原生传输
-      - name: Transfer Image via Native SCP
+      # 4. 原生传输：改用 sshpass + 密码，彻底免疫密钥配对问题
+      - name: Transfer Image via Pass SCP
         env:
-          HOST_IP: ${{ secrets.HOST_NAME }} # 🚀 完美对齐你的 HOST_NAME
-          SSH_KEY: ${{ secrets.SSH_KEY }}   # 🚀 完美对齐你的 SSH_KEY
+          HOST_IP: ${{ secrets.HOST_NAME }}
+          SSH_PASS: ${{ secrets.SERVER_PASS }} # 🚀 引入你的服务器密码
         run: |
-          if [ -z "$HOST_IP" ] || [ -z "$SSH_KEY" ]; then
-            echo "错误：GitHub Secrets 读取失败，请检查配置！"
-            echo ${{ secrets.HOST_NAME }}
-            echo ${{ secrets.SSH_KEY }}
-            exit 1
-          fi
-
-          echo "$SSH_KEY" > /tmp/id_rsa
-          chmod 600 /tmp/id_rsa
+          # 安装 Linux 原生密码管道工具
+          sudo apk add --no-cache sshpass || sudo apt-get update && sudo apt-get install -y sshpass
           
-          scp -i /tmp/id_rsa -o StrictHostKeyChecking=no /tmp/flower-app.tar root@$HOST_IP:/root/flower-platform/tmp/flower-app.tar
-          rm -f /tmp/id_rsa
+          # 使用密码进行强行无阻碍投送
+          sshpass -p "$SSH_PASS" scp -o StrictHostKeyChecking=no /tmp/flower-app.tar root@$HOST_IP:/root/flower-platform/tmp/flower-app.tar
 
-      # 5. 原生部署
-      - name: Execute Remote Deploy via Native SSH
+      # 5. 原生部署：改用 sshpass + 密码登入服务器下达帅印
+      - name: Execute Remote Deploy via Pass SSH
         env:
-          HOST_IP: ${{ secrets.HOST_NAME }} # 🚀 完美对齐你的 HOST_NAME
-          SSH_KEY: ${{ secrets.SSH_KEY }}   # 🚀 完美对齐你的 SSH_KEY
+          HOST_IP: ${{ secrets.HOST_NAME }}
+          SSH_PASS: ${{ secrets.SERVER_PASS }}
         run: |
-          echo "$SSH_KEY" > /tmp/id_rsa
-          chmod 600 /tmp/id_rsa
-          
-          ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no root@$HOST_IP "
+          sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no root@$HOST_IP "
             cd /root/flower-platform && \
             docker load -i tmp/flower-app.tar && \
             rm -f tmp/flower-app.tar && \
             docker compose up -d gateway web && \
             docker image prune -f
           "
-          rm -f /tmp/id_rsa
