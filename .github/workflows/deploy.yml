@@ -10,9 +10,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. 唯独保留核心源码拉取（走 Git 协议，绝对稳定）
-      - name: Checkout Source Code
+      # ========================================================
+      # 🔓 强制改用你自己的 SSH 凭证进行安全拉取，彻底秒杀 403
+      # ========================================================
+      - name: Checkout Source Code via Private SSH
         uses: actions/checkout@v4
+        with:
+          # 如果你的 SERVER_SSH_KEY 同时也拥有读取这个 GitHub 仓库的特权
+          # 这样写能让虚拟机直接变身成为你本人，无视任何官方 Bot 的干扰
+          ssh-key: ${{ secrets.SERVER_SSH_KEY }} 
 
       # 2. 原生构建：直接用虚拟机自带的 Docker 编译
       - name: Build Application Image via Native Docker
@@ -25,26 +31,19 @@ jobs:
           mkdir -p /tmp
           docker save -o /tmp/flower-app.tar flower-app:latest
 
-      # 4. 原生传输：绕过 appleboy/scp-action，直接用 Linux 自带的 scp 跨网传送
+      # 4. 原生传输：使用 Linux 自带的 scp 跨网传送
       - name: Transfer Image via Native SCP
         run: |
-          # 临时将 GitHub 里的安全私钥写入虚拟机的内存文件里
           echo "${{ secrets.SERVER_SSH_KEY }}" > /tmp/id_rsa
           chmod 600 /tmp/id_rsa
-          
-          # 使用原生 scp 隔空投送文件，加上严格的参数忽略首次握手的指纹确认
           scp -i /tmp/id_rsa -o StrictHostKeyChecking=no /tmp/flower-app.tar root@${{ secrets.SERVER_HOST }}:/root/flower-platform/tmp/flower-app.tar
-          
-          # 阅后即焚，擦除内存中的私钥痕迹
           rm -f /tmp/id_rsa
 
-      # 5. 原生部署：绕过 appleboy/ssh-action，直接用 Linux 自带的 ssh 登入服务器下达帅印
+      # 5. 原生部署：使用 Linux 自带的 ssh 登入服务器下达帅印
       - name: Execute Remote Deploy via Native SSH
         run: |
           echo "${{ secrets.SERVER_SSH_KEY }}" > /tmp/id_rsa
           chmod 600 /tmp/id_rsa
-          
-          # 隔空直接向阿里云发送连环部署密令
           ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no root@${{ secrets.SERVER_HOST }} "
             cd /root/flower-platform && \
             docker load -i tmp/flower-app.tar && \
@@ -52,5 +51,4 @@ jobs:
             docker compose up -d gateway web && \
             docker image prune -f
           "
-          
           rm -f /tmp/id_rsa
