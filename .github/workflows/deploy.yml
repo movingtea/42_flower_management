@@ -3,7 +3,7 @@ name: Flower Platform CI/CD Pipeline
 on:
   push:
     branches:
-      - master
+      - master  # 🚀 这里已经对齐了你的本地 master 分支
 
 jobs:
   build-and-deploy:
@@ -13,11 +13,13 @@ jobs:
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
+      # 🔒 修复核心：这里将版本升级为最新的稳定版 @v4
       - name: Set up Docker Buildx
-        uses: actions/setup-buildx-action@v3
+        uses: docker/setup-buildx-action@v4
 
+      # 🔒 顺便把编译组件也对齐到最新版 @v6，防止后续类似报错
       - name: Build Application Image Locally
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v6
         with:
           context: .
           file: ./Dockerfile
