@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. 拿着你现有的 SSH_KEY 去拉取私有库（这一步已经向我们证明了它是好用的！）
+      # 1. 拿着特权拉代码
       - name: Checkout Source Code via Private SSH
         uses: actions/checkout@v4
         with:
@@ -21,31 +21,33 @@ jobs:
         run: |
           docker build -t flower-app:latest .
 
-      # 3. 原生打包
+      # 3. 原生打包物理镜像
       - name: Save Image to Tar File
         run: |
           mkdir -p /tmp
           docker save -o /tmp/flower-app.tar flower-app:latest
 
-      # 4. 原生传输：改用 sshpass + 密码，彻底免疫密钥配对问题
+      # 4. 原生传输（✨ 核心加固：投送前先自动就地建好服务器的 tmp 文件夹）
       - name: Transfer Image via Pass SCP
         env:
           HOST_IP: ${{ secrets.HOST_NAME }}
-          SSH_PASS: ${{ secrets.SERVER_PASS }} # 🚀 引入你的服务器密码
+          SSH_PASS: ${{ secrets.SERVER_PASS }}
         run: |
-          # 安装 Linux 原生密码管道工具
           sudo apk add --no-cache sshpass || sudo apt-get update && sudo apt-get install -y sshpass
           
-          # 使用密码进行强行无阻碍投送
-          sshpass -p "$SSH_PASS" scp -o StrictHostKeyChecking=no /tmp/flower-app.tar root@$HOST_IP:/root/flower-platform/tmp/flower-app.tar
+          # 🔒 核心指令：传输前，先隔空在阿里云上确保 /root/flower-platform/tmp 目录绝对存在
+          sshpass -p '$SSH_PASS' ssh -o StrictHostKeyChecking=no root@$HOST_IP "mkdir -p /root/flower-platform/tmp"
+          
+          # 此时再去投送，绝不会再报 No such file or directory！
+          sshpass -p '$SSH_PASS' scp -o StrictHostKeyChecking=no /tmp/flower-app.tar root@$HOST_IP:/root/flower-platform/tmp/flower-app.tar
 
-      # 5. 原生部署：改用 sshpass + 密码登入服务器下达帅印
+      # 5. 原生部署
       - name: Execute Remote Deploy via Pass SSH
         env:
           HOST_IP: ${{ secrets.HOST_NAME }}
           SSH_PASS: ${{ secrets.SERVER_PASS }}
         run: |
-          sshpass -p "$SSH_PASS" ssh -o StrictHostKeyChecking=no root@$HOST_IP "
+          sshpass -p '$SSH_PASS' ssh -o StrictHostKeyChecking=no root@$HOST_IP "
             cd /root/flower-platform && \
             docker load -i tmp/flower-app.tar && \
             rm -f tmp/flower-app.tar && \
