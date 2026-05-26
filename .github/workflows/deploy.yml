@@ -38,7 +38,7 @@ jobs:
           scp -i /tmp/id_rsa -o StrictHostKeyChecking=no /tmp/flower-app.tar root@$HOST_IP:/root/flower-platform/tmp/flower-app.tar
           rm -f /tmp/id_rsa
 
-      # 5. 原生部署（🔒 数据库免打扰必杀技）
+      # 5. 原生部署（🔒 数据库免打扰、无损交替完全体）
       - name: Execute Remote Deploy via Private Key SSH
         env:
           HOST_IP: ${{ secrets.HOST_NAME }}
@@ -52,12 +52,12 @@ jobs:
             docker load -i tmp/flower-app.tar && \
             rm -f tmp/flower-app.tar && \
             
-            # ✨ 核心修复：1. 仅停止和删除业务微服务，绝对不碰数据库
+            # 1. 仅停止和删除业务微服务，绝对不碰数据库
             docker compose stop gateway web && \
             docker compose rm -f gateway web && \
             
-            # ✨ 核心修复：2. 仅拉起业务微服务，并在后台自动连接现有的 postgres 基座
-            docker compose up -d gateway web && \
+            # ✨ 终极修复：带上 --no-deps 强行拉起，严禁检查或打扰现存的数据库容器！
+            docker compose up -d --no-deps gateway web && \
             
             docker image prune -f
           "
