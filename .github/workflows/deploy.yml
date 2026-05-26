@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. 用你的私钥钥匙无缝拉取 GitHub 私有库
+      # 1. 拿着特权拉取代码
       - name: Checkout Source Code via Private SSH
         uses: actions/checkout@v4
         with:
@@ -27,22 +27,18 @@ jobs:
           mkdir -p /tmp
           docker save -o /tmp/flower-app.tar flower-app:latest
 
-      # 4. 原生传输：直接用你的私钥钥匙扔给阿里云
+      # 4. 原生传输：直接扔给阿里云
       - name: Transfer Image via Private Key SCP
         env:
           HOST_IP: ${{ secrets.HOST_NAME }}
           SSH_KEY: ${{ secrets.SSH_KEY }}
         run: |
-          # 将私钥还原到虚拟机内存中
           echo "$SSH_KEY" > /tmp/id_rsa
           chmod 600 /tmp/id_rsa
-          
-          # 拿着私钥直接强推，彻底无视密码限制
           scp -i /tmp/id_rsa -o StrictHostKeyChecking=no /tmp/flower-app.tar root@$HOST_IP:/root/flower-platform/tmp/flower-app.tar
-          
           rm -f /tmp/id_rsa
 
-      # 5. 原生部署：同样用私钥钥匙登入执行大合拢
+      # 5. 原生部署（🔒 数据库免打扰必杀技）
       - name: Execute Remote Deploy via Private Key SSH
         env:
           HOST_IP: ${{ secrets.HOST_NAME }}
@@ -55,8 +51,14 @@ jobs:
             cd /root/flower-platform && \
             docker load -i tmp/flower-app.tar && \
             rm -f tmp/flower-app.tar && \
+            
+            # ✨ 核心修复：1. 仅停止和删除业务微服务，绝对不碰数据库
+            docker compose stop gateway web && \
+            docker compose rm -f gateway web && \
+            
+            # ✨ 核心修复：2. 仅拉起业务微服务，并在后台自动连接现有的 postgres 基座
             docker compose up -d gateway web && \
+            
             docker image prune -f
           "
-          
           rm -f /tmp/id_rsa
