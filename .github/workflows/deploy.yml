@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. 拿着特权拉代码
+      # 1. 用你的私钥钥匙无缝拉取 GitHub 私有库
       - name: Checkout Source Code via Private SSH
         uses: actions/checkout@v4
         with:
@@ -27,30 +27,36 @@ jobs:
           mkdir -p /tmp
           docker save -o /tmp/flower-app.tar flower-app:latest
 
-      # 4. 原生传输（✨ 核心加固：投送前先自动就地建好服务器的 tmp 文件夹）
-      - name: Transfer Image via Pass SCP
+      # 4. 原生传输：直接用你的私钥钥匙扔给阿里云
+      - name: Transfer Image via Private Key SCP
         env:
           HOST_IP: ${{ secrets.HOST_NAME }}
-          SSH_PASS: ${{ secrets.SERVER_PASS }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
         run: |
-          sudo apk add --no-cache sshpass || sudo apt-get update && sudo apt-get install -y sshpass
+          # 将私钥还原到虚拟机内存中
+          echo "$SSH_KEY" > /tmp/id_rsa
+          chmod 600 /tmp/id_rsa
           
-          # 🔒 核心指令：传输前，先隔空在阿里云上确保 /root/flower-platform/tmp 目录绝对存在
-          sshpass -p '$SSH_PASS' ssh -o StrictHostKeyChecking=no root@$HOST_IP "mkdir -p /root/flower-platform/tmp"
+          # 拿着私钥直接强推，彻底无视密码限制
+          scp -i /tmp/id_rsa -o StrictHostKeyChecking=no /tmp/flower-app.tar root@$HOST_IP:/root/flower-platform/tmp/flower-app.tar
           
-          # 此时再去投送，绝不会再报 No such file or directory！
-          sshpass -p '$SSH_PASS' scp -o StrictHostKeyChecking=no /tmp/flower-app.tar root@$HOST_IP:/root/flower-platform/tmp/flower-app.tar
+          rm -f /tmp/id_rsa
 
-      # 5. 原生部署
-      - name: Execute Remote Deploy via Pass SSH
+      # 5. 原生部署：同样用私钥钥匙登入执行大合拢
+      - name: Execute Remote Deploy via Private Key SSH
         env:
           HOST_IP: ${{ secrets.HOST_NAME }}
-          SSH_PASS: ${{ secrets.SERVER_PASS }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
         run: |
-          sshpass -p '$SSH_PASS' ssh -o StrictHostKeyChecking=no root@$HOST_IP "
+          echo "$SSH_KEY" > /tmp/id_rsa
+          chmod 600 /tmp/id_rsa
+          
+          ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no root@$HOST_IP "
             cd /root/flower-platform && \
             docker load -i tmp/flower-app.tar && \
             rm -f tmp/flower-app.tar && \
             docker compose up -d gateway web && \
             docker image prune -f
           "
+          
+          rm -f /tmp/id_rsa
