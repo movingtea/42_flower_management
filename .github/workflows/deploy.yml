@@ -35,8 +35,8 @@ jobs:
         run: |
           if [ -z "$HOST_IP" ] || [ -z "$SSH_KEY" ]; then
             echo "错误：GitHub Secrets 读取失败，请检查配置！"
-            echo "HOST_IP: $HOST_IP"
-            echo "SSH_KEY: $SSH_KEY"
+            echo ${{ secrets.HOST_NAME }}
+            echo ${{ secrets.SSH_KEY }}
             exit 1
           fi
 
