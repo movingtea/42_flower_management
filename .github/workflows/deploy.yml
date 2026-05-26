@@ -10,42 +10,47 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. 唯独保留最核心的源码拉取（这个极其稳定，走 Git 协议）
+      # 1. 唯独保留核心源码拉取（走 Git 协议，绝对稳定）
       - name: Checkout Source Code
         uses: actions/checkout@v4
 
-      # 2. 纯原生：直接在 GitHub 的 Linux 虚拟机上用原生的 docker build 命令打包
+      # 2. 原生构建：直接用虚拟机自带的 Docker 编译
       - name: Build Application Image via Native Docker
         run: |
           docker build -t flower-app:latest .
 
-      # 3. 纯原生：直接用原生的 docker save 命令把镜像导出为物理压缩包
+      # 3. 原生打包：直接用系统命令打成物理大文件
       - name: Save Image to Tar File
         run: |
           mkdir -p /tmp
           docker save -o /tmp/flower-app.tar flower-app:latest
 
-      # 4. 传输：将镜像跨网空降到你的阿里云服务器
-      - name: Transfer Image to Server
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: root
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          source: "/tmp/flower-app.tar"
-          target: "/root/flower-platform/tmp/"
-          strip_components: 1
+      # 4. 原生传输：绕过 appleboy/scp-action，直接用 Linux 自带的 scp 跨网传送
+      - name: Transfer Image via Native SCP
+        run: |
+          # 临时将 GitHub 里的安全私钥写入虚拟机的内存文件里
+          echo "${{ secrets.SERVER_SSH_KEY }}" > /tmp/id_rsa
+          chmod 600 /tmp/id_rsa
+          
+          # 使用原生 scp 隔空投送文件，加上严格的参数忽略首次握手的指纹确认
+          scp -i /tmp/id_rsa -o StrictHostKeyChecking=no /tmp/flower-app.tar root@${{ secrets.SERVER_HOST }}:/root/flower-platform/tmp/flower-app.tar
+          
+          # 阅后即焚，擦除内存中的私钥痕迹
+          rm -f /tmp/id_rsa
 
-      # 5. 执掌帅印：让服务器加载新镜像，完成旧容器的秒级无损交替
-      - name: Execute Remote SSH Commands to Deploy
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.SERVER_HOST }}
-          username: root
-          key: ${{ secrets.SERVER_SSH_KEY }}
-          script: |
-            cd /root/flower-platform
-            docker load -i tmp/flower-app.tar
-            rm -f tmp/flower-app.tar
-            docker compose up -d gateway web
+      # 5. 原生部署：绕过 appleboy/ssh-action，直接用 Linux 自带的 ssh 登入服务器下达帅印
+      - name: Execute Remote Deploy via Native SSH
+        run: |
+          echo "${{ secrets.SERVER_SSH_KEY }}" > /tmp/id_rsa
+          chmod 600 /tmp/id_rsa
+          
+          # 隔空直接向阿里云发送连环部署密令
+          ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no root@${{ secrets.SERVER_HOST }} "
+            cd /root/flower-platform && \
+            docker load -i tmp/flower-app.tar && \
+            rm -f tmp/flower-app.tar && \
+            docker compose up -d gateway web && \
             docker image prune -f
+          "
+          
+          rm -f /tmp/id_rsa
