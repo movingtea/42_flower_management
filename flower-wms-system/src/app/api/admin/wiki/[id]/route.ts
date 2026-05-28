@@ -1,5 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
 import { serializeWiki } from "@/lib/wiki-serialize";
 import { deleteWiki, getWikiById, updateWiki } from "@/services/wiki";
 
@@ -37,6 +38,9 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const staff = await requirePermission("wms:read");
+    if (isResponse(staff)) return staff;
+
     const { id } = await context.params;
     const wiki = await getWikiById(id);
     if (!wiki) return jsonError("花材 Wiki 不存在", 404);
@@ -52,6 +56,9 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const staff = await requirePermission("wms:write");
+    if (isResponse(staff)) return staff;
+
     const { id } = await context.params;
     const raw = await request.json();
     const wiki = await updateWiki(id, raw);
@@ -70,6 +77,9 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const staff = await requirePermission("wms:write");
+    if (isResponse(staff)) return staff;
+
     const { id } = await context.params;
     await deleteWiki(id);
     return jsonSuccess({ message: "花材母表已删除" });

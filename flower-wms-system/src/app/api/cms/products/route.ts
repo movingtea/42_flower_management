@@ -1,5 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
 import {
   buildSkuCreateRows,
   cmsSpuCreateData,
@@ -41,6 +42,9 @@ function mapError(err: unknown): { message: string; status: number } {
 /** POST：创建 CMS 商品（SPU + SKU） */
 export async function POST(request: Request) {
   try {
+    const staff = await requirePermission("cms:write");
+    if (isResponse(staff)) return staff;
+
     const categoryConfig = await loadCmsProductCategories();
     const body = parseCmsProductBody(await request.json(), categoryConfig);
     if (body.recipeId) await assertRecipeExists(body.recipeId);

@@ -41,6 +41,7 @@ export type StockLossRecordMinAggregateOutputType = {
   lossQuantity: number | null
   reason: string | null
   operator: string | null
+  operatorStaffId: string | null
   stockLogId: string | null
   createdAt: Date | null
 }
@@ -52,6 +53,7 @@ export type StockLossRecordMaxAggregateOutputType = {
   lossQuantity: number | null
   reason: string | null
   operator: string | null
+  operatorStaffId: string | null
   stockLogId: string | null
   createdAt: Date | null
 }
@@ -63,6 +65,7 @@ export type StockLossRecordCountAggregateOutputType = {
   lossQuantity: number
   reason: number
   operator: number
+  operatorStaffId: number
   stockLogId: number
   createdAt: number
   _all: number
@@ -84,6 +87,7 @@ export type StockLossRecordMinAggregateInputType = {
   lossQuantity?: true
   reason?: true
   operator?: true
+  operatorStaffId?: true
   stockLogId?: true
   createdAt?: true
 }
@@ -95,6 +99,7 @@ export type StockLossRecordMaxAggregateInputType = {
   lossQuantity?: true
   reason?: true
   operator?: true
+  operatorStaffId?: true
   stockLogId?: true
   createdAt?: true
 }
@@ -106,6 +111,7 @@ export type StockLossRecordCountAggregateInputType = {
   lossQuantity?: true
   reason?: true
   operator?: true
+  operatorStaffId?: true
   stockLogId?: true
   createdAt?: true
   _all?: true
@@ -204,6 +210,7 @@ export type StockLossRecordGroupByOutputType = {
   lossQuantity: number
   reason: string
   operator: string | null
+  operatorStaffId: string | null
   stockLogId: string
   createdAt: Date
   _count: StockLossRecordCountAggregateOutputType | null
@@ -238,11 +245,13 @@ export type StockLossRecordWhereInput = {
   lossQuantity?: Prisma.IntFilter<"StockLossRecord"> | number
   reason?: Prisma.StringFilter<"StockLossRecord"> | string
   operator?: Prisma.StringNullableFilter<"StockLossRecord"> | string | null
+  operatorStaffId?: Prisma.StringNullableFilter<"StockLossRecord"> | string | null
   stockLogId?: Prisma.StringFilter<"StockLossRecord"> | string
   createdAt?: Prisma.DateTimeFilter<"StockLossRecord"> | Date | string
   wiki?: Prisma.XOR<Prisma.FlowerWikiScalarRelationFilter, Prisma.FlowerWikiWhereInput>
   batch?: Prisma.XOR<Prisma.BatchScalarRelationFilter, Prisma.BatchWhereInput>
   stockLog?: Prisma.XOR<Prisma.StockLogScalarRelationFilter, Prisma.StockLogWhereInput>
+  operatorStaff?: Prisma.XOR<Prisma.StaffUserNullableScalarRelationFilter, Prisma.StaffUserWhereInput> | null
 }
 
 export type StockLossRecordOrderByWithRelationInput = {
@@ -252,11 +261,13 @@ export type StockLossRecordOrderByWithRelationInput = {
   lossQuantity?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   operator?: Prisma.SortOrderInput | Prisma.SortOrder
+  operatorStaffId?: Prisma.SortOrderInput | Prisma.SortOrder
   stockLogId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   wiki?: Prisma.FlowerWikiOrderByWithRelationInput
   batch?: Prisma.BatchOrderByWithRelationInput
   stockLog?: Prisma.StockLogOrderByWithRelationInput
+  operatorStaff?: Prisma.StaffUserOrderByWithRelationInput
 }
 
 export type StockLossRecordWhereUniqueInput = Prisma.AtLeast<{
@@ -270,10 +281,12 @@ export type StockLossRecordWhereUniqueInput = Prisma.AtLeast<{
   lossQuantity?: Prisma.IntFilter<"StockLossRecord"> | number
   reason?: Prisma.StringFilter<"StockLossRecord"> | string
   operator?: Prisma.StringNullableFilter<"StockLossRecord"> | string | null
+  operatorStaffId?: Prisma.StringNullableFilter<"StockLossRecord"> | string | null
   createdAt?: Prisma.DateTimeFilter<"StockLossRecord"> | Date | string
   wiki?: Prisma.XOR<Prisma.FlowerWikiScalarRelationFilter, Prisma.FlowerWikiWhereInput>
   batch?: Prisma.XOR<Prisma.BatchScalarRelationFilter, Prisma.BatchWhereInput>
   stockLog?: Prisma.XOR<Prisma.StockLogScalarRelationFilter, Prisma.StockLogWhereInput>
+  operatorStaff?: Prisma.XOR<Prisma.StaffUserNullableScalarRelationFilter, Prisma.StaffUserWhereInput> | null
 }, "id" | "stockLogId">
 
 export type StockLossRecordOrderByWithAggregationInput = {
@@ -283,6 +296,7 @@ export type StockLossRecordOrderByWithAggregationInput = {
   lossQuantity?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   operator?: Prisma.SortOrderInput | Prisma.SortOrder
+  operatorStaffId?: Prisma.SortOrderInput | Prisma.SortOrder
   stockLogId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   _count?: Prisma.StockLossRecordCountOrderByAggregateInput
@@ -302,6 +316,7 @@ export type StockLossRecordScalarWhereWithAggregatesInput = {
   lossQuantity?: Prisma.IntWithAggregatesFilter<"StockLossRecord"> | number
   reason?: Prisma.StringWithAggregatesFilter<"StockLossRecord"> | string
   operator?: Prisma.StringNullableWithAggregatesFilter<"StockLossRecord"> | string | null
+  operatorStaffId?: Prisma.StringNullableWithAggregatesFilter<"StockLossRecord"> | string | null
   stockLogId?: Prisma.StringWithAggregatesFilter<"StockLossRecord"> | string
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"StockLossRecord"> | Date | string
 }
@@ -315,6 +330,7 @@ export type StockLossRecordCreateInput = {
   wiki: Prisma.FlowerWikiCreateNestedOneWithoutStockLossRecordsInput
   batch: Prisma.BatchCreateNestedOneWithoutStockLossRecordsInput
   stockLog: Prisma.StockLogCreateNestedOneWithoutStockLossRecordInput
+  operatorStaff?: Prisma.StaffUserCreateNestedOneWithoutStockLossRecordsInput
 }
 
 export type StockLossRecordUncheckedCreateInput = {
@@ -324,6 +340,7 @@ export type StockLossRecordUncheckedCreateInput = {
   lossQuantity: number
   reason: string
   operator?: string | null
+  operatorStaffId?: string | null
   stockLogId: string
   createdAt?: Date | string
 }
@@ -337,6 +354,7 @@ export type StockLossRecordUpdateInput = {
   wiki?: Prisma.FlowerWikiUpdateOneRequiredWithoutStockLossRecordsNestedInput
   batch?: Prisma.BatchUpdateOneRequiredWithoutStockLossRecordsNestedInput
   stockLog?: Prisma.StockLogUpdateOneRequiredWithoutStockLossRecordNestedInput
+  operatorStaff?: Prisma.StaffUserUpdateOneWithoutStockLossRecordsNestedInput
 }
 
 export type StockLossRecordUncheckedUpdateInput = {
@@ -346,6 +364,7 @@ export type StockLossRecordUncheckedUpdateInput = {
   lossQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operatorStaffId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stockLogId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -357,6 +376,7 @@ export type StockLossRecordCreateManyInput = {
   lossQuantity: number
   reason: string
   operator?: string | null
+  operatorStaffId?: string | null
   stockLogId: string
   createdAt?: Date | string
 }
@@ -376,6 +396,7 @@ export type StockLossRecordUncheckedUpdateManyInput = {
   lossQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operatorStaffId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stockLogId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -402,6 +423,7 @@ export type StockLossRecordCountOrderByAggregateInput = {
   lossQuantity?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   operator?: Prisma.SortOrder
+  operatorStaffId?: Prisma.SortOrder
   stockLogId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -417,6 +439,7 @@ export type StockLossRecordMaxOrderByAggregateInput = {
   lossQuantity?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   operator?: Prisma.SortOrder
+  operatorStaffId?: Prisma.SortOrder
   stockLogId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -428,6 +451,7 @@ export type StockLossRecordMinOrderByAggregateInput = {
   lossQuantity?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   operator?: Prisma.SortOrder
+  operatorStaffId?: Prisma.SortOrder
   stockLogId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
 }
@@ -510,6 +534,48 @@ export type StockLossRecordUncheckedUpdateOneWithoutStockLogNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.StockLossRecordUpdateToOneWithWhereWithoutStockLogInput, Prisma.StockLossRecordUpdateWithoutStockLogInput>, Prisma.StockLossRecordUncheckedUpdateWithoutStockLogInput>
 }
 
+export type StockLossRecordCreateNestedManyWithoutOperatorStaffInput = {
+  create?: Prisma.XOR<Prisma.StockLossRecordCreateWithoutOperatorStaffInput, Prisma.StockLossRecordUncheckedCreateWithoutOperatorStaffInput> | Prisma.StockLossRecordCreateWithoutOperatorStaffInput[] | Prisma.StockLossRecordUncheckedCreateWithoutOperatorStaffInput[]
+  connectOrCreate?: Prisma.StockLossRecordCreateOrConnectWithoutOperatorStaffInput | Prisma.StockLossRecordCreateOrConnectWithoutOperatorStaffInput[]
+  createMany?: Prisma.StockLossRecordCreateManyOperatorStaffInputEnvelope
+  connect?: Prisma.StockLossRecordWhereUniqueInput | Prisma.StockLossRecordWhereUniqueInput[]
+}
+
+export type StockLossRecordUncheckedCreateNestedManyWithoutOperatorStaffInput = {
+  create?: Prisma.XOR<Prisma.StockLossRecordCreateWithoutOperatorStaffInput, Prisma.StockLossRecordUncheckedCreateWithoutOperatorStaffInput> | Prisma.StockLossRecordCreateWithoutOperatorStaffInput[] | Prisma.StockLossRecordUncheckedCreateWithoutOperatorStaffInput[]
+  connectOrCreate?: Prisma.StockLossRecordCreateOrConnectWithoutOperatorStaffInput | Prisma.StockLossRecordCreateOrConnectWithoutOperatorStaffInput[]
+  createMany?: Prisma.StockLossRecordCreateManyOperatorStaffInputEnvelope
+  connect?: Prisma.StockLossRecordWhereUniqueInput | Prisma.StockLossRecordWhereUniqueInput[]
+}
+
+export type StockLossRecordUpdateManyWithoutOperatorStaffNestedInput = {
+  create?: Prisma.XOR<Prisma.StockLossRecordCreateWithoutOperatorStaffInput, Prisma.StockLossRecordUncheckedCreateWithoutOperatorStaffInput> | Prisma.StockLossRecordCreateWithoutOperatorStaffInput[] | Prisma.StockLossRecordUncheckedCreateWithoutOperatorStaffInput[]
+  connectOrCreate?: Prisma.StockLossRecordCreateOrConnectWithoutOperatorStaffInput | Prisma.StockLossRecordCreateOrConnectWithoutOperatorStaffInput[]
+  upsert?: Prisma.StockLossRecordUpsertWithWhereUniqueWithoutOperatorStaffInput | Prisma.StockLossRecordUpsertWithWhereUniqueWithoutOperatorStaffInput[]
+  createMany?: Prisma.StockLossRecordCreateManyOperatorStaffInputEnvelope
+  set?: Prisma.StockLossRecordWhereUniqueInput | Prisma.StockLossRecordWhereUniqueInput[]
+  disconnect?: Prisma.StockLossRecordWhereUniqueInput | Prisma.StockLossRecordWhereUniqueInput[]
+  delete?: Prisma.StockLossRecordWhereUniqueInput | Prisma.StockLossRecordWhereUniqueInput[]
+  connect?: Prisma.StockLossRecordWhereUniqueInput | Prisma.StockLossRecordWhereUniqueInput[]
+  update?: Prisma.StockLossRecordUpdateWithWhereUniqueWithoutOperatorStaffInput | Prisma.StockLossRecordUpdateWithWhereUniqueWithoutOperatorStaffInput[]
+  updateMany?: Prisma.StockLossRecordUpdateManyWithWhereWithoutOperatorStaffInput | Prisma.StockLossRecordUpdateManyWithWhereWithoutOperatorStaffInput[]
+  deleteMany?: Prisma.StockLossRecordScalarWhereInput | Prisma.StockLossRecordScalarWhereInput[]
+}
+
+export type StockLossRecordUncheckedUpdateManyWithoutOperatorStaffNestedInput = {
+  create?: Prisma.XOR<Prisma.StockLossRecordCreateWithoutOperatorStaffInput, Prisma.StockLossRecordUncheckedCreateWithoutOperatorStaffInput> | Prisma.StockLossRecordCreateWithoutOperatorStaffInput[] | Prisma.StockLossRecordUncheckedCreateWithoutOperatorStaffInput[]
+  connectOrCreate?: Prisma.StockLossRecordCreateOrConnectWithoutOperatorStaffInput | Prisma.StockLossRecordCreateOrConnectWithoutOperatorStaffInput[]
+  upsert?: Prisma.StockLossRecordUpsertWithWhereUniqueWithoutOperatorStaffInput | Prisma.StockLossRecordUpsertWithWhereUniqueWithoutOperatorStaffInput[]
+  createMany?: Prisma.StockLossRecordCreateManyOperatorStaffInputEnvelope
+  set?: Prisma.StockLossRecordWhereUniqueInput | Prisma.StockLossRecordWhereUniqueInput[]
+  disconnect?: Prisma.StockLossRecordWhereUniqueInput | Prisma.StockLossRecordWhereUniqueInput[]
+  delete?: Prisma.StockLossRecordWhereUniqueInput | Prisma.StockLossRecordWhereUniqueInput[]
+  connect?: Prisma.StockLossRecordWhereUniqueInput | Prisma.StockLossRecordWhereUniqueInput[]
+  update?: Prisma.StockLossRecordUpdateWithWhereUniqueWithoutOperatorStaffInput | Prisma.StockLossRecordUpdateWithWhereUniqueWithoutOperatorStaffInput[]
+  updateMany?: Prisma.StockLossRecordUpdateManyWithWhereWithoutOperatorStaffInput | Prisma.StockLossRecordUpdateManyWithWhereWithoutOperatorStaffInput[]
+  deleteMany?: Prisma.StockLossRecordScalarWhereInput | Prisma.StockLossRecordScalarWhereInput[]
+}
+
 export type StockLossRecordCreateNestedManyWithoutWikiInput = {
   create?: Prisma.XOR<Prisma.StockLossRecordCreateWithoutWikiInput, Prisma.StockLossRecordUncheckedCreateWithoutWikiInput> | Prisma.StockLossRecordCreateWithoutWikiInput[] | Prisma.StockLossRecordUncheckedCreateWithoutWikiInput[]
   connectOrCreate?: Prisma.StockLossRecordCreateOrConnectWithoutWikiInput | Prisma.StockLossRecordCreateOrConnectWithoutWikiInput[]
@@ -560,6 +626,7 @@ export type StockLossRecordCreateWithoutBatchInput = {
   createdAt?: Date | string
   wiki: Prisma.FlowerWikiCreateNestedOneWithoutStockLossRecordsInput
   stockLog: Prisma.StockLogCreateNestedOneWithoutStockLossRecordInput
+  operatorStaff?: Prisma.StaffUserCreateNestedOneWithoutStockLossRecordsInput
 }
 
 export type StockLossRecordUncheckedCreateWithoutBatchInput = {
@@ -568,6 +635,7 @@ export type StockLossRecordUncheckedCreateWithoutBatchInput = {
   lossQuantity: number
   reason: string
   operator?: string | null
+  operatorStaffId?: string | null
   stockLogId: string
   createdAt?: Date | string
 }
@@ -608,6 +676,7 @@ export type StockLossRecordScalarWhereInput = {
   lossQuantity?: Prisma.IntFilter<"StockLossRecord"> | number
   reason?: Prisma.StringFilter<"StockLossRecord"> | string
   operator?: Prisma.StringNullableFilter<"StockLossRecord"> | string | null
+  operatorStaffId?: Prisma.StringNullableFilter<"StockLossRecord"> | string | null
   stockLogId?: Prisma.StringFilter<"StockLossRecord"> | string
   createdAt?: Prisma.DateTimeFilter<"StockLossRecord"> | Date | string
 }
@@ -620,6 +689,7 @@ export type StockLossRecordCreateWithoutStockLogInput = {
   createdAt?: Date | string
   wiki: Prisma.FlowerWikiCreateNestedOneWithoutStockLossRecordsInput
   batch: Prisma.BatchCreateNestedOneWithoutStockLossRecordsInput
+  operatorStaff?: Prisma.StaffUserCreateNestedOneWithoutStockLossRecordsInput
 }
 
 export type StockLossRecordUncheckedCreateWithoutStockLogInput = {
@@ -629,6 +699,7 @@ export type StockLossRecordUncheckedCreateWithoutStockLogInput = {
   lossQuantity: number
   reason: string
   operator?: string | null
+  operatorStaffId?: string | null
   createdAt?: Date | string
 }
 
@@ -656,6 +727,7 @@ export type StockLossRecordUpdateWithoutStockLogInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   wiki?: Prisma.FlowerWikiUpdateOneRequiredWithoutStockLossRecordsNestedInput
   batch?: Prisma.BatchUpdateOneRequiredWithoutStockLossRecordsNestedInput
+  operatorStaff?: Prisma.StaffUserUpdateOneWithoutStockLossRecordsNestedInput
 }
 
 export type StockLossRecordUncheckedUpdateWithoutStockLogInput = {
@@ -665,7 +737,56 @@ export type StockLossRecordUncheckedUpdateWithoutStockLogInput = {
   lossQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operatorStaffId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type StockLossRecordCreateWithoutOperatorStaffInput = {
+  id?: string
+  lossQuantity: number
+  reason: string
+  operator?: string | null
+  createdAt?: Date | string
+  wiki: Prisma.FlowerWikiCreateNestedOneWithoutStockLossRecordsInput
+  batch: Prisma.BatchCreateNestedOneWithoutStockLossRecordsInput
+  stockLog: Prisma.StockLogCreateNestedOneWithoutStockLossRecordInput
+}
+
+export type StockLossRecordUncheckedCreateWithoutOperatorStaffInput = {
+  id?: string
+  flowerWikiId: string
+  batchId: string
+  lossQuantity: number
+  reason: string
+  operator?: string | null
+  stockLogId: string
+  createdAt?: Date | string
+}
+
+export type StockLossRecordCreateOrConnectWithoutOperatorStaffInput = {
+  where: Prisma.StockLossRecordWhereUniqueInput
+  create: Prisma.XOR<Prisma.StockLossRecordCreateWithoutOperatorStaffInput, Prisma.StockLossRecordUncheckedCreateWithoutOperatorStaffInput>
+}
+
+export type StockLossRecordCreateManyOperatorStaffInputEnvelope = {
+  data: Prisma.StockLossRecordCreateManyOperatorStaffInput | Prisma.StockLossRecordCreateManyOperatorStaffInput[]
+  skipDuplicates?: boolean
+}
+
+export type StockLossRecordUpsertWithWhereUniqueWithoutOperatorStaffInput = {
+  where: Prisma.StockLossRecordWhereUniqueInput
+  update: Prisma.XOR<Prisma.StockLossRecordUpdateWithoutOperatorStaffInput, Prisma.StockLossRecordUncheckedUpdateWithoutOperatorStaffInput>
+  create: Prisma.XOR<Prisma.StockLossRecordCreateWithoutOperatorStaffInput, Prisma.StockLossRecordUncheckedCreateWithoutOperatorStaffInput>
+}
+
+export type StockLossRecordUpdateWithWhereUniqueWithoutOperatorStaffInput = {
+  where: Prisma.StockLossRecordWhereUniqueInput
+  data: Prisma.XOR<Prisma.StockLossRecordUpdateWithoutOperatorStaffInput, Prisma.StockLossRecordUncheckedUpdateWithoutOperatorStaffInput>
+}
+
+export type StockLossRecordUpdateManyWithWhereWithoutOperatorStaffInput = {
+  where: Prisma.StockLossRecordScalarWhereInput
+  data: Prisma.XOR<Prisma.StockLossRecordUpdateManyMutationInput, Prisma.StockLossRecordUncheckedUpdateManyWithoutOperatorStaffInput>
 }
 
 export type StockLossRecordCreateWithoutWikiInput = {
@@ -676,6 +797,7 @@ export type StockLossRecordCreateWithoutWikiInput = {
   createdAt?: Date | string
   batch: Prisma.BatchCreateNestedOneWithoutStockLossRecordsInput
   stockLog: Prisma.StockLogCreateNestedOneWithoutStockLossRecordInput
+  operatorStaff?: Prisma.StaffUserCreateNestedOneWithoutStockLossRecordsInput
 }
 
 export type StockLossRecordUncheckedCreateWithoutWikiInput = {
@@ -684,6 +806,7 @@ export type StockLossRecordUncheckedCreateWithoutWikiInput = {
   lossQuantity: number
   reason: string
   operator?: string | null
+  operatorStaffId?: string | null
   stockLogId: string
   createdAt?: Date | string
 }
@@ -720,6 +843,7 @@ export type StockLossRecordCreateManyBatchInput = {
   lossQuantity: number
   reason: string
   operator?: string | null
+  operatorStaffId?: string | null
   stockLogId: string
   createdAt?: Date | string
 }
@@ -732,6 +856,7 @@ export type StockLossRecordUpdateWithoutBatchInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   wiki?: Prisma.FlowerWikiUpdateOneRequiredWithoutStockLossRecordsNestedInput
   stockLog?: Prisma.StockLogUpdateOneRequiredWithoutStockLossRecordNestedInput
+  operatorStaff?: Prisma.StaffUserUpdateOneWithoutStockLossRecordsNestedInput
 }
 
 export type StockLossRecordUncheckedUpdateWithoutBatchInput = {
@@ -740,6 +865,7 @@ export type StockLossRecordUncheckedUpdateWithoutBatchInput = {
   lossQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operatorStaffId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stockLogId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -747,6 +873,51 @@ export type StockLossRecordUncheckedUpdateWithoutBatchInput = {
 export type StockLossRecordUncheckedUpdateManyWithoutBatchInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   flowerWikiId?: Prisma.StringFieldUpdateOperationsInput | string
+  lossQuantity?: Prisma.IntFieldUpdateOperationsInput | number
+  reason?: Prisma.StringFieldUpdateOperationsInput | string
+  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operatorStaffId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stockLogId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type StockLossRecordCreateManyOperatorStaffInput = {
+  id?: string
+  flowerWikiId: string
+  batchId: string
+  lossQuantity: number
+  reason: string
+  operator?: string | null
+  stockLogId: string
+  createdAt?: Date | string
+}
+
+export type StockLossRecordUpdateWithoutOperatorStaffInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  lossQuantity?: Prisma.IntFieldUpdateOperationsInput | number
+  reason?: Prisma.StringFieldUpdateOperationsInput | string
+  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  wiki?: Prisma.FlowerWikiUpdateOneRequiredWithoutStockLossRecordsNestedInput
+  batch?: Prisma.BatchUpdateOneRequiredWithoutStockLossRecordsNestedInput
+  stockLog?: Prisma.StockLogUpdateOneRequiredWithoutStockLossRecordNestedInput
+}
+
+export type StockLossRecordUncheckedUpdateWithoutOperatorStaffInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerWikiId?: Prisma.StringFieldUpdateOperationsInput | string
+  batchId?: Prisma.StringFieldUpdateOperationsInput | string
+  lossQuantity?: Prisma.IntFieldUpdateOperationsInput | number
+  reason?: Prisma.StringFieldUpdateOperationsInput | string
+  operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  stockLogId?: Prisma.StringFieldUpdateOperationsInput | string
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type StockLossRecordUncheckedUpdateManyWithoutOperatorStaffInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerWikiId?: Prisma.StringFieldUpdateOperationsInput | string
+  batchId?: Prisma.StringFieldUpdateOperationsInput | string
   lossQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -760,6 +931,7 @@ export type StockLossRecordCreateManyWikiInput = {
   lossQuantity: number
   reason: string
   operator?: string | null
+  operatorStaffId?: string | null
   stockLogId: string
   createdAt?: Date | string
 }
@@ -772,6 +944,7 @@ export type StockLossRecordUpdateWithoutWikiInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   batch?: Prisma.BatchUpdateOneRequiredWithoutStockLossRecordsNestedInput
   stockLog?: Prisma.StockLogUpdateOneRequiredWithoutStockLossRecordNestedInput
+  operatorStaff?: Prisma.StaffUserUpdateOneWithoutStockLossRecordsNestedInput
 }
 
 export type StockLossRecordUncheckedUpdateWithoutWikiInput = {
@@ -780,6 +953,7 @@ export type StockLossRecordUncheckedUpdateWithoutWikiInput = {
   lossQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operatorStaffId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stockLogId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -790,6 +964,7 @@ export type StockLossRecordUncheckedUpdateManyWithoutWikiInput = {
   lossQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   reason?: Prisma.StringFieldUpdateOperationsInput | string
   operator?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  operatorStaffId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   stockLogId?: Prisma.StringFieldUpdateOperationsInput | string
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -803,11 +978,13 @@ export type StockLossRecordSelect<ExtArgs extends runtime.Types.Extensions.Inter
   lossQuantity?: boolean
   reason?: boolean
   operator?: boolean
+  operatorStaffId?: boolean
   stockLogId?: boolean
   createdAt?: boolean
   wiki?: boolean | Prisma.FlowerWikiDefaultArgs<ExtArgs>
   batch?: boolean | Prisma.BatchDefaultArgs<ExtArgs>
   stockLog?: boolean | Prisma.StockLogDefaultArgs<ExtArgs>
+  operatorStaff?: boolean | Prisma.StockLossRecord$operatorStaffArgs<ExtArgs>
 }, ExtArgs["result"]["stockLossRecord"]>
 
 export type StockLossRecordSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -817,11 +994,13 @@ export type StockLossRecordSelectCreateManyAndReturn<ExtArgs extends runtime.Typ
   lossQuantity?: boolean
   reason?: boolean
   operator?: boolean
+  operatorStaffId?: boolean
   stockLogId?: boolean
   createdAt?: boolean
   wiki?: boolean | Prisma.FlowerWikiDefaultArgs<ExtArgs>
   batch?: boolean | Prisma.BatchDefaultArgs<ExtArgs>
   stockLog?: boolean | Prisma.StockLogDefaultArgs<ExtArgs>
+  operatorStaff?: boolean | Prisma.StockLossRecord$operatorStaffArgs<ExtArgs>
 }, ExtArgs["result"]["stockLossRecord"]>
 
 export type StockLossRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -831,11 +1010,13 @@ export type StockLossRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Typ
   lossQuantity?: boolean
   reason?: boolean
   operator?: boolean
+  operatorStaffId?: boolean
   stockLogId?: boolean
   createdAt?: boolean
   wiki?: boolean | Prisma.FlowerWikiDefaultArgs<ExtArgs>
   batch?: boolean | Prisma.BatchDefaultArgs<ExtArgs>
   stockLog?: boolean | Prisma.StockLogDefaultArgs<ExtArgs>
+  operatorStaff?: boolean | Prisma.StockLossRecord$operatorStaffArgs<ExtArgs>
 }, ExtArgs["result"]["stockLossRecord"]>
 
 export type StockLossRecordSelectScalar = {
@@ -845,25 +1026,29 @@ export type StockLossRecordSelectScalar = {
   lossQuantity?: boolean
   reason?: boolean
   operator?: boolean
+  operatorStaffId?: boolean
   stockLogId?: boolean
   createdAt?: boolean
 }
 
-export type StockLossRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "flowerWikiId" | "batchId" | "lossQuantity" | "reason" | "operator" | "stockLogId" | "createdAt", ExtArgs["result"]["stockLossRecord"]>
+export type StockLossRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "flowerWikiId" | "batchId" | "lossQuantity" | "reason" | "operator" | "operatorStaffId" | "stockLogId" | "createdAt", ExtArgs["result"]["stockLossRecord"]>
 export type StockLossRecordInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   wiki?: boolean | Prisma.FlowerWikiDefaultArgs<ExtArgs>
   batch?: boolean | Prisma.BatchDefaultArgs<ExtArgs>
   stockLog?: boolean | Prisma.StockLogDefaultArgs<ExtArgs>
+  operatorStaff?: boolean | Prisma.StockLossRecord$operatorStaffArgs<ExtArgs>
 }
 export type StockLossRecordIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   wiki?: boolean | Prisma.FlowerWikiDefaultArgs<ExtArgs>
   batch?: boolean | Prisma.BatchDefaultArgs<ExtArgs>
   stockLog?: boolean | Prisma.StockLogDefaultArgs<ExtArgs>
+  operatorStaff?: boolean | Prisma.StockLossRecord$operatorStaffArgs<ExtArgs>
 }
 export type StockLossRecordIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   wiki?: boolean | Prisma.FlowerWikiDefaultArgs<ExtArgs>
   batch?: boolean | Prisma.BatchDefaultArgs<ExtArgs>
   stockLog?: boolean | Prisma.StockLogDefaultArgs<ExtArgs>
+  operatorStaff?: boolean | Prisma.StockLossRecord$operatorStaffArgs<ExtArgs>
 }
 
 export type $StockLossRecordPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -872,6 +1057,7 @@ export type $StockLossRecordPayload<ExtArgs extends runtime.Types.Extensions.Int
     wiki: Prisma.$FlowerWikiPayload<ExtArgs>
     batch: Prisma.$BatchPayload<ExtArgs>
     stockLog: Prisma.$StockLogPayload<ExtArgs>
+    operatorStaff: Prisma.$StaffUserPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -879,7 +1065,11 @@ export type $StockLossRecordPayload<ExtArgs extends runtime.Types.Extensions.Int
     batchId: string
     lossQuantity: number
     reason: string
+    /**
+     * 操作员快照（username）
+     */
     operator: string | null
+    operatorStaffId: string | null
     stockLogId: string
     createdAt: Date
   }, ExtArgs["result"]["stockLossRecord"]>
@@ -1279,6 +1469,7 @@ export interface Prisma__StockLossRecordClient<T, Null = never, ExtArgs extends 
   wiki<T extends Prisma.FlowerWikiDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FlowerWikiDefaultArgs<ExtArgs>>): Prisma.Prisma__FlowerWikiClient<runtime.Types.Result.GetResult<Prisma.$FlowerWikiPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   batch<T extends Prisma.BatchDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.BatchDefaultArgs<ExtArgs>>): Prisma.Prisma__BatchClient<runtime.Types.Result.GetResult<Prisma.$BatchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   stockLog<T extends Prisma.StockLogDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StockLogDefaultArgs<ExtArgs>>): Prisma.Prisma__StockLogClient<runtime.Types.Result.GetResult<Prisma.$StockLogPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  operatorStaff<T extends Prisma.StockLossRecord$operatorStaffArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StockLossRecord$operatorStaffArgs<ExtArgs>>): Prisma.Prisma__StaffUserClient<runtime.Types.Result.GetResult<Prisma.$StaffUserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1314,6 +1505,7 @@ export interface StockLossRecordFieldRefs {
   readonly lossQuantity: Prisma.FieldRef<"StockLossRecord", 'Int'>
   readonly reason: Prisma.FieldRef<"StockLossRecord", 'String'>
   readonly operator: Prisma.FieldRef<"StockLossRecord", 'String'>
+  readonly operatorStaffId: Prisma.FieldRef<"StockLossRecord", 'String'>
   readonly stockLogId: Prisma.FieldRef<"StockLossRecord", 'String'>
   readonly createdAt: Prisma.FieldRef<"StockLossRecord", 'DateTime'>
 }
@@ -1714,6 +1906,25 @@ export type StockLossRecordDeleteManyArgs<ExtArgs extends runtime.Types.Extensio
    * Limit how many StockLossRecords to delete.
    */
   limit?: number
+}
+
+/**
+ * StockLossRecord.operatorStaff
+ */
+export type StockLossRecord$operatorStaffArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the StaffUser
+   */
+  select?: Prisma.StaffUserSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the StaffUser
+   */
+  omit?: Prisma.StaffUserOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.StaffUserInclude<ExtArgs> | null
+  where?: Prisma.StaffUserWhereInput
 }
 
 /**

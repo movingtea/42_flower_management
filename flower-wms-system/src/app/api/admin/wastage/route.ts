@@ -1,5 +1,7 @@
 import { Prisma } from "@/generated/prisma/client";
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
+import { resolveOperatorContext } from "@/lib/operator-context";
 import {
   registerBatchWastage,
   type RegisterWastagePayload,
@@ -7,7 +9,7 @@ import {
 
 export const dynamic = "force-dynamic";
 
-function parseWastageBody(raw: unknown): RegisterWastagePayload {
+function parseWastageBody(raw: unknown): WastageBody {
   if (!raw || typeof raw !== "object") {
     throw new Error("请求体须为 JSON 对象");
   }
@@ -16,20 +18,18 @@ function parseWastageBody(raw: unknown): RegisterWastagePayload {
 
   const batchId = typeof b.batchId === "string" ? b.batchId.trim() : "";
   const reason = typeof b.reason === "string" ? b.reason.trim() : "";
-  const operatorId =
-    typeof b.operatorId === "string" ? b.operatorId.trim() : "";
-
   if (!batchId) throw new Error("batchId 不能为空");
   if (!reason) throw new Error("reason 不能为空");
-  if (!operatorId) throw new Error("operatorId 不能为空");
 
   const wastageQty = Number(b.wastageQty);
   if (!Number.isInteger(wastageQty) || wastageQty <= 0) {
     throw new Error("wastageQty 须为正整数");
   }
 
-  return { batchId, wastageQty, reason, operatorId };
+  return { batchId, wastageQty, reason };
 }
+
+type WastageBody = Omit<RegisterWastagePayload, "operatorStaffId" | "operatorLabel">;
 
 function mapErrorStatus(err: unknown): { message: string; status: number } {
   if (err instanceof Error) {
@@ -57,6 +57,9 @@ function mapErrorStatus(err: unknown): { message: string; status: number } {
 
 export async function POST(request: Request) {
   try {
+    const staff = await requirePermission("wms:write");
+    if (isResponse(staff)) return staff;
+
     let raw: unknown;
     try {
       raw = await request.json();
@@ -64,8 +67,13 @@ export async function POST(request: Request) {
       return jsonError("无法解析请求体 JSON", 400);
     }
 
-    const payload = parseWastageBody(raw);
-    const result = await registerBatchWastage(payload);
+    const base = parseWastageBody(raw);
+    const operator = await resolveOperatorContext(staff.id);
+    const result = await registerBatchWastage({
+      ...base,
+      operatorStaffId: staff.id,
+      operatorLabel: operator.operatorLabel,
+    });
 
     return jsonSuccess({
       message: "损耗核销成功",

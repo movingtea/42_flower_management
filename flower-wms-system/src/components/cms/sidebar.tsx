@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { StaffAccountBar } from "@/components/shared/StaffAccountBar";
 
 const navItems = [
   { href: "/cms/products", label: "商城商品", icon: "🌸" },
@@ -43,11 +44,7 @@ export function CmsSidebar() {
           );
         })}
       </nav>
-      <div className="border-t border-rose-100 p-4">
-        <Link href="/" className="text-xs text-zinc-500 hover:text-rose-600">
-          ← 返回工作台
-        </Link>
-      </div>
+      <StaffAccountBar variant="cms" />
     </aside>
   );
 }

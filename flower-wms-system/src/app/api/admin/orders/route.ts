@@ -1,5 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
 import { transitionOrderStatus } from "@/services/order-status";
 
 export const dynamic = "force-dynamic";
@@ -59,6 +60,9 @@ function mapErrorStatus(err: unknown): { message: string; status: number } {
 
 export async function PATCH(request: Request) {
   try {
+    const staff = await requirePermission("orders:write");
+    if (isResponse(staff)) return staff;
+
     let raw: unknown;
     try {
       raw = await request.json();

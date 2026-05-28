@@ -83,6 +83,16 @@ export type StockLog = Prisma.StockLogModel
  */
 export type StockLossRecord = Prisma.StockLossRecordModel
 /**
+ * Model StaffUser
+ * 
+ */
+export type StaffUser = Prisma.StaffUserModel
+/**
+ * Model StaffAuditLog
+ * 
+ */
+export type StaffAuditLog = Prisma.StaffAuditLogModel
+/**
  * Model User
  * 
  */

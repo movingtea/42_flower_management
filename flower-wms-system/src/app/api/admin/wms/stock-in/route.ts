@@ -1,6 +1,9 @@
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
+import { resolveOperatorContext } from "@/lib/operator-context";
 import {
-  parseStockInPayload,
+  attachOperatorToStockInPayload,
+  parseStockInBody,
   runStockInTransaction,
 } from "@/services/wms-stock";
 
@@ -8,8 +11,13 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
+    const staff = await requirePermission("wms:write");
+    if (isResponse(staff)) return staff;
+
     const body = await request.json();
-    const payload = parseStockInPayload(body);
+    const base = parseStockInBody(body);
+    const operator = await resolveOperatorContext(staff.id);
+    const payload = attachOperatorToStockInPayload(base, operator);
     const result = await runStockInTransaction(payload);
 
     return jsonSuccess(

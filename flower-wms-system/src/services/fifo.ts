@@ -1,5 +1,6 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { assertStockMutationAuthorized } from "@/lib/stock-mutation-auth";
 import type { FifoDeduction } from "@/types";
 import { StockLogType } from "@/generated/prisma/enums";
 
@@ -44,16 +45,31 @@ type ApplyFifoOptions = {
   materialId: string;
   quantity: number;
   logType: typeof StockLogType.SALE_OUT | typeof StockLogType.WASTAGE_OUT;
+  operatorStaffId: string;
+  operatorLabel: string;
   orderId?: string;
   orderItemId?: string;
   wastageReason?: string;
-  operator?: string;
 };
 
 /**
  * 执行 FIFO 扣减：更新批次余量并写入 StockLog。
  */
 export async function applyFifoDeductions(options: ApplyFifoOptions) {
+  const permission =
+    options.logType === StockLogType.SALE_OUT ? "orders:write" : "wms:write";
+  const sessionOperator = await assertStockMutationAuthorized(permission);
+
+  if (
+    options.operatorStaffId &&
+    options.operatorStaffId !== sessionOperator.operatorStaffId
+  ) {
+    throw new Error("操作员身份与会话不一致，禁止代他人记账");
+  }
+
+  const operatorStaffId = sessionOperator.operatorStaffId;
+  const operatorLabel = sessionOperator.operatorLabel;
+
   return prisma.$transaction(async (tx) => {
     const deductions = await calculateFifoDeductions(
       options.materialId,
@@ -76,7 +92,8 @@ export async function applyFifoDeductions(options: ApplyFifoOptions) {
           orderId: options.orderId,
           orderItemId: options.orderItemId,
           wastageReason: options.wastageReason,
-          operator: options.operator,
+          operator: operatorLabel,
+          operatorStaffId,
         },
       });
     }

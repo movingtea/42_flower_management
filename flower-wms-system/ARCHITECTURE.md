@@ -337,6 +337,136 @@ applyFifoDeductions({ logType: SALE_OUT, ... })
 
 ---
 
+### 用户与权限管理（五级 RBAC）
+
+后台员工与小程序顾客 **分表**：`staff_users`（Credentials + RBAC）与 `users`（微信 `openId`）。避免改动订单外键。
+
+#### 角色职责边界
+
+| 角色 | 职责 | 业务数据 |
+|------|------|----------|
+| `IT_ADMIN` | 创建/停用后台账号、分配角色 | **禁止**：批次、配方、Wiki、订单、CMS 商品等一切业务读写 |
+| `STORE_ADMIN` | 门店全权：WMS + CMS + 店内人员 + **全量损耗审计** | 全部业务 |
+| `WAREHOUSE_MANAGER` | 入库、**指定批次报损**、Wiki、标准配方审定 | WMS 写；**禁止 CMS** |
+| `FLORIST` | 订单履约看板；Wiki/配方 **只读**；销售 FIFO 扣库（服务已就绪，订单链路待接通） | `/wms/orders` + 只读 API |
+| `STORE_OPERATOR` | CMS 商品上架；`recipeId` **只读引用** | **禁止** WMS 写与 Wiki；`GET /api/admin/wms/recipes` 只读 |
+
+权限矩阵实现：`src/lib/rbac.ts`；Route Handler 二次校验：`requirePermission()`（`src/lib/api-auth.ts`）。
+
+#### IT Admin 业务盲区
+
+- **Middleware**（`src/middleware.ts`）：拦截 `BUSINESS_API_PREFIXES` 下所有 `/api/admin/wms|wiki|orders|…` 与 `/api/cms`，以及 `/wms`、`/cms` 页面，重定向至 `/admin/staff-users`。
+- **API 层**：`canAccessBusinessData(role)` 为 false 时，业务 Route 返回 403。
+- 运维账号 **看不到** 批次余量、报损明细、配方行、订单金额等敏感字段（未登录则 401）。
+
+#### Store Operator 与 CMS 只读红线
+
+- CMS 写路径：`/cms/*`、`/api/cms/*`，权限 `cms:write`。
+- 绑定 SPU 时仅允许选择已存在的 `recipes.id`（`assertRecipeExists`），**不得** POST/PUT 配方行或物料批次。
+- Middleware 对 `STORE_OPERATOR` 仅放行配方 **GET**；其余 `/api/admin/wms`、`/api/admin/wiki` 返回 403。
+
+#### 审计追溯（operatorStaffId）
+
+物理库存变动必须带操作员：
+
+| 场景 | 服务 | 审计字段 |
+|------|------|----------|
+| 采购入库 | `wms-stock.runStockInTransaction` | `stock_logs.operator_staff_id` |
+| 指定批次报损 | `wms-stock.runStockLossTransaction` + `stock_loss_records` | 同上 + 损耗专表 |
+| FIFO 销售/跨批次损耗 | `fifo.applyFifoDeductions` | `operatorStaffId` + `operator` 快照 |
+| 旧报损 API（待废弃） | `wastage.registerBatchWastage` | 已从 Session 注入，不再信任客户端 `operatorId` |
+
+初始化账号：`npx prisma db seed` → 用户名/密码 `admin` / `admin`，角色 `IT_ADMIN`（请上线后立即改密）。
+
+#### 登出与会话失效
+
+- **UI**：`StaffAccountBar`（WMS/CMS/Admin 侧栏底部 + 工作台 `PortalAccountStrip`）调用 `signOut({ redirect: true, callbackUrl: "/login" })`，清除客户端 Session Cookie 并整页跳转登录页。
+- **会话策略**：JWT `maxAge` 12 小时（`auth.config.ts`）；登出后 Middleware 对受保护路径返回 401/重定向 `/login`。
+- **切换账号**：必须先登出，再以另一组 Credentials 登录（无「多账号并存」）。
+
+#### 管理员代行重置密码
+
+- **Server Action**：`src/actions/staff-users.ts` → `resetUserPassword(targetStaffId, newPassword)`。
+- **权限**：仅 `IT_ADMIN`、`STORE_ADMIN`（`canManageStaffUsers`）；`STORE_ADMIN` **不可**重置 `IT_ADMIN` 账号密码。
+- **存储**：`bcrypt`（cost 12）写入 `staff_users.password_hash`，禁止明文。
+- **审计表**：`staff_audit_logs`（`action = PASSWORD_RESET`，`operator_staff_id`、`target_staff_id`、`created_at`）。
+- **UI**：`/admin/staff-users` 列表仅在 `canResetPassword` 为真时显示「重置密码」→ Modal 确认 → Toast。
+
+相关文件：`src/auth.ts`、`src/auth.config.ts`、`src/middleware.ts`、`prisma/seed.ts`、`src/components/shared/StaffAccountBar.tsx`。
+
+---
+
+### 安全策略（Auth.js 与边缘性能）
+
+#### Auth.js（NextAuth v5）
+
+- **Provider**：Credentials，校验 `staff_users.password_hash`（bcrypt）。
+- **Session**：JWT，`session.user` 含 `id`、`username`、`role`（见 `src/types/next-auth.d.ts`）。
+- **环境变量**：`AUTH_SECRET` 或 `NEXTAUTH_SECRET`；`NEXTAUTH_URL` 与部署域名一致。
+- **入口**：`/login`；Handler：`/api/auth/[...nextauth]`。
+
+#### 路由拦截机制（护城河闭环）
+
+**文件**：`src/middleware.ts`（NextAuth `auth()` 包装）+ `src/lib/auth-routes.ts`（路径判定与角色首页）。
+
+**`matcher` 覆盖范围**（未列入的路径不解析 JWT，如 `/api/wechat` 小程序接口保持公开）：
+
+| 模式 | 作用 |
+|------|------|
+| `/` | 工作台门户：未登录 → `/login` |
+| `/login` | 已登录 → 按角色 `getRoleHomePath()` 跳转 |
+| `/wms/:path*`、`/cms/:path*`、`/admin/:path*` | 后台页面 |
+| `/api/admin/:path*`、`/api/cms/:path*`、`/api/business/:path*` | 后台 API |
+
+**未登录**：凡 `isStaffProtectedPath()`（`/`、WMS/CMS/Admin 页面及后台 API）→ 页面 **302** 至 `/login?callbackUrl=…`；API 返回 **401 JSON**。
+
+**已登录按角色**（Middleware 内，无 DB）：
+
+- `IT_ADMIN`：业务 API（`BUSINESS_API_PREFIXES`）→ **403**；访问 `/`、`/wms`、`/cms` 或非 `staff-users` 的 `/api/admin/*` → **重定向** `/admin/staff-users`（**物理上看不到**批次/配方/订单等业务数据）。
+- `STORE_OPERATOR`：禁止 `/wms`；`/api/admin/wms` 仅放行配方 **GET**。
+- `FLORIST`：仅 `/wms/orders` 与 WMS **GET** API。
+- `WAREHOUSE_MANAGER`：禁止 `/cms` 与 `/api/cms`。
+- `STORE_ADMIN`：可访问 `/` 门户；其余角色访问 `/` 时重定向至各自首页。
+
+**页面双保险**：`src/app/page.tsx` 在 Server Component 内再次 `auth()`，未登录 `redirect('/login')`，非主理人重定向角色首页（防止 Middleware 配置疏漏）。
+
+#### IT Admin 数据脱敏（物理实现）
+
+1. **Middleware 盲区**：`canAccessBusinessData(IT_ADMIN) === false`；`isBusinessApiPath()` 命中即 403，不进入 Prisma。  
+2. **页面隔离**：无法打开 `/wms/*`、`/cms/*`；仅 `/admin/staff-users` 可管理 `staff_users`。  
+3. **API 层**：`requirePermission()` 对非 `staff:manage` 权限一律 403。  
+4. **服务层**：`assertStockMutationAuthorized()` 拒绝 IT Admin 调用入库/报损/FIFO（即使伪造 API 请求）。
+
+#### Middleware 性能（2 核 2G）
+
+- 不对 `/api/wechat`、静态资源做 JWT 解析。  
+- 规则仅字符串前缀 + HTTP Method，无 Prisma。
+
+#### 账户退出清理机制
+
+1. 客户端：`signOut({ redirect: true, callbackUrl: "/login" })` 由 Auth.js 清除 Session Token（JWT Cookie）。  
+2. 边缘：`middleware.ts` 在后续请求中 `req.auth` 为空，受保护路径无法进入业务页。  
+3. 服务端：Route Handler / Server Action 通过 `auth()` 读取 Session；登出后 `requireStaffSession()` 返回 401。  
+4. **不**依赖客户端 localStorage 存凭据；Credentials 仅在登录 POST 时使用一次。
+
+#### 管理员代行重置密码（权限判定）
+
+| 操作者 | 可重置对象 | 业务 API |
+|--------|------------|----------|
+| `IT_ADMIN` | 除自身外的所有 `staff_users`（含 `STORE_ADMIN` 等） | **仍禁止** `/api/admin/wms`、`/api/cms`、`/api/business/**` 等业务路径 |
+| `STORE_ADMIN` | 非 `IT_ADMIN` 的员工账号 | 拥有业务权限，与用户管理无关 |
+
+IT Admin 可在 `/admin/staff-users` 重置他人密码，但 Middleware 与 `canAccessBusinessData` 确保其 **永远无法读取** 批次库存、配方、订单等业务 payload。
+
+#### 纵深防御（四层）
+
+1. **Middleware**：登录门禁 + 角色路径隔离 + IT Admin 业务盲区。  
+2. **Route Handler**：`requirePermission()` 细粒度能力。  
+3. **Server Action / 服务层**：`resetUserPassword` 内 `auth()` + 角色校验；库存侧 `assertStockMutationAuthorized`。  
+4. **审计字段**：库存 `operator_staff_id`、账号 `staff_audit_logs` 均绑定真实操作员 ID。
+
+---
+
 ### 附录：核心 ER 关系（简图）
 
 ```mermaid
@@ -350,6 +480,8 @@ erDiagram
   batches ||--o{ stock_loss_records : "batch_id"
   flower_wikis ||--o{ stock_loss_records : "flower_wiki_id"
   stock_logs ||--o| stock_loss_records : "stock_log_id"
+  staff_users ||--o{ stock_logs : "operator_staff_id"
+  staff_users ||--o{ stock_loss_records : "operator_staff_id"
   product_spus ||--o{ product_skus : "spu_id"
   product_skus ||--o{ order_items : "sku_id"
 ```

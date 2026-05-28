@@ -1,11 +1,14 @@
 import { StockLogType } from "@/generated/prisma/enums";
+import { assertStockMutationOperatorMatches } from "@/lib/stock-mutation-auth";
+import type { OperatorContext } from "@/lib/operator-context";
 import { prisma } from "@/lib/prisma";
 
 export type RegisterWastagePayload = {
   batchId: string;
   wastageQty: number;
   reason: string;
-  operatorId: string;
+  operatorStaffId: string;
+  operatorLabel: string;
 };
 
 export type RegisterWastageResult = {
@@ -32,6 +35,15 @@ export type RegisterWastageResult = {
 export async function registerBatchWastage(
   payload: RegisterWastagePayload
 ): Promise<RegisterWastageResult> {
+  const operator: OperatorContext = {
+    operatorStaffId: payload.operatorStaffId,
+    operatorLabel: payload.operatorLabel,
+  };
+  const sessionOperator = await assertStockMutationOperatorMatches(
+    "wms:write",
+    operator
+  );
+
   return prisma.$transaction(async (tx) => {
     const batch = await tx.batch.findUnique({
       where: { id: payload.batchId },
@@ -66,7 +78,8 @@ export async function registerBatchWastage(
         delta: -payload.wastageQty,
         quantity: payload.wastageQty,
         wastageReason: payload.reason,
-        operator: payload.operatorId,
+        operator: sessionOperator.operatorLabel,
+        operatorStaffId: sessionOperator.operatorStaffId,
         remark: payload.reason,
       },
     });

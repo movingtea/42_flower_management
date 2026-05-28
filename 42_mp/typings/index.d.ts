@@ -11,6 +11,7 @@ interface AppGlobalUser {
 interface IAppOption {
   globalData: {
     userInfo?: AppGlobalUser;
+    baseUrl: string;
   };
   userInfoReadyCallback?: WechatMiniprogram.GetUserInfoSuccessCallback;
   /** 静默登录（App 实例方法，必填以实现类型安全） */

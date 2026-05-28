@@ -1,5 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
 import { cmsSpuUpdateData, syncProductSkus } from "@/lib/cms-product-write";
 import { loadCmsProductCategories } from "@/lib/cms-product-categories.server";
 import { parseCmsProductBody } from "@/lib/cms-products";
@@ -44,6 +45,9 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const staff = await requirePermission("cms:write");
+    if (isResponse(staff)) return staff;
+
     const { id } = await context.params;
     const categoryConfig = await loadCmsProductCategories();
     const body = parseCmsProductBody(await request.json(), categoryConfig);
@@ -83,6 +87,9 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const staff = await requirePermission("cms:write");
+    if (isResponse(staff)) return staff;
+
     const { id } = await context.params;
     const product = await softDeleteProduct(id);
     return jsonSuccess({
