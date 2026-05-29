@@ -59,3 +59,21 @@ export const FloralRole = {
 } as const
 
 export type FloralRole = (typeof FloralRole)[keyof typeof FloralRole]
+
+
+export const Role = {
+  IT_ADMIN: 'IT_ADMIN',
+  STORE_ADMIN: 'STORE_ADMIN',
+  WAREHOUSE_MANAGER: 'WAREHOUSE_MANAGER',
+  FLORIST: 'FLORIST',
+  STORE_OPERATOR: 'STORE_OPERATOR'
+} as const
+
+export type Role = (typeof Role)[keyof typeof Role]
+
+
+export const StaffAuditAction = {
+  PASSWORD_RESET: 'PASSWORD_RESET'
+} as const
+
+export type StaffAuditAction = (typeof StaffAuditAction)[keyof typeof StaffAuditAction]

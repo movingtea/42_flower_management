@@ -1,4 +1,9 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { PortalAccountStrip } from "@/components/shared/PortalAccountStrip";
+import { Role } from "@/generated/prisma/enums";
+import { getRoleHomePath } from "@/lib/auth-routes";
 
 function WmsIcon() {
   return (
@@ -38,9 +43,20 @@ function CmsIcon() {
   );
 }
 
-export default function PortalPage() {
+export default async function PortalPage() {
+  const session = await auth();
+  if (!session?.user?.role) {
+    redirect("/login");
+  }
+
+  const role = session.user.role as Role;
+  if (role !== Role.STORE_ADMIN) {
+    redirect(getRoleHomePath(role));
+  }
+
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-stone-100 via-zinc-50 to-stone-200 px-6 py-16">
+    <div className="relative flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-stone-100 via-zinc-50 to-stone-200 px-6 py-16">
+      <PortalAccountStrip />
       <main className="w-full max-w-5xl text-center">
         <p className="text-xs font-medium uppercase tracking-[0.2em] text-zinc-400">
           Flower Studio

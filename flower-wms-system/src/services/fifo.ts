@@ -1,5 +1,6 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { assertStockMutationAuthorized } from "@/lib/stock-mutation-auth";
 import type { FifoDeduction } from "@/types";
 import { StockLogType } from "@/generated/prisma/enums";
 import { PHYSICAL_STOCK_INSUFFICIENT } from "@/services/order-fifo-pure";
@@ -58,15 +59,19 @@ type ApplyFifoOptions = {
   materialId: string;
   quantity: number;
   logType: typeof StockLogType.SALE_OUT | typeof StockLogType.WASTAGE_OUT;
+  operatorStaffId?: string;
+  operatorLabel?: string;
   orderId?: string;
   orderItemId?: string;
   wastageReason?: string;
+  /** 系统/支付路径操作员快照（无 StaffUser 会话时） */
   operator?: string;
   remark?: string;
 };
 
 /**
  * 在既有 Prisma 事务内执行 FIFO 扣减（不开启嵌套 $transaction）。
+ * 支付自动化路径可仅传 operator 文本；人工报损应传 operatorStaffId + operatorLabel。
  */
 export async function applyFifoDeductionsInTx(
   tx: Prisma.TransactionClient,
@@ -111,7 +116,8 @@ export async function applyFifoDeductionsInTx(
         orderId: options.orderId,
         orderItemId: options.orderItemId,
         wastageReason: options.wastageReason,
-        operator: options.operator,
+        operator: options.operatorLabel ?? options.operator,
+        operatorStaffId: options.operatorStaffId,
         remark: options.remark,
       },
     });
@@ -121,8 +127,28 @@ export async function applyFifoDeductionsInTx(
 }
 
 /**
- * 执行 FIFO 扣减：更新批次余量并写入 StockLog。
+ * 执行 FIFO 扣减：更新批次余量并写入 StockLog（独立事务 + Session 鉴权）。
  */
 export async function applyFifoDeductions(options: ApplyFifoOptions) {
-  return prisma.$transaction((tx) => applyFifoDeductionsInTx(tx, options));
+  const permission =
+    options.logType === StockLogType.SALE_OUT ? "orders:write" : "wms:write";
+  const sessionOperator = await assertStockMutationAuthorized(permission);
+
+  if (
+    options.operatorStaffId &&
+    options.operatorStaffId !== sessionOperator.operatorStaffId
+  ) {
+    throw new Error("操作员身份与会话不一致，禁止代他人记账");
+  }
+
+  const operatorStaffId = sessionOperator.operatorStaffId;
+  const operatorLabel = sessionOperator.operatorLabel;
+
+  return prisma.$transaction((tx) =>
+    applyFifoDeductionsInTx(tx, {
+      ...options,
+      operatorStaffId,
+      operatorLabel,
+    })
+  );
 }

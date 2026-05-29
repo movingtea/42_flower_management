@@ -1,0 +1,64 @@
+name: Flower Platform CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. 拿着特权拉取代码
+      - name: Checkout Source Code via Private SSH
+        uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.SSH_KEY }}
+
+      # 2. 原生 Docker 编译
+      - name: Build Application Image via Native Docker
+        run: |
+          docker build -t flower-app:latest .
+
+      # 3. 原生打包物理镜像
+      - name: Save Image to Tar File
+        run: |
+          mkdir -p /tmp
+          docker save -o /tmp/flower-app.tar flower-app:latest
+
+      # 4. 原生传输：直接扔给阿里云
+      - name: Transfer Image via Private Key SCP
+        env:
+          HOST_IP: ${{ secrets.HOST_NAME }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+        run: |
+          echo "$SSH_KEY" > /tmp/id_rsa
+          chmod 600 /tmp/id_rsa
+          scp -i /tmp/id_rsa -o StrictHostKeyChecking=no /tmp/flower-app.tar root@$HOST_IP:/root/flower-platform/tmp/flower-app.tar
+          rm -f /tmp/id_rsa
+
+      # 5. 原生部署（🔒 数据库免打扰、无损交替完全体）
+      - name: Execute Remote Deploy via Private Key SSH
+        env:
+          HOST_IP: ${{ secrets.HOST_NAME }}
+          SSH_KEY: ${{ secrets.SSH_KEY }}
+        run: |
+          echo "$SSH_KEY" > /tmp/id_rsa
+          chmod 600 /tmp/id_rsa
+          
+          ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no root@$HOST_IP "
+            cd /root/flower-platform && \
+            docker load -i tmp/flower-app.tar && \
+            rm -f tmp/flower-app.tar && \
+            
+            # 1. 仅停止和删除业务微服务，绝对不碰数据库
+            docker compose stop gateway web && \
+            docker compose rm -f gateway web && \
+            
+            # ✨ 终极修复：带上 --no-deps 强行拉起，严禁检查或打扰现存的数据库容器！
+            docker compose up -d --no-deps gateway web && \
+            
+            docker image prune -f
+          "
+          rm -f /tmp/id_rsa

@@ -397,6 +397,8 @@ export const ModelName = {
   Batch: 'Batch',
   StockLog: 'StockLog',
   StockLossRecord: 'StockLossRecord',
+  StaffUser: 'StaffUser',
+  StaffAuditLog: 'StaffAuditLog',
   User: 'User',
   Order: 'Order',
   OrderItem: 'OrderItem',
@@ -417,7 +419,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "productCategory" | "productCategoryRelation" | "materialCategory" | "materialCategoryRelation" | "productSpu" | "productSku" | "banner" | "material" | "recipe" | "recipeLine" | "batch" | "stockLog" | "stockLossRecord" | "user" | "order" | "orderItem" | "appConfig" | "flowerWiki"
+    modelProps: "productCategory" | "productCategoryRelation" | "materialCategory" | "materialCategoryRelation" | "productSpu" | "productSku" | "banner" | "material" | "recipe" | "recipeLine" | "batch" | "stockLog" | "stockLossRecord" | "staffUser" | "staffAuditLog" | "user" | "order" | "orderItem" | "appConfig" | "flowerWiki"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1383,6 +1385,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    StaffUser: {
+      payload: Prisma.$StaffUserPayload<ExtArgs>
+      fields: Prisma.StaffUserFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StaffUserFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffUserPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StaffUserFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffUserPayload>
+        }
+        findFirst: {
+          args: Prisma.StaffUserFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffUserPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StaffUserFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffUserPayload>
+        }
+        findMany: {
+          args: Prisma.StaffUserFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffUserPayload>[]
+        }
+        create: {
+          args: Prisma.StaffUserCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffUserPayload>
+        }
+        createMany: {
+          args: Prisma.StaffUserCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StaffUserCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffUserPayload>[]
+        }
+        delete: {
+          args: Prisma.StaffUserDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffUserPayload>
+        }
+        update: {
+          args: Prisma.StaffUserUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffUserPayload>
+        }
+        deleteMany: {
+          args: Prisma.StaffUserDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StaffUserUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StaffUserUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffUserPayload>[]
+        }
+        upsert: {
+          args: Prisma.StaffUserUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffUserPayload>
+        }
+        aggregate: {
+          args: Prisma.StaffUserAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStaffUser>
+        }
+        groupBy: {
+          args: Prisma.StaffUserGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StaffUserGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StaffUserCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StaffUserCountAggregateOutputType> | number
+        }
+      }
+    }
+    StaffAuditLog: {
+      payload: Prisma.$StaffAuditLogPayload<ExtArgs>
+      fields: Prisma.StaffAuditLogFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.StaffAuditLogFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffAuditLogPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.StaffAuditLogFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffAuditLogPayload>
+        }
+        findFirst: {
+          args: Prisma.StaffAuditLogFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffAuditLogPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.StaffAuditLogFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffAuditLogPayload>
+        }
+        findMany: {
+          args: Prisma.StaffAuditLogFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffAuditLogPayload>[]
+        }
+        create: {
+          args: Prisma.StaffAuditLogCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffAuditLogPayload>
+        }
+        createMany: {
+          args: Prisma.StaffAuditLogCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.StaffAuditLogCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffAuditLogPayload>[]
+        }
+        delete: {
+          args: Prisma.StaffAuditLogDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffAuditLogPayload>
+        }
+        update: {
+          args: Prisma.StaffAuditLogUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffAuditLogPayload>
+        }
+        deleteMany: {
+          args: Prisma.StaffAuditLogDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.StaffAuditLogUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.StaffAuditLogUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffAuditLogPayload>[]
+        }
+        upsert: {
+          args: Prisma.StaffAuditLogUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$StaffAuditLogPayload>
+        }
+        aggregate: {
+          args: Prisma.StaffAuditLogAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateStaffAuditLog>
+        }
+        groupBy: {
+          args: Prisma.StaffAuditLogGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StaffAuditLogGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.StaffAuditLogCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.StaffAuditLogCountAggregateOutputType> | number
+        }
+      }
+    }
     User: {
       payload: Prisma.$UserPayload<ExtArgs>
       fields: Prisma.UserFieldRefs
@@ -1956,6 +2106,7 @@ export const StockLogScalarFieldEnum = {
   wastageReason: 'wastageReason',
   remark: 'remark',
   operator: 'operator',
+  operatorStaffId: 'operatorStaffId',
   createdAt: 'createdAt'
 } as const
 
@@ -1969,11 +2120,37 @@ export const StockLossRecordScalarFieldEnum = {
   lossQuantity: 'lossQuantity',
   reason: 'reason',
   operator: 'operator',
+  operatorStaffId: 'operatorStaffId',
   stockLogId: 'stockLogId',
   createdAt: 'createdAt'
 } as const
 
 export type StockLossRecordScalarFieldEnum = (typeof StockLossRecordScalarFieldEnum)[keyof typeof StockLossRecordScalarFieldEnum]
+
+
+export const StaffUserScalarFieldEnum = {
+  id: 'id',
+  username: 'username',
+  passwordHash: 'passwordHash',
+  role: 'role',
+  displayName: 'displayName',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StaffUserScalarFieldEnum = (typeof StaffUserScalarFieldEnum)[keyof typeof StaffUserScalarFieldEnum]
+
+
+export const StaffAuditLogScalarFieldEnum = {
+  id: 'id',
+  action: 'action',
+  operatorStaffId: 'operatorStaffId',
+  targetStaffId: 'targetStaffId',
+  createdAt: 'createdAt'
+} as const
+
+export type StaffAuditLogScalarFieldEnum = (typeof StaffAuditLogScalarFieldEnum)[keyof typeof StaffAuditLogScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {
@@ -2214,6 +2391,34 @@ export type ListEnumStockLogTypeFieldRefInput<$PrismaModel> = FieldRefInputType<
 
 
 /**
+ * Reference to a field of type 'Role'
+ */
+export type EnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Role'>
+    
+
+
+/**
+ * Reference to a field of type 'Role[]'
+ */
+export type ListEnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Role[]'>
+    
+
+
+/**
+ * Reference to a field of type 'StaffAuditAction'
+ */
+export type EnumStaffAuditActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StaffAuditAction'>
+    
+
+
+/**
+ * Reference to a field of type 'StaffAuditAction[]'
+ */
+export type ListEnumStaffAuditActionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'StaffAuditAction[]'>
+    
+
+
+/**
  * Reference to a field of type 'OrderStatus'
  */
 export type EnumOrderStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'OrderStatus'>
@@ -2391,6 +2596,8 @@ export type GlobalOmitConfig = {
   batch?: Prisma.BatchOmit
   stockLog?: Prisma.StockLogOmit
   stockLossRecord?: Prisma.StockLossRecordOmit
+  staffUser?: Prisma.StaffUserOmit
+  staffAuditLog?: Prisma.StaffAuditLogOmit
   user?: Prisma.UserOmit
   order?: Prisma.OrderOmit
   orderItem?: Prisma.OrderItemOmit

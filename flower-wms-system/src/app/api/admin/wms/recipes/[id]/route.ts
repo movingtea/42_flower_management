@@ -1,5 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
 import { getRecipeById, updateRecipe } from "@/services/recipe";
 
 export const dynamic = "force-dynamic";
@@ -30,6 +31,9 @@ export async function GET(
   ctx: { params: Promise<{ id: string }> }
 ) {
   try {
+    const staff = await requirePermission("wms:read");
+    if (isResponse(staff)) return staff;
+
     const { id } = await ctx.params;
     const recipe = await getRecipeById(id);
     return jsonSuccess({ recipe });
@@ -45,6 +49,9 @@ export async function PUT(
   ctx: { params: Promise<{ id: string }> }
 ) {
   try {
+    const staff = await requirePermission("wms:write");
+    if (isResponse(staff)) return staff;
+
     const { id } = await ctx.params;
     const raw = await request.json();
     const recipe = await updateRecipe(id, raw);

@@ -1,5 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
 import { serializeWiki } from "@/lib/wiki-serialize";
 import { parseFloralRole } from "@/lib/wiki-constants";
 import { createWiki, listWikis } from "@/services/wiki";
@@ -31,6 +32,9 @@ function mapError(err: unknown): { message: string; status: number } {
 
 export async function GET(request: Request) {
   try {
+    const staff = await requirePermission("wms:read");
+    if (isResponse(staff)) return staff;
+
     const { searchParams } = new URL(request.url);
     const roleParam = searchParams.get("role") ?? undefined;
     const page = Number(searchParams.get("page") ?? "1");
@@ -58,6 +62,9 @@ export async function GET(request: Request) {
 
 export async function POST(request: Request) {
   try {
+    const staff = await requirePermission("wms:write");
+    if (isResponse(staff)) return staff;
+
     const raw = await request.json();
     const wiki = await createWiki(raw);
     return jsonSuccess(

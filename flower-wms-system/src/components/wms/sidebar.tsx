@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { StaffAccountBar } from "@/components/shared/StaffAccountBar";
 
 const navItems = [
   { href: "/wms/dashboard", label: "仪表盘", icon: "📊" },
@@ -46,11 +47,7 @@ export function WmsSidebar() {
           );
         })}
       </nav>
-      <div className="border-t border-zinc-200 p-4">
-        <Link href="/" className="text-xs text-zinc-500 hover:text-zinc-800">
-          ← 返回工作台
-        </Link>
-      </div>
+      <StaffAccountBar variant="wms" />
     </aside>
   );
 }

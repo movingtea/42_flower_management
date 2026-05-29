@@ -18,14 +18,14 @@ export const KANBAN_COLUMNS: KanbanColumnDef[] = [
   },
   {
     id: "production",
-    title: "花艺制作中",
+    title: "制作中",
     status: "PRODUCTION",
     accentClass: "border-violet-200 bg-violet-50/90",
     badgeClass: "bg-violet-100 text-violet-900",
   },
   {
     id: "delivering",
-    title: "鲜花配送中",
+    title: "配送中",
     status: "DELIVERING",
     accentClass: "border-orange-200 bg-orange-50/90",
     badgeClass: "bg-orange-100 text-orange-900",

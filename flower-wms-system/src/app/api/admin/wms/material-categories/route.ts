@@ -1,5 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
 import {
   parseMaterialCategoryWriteBody,
   type MaterialCategoryRow,
@@ -43,6 +44,9 @@ function mapPrismaError(err: unknown): { message: string; status: number } {
 /** GET：原材料分类扁平列表（按 sortOrder 排序） */
 export async function GET() {
   try {
+    const staff = await requirePermission("wms:read");
+    if (isResponse(staff)) return staff;
+
     const list = await loadMaterialCategories();
     return jsonSuccess({ list });
   } catch (err) {
@@ -54,6 +58,9 @@ export async function GET() {
 /** POST：创建原材料分类 */
 export async function POST(request: Request) {
   try {
+    const staff = await requirePermission("wms:write");
+    if (isResponse(staff)) return staff;
+
     const body = parseMaterialCategoryWriteBody(await request.json());
 
     const created = await prisma.materialCategory.create({

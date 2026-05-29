@@ -64,6 +64,8 @@ export const ModelName = {
   Batch: 'Batch',
   StockLog: 'StockLog',
   StockLossRecord: 'StockLossRecord',
+  StaffUser: 'StaffUser',
+  StaffAuditLog: 'StaffAuditLog',
   User: 'User',
   Order: 'Order',
   OrderItem: 'OrderItem',
@@ -251,6 +253,7 @@ export const StockLogScalarFieldEnum = {
   wastageReason: 'wastageReason',
   remark: 'remark',
   operator: 'operator',
+  operatorStaffId: 'operatorStaffId',
   createdAt: 'createdAt'
 } as const
 
@@ -264,11 +267,37 @@ export const StockLossRecordScalarFieldEnum = {
   lossQuantity: 'lossQuantity',
   reason: 'reason',
   operator: 'operator',
+  operatorStaffId: 'operatorStaffId',
   stockLogId: 'stockLogId',
   createdAt: 'createdAt'
 } as const
 
 export type StockLossRecordScalarFieldEnum = (typeof StockLossRecordScalarFieldEnum)[keyof typeof StockLossRecordScalarFieldEnum]
+
+
+export const StaffUserScalarFieldEnum = {
+  id: 'id',
+  username: 'username',
+  passwordHash: 'passwordHash',
+  role: 'role',
+  displayName: 'displayName',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type StaffUserScalarFieldEnum = (typeof StaffUserScalarFieldEnum)[keyof typeof StaffUserScalarFieldEnum]
+
+
+export const StaffAuditLogScalarFieldEnum = {
+  id: 'id',
+  action: 'action',
+  operatorStaffId: 'operatorStaffId',
+  targetStaffId: 'targetStaffId',
+  createdAt: 'createdAt'
+} as const
+
+export type StaffAuditLogScalarFieldEnum = (typeof StaffAuditLogScalarFieldEnum)[keyof typeof StaffAuditLogScalarFieldEnum]
 
 
 export const UserScalarFieldEnum = {

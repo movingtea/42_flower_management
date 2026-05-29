@@ -1,4 +1,5 @@
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
 import {
   listStockLossHistory,
   listStockLossHistoryByMaterialId,
@@ -8,6 +9,9 @@ export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   try {
+    const staff = await requirePermission("loss:audit");
+    if (isResponse(staff)) return staff;
+
     const { searchParams } = new URL(request.url);
     const flowerWikiId = searchParams.get("flowerWikiId")?.trim();
     const materialId = searchParams.get("materialId")?.trim();

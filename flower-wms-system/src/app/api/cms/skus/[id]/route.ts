@@ -1,17 +1,14 @@
 import { Prisma } from "@/generated/prisma/client";
+import { isResponse, requirePermission } from "@/lib/api-auth";
 import { jsonError, jsonSuccess } from "@/lib/api";
 import {
   parseSkuMarketingPatch,
   updateSkuMarketingOnly,
 } from "@/lib/cms-sku-marketing";
-import { ForbiddenError, requirePermission } from "@/lib/rbac";
 
 export const dynamic = "force-dynamic";
 
 function mapError(err: unknown): { message: string; status: number } {
-  if (err instanceof ForbiddenError) {
-    return { message: err.message, status: 403 };
-  }
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     if (err.code === "P2025") {
       return { message: "SKU 不存在", status: 404 };
@@ -36,14 +33,15 @@ function mapError(err: unknown): { message: string; status: number } {
 
 /**
  * PATCH：运营人员仅可修改 SKU 营销图文（description / imageUrl）。
- * 需 STORE_OPERATOR 及以上角色（含店长 STORE_MANAGER）。
+ * 需 cms:write（STORE_OPERATOR / STORE_ADMIN）。
  */
 export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
-    await requirePermission(request, "STORE_OPERATOR");
+    const staff = await requirePermission("cms:write");
+    if (isResponse(staff)) return staff;
 
     const { id: skuId } = await context.params;
     if (!skuId?.trim()) {

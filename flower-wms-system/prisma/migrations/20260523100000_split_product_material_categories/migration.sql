@@ -124,3 +124,33 @@ FROM (VALUES
     ('花艺工具', '剪刀、花泥等工具', 4)
 ) AS v(name, description, sort_order)
 WHERE NOT EXISTS (SELECT 1 FROM "material_categories" mc WHERE mc."name" = v.name);
+
+-- 6. 统一重命名迁移后遗留的约束与索引名称。历史上这些语句位于
+-- 20260523005506_rebuild_catetories，但该 migration 在空库初始化时会先于
+-- 本 migration 执行，导致 product_categories_list 尚不存在而失败。
+DO $$
+BEGIN
+  IF EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'categories_pkey'
+  ) THEN
+    ALTER TABLE "product_categories_list" RENAME CONSTRAINT "categories_pkey" TO "product_categories_list_pkey";
+  END IF;
+
+  IF EXISTS (
+    SELECT 1 FROM pg_constraint WHERE conname = 'categories_parentId_fkey'
+  ) THEN
+    ALTER TABLE "product_categories_list" RENAME CONSTRAINT "categories_parentId_fkey" TO "product_categories_list_parent_id_fkey";
+  END IF;
+END $$;
+
+ALTER INDEX IF EXISTS "material_category_relations_material_id_material_category_id_ke"
+  RENAME TO "material_category_relations_material_id_material_category_i_key";
+
+ALTER INDEX IF EXISTS "product_categories_categoryId_idx"
+  RENAME TO "product_categories_product_category_id_idx";
+
+ALTER INDEX IF EXISTS "categories_parentId_idx"
+  RENAME TO "product_categories_list_parent_id_idx";
+
+ALTER INDEX IF EXISTS "categories_sortOrder_idx"
+  RENAME TO "product_categories_list_sortOrder_idx";

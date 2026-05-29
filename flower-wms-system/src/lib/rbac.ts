@@ -1,68 +1,110 @@
-import { extractBearerToken } from "@/lib/wechat-auth-request";
-import { verifyStaffToken } from "@/lib/staff-jwt";
-import {
-  isStaffRoleName,
-  StaffRole,
-  type StaffPermission,
-  type StaffRoleName,
-} from "@/lib/staff-role";
+import { Role } from "@/generated/prisma/enums";
 
-export { StaffRole, type StaffPermission, type StaffRoleName } from "@/lib/staff-role";
+export type StaffRole = Role;
 
-const ROLE_RANK: Record<StaffRoleName, number> = {
-  [StaffRole.VIEWER]: 1,
-  [StaffRole.STORE_OPERATOR]: 2,
-  [StaffRole.STORE_MANAGER]: 3,
-  [StaffRole.WMS_OPERATOR]: 4,
-  [StaffRole.SUPER_ADMIN]: 5,
-};
+/** IT Admin 严禁访问任何业务数据 API */
+export function canAccessBusinessData(role: StaffRole): boolean {
+  return role !== Role.IT_ADMIN;
+}
 
-export type StaffSession = {
-  staffId: string;
-  role: StaffRoleName;
-};
+export function canManageStaffUsers(role: StaffRole): boolean {
+  return role === Role.IT_ADMIN || role === Role.STORE_ADMIN;
+}
 
-export class ForbiddenError extends Error {
-  constructor(message = "无权访问") {
-    super(message);
-    this.name = "ForbiddenError";
+/** 大仓写：入库、报损、Wiki 维护、配方审定 */
+export function canWmsWrite(role: StaffRole): boolean {
+  return role === Role.STORE_ADMIN || role === Role.WAREHOUSE_MANAGER;
+}
+
+/** Wiki / 标准配方只读（Florist） */
+export function canWmsReadWikiAndRecipe(role: StaffRole): boolean {
+  return (
+    canWmsWrite(role) ||
+    role === Role.FLORIST ||
+    role === Role.STORE_OPERATOR
+  );
+}
+
+/** CMS 商品/运营写 */
+export function canCmsWrite(role: StaffRole): boolean {
+  return role === Role.STORE_ADMIN || role === Role.STORE_OPERATOR;
+}
+
+/** 订单履约看板（Florist 触发 FIFO 销售出库） */
+export function canOperateOrders(role: StaffRole): boolean {
+  return role === Role.STORE_ADMIN || role === Role.FLORIST;
+}
+
+/** 全量损耗审计日志 */
+export function canViewLossAudit(role: StaffRole): boolean {
+  return role === Role.STORE_ADMIN || role === Role.WAREHOUSE_MANAGER;
+}
+
+export function canViewWmsDashboard(role: StaffRole): boolean {
+  return role !== Role.IT_ADMIN && role !== Role.STORE_OPERATOR;
+}
+
+export type ApiPermission =
+  | "business:read"
+  | "business:write"
+  | "wms:write"
+  | "wms:read"
+  | "cms:write"
+  | "cms:read"
+  | "orders:write"
+  | "loss:audit"
+  | "staff:manage";
+
+export function hasPermission(role: StaffRole, permission: ApiPermission): boolean {
+  switch (permission) {
+    case "staff:manage":
+      return canManageStaffUsers(role);
+    case "business:read":
+      return canAccessBusinessData(role);
+    case "business:write":
+      return canWmsWrite(role) || canCmsWrite(role) || canOperateOrders(role);
+    case "wms:write":
+      return canWmsWrite(role);
+    case "wms:read":
+      return canWmsReadWikiAndRecipe(role) || canViewWmsDashboard(role);
+    case "cms:write":
+      return canCmsWrite(role);
+    case "cms:read":
+      return canCmsWrite(role) || role === Role.STORE_ADMIN;
+    case "orders:write":
+      return canOperateOrders(role);
+    case "loss:audit":
+      return canViewLossAudit(role);
+    default:
+      return false;
   }
 }
 
-export function hasMinimumRole(
-  actual: StaffRoleName,
-  required: StaffPermission
-): boolean {
-  return ROLE_RANK[actual] >= ROLE_RANK[required];
+/** 业务 API 路径前缀（供 Middleware 识别 IT Admin 盲区） */
+export const BUSINESS_API_PREFIXES = [
+  "/api/admin/wms",
+  "/api/admin/wiki",
+  "/api/admin/orders",
+  "/api/admin/batches",
+  "/api/admin/wastage",
+  "/api/admin/stocktake",
+  "/api/admin/products",
+  "/api/admin/banners",
+  "/api/admin/product-categories",
+  "/api/admin/categories",
+  "/api/cms",
+  "/api/business",
+] as const;
+
+export function isBusinessApiPath(pathname: string): boolean {
+  return BUSINESS_API_PREFIXES.some(
+    (p) => pathname === p || pathname.startsWith(`${p}/`)
+  );
 }
 
-/** 从 Authorization Bearer 解析员工会话，失败返回 null */
-export function getStaffFromRequest(request: Request): StaffSession | null {
-  const token = extractBearerToken(request);
-  if (!token) return null;
-
-  const payload = verifyStaffToken(token);
-  if (!payload || !isStaffRoleName(payload.role)) {
-    return null;
-  }
-
-  return { staffId: payload.sub, role: payload.role };
-}
-
-/**
- * RBAC 门禁：不具备 `minimum` 及以上角色的请求一律 403。
- * 须在 Route Handler 最顶层调用。
- */
-export async function requirePermission(
-  request: Request,
-  minimum: StaffPermission
-): Promise<StaffSession> {
-  const staff = getStaffFromRequest(request);
-  if (!staff) {
-    throw new ForbiddenError("未登录或会话已失效");
-  }
-  if (!hasMinimumRole(staff.role, minimum)) {
-    throw new ForbiddenError("权限不足");
-  }
-  return staff;
+export function isStaffAdminApiPath(pathname: string): boolean {
+  return (
+    pathname === "/api/admin/staff-users" ||
+    pathname.startsWith("/api/admin/staff-users/")
+  );
 }

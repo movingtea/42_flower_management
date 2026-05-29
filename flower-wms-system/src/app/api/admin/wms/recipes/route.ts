@@ -1,5 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
 import {
   createRecipe,
   getRecipeById,
@@ -36,6 +37,9 @@ function mapError(err: unknown): { message: string; status: number } {
 /** GET：独立配方列表；?id= 返回单条详情 */
 export async function GET(request: Request) {
   try {
+    const staff = await requirePermission("wms:read");
+    if (isResponse(staff)) return staff;
+
     const { searchParams } = new URL(request.url);
     const id = searchParams.get("id")?.trim();
     if (id) {
@@ -54,6 +58,9 @@ export async function GET(request: Request) {
 /** POST：创建新标准配方 */
 export async function POST(request: Request) {
   try {
+    const staff = await requirePermission("wms:write");
+    if (isResponse(staff)) return staff;
+
     const raw = await request.json();
     const recipe = await createRecipe(raw);
     return jsonSuccess(

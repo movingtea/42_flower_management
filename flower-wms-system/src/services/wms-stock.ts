@@ -1,5 +1,7 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { StockLogType } from "@/generated/prisma/enums";
+import type { OperatorContext } from "@/lib/operator-context";
+import { assertStockMutationOperatorMatches } from "@/lib/stock-mutation-auth";
 import { prisma } from "@/lib/prisma";
 import { generateBatchNo } from "@/utils/batch-no";
 import { generateUniqueSku } from "@/utils/skuGenerator";
@@ -9,6 +11,7 @@ export type StockInPayload = {
   quantity: number;
   costPrice: number;
   supplier?: string;
+  operator: OperatorContext;
 };
 
 export type StockLossPayload = {
@@ -16,7 +19,7 @@ export type StockLossPayload = {
   stockBatchId: string;
   lossQuantity: number;
   reason: string;
-  operator?: string;
+  operator: OperatorContext;
 };
 
 export type BatchPipelineRow = {
@@ -91,7 +94,21 @@ function parseReason(raw: unknown): string {
   return reason;
 }
 
-export function parseStockInPayload(raw: unknown): StockInPayload {
+export function attachOperatorToStockLossPayload(
+  base: Omit<StockLossPayload, "operator">,
+  operator: OperatorContext
+): StockLossPayload {
+  return { ...base, operator };
+}
+
+export function attachOperatorToStockInPayload(
+  base: Omit<StockInPayload, "operator">,
+  operator: OperatorContext
+): StockInPayload {
+  return { ...base, operator };
+}
+
+export function parseStockInBody(raw: unknown): Omit<StockInPayload, "operator"> {
   if (!raw || typeof raw !== "object") {
     throw new Error("请求体须为 JSON 对象");
   }
@@ -105,7 +122,9 @@ export function parseStockInPayload(raw: unknown): StockInPayload {
   };
 }
 
-export function parseStockLossPayload(raw: unknown): StockLossPayload {
+export function parseStockLossBody(
+  raw: unknown
+): Omit<StockLossPayload, "operator"> {
   if (!raw || typeof raw !== "object") {
     throw new Error("请求体须为 JSON 对象");
   }
@@ -115,8 +134,6 @@ export function parseStockLossPayload(raw: unknown): StockLossPayload {
     stockBatchId: parseStockBatchId(body.stockBatchId),
     lossQuantity: parsePositiveInt(body.lossQuantity, "损耗数量"),
     reason: parseReason(body.reason),
-    operator:
-      typeof body.operator === "string" ? body.operator.trim() || undefined : undefined,
   };
 }
 
@@ -153,6 +170,11 @@ async function resolveOrCreateMaterial(tx: Tx, flowerWikiId: string) {
 
 /** 原料到货入库：每批独立 Batch + INBOUND 流水 */
 export async function runStockInTransaction(payload: StockInPayload) {
+  const operator = await assertStockMutationOperatorMatches(
+    "wms:write",
+    payload.operator
+  );
+
   return prisma.$transaction(async (tx) => {
     const material = await resolveOrCreateMaterial(tx, payload.flowerWikiId);
     const batchNo = await generateBatchNo(tx);
@@ -178,7 +200,8 @@ export async function runStockInTransaction(payload: StockInPayload) {
         delta: payload.quantity,
         quantity: payload.quantity,
         remark: "原料到货入库",
-        operator: payload.supplier ? `supplier:${payload.supplier}` : "wms",
+        operator: operator.operatorLabel,
+        operatorStaffId: operator.operatorStaffId,
       },
     });
 
@@ -188,6 +211,11 @@ export async function runStockInTransaction(payload: StockInPayload) {
 
 /** 指定批次精准扣减（非 FIFO，由仓管手动选定批次） */
 export async function runStockLossTransaction(payload: StockLossPayload) {
+  const operator = await assertStockMutationOperatorMatches(
+    "wms:write",
+    payload.operator
+  );
+
   return prisma.$transaction(async (tx) => {
     await assertWikiExists(tx, payload.flowerWikiId);
 
@@ -231,7 +259,8 @@ export async function runStockLossTransaction(payload: StockLossPayload) {
         quantity: payload.lossQuantity,
         wastageReason: payload.reason,
         remark: payload.reason,
-        operator: payload.operator ?? "wms",
+        operator: operator.operatorLabel,
+        operatorStaffId: operator.operatorStaffId,
       },
     });
 
@@ -241,7 +270,8 @@ export async function runStockLossTransaction(payload: StockLossPayload) {
         batchId: batch.id,
         lossQuantity: payload.lossQuantity,
         reason: payload.reason,
-        operator: payload.operator ?? "wms",
+        operator: operator.operatorLabel,
+        operatorStaffId: operator.operatorStaffId,
         stockLogId: stockLog.id,
       },
     });

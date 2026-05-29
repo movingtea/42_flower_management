@@ -59,6 +59,20 @@ enum FloralRole {
   FOLIAGE /// 叶材
 }
 
+/// 后台员工 RBAC 五级角色（与小程序 users 表解耦）
+enum Role {
+  IT_ADMIN /// 系统运维：仅用户/权限，业务盲区
+  STORE_ADMIN /// 门店主理人：WMS + CMS + 人员 + 全量损耗审计
+  WAREHOUSE_MANAGER /// 大仓：入库、报损、Wiki、配方审定
+  FLORIST /// 花艺师：订单看板 + Wiki/配方只读
+  STORE_OPERATOR /// 前台：CMS 商品上架，配方只读引用
+}
+
+/// 后台账号管理审计动作
+enum StaffAuditAction {
+  PASSWORD_RESET /// 管理员代行重置密码
+}
+
 // ---------------------------------------------------------------------------
 // ProductCategory — 商城商品分类（二级树，CMS / 小程序）
 // ---------------------------------------------------------------------------
@@ -308,15 +322,17 @@ model StockLog {
   quantity      Int
   orderId       String?
   orderItemId   String?
-  wastageReason String?
-  remark        String?      @db.Text
-  operator      String?
-  createdAt     DateTime     @default(now())
+  wastageReason     String?
+  remark            String?  @db.Text
+  operator          String? /// 操作员快照（username）
+  operatorStaffId   String?  @map("operator_staff_id")
+  createdAt         DateTime @default(now())
 
-  material  Material   @relation(fields: [materialId], references: [id], onDelete: Restrict)
-  batch     Batch      @relation(fields: [batchId], references: [id], onDelete: Restrict)
-  order     Order?     @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  orderItem OrderItem? @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+  material        Material    @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  batch           Batch       @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  order           Order?      @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  orderItem       OrderItem?  @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+  operatorStaff   StaffUser?  @relation(fields: [operatorStaffId], references: [id], onDelete: SetNull)
   stockLossRecord StockLossRecord?
 
   @@index([materialId, createdAt])
@@ -324,6 +340,7 @@ model StockLog {
   @@index([type, createdAt])
   @@index([orderId])
   @@index([orderItemId])
+  @@index([operatorStaffId])
   @@map("stock_logs")
 }
 
@@ -336,18 +353,65 @@ model StockLossRecord {
   flowerWikiId String   @map("flower_wiki_id")
   batchId      String   @map("batch_id")
   lossQuantity Int      @map("loss_quantity")
-  reason       String   @db.Text
-  operator     String?
-  stockLogId   String   @unique @map("stock_log_id")
-  createdAt    DateTime @default(now()) @map("created_at")
+  reason           String   @db.Text
+  operator         String? /// 操作员快照（username）
+  operatorStaffId  String?  @map("operator_staff_id")
+  stockLogId       String   @unique @map("stock_log_id")
+  createdAt        DateTime @default(now()) @map("created_at")
 
-  wiki     FlowerWiki @relation(fields: [flowerWikiId], references: [id], onDelete: Restrict)
-  batch    Batch      @relation(fields: [batchId], references: [id], onDelete: Restrict)
-  stockLog StockLog   @relation(fields: [stockLogId], references: [id], onDelete: Restrict)
+  wiki           FlowerWiki @relation(fields: [flowerWikiId], references: [id], onDelete: Restrict)
+  batch          Batch      @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  stockLog       StockLog   @relation(fields: [stockLogId], references: [id], onDelete: Restrict)
+  operatorStaff  StaffUser? @relation(fields: [operatorStaffId], references: [id], onDelete: SetNull)
 
   @@index([flowerWikiId, createdAt])
   @@index([batchId, createdAt])
+  @@index([operatorStaffId])
   @@map("stock_loss_records")
+}
+
+// ---------------------------------------------------------------------------
+// StaffUser — 后台登录账号（Credentials + RBAC）
+// 说明：小程序顾客仍使用下方 User（openId），二者物理隔离
+// ---------------------------------------------------------------------------
+
+model StaffUser {
+  id           String   @id @default(uuid())
+  username     String   @unique
+  passwordHash String   @map("password_hash")
+  role         Role
+  displayName  String?  @map("display_name")
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  stockLogs              StockLog[]
+  stockLossRecords       StockLossRecord[]
+  auditsAsOperator       StaffAuditLog[] @relation("StaffAuditOperator")
+  auditsAsTarget         StaffAuditLog[] @relation("StaffAuditTarget")
+
+  @@index([role])
+  @@map("staff_users")
+}
+
+// ---------------------------------------------------------------------------
+// StaffAuditLog — 后台账号操作审计（密码重置等）
+// ---------------------------------------------------------------------------
+
+model StaffAuditLog {
+  id              String           @id @default(uuid())
+  action          StaffAuditAction
+  operatorStaffId String           @map("operator_staff_id")
+  targetStaffId   String           @map("target_staff_id")
+  createdAt       DateTime         @default(now()) @map("created_at")
+
+  operator StaffUser @relation("StaffAuditOperator", fields: [operatorStaffId], references: [id], onDelete: Restrict)
+  target   StaffUser @relation("StaffAuditTarget", fields: [targetStaffId], references: [id], onDelete: Restrict)
+
+  @@index([operatorStaffId, createdAt])
+  @@index([targetStaffId, createdAt])
+  @@index([action, createdAt])
+  @@map("staff_audit_logs")
 }
 
 // ---------------------------------------------------------------------------

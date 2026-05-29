@@ -50,7 +50,7 @@
 
 | 项 | 说明 |
 |----|------|
-| 员工登录 UI / StaffUser 持久化 | 五级 RBAC 与 `STAFF_JWT_SECRET` 已落地；**无** `staff_users` 表与登录页，Token 须运维签发或后续接入 |
+| 员工登录 UI | Auth.js + `StaffUser` 表已落地；`/login` 与 `staff-users` 管理页可用 |
 | 定时自动库存投影 | `syncPhysicalStockToVirtual` 仅提供手动脚本，无 Cron / 队列 |
 
 **历史命名 → 现行模型**
@@ -139,22 +139,21 @@ flower-wms-system/
 |------|------|------|
 | PATCH | `/api/cms/skus/[id]` | **白名单更新**：仅 `description`、`imageUrl`；拒绝 `recipeId` / `price` / `stock` 等 mass-assignment |
 
-- 鉴权：`lib/rbac.ts` → `requirePermission(request, 'STORE_OPERATOR')`（含店长及以上）；失败 **403**
+- 鉴权：`lib/api-auth.ts` → `requirePermission('cms:write')`（`STORE_OPERATOR` / `STORE_ADMIN`）；失败 **401/403**
 - 解析：`lib/cms-sku-marketing.ts` → `parseSkuMarketingPatch` + `updateSkuMarketingOnly`
-- 员工 JWT：`Authorization: Bearer` + `STAFF_JWT_SECRET`（`lib/staff-jwt.ts`）
 - 完整商品保存（含配方/价格）仍走 `PUT /api/cms/products/[id]`，运营改图文应优先用本接口
 
-#### 后台鉴权（五级 RBAC）
+#### 后台鉴权（五级 RBAC + Auth.js）
 
-| 角色（升序） | 常量 | 典型能力 |
-|--------------|------|----------|
-| 1 | `VIEWER` | 只读 |
-| 2 | `STORE_OPERATOR` | CMS 运营（SKU 营销图文 PATCH） |
-| 3 | `STORE_MANAGER` | 店长（含运营权限） |
-| 4 | `WMS_OPERATOR` | 仓储操作 |
-| 5 | `SUPER_ADMIN` | 全权限 |
+| 角色（Prisma `Role`） | 典型能力 |
+|------------------------|----------|
+| `IT_ADMIN` | 仅员工账号管理，**业务 API 盲区** |
+| `STORE_ADMIN` | 门店主理人：WMS + CMS + 人员 + 损耗审计 |
+| `WAREHOUSE_MANAGER` | 大仓：入库、报损、Wiki、配方审定 |
+| `FLORIST` | 订单看板、Wiki/配方只读 |
+| `STORE_OPERATOR` | CMS 商品上架、SKU 营销图文 PATCH |
 
-实现：`lib/staff-role.ts`（角色常量）、`lib/staff-jwt.ts`（签发/校验）、`lib/rbac.ts`（`requirePermission` / `ForbiddenError`）。与小程序用户 JWT（`WECHAT_JWT_SECRET`）**完全隔离**。
+实现：`auth.ts`（Auth.js v5）+ `lib/rbac.ts`（`hasPermission` / `canCmsWrite` 等）+ `lib/api-auth.ts`（`requirePermission`）+ `lib/stock-mutation-auth.ts`（库存服务层 Session 鉴权）。与小程序用户 JWT（`WECHAT_JWT_SECRET`）**完全隔离**。
 
 #### WMS 后台 API（`src/app/api/admin/wms/`）
 
@@ -542,7 +541,7 @@ markOrderPaidWithFifo({ orderId, userId?, operator? })
 
 | 项 | 说明 |
 |----|------|
-| 员工账号体系 | RBAC + JWT 已就绪；`staff_users` 表与登录 API 待接入 |
+| 员工账号体系 | 部分遗留 admin 路由（`banners`、`app-config`）仍仅靠 Middleware 粗拦截 |
 | 旧 BOM 商品 API | `GET /api/admin/products/bom` 只读兼容；经 `getRecipeForProduct` 查 SPU 下首个有 `recipeId` 的 SKU |
 | `productRecipeInclude` | 已废弃别名，请用 `skuRecipeInclude`（`lib/product-categories.ts`） |
 | 遗留 `inbound.ts` | 与 `wms-stock` 功能重叠，无 import 方，可删除 |

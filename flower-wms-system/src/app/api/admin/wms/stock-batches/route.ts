@@ -1,10 +1,14 @@
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
 import { listWikiAvailableBatches } from "@/services/wms-stock";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: Request) {
   try {
+    const staff = await requirePermission("wms:read");
+    if (isResponse(staff)) return staff;
+
     const { searchParams } = new URL(request.url);
     const flowerWikiId = searchParams.get("flowerWikiId")?.trim();
 
