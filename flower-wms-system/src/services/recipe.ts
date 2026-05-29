@@ -92,7 +92,7 @@ function serializeRecipe(
         colorTags: string[];
       };
     }>;
-    _count: { products: number };
+    _count: { skus: number };
   }
 ): RecipeSummary {
   const ingredients = mapRecipeLines(recipe.lines);
@@ -102,7 +102,7 @@ function serializeRecipe(
     recipeCode: recipe.recipeCode,
     name: recipe.name,
     description: recipe.description,
-    productCount: recipe._count.products,
+    productCount: recipe._count.skus,
     ingredients,
     createdAt: recipe.createdAt.toISOString(),
     updatedAt: recipe.updatedAt.toISOString(),
@@ -206,7 +206,7 @@ async function loadRecipeById(id: string, tx: Tx = prisma): Promise<RecipeSummar
     where: { id },
     include: {
       lines: { include: lineInclude, orderBy: { quantityNeeded: "desc" } },
-      _count: { select: { products: true } },
+      _count: { select: { skus: true } },
     },
   });
   if (!recipe) throw new Error("配方不存在");
@@ -238,7 +238,7 @@ export async function listRecipes(): Promise<RecipeListItem[]> {
     orderBy: { updatedAt: "desc" },
     include: {
       lines: { include: lineInclude },
-      _count: { select: { products: true } },
+      _count: { select: { skus: true } },
     },
   });
 
@@ -249,7 +249,7 @@ export async function listRecipes(): Promise<RecipeListItem[]> {
       recipeCode: recipe.recipeCode,
       name: recipe.name,
       ingredientSummary: formatIngredientSummary(ingredients),
-      productCount: recipe._count.products,
+      productCount: recipe._count.skus,
       ingredientCount: ingredients.length,
     };
   });
@@ -365,12 +365,29 @@ export async function assertRecipeExists(recipeId: string): Promise<void> {
 }
 
 export async function getRecipeForProduct(
-  productId: string
+  productId: string,
+  skuId?: string
 ): Promise<RecipeSummary | null> {
   const spu = await prisma.productSpu.findFirst({
-    where: { id: productId, isDeleted: false },
-    select: { recipeId: true },
+    where: {
+      id: productId,
+      isDeleted: false,
+      skus: skuId
+        ? { some: { id: skuId, recipeId: { not: null } } }
+        : { some: { recipeId: { not: null } } },
+    },
+    select: {
+      skus: {
+        where: skuId
+          ? { id: skuId, recipeId: { not: null } }
+          : { recipeId: { not: null } },
+        select: { recipeId: true },
+        orderBy: { sortOrder: "asc" },
+        take: 1,
+      },
+    },
   });
-  if (!spu?.recipeId) return null;
-  return getRecipeById(spu.recipeId);
+  const recipeId = spu?.skus[0]?.recipeId;
+  if (!recipeId) return null;
+  return getRecipeById(recipeId);
 }

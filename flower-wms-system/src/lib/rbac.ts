@@ -30,7 +30,7 @@ export function canCmsWrite(role: StaffRole): boolean {
   return role === Role.STORE_ADMIN || role === Role.STORE_OPERATOR;
 }
 
-/** 订单履约看板（Florist 触发 FIFO 销售出库 — 服务层待接通） */
+/** 订单履约看板（Florist 触发 FIFO 销售出库） */
 export function canOperateOrders(role: StaffRole): boolean {
   return role === Role.STORE_ADMIN || role === Role.FLORIST;
 }

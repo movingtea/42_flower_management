@@ -3,7 +3,7 @@ import { StockLogType } from "@/generated/prisma/enums";
 import type { OperatorContext } from "@/lib/operator-context";
 import { assertStockMutationOperatorMatches } from "@/lib/stock-mutation-auth";
 import { prisma } from "@/lib/prisma";
-import { generateBatchNo } from "@/services/wiki-inbound";
+import { generateBatchNo } from "@/utils/batch-no";
 import { generateUniqueSku } from "@/utils/skuGenerator";
 
 export type StockInPayload = {

@@ -27,6 +27,7 @@ function emptySkuRow(sortOrder = 0): ProductSkuEditorRow {
     imageUrl: "",
     isMainImage: sortOrder === 0,
     sortOrder,
+    recipeId: null,
   };
 }
 
@@ -55,7 +56,6 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
   const [skus, setSkus] = useState<ProductSkuEditorRow[]>(
     initial.skus.length > 0 ? initial.skus : [emptySkuRow(0)]
   );
-  const [recipeId, setRecipeId] = useState<string | null>(initial.recipeId);
 
   function showToast(message: string, type: "success" | "error") {
     setToast({ message, type });
@@ -188,7 +188,6 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
       shippingFee: needsShipping ? Number(shippingFee.trim()) : 0,
       description: description.trim() || null,
       maintenanceGuide: maintenanceGuideline.trim() || null,
-      recipeId,
       skus: skus.map((row, index) => ({
         id: row.id,
         skuCode: row.skuCode,
@@ -198,6 +197,7 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
         imageUrl: row.imageUrl.trim() || null,
         isMainImage: row.isMainImage,
         sortOrder: row.sortOrder ?? index * 10,
+        recipeId: row.recipeId,
       })),
     };
 
@@ -239,14 +239,6 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
 
   const sidebarMeta = (
     <>
-      <section className="space-y-3 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
-        <RecipeSelect
-          value={recipeId}
-          onChange={setRecipeId}
-          disabled={submitting}
-        />
-      </section>
-
       <section className="space-y-3 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
         <h3 className="text-sm font-semibold text-zinc-900">分类与预览</h3>
         <p className="text-xs text-zinc-500">
@@ -380,6 +372,7 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
                 <thead className="border-b bg-zinc-50 text-zinc-600">
                   <tr>
                     <th className="px-3 py-2 font-medium">款式品名</th>
+                    <th className="px-3 py-2 font-medium">大仓配方</th>
                     <th className="px-3 py-2 font-medium">价格</th>
                     <th className="px-3 py-2 font-medium">库存</th>
                     <th className="px-3 py-2 font-medium">款式图</th>
@@ -404,6 +397,16 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
                             编码：{row.skuCode}
                           </p>
                         ) : null}
+                      </td>
+                      <td className="px-3 py-3">
+                        <RecipeSelect
+                          value={row.recipeId}
+                          onChange={(recipeId) =>
+                            updateSkuRow(index, { recipeId })
+                          }
+                          disabled={submitting}
+                          compact
+                        />
                       </td>
                       <td className="px-3 py-3">
                         <input

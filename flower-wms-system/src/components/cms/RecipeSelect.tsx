@@ -14,9 +14,11 @@ type Props = {
   value: string | null;
   onChange: (recipeId: string | null) => void;
   disabled?: boolean;
+  /** 表格行内使用：隐藏标题与说明 */
+  compact?: boolean;
 };
 
-export function RecipeSelect({ value, onChange, disabled }: Props) {
+export function RecipeSelect({ value, onChange, disabled, compact }: Props) {
   const [options, setOptions] = useState<RecipeOption[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -57,15 +59,19 @@ export function RecipeSelect({ value, onChange, disabled }: Props) {
   }
 
   return (
-    <div className="space-y-2">
-      <label className="block text-sm font-medium text-zinc-800">
-        🔌 绑定大仓生产配方
-      </label>
+    <div className={compact ? "" : "space-y-2"}>
+      {compact ? null : (
+        <label className="block text-sm font-medium text-zinc-800">
+          🔌 绑定大仓生产配方
+        </label>
+      )}
       <select
         value={value ?? ""}
         disabled={disabled || loading}
         onChange={(e) => onChange(e.target.value || null)}
-        className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-rose-400 disabled:bg-zinc-50"
+        className={`rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-rose-400 disabled:bg-zinc-50 ${
+          compact ? "w-full min-w-[12rem]" : "w-full"
+        }`}
       >
         <option value="">
           {loading ? "加载配方中…" : "— 暂不绑定配方 —"}
@@ -77,9 +83,11 @@ export function RecipeSelect({ value, onChange, disabled }: Props) {
         ))}
       </select>
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
-      <p className="text-xs text-zinc-500">
-        配方在 WMS「标准配方研发中心」维护，单号由系统自动分配
-      </p>
+      {compact ? null : (
+        <p className="text-xs text-zinc-500">
+          配方在 WMS「标准配方研发中心」维护，单号由系统自动分配
+        </p>
+      )}
     </div>
   );
 }

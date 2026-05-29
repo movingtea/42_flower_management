@@ -1,6 +1,6 @@
 // =============================================================================
 // Flower WMS — 花店仓库管理与微信小程序订单
-// 架构：Recipe（WMS 标准配方）↔ ProductSpu；RecipeLine ↔ Material + Batch FIFO
+// 架构：Recipe（WMS 标准配方）↔ ProductSku（每规格可选绑定）；RecipeLine ↔ FlowerWiki
 // 商品分类与原材料分类完全解耦，各自独立表与中间表
 // =============================================================================
 
@@ -164,18 +164,15 @@ model ProductSpu {
   shippingFee      Float    @default(0) @map("shipping_fee")
   allowPreOrder    Boolean  @default(true) @map("allow_pre_order")
   productionTime   Int      @default(30) @map("production_time")
-  recipeId         String?  @map("recipe_id")
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
   skus       ProductSku[]
   categories ProductCategoryRelation[]
-  recipe     Recipe?   @relation(fields: [recipeId], references: [id], onDelete: SetNull)
   banners    Banner[]
 
   @@index([isActive])
   @@index([isDeleted])
-  @@index([recipeId])
   @@map("product_spus")
 }
 
@@ -186,6 +183,8 @@ model ProductSku {
   specName    String   @map("spec_name")
   price       Decimal  @db.Decimal(10, 2)
   stock       Int      @default(0)
+  recipeId    String?  @map("recipe_id")
+  description String?  @db.Text
   imageUrl    String?  @map("image_url")
   isMainImage Boolean  @default(false) @map("is_main_image")
   sortOrder   Int      @default(0) @map("sort_order")
@@ -193,10 +192,12 @@ model ProductSku {
   updatedAt   DateTime @updatedAt
 
   spu        ProductSpu  @relation(fields: [spuId], references: [id], onDelete: Cascade)
+  recipe     Recipe?     @relation(fields: [recipeId], references: [id], onDelete: SetNull)
   orderItems OrderItem[]
 
   @@index([spuId])
   @@index([spuId, isMainImage])
+  @@index([recipeId])
   @@map("product_skus")
 }
 
@@ -259,7 +260,7 @@ model Recipe {
   updatedAt   DateTime @updatedAt @map("updated_at")
 
   lines    RecipeLine[]
-  products ProductSpu[]
+  skus     ProductSku[]
 
   @@index([name])
   @@map("recipes")

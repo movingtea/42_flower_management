@@ -40,8 +40,8 @@ export async function POST(request: Request, ctx: RouteCtx) {
 
     return jsonSuccess({
       message: body.rollbackStock
-        ? "已退款取消并归还库存"
-        : "已记录退款，库存未回滚",
+        ? "已退款取消，物理批次与虚拟库存均已回库"
+        : "已退款取消，物理批次已回库（虚拟 SKU 未回滚）",
       order: {
         id: order.id,
         orderNo: order.orderNo,

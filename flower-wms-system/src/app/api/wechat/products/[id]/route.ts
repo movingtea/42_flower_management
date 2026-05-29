@@ -1,10 +1,10 @@
 import { jsonError } from "@/lib/api";
 import { activeSpuWhere } from "@/lib/product-query";
+import { productSpuInclude } from "@/lib/product-spu";
 import {
-  productSpuInclude,
-  resolveSpuBannerImages,
-} from "@/lib/product-spu";
-import { mapSpuToWechatListItem } from "@/lib/wechat-product-mapper";
+  mapSpuToWechatListItem,
+  resolveBannerImagesFromSkus,
+} from "@/lib/wechat-product-mapper";
 import { jsonWechatSuccess } from "@/lib/wechat-api";
 import { prisma } from "@/lib/prisma";
 
@@ -32,7 +32,7 @@ export async function GET(
     }
 
     const product = mapSpuToWechatListItem(spu);
-    const bannerImages = resolveSpuBannerImages(spu.skus);
+    const bannerImages = resolveBannerImagesFromSkus(product.skus);
 
     return jsonWechatSuccess({
       product,

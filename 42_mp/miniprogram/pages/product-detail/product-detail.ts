@@ -78,9 +78,14 @@ Page({
 
       const raw = detailRes.product;
       const base = normalizeWechatProduct(raw);
+      const defaultSku = pickDefaultSku(base);
+      const effectiveDescription =
+        defaultSku?.description?.trim() ||
+        raw.description?.trim() ||
+        null;
       const product: DetailProduct = {
         ...base,
-        description: raw.description ?? null,
+        description: effectiveDescription,
         maintenanceGuide: raw.maintenanceGuide ?? null,
       };
 
@@ -102,7 +107,7 @@ Page({
         minPrice,
         maxPrice,
         priceLabel,
-        descriptionHtml: rewriteRichTextImageSrc(product.description ?? ''),
+        descriptionHtml: rewriteRichTextImageSrc(effectiveDescription ?? ''),
         maintenanceHtml: rewriteRichTextImageSrc(product.maintenanceGuide ?? ''),
         recommendList,
       });

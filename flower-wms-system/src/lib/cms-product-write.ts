@@ -36,6 +36,7 @@ export async function buildSkuCreateRows(
       imageUrl: row.imageUrl,
       isMainImage: row.isMainImage,
       sortOrder: row.sortOrder ?? i * 10,
+      recipeId: row.recipeId ?? null,
     });
   }
 
@@ -70,6 +71,7 @@ export async function syncProductSkus(
       imageUrl: row.imageUrl,
       isMainImage: row.isMainImage,
       sortOrder: row.sortOrder ?? i * 10,
+      recipeId: row.recipeId ?? null,
     };
 
     if (row.id && existingIds.has(row.id)) {

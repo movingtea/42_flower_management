@@ -42,33 +42,6 @@ export interface WmsStockLossBody {
   operator?: string;
 }
 
-/** 后台采购入库 POST /api/admin/batches */
-export interface AdminInboundBody {
-  name: string;
-  category: import("@/lib/constants").WmsCategory;
-  receivedQty: number;
-  costPrice: number;
-  safetyStockThreshold: number;
-  expiryDate?: string;
-  supplierName?: string;
-}
-
-/** 后台损耗核销 POST /api/admin/wastage */
-export interface AdminWastageBody {
-  batchId: string;
-  wastageQty: number;
-  reason: string;
-  operatorId: string;
-}
-
-/** @deprecated 使用 AdminWastageBody */
-export interface CreateWastageInput {
-  productId: string;
-  quantity: number;
-  wastageReason: string;
-  operator?: string;
-}
-
 /** 盘点调整请求 */
 export interface StocktakeInput {
   batchId: string;

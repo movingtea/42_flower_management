@@ -45,6 +45,8 @@ export type ProductSkuMinAggregateOutputType = {
   specName: string | null
   price: runtime.Decimal | null
   stock: number | null
+  recipeId: string | null
+  description: string | null
   imageUrl: string | null
   isMainImage: boolean | null
   sortOrder: number | null
@@ -59,6 +61,8 @@ export type ProductSkuMaxAggregateOutputType = {
   specName: string | null
   price: runtime.Decimal | null
   stock: number | null
+  recipeId: string | null
+  description: string | null
   imageUrl: string | null
   isMainImage: boolean | null
   sortOrder: number | null
@@ -73,6 +77,8 @@ export type ProductSkuCountAggregateOutputType = {
   specName: number
   price: number
   stock: number
+  recipeId: number
+  description: number
   imageUrl: number
   isMainImage: number
   sortOrder: number
@@ -101,6 +107,8 @@ export type ProductSkuMinAggregateInputType = {
   specName?: true
   price?: true
   stock?: true
+  recipeId?: true
+  description?: true
   imageUrl?: true
   isMainImage?: true
   sortOrder?: true
@@ -115,6 +123,8 @@ export type ProductSkuMaxAggregateInputType = {
   specName?: true
   price?: true
   stock?: true
+  recipeId?: true
+  description?: true
   imageUrl?: true
   isMainImage?: true
   sortOrder?: true
@@ -129,6 +139,8 @@ export type ProductSkuCountAggregateInputType = {
   specName?: true
   price?: true
   stock?: true
+  recipeId?: true
+  description?: true
   imageUrl?: true
   isMainImage?: true
   sortOrder?: true
@@ -230,6 +242,8 @@ export type ProductSkuGroupByOutputType = {
   specName: string
   price: runtime.Decimal
   stock: number
+  recipeId: string | null
+  description: string | null
   imageUrl: string | null
   isMainImage: boolean
   sortOrder: number
@@ -267,12 +281,15 @@ export type ProductSkuWhereInput = {
   specName?: Prisma.StringFilter<"ProductSku"> | string
   price?: Prisma.DecimalFilter<"ProductSku"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: Prisma.IntFilter<"ProductSku"> | number
+  recipeId?: Prisma.StringNullableFilter<"ProductSku"> | string | null
+  description?: Prisma.StringNullableFilter<"ProductSku"> | string | null
   imageUrl?: Prisma.StringNullableFilter<"ProductSku"> | string | null
   isMainImage?: Prisma.BoolFilter<"ProductSku"> | boolean
   sortOrder?: Prisma.IntFilter<"ProductSku"> | number
   createdAt?: Prisma.DateTimeFilter<"ProductSku"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProductSku"> | Date | string
   spu?: Prisma.XOR<Prisma.ProductSpuScalarRelationFilter, Prisma.ProductSpuWhereInput>
+  recipe?: Prisma.XOR<Prisma.RecipeNullableScalarRelationFilter, Prisma.RecipeWhereInput> | null
   orderItems?: Prisma.OrderItemListRelationFilter
 }
 
@@ -283,12 +300,15 @@ export type ProductSkuOrderByWithRelationInput = {
   specName?: Prisma.SortOrder
   price?: Prisma.SortOrder
   stock?: Prisma.SortOrder
+  recipeId?: Prisma.SortOrderInput | Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   isMainImage?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   spu?: Prisma.ProductSpuOrderByWithRelationInput
+  recipe?: Prisma.RecipeOrderByWithRelationInput
   orderItems?: Prisma.OrderItemOrderByRelationAggregateInput
 }
 
@@ -302,12 +322,15 @@ export type ProductSkuWhereUniqueInput = Prisma.AtLeast<{
   specName?: Prisma.StringFilter<"ProductSku"> | string
   price?: Prisma.DecimalFilter<"ProductSku"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: Prisma.IntFilter<"ProductSku"> | number
+  recipeId?: Prisma.StringNullableFilter<"ProductSku"> | string | null
+  description?: Prisma.StringNullableFilter<"ProductSku"> | string | null
   imageUrl?: Prisma.StringNullableFilter<"ProductSku"> | string | null
   isMainImage?: Prisma.BoolFilter<"ProductSku"> | boolean
   sortOrder?: Prisma.IntFilter<"ProductSku"> | number
   createdAt?: Prisma.DateTimeFilter<"ProductSku"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProductSku"> | Date | string
   spu?: Prisma.XOR<Prisma.ProductSpuScalarRelationFilter, Prisma.ProductSpuWhereInput>
+  recipe?: Prisma.XOR<Prisma.RecipeNullableScalarRelationFilter, Prisma.RecipeWhereInput> | null
   orderItems?: Prisma.OrderItemListRelationFilter
 }, "id" | "skuCode">
 
@@ -318,6 +341,8 @@ export type ProductSkuOrderByWithAggregationInput = {
   specName?: Prisma.SortOrder
   price?: Prisma.SortOrder
   stock?: Prisma.SortOrder
+  recipeId?: Prisma.SortOrderInput | Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
   imageUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   isMainImage?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
@@ -340,6 +365,8 @@ export type ProductSkuScalarWhereWithAggregatesInput = {
   specName?: Prisma.StringWithAggregatesFilter<"ProductSku"> | string
   price?: Prisma.DecimalWithAggregatesFilter<"ProductSku"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: Prisma.IntWithAggregatesFilter<"ProductSku"> | number
+  recipeId?: Prisma.StringNullableWithAggregatesFilter<"ProductSku"> | string | null
+  description?: Prisma.StringNullableWithAggregatesFilter<"ProductSku"> | string | null
   imageUrl?: Prisma.StringNullableWithAggregatesFilter<"ProductSku"> | string | null
   isMainImage?: Prisma.BoolWithAggregatesFilter<"ProductSku"> | boolean
   sortOrder?: Prisma.IntWithAggregatesFilter<"ProductSku"> | number
@@ -353,12 +380,14 @@ export type ProductSkuCreateInput = {
   specName: string
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: number
+  description?: string | null
   imageUrl?: string | null
   isMainImage?: boolean
   sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   spu: Prisma.ProductSpuCreateNestedOneWithoutSkusInput
+  recipe?: Prisma.RecipeCreateNestedOneWithoutSkusInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutSkuInput
 }
 
@@ -369,6 +398,8 @@ export type ProductSkuUncheckedCreateInput = {
   specName: string
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: number
+  recipeId?: string | null
+  description?: string | null
   imageUrl?: string | null
   isMainImage?: boolean
   sortOrder?: number
@@ -383,12 +414,14 @@ export type ProductSkuUpdateInput = {
   specName?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: Prisma.IntFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMainImage?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   spu?: Prisma.ProductSpuUpdateOneRequiredWithoutSkusNestedInput
+  recipe?: Prisma.RecipeUpdateOneWithoutSkusNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutSkuNestedInput
 }
 
@@ -399,6 +432,8 @@ export type ProductSkuUncheckedUpdateInput = {
   specName?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: Prisma.IntFieldUpdateOperationsInput | number
+  recipeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMainImage?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
@@ -414,6 +449,8 @@ export type ProductSkuCreateManyInput = {
   specName: string
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: number
+  recipeId?: string | null
+  description?: string | null
   imageUrl?: string | null
   isMainImage?: boolean
   sortOrder?: number
@@ -427,6 +464,7 @@ export type ProductSkuUpdateManyMutationInput = {
   specName?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: Prisma.IntFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMainImage?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
@@ -441,6 +479,8 @@ export type ProductSkuUncheckedUpdateManyInput = {
   specName?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: Prisma.IntFieldUpdateOperationsInput | number
+  recipeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMainImage?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
@@ -465,6 +505,8 @@ export type ProductSkuCountOrderByAggregateInput = {
   specName?: Prisma.SortOrder
   price?: Prisma.SortOrder
   stock?: Prisma.SortOrder
+  recipeId?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
   isMainImage?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
@@ -485,6 +527,8 @@ export type ProductSkuMaxOrderByAggregateInput = {
   specName?: Prisma.SortOrder
   price?: Prisma.SortOrder
   stock?: Prisma.SortOrder
+  recipeId?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
   isMainImage?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
@@ -499,6 +543,8 @@ export type ProductSkuMinOrderByAggregateInput = {
   specName?: Prisma.SortOrder
   price?: Prisma.SortOrder
   stock?: Prisma.SortOrder
+  recipeId?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   imageUrl?: Prisma.SortOrder
   isMainImage?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
@@ -567,6 +613,48 @@ export type DecimalFieldUpdateOperationsInput = {
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
+export type ProductSkuCreateNestedManyWithoutRecipeInput = {
+  create?: Prisma.XOR<Prisma.ProductSkuCreateWithoutRecipeInput, Prisma.ProductSkuUncheckedCreateWithoutRecipeInput> | Prisma.ProductSkuCreateWithoutRecipeInput[] | Prisma.ProductSkuUncheckedCreateWithoutRecipeInput[]
+  connectOrCreate?: Prisma.ProductSkuCreateOrConnectWithoutRecipeInput | Prisma.ProductSkuCreateOrConnectWithoutRecipeInput[]
+  createMany?: Prisma.ProductSkuCreateManyRecipeInputEnvelope
+  connect?: Prisma.ProductSkuWhereUniqueInput | Prisma.ProductSkuWhereUniqueInput[]
+}
+
+export type ProductSkuUncheckedCreateNestedManyWithoutRecipeInput = {
+  create?: Prisma.XOR<Prisma.ProductSkuCreateWithoutRecipeInput, Prisma.ProductSkuUncheckedCreateWithoutRecipeInput> | Prisma.ProductSkuCreateWithoutRecipeInput[] | Prisma.ProductSkuUncheckedCreateWithoutRecipeInput[]
+  connectOrCreate?: Prisma.ProductSkuCreateOrConnectWithoutRecipeInput | Prisma.ProductSkuCreateOrConnectWithoutRecipeInput[]
+  createMany?: Prisma.ProductSkuCreateManyRecipeInputEnvelope
+  connect?: Prisma.ProductSkuWhereUniqueInput | Prisma.ProductSkuWhereUniqueInput[]
+}
+
+export type ProductSkuUpdateManyWithoutRecipeNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductSkuCreateWithoutRecipeInput, Prisma.ProductSkuUncheckedCreateWithoutRecipeInput> | Prisma.ProductSkuCreateWithoutRecipeInput[] | Prisma.ProductSkuUncheckedCreateWithoutRecipeInput[]
+  connectOrCreate?: Prisma.ProductSkuCreateOrConnectWithoutRecipeInput | Prisma.ProductSkuCreateOrConnectWithoutRecipeInput[]
+  upsert?: Prisma.ProductSkuUpsertWithWhereUniqueWithoutRecipeInput | Prisma.ProductSkuUpsertWithWhereUniqueWithoutRecipeInput[]
+  createMany?: Prisma.ProductSkuCreateManyRecipeInputEnvelope
+  set?: Prisma.ProductSkuWhereUniqueInput | Prisma.ProductSkuWhereUniqueInput[]
+  disconnect?: Prisma.ProductSkuWhereUniqueInput | Prisma.ProductSkuWhereUniqueInput[]
+  delete?: Prisma.ProductSkuWhereUniqueInput | Prisma.ProductSkuWhereUniqueInput[]
+  connect?: Prisma.ProductSkuWhereUniqueInput | Prisma.ProductSkuWhereUniqueInput[]
+  update?: Prisma.ProductSkuUpdateWithWhereUniqueWithoutRecipeInput | Prisma.ProductSkuUpdateWithWhereUniqueWithoutRecipeInput[]
+  updateMany?: Prisma.ProductSkuUpdateManyWithWhereWithoutRecipeInput | Prisma.ProductSkuUpdateManyWithWhereWithoutRecipeInput[]
+  deleteMany?: Prisma.ProductSkuScalarWhereInput | Prisma.ProductSkuScalarWhereInput[]
+}
+
+export type ProductSkuUncheckedUpdateManyWithoutRecipeNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductSkuCreateWithoutRecipeInput, Prisma.ProductSkuUncheckedCreateWithoutRecipeInput> | Prisma.ProductSkuCreateWithoutRecipeInput[] | Prisma.ProductSkuUncheckedCreateWithoutRecipeInput[]
+  connectOrCreate?: Prisma.ProductSkuCreateOrConnectWithoutRecipeInput | Prisma.ProductSkuCreateOrConnectWithoutRecipeInput[]
+  upsert?: Prisma.ProductSkuUpsertWithWhereUniqueWithoutRecipeInput | Prisma.ProductSkuUpsertWithWhereUniqueWithoutRecipeInput[]
+  createMany?: Prisma.ProductSkuCreateManyRecipeInputEnvelope
+  set?: Prisma.ProductSkuWhereUniqueInput | Prisma.ProductSkuWhereUniqueInput[]
+  disconnect?: Prisma.ProductSkuWhereUniqueInput | Prisma.ProductSkuWhereUniqueInput[]
+  delete?: Prisma.ProductSkuWhereUniqueInput | Prisma.ProductSkuWhereUniqueInput[]
+  connect?: Prisma.ProductSkuWhereUniqueInput | Prisma.ProductSkuWhereUniqueInput[]
+  update?: Prisma.ProductSkuUpdateWithWhereUniqueWithoutRecipeInput | Prisma.ProductSkuUpdateWithWhereUniqueWithoutRecipeInput[]
+  updateMany?: Prisma.ProductSkuUpdateManyWithWhereWithoutRecipeInput | Prisma.ProductSkuUpdateManyWithWhereWithoutRecipeInput[]
+  deleteMany?: Prisma.ProductSkuScalarWhereInput | Prisma.ProductSkuScalarWhereInput[]
+}
+
 export type ProductSkuCreateNestedOneWithoutOrderItemsInput = {
   create?: Prisma.XOR<Prisma.ProductSkuCreateWithoutOrderItemsInput, Prisma.ProductSkuUncheckedCreateWithoutOrderItemsInput>
   connectOrCreate?: Prisma.ProductSkuCreateOrConnectWithoutOrderItemsInput
@@ -587,11 +675,13 @@ export type ProductSkuCreateWithoutSpuInput = {
   specName: string
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: number
+  description?: string | null
   imageUrl?: string | null
   isMainImage?: boolean
   sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  recipe?: Prisma.RecipeCreateNestedOneWithoutSkusInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutSkuInput
 }
 
@@ -601,6 +691,8 @@ export type ProductSkuUncheckedCreateWithoutSpuInput = {
   specName: string
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: number
+  recipeId?: string | null
+  description?: string | null
   imageUrl?: string | null
   isMainImage?: boolean
   sortOrder?: number
@@ -645,11 +737,71 @@ export type ProductSkuScalarWhereInput = {
   specName?: Prisma.StringFilter<"ProductSku"> | string
   price?: Prisma.DecimalFilter<"ProductSku"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: Prisma.IntFilter<"ProductSku"> | number
+  recipeId?: Prisma.StringNullableFilter<"ProductSku"> | string | null
+  description?: Prisma.StringNullableFilter<"ProductSku"> | string | null
   imageUrl?: Prisma.StringNullableFilter<"ProductSku"> | string | null
   isMainImage?: Prisma.BoolFilter<"ProductSku"> | boolean
   sortOrder?: Prisma.IntFilter<"ProductSku"> | number
   createdAt?: Prisma.DateTimeFilter<"ProductSku"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProductSku"> | Date | string
+}
+
+export type ProductSkuCreateWithoutRecipeInput = {
+  id?: string
+  skuCode: string
+  specName: string
+  price: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stock?: number
+  description?: string | null
+  imageUrl?: string | null
+  isMainImage?: boolean
+  sortOrder?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  spu: Prisma.ProductSpuCreateNestedOneWithoutSkusInput
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutSkuInput
+}
+
+export type ProductSkuUncheckedCreateWithoutRecipeInput = {
+  id?: string
+  spuId: string
+  skuCode: string
+  specName: string
+  price: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stock?: number
+  description?: string | null
+  imageUrl?: string | null
+  isMainImage?: boolean
+  sortOrder?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutSkuInput
+}
+
+export type ProductSkuCreateOrConnectWithoutRecipeInput = {
+  where: Prisma.ProductSkuWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductSkuCreateWithoutRecipeInput, Prisma.ProductSkuUncheckedCreateWithoutRecipeInput>
+}
+
+export type ProductSkuCreateManyRecipeInputEnvelope = {
+  data: Prisma.ProductSkuCreateManyRecipeInput | Prisma.ProductSkuCreateManyRecipeInput[]
+  skipDuplicates?: boolean
+}
+
+export type ProductSkuUpsertWithWhereUniqueWithoutRecipeInput = {
+  where: Prisma.ProductSkuWhereUniqueInput
+  update: Prisma.XOR<Prisma.ProductSkuUpdateWithoutRecipeInput, Prisma.ProductSkuUncheckedUpdateWithoutRecipeInput>
+  create: Prisma.XOR<Prisma.ProductSkuCreateWithoutRecipeInput, Prisma.ProductSkuUncheckedCreateWithoutRecipeInput>
+}
+
+export type ProductSkuUpdateWithWhereUniqueWithoutRecipeInput = {
+  where: Prisma.ProductSkuWhereUniqueInput
+  data: Prisma.XOR<Prisma.ProductSkuUpdateWithoutRecipeInput, Prisma.ProductSkuUncheckedUpdateWithoutRecipeInput>
+}
+
+export type ProductSkuUpdateManyWithWhereWithoutRecipeInput = {
+  where: Prisma.ProductSkuScalarWhereInput
+  data: Prisma.XOR<Prisma.ProductSkuUpdateManyMutationInput, Prisma.ProductSkuUncheckedUpdateManyWithoutRecipeInput>
 }
 
 export type ProductSkuCreateWithoutOrderItemsInput = {
@@ -658,12 +810,14 @@ export type ProductSkuCreateWithoutOrderItemsInput = {
   specName: string
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: number
+  description?: string | null
   imageUrl?: string | null
   isMainImage?: boolean
   sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
   spu: Prisma.ProductSpuCreateNestedOneWithoutSkusInput
+  recipe?: Prisma.RecipeCreateNestedOneWithoutSkusInput
 }
 
 export type ProductSkuUncheckedCreateWithoutOrderItemsInput = {
@@ -673,6 +827,8 @@ export type ProductSkuUncheckedCreateWithoutOrderItemsInput = {
   specName: string
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: number
+  recipeId?: string | null
+  description?: string | null
   imageUrl?: string | null
   isMainImage?: boolean
   sortOrder?: number
@@ -702,12 +858,14 @@ export type ProductSkuUpdateWithoutOrderItemsInput = {
   specName?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: Prisma.IntFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMainImage?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   spu?: Prisma.ProductSpuUpdateOneRequiredWithoutSkusNestedInput
+  recipe?: Prisma.RecipeUpdateOneWithoutSkusNestedInput
 }
 
 export type ProductSkuUncheckedUpdateWithoutOrderItemsInput = {
@@ -717,6 +875,8 @@ export type ProductSkuUncheckedUpdateWithoutOrderItemsInput = {
   specName?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: Prisma.IntFieldUpdateOperationsInput | number
+  recipeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMainImage?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
@@ -730,6 +890,8 @@ export type ProductSkuCreateManySpuInput = {
   specName: string
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: number
+  recipeId?: string | null
+  description?: string | null
   imageUrl?: string | null
   isMainImage?: boolean
   sortOrder?: number
@@ -743,11 +905,13 @@ export type ProductSkuUpdateWithoutSpuInput = {
   specName?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: Prisma.IntFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMainImage?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recipe?: Prisma.RecipeUpdateOneWithoutSkusNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutSkuNestedInput
 }
 
@@ -757,6 +921,8 @@ export type ProductSkuUncheckedUpdateWithoutSpuInput = {
   specName?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: Prisma.IntFieldUpdateOperationsInput | number
+  recipeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMainImage?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
@@ -771,6 +937,70 @@ export type ProductSkuUncheckedUpdateManyWithoutSpuInput = {
   specName?: Prisma.StringFieldUpdateOperationsInput | string
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   stock?: Prisma.IntFieldUpdateOperationsInput | number
+  recipeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isMainImage?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type ProductSkuCreateManyRecipeInput = {
+  id?: string
+  spuId: string
+  skuCode: string
+  specName: string
+  price: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stock?: number
+  description?: string | null
+  imageUrl?: string | null
+  isMainImage?: boolean
+  sortOrder?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type ProductSkuUpdateWithoutRecipeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  skuCode?: Prisma.StringFieldUpdateOperationsInput | string
+  specName?: Prisma.StringFieldUpdateOperationsInput | string
+  price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stock?: Prisma.IntFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isMainImage?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  spu?: Prisma.ProductSpuUpdateOneRequiredWithoutSkusNestedInput
+  orderItems?: Prisma.OrderItemUpdateManyWithoutSkuNestedInput
+}
+
+export type ProductSkuUncheckedUpdateWithoutRecipeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  spuId?: Prisma.StringFieldUpdateOperationsInput | string
+  skuCode?: Prisma.StringFieldUpdateOperationsInput | string
+  specName?: Prisma.StringFieldUpdateOperationsInput | string
+  price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stock?: Prisma.IntFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isMainImage?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutSkuNestedInput
+}
+
+export type ProductSkuUncheckedUpdateManyWithoutRecipeInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  spuId?: Prisma.StringFieldUpdateOperationsInput | string
+  skuCode?: Prisma.StringFieldUpdateOperationsInput | string
+  specName?: Prisma.StringFieldUpdateOperationsInput | string
+  price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stock?: Prisma.IntFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMainImage?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
@@ -816,12 +1046,15 @@ export type ProductSkuSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   specName?: boolean
   price?: boolean
   stock?: boolean
+  recipeId?: boolean
+  description?: boolean
   imageUrl?: boolean
   isMainImage?: boolean
   sortOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
+  recipe?: boolean | Prisma.ProductSku$recipeArgs<ExtArgs>
   orderItems?: boolean | Prisma.ProductSku$orderItemsArgs<ExtArgs>
   _count?: boolean | Prisma.ProductSkuCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["productSku"]>
@@ -833,12 +1066,15 @@ export type ProductSkuSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   specName?: boolean
   price?: boolean
   stock?: boolean
+  recipeId?: boolean
+  description?: boolean
   imageUrl?: boolean
   isMainImage?: boolean
   sortOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
+  recipe?: boolean | Prisma.ProductSku$recipeArgs<ExtArgs>
 }, ExtArgs["result"]["productSku"]>
 
 export type ProductSkuSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -848,12 +1084,15 @@ export type ProductSkuSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   specName?: boolean
   price?: boolean
   stock?: boolean
+  recipeId?: boolean
+  description?: boolean
   imageUrl?: boolean
   isMainImage?: boolean
   sortOrder?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
+  recipe?: boolean | Prisma.ProductSku$recipeArgs<ExtArgs>
 }, ExtArgs["result"]["productSku"]>
 
 export type ProductSkuSelectScalar = {
@@ -863,6 +1102,8 @@ export type ProductSkuSelectScalar = {
   specName?: boolean
   price?: boolean
   stock?: boolean
+  recipeId?: boolean
+  description?: boolean
   imageUrl?: boolean
   isMainImage?: boolean
   sortOrder?: boolean
@@ -870,23 +1111,27 @@ export type ProductSkuSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ProductSkuOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "spuId" | "skuCode" | "specName" | "price" | "stock" | "imageUrl" | "isMainImage" | "sortOrder" | "createdAt" | "updatedAt", ExtArgs["result"]["productSku"]>
+export type ProductSkuOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "spuId" | "skuCode" | "specName" | "price" | "stock" | "recipeId" | "description" | "imageUrl" | "isMainImage" | "sortOrder" | "createdAt" | "updatedAt", ExtArgs["result"]["productSku"]>
 export type ProductSkuInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
+  recipe?: boolean | Prisma.ProductSku$recipeArgs<ExtArgs>
   orderItems?: boolean | Prisma.ProductSku$orderItemsArgs<ExtArgs>
   _count?: boolean | Prisma.ProductSkuCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ProductSkuIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
+  recipe?: boolean | Prisma.ProductSku$recipeArgs<ExtArgs>
 }
 export type ProductSkuIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
+  recipe?: boolean | Prisma.ProductSku$recipeArgs<ExtArgs>
 }
 
 export type $ProductSkuPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "ProductSku"
   objects: {
     spu: Prisma.$ProductSpuPayload<ExtArgs>
+    recipe: Prisma.$RecipePayload<ExtArgs> | null
     orderItems: Prisma.$OrderItemPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -896,6 +1141,8 @@ export type $ProductSkuPayload<ExtArgs extends runtime.Types.Extensions.Internal
     specName: string
     price: runtime.Decimal
     stock: number
+    recipeId: string | null
+    description: string | null
     imageUrl: string | null
     isMainImage: boolean
     sortOrder: number
@@ -1296,6 +1543,7 @@ readonly fields: ProductSkuFieldRefs;
 export interface Prisma__ProductSkuClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   spu<T extends Prisma.ProductSpuDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductSpuDefaultArgs<ExtArgs>>): Prisma.Prisma__ProductSpuClient<runtime.Types.Result.GetResult<Prisma.$ProductSpuPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  recipe<T extends Prisma.ProductSku$recipeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductSku$recipeArgs<ExtArgs>>): Prisma.Prisma__RecipeClient<runtime.Types.Result.GetResult<Prisma.$RecipePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   orderItems<T extends Prisma.ProductSku$orderItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductSku$orderItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1332,6 +1580,8 @@ export interface ProductSkuFieldRefs {
   readonly specName: Prisma.FieldRef<"ProductSku", 'String'>
   readonly price: Prisma.FieldRef<"ProductSku", 'Decimal'>
   readonly stock: Prisma.FieldRef<"ProductSku", 'Int'>
+  readonly recipeId: Prisma.FieldRef<"ProductSku", 'String'>
+  readonly description: Prisma.FieldRef<"ProductSku", 'String'>
   readonly imageUrl: Prisma.FieldRef<"ProductSku", 'String'>
   readonly isMainImage: Prisma.FieldRef<"ProductSku", 'Boolean'>
   readonly sortOrder: Prisma.FieldRef<"ProductSku", 'Int'>
@@ -1735,6 +1985,25 @@ export type ProductSkuDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.In
    * Limit how many ProductSkus to delete.
    */
   limit?: number
+}
+
+/**
+ * ProductSku.recipe
+ */
+export type ProductSku$recipeArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Recipe
+   */
+  select?: Prisma.RecipeSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Recipe
+   */
+  omit?: Prisma.RecipeOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RecipeInclude<ExtArgs> | null
+  where?: Prisma.RecipeWhereInput
 }
 
 /**

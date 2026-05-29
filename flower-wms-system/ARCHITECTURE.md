@@ -12,22 +12,56 @@
 核心能力边界：
 
 - **WMS 端（`/wms`）**：主导物料母表、标准工艺配方（BOM）、物理批次库存、仓储日常（入库 / 指定批次报损）、库存查询、订单履约看板。
-- **CMS 端（`/cms`）**：纯粹的小程序运营货架——商品 SPU/SKU、商品分类、轮播、营销配置；通过 `ProductSpu.recipeId` **只读绑定** WMS 配方，不在 CMS 维护 BOM 明细。
-- **Admin 端（`/admin`）**：后台员工账号与权限（五级 RBAC）；IT 运维默认入口。
-- **微信小程序 API（`/api/wechat/*`）**：用户登录、商品浏览、购物车、下单与 mock 支付、订单查询等（**不经**员工 Middleware 拦截）。
+- **CMS 端（`/cms`）**：纯粹的小程序运营货架——商品 SPU/SKU、商品分类、轮播、营销配置；通过 **`ProductSku.recipeId`** **只读绑定** WMS 配方（同 SPU 下各款式可绑不同 BOM），不在 CMS 维护 BOM 明细。
+- **微信小程序 API（`/api/wechat/*`）**：用户登录、商品浏览、购物车、下单与 mock 支付、订单查询等。
 
 技术栈要点：
 
 | 层级 | 选型 |
 |------|------|
 | 框架 | Next.js App Router，Server / Client Component 混用 |
-| 认证 | Auth.js（NextAuth v5）Credentials + JWT；Edge/Node 配置拆分 |
 | ORM | Prisma Client，输出至 `src/generated/prisma` |
 | 数据库 | PostgreSQL（`datasource db`） |
-| 样式 | Tailwind CSS 4；图标 `lucide-react`（侧栏登出等） |
+| 样式 | Tailwind CSS 4 |
+| 图标 | `lucide-react`（WMS 看板等 Client Component） |
 | 拼音检索 | `pinyin-pro` → `src/lib/pinyin-index.ts` |
 
-**不存在于本代码库的能力（请勿臆造）**：多租户 SaaS、聚合配送调度、独立的 `stock_batches` / `product_bom` 物理表、销售订单自动扣减物理批次库存（见下文「待重构」）。
+#### 能力边界速查（避免与历史设计或臆造功能混淆）
+
+**本代码库不存在（请勿臆造表名或接口）**
+
+| 项 | 说明 |
+|----|------|
+| 多租户 SaaS | 无租户隔离模型 |
+| 聚合配送调度 | 无第三方配送编排 |
+| 物理表 `stock_batches` | 从未作为当前 Schema 表名；物理批次使用 **`batches`**（`Batch` 模型） |
+| 物理表 `product_bom` | 早期迁移曾存在，**当前 Schema 已移除**；配方使用 **`recipes` + `recipe_lines`**，商品通过 **`product_skus.recipe_id`** 绑定（已从 SPU 下沉至 SKU，迁移 `20260529160000_sku_recipe_binding`） |
+
+**已实现**
+
+| 项 | 说明 |
+|----|------|
+| 销售支付 → 物理批次 FIFO | `markOrderPaidWithFifo`（见「订单与双轨库存」）：支付成功时在 `Serializable` 事务内扣 `batches.remaining_qty` 并写 `SALE_OUT` |
+| 退款 → 物理批次原路回库 | `refundPaidOrder` → `restorePhysicalStockFromSaleOutInTx`：按历史 `SALE_OUT` 逐批 `increment` + 写 `IN_CANCEL`（`operator: SYSTEM_REFUND_AUTO`） |
+| 虚拟库存健康投影校准 | `syncPhysicalStockToVirtual`（`services/inventory-sync.ts`）：木桶原理将 `product_skus.stock` 向下截断至物理可成套上限 |
+| CMS SKU 营销图文白名单 API | `PATCH /api/cms/skus/[id]`：仅 `description` / `imageUrl`；`requirePermission(STORE_OPERATOR)` |
+
+**尚未实现**
+
+| 项 | 说明 |
+|----|------|
+| 员工登录 UI | Auth.js + `StaffUser` 表已落地；`/login` 与 `staff-users` 管理页可用 |
+| 定时自动库存投影 | `syncPhysicalStockToVirtual` 仅提供手动脚本，无 Cron / 队列 |
+
+**历史命名 → 现行模型**
+
+```text
+stock_batches（不存在）     →  batches
+product_bom（已废弃）       →  recipes + recipe_lines + product_skus.recipe_id
+product_spus.recipe_id      →  已删除；配方指针在 product_skus.recipe_id
+```
+
+**Monorepo 边界**：后端与后台在 `flower-wms-system/`；微信小程序客户端在仓库根目录 `42_mp/`（API 基址见 `42_mp/miniprogram/config/index.ts` → `baseUrl` / `apiWechatBaseUrl`）。
 
 ---
 
@@ -37,40 +71,27 @@
 flower-wms-system/
 ├── prisma/
 │   ├── schema.prisma          # 唯一数据模型真理源
-│   ├── seed.ts                # 默认 IT 运维账号 admin/admin
 │   └── migrations/            # 历史迁移 SQL
-├── prisma.config.ts           # Prisma 7 配置（含 db seed 命令）
 ├── src/
-│   ├── auth.ts                # Node：Credentials + Prisma 登录
-│   ├── auth.config.ts         # Edge：JWT/session 回调（供 middleware）
-│   ├── middleware.ts          # 路由门禁 + 五级 RBAC 隔离
-│   ├── actions/
-│   │   └── staff-users.ts     # resetUserPassword Server Action
 │   ├── app/
-│   │   ├── page.tsx           # 工作台门户（STORE_ADMIN 专属）
-│   │   ├── login/             # 员工登录页
+│   │   ├── page.tsx           # 工作台门户（WMS / CMS 分流）
 │   │   ├── wms/               # WMS 页面路由
 │   │   ├── cms/               # CMS 页面路由
-│   │   ├── admin/             # 系统管理（用户与权限）
+│   │   ├── admin/             # 管理壳（轻量）
 │   │   └── api/
-│   │       ├── auth/[...nextauth]/  # Auth.js Handler
-│   │       ├── admin/         # 后台 REST（含 wms、wiki、staff-users…）
+│   │       ├── admin/         # 后台 REST（含 wms、wiki、orders…）
 │   │       ├── cms/           # CMS 专用 API
-│   │       └── wechat/        # 小程序 API（公开，不经员工 RBAC）
+│   │       └── wechat/        # 小程序 API
 │   ├── components/
 │   │   ├── wms/               # WMS 侧栏等
 │   │   ├── cms/               # CMS 侧栏、RecipeSelect、商品编辑器
-│   │   ├── admin/             # AdminSidebar
-│   │   ├── shared/            # StaffAccountBar、PortalAccountStrip、QuantityStepper…
+│   │   ├── shared/            # QuantityStepper、上传区等
 │   │   └── ui/                # FlowerMaterialSelect、Input、Button…
-│   ├── services/              # 领域事务与查询（recipe、wms-stock、fifo…）
-│   ├── lib/
-│   │   ├── rbac.ts            # 五级角色权限矩阵
-│   │   ├── api-auth.ts        # requirePermission / requireStaffSession
-│   │   ├── auth-routes.ts     # 受保护路径判定、getRoleHomePath
-│   │   ├── stock-mutation-auth.ts  # 库存变动服务层 Session 鉴权
-│   │   └── …                  # 序列化、库存查询 helper
+│   ├── services/              # 领域事务（order-fifo、fifo、wms-stock、recipe…）
+│   ├── utils/                 # 无状态工具（batch-no、skuGenerator）
+│   ├── lib/                   # 工具、RBAC、CMS 白名单、库存查询 helper
 │   └── generated/prisma/      # Prisma 生成物（勿手改）
+└── scripts/                   # 种子、FIFO 试跑、库存投影校准等运维脚本
 ```
 
 #### WMS 页面路由（`src/app/wms/`）
@@ -84,7 +105,7 @@ flower-wms-system/
 | `/wms/wiki` | 物料母表（FlowerWiki）维护 |
 | `/wms/recipes` | 标准配方研发中心 |
 | `/wms/material-categories` | 原材料分类（与商品分类解耦） |
-| `/wms/orders` | 小程序订单履约看板 |
+| `/wms/orders` | 小程序订单履约看板（Trello 五列拖拽 + 卡片详情弹窗） |
 | `/wms/batches` | → 重定向至 `/wms/operations` |
 | `/wms/wastage` | → 重定向至 `/wms/operations?panel=loss` |
 | `/wms/bom` | → 重定向至 `/wms/recipes` |
@@ -95,30 +116,44 @@ flower-wms-system/
 
 | 路径 | 职责 |
 |------|------|
-| `/cms/products` | 商品列表与编辑（含 `recipeId` 下拉绑定） |
+| `/cms/products` | 商品列表与编辑（**每 SKU 一行**绑定 `recipeId`，`RecipeSelect` 在款式表格内） |
 | `/cms/product-categories` | 商城商品分类树 |
 | `/cms/banner` | 首页轮播 |
 | `/cms/marketing` | 营销配置（`app_configs`） |
 
 导航定义：`src/components/cms/sidebar.tsx`。CMS **不包含** BOM 编辑、入库、报损入口。
 
-#### Admin 页面路由（`src/app/admin/`）
+#### CMS 商品 API（`src/app/api/cms/products/`）
 
-| 路径 | 职责 |
-|------|------|
-| `/admin/staff-users` | 员工账号列表、创建、**重置密码**（IT_ADMIN / STORE_ADMIN） |
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/cms/products` | 创建 SPU + SKU；`recipeId` 写在各 `skus[]` 项 |
+| PUT | `/api/cms/products/[id]` | 更新 SPU 字段 + `syncProductSkus`（含 `recipeId`） |
+| DELETE | `/api/cms/products/[id]` | 软删除 SPU |
 
-布局：`src/app/admin/layout.tsx` + `src/components/admin/AdminSidebar.tsx`。  
-IT 运维默认落地页；侧栏底部 `StaffAccountBar` 展示 `username (ROLE)` 与退出登录。
+解析与校验：`lib/cms-products.ts`（`parseCmsProductBody`、`assertSkuRecipesExist`）；SPU 字段映射：`lib/cms-product-mapper.ts`（**不再**写 SPU 级 `recipeId`）。`POST/PUT /api/admin/products` 为 deprecated 薄封装，行为同上。
 
-#### 认证与门户
+#### CMS SKU 营销图文 API（`src/app/api/cms/skus/`）
 
-| 路径 | 职责 |
-|------|------|
-| `/login` | 员工 Credentials 登录（`pages.signIn`） |
-| `/` | 工作台门户；**仅 `STORE_ADMIN`** 可见 WMS/CMS 双入口，其余角色由 Middleware 重定向至角色首页 |
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| PATCH | `/api/cms/skus/[id]` | **白名单更新**：仅 `description`、`imageUrl`；拒绝 `recipeId` / `price` / `stock` 等 mass-assignment |
 
-门户账号条：`src/components/shared/PortalAccountStrip.tsx`（门店主理人右上角登出）。
+- 鉴权：`lib/api-auth.ts` → `requirePermission('cms:write')`（`STORE_OPERATOR` / `STORE_ADMIN`）；失败 **401/403**
+- 解析：`lib/cms-sku-marketing.ts` → `parseSkuMarketingPatch` + `updateSkuMarketingOnly`
+- 完整商品保存（含配方/价格）仍走 `PUT /api/cms/products/[id]`，运营改图文应优先用本接口
+
+#### 后台鉴权（五级 RBAC + Auth.js）
+
+| 角色（Prisma `Role`） | 典型能力 |
+|------------------------|----------|
+| `IT_ADMIN` | 仅员工账号管理，**业务 API 盲区** |
+| `STORE_ADMIN` | 门店主理人：WMS + CMS + 人员 + 损耗审计 |
+| `WAREHOUSE_MANAGER` | 大仓：入库、报损、Wiki、配方审定 |
+| `FLORIST` | 订单看板、Wiki/配方只读 |
+| `STORE_OPERATOR` | CMS 商品上架、SKU 营销图文 PATCH |
+
+实现：`auth.ts`（Auth.js v5）+ `lib/rbac.ts`（`hasPermission` / `canCmsWrite` 等）+ `lib/api-auth.ts`（`requirePermission`）+ `lib/stock-mutation-auth.ts`（库存服务层 Session 鉴权）。与小程序用户 JWT（`WECHAT_JWT_SECRET`）**完全隔离**。
 
 #### WMS 后台 API（`src/app/api/admin/wms/`）
 
@@ -132,9 +167,9 @@ IT 运维默认落地页；侧栏底部 `StaffAccountBar` 展示 `username (ROLE
 | GET | `/api/admin/wms/stock-loss/history` | `services/wms-stock.ts` | 报损历史 |
 | GET | `/api/admin/wms/stock-pipeline` | `services/wms-stock.ts` | 在库批次流水线 |
 | GET/POST | `/api/admin/wms/material-categories` | `lib/material-category*` | 原材料分类 |
-| GET/POST | `/api/admin/wms/inbound/confirm` | `services/wiki-inbound.ts` | Wiki 撞库 / 双写入库（旧链路） |
 | GET/POST | `/api/admin/wms/bom` | — | **410**，已迁移至 `recipes` |
-| POST | `/api/admin/wms/ai-preview` | `@/lib/wiki-ai` | AI 花材图像预览（依赖外部模块） |
+
+已移除的旧链路（勿再引用）：`POST /api/admin/wastage`、`POST /api/admin/batches`、`/api/admin/wms/inbound/confirm`（`wiki-inbound`）、`ai-preview`。
 
 #### 物料母表 API（WMS 数据，路径在 `admin/wiki`）
 
@@ -143,14 +178,24 @@ IT 运维默认落地页；侧栏底部 `StaffAccountBar` 展示 `username (ROLE
 | `/api/admin/wiki` | 列表 / 创建；支持 `q` 简拼检索 |
 | `/api/admin/wiki/[id]` | 单条读写 |
 
-#### 员工账号 API（`src/app/api/admin/staff-users/`）
+#### 服务层职责（`src/services/`）
 
-| 方法 | 路径 | 权限 | 说明 |
-|------|------|------|------|
-| GET | `/api/admin/staff-users` | `staff:manage` | 账号列表 |
-| POST | `/api/admin/staff-users` | `staff:manage` | 创建账号（bcrypt 哈希密码） |
+| 模块 | 文件 | 职责 |
+|------|------|------|
+| 订单生命周期 | `order-lifecycle.ts` | 下单、关单、退款、履约流转；`closePendingOrder` / `refundPaidOrder` 均为 **Serializable** |
+| 支付 × FIFO | `order-fifo.ts` | `markOrderPaidWithFifo`、`deductPhysicalStockForPaidOrder`、`restorePhysicalStockFromSaleOutInTx`（**IN_CANCEL**） |
+| 配方展开（纯函数） | `order-fifo-pure.ts` | `expandAndAggregateWikiDemands`（`recipeId` 为空的订单行静默跳过；单测：`order-fifo-pure.test.ts`） |
+| FIFO 算法 | `fifo.ts` | `calculateFifoDeductions`、`applyFifoDeductionsInTx`、`applyFifoDeductions` |
+| 库存健康投影 | `inventory-sync.ts` | `syncPhysicalStockToVirtual`：物理批次木桶上限 → 截断 `product_skus.stock` |
+| 微信订单门面 | `wechat-order.ts` | 再导出 `order-lifecycle` 公开 API |
+| 看板状态 | `order-status.ts` | `transitionOrderStatus`（含 `PAID` 拖拽） |
+| 看板详情聚合 | `order-fulfillment-detail.ts` | `getOrderFulfillmentDetail`：订单全量字段 + 物理花材消耗清单 |
+| 仓储事务 | `wms-stock.ts` | `runStockInTransaction`、`runStockLossTransaction`、流水线查询 |
+| 配方 | `recipe.ts` | 配方 CRUD、编号生成、`getRecipeForProduct`（经 SPU → `skus` 级联查首个有配方的 SKU） |
+| 母表 | `wiki.ts` | FlowerWiki CRUD、简拼检索 |
+| 盘点 | `stocktake.ts` | `POST /api/admin/stocktake` |
 
-密码重置走 **Server Action** `resetUserPassword`（`src/actions/staff-users.ts`），非 REST。
+批次号生成已提取至 `src/utils/batch-no.ts`（`wms-stock` 入库使用）。`services/inbound.ts` 为遗留文件，**当前无引用**。
 
 #### 业务解耦原则（代码现状）
 
@@ -161,9 +206,9 @@ FlowerWiki（母表真理）
     │       └── Batch（物理批次，独立进价）
     └── StockLossRecord（报损留痕）
 
-ProductSpu（CMS 商品）
-    ├── ProductSku（可售库存 stock 字段）
-    └── recipeId → Recipe（只读引用，不反向写库存）
+ProductSpu（CMS 商品 SPU）
+    └── ProductSku（可售库存 stock + 可选 recipeId → Recipe）
+            └── Recipe（只读引用，不反向写库存）
 ```
 
 ---
@@ -203,7 +248,11 @@ Prisma 模型：`FlowerWiki` → 表 **`flower_wikis`**。
 - `recipe_lines.flower_wiki_id` → `flower_wikis.id`（**直接关联母表**，不关联 `materials`）。
 - `recipe_lines.quantity_needed` ← 所需枝数。
 
-**与 CMS 的绑定**：`product_spus.recipe_id` → `recipes.id`。CMS 通过 `src/components/cms/RecipeSelect.tsx` 拉取 `/api/admin/wms/recipes` 展示 `{code} - {name} ({summary})`。
+**与 CMS 的绑定**：`product_skus.recipe_id` → `recipes.id`（**非**已废弃的 `product_bom` 表，**非**已删除的 `product_spus.recipe_id`）。迁移 `20260529160000_sku_recipe_binding` 会将既有 SPU 级配方回填到其下所有 SKU 后删除 SPU 列。
+
+CMS 商品编辑（`src/app/cms/products/ProductEditor.tsx`）在**款式表格**内为每个 SKU 渲染 `src/components/cms/RecipeSelect.tsx`（`compact` 模式），拉取 `/api/admin/wms/recipes` 展示 `{code} - {name} ({summary})`。保存经 `parseCmsProductBody` → `syncProductSkus` / `buildSkuCreateRows` 写入 `product_skus.recipe_id`（`src/lib/cms-product-write.ts`）。请求体仍兼容顶层 `recipeId`，会自动下沉到未指定配方的 SKU。
+
+配方关联 SKU 计数：`recipe._count.skus`（`listRecipes` / `getRecipeById`）。
 
 #### 配方保存的沙盒隔离（已实现）
 
@@ -224,6 +273,136 @@ Prisma 模型：`FlowerWiki` → 表 **`flower_wikis`**。
 
 ---
 
+### 🛒 订单与双轨库存
+
+小程序订单涉及**两层库存**，职责分离、时点不同：
+
+| 层级 | 字段 / 表 | 扣减时点 | 实现 |
+|------|-----------|----------|------|
+| **虚拟可售库存** | `product_skus.stock` | **创建订单**（`PENDING_PAYMENT`） | `order-lifecycle.ts` → `atomicDecrementSkuStock` + `Serializable` 事务 |
+| **物理批次库存** | `batches.remaining_qty` | **支付成功**（`PAID`） | `order-fifo.ts` → `markOrderPaidWithFifo` → `applyFifoDeductionsInTx` |
+
+| 逆向操作 | 虚拟 SKU | 物理批次 | 实现 |
+|----------|----------|----------|------|
+| 关闭待支付 | `restoreOrderSkuStock` | 无（未支付无 `SALE_OUT`） | `closePendingOrder`（Serializable） |
+| 已付退款 | 可选 `restoreOrderSkuStock`（`rollbackStock`） | **原路回库** `IN_CANCEL` | `refundPaidOrder`（Serializable） |
+
+#### 退款物理原路回库（`IN_CANCEL`）
+
+`refundPaidOrder` 在 **Serializable** 事务内顺序：
+
+```text
+refundPaidOrder(orderId, { rollbackStock? })
+  → prisma.$transaction (Serializable)
+  1. restorePhysicalStockFromSaleOutInTx(orderId)
+     a. 防重复：已有 IN_CANCEL 则拒绝
+     b. 拉取该 orderId 全部 SALE_OUT 流水
+     c. 逐条：batch.remainingQty += log.quantity
+     d. 写入 stock_logs: IN_CANCEL（delta/quantity 为正，operator: SYSTEM_REFUND_AUTO）
+  2. orders → CANCELLED（refundAmount / refundTime / cancelSource）
+  3. 若 rollbackStock：restoreOrderSkuStock（虚拟 SKU）
+  → 任一步失败整笔 Rollback
+```
+
+`closePendingOrder` 仅归还虚拟 SKU，不涉及物理批次。
+
+#### 虚拟库存健康投影（木桶校准）
+
+服务：`services/inventory-sync.ts` → `syncPhysicalStockToVirtual`
+
+1. 拉取 `recipeId IS NOT NULL` 且 SPU 已上架、未软删的 SKU（含 `recipe.lines`）
+2. 对每个 `flowerWikiId`：`batch.aggregate(_sum remainingQty)`（可用批次：`remainingQty > 0` 且未过期）
+3. 木桶：`maxPossibleQty = min(floor(总支数 / quantityNeeded))`
+4. 若 `sku.stock > maxPossibleQty` → 强行 `update` 截断（只降不升）
+
+运维脚本：`npx tsx scripts/sync-physical-to-virtual-stock.ts`
+
+#### 支付成功接入点（均已调用 `markOrderPaidWithFifo`）
+
+| 入口 | 文件 | 说明 |
+|------|------|------|
+| 小程序 mock 支付 | `POST /api/wechat/orders/mock-pay` → `mockPayWechatOrder` | 物理库存不足返回 **409** |
+| 微信回调占位 | `POST /api/wechat/orders/callback` | 同事务 FIFO；已 `PAID` 幂等返回 |
+| 后台看板标记已付 | `adminMarkOrderPaid` ← `order-status.ts` | 拖拽至「已支付」 |
+
+#### 支付事务内 FIFO 步骤
+
+```text
+markOrderPaidWithFifo({ orderId, userId?, operator? })
+  → prisma.$transaction (Serializable)
+  1. orders: PENDING_PAYMENT → PAID（updateMany 防并发）
+  2. orderItem → sku（recipeId）→ recipe → recipe_lines
+  3. expandAndAggregateWikiDemands（quantityNeeded × item.quantity；无 recipeId 的 SKU 行跳过）
+  4. flower_wiki_id → materials.id（无 Material 则熔断）
+  5. calculateFifoDeductions(materialId, qty, tx)  // createdAt ASC
+  6. batch.updateMany（remainingQty >= take，防超卖）
+  7. stock_logs: SALE_OUT + orderId + orderItemId + batchId
+  → 任一步失败抛 PhysicalStockInsufficientError（「物理大仓花材库存不足」），整笔回滚
+```
+
+试跑脚本：`npx tsx scripts/draft-trigger-order-fifo-pay.ts <orderId> [userId]`。
+
+#### 微信小程序 API（`src/app/api/wechat/`）
+
+| 路径 | 说明 |
+|------|------|
+| `auth/login`、`login` | 用户登录（JWT） |
+| `products`、`products/[id]`、`product-categories` | 货架浏览 |
+| `homepage`、`home-banners` | 首页聚合 |
+| `cart` | 购物车 |
+| `orders/create` | 创建待支付订单（扣 SKU 库存） |
+| `orders/mock-pay` | 模拟支付（扣物理批次） |
+| `orders/callback` | 微信支付回调占位 |
+| `orders`、`orders/cancel`、`orders/confirm-receipt` | 列表 / 关单 / 确认收货 |
+| `user/profile`、`upload` | 资料与上传 |
+
+客户端请求封装：`42_mp/miniprogram/utils/request.ts` → `apiWechatBaseUrl`（默认 `${baseUrl}/api/wechat`）。
+
+#### 后台订单 API
+
+| 路径 | 说明 |
+|------|------|
+| `PATCH /api/admin/orders` | 看板拖拽 / 按钮流转（`orderId` + `nextStatus`） |
+| `GET /api/admin/orders/[id]/detail` | 履约详情 + **WMS 物理花材消耗表**（`order-fulfillment-detail.ts`） |
+| `POST /api/admin/orders/[id]/cancel-or-close` | 关闭待支付 |
+| `POST /api/admin/orders/[id]/refund` | 退款取消（**始终**物理 `IN_CANCEL`；`rollbackStock` 控制虚拟 SKU） |
+
+#### 订单履约看板 UI（`/wms/orders`）
+
+| 文件 | 职责 |
+|------|------|
+| `page.tsx` | Server：拉取 `listKanbanOrders` → `mapPrismaOrderToKanban` |
+| `OrdersKanban.tsx` | Client：五列瀑布流、拖拽流转、发货 / 退款弹窗 |
+| `OrderKanbanCard.tsx` | 单卡：完整换行单号、复制按钮、点击打开详情（`isModalOpen` 本地状态） |
+| `OrderDetailModal.tsx` | 详情弹窗：`orderId` 拉取详情；遮罩 / `Esc` 关闭 |
+| `CopyIconButton.tsx` | 单号 / 电话 / 地址复制（`stopPropagation`，成功 2s 变 Check） |
+| `kanban-config.ts` | 五列定义（待支付 → … → 归档） |
+| `archive-semantics.ts` | 归档列卡片语义着色 |
+
+**卡片交互**
+
+- 订单号：`break-all text-sm md:text-base font-bold`，禁止 `truncate`。
+- 复制：`navigator.clipboard.writeText` + `e.stopPropagation()`，避免触发卡片点击。
+- 点击卡片本体 → 卡片内 `isModalOpen = true` → 渲染 `OrderDetailModal`；底部履约按钮区 `stopPropagation`。
+- 拖拽：拖拽结束后短暂屏蔽点击，避免误开弹窗。
+
+**详情弹窗与物理消耗**
+
+- 弹窗：`fixed inset-0 z-50 bg-black/50 backdrop-blur-xs`；点击遮罩或 `Escape` 调用 `onClose()`。
+- 展示：履约状态、实付金额、收货人三件套、期望送达时间、贺卡寄语、商品明细。
+- 底部 **WMS 物理花材消耗表**（HTML Table）：
+
+| 列 | 数据来源 |
+|----|----------|
+| 花材母表名称 | `flower_wikis.chinese_name`（经 `materials.wiki` 或配方行） |
+| 工艺角色 | `flower_wikis.floral_role` → `FLORAL_ROLE_LABEL` |
+| 锁定批次号 | 已支付：`stock_logs`（`SALE_OUT`）→ `batches.batch_no`；待支付：显示「待支付锁定」 |
+| 消耗数量 | 已支付：流水 `quantity`；待支付：BOM 展开预估（`expandAndAggregateWikiDemands` 按 wiki 合并） |
+
+`consumptionMode`：`locked`（实扣）| `projected`（配方预估）| `empty`（无配方或无流水）。
+
+---
+
 ### 📦 WMS 库存核心：销售 FIFO 与批次精准报损
 
 #### 物理表模型（Schema First）
@@ -231,11 +410,9 @@ Prisma 模型：`FlowerWiki` → 表 **`flower_wikis`**。
 | Prisma 模型 | 物理表 | 说明 |
 |-------------|--------|------|
 | `Material` | `materials` | 仓储原材料；`wiki_id` 可选关联母表 |
-| `Batch` | **`batches`** | 物理库存批次（**非** `stock_batches`） |
-| `StockLog` | `stock_logs` | 全量库存流水；含 `operator_staff_id` |
+| `Batch` | **`batches`** | 物理库存批次（勿与臆造的 `stock_batches` 混淆） |
+| `StockLog` | `stock_logs` | 全量库存流水 |
 | `StockLossRecord` | `stock_loss_records` | 报损专表留痕 |
-| `StaffUser` | `staff_users` | 后台员工（Credentials + RBAC） |
-| `StaffAuditLog` | `staff_audit_logs` | 账号操作审计（如 `PASSWORD_RESET`） |
 
 `batches` 核心字段：`original_qty`、`remaining_qty`、`unit_cost`（批次独立进价）、`inbound_at`、`created_at`、`supplier`。
 
@@ -243,19 +420,16 @@ Prisma 模型：`FlowerWiki` → 表 **`flower_wikis`**。
 
 | 场景 | 实现位置 | 算法 | 状态 |
 |------|----------|------|------|
-| **销售出库 FIFO** | `src/services/fifo.ts` | 按 `createdAt ASC` 查 `remainingQty > 0` 的批次，跨批次扣减并写 `StockLogType.SALE_OUT` | 算法已实现；**[待架构重构/Pending Refactoring]** 当前 `order-lifecycle.ts` 仅扣减 `product_skus.stock`，**未调用** `applyFifoDeductions()`，物理批次与销售未打通 |
+| **销售出库 FIFO** | `src/services/fifo.ts` + `src/services/order-fifo.ts` | 按 `createdAt ASC` 查 `remainingQty > 0` 的批次，跨批次扣减并写 `StockLogType.SALE_OUT` | **已接入**：支付成功（`mockPayWechatOrder` / `adminMarkOrderPaid` / 微信回调）在 `Serializable` 事务内调用 `markOrderPaidWithFifo` → `applyFifoDeductionsInTx`；下单时仍原子扣减 `product_skus.stock`（虚拟可售） |
 | **物理损耗盘点** | `src/services/wms-stock.ts` → `runStockLossTransaction()` | 操作员指定 `stockBatchId`，单批次精准扣减 | **已上线**，主路径 `/api/admin/wms/stock-loss` |
 
-##### 1. 销售 FIFO（设计意图，代码已备未接）
+##### 1. 销售 FIFO（支付成功时原子扣减）
 
-```text
-calculateFifoDeductions(materialId, qty)
-  → batches WHERE remaining_qty > 0 ORDER BY created_at ASC
-  → 依次扣减直至 qty 为 0
+调用链详见上文「订单与双轨库存」。核心 API：
 
-applyFifoDeductions({ logType: SALE_OUT, ... })
-  → 事务内 update batch + insert stock_logs
-```
+- `fifo.ts`：`calculateFifoDeductions`、`applyFifoDeductionsInTx`（须在父事务内调用，禁止嵌套 `$transaction`）
+- `fifo.ts`：`applyFifoDeductions` 为独立事务薄包装（报损等单操作用）
+- `order-fifo.ts`：`markOrderPaidWithFifo` 编排订单状态 + 配方展开 + FIFO
 
 ##### 2. 物理报损：指定批次精准扣减（当前生产路径）
 
@@ -268,20 +442,18 @@ applyFifoDeductions({ logType: SALE_OUT, ... })
   "flowerWikiId": "uuid",
   "stockBatchId": "cuid",
   "lossQuantity": 5,
-  "reason": "自然开败"
+  "reason": "自然开败",
+  "operator": "可选"
 }
 ```
 
-操作员由服务端从 Session 注入（`operatorStaffId` / `operator` 快照），**禁止**客户端伪造 `operatorId`。
-
 事务逻辑（`runStockLossTransaction`）：
 
-1. **服务层鉴权**：`assertStockMutationOperatorMatches("wms:write", payload.operator)`（`lib/stock-mutation-auth.ts`）；
-2. 校验批次存在且 `batch.material.wikiId === flowerWikiId`；
-3. 若 `lossQuantity > batch.remainingQty` → 报错 **「报损数量超出该批次可用库存」**；
-4. `batches.remaining_qty` 递减；
-5. 写 `stock_logs`（`WASTAGE_OUT`，含 `operator_staff_id`）；
-6. 写 **`stock_loss_records`**（关联 `flower_wiki_id`、`batch_id`、`stock_log_id`）。
+1. 校验批次存在且 `batch.material.wikiId === flowerWikiId`；
+2. 若 `lossQuantity > batch.remainingQty` → 报错 **「报损数量超出该批次可用库存」**；
+3. `batches.remaining_qty` 递减；
+4. 写 `stock_logs`（`WASTAGE_OUT`）；
+5. 写 **`stock_loss_records`**（关联 `flower_wiki_id`、`batch_id`、`stock_log_id`）。
 
 **报损历史查询**：
 
@@ -356,25 +528,26 @@ applyFifoDeductions({ logType: SALE_OUT, ... })
    - 原材料分类：`material_categories` + `material_category_relations`  
    二者无 `parentId` 交叉。
 
-7. **员工与顾客账号分表**  
-   `staff_users`（后台 RBAC）与 `users`（微信 `openId`）物理隔离；订单外键仍指向 `users`。
+7. **配方绑定在 SKU，禁止写回 SPU**  
+   `product_spus` 无 `recipe_id` 列；CMS 保存、FIFO 展开、`getRecipeForProduct` 均只认 `product_skus.recipe_id`。
 
-8. **库存变动必须经 Session 鉴权**  
-   `fifo.applyFifoDeductions`、`wms-stock` 入库/报损、`wastage.registerBatchWastage` 均调用 `stock-mutation-auth`，`operator_staff_id` 仅来自当前登录员工。
+8. **CMS SKU 营销图文与供应链字段物理隔离**  
+   运营改 `description` / `imageUrl` 必须走 `PATCH /api/cms/skus/[id]`；禁止在该接口或前端向 Prisma 传入 `recipeId`、`price`、`stock` 等列。
+
+9. **退款物理回库必须可追溯**  
+   已付订单退款须经 `SALE_OUT` → `IN_CANCEL` 成对留痕；禁止直接 `UPDATE batches` 而不写 `stock_logs`。
 
 #### 已知悬空 / 待清理 `[待架构重构/Pending Refactoring]`
 
 | 项 | 说明 |
 |----|------|
-| 销售 → 物理批次 FIFO | `fifo.ts` 已实现但无调用方；订单仍扣 `product_skus.stock`（`order-lifecycle.ts`） |
-| 旧报损 API | `POST /api/admin/wastage` + `services/wastage.ts`（单批次扣减）仍存在；UI 已迁到 `/wms/operations`，建议废弃或 410 |
-| 旧入库链路 | `InboundForm`、`/api/admin/batches`、`wiki-inbound` 与新版 `stock-in` 并存 |
-| 旧 BOM 路由 | `/api/admin/products/bom`、`services/bom.ts` 等遗留；WMS 侧已 410 / 重定向 |
-| 损耗 UI 死代码 | `wms/wastage/WastageWorkspace.tsx`、`WastageForm.tsx` 仍保留，页面已 redirect |
-| AI 视觉依赖 | `ai-preview`、`ai/vision`、`wiki/ai-generate` 路由引用 `@/lib/wiki-ai`；该模块可能未纳入当前工作区 / 需环境变量，**生产启用前需单独验证** |
-| Schema 注释滞后 | `schema.prisma` 文件头仍写「RecipeLine ↔ Material」；实际 `recipe_lines.flower_wiki_id`；`WASTAGE_OUT` 注释写「FIFO」但主报损路径为**指定批次**扣减 |
-| 部分 admin API 未加 `requirePermission` | `banners`、`app-config`、`batches` 等遗留路由仍主要靠 Middleware 粗拦截 |
-| Mock 数据 | `src/lib/mock/*` 部分页面未引用，仅测试 / 遗留 |
+| 员工账号体系 | 部分遗留 admin 路由（`banners`、`app-config`）仍仅靠 Middleware 粗拦截 |
+| 旧 BOM 商品 API | `GET /api/admin/products/bom` 只读兼容；经 `getRecipeForProduct` 查 SPU 下首个有 `recipeId` 的 SKU |
+| `productRecipeInclude` | 已废弃别名，请用 `skuRecipeInclude`（`lib/product-categories.ts`） |
+| 遗留 `inbound.ts` | 与 `wms-stock` 功能重叠，无 import 方，可删除 |
+| Schema 注释滞后 | `schema.prisma` 头部仍写「RecipeLine ↔ Material」；`WASTAGE_OUT` 注释与指定批次报损实现不符 |
+| 双轨库存运营 | 虚拟 SKU 与物理批次需运营对齐；**SKU 无 `recipeId`** 或 Wiki 无入库 Material 会导致支付跳过该行或 FIFO 熔断 |
+| 数据库迁移 | 部署后须执行 `npx prisma migrate deploy`（含 `20260529160000_sku_recipe_binding`） |
 
 #### API 与枚举速查
 
@@ -383,187 +556,19 @@ applyFifoDeductions({ logType: SALE_OUT, ... })
 | 枚举 | 含义 |
 |------|------|
 | `INBOUND` | 采购入库 |
-| `SALE_OUT` | 销售出库（设计为 FIFO） |
-| `WASTAGE_OUT` | 损耗出库 |
+| `SALE_OUT` | 销售出库（支付成功 FIFO，关联 `orderId` / `orderItemId`） |
+| `WASTAGE_OUT` | 损耗出库（指定批次报损，非 FIFO） |
 | `ADJUSTMENT` | 盘点调整 |
-| `IN_CANCEL` | 订单取消回库 |
+| `IN_CANCEL` | 订单取消回库（`refundPaidOrder` 按 `SALE_OUT` 原路补偿，`operator: SYSTEM_REFUND_AUTO`） |
 
-**订单状态机**：`OrderStatus` — 待支付 → 已支付 → 制作中 → 配送中 → 已完成 / 已取消（`services/order-lifecycle.ts`）。
+**订单状态机**：`OrderStatus` — 待支付 → 已支付 → 制作中 → 配送中 → 已完成 / 已取消（`services/order-lifecycle.ts` + `order-status.ts`）。
 
-**`Role`（`staff_users.role`）**
-
-| 枚举 | 中文 |
-|------|------|
-| `IT_ADMIN` | IT 运维 |
-| `STORE_ADMIN` | 门店主理人 |
-| `WAREHOUSE_MANAGER` | 大仓经理 |
-| `FLORIST` | 花艺师 |
-| `STORE_OPERATOR` | 前台运营 |
-
-**`StaffAuditAction`（`staff_audit_logs.action`）**
-
-| 枚举 | 含义 |
-|------|------|
-| `PASSWORD_RESET` | 管理员代行重置密码 |
-
----
-
-### 用户与权限管理（五级 RBAC）
-
-后台员工与小程序顾客 **分表**：`staff_users`（Credentials + RBAC）与 `users`（微信 `openId`）。避免改动订单外键。
-
-#### 数据模型
-
-| 模型 | 物理表 | 关键字段 |
-|------|--------|----------|
-| `StaffUser` | `staff_users` | `username`、`password_hash`（bcrypt）、`role`、`is_active` |
-| `StaffAuditLog` | `staff_audit_logs` | `action`、`operator_staff_id`、`target_staff_id`、`created_at` |
-
-种子数据：`npm run db:seed`（`prisma.config.ts` → `tsx prisma/seed.ts`）创建默认 `admin` / `admin`（`IT_ADMIN`）。
-
-#### 角色职责边界
-
-| 角色 | 职责 | 业务数据 |
-|------|------|----------|
-| `IT_ADMIN` | 创建/停用后台账号、分配角色 | **禁止**：批次、配方、Wiki、订单、CMS 商品等一切业务读写 |
-| `STORE_ADMIN` | 门店全权：WMS + CMS + 店内人员 + **全量损耗审计** | 全部业务 |
-| `WAREHOUSE_MANAGER` | 入库、**指定批次报损**、Wiki、标准配方审定 | WMS 写；**禁止 CMS** |
-| `FLORIST` | 订单履约看板；Wiki/配方 **只读**；销售 FIFO 扣库（服务已就绪，订单链路待接通） | `/wms/orders` + 只读 API |
-| `STORE_OPERATOR` | CMS 商品上架；`recipeId` **只读引用** | **禁止** WMS 写与 Wiki；`GET /api/admin/wms/recipes` 只读 |
-
-权限矩阵实现：`src/lib/rbac.ts`；Route Handler 二次校验：`requirePermission()`（`src/lib/api-auth.ts`）。
-
-#### IT Admin 业务盲区
-
-- **Middleware**（`src/middleware.ts`）：拦截 `BUSINESS_API_PREFIXES` 下所有 `/api/admin/wms|wiki|orders|…` 与 `/api/cms`，以及 `/wms`、`/cms` 页面，重定向至 `/admin/staff-users`。
-- **API 层**：`canAccessBusinessData(role)` 为 false 时，业务 Route 返回 403。
-- 运维账号 **看不到** 批次余量、报损明细、配方行、订单金额等敏感字段（未登录则 401）。
-
-#### Store Operator 与 CMS 只读红线
-
-- CMS 写路径：`/cms/*`、`/api/cms/*`，权限 `cms:write`。
-- 绑定 SPU 时仅允许选择已存在的 `recipes.id`（`assertRecipeExists`），**不得** POST/PUT 配方行或物料批次。
-- Middleware 对 `STORE_OPERATOR` 仅放行配方 **GET**；其余 `/api/admin/wms`、`/api/admin/wiki` 返回 403。
-
-#### 审计追溯（operatorStaffId）
-
-物理库存变动必须带操作员：
-
-| 场景 | 服务 | 审计字段 |
-|------|------|----------|
-| 采购入库 | `wms-stock.runStockInTransaction` | `stock_logs.operator_staff_id` |
-| 指定批次报损 | `wms-stock.runStockLossTransaction` + `stock_loss_records` | 同上 + 损耗专表 |
-| FIFO 销售/跨批次损耗 | `fifo.applyFifoDeductions` | Session 注入 `operatorStaffId` + `operator` 快照 |
-| 旧报损 API（待废弃） | `wastage.registerBatchWastage` | 同上，服务层 `assertStockMutationOperatorMatches` |
-| 管理员重置密码 | `actions/staff-users.resetUserPassword` | `staff_audit_logs`（`PASSWORD_RESET`） |
-
-初始化账号：`npx prisma db seed` → 用户名/密码 `admin` / `admin`，角色 `IT_ADMIN`（请上线后立即改密）。
-
-#### 登出与会话失效
-
-- **UI**：`StaffAccountBar`（WMS/CMS/Admin 侧栏底部 + 工作台 `PortalAccountStrip`）调用 `signOut({ redirect: true, callbackUrl: "/login" })`，清除客户端 Session Cookie 并整页跳转登录页。
-- **会话策略**：JWT `maxAge` 12 小时（`auth.config.ts`）；登出后 Middleware 对受保护路径返回 401/重定向 `/login`。
-- **切换账号**：必须先登出，再以另一组 Credentials 登录（无「多账号并存」）。
-
-#### 管理员代行重置密码
-
-- **Server Action**：`src/actions/staff-users.ts` → `resetUserPassword(targetStaffId, newPassword)`。
-- **权限**：仅 `IT_ADMIN`、`STORE_ADMIN`（`canManageStaffUsers`）；`STORE_ADMIN` **不可**重置 `IT_ADMIN` 账号密码。
-- **存储**：`bcrypt`（cost 12）写入 `staff_users.password_hash`，禁止明文。
-- **审计表**：`staff_audit_logs`（`action = PASSWORD_RESET`，`operator_staff_id`、`target_staff_id`、`created_at`）。
-- **UI**：`/admin/staff-users` 列表仅在 `canResetPassword` 为真时显示「重置密码」→ Modal 确认 → Toast。
-
-相关文件：`src/auth.ts`、`src/auth.config.ts`、`src/middleware.ts`、`prisma/seed.ts`、`src/components/shared/StaffAccountBar.tsx`。
-
----
-
-### 安全策略（Auth.js 与边缘性能）
-
-#### Auth.js（NextAuth v5）— Edge / Node 拆分
-
-| 文件 | 运行时 | 职责 |
-|------|--------|------|
-| `src/auth.config.ts` | **Edge**（middleware） | JWT/session 回调、`pages.signIn`；**禁止** import Prisma/bcrypt |
-| `src/auth.ts` | **Node**（Route Handler、Server Component、Server Action） | 合并 `authConfig` + Credentials Provider（Prisma 查 `staff_users`） |
-| `src/middleware.ts` | Edge | `NextAuth(authConfig).auth(...)` — 不得 `import { auth } from "@/auth"` |
-
-- **Provider**：Credentials，校验 `staff_users.password_hash`（bcrypt cost 12）。
-- **Session**：JWT，`maxAge` 12h；`session.user` 含 `id`、`username`、`role`（`src/types/next-auth.d.ts`）。
-- **环境变量**：`AUTH_SECRET` 或 `NEXTAUTH_SECRET`；`NEXTAUTH_URL` 与部署域名一致（本地 `http://localhost:3000`）。
-- **入口**：`/login`；Handler：`/api/auth/[...nextauth]`。
-- **构建**：`next.config.ts` 中 `serverExternalPackages: ["@prisma/client", "bcryptjs"]`，避免 Node 包误入 Edge bundle。
-
-> Edge 运行时无法加载 `node:util/types` 等 Node 原生模块；若 middleware 误引 `@/auth`，会导致整站白屏。当前已通过 `auth.config.ts` 拆分修复。
-
-#### 路由拦截机制（护城河闭环）
-
-**文件**：`src/middleware.ts`（NextAuth `auth()` 包装）+ `src/lib/auth-routes.ts`（路径判定与角色首页）。
-
-**`matcher` 覆盖范围**（未列入的路径不解析 JWT，如 `/api/wechat` 小程序接口保持公开）：
-
-| 模式 | 作用 |
-|------|------|
-| `/` | 工作台门户：未登录 → `/login` |
-| `/login` | 已登录 → 按角色 `getRoleHomePath()` 跳转 |
-| `/wms/:path*`、`/cms/:path*`、`/admin/:path*` | 后台页面 |
-| `/api/admin/:path*`、`/api/cms/:path*`、`/api/business/:path*` | 后台 API |
-
-**未登录**：凡 `isStaffProtectedPath()`（`/`、WMS/CMS/Admin 页面及后台 API）→ 页面 **302** 至 `/login?callbackUrl=…`；API 返回 **401 JSON**。
-
-**已登录按角色**（Middleware 内，无 DB）：
-
-- `IT_ADMIN`：业务 API（`BUSINESS_API_PREFIXES`）→ **403**；访问 `/`、`/wms`、`/cms` 或非 `staff-users` 的 `/api/admin/*` → **重定向** `/admin/staff-users`（**物理上看不到**批次/配方/订单等业务数据）。
-- `STORE_OPERATOR`：禁止 `/wms`；`/api/admin/wms` 仅放行配方 **GET**。
-- `FLORIST`：仅 `/wms/orders` 与 WMS **GET** API。
-- `WAREHOUSE_MANAGER`：禁止 `/cms` 与 `/api/cms`。
-- `STORE_ADMIN`：可访问 `/` 门户；其余角色访问 `/` 时重定向至各自首页。
-
-**角色默认首页**（`getRoleHomePath`，`src/lib/auth-routes.ts`）：
-
-| 角色 | 路径 |
-|------|------|
-| `IT_ADMIN` | `/admin/staff-users` |
-| `STORE_ADMIN` | `/` |
-| `WAREHOUSE_MANAGER` | `/wms/operations` |
-| `FLORIST` | `/wms/orders` |
-| `STORE_OPERATOR` | `/cms/products` |
-
-**页面双保险**：`src/app/page.tsx` 在 Server Component 内再次 `auth()`，未登录 `redirect('/login')`，非主理人重定向角色首页（防止 Middleware 配置疏漏）。
-
-#### IT Admin 数据脱敏（物理实现）
-
-1. **Middleware 盲区**：`canAccessBusinessData(IT_ADMIN) === false`；`isBusinessApiPath()` 命中即 403，不进入 Prisma。  
-2. **页面隔离**：无法打开 `/wms/*`、`/cms/*`；仅 `/admin/staff-users` 可管理 `staff_users`。  
-3. **API 层**：`requirePermission()` 对非 `staff:manage` 权限一律 403。  
-4. **服务层**：`assertStockMutationAuthorized()` 拒绝 IT Admin 调用入库/报损/FIFO（即使伪造 API 请求）。
-
-#### Middleware 性能（2 核 2G）
-
-- 不对 `/api/wechat`、静态资源做 JWT 解析。  
-- 规则仅字符串前缀 + HTTP Method，无 Prisma。
-
-#### 账户退出清理机制
-
-1. 客户端：`signOut({ redirect: true, callbackUrl: "/login" })` 由 Auth.js 清除 Session Token（JWT Cookie）。  
-2. 边缘：`middleware.ts` 在后续请求中 `req.auth` 为空，受保护路径无法进入业务页。  
-3. 服务端：Route Handler / Server Action 通过 `auth()` 读取 Session；登出后 `requireStaffSession()` 返回 401。  
-4. **不**依赖客户端 localStorage 存凭据；Credentials 仅在登录 POST 时使用一次。
-
-#### 管理员代行重置密码（权限判定）
-
-| 操作者 | 可重置对象 | 业务 API |
-|--------|------------|----------|
-| `IT_ADMIN` | 除自身外的所有 `staff_users`（含 `STORE_ADMIN` 等） | **仍禁止** `/api/admin/wms`、`/api/cms`、`/api/business/**` 等业务路径 |
-| `STORE_ADMIN` | 非 `IT_ADMIN` 的员工账号 | 拥有业务权限，与用户管理无关 |
-
-IT Admin 可在 `/admin/staff-users` 重置他人密码，但 Middleware 与 `canAccessBusinessData` 确保其 **永远无法读取** 批次库存、配方、订单等业务 payload。
-
-#### 纵深防御（四层）
-
-1. **Middleware**：登录门禁 + 角色路径隔离 + IT Admin 业务盲区。  
-2. **Route Handler**：`requirePermission()` 细粒度能力。  
-3. **Server Action / 服务层**：`resetUserPassword` 内 `auth()` + 角色校验；库存侧 `assertStockMutationAuthorized`。  
-4. **审计字段**：库存 `operator_staff_id`、账号 `staff_audit_logs` 均绑定真实操作员 ID。
+| 状态 | 典型触发 |
+|------|----------|
+| `PENDING_PAYMENT` | `createWechatOrder`（扣 SKU） |
+| `PAID` | `markOrderPaidWithFifo`（扣物理批次） |
+| `PRODUCTION` / `DELIVERING` / `COMPLETED` | `adminTransitionOrder` |
+| `CANCELLED` | `closePendingOrder`（仅还虚拟 SKU）或 `refundPaidOrder`（物理 `IN_CANCEL` + 可选还虚拟 SKU） |
 
 ---
 
@@ -573,42 +578,26 @@ IT Admin 可在 `/admin/staff-users` 重置他人密码，但 Middleware 与 `ca
 erDiagram
   flower_wikis ||--o{ recipe_lines : "flower_wiki_id"
   recipes ||--o{ recipe_lines : "recipe_id"
-  recipes ||--o{ product_spus : "recipe_id"
+  recipes ||--o{ product_skus : "recipe_id"
   flower_wikis ||--o{ materials : "wiki_id"
   materials ||--o{ batches : "material_id"
   batches ||--o{ stock_logs : "batch_id"
   batches ||--o{ stock_loss_records : "batch_id"
   flower_wikis ||--o{ stock_loss_records : "flower_wiki_id"
   stock_logs ||--o| stock_loss_records : "stock_log_id"
-  staff_users ||--o{ stock_logs : "operator_staff_id"
-  staff_users ||--o{ stock_loss_records : "operator_staff_id"
-  staff_users ||--o{ staff_audit_logs : "operator_staff_id"
-  staff_users ||--o{ staff_audit_logs : "target_staff_id"
   product_spus ||--o{ product_skus : "spu_id"
   product_skus ||--o{ order_items : "sku_id"
-  users ||--o{ orders : "user_id"
+  orders ||--o{ stock_logs : "order_id"
+  order_items ||--o{ stock_logs : "order_item_id"
 ```
-
----
-
-### 关键文件索引（RBAC / 认证）
-
-|  Concern | 文件 |
-|----------|------|
-| 权限矩阵 | `src/lib/rbac.ts` |
-| API 鉴权 | `src/lib/api-auth.ts` |
-| 路径门禁 | `src/lib/auth-routes.ts`、`src/middleware.ts` |
-| 库存服务层鉴权 | `src/lib/stock-mutation-auth.ts` |
-| 操作员解析 | `src/lib/operator-context.ts` |
-| 登出 UI | `src/components/shared/StaffAccountBar.tsx` |
-| 密码重置 | `src/actions/staff-users.ts`、`StaffUserManager.tsx` |
-| 角色中文标签 | `src/lib/role-labels.ts` |
 
 ---
 
 ### 文档维护说明
 
-- 变更 Prisma Schema 后，请同步更新本文「物理表名」与 ER 图。
-- 新增 WMS API 请在 `src/app/api/admin/wms/` 落地，并在 `services/` 封装事务；Route Handler 内应调用 `requirePermission()`。
-- 变更 Auth / Middleware 时，保持 `auth.config.ts`（Edge）与 `auth.ts`（Node）拆分，勿在 middleware 引入 Prisma。
-- 若完成「销售 FIFO 与物理批次」打通，请移除文中对应 `[待架构重构]` 条目并补充 `order-lifecycle.ts` 调用链说明。
+- 变更 Prisma Schema 后，请同步更新本文「物理表名」与 ER 图，并执行 `npx prisma migrate deploy` + `npx prisma generate`。
+- 配方绑定层级变更（SPU → SKU）时，同步更新 CMS 写入链（`cms-products.ts` / `cms-product-write.ts` / `ProductEditor`）与 FIFO 展开链（`order-fifo.ts`）。
+- 新增 WMS API 请在 `src/app/api/admin/wms/` 落地，并在 `services/` 封装事务，避免 Route Handler 内联复杂 Prisma 逻辑。
+- 订单库存逻辑变更时，同步更新「订单与双轨库存」与 `fifo.ts` / `order-fifo.ts` / `inventory-sync.ts` 调用链说明。
+- CMS 运营接口或 RBAC 变更时，同步更新「CMS SKU 营销图文 API」与 `lib/rbac.ts` 角色表。
+- 看板 UI / 详情弹窗变更时，同步更新「订单履约看板 UI」与 `GET /api/admin/orders/[id]/detail` 说明。

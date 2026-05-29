@@ -6,7 +6,7 @@ import {
   cmsSpuCreateData,
 } from "@/lib/cms-product-write";
 import { loadCmsProductCategories } from "@/lib/cms-product-categories.server";
-import { parseCmsProductBody } from "@/lib/cms-products";
+import { parseCmsProductBody, assertSkuRecipesExist } from "@/lib/cms-products";
 import {
   productCategoriesInclude,
   resolveProductCategoryIdsForSave,
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
 
     const categoryConfig = await loadCmsProductCategories();
     const body = parseCmsProductBody(await request.json(), categoryConfig);
-    if (body.recipeId) await assertRecipeExists(body.recipeId);
+    await assertSkuRecipesExist(body.skus, assertRecipeExists);
 
     const product = await prisma.$transaction(async (tx) => {
       const spu = await tx.productSpu.create({

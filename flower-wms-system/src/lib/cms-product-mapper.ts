@@ -23,7 +23,6 @@ export function cmsBodyToSpuData(
     shippingFee: body.shippingFee,
     allowPreOrder: body.allowPreOrder ?? true,
     productionTime: body.productionTime ?? 30,
-    recipeId: body.recipeId ?? null,
   };
 }
 
@@ -45,6 +44,7 @@ export function productToEditorInitial(
     imageUrl: sku.imageUrl ?? "",
     isMainImage: sku.isMainImage,
     sortOrder: sku.sortOrder,
+    recipeId: sku.recipeId ?? null,
   }));
 
   const cardImage = resolveSpuCardImageUrl(spu.skus);
@@ -65,6 +65,5 @@ export function productToEditorInitial(
     displaySku: skus[0]?.skuCode ?? "",
     displayImageUrl: cardImage,
     displayMinPrice: minPrice.toFixed(2),
-    recipeId: spu.recipeId ?? null,
   };
 }
