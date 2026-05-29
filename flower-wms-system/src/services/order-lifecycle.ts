@@ -1,6 +1,7 @@
 import { Prisma } from "@/generated/prisma/client";
 import { OrderCancelSource, OrderStatus } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
+import { markOrderPaidWithFifo } from "@/services/order-fifo";
 
 export const STOCK_SOLD_OUT_MESSAGE = "手慢了，花材库存已被抢光！";
 
@@ -194,30 +195,9 @@ export async function createWechatOrder(
   );
 }
 
-/** 模拟支付：前置状态必须为待支付 */
+/** 模拟支付：待支付 → 已支付，同事务 FIFO 扣减物理批次 */
 export async function mockPayWechatOrder(userId: string, orderId: string) {
-  const updated = await prisma.order.updateMany({
-    where: {
-      id: orderId,
-      userId,
-      status: OrderStatus.PENDING_PAYMENT,
-    },
-    data: {
-      status: OrderStatus.PAID,
-      paidAt: new Date(),
-    },
-  });
-
-  if (updated.count !== 1) {
-    const order = await prisma.order.findFirst({
-      where: { id: orderId, userId },
-    });
-    if (!order) throw new Error("订单不存在");
-    if (order.status === OrderStatus.PAID) return order;
-    throw new Error("当前订单状态不可支付");
-  }
-
-  return prisma.order.findUniqueOrThrow({ where: { id: orderId } });
+  return markOrderPaidWithFifo({ orderId, userId, operator: "mock-pay" });
 }
 
 /** 用户确认收货：仅配送中可完成 */
@@ -309,19 +289,16 @@ export async function refundPaidOrder(
   });
 }
 
-/** 店长将待支付标记为已支付（看板拖拽 1→2） */
+/** 店长将待支付标记为已支付（看板拖拽 1→2），同事务 FIFO 扣减物理批次 */
 export async function adminMarkOrderPaid(orderId: string) {
-  const updated = await prisma.order.updateMany({
-    where: { id: orderId, status: OrderStatus.PENDING_PAYMENT },
-    data: {
-      status: OrderStatus.PAID,
-      paidAt: new Date(),
-    },
-  });
-  if (updated.count !== 1) {
-    throw new Error("仅待支付订单可标记为已支付");
+  try {
+    return await markOrderPaidWithFifo({ orderId, operator: "admin-mark-paid" });
+  } catch (err) {
+    if (err instanceof Error && err.message === "当前订单状态不可支付") {
+      throw new Error("仅待支付订单可标记为已支付");
+    }
+    throw err;
   }
-  return prisma.order.findUniqueOrThrow({ where: { id: orderId } });
 }
 
 export type AdminTransition =

@@ -3,7 +3,7 @@
  * baseUrl：Next.js 静态资源根（拼接 /uploads 等相对路径，末尾无斜杠）
  * apiWechatBaseUrl：微信 API 前缀
  */
-export const baseUrl = 'http://192.168.31.200:3000';
+export const baseUrl = 'http://localhost:3000';
 
 /** @deprecated 请使用 baseUrl */
 export const assetBaseUrl = baseUrl;

@@ -14,6 +14,7 @@
     "@prisma/client": "^7.8.0",
     "@wangeditor/editor": "^5.1.23",
     "@wangeditor/editor-for-react": "^1.0.6",
+    "lucide-react": "^1.17.0",
     "next": "16.2.6",
     "pg": "^8.21.0",
     "pinyin-pro": "^3.28.1",

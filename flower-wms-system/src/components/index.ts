@@ -1,4 +1,3 @@
-export { Sidebar } from "./admin/sidebar";
 export { StatCard } from "./admin/stat-card";
 export { Badge } from "./ui/Badge";
 export { Button } from "./ui/button";

@@ -1,7 +1,7 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { StockLogType } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
-import { generateBatchNo } from "@/services/wiki-inbound";
+import { generateBatchNo } from "@/utils/batch-no";
 import { generateUniqueSku } from "@/utils/skuGenerator";
 
 export type StockInPayload = {

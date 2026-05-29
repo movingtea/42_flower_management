@@ -1,6 +1,10 @@
 import { jsonError } from "@/lib/api";
 import { requireUserFromRequest } from "@/lib/wechat-auth-request";
 import { jsonWechatSuccess } from "@/lib/wechat-api";
+import {
+  PhysicalStockInsufficientError,
+  PHYSICAL_STOCK_INSUFFICIENT,
+} from "@/services/order-fifo";
 import { mockPayWechatOrder } from "@/services/wechat-order";
 
 export const dynamic = "force-dynamic";
@@ -37,11 +41,15 @@ export async function POST(request: Request) {
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "模拟支付失败";
-    const status =
-      message.includes("未登录") ? 401 : message.includes("不存在") ||
-        message.includes("不可支付")
-        ? 400
-        : 500;
+    const status = message.includes("未登录")
+      ? 401
+      : err instanceof PhysicalStockInsufficientError ||
+          message.includes(PHYSICAL_STOCK_INSUFFICIENT) ||
+          message.includes("未绑定标准配方")
+        ? 409
+        : message.includes("不存在") || message.includes("不可支付")
+          ? 400
+          : 500;
     return jsonError(message, status);
   }
 }
