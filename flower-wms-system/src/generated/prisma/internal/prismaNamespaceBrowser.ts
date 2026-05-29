@@ -143,7 +143,6 @@ export const ProductSpuScalarFieldEnum = {
   shippingFee: 'shippingFee',
   allowPreOrder: 'allowPreOrder',
   productionTime: 'productionTime',
-  recipeId: 'recipeId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -158,6 +157,8 @@ export const ProductSkuScalarFieldEnum = {
   specName: 'specName',
   price: 'price',
   stock: 'stock',
+  recipeId: 'recipeId',
+  description: 'description',
   imageUrl: 'imageUrl',
   isMainImage: 'isMainImage',
   sortOrder: 'sortOrder',

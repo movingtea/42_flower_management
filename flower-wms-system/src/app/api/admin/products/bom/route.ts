@@ -1,4 +1,4 @@
-/** @deprecated 请使用 /api/admin/wms/recipes；商品通过 recipeId 挂载配方 */
+/** @deprecated 请使用 /api/admin/wms/recipes；配方通过 SKU.recipeId 挂载 */
 import { jsonError, jsonSuccess } from "@/lib/api";
 import { getRecipeForProduct } from "@/services/recipe";
 
@@ -25,7 +25,7 @@ export async function GET(request: Request) {
 
 export async function POST() {
   return jsonError(
-    "商品级 BOM 写入已废弃，请先在 WMS 创建标准配方，再在商品编辑页挂载 recipeId",
+    "商品级 BOM 写入已废弃，请先在 WMS 创建标准配方，再在商品款式（SKU）上挂载 recipeId",
     410
   );
 }

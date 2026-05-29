@@ -131,7 +131,7 @@ export async function syncProductCategoryLinks(
   });
 }
 
-export const productRecipeInclude = {
+export const skuRecipeInclude = {
   recipe: {
     select: {
       id: true,
@@ -140,3 +140,6 @@ export const productRecipeInclude = {
     },
   },
 } as const;
+
+/** @deprecated 配方已绑定至 SKU，请使用 skuRecipeInclude */
+export const productRecipeInclude = skuRecipeInclude;

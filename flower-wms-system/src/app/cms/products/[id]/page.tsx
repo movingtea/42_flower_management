@@ -28,12 +28,12 @@ const EMPTY: ProductEditorInitial = {
       imageUrl: "",
       isMainImage: true,
       sortOrder: 0,
+      recipeId: null,
     },
   ],
   displaySku: "",
   displayImageUrl: "",
   displayMinPrice: "0.00",
-  recipeId: null,
 };
 
 export default async function CmsProductEditPage({

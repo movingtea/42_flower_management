@@ -7,6 +7,8 @@ export interface WechatProductSku {
   specName: string;
   price: string;
   stock: number;
+  /** 展现用富文本（API 已做 SPU Fallback） */
+  description?: string | null;
   imageUrl: string | null;
   isMainImage: boolean;
 }
@@ -16,6 +18,7 @@ export interface WechatProductRaw {
   name: string;
   description?: string | null;
   maintenanceGuide?: string | null;
+  mainImageUrl?: string;
   subtitle?: string;
   minPrice?: string;
   sellPrice?: string;
@@ -41,18 +44,36 @@ export interface WechatProductItem {
 }
 
 export function normalizeWechatProduct(item: WechatProductRaw): WechatProductItem {
+  const spuDescription = item.description?.trim() || null;
+  const spuMainImage =
+    item.mainImageUrl?.trim() ||
+    item.imageUrl?.trim() ||
+    (item.images && item.images.length > 0 ? item.images[0] : '') ||
+    '';
+
   const rawSkus = Array.isArray(item.skus) ? item.skus : [];
-  const skus = rawSkus.map((s) => ({
-    ...s,
-    imageUrl: s.imageUrl ? toRelativeImagePath(s.imageUrl) : null,
-  }));
+  const skus = rawSkus.map((s) => {
+    const ownDescription = s.description?.trim() || null;
+    const ownImage = s.imageUrl?.trim() || null;
+    return {
+      ...s,
+      description: ownDescription ?? spuDescription,
+      imageUrl: ownImage
+        ? toRelativeImagePath(ownImage)
+        : spuMainImage
+          ? toRelativeImagePath(spuMainImage)
+          : null,
+    };
+  });
   const price =
     item.minPrice ??
     item.sellPrice ??
     (item.price != null ? String(item.price) : '0');
   const priceSuffix = item.priceSuffix ?? (skus.length > 1 ? '起' : '');
   const rawCover =
-    item.imageUrl ?? (item.images && item.images.length > 0 ? item.images[0] : '');
+    item.mainImageUrl ??
+    item.imageUrl ??
+    (item.images && item.images.length > 0 ? item.images[0] : '');
   const imageUrl = toRelativeImagePath(rawCover);
 
   return {

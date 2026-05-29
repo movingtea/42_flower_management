@@ -3,7 +3,7 @@ import type { FloralRole } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { FLORAL_ROLE_LABEL } from "@/lib/wiki-constants";
 import { ORDER_STATUS_LABEL } from "@/services/order-lifecycle";
-import { expandWikiDemandsFromOrderItems } from "@/services/order-fifo-pure";
+import { expandAndAggregateWikiDemands } from "@/services/order-fifo-pure";
 import type { OrderStatus } from "@/generated/prisma/client";
 
 export type OrderPhysicalConsumptionRow = {
@@ -53,18 +53,19 @@ function buildProjectedConsumption(
   const itemLikes = orderItems.map((item) => ({
     id: item.id,
     quantity: item.quantity,
-    snapshotProductName: item.snapshotProductName,
+    snapshotProductName: `${item.snapshotProductName}（${item.snapshotSpecName}）`,
+    recipeId: item.sku.recipeId,
     recipeLines:
-      item.sku.spu.recipe?.lines.map((line) => ({
+      item.sku.recipe?.lines.map((line) => ({
         flowerWikiId: line.flowerWikiId,
         quantityNeeded: line.quantityNeeded,
         wiki: line.wiki,
       })) ?? [],
   }));
 
-  let demands;
+  let aggregated;
   try {
-    demands = expandWikiDemandsFromOrderItems(itemLikes);
+    aggregated = expandAndAggregateWikiDemands(itemLikes);
   } catch {
     return [];
   }
@@ -74,7 +75,7 @@ function buildProjectedConsumption(
     { chineseName: string; floralRole: FloralRole }
   >();
   for (const item of orderItems) {
-    for (const line of item.sku.spu.recipe?.lines ?? []) {
+    for (const line of item.sku.recipe?.lines ?? []) {
       wikiMeta.set(line.flowerWikiId, {
         chineseName: line.wiki.chineseName,
         floralRole: line.wiki.floralRole,
@@ -82,19 +83,14 @@ function buildProjectedConsumption(
     }
   }
 
-  const merged = new Map<string, number>();
-  for (const d of demands) {
-    merged.set(d.flowerWikiId, (merged.get(d.flowerWikiId) ?? 0) + d.quantity);
-  }
-
-  return [...merged.entries()].map(([wikiId, quantity]) => {
-    const meta = wikiMeta.get(wikiId);
+  return aggregated.map((demand) => {
+    const meta = wikiMeta.get(demand.flowerWikiId);
     return {
-      id: `projected-${wikiId}`,
-      wikiName: wikiDisplayName(meta?.chineseName),
+      id: `projected-${demand.flowerWikiId}`,
+      wikiName: wikiDisplayName(meta?.chineseName, demand.chineseName),
       floralRoleLabel: roleLabel(meta?.floralRole),
       batchNo: null,
-      quantity,
+      quantity: demand.quantity,
       source: "projected" as const,
     };
   });
@@ -108,18 +104,14 @@ async function fetchOrderWithRelations(orderId: string) {
         include: {
           sku: {
             include: {
-              spu: {
+              recipe: {
                 include: {
-                  recipe: {
+                  lines: {
                     include: {
-                      lines: {
-                        include: {
-                          wiki: {
-                            select: {
-                              chineseName: true,
-                              floralRole: true,
-                            },
-                          },
+                      wiki: {
+                        select: {
+                          chineseName: true,
+                          floralRole: true,
                         },
                       },
                     },

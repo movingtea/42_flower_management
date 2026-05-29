@@ -2,7 +2,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { jsonError, jsonSuccess } from "@/lib/api";
 import { cmsSpuUpdateData, syncProductSkus } from "@/lib/cms-product-write";
 import { loadCmsProductCategories } from "@/lib/cms-product-categories.server";
-import { parseCmsProductBody } from "@/lib/cms-products";
+import { parseCmsProductBody, assertSkuRecipesExist } from "@/lib/cms-products";
 import {
   productCategoriesInclude,
   syncProductCategoryLinks,
@@ -47,7 +47,7 @@ export async function PUT(
     const { id } = await context.params;
     const categoryConfig = await loadCmsProductCategories();
     const body = parseCmsProductBody(await request.json(), categoryConfig);
-    if (body.recipeId) await assertRecipeExists(body.recipeId);
+    await assertSkuRecipesExist(body.skus, assertRecipeExists);
 
     const existing = await prisma.productSpu.findFirst({
       where: { id, ...activeSpuWhere },

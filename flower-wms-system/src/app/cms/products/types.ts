@@ -7,6 +7,7 @@ export type ProductSkuEditorRow = {
   imageUrl: string;
   isMainImage: boolean;
   sortOrder?: number;
+  recipeId: string | null;
 };
 
 export type ProductEditorInitial = {
@@ -21,7 +22,6 @@ export type ProductEditorInitial = {
   displaySku: string;
   displayImageUrl: string;
   displayMinPrice: string;
-  recipeId: string | null;
 };
 
 export type ProductEditorProps = {

@@ -12,7 +12,7 @@
 核心能力边界：
 
 - **WMS 端（`/wms`）**：主导物料母表、标准工艺配方（BOM）、物理批次库存、仓储日常（入库 / 指定批次报损）、库存查询、订单履约看板。
-- **CMS 端（`/cms`）**：纯粹的小程序运营货架——商品 SPU/SKU、商品分类、轮播、营销配置；通过 `ProductSpu.recipeId` **只读绑定** WMS 配方，不在 CMS 维护 BOM 明细。
+- **CMS 端（`/cms`）**：纯粹的小程序运营货架——商品 SPU/SKU、商品分类、轮播、营销配置；通过 **`ProductSku.recipeId`** **只读绑定** WMS 配方（同 SPU 下各款式可绑不同 BOM），不在 CMS 维护 BOM 明细。
 - **微信小程序 API（`/api/wechat/*`）**：用户登录、商品浏览、购物车、下单与 mock 支付、订单查询等。
 
 技术栈要点：
@@ -35,26 +35,30 @@
 | 多租户 SaaS | 无租户隔离模型 |
 | 聚合配送调度 | 无第三方配送编排 |
 | 物理表 `stock_batches` | 从未作为当前 Schema 表名；物理批次使用 **`batches`**（`Batch` 模型） |
-| 物理表 `product_bom` | 早期迁移曾存在，**当前 Schema 已移除**；配方使用 **`recipes` + `recipe_lines`**，商品通过 **`product_spus.recipe_id`** 绑定 |
+| 物理表 `product_bom` | 早期迁移曾存在，**当前 Schema 已移除**；配方使用 **`recipes` + `recipe_lines`**，商品通过 **`product_skus.recipe_id`** 绑定（已从 SPU 下沉至 SKU，迁移 `20260529160000_sku_recipe_binding`） |
 
 **已实现**
 
 | 项 | 说明 |
 |----|------|
 | 销售支付 → 物理批次 FIFO | `markOrderPaidWithFifo`（见「订单与双轨库存」）：支付成功时在 `Serializable` 事务内扣 `batches.remaining_qty` 并写 `SALE_OUT` |
+| 退款 → 物理批次原路回库 | `refundPaidOrder` → `restorePhysicalStockFromSaleOutInTx`：按历史 `SALE_OUT` 逐批 `increment` + 写 `IN_CANCEL`（`operator: SYSTEM_REFUND_AUTO`） |
+| 虚拟库存健康投影校准 | `syncPhysicalStockToVirtual`（`services/inventory-sync.ts`）：木桶原理将 `product_skus.stock` 向下截断至物理可成套上限 |
+| CMS SKU 营销图文白名单 API | `PATCH /api/cms/skus/[id]`：仅 `description` / `imageUrl`；`requirePermission(STORE_OPERATOR)` |
 
 **尚未实现**
 
 | 项 | 说明 |
 |----|------|
-| 退款 / 取消 → 物理批次回库 | `refundPaidOrder`、`closePendingOrder` 仅可归还 **`product_skus.stock`**（虚拟可售）；**不**恢复 `batches`，**不**写入 `stock_logs` |
-| `StockLogType.IN_CANCEL` 业务流 | 枚举与库存详情展示文案已定义，**无任何服务代码**在退款/取消时写入该类型流水 |
+| 员工登录 UI / StaffUser 持久化 | 五级 RBAC 与 `STAFF_JWT_SECRET` 已落地；**无** `staff_users` 表与登录页，Token 须运维签发或后续接入 |
+| 定时自动库存投影 | `syncPhysicalStockToVirtual` 仅提供手动脚本，无 Cron / 队列 |
 
 **历史命名 → 现行模型**
 
 ```text
 stock_batches（不存在）     →  batches
-product_bom（已废弃）       →  recipes + recipe_lines + product_spus.recipe_id
+product_bom（已废弃）       →  recipes + recipe_lines + product_skus.recipe_id
+product_spus.recipe_id      →  已删除；配方指针在 product_skus.recipe_id
 ```
 
 **Monorepo 边界**：后端与后台在 `flower-wms-system/`；微信小程序客户端在仓库根目录 `42_mp/`（API 基址见 `42_mp/miniprogram/config/index.ts` → `baseUrl` / `apiWechatBaseUrl`）。
@@ -85,9 +89,9 @@ flower-wms-system/
 │   │   └── ui/                # FlowerMaterialSelect、Input、Button…
 │   ├── services/              # 领域事务（order-fifo、fifo、wms-stock、recipe…）
 │   ├── utils/                 # 无状态工具（batch-no、skuGenerator）
-│   ├── lib/                   # 工具、序列化、库存查询 helper
+│   ├── lib/                   # 工具、RBAC、CMS 白名单、库存查询 helper
 │   └── generated/prisma/      # Prisma 生成物（勿手改）
-└── scripts/                   # 种子、FIFO 试跑等运维脚本
+└── scripts/                   # 种子、FIFO 试跑、库存投影校准等运维脚本
 ```
 
 #### WMS 页面路由（`src/app/wms/`）
@@ -112,12 +116,45 @@ flower-wms-system/
 
 | 路径 | 职责 |
 |------|------|
-| `/cms/products` | 商品列表与编辑（含 `recipeId` 下拉绑定） |
+| `/cms/products` | 商品列表与编辑（**每 SKU 一行**绑定 `recipeId`，`RecipeSelect` 在款式表格内） |
 | `/cms/product-categories` | 商城商品分类树 |
 | `/cms/banner` | 首页轮播 |
 | `/cms/marketing` | 营销配置（`app_configs`） |
 
 导航定义：`src/components/cms/sidebar.tsx`。CMS **不包含** BOM 编辑、入库、报损入口。
+
+#### CMS 商品 API（`src/app/api/cms/products/`）
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| POST | `/api/cms/products` | 创建 SPU + SKU；`recipeId` 写在各 `skus[]` 项 |
+| PUT | `/api/cms/products/[id]` | 更新 SPU 字段 + `syncProductSkus`（含 `recipeId`） |
+| DELETE | `/api/cms/products/[id]` | 软删除 SPU |
+
+解析与校验：`lib/cms-products.ts`（`parseCmsProductBody`、`assertSkuRecipesExist`）；SPU 字段映射：`lib/cms-product-mapper.ts`（**不再**写 SPU 级 `recipeId`）。`POST/PUT /api/admin/products` 为 deprecated 薄封装，行为同上。
+
+#### CMS SKU 营销图文 API（`src/app/api/cms/skus/`）
+
+| 方法 | 路径 | 说明 |
+|------|------|------|
+| PATCH | `/api/cms/skus/[id]` | **白名单更新**：仅 `description`、`imageUrl`；拒绝 `recipeId` / `price` / `stock` 等 mass-assignment |
+
+- 鉴权：`lib/rbac.ts` → `requirePermission(request, 'STORE_OPERATOR')`（含店长及以上）；失败 **403**
+- 解析：`lib/cms-sku-marketing.ts` → `parseSkuMarketingPatch` + `updateSkuMarketingOnly`
+- 员工 JWT：`Authorization: Bearer` + `STAFF_JWT_SECRET`（`lib/staff-jwt.ts`）
+- 完整商品保存（含配方/价格）仍走 `PUT /api/cms/products/[id]`，运营改图文应优先用本接口
+
+#### 后台鉴权（五级 RBAC）
+
+| 角色（升序） | 常量 | 典型能力 |
+|--------------|------|----------|
+| 1 | `VIEWER` | 只读 |
+| 2 | `STORE_OPERATOR` | CMS 运营（SKU 营销图文 PATCH） |
+| 3 | `STORE_MANAGER` | 店长（含运营权限） |
+| 4 | `WMS_OPERATOR` | 仓储操作 |
+| 5 | `SUPER_ADMIN` | 全权限 |
+
+实现：`lib/staff-role.ts`（角色常量）、`lib/staff-jwt.ts`（签发/校验）、`lib/rbac.ts`（`requirePermission` / `ForbiddenError`）。与小程序用户 JWT（`WECHAT_JWT_SECRET`）**完全隔离**。
 
 #### WMS 后台 API（`src/app/api/admin/wms/`）
 
@@ -146,15 +183,16 @@ flower-wms-system/
 
 | 模块 | 文件 | 职责 |
 |------|------|------|
-| 订单生命周期 | `order-lifecycle.ts` | 下单、关单、退款、履约流转；**下单时**原子扣减 `product_skus.stock` |
-| 支付 × FIFO | `order-fifo.ts` | `markOrderPaidWithFifo`、`deductPhysicalStockForPaidOrder` |
-| 配方展开（纯函数） | `order-fifo-pure.ts` | `expandWikiDemandsFromOrderItems`（单测：`order-fifo-pure.test.ts`） |
+| 订单生命周期 | `order-lifecycle.ts` | 下单、关单、退款、履约流转；`closePendingOrder` / `refundPaidOrder` 均为 **Serializable** |
+| 支付 × FIFO | `order-fifo.ts` | `markOrderPaidWithFifo`、`deductPhysicalStockForPaidOrder`、`restorePhysicalStockFromSaleOutInTx`（**IN_CANCEL**） |
+| 配方展开（纯函数） | `order-fifo-pure.ts` | `expandAndAggregateWikiDemands`（`recipeId` 为空的订单行静默跳过；单测：`order-fifo-pure.test.ts`） |
 | FIFO 算法 | `fifo.ts` | `calculateFifoDeductions`、`applyFifoDeductionsInTx`、`applyFifoDeductions` |
+| 库存健康投影 | `inventory-sync.ts` | `syncPhysicalStockToVirtual`：物理批次木桶上限 → 截断 `product_skus.stock` |
 | 微信订单门面 | `wechat-order.ts` | 再导出 `order-lifecycle` 公开 API |
 | 看板状态 | `order-status.ts` | `transitionOrderStatus`（含 `PAID` 拖拽） |
 | 看板详情聚合 | `order-fulfillment-detail.ts` | `getOrderFulfillmentDetail`：订单全量字段 + 物理花材消耗清单 |
 | 仓储事务 | `wms-stock.ts` | `runStockInTransaction`、`runStockLossTransaction`、流水线查询 |
-| 配方 | `recipe.ts` | 配方 CRUD、编号生成 |
+| 配方 | `recipe.ts` | 配方 CRUD、编号生成、`getRecipeForProduct`（经 SPU → `skus` 级联查首个有配方的 SKU） |
 | 母表 | `wiki.ts` | FlowerWiki CRUD、简拼检索 |
 | 盘点 | `stocktake.ts` | `POST /api/admin/stocktake` |
 
@@ -169,9 +207,9 @@ FlowerWiki（母表真理）
     │       └── Batch（物理批次，独立进价）
     └── StockLossRecord（报损留痕）
 
-ProductSpu（CMS 商品）
-    ├── ProductSku（可售库存 stock 字段）
-    └── recipeId → Recipe（只读引用，不反向写库存）
+ProductSpu（CMS 商品 SPU）
+    └── ProductSku（可售库存 stock + 可选 recipeId → Recipe）
+            └── Recipe（只读引用，不反向写库存）
 ```
 
 ---
@@ -211,7 +249,11 @@ Prisma 模型：`FlowerWiki` → 表 **`flower_wikis`**。
 - `recipe_lines.flower_wiki_id` → `flower_wikis.id`（**直接关联母表**，不关联 `materials`）。
 - `recipe_lines.quantity_needed` ← 所需枝数。
 
-**与 CMS 的绑定**：`product_spus.recipe_id` → `recipes.id`（**非**已废弃的 `product_bom` 表）。CMS 通过 `src/components/cms/RecipeSelect.tsx` 拉取 `/api/admin/wms/recipes` 展示 `{code} - {name} ({summary})`。
+**与 CMS 的绑定**：`product_skus.recipe_id` → `recipes.id`（**非**已废弃的 `product_bom` 表，**非**已删除的 `product_spus.recipe_id`）。迁移 `20260529160000_sku_recipe_binding` 会将既有 SPU 级配方回填到其下所有 SKU 后删除 SPU 列。
+
+CMS 商品编辑（`src/app/cms/products/ProductEditor.tsx`）在**款式表格**内为每个 SKU 渲染 `src/components/cms/RecipeSelect.tsx`（`compact` 模式），拉取 `/api/admin/wms/recipes` 展示 `{code} - {name} ({summary})`。保存经 `parseCmsProductBody` → `syncProductSkus` / `buildSkuCreateRows` 写入 `product_skus.recipe_id`（`src/lib/cms-product-write.ts`）。请求体仍兼容顶层 `recipeId`，会自动下沉到未指定配方的 SKU。
+
+配方关联 SKU 计数：`recipe._count.skus`（`listRecipes` / `getRecipeById`）。
 
 #### 配方保存的沙盒隔离（已实现）
 
@@ -241,7 +283,40 @@ Prisma 模型：`FlowerWiki` → 表 **`flower_wikis`**。
 | **虚拟可售库存** | `product_skus.stock` | **创建订单**（`PENDING_PAYMENT`） | `order-lifecycle.ts` → `atomicDecrementSkuStock` + `Serializable` 事务 |
 | **物理批次库存** | `batches.remaining_qty` | **支付成功**（`PAID`） | `order-fifo.ts` → `markOrderPaidWithFifo` → `applyFifoDeductionsInTx` |
 
-关单 / 退款（可选）仅归还 SKU 虚拟库存（`restoreOrderSkuStock`）。已支付订单的物理批次在支付时已扣减，**退款不会回滚** `batches`（`IN_CANCEL` 流水未实现，见上文「尚未实现」）。
+| 逆向操作 | 虚拟 SKU | 物理批次 | 实现 |
+|----------|----------|----------|------|
+| 关闭待支付 | `restoreOrderSkuStock` | 无（未支付无 `SALE_OUT`） | `closePendingOrder`（Serializable） |
+| 已付退款 | 可选 `restoreOrderSkuStock`（`rollbackStock`） | **原路回库** `IN_CANCEL` | `refundPaidOrder`（Serializable） |
+
+#### 退款物理原路回库（`IN_CANCEL`）
+
+`refundPaidOrder` 在 **Serializable** 事务内顺序：
+
+```text
+refundPaidOrder(orderId, { rollbackStock? })
+  → prisma.$transaction (Serializable)
+  1. restorePhysicalStockFromSaleOutInTx(orderId)
+     a. 防重复：已有 IN_CANCEL 则拒绝
+     b. 拉取该 orderId 全部 SALE_OUT 流水
+     c. 逐条：batch.remainingQty += log.quantity
+     d. 写入 stock_logs: IN_CANCEL（delta/quantity 为正，operator: SYSTEM_REFUND_AUTO）
+  2. orders → CANCELLED（refundAmount / refundTime / cancelSource）
+  3. 若 rollbackStock：restoreOrderSkuStock（虚拟 SKU）
+  → 任一步失败整笔 Rollback
+```
+
+`closePendingOrder` 仅归还虚拟 SKU，不涉及物理批次。
+
+#### 虚拟库存健康投影（木桶校准）
+
+服务：`services/inventory-sync.ts` → `syncPhysicalStockToVirtual`
+
+1. 拉取 `recipeId IS NOT NULL` 且 SPU 已上架、未软删的 SKU（含 `recipe.lines`）
+2. 对每个 `flowerWikiId`：`batch.aggregate(_sum remainingQty)`（可用批次：`remainingQty > 0` 且未过期）
+3. 木桶：`maxPossibleQty = min(floor(总支数 / quantityNeeded))`
+4. 若 `sku.stock > maxPossibleQty` → 强行 `update` 截断（只降不升）
+
+运维脚本：`npx tsx scripts/sync-physical-to-virtual-stock.ts`
 
 #### 支付成功接入点（均已调用 `markOrderPaidWithFifo`）
 
@@ -257,8 +332,8 @@ Prisma 模型：`FlowerWiki` → 表 **`flower_wikis`**。
 markOrderPaidWithFifo({ orderId, userId?, operator? })
   → prisma.$transaction (Serializable)
   1. orders: PENDING_PAYMENT → PAID（updateMany 防并发）
-  2. orderItem → sku → spu → recipe → recipe_lines
-  3. expandWikiDemandsFromOrderItems（quantityNeeded × item.quantity）
+  2. orderItem → sku（recipeId）→ recipe → recipe_lines
+  3. expandAndAggregateWikiDemands（quantityNeeded × item.quantity；无 recipeId 的 SKU 行跳过）
   4. flower_wiki_id → materials.id（无 Material 则熔断）
   5. calculateFifoDeductions(materialId, qty, tx)  // createdAt ASC
   6. batch.updateMany（remainingQty >= take，防超卖）
@@ -291,7 +366,7 @@ markOrderPaidWithFifo({ orderId, userId?, operator? })
 | `PATCH /api/admin/orders` | 看板拖拽 / 按钮流转（`orderId` + `nextStatus`） |
 | `GET /api/admin/orders/[id]/detail` | 履约详情 + **WMS 物理花材消耗表**（`order-fulfillment-detail.ts`） |
 | `POST /api/admin/orders/[id]/cancel-or-close` | 关闭待支付 |
-| `POST /api/admin/orders/[id]/refund` | 退款取消（可选回滚 SKU） |
+| `POST /api/admin/orders/[id]/refund` | 退款取消（**始终**物理 `IN_CANCEL`；`rollbackStock` 控制虚拟 SKU） |
 
 #### 订单履约看板 UI（`/wms/orders`）
 
@@ -323,7 +398,7 @@ markOrderPaidWithFifo({ orderId, userId?, operator? })
 | 花材母表名称 | `flower_wikis.chinese_name`（经 `materials.wiki` 或配方行） |
 | 工艺角色 | `flower_wikis.floral_role` → `FLORAL_ROLE_LABEL` |
 | 锁定批次号 | 已支付：`stock_logs`（`SALE_OUT`）→ `batches.batch_no`；待支付：显示「待支付锁定」 |
-| 消耗数量 | 已支付：流水 `quantity`；待支付：BOM 展开预估（`expandWikiDemandsFromOrderItems` 按 wiki 合并） |
+| 消耗数量 | 已支付：流水 `quantity`；待支付：BOM 展开预估（`expandAndAggregateWikiDemands` 按 wiki 合并） |
 
 `consumptionMode`：`locked`（实扣）| `projected`（配方预估）| `empty`（无配方或无流水）。
 
@@ -454,15 +529,26 @@ markOrderPaidWithFifo({ orderId, userId?, operator? })
    - 原材料分类：`material_categories` + `material_category_relations`  
    二者无 `parentId` 交叉。
 
+7. **配方绑定在 SKU，禁止写回 SPU**  
+   `product_spus` 无 `recipe_id` 列；CMS 保存、FIFO 展开、`getRecipeForProduct` 均只认 `product_skus.recipe_id`。
+
+8. **CMS SKU 营销图文与供应链字段物理隔离**  
+   运营改 `description` / `imageUrl` 必须走 `PATCH /api/cms/skus/[id]`；禁止在该接口或前端向 Prisma 传入 `recipeId`、`price`、`stock` 等列。
+
+9. **退款物理回库必须可追溯**  
+   已付订单退款须经 `SALE_OUT` → `IN_CANCEL` 成对留痕；禁止直接 `UPDATE batches` 而不写 `stock_logs`。
+
 #### 已知悬空 / 待清理 `[待架构重构/Pending Refactoring]`
 
 | 项 | 说明 |
 |----|------|
-| 退款物理回库 | **未实现**：`refundPaidOrder(rollbackStock: true)` 只调 `restoreOrderSkuStock`；`IN_CANCEL` 枚举无写入方 |
-| 旧 BOM 商品 API | `GET /api/admin/products/bom` 只读兼容旧客户端；数据来自 `recipeId`，非 `product_bom` 表 |
+| 员工账号体系 | RBAC + JWT 已就绪；`staff_users` 表与登录 API 待接入 |
+| 旧 BOM 商品 API | `GET /api/admin/products/bom` 只读兼容；经 `getRecipeForProduct` 查 SPU 下首个有 `recipeId` 的 SKU |
+| `productRecipeInclude` | 已废弃别名，请用 `skuRecipeInclude`（`lib/product-categories.ts`） |
 | 遗留 `inbound.ts` | 与 `wms-stock` 功能重叠，无 import 方，可删除 |
-| Schema 注释滞后 | `schema.prisma` 头部仍写「RecipeLine ↔ Material」；实际 `recipe_lines.flower_wiki_id`；`WASTAGE_OUT` 注释写「FIFO」与报损实现（指定批次）不符 |
-| 双轨库存运营 | 虚拟 SKU 与物理批次需运营对齐；SPU 无配方或 Wiki 无入库 Material 会导致支付熔断 |
+| Schema 注释滞后 | `schema.prisma` 头部仍写「RecipeLine ↔ Material」；`WASTAGE_OUT` 注释与指定批次报损实现不符 |
+| 双轨库存运营 | 虚拟 SKU 与物理批次需运营对齐；**SKU 无 `recipeId`** 或 Wiki 无入库 Material 会导致支付跳过该行或 FIFO 熔断 |
+| 数据库迁移 | 部署后须执行 `npx prisma migrate deploy`（含 `20260529160000_sku_recipe_binding`） |
 
 #### API 与枚举速查
 
@@ -474,7 +560,7 @@ markOrderPaidWithFifo({ orderId, userId?, operator? })
 | `SALE_OUT` | 销售出库（支付成功 FIFO，关联 `orderId` / `orderItemId`） |
 | `WASTAGE_OUT` | 损耗出库（指定批次报损，非 FIFO） |
 | `ADJUSTMENT` | 盘点调整 |
-| `IN_CANCEL` | 订单取消回库（**枚举占位**，当前无业务写入；退款不回滚物理批次） |
+| `IN_CANCEL` | 订单取消回库（`refundPaidOrder` 按 `SALE_OUT` 原路补偿，`operator: SYSTEM_REFUND_AUTO`） |
 
 **订单状态机**：`OrderStatus` — 待支付 → 已支付 → 制作中 → 配送中 → 已完成 / 已取消（`services/order-lifecycle.ts` + `order-status.ts`）。
 
@@ -483,7 +569,7 @@ markOrderPaidWithFifo({ orderId, userId?, operator? })
 | `PENDING_PAYMENT` | `createWechatOrder`（扣 SKU） |
 | `PAID` | `markOrderPaidWithFifo`（扣物理批次） |
 | `PRODUCTION` / `DELIVERING` / `COMPLETED` | `adminTransitionOrder` |
-| `CANCELLED` | `closePendingOrder`（还 SKU）或 `refundPaidOrder` |
+| `CANCELLED` | `closePendingOrder`（仅还虚拟 SKU）或 `refundPaidOrder`（物理 `IN_CANCEL` + 可选还虚拟 SKU） |
 
 ---
 
@@ -493,7 +579,7 @@ markOrderPaidWithFifo({ orderId, userId?, operator? })
 erDiagram
   flower_wikis ||--o{ recipe_lines : "flower_wiki_id"
   recipes ||--o{ recipe_lines : "recipe_id"
-  recipes ||--o{ product_spus : "recipe_id"
+  recipes ||--o{ product_skus : "recipe_id"
   flower_wikis ||--o{ materials : "wiki_id"
   materials ||--o{ batches : "material_id"
   batches ||--o{ stock_logs : "batch_id"
@@ -510,7 +596,9 @@ erDiagram
 
 ### 文档维护说明
 
-- 变更 Prisma Schema 后，请同步更新本文「物理表名」与 ER 图。
+- 变更 Prisma Schema 后，请同步更新本文「物理表名」与 ER 图，并执行 `npx prisma migrate deploy` + `npx prisma generate`。
+- 配方绑定层级变更（SPU → SKU）时，同步更新 CMS 写入链（`cms-products.ts` / `cms-product-write.ts` / `ProductEditor`）与 FIFO 展开链（`order-fifo.ts`）。
 - 新增 WMS API 请在 `src/app/api/admin/wms/` 落地，并在 `services/` 封装事务，避免 Route Handler 内联复杂 Prisma 逻辑。
-- 订单库存逻辑变更时，同步更新「订单与双轨库存」与 `fifo.ts` / `order-fifo.ts` 调用链说明。
+- 订单库存逻辑变更时，同步更新「订单与双轨库存」与 `fifo.ts` / `order-fifo.ts` / `inventory-sync.ts` 调用链说明。
+- CMS 运营接口或 RBAC 变更时，同步更新「CMS SKU 营销图文 API」与 `lib/rbac.ts` 角色表。
 - 看板 UI / 详情弹窗变更时，同步更新「订单履约看板 UI」与 `GET /api/admin/orders/[id]/detail` 说明。

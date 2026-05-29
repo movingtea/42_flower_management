@@ -46,6 +46,7 @@ export type CmsProductSkuInput = {
   imageUrl: string | null;
   isMainImage: boolean;
   sortOrder?: number;
+  recipeId?: string | null;
 };
 
 export type CmsProductBody = {
@@ -58,7 +59,6 @@ export type CmsProductBody = {
   shippingFee: number;
   allowPreOrder?: boolean;
   productionTime?: number;
-  recipeId?: string | null;
   skus: CmsProductSkuInput[];
 };
 
@@ -95,6 +95,11 @@ function parseSkuRows(raw: unknown): CmsProductSkuInput[] {
         ? r.imageUrl.trim()
         : null;
 
+    const recipeId =
+      typeof r.recipeId === "string" && r.recipeId.trim()
+        ? r.recipeId.trim()
+        : null;
+
     rows.push({
       id: typeof r.id === "string" && r.id.trim() ? r.id.trim() : undefined,
       skuCode:
@@ -109,6 +114,7 @@ function parseSkuRows(raw: unknown): CmsProductSkuInput[] {
       sortOrder: Number.isFinite(Number(r.sortOrder))
         ? Math.round(Number(r.sortOrder))
         : i * 10,
+      recipeId,
     });
   }
 
@@ -148,6 +154,17 @@ export function parseCmsProductBody(
 
   const skus = parseSkuRows(b.skus);
 
+  // 兼容旧版请求体：顶层 recipeId 下沉到尚未指定配方的 SKU
+  const legacyRecipeId =
+    typeof b.recipeId === "string" && b.recipeId.trim()
+      ? b.recipeId.trim()
+      : null;
+  if (legacyRecipeId) {
+    for (const sku of skus) {
+      if (!sku.recipeId) sku.recipeId = legacyRecipeId;
+    }
+  }
+
   const productionTime = Number(b.productionTime ?? 30);
   if (!Number.isInteger(productionTime) || productionTime < 0) {
     throw new Error("productionTime 须为非负整数");
@@ -155,11 +172,6 @@ export function parseCmsProductBody(
 
   const needsShipping = Boolean(b.needsShipping);
   const shippingFee = parseShippingFeeValue(b.shippingFee, needsShipping);
-
-  const recipeId =
-    typeof b.recipeId === "string" && b.recipeId.trim()
-      ? b.recipeId.trim()
-      : null;
 
   return {
     name,
@@ -177,7 +189,23 @@ export function parseCmsProductBody(
     productionTime,
     needsShipping,
     shippingFee,
-    recipeId,
     skus,
   };
+}
+
+/** 校验请求体中各 SKU 所引用的配方均存在 */
+export async function assertSkuRecipesExist(
+  skus: CmsProductSkuInput[],
+  assertRecipeExists: (recipeId: string) => Promise<void>
+): Promise<void> {
+  const ids = [
+    ...new Set(
+      skus
+        .map((s) => s.recipeId)
+        .filter((id): id is string => Boolean(id))
+    ),
+  ];
+  for (const id of ids) {
+    await assertRecipeExists(id);
+  }
 }

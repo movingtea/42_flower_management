@@ -1,7 +1,10 @@
 import { Prisma } from "@/generated/prisma/client";
 import { OrderCancelSource, OrderStatus } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
-import { markOrderPaidWithFifo } from "@/services/order-fifo";
+import {
+  markOrderPaidWithFifo,
+  restorePhysicalStockFromSaleOutInTx,
+} from "@/services/order-fifo";
 
 export const STOCK_SOLD_OUT_MESSAGE = "手慢了，花材库存已被抢光！";
 
@@ -218,75 +221,92 @@ export async function confirmWechatOrderReceipt(userId: string, orderId: string)
   return prisma.order.findUniqueOrThrow({ where: { id: orderId } });
 }
 
-/** 关闭待支付订单并归还库存 */
+/** 关闭待支付订单并归还虚拟 SKU 库存（无 SALE_OUT，不涉及物理回库） */
 export async function closePendingOrder(orderId: string, userId?: string) {
-  return prisma.$transaction(async (tx) => {
-    const updated = await tx.order.updateMany({
-      where: {
-        id: orderId,
-        status: OrderStatus.PENDING_PAYMENT,
-        ...(userId ? { userId } : {}),
-      },
-      data: {
-        status: OrderStatus.CANCELLED,
-        cancelSource: userId
-          ? OrderCancelSource.CUSTOMER
-          : OrderCancelSource.ADMIN,
-      },
-    });
+  return prisma.$transaction(
+    async (tx) => {
+      const updated = await tx.order.updateMany({
+        where: {
+          id: orderId,
+          status: OrderStatus.PENDING_PAYMENT,
+          ...(userId ? { userId } : {}),
+        },
+        data: {
+          status: OrderStatus.CANCELLED,
+          cancelSource: userId
+            ? OrderCancelSource.CUSTOMER
+            : OrderCancelSource.ADMIN,
+        },
+      });
 
-    if (updated.count !== 1) {
-      throw new Error("仅待支付订单可关闭");
+      if (updated.count !== 1) {
+        throw new Error("仅待支付订单可关闭");
+      }
+
+      await restoreOrderSkuStock(tx, orderId);
+
+      return tx.order.findUniqueOrThrow({ where: { id: orderId } });
+    },
+    {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 10000,
+      timeout: 30000,
     }
-
-    await restoreOrderSkuStock(tx, orderId);
-
-    return tx.order.findUniqueOrThrow({ where: { id: orderId } });
-  });
+  );
 }
 
-/** 已付订单退款取消：可选是否回滚 SKU 库存 */
+/**
+ * 已付订单退款取消：Serializable 事务内原路回库物理批次（IN_CANCEL）+ 可选归还虚拟 SKU。
+ */
 export async function refundPaidOrder(
   orderId: string,
   options: { rollbackStock: boolean; refundAmount?: number }
 ) {
-  return prisma.$transaction(async (tx) => {
-    const order = await tx.order.findUnique({ where: { id: orderId } });
-    if (!order) throw new Error("订单不存在");
+  return prisma.$transaction(
+    async (tx) => {
+      const order = await tx.order.findUnique({ where: { id: orderId } });
+      if (!order) throw new Error("订单不存在");
 
-    if (
-      order.status !== OrderStatus.PAID &&
-      order.status !== OrderStatus.PRODUCTION
-    ) {
-      throw new Error("仅已支付或制作中订单可退款取消");
+      if (
+        order.status !== OrderStatus.PAID &&
+        order.status !== OrderStatus.PRODUCTION
+      ) {
+        throw new Error("仅已支付或制作中订单可退款取消");
+      }
+
+      const refundAmount = options.refundAmount ?? order.payAmount;
+
+      await restorePhysicalStockFromSaleOutInTx(tx, orderId);
+
+      const updated = await tx.order.updateMany({
+        where: {
+          id: orderId,
+          status: order.status,
+        },
+        data: {
+          status: OrderStatus.CANCELLED,
+          refundAmount,
+          refundTime: new Date(),
+          cancelSource: OrderCancelSource.REFUND,
+        },
+      });
+
+      if (updated.count !== 1) {
+        throw new Error("订单状态已变更，请刷新后重试");
+      }
+
+      if (options.rollbackStock) {
+        await restoreOrderSkuStock(tx, orderId);
+      }
+
+      return tx.order.findUniqueOrThrow({ where: { id: orderId } });
+    },
+    {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 10000,
+      timeout: 30000,
     }
-
-    const refundAmount =
-      options.refundAmount ?? order.payAmount;
-
-    const updated = await tx.order.updateMany({
-      where: {
-        id: orderId,
-        status: order.status,
-      },
-      data: {
-        status: OrderStatus.CANCELLED,
-        refundAmount,
-        refundTime: new Date(),
-        cancelSource: OrderCancelSource.REFUND,
-      },
-    });
-
-    if (updated.count !== 1) {
-      throw new Error("订单状态已变更，请刷新后重试");
-    }
-
-    if (options.rollbackStock) {
-      await restoreOrderSkuStock(tx, orderId);
-    }
-
-    return tx.order.findUniqueOrThrow({ where: { id: orderId } });
-  });
+  );
 }
 
 /** 店长将待支付标记为已支付（看板拖拽 1→2），同事务 FIFO 扣减物理批次 */

@@ -7,12 +7,26 @@ import {
   type ProductSpuWithRelations,
 } from "@/lib/product-spu";
 
+export type WechatProductSkuItem = {
+  id: string;
+  skuCode: string;
+  specName: string;
+  price: string;
+  stock: number;
+  /** 展现用图文（已做 SPU Fallback，SKU 有值时不被覆盖） */
+  description: string | null;
+  imageUrl: string | null;
+  isMainImage: boolean;
+};
+
 export type WechatProductListItem = {
   id: string;
   name: string;
   category: string[];
   description: string | null;
   maintenanceGuide: string | null;
+  /** SPU 级主图（主图 SKU 或首个有图 SKU，供 Fallback 与列表封面） */
+  mainImageUrl: string;
   imageUrl: string;
   images: string[];
   minPrice: string;
@@ -23,45 +37,95 @@ export type WechatProductListItem = {
   shippingFee: number;
   allowPreOrder: boolean;
   productionTime: number;
-  skus: Array<{
-    id: string;
-    skuCode: string;
-    specName: string;
-    price: string;
-    stock: number;
-    imageUrl: string | null;
-    isMainImage: boolean;
-  }>;
+  skus: WechatProductSkuItem[];
 };
+
+function trimOrNull(value: string | null | undefined): string | null {
+  const trimmed = value?.trim();
+  return trimmed ? trimmed : null;
+}
+
+/** SKU 级展现字段：空则继承 SPU description / mainImageUrl，有值则绝不覆盖 */
+export function resolveWechatSkuPresentation(
+  sku: { description?: string | null; imageUrl: string | null },
+  spuFallback: { description: string | null; mainImageUrl: string }
+): Pick<WechatProductSkuItem, "description" | "imageUrl"> {
+  const ownDescription = trimOrNull(sku.description ?? null);
+  const ownImage = trimOrNull(sku.imageUrl);
+
+  return {
+    description: ownDescription ?? spuFallback.description,
+    imageUrl: ownImage ?? (spuFallback.mainImageUrl || null),
+  };
+}
+
+function resolveBannerImagesFromSkus(
+  skus: WechatProductSkuItem[]
+): string[] {
+  const urls: string[] = [];
+  const seen = new Set<string>();
+
+  const push = (raw: string | null | undefined) => {
+    const u = raw?.trim();
+    if (!u || seen.has(u)) return;
+    seen.add(u);
+    urls.push(u);
+  };
+
+  const main = skus.find((s) => s.isMainImage);
+  if (main) push(main.imageUrl);
+
+  for (const sku of skus) {
+    push(sku.imageUrl);
+  }
+
+  return urls;
+}
 
 export function mapSpuToWechatListItem(
   spu: ProductSpuWithRelations
 ): WechatProductListItem {
-  const skus = spu.skus.map((s) => ({
-    id: s.id,
-    skuCode: s.skuCode,
-    specName: s.specName,
-    price: s.price.toString(),
-    stock: s.stock,
-    imageUrl: s.imageUrl,
-    isMainImage: s.isMainImage,
-  }));
+  const mainImageUrl = resolveSpuCardImageUrl(spu.skus);
+  const spuFallback = {
+    description: trimOrNull(spu.description),
+    mainImageUrl,
+  };
+
+  const skus: WechatProductSkuItem[] = spu.skus.map((s) => {
+    const presentation = resolveWechatSkuPresentation(s, spuFallback);
+    return {
+      id: s.id,
+      skuCode: s.skuCode,
+      specName: s.specName,
+      price: s.price.toString(),
+      stock: s.stock,
+      description: presentation.description,
+      imageUrl: presentation.imageUrl,
+      isMainImage: s.isMainImage,
+    };
+  });
 
   const minPrice = resolveSpuMinPrice(spu.skus);
   const { displayPrice, priceSuffix } = formatMinPriceLabel(
     minPrice,
     skus.length
   );
-  const imageUrl = resolveSpuCardImageUrl(spu.skus);
+  const imageUrl = mainImageUrl || skus[0]?.imageUrl || "";
+  const bannerImages = resolveBannerImagesFromSkus(skus);
 
   return {
     id: spu.id,
     name: spu.name,
     category: categoryIdsFromProduct(spu),
-    description: spu.description,
-    maintenanceGuide: spu.maintenanceGuide,
+    description: spuFallback.description,
+    maintenanceGuide: trimOrNull(spu.maintenanceGuide),
+    mainImageUrl: imageUrl,
     imageUrl,
-    images: imageUrl ? [imageUrl] : [],
+    images: bannerImages.length
+      ? bannerImages
+      : imageUrl
+        ? [imageUrl]
+        : [],
     minPrice: displayPrice,
     sellPrice: displayPrice,
     priceSuffix,
@@ -73,3 +137,5 @@ export function mapSpuToWechatListItem(
     skus,
   };
 }
+
+export { resolveBannerImagesFromSkus };

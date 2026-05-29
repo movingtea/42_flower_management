@@ -32,11 +32,7 @@ async function main() {
         include: {
           sku: {
             include: {
-              spu: {
-                include: {
-                  recipe: { include: { lines: { include: { wiki: true } } } },
-                },
-              },
+              recipe: { include: { lines: { include: { wiki: true } } } },
             },
           },
         },
@@ -53,9 +49,9 @@ async function main() {
   console.log("orderNo:", before.orderNo);
   console.log("status:", before.status);
   for (const item of before.items) {
-    const recipe = item.sku.spu.recipe;
+    const recipe = item.sku.recipe;
     console.log(
-      `  item ${item.id}: skuQty=${item.quantity} spu=${item.snapshotProductName} recipeId=${recipe?.id ?? "无"}`
+      `  item ${item.id}: skuQty=${item.quantity} spec=${item.snapshotSpecName} recipeId=${item.sku.recipeId ?? recipe?.id ?? "无"}`
     );
     recipe?.lines.forEach((line) => {
       console.log(
