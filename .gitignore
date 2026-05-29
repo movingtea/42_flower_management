@@ -9,6 +9,7 @@ yarn-error.log*
 .next/
 out/
 build/
+**/tsconfig.tsbuildinfo
 .env*.local
 **/.env
 

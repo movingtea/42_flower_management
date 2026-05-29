@@ -9,25 +9,31 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
 
+    env:
+      IMAGE_NAME: flower-app:latest
+      REMOTE_PLATFORM_DIR: /root/flower-platform
+
     steps:
-      # 1. 拿着特权拉取代码
       - name: Checkout Source Code via Private SSH
         uses: actions/checkout@v4
         with:
           ssh-key: ${{ secrets.SSH_KEY }}
 
-      # 2. 原生 Docker 编译
-      - name: Build Application Image via Native Docker
+      - name: Build Application Image
+        env:
+          NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
+          NEXT_PUBLIC_ASSET_BASE_URL: ${{ secrets.NEXT_PUBLIC_ASSET_BASE_URL }}
         run: |
-          docker build -t flower-app:latest .
+          docker build \
+            --build-arg NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-http://localhost:3000}" \
+            --build-arg NEXT_PUBLIC_ASSET_BASE_URL="${NEXT_PUBLIC_ASSET_BASE_URL:-http://localhost:3000}" \
+            -t "$IMAGE_NAME" .
 
-      # 3. 原生打包物理镜像
       - name: Save Image to Tar File
         run: |
           mkdir -p /tmp
-          docker save -o /tmp/flower-app.tar flower-app:latest
+          docker save -o /tmp/flower-app.tar "$IMAGE_NAME"
 
-      # 4. 原生传输：直接扔给阿里云
       - name: Transfer Image via Private Key SCP
         env:
           HOST_IP: ${{ secrets.HOST_NAME }}
@@ -35,10 +41,10 @@ jobs:
         run: |
           echo "$SSH_KEY" > /tmp/id_rsa
           chmod 600 /tmp/id_rsa
-          scp -i /tmp/id_rsa -o StrictHostKeyChecking=no /tmp/flower-app.tar root@$HOST_IP:/root/flower-platform/tmp/flower-app.tar
+          scp -i /tmp/id_rsa -o StrictHostKeyChecking=no \
+            /tmp/flower-app.tar "root@${HOST_IP}:${REMOTE_PLATFORM_DIR}/tmp/flower-app.tar"
           rm -f /tmp/id_rsa
 
-      # 5. 原生部署（🔒 数据库免打扰、无损交替完全体）
       - name: Execute Remote Deploy via Private Key SSH
         env:
           HOST_IP: ${{ secrets.HOST_NAME }}
@@ -46,19 +52,33 @@ jobs:
         run: |
           echo "$SSH_KEY" > /tmp/id_rsa
           chmod 600 /tmp/id_rsa
-          
-          ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no root@$HOST_IP "
-            cd /root/flower-platform && \
-            docker load -i tmp/flower-app.tar && \
-            rm -f tmp/flower-app.tar && \
-            
-            # 1. 仅停止和删除业务微服务，绝对不碰数据库
-            docker compose stop gateway web && \
-            docker compose rm -f gateway web && \
-            
-            # ✨ 终极修复：带上 --no-deps 强行拉起，严禁检查或打扰现存的数据库容器！
-            docker compose up -d --no-deps gateway web && \
-            
-            docker image prune -f
-          "
+
+          ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no "root@${HOST_IP}" bash -s <<'REMOTE'
+          set -euo pipefail
+          cd /root/flower-platform
+
+          echo "[deploy] load image..."
+          docker load -i tmp/flower-app.tar
+          rm -f tmp/flower-app.tar
+
+          echo "[deploy] restart app containers (db untouched)..."
+          docker compose stop gateway web || true
+          docker compose rm -f gateway web || true
+          docker compose up -d --no-deps gateway web
+
+          echo "[deploy] wait for web to finish entrypoint (migrate + boot)..."
+          sleep 12
+
+          docker compose ps
+
+          echo "[deploy] prisma migrate status:"
+          docker compose exec -T web npx prisma migrate status || true
+
+          echo "[deploy] recent web logs:"
+          docker compose logs --tail=40 web
+
+          docker image prune -f
+          echo "[deploy] done."
+          REMOTE
+
           rm -f /tmp/id_rsa

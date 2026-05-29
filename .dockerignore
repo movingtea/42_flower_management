@@ -1,4 +1,4 @@
-# 小程序（不参与 WMS 镜像构建）
+# 小程序（不参与 WMS 镜像）
 42_mp/
 
 # WMS 依赖与构建产物
@@ -7,24 +7,32 @@ flower-wms-system/.next
 flower-wms-system/out
 flower-wms-system/dist
 flower-wms-system/tsconfig.tsbuildinfo
+flower-wms-system/coverage
 
-# 环境与密钥
+# 环境与密钥（运行时由 compose / secrets 注入）
 **/.env
 **/.env.*
 !flower-wms-system/.env.example
 
-# 版本控制与 IDE
+# 版本控制、CI 与 IDE
 .git
 .gitignore
+.github
 .cursor
 .vscode
+**/.DS_Store
+
+# 文档（减小构建上下文；不影响镜像）
 **/*.md
+!readme.md
 !README.md
 
-# 测试与日志
+# 测试、日志与临时文件
 **/coverage
 **/*.log
 npm-debug.log*
+**/tmp
+**/.turbo
 
-# 本地上传（运行时建议挂载 volume）
+# 本地上传目录（生产建议挂载 volume）
 flower-wms-system/public/uploads

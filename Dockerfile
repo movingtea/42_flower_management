@@ -1,21 +1,22 @@
 # syntax=docker/dockerfile:1
 
 # ---------------------------------------------------------------------------
-# Flower WMS — Next.js + Prisma + PostgreSQL
+# Flower WMS — Next.js 16 standalone + Prisma 7 + PostgreSQL
 # 构建上下文：monorepo 根目录（42_flower_management/）
 # 应用源码：flower-wms-system/
 #
-# 构建与运行（在仓库根目录执行）：
-#   docker build -t flower-wms .
-#   docker run -p 3000:3000 \
-#     -e DATABASE_URL="postgresql://user:pass@host:5432/42_flowers?schema=public" \
-#     -e NEXT_PUBLIC_API_URL="http://localhost:3000" \
-#     -e NEXT_PUBLIC_ASSET_BASE_URL="http://localhost:3000" \
-#     flower-wms
+# 本地构建（仓库根目录）：
+#   docker build -t flower-app:latest \
+#     --build-arg NEXT_PUBLIC_API_URL=https://your-domain.com \
+#     --build-arg NEXT_PUBLIC_ASSET_BASE_URL=https://your-domain.com \
+#     .
+#
+# 运行（migrate 在 entrypoint 自动执行，可用 SKIP_DB_MIGRATE=true 跳过）：
+#   docker run -p 3000:3000 --env-file flower-wms-system/.env flower-app:latest
 # ---------------------------------------------------------------------------
 
 FROM node:22-alpine AS base
-RUN apk add --no-cache libc6-compat openssl
+RUN apk add --no-cache libc6-compat openssl wget
 WORKDIR /app
 
 # ---------- 依赖 ----------
@@ -23,7 +24,7 @@ FROM base AS deps
 COPY flower-wms-system/package.json flower-wms-system/package-lock.json ./
 RUN npm ci
 
-# ---------- 生产依赖 ----------
+# ---------- 生产依赖（保留 prisma / bcryptjs / tsx 供 migrate 与 seed） ----------
 FROM deps AS prod-deps
 RUN npm prune --omit=dev
 
@@ -37,12 +38,13 @@ ENV NEXT_TELEMETRY_DISABLED=1
 
 RUN npx prisma generate
 
-ARG NEXT_PUBLIC_API_URL
-ARG NEXT_PUBLIC_ASSET_BASE_URL
+ARG NEXT_PUBLIC_API_URL=http://localhost:3000
+ARG NEXT_PUBLIC_ASSET_BASE_URL=http://localhost:3000
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_ASSET_BASE_URL=$NEXT_PUBLIC_ASSET_BASE_URL
 
-ARG DATABASE_URL="postgresql://build:build@localhost:5432/build?schema=public"
+# next build 不连接真实库；仅满足 Prisma 客户端初始化
+ARG DATABASE_URL="postgresql://build:build@127.0.0.1:5432/build?schema=public"
 ENV DATABASE_URL=$DATABASE_URL
 
 RUN npm run build
@@ -68,8 +70,16 @@ COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder --chown=nextjs:nodejs /app/src/generated ./src/generated
+COPY --from=builder --chown=nextjs:nodejs /app/docker-entrypoint.sh ./docker-entrypoint.sh
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+
+RUN chmod +x ./docker-entrypoint.sh
 
 USER nextjs
 EXPOSE 3000
 
+HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+  CMD wget -qO- "http://127.0.0.1:${PORT}/login" >/dev/null 2>&1 || exit 1
+
+ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["node", "server.js"]
