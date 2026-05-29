@@ -23,6 +23,10 @@ FROM base AS deps
 COPY flower-wms-system/package.json flower-wms-system/package-lock.json ./
 RUN npm ci
 
+# ---------- 生产依赖 ----------
+FROM deps AS prod-deps
+RUN npm prune --omit=dev
+
 # ---------- 构建 ----------
 FROM base AS builder
 WORKDIR /app
@@ -58,6 +62,9 @@ RUN addgroup --system --gid 1001 nodejs \
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=prod-deps --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=prod-deps --chown=nextjs:nodejs /app/package-lock.json ./package-lock.json
+COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder --chown=nextjs:nodejs /app/src/generated ./src/generated
