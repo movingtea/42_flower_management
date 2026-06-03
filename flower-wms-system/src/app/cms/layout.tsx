@@ -1,4 +1,5 @@
 import { CmsSidebar } from "@/components/cms/sidebar";
+import { IcpFooter } from "@/components/shared/IcpFooter";
 
 export const metadata = {
   title: "CMS · 小程序运营内容",
@@ -13,7 +14,10 @@ export default function CmsLayout({
   return (
     <div className="flex min-h-screen bg-rose-50/30">
       <CmsSidebar />
-      <main className="flex-1 overflow-auto p-8">{children}</main>
+      <main className="flex min-h-screen flex-1 flex-col overflow-auto p-8">
+        <div className="flex-1">{children}</div>
+        <IcpFooter />
+      </main>
     </div>
   );
 }

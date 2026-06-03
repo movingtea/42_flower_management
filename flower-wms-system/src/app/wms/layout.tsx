@@ -1,3 +1,4 @@
+import { IcpFooter } from "@/components/shared/IcpFooter";
 import { WmsSidebar } from "@/components/wms/sidebar";
 
 export const metadata = {
@@ -13,7 +14,10 @@ export default function WmsLayout({
   return (
     <div className="flex min-h-screen bg-zinc-50/80">
       <WmsSidebar />
-      <main className="flex-1 overflow-auto p-4 md:p-8">{children}</main>
+      <main className="flex min-h-screen flex-1 flex-col overflow-auto p-4 md:p-8">
+        <div className="flex-1">{children}</div>
+        <IcpFooter />
+      </main>
     </div>
   );
 }
