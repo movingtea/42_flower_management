@@ -8,8 +8,12 @@ import { generateUniqueSku } from "@/utils/skuGenerator";
 
 export type StockInPayload = {
   flowerWikiId: string;
-  quantity: number;
-  costPrice: number;
+  /** 到货束数 */
+  bundleCount: number;
+  /** 每束包含的支数 */
+  stemsPerBundle: number;
+  /** 每束采购价（元） */
+  costPricePerBundle: number;
   supplier?: string;
   operator: OperatorContext;
 };
@@ -80,12 +84,23 @@ function parsePositiveInt(raw: unknown, label: string): number {
   return n;
 }
 
-function parseCostPrice(raw: unknown): number {
+function parseCostPricePerBundle(raw: unknown): number {
   const n = Number(raw);
   if (!Number.isFinite(n) || n < 0) {
-    throw new Error("进货单价无效");
+    throw new Error("每束进货价无效");
   }
   return n;
+}
+
+/** 束 → 支：计算入库总支数与单支成本（库存/FIFO 仍以支为基准单位） */
+export function resolveStockInQuantities(payload: {
+  bundleCount: number;
+  stemsPerBundle: number;
+  costPricePerBundle: number;
+}) {
+  const totalStems = payload.bundleCount * payload.stemsPerBundle;
+  const unitCostPerStem = payload.costPricePerBundle / payload.stemsPerBundle;
+  return { totalStems, unitCostPerStem };
 }
 
 function parseReason(raw: unknown): string {
@@ -115,8 +130,9 @@ export function parseStockInBody(raw: unknown): Omit<StockInPayload, "operator">
   const body = raw as Record<string, unknown>;
   return {
     flowerWikiId: parseFlowerWikiId(body.flowerWikiId),
-    quantity: parsePositiveInt(body.quantity, "到货数量"),
-    costPrice: parseCostPrice(body.costPrice),
+    bundleCount: parsePositiveInt(body.bundleCount, "到货束数"),
+    stemsPerBundle: parsePositiveInt(body.stemsPerBundle, "每束支数"),
+    costPricePerBundle: parseCostPricePerBundle(body.costPricePerBundle),
     supplier:
       typeof body.supplier === "string" ? body.supplier.trim() || undefined : undefined,
   };
@@ -179,15 +195,17 @@ export async function runStockInTransaction(payload: StockInPayload) {
     const material = await resolveOrCreateMaterial(tx, payload.flowerWikiId);
     const batchNo = await generateBatchNo(tx);
     const now = new Date();
+    const { totalStems, unitCostPerStem } = resolveStockInQuantities(payload);
+    const inboundRemark = `原料到货入库（${payload.bundleCount}束×${payload.stemsPerBundle}支/束）`;
 
     const batch = await tx.batch.create({
       data: {
         materialId: material.id,
         batchNo,
         inboundAt: now,
-        originalQty: payload.quantity,
-        remainingQty: payload.quantity,
-        unitCost: payload.costPrice,
+        originalQty: totalStems,
+        remainingQty: totalStems,
+        unitCost: unitCostPerStem,
         supplier: payload.supplier ?? null,
       },
     });
@@ -197,15 +215,15 @@ export async function runStockInTransaction(payload: StockInPayload) {
         materialId: material.id,
         batchId: batch.id,
         type: StockLogType.INBOUND,
-        delta: payload.quantity,
-        quantity: payload.quantity,
-        remark: "原料到货入库",
+        delta: totalStems,
+        quantity: totalStems,
+        remark: inboundRemark,
         operator: operator.operatorLabel,
         operatorStaffId: operator.operatorStaffId,
       },
     });
 
-    return { material, batch };
+    return { material, batch, totalStems };
   });
 }
 

@@ -22,11 +22,14 @@ export async function POST(request: Request) {
 
     return jsonSuccess(
       {
-        message: "入库成功，已创建独立 FIFO 批次",
+        message: `入库成功，共 ${result.totalStems} 支（${base.bundleCount} 束 × ${base.stemsPerBundle} 支/束）`,
         batch: {
           id: result.batch.id,
           batchNo: result.batch.batchNo,
           materialId: result.material.id,
+          bundleCount: base.bundleCount,
+          stemsPerBundle: base.stemsPerBundle,
+          costPricePerBundle: base.costPricePerBundle,
           quantity: result.batch.originalQty,
           remainingQty: result.batch.remainingQty,
           unitCost: result.batch.unitCost.toString(),

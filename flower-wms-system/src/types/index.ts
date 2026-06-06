@@ -25,11 +25,12 @@ export interface FifoDeduction {
   inboundAt: Date;
 }
 
-/** WMS 原料到货入库 POST /api/admin/wms/stock-in */
+/** WMS 原料到货入库 POST /api/admin/wms/stock-in（录入束数，服务端换算为支） */
 export interface WmsStockInBody {
   flowerWikiId: string;
-  quantity: number;
-  costPrice: number;
+  bundleCount: number;
+  stemsPerBundle: number;
+  costPricePerBundle: number;
   supplier?: string;
 }
 

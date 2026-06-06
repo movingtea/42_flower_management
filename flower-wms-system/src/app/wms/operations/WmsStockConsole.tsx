@@ -41,8 +41,9 @@ export function WmsStockConsole({
   } | null>(null);
 
   const [inboundWikiId, setInboundWikiId] = useState<string | null>(null);
-  const [inboundQty, setInboundQty] = useState(1);
-  const [costPrice, setCostPrice] = useState("");
+  const [inboundBundleCount, setInboundBundleCount] = useState(1);
+  const [stemsPerBundle, setStemsPerBundle] = useState(10);
+  const [costPricePerBundle, setCostPricePerBundle] = useState("");
   const [supplier, setSupplier] = useState("");
   const [inboundSubmitting, setInboundSubmitting] = useState(false);
 
@@ -57,6 +58,15 @@ export function WmsStockConsole({
 
   const selectedBatch = wikiBatches.find((b) => b.batchId === lossBatchId);
   const lossMaxQty = selectedBatch?.remainingQty ?? 0;
+
+  const inboundTotalStems = inboundBundleCount * stemsPerBundle;
+  const parsedBundlePrice = Number(costPricePerBundle);
+  const inboundUnitStemCost =
+    stemsPerBundle > 0 &&
+    Number.isFinite(parsedBundlePrice) &&
+    parsedBundlePrice >= 0
+      ? parsedBundlePrice / stemsPerBundle
+      : null;
 
   function showToast(message: string, type: "success" | "error") {
     setToast({ message, type });
@@ -142,9 +152,13 @@ export function WmsStockConsole({
       showToast("请先选择到货花材", "error");
       return;
     }
-    const price = Number(costPrice);
+    const price = Number(costPricePerBundle);
     if (!Number.isFinite(price) || price < 0) {
-      showToast("进货单价无效", "error");
+      showToast("每束进货价无效", "error");
+      return;
+    }
+    if (stemsPerBundle <= 0) {
+      showToast("每束支数须大于 0", "error");
       return;
     }
 
@@ -155,8 +169,9 @@ export function WmsStockConsole({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           flowerWikiId: inboundWikiId,
-          quantity: inboundQty,
-          costPrice: price,
+          bundleCount: inboundBundleCount,
+          stemsPerBundle,
+          costPricePerBundle: price,
           supplier: supplier.trim() || undefined,
         }),
       });
@@ -172,8 +187,9 @@ export function WmsStockConsole({
       }
 
       showToast(json.data?.message ?? "入库成功", "success");
-      setInboundQty(1);
-      setCostPrice("");
+      setInboundBundleCount(1);
+      setStemsPerBundle(10);
+      setCostPricePerBundle("");
       setSupplier("");
       await refreshPipeline();
     } catch {
@@ -320,29 +336,52 @@ export function WmsStockConsole({
 
               <div>
                 <label className="mb-2 block text-sm font-medium text-zinc-700">
-                  到货数量
+                  到货束数
                 </label>
                 <QuantityStepper
-                  value={inboundQty}
+                  value={inboundBundleCount}
                   min={1}
-                  onChange={setInboundQty}
+                  onChange={setInboundBundleCount}
                   disabled={inboundSubmitting}
-                  aria-label="到货数量"
+                  aria-label="到货束数"
+                />
+              </div>
+
+              <div>
+                <label className="mb-2 block text-sm font-medium text-zinc-700">
+                  每束支数
+                </label>
+                <QuantityStepper
+                  value={stemsPerBundle}
+                  min={1}
+                  onChange={setStemsPerBundle}
+                  disabled={inboundSubmitting}
+                  aria-label="每束支数"
                 />
               </div>
 
               <Input
-                label="进货单价（元）"
+                label="每束进货价（元）"
                 type="number"
                 inputMode="decimal"
                 min={0}
                 step={0.01}
-                placeholder="2.50"
-                value={costPrice}
-                onChange={(e) => setCostPrice(e.target.value)}
+                placeholder="25.00"
+                value={costPricePerBundle}
+                onChange={(e) => setCostPricePerBundle(e.target.value)}
                 disabled={inboundSubmitting}
                 required
               />
+
+              {inboundTotalStems > 0 && inboundUnitStemCost != null && (
+                <p className="rounded-lg bg-zinc-50 px-3 py-2 text-xs text-zinc-600">
+                  合计入库{" "}
+                  <span className="font-semibold text-zinc-900">
+                    {inboundTotalStems} 支
+                  </span>
+                  ，折合单支成本 ¥{inboundUnitStemCost.toFixed(4)}
+                </p>
+              )}
 
               <Input
                 label="供应商"
