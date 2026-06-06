@@ -25,3 +25,5 @@ wechat-mini-program/project.private.config.json
 .vscode/
 
 flower-wms-system/.env
+
+docker-compose.yml
