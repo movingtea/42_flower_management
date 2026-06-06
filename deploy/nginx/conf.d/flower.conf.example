@@ -1,0 +1,42 @@
+# 复制到服务器：/root/flower-nginx/conf.d/flower.conf
+# upstream 必须使用 compose 服务名 flower-web（勿写 127.0.0.1）
+
+upstream flower_web_upstream {
+    server flower-web:3000;
+    keepalive 32;
+}
+
+server {
+    listen 80;
+    server_name www.universe42.studio universe42.studio;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    server_name www.universe42.studio universe42.studio;
+
+    ssl_certificate     /etc/nginx/cert/fullchain.pem;
+    ssl_certificate_key /etc/nginx/cert/privkey.pem;
+
+    client_max_body_size 20m;
+
+    location / {
+        proxy_pass http://flower_web_upstream;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 120s;
+    }
+}

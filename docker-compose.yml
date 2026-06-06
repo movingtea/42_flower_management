@@ -47,7 +47,7 @@ services:
       - NEXTAUTH_URL=https://www.universe42.studio
       - NEXTAUTH_SECRET=7bF9mQ2xK5wP8vA1zL4nT7sJ3cX6vB9d
       - AUTH_SECRET=7bF9mQ2xK5wP8vA1zL4nT7sJ3cX6vB9d
-    entrypoint: ["npx", "tsx", "scripts/cron-inventory-daemon.ts"]
+    entrypoint: ["npx", "tsx", "--tsconfig", "tsconfig.json", "scripts/cron-inventory-daemon.ts"]
     networks:
       - flower-prod-network
     depends_on:

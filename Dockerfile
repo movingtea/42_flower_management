@@ -71,6 +71,9 @@ COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder --chown=nextjs:nodejs /app/src/generated ./src/generated
+COPY --from=builder --chown=nextjs:nodejs /app/src/lib ./src/lib
+COPY --from=builder --chown=nextjs:nodejs /app/src/services ./src/services
+COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
 COPY --from=builder --chown=nextjs:nodejs /app/docker-entrypoint.sh ./docker-entrypoint.sh
 COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 
