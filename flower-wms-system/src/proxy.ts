@@ -1,9 +1,8 @@
-import { NextResponse } from "next/server";
 import NextAuth from "next-auth";
+import { NextResponse } from "next/server";
+
 import { authConfig } from "@/auth.config";
 import { Role } from "@/generated/prisma/enums";
-
-const { auth } = NextAuth(authConfig);
 import {
   getRoleHomePath,
   isStaffProtectedAdminApi,
@@ -17,13 +16,15 @@ import {
   isStaffAdminApiPath,
 } from "@/lib/rbac";
 
+const { auth } = NextAuth(authConfig);
+
 function redirectToLogin(req: { nextUrl: URL }, pathname: string) {
   const login = new URL("/login", req.nextUrl);
   login.searchParams.set("callbackUrl", pathname);
   return NextResponse.redirect(login);
 }
 
-export default auth((req) => {
+export const proxy = auth((req) => {
   const { pathname } = req.nextUrl;
   const role = req.auth?.user?.role as Role | undefined;
   const isLoggedIn = !!req.auth?.user?.id && !!role;
