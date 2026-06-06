@@ -34,6 +34,7 @@ export async function POST(request: Request) {
       where: { chineseName: { equals: flowerName, mode: "insensitive" } },
       select: {
         englishName: true,
+        flowerLanguage: true,
         maintenanceCare: true,
         maintenance: true,
       },
@@ -49,6 +50,7 @@ export async function POST(request: Request) {
         ai.latinName,
         ai.englishName
       ),
+      flowerLanguage: ai.flowerLanguage,
       careTable: ai.careTable,
       cachedHint: cached
         ? "已存在同名母表记录，AI 结果仅供参考"

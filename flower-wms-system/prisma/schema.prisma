@@ -519,6 +519,7 @@ model FlowerWiki {
   supplySeason String?    @map("supply_season")
   floralRole   FloralRole @map("floral_role")
   maintenance  String     @db.Text
+  flowerLanguage String?   @map("flower_language") @db.Text
   /// 结构化养护指南表格（AI / 表格编辑）；maintenance 保留文本摘要兼容旧数据
   maintenanceCare Json?   @map("maintenance_care")
   /// 默认保质期（天）；入库时用于计算 batch.expiresAt，可单次入库覆盖

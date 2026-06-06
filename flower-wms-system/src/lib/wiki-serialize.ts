@@ -28,6 +28,7 @@ export function serializeWiki(row: FlowerWiki) {
     floralRole: row.floralRole,
     /** UI 别名：花艺角色中文 */
     role: FLORAL_ROLE_LABEL[row.floralRole],
+    flowerLanguage: row.flowerLanguage,
     maintenance: row.maintenance,
     careTable: parseStoredCareDocument(row.maintenanceCare),
     aliasMap,

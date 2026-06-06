@@ -26,6 +26,7 @@ export const WIKI_CARE_ROW_SPECS: ReadonlyArray<{
 export type FlowerAiCompleteResult = {
   latinName: string;
   englishName: string;
+  flowerLanguage: string;
   careTable: WikiCareRow[];
 };
 
@@ -118,9 +119,14 @@ export function parseFlowerAiJson(raw: string): FlowerAiCompleteResult {
     typeof data.latinName === "string" ? data.latinName.trim() : "";
   const englishName =
     typeof data.englishName === "string" ? data.englishName.trim() : "";
+  const flowerLanguage =
+    typeof data.flowerLanguage === "string" ? data.flowerLanguage.trim() : "";
   const careTableRaw = parseCareTable(data.careTable);
   if (!latinName && !englishName) {
     throw new Error("AI 未返回有效的拉丁学名或英文名");
+  }
+  if (!flowerLanguage) {
+    throw new Error("AI 未返回有效的花语");
   }
   if (!careTableRaw || !validateCareTableForSave(careTableRaw)) {
     throw new Error("AI 未返回有效的养护指南表格");
@@ -128,6 +134,7 @@ export function parseFlowerAiJson(raw: string): FlowerAiCompleteResult {
   return {
     latinName,
     englishName,
+    flowerLanguage,
     careTable: normalizeCareTable(careTableRaw),
   };
 }

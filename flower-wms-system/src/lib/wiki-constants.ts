@@ -36,6 +36,7 @@ export type WikiFormPayload = {
   morphology?: string | null;
   supplySeason?: string | null;
   floralRole: FloralRole;
+  flowerLanguage?: string | null;
   maintenance: string;
   careTable?: WikiCareRow[] | null;
   aliasMap?: Record<string, string[]>;
@@ -58,6 +59,7 @@ export type WikiListItem = {
   availability: string;
   floralRole: FloralRole;
   role: string;
+  flowerLanguage: string | null;
   maintenance: string;
   careTable: WikiCareRow[] | null;
   aliasMap: Record<string, string[]>;
@@ -73,6 +75,7 @@ export type WikiAiFields = {
   morphology: string;
   supplySeason: string;
   floralRole: FloralRole;
+  flowerLanguage: string;
   maintenance: string;
   suggestedAliases: string[];
 };
@@ -96,6 +99,7 @@ export const EMPTY_WIKI_FORM: WikiFormPayload = {
   morphology: "",
   supplySeason: "",
   floralRole: FloralRole.MAIN,
+  flowerLanguage: "",
   maintenance: WIKI_MAINTENANCE_TEMPLATE,
   aliasMap: { zh: [] },
   defaultShelfLifeDays: null,

@@ -226,6 +226,7 @@ Prisma 模型：`FlowerWiki` → 表 **`flower_wikis`**。
 | `pinyin_index` | `pinyinIndex` | 简拼索引，写入时由 `toPinyinIndex()` 生成 |
 | `color_tags` | `colorTags` | 色系标签数组 |
 | `floral_role` | `floralRole` | 枚举：主花 / 配花 / 线条 / 叶材 |
+| `flower_language` | `flowerLanguage` | 花语 / 寓意，由 DeepSeek 补全返回，可人工调整 |
 | `alias_map` | `aliasMap` | JSON 别名 |
 
 **简拼检索流**：

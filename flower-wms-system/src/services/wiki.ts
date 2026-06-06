@@ -109,9 +109,14 @@ export function parseWikiPayload(raw: unknown): WikiFormPayload {
   if (!maintenance) throw new Error("养护指南不能为空");
 
   const colorTags = readColorTags(b);
-  if (colorTags.length === 0) throw new Error("色系标签不能为空");
 
   const floralRole = parseFloralRole(b.floralRole ?? b.role);
+  const flowerLanguage =
+    typeof b.flowerLanguage === "string"
+      ? b.flowerLanguage.trim()
+      : typeof b.floriography === "string"
+        ? b.floriography.trim()
+        : null;
   const photo = typeof b.photo === "string" ? b.photo.trim() : null;
   const morphology =
     typeof b.morphology === "string"
@@ -143,6 +148,7 @@ export function parseWikiPayload(raw: unknown): WikiFormPayload {
     morphology: morphology || null,
     supplySeason: supplySeason || null,
     floralRole,
+    flowerLanguage: flowerLanguage || null,
     maintenance,
     careTable,
     aliasMap,
@@ -172,6 +178,7 @@ function toCreateData(p: WikiFormPayload): Prisma.FlowerWikiCreateInput {
     morphology: p.morphology,
     supplySeason: p.supplySeason,
     floralRole: p.floralRole,
+    flowerLanguage: p.flowerLanguage,
     maintenance: p.maintenance,
     maintenanceCare: maintenanceCareInput(p.careTable, "create"),
     defaultShelfLifeDays: p.defaultShelfLifeDays ?? null,
