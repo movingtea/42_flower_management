@@ -17,13 +17,11 @@ import {
   validateCareTableForSave,
   type WikiCareRow,
 } from "@/lib/wiki-care";
-import { FloralRole } from "@/generated/prisma/enums";
 
 type FormState = {
   name: string;
   englishName: string;
-  role: FloralRole;
-  color: string;
+  flowerLanguage: string;
   availability: string;
   maintenance: string;
   defaultShelfLifeDays: string;
@@ -34,8 +32,7 @@ type CareEditorMode = "text" | "table";
 const EMPTY_FORM: FormState = {
   name: "",
   englishName: "",
-  role: FloralRole.MAIN,
-  color: "",
+  flowerLanguage: "",
   availability: "",
   maintenance: WIKI_MAINTENANCE_TEMPLATE,
   defaultShelfLifeDays: "",
@@ -45,8 +42,7 @@ function toForm(item: WikiListItem): FormState {
   return {
     name: item.chineseName,
     englishName: item.englishName,
-    role: item.floralRole,
-    color: item.colorTags[0] ?? item.color ?? "",
+    flowerLanguage: item.flowerLanguage ?? "",
     availability: item.supplySeason ?? item.availability ?? "",
     maintenance: item.maintenance,
     defaultShelfLifeDays:
@@ -58,6 +54,8 @@ function toPayload(
   form: FormState,
   options: {
     preservedMorphology?: string | null;
+    preservedColorTags?: string[] | null;
+    preservedFloralRole?: WikiListItem["floralRole"] | null;
     careTable: WikiCareRow[] | null;
     careMode: CareEditorMode;
   }
@@ -71,8 +69,9 @@ function toPayload(
   return {
     name: form.name.trim(),
     englishName: form.englishName.trim(),
-    role: FLORAL_ROLE_LABEL[form.role],
-    color: form.color.trim(),
+    colorTags: options.preservedColorTags ?? [],
+    floralRole: options.preservedFloralRole ?? undefined,
+    flowerLanguage: form.flowerLanguage.trim() || null,
     texture: options.preservedMorphology?.trim() || null,
     availability: form.availability.trim() || null,
     maintenance: useTable
@@ -95,6 +94,10 @@ export function WikiMaterialConsole() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingMorphology, setEditingMorphology] = useState<string | null>(null);
+  const [editingColorTags, setEditingColorTags] = useState<string[] | null>(null);
+  const [editingFloralRole, setEditingFloralRole] = useState<
+    WikiListItem["floralRole"] | null
+  >(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [careMode, setCareMode] = useState<CareEditorMode>("text");
   const [careTable, setCareTable] = useState<WikiCareRow[]>(emptyCareTable());
@@ -163,6 +166,8 @@ export function WikiMaterialConsole() {
   function openCreate() {
     setEditingId(null);
     setEditingMorphology(null);
+    setEditingColorTags(null);
+    setEditingFloralRole(null);
     setForm({ ...EMPTY_FORM });
     resetCareEditor("text");
     setModalOpen(true);
@@ -171,6 +176,8 @@ export function WikiMaterialConsole() {
   function openEdit(item: WikiListItem) {
     setEditingId(item.id);
     setEditingMorphology(item.morphology);
+    setEditingColorTags(item.colorTags);
+    setEditingFloralRole(item.floralRole);
     setForm(toForm(item));
     if (item.careTable?.length) {
       setCareTable(normalizeCareTable(item.careTable));
@@ -185,6 +192,8 @@ export function WikiMaterialConsole() {
     setModalOpen(false);
     setEditingId(null);
     setEditingMorphology(null);
+    setEditingColorTags(null);
+    setEditingFloralRole(null);
     setForm({ ...EMPTY_FORM });
     resetCareEditor("text");
   }
@@ -210,6 +219,7 @@ export function WikiMaterialConsole() {
           combinedEnglishName?: string;
           latinName?: string;
           englishName?: string;
+          flowerLanguage?: string;
           careTable?: WikiCareRow[];
           cachedHint?: string;
         };
@@ -230,6 +240,7 @@ export function WikiMaterialConsole() {
       setForm((prev) => ({
         ...prev,
         englishName: combined,
+        flowerLanguage: data.flowerLanguage ?? prev.flowerLanguage,
         maintenance: data.careTable
           ? careTableToMaintenanceText(data.careTable)
           : prev.maintenance,
@@ -262,11 +273,6 @@ export function WikiMaterialConsole() {
       showToast("请填写拉丁学名", "error");
       return;
     }
-    if (!form.color.trim()) {
-      showToast("请填写色系标签", "error");
-      return;
-    }
-
     const hasTableCare =
       careMode === "table" && validateCareTableForSave(careTable);
     if (!hasTableCare && !form.maintenance.trim()) {
@@ -285,6 +291,8 @@ export function WikiMaterialConsole() {
         body: JSON.stringify(
           toPayload(form, {
             preservedMorphology: editingMorphology,
+            preservedColorTags: editingColorTags,
+            preservedFloralRole: editingFloralRole,
             careTable: hasTableCare ? careTable : null,
             careMode,
           })
@@ -506,32 +514,20 @@ export function WikiMaterialConsole() {
                   className="sm:col-span-2"
                 />
 
-                <label className="block text-sm">
+                <label className="block text-sm sm:col-span-2">
                   <span className="mb-1 block font-medium text-zinc-700">
-                    花艺核心角色
+                    花语
                   </span>
-                  <select
-                    value={form.role}
+                  <textarea
+                    rows={3}
+                    placeholder="AI 一键智能补全后自动生成，也可手动调整"
+                    value={form.flowerLanguage}
                     onChange={(e) =>
-                      setForm({ ...form, role: e.target.value as FloralRole })
+                      setForm({ ...form, flowerLanguage: e.target.value })
                     }
-                    className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-zinc-900 outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-400"
-                  >
-                    {(Object.entries(FLORAL_ROLE_LABEL) as [FloralRole, string][]).map(
-                      ([role, label]) => (
-                        <option key={role} value={role}>
-                          {label}
-                        </option>
-                      )
-                    )}
-                  </select>
+                    className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-400"
+                  />
                 </label>
-                <Input
-                  label="色系标签"
-                  placeholder="如：香槟色、复古粉"
-                  value={form.color}
-                  onChange={(e) => setForm({ ...form, color: e.target.value })}
-                />
                 <Input
                   label="供货周期"
                   placeholder="如：全年、4-9月"

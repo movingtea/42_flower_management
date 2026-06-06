@@ -44,6 +44,7 @@ export type FlowerWikiMinAggregateOutputType = {
   supplySeason: string | null
   floralRole: $Enums.FloralRole | null
   maintenance: string | null
+  flowerLanguage: string | null
   defaultShelfLifeDays: number | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -59,6 +60,7 @@ export type FlowerWikiMaxAggregateOutputType = {
   supplySeason: string | null
   floralRole: $Enums.FloralRole | null
   maintenance: string | null
+  flowerLanguage: string | null
   defaultShelfLifeDays: number | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -75,6 +77,7 @@ export type FlowerWikiCountAggregateOutputType = {
   supplySeason: number
   floralRole: number
   maintenance: number
+  flowerLanguage: number
   maintenanceCare: number
   defaultShelfLifeDays: number
   aliasMap: number
@@ -102,6 +105,7 @@ export type FlowerWikiMinAggregateInputType = {
   supplySeason?: true
   floralRole?: true
   maintenance?: true
+  flowerLanguage?: true
   defaultShelfLifeDays?: true
   createdAt?: true
   updatedAt?: true
@@ -117,6 +121,7 @@ export type FlowerWikiMaxAggregateInputType = {
   supplySeason?: true
   floralRole?: true
   maintenance?: true
+  flowerLanguage?: true
   defaultShelfLifeDays?: true
   createdAt?: true
   updatedAt?: true
@@ -133,6 +138,7 @@ export type FlowerWikiCountAggregateInputType = {
   supplySeason?: true
   floralRole?: true
   maintenance?: true
+  flowerLanguage?: true
   maintenanceCare?: true
   defaultShelfLifeDays?: true
   aliasMap?: true
@@ -238,6 +244,7 @@ export type FlowerWikiGroupByOutputType = {
   supplySeason: string | null
   floralRole: $Enums.FloralRole
   maintenance: string
+  flowerLanguage: string | null
   maintenanceCare: runtime.JsonValue | null
   defaultShelfLifeDays: number | null
   aliasMap: runtime.JsonValue
@@ -279,6 +286,7 @@ export type FlowerWikiWhereInput = {
   supplySeason?: Prisma.StringNullableFilter<"FlowerWiki"> | string | null
   floralRole?: Prisma.EnumFloralRoleFilter<"FlowerWiki"> | $Enums.FloralRole
   maintenance?: Prisma.StringFilter<"FlowerWiki"> | string
+  flowerLanguage?: Prisma.StringNullableFilter<"FlowerWiki"> | string | null
   maintenanceCare?: Prisma.JsonNullableFilter<"FlowerWiki">
   defaultShelfLifeDays?: Prisma.IntNullableFilter<"FlowerWiki"> | number | null
   aliasMap?: Prisma.JsonFilter<"FlowerWiki">
@@ -300,6 +308,7 @@ export type FlowerWikiOrderByWithRelationInput = {
   supplySeason?: Prisma.SortOrderInput | Prisma.SortOrder
   floralRole?: Prisma.SortOrder
   maintenance?: Prisma.SortOrder
+  flowerLanguage?: Prisma.SortOrderInput | Prisma.SortOrder
   maintenanceCare?: Prisma.SortOrderInput | Prisma.SortOrder
   defaultShelfLifeDays?: Prisma.SortOrderInput | Prisma.SortOrder
   aliasMap?: Prisma.SortOrder
@@ -324,6 +333,7 @@ export type FlowerWikiWhereUniqueInput = Prisma.AtLeast<{
   supplySeason?: Prisma.StringNullableFilter<"FlowerWiki"> | string | null
   floralRole?: Prisma.EnumFloralRoleFilter<"FlowerWiki"> | $Enums.FloralRole
   maintenance?: Prisma.StringFilter<"FlowerWiki"> | string
+  flowerLanguage?: Prisma.StringNullableFilter<"FlowerWiki"> | string | null
   maintenanceCare?: Prisma.JsonNullableFilter<"FlowerWiki">
   defaultShelfLifeDays?: Prisma.IntNullableFilter<"FlowerWiki"> | number | null
   aliasMap?: Prisma.JsonFilter<"FlowerWiki">
@@ -345,6 +355,7 @@ export type FlowerWikiOrderByWithAggregationInput = {
   supplySeason?: Prisma.SortOrderInput | Prisma.SortOrder
   floralRole?: Prisma.SortOrder
   maintenance?: Prisma.SortOrder
+  flowerLanguage?: Prisma.SortOrderInput | Prisma.SortOrder
   maintenanceCare?: Prisma.SortOrderInput | Prisma.SortOrder
   defaultShelfLifeDays?: Prisma.SortOrderInput | Prisma.SortOrder
   aliasMap?: Prisma.SortOrder
@@ -371,6 +382,7 @@ export type FlowerWikiScalarWhereWithAggregatesInput = {
   supplySeason?: Prisma.StringNullableWithAggregatesFilter<"FlowerWiki"> | string | null
   floralRole?: Prisma.EnumFloralRoleWithAggregatesFilter<"FlowerWiki"> | $Enums.FloralRole
   maintenance?: Prisma.StringWithAggregatesFilter<"FlowerWiki"> | string
+  flowerLanguage?: Prisma.StringNullableWithAggregatesFilter<"FlowerWiki"> | string | null
   maintenanceCare?: Prisma.JsonNullableWithAggregatesFilter<"FlowerWiki">
   defaultShelfLifeDays?: Prisma.IntNullableWithAggregatesFilter<"FlowerWiki"> | number | null
   aliasMap?: Prisma.JsonWithAggregatesFilter<"FlowerWiki">
@@ -389,6 +401,7 @@ export type FlowerWikiCreateInput = {
   supplySeason?: string | null
   floralRole: $Enums.FloralRole
   maintenance: string
+  flowerLanguage?: string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -410,6 +423,7 @@ export type FlowerWikiUncheckedCreateInput = {
   supplySeason?: string | null
   floralRole: $Enums.FloralRole
   maintenance: string
+  flowerLanguage?: string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -431,6 +445,7 @@ export type FlowerWikiUpdateInput = {
   supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   floralRole?: Prisma.EnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole
   maintenance?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -452,6 +467,7 @@ export type FlowerWikiUncheckedUpdateInput = {
   supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   floralRole?: Prisma.EnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole
   maintenance?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -473,6 +489,7 @@ export type FlowerWikiCreateManyInput = {
   supplySeason?: string | null
   floralRole: $Enums.FloralRole
   maintenance: string
+  flowerLanguage?: string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -491,6 +508,7 @@ export type FlowerWikiUpdateManyMutationInput = {
   supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   floralRole?: Prisma.EnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole
   maintenance?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -509,6 +527,7 @@ export type FlowerWikiUncheckedUpdateManyInput = {
   supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   floralRole?: Prisma.EnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole
   maintenance?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -545,6 +564,7 @@ export type FlowerWikiCountOrderByAggregateInput = {
   supplySeason?: Prisma.SortOrder
   floralRole?: Prisma.SortOrder
   maintenance?: Prisma.SortOrder
+  flowerLanguage?: Prisma.SortOrder
   maintenanceCare?: Prisma.SortOrder
   defaultShelfLifeDays?: Prisma.SortOrder
   aliasMap?: Prisma.SortOrder
@@ -566,6 +586,7 @@ export type FlowerWikiMaxOrderByAggregateInput = {
   supplySeason?: Prisma.SortOrder
   floralRole?: Prisma.SortOrder
   maintenance?: Prisma.SortOrder
+  flowerLanguage?: Prisma.SortOrder
   defaultShelfLifeDays?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -581,6 +602,7 @@ export type FlowerWikiMinOrderByAggregateInput = {
   supplySeason?: Prisma.SortOrder
   floralRole?: Prisma.SortOrder
   maintenance?: Prisma.SortOrder
+  flowerLanguage?: Prisma.SortOrder
   defaultShelfLifeDays?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -666,6 +688,7 @@ export type FlowerWikiCreateWithoutMaterialsInput = {
   supplySeason?: string | null
   floralRole: $Enums.FloralRole
   maintenance: string
+  flowerLanguage?: string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -686,6 +709,7 @@ export type FlowerWikiUncheckedCreateWithoutMaterialsInput = {
   supplySeason?: string | null
   floralRole: $Enums.FloralRole
   maintenance: string
+  flowerLanguage?: string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -722,6 +746,7 @@ export type FlowerWikiUpdateWithoutMaterialsInput = {
   supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   floralRole?: Prisma.EnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole
   maintenance?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -742,6 +767,7 @@ export type FlowerWikiUncheckedUpdateWithoutMaterialsInput = {
   supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   floralRole?: Prisma.EnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole
   maintenance?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -762,6 +788,7 @@ export type FlowerWikiCreateWithoutRecipeLinesInput = {
   supplySeason?: string | null
   floralRole: $Enums.FloralRole
   maintenance: string
+  flowerLanguage?: string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -782,6 +809,7 @@ export type FlowerWikiUncheckedCreateWithoutRecipeLinesInput = {
   supplySeason?: string | null
   floralRole: $Enums.FloralRole
   maintenance: string
+  flowerLanguage?: string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -818,6 +846,7 @@ export type FlowerWikiUpdateWithoutRecipeLinesInput = {
   supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   floralRole?: Prisma.EnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole
   maintenance?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -838,6 +867,7 @@ export type FlowerWikiUncheckedUpdateWithoutRecipeLinesInput = {
   supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   floralRole?: Prisma.EnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole
   maintenance?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -858,6 +888,7 @@ export type FlowerWikiCreateWithoutStockLossRecordsInput = {
   supplySeason?: string | null
   floralRole: $Enums.FloralRole
   maintenance: string
+  flowerLanguage?: string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -878,6 +909,7 @@ export type FlowerWikiUncheckedCreateWithoutStockLossRecordsInput = {
   supplySeason?: string | null
   floralRole: $Enums.FloralRole
   maintenance: string
+  flowerLanguage?: string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -914,6 +946,7 @@ export type FlowerWikiUpdateWithoutStockLossRecordsInput = {
   supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   floralRole?: Prisma.EnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole
   maintenance?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -934,6 +967,7 @@ export type FlowerWikiUncheckedUpdateWithoutStockLossRecordsInput = {
   supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   floralRole?: Prisma.EnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole
   maintenance?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
@@ -1003,6 +1037,7 @@ export type FlowerWikiSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   supplySeason?: boolean
   floralRole?: boolean
   maintenance?: boolean
+  flowerLanguage?: boolean
   maintenanceCare?: boolean
   defaultShelfLifeDays?: boolean
   aliasMap?: boolean
@@ -1025,6 +1060,7 @@ export type FlowerWikiSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   supplySeason?: boolean
   floralRole?: boolean
   maintenance?: boolean
+  flowerLanguage?: boolean
   maintenanceCare?: boolean
   defaultShelfLifeDays?: boolean
   aliasMap?: boolean
@@ -1043,6 +1079,7 @@ export type FlowerWikiSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   supplySeason?: boolean
   floralRole?: boolean
   maintenance?: boolean
+  flowerLanguage?: boolean
   maintenanceCare?: boolean
   defaultShelfLifeDays?: boolean
   aliasMap?: boolean
@@ -1061,6 +1098,7 @@ export type FlowerWikiSelectScalar = {
   supplySeason?: boolean
   floralRole?: boolean
   maintenance?: boolean
+  flowerLanguage?: boolean
   maintenanceCare?: boolean
   defaultShelfLifeDays?: boolean
   aliasMap?: boolean
@@ -1068,7 +1106,7 @@ export type FlowerWikiSelectScalar = {
   updatedAt?: boolean
 }
 
-export type FlowerWikiOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "photo" | "englishName" | "chineseName" | "pinyinIndex" | "colorTags" | "morphology" | "supplySeason" | "floralRole" | "maintenance" | "maintenanceCare" | "defaultShelfLifeDays" | "aliasMap" | "createdAt" | "updatedAt", ExtArgs["result"]["flowerWiki"]>
+export type FlowerWikiOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "photo" | "englishName" | "chineseName" | "pinyinIndex" | "colorTags" | "morphology" | "supplySeason" | "floralRole" | "maintenance" | "flowerLanguage" | "maintenanceCare" | "defaultShelfLifeDays" | "aliasMap" | "createdAt" | "updatedAt", ExtArgs["result"]["flowerWiki"]>
 export type FlowerWikiInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   materials?: boolean | Prisma.FlowerWiki$materialsArgs<ExtArgs>
   recipeLines?: boolean | Prisma.FlowerWiki$recipeLinesArgs<ExtArgs>
@@ -1096,6 +1134,7 @@ export type $FlowerWikiPayload<ExtArgs extends runtime.Types.Extensions.Internal
     supplySeason: string | null
     floralRole: $Enums.FloralRole
     maintenance: string
+    flowerLanguage: string | null
     /**
      * 结构化养护指南表格（AI / 表格编辑）；maintenance 保留文本摘要兼容旧数据
      */
@@ -1543,6 +1582,7 @@ export interface FlowerWikiFieldRefs {
   readonly supplySeason: Prisma.FieldRef<"FlowerWiki", 'String'>
   readonly floralRole: Prisma.FieldRef<"FlowerWiki", 'FloralRole'>
   readonly maintenance: Prisma.FieldRef<"FlowerWiki", 'String'>
+  readonly flowerLanguage: Prisma.FieldRef<"FlowerWiki", 'String'>
   readonly maintenanceCare: Prisma.FieldRef<"FlowerWiki", 'Json'>
   readonly defaultShelfLifeDays: Prisma.FieldRef<"FlowerWiki", 'Int'>
   readonly aliasMap: Prisma.FieldRef<"FlowerWiki", 'Json'>

@@ -378,6 +378,7 @@ export const FlowerWikiScalarFieldEnum = {
   supplySeason: 'supplySeason',
   floralRole: 'floralRole',
   maintenance: 'maintenance',
+  flowerLanguage: 'flowerLanguage',
   maintenanceCare: 'maintenanceCare',
   defaultShelfLifeDays: 'defaultShelfLifeDays',
   aliasMap: 'aliasMap',
