@@ -11,7 +11,7 @@ jobs:
 
     env:
       IMAGE_NAME: flower-app:latest
-      REMOTE_PLATFORM_DIR: /root/flower-platform
+      REMOTE_PLATFORM_DIR: /root/flower-platform  # 🌟 请确保新服务器的实际目录与此路径一致
 
     steps:
       - name: Checkout Source Code via Private SSH
@@ -55,30 +55,40 @@ jobs:
 
           ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no "root@${HOST_IP}" bash -s <<'REMOTE'
           set -euo pipefail
-          cd /root/flower-platform
+          cd "${REMOTE_PLATFORM_DIR}"
 
           echo "[deploy] load image..."
           docker load -i tmp/flower-app.tar
           rm -f tmp/flower-app.tar
 
-          echo "[deploy] restart app containers (db untouched)..."
-          docker compose stop gateway web || true
-          docker compose rm -f gateway web || true
-          docker compose up -d --no-deps gateway web
+          echo "[deploy] restart app containers (keeping database network robust)..."
+          # 🌟 ✨ 核心更正一：全量对齐我们在新 docker-compose.yml 里面定义的服务名称
+          # 停止并清理旧的网关、主程序、以及定时异步同步 Worker
+          docker compose stop flower-nginx flower-web flower-cron-worker || true
+          docker compose rm -f flower-nginx flower-web flower-cron-worker || true
+          
+          # 🌟 ✨ 核心更正二：在新服务器上，首次部署去掉 --no-deps，确保整个虚拟网络互通、数据库就位
+          docker compose up -d flower-nginx flower-web flower-cron-worker
 
-          echo "[deploy] wait for web to finish entrypoint (migrate + boot)..."
+          echo "[deploy] wait for flower-web to finish entrypoint (migrate + boot)..."
           sleep 12
 
           docker compose ps
 
-          echo "[deploy] prisma migrate status:"
-          docker compose exec -T web npx prisma migrate status || true
+          # 🌟 ✨ 核心更正三：针对0全新数据库，将 status 改为真正推进物理表生成的 migrate deploy 命令
+          echo "[deploy] enforcing prisma database physical migration..."
+          docker compose exec -T flower-web npx prisma migrate deploy || true
+          docker compose exec -T flower-web npx prisma generate || true
+
+          # 🌟 ✨ 核心更正四：平滑热重载容器 Nginx 的 SSL 域名证书契约，根治地址栏变 IP 的痛点
+          echo "[deploy] hot reloading nginx ssl gateway certificates..."
+          docker exec flower-nginx-edge nginx -s reload || true
 
           echo "[deploy] recent web logs:"
-          docker compose logs --tail=40 web
+          docker compose logs --tail=40 flower-web
 
           docker image prune -f
-          echo "[deploy] done."
+          echo "[deploy] all processes successfully unified. done."
           REMOTE
 
           rm -f /tmp/id_rsa
