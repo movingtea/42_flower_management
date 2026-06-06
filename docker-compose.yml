@@ -1,0 +1,85 @@
+services:
+  # 网关哨兵
+  flower-nginx:
+    image: nginx:alpine
+    container_name: flower-nginx-edge
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /root/flower-nginx/conf.d:/etc/nginx/conf.d:ro
+      - /root/flower-nginx/cert:/etc/nginx/cert:ro
+    networks:
+      - flower-prod-network
+    depends_on:
+      - flower-web
+
+  # 主 Web 应用
+  flower-web:
+    image: flower-platform-app:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: flower-web-prod
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://flower_admin:2Ghlmcl!hblsqt@db:5432/flower_hub_prod?schema=public
+      - NEXTAUTH_URL=https://www.universe42.studio
+      - NEXTAUTH_SECRET=7bF9mQ2xK5wP8vA1zL4nT7sJ3cX6vB9d
+      - AUTH_SECRET=7bF9mQ2xK5wP8vA1zL4nT7sJ3cX6vB9d
+    volumes:
+      - next-cache:/app/.next/cache
+    networks:
+      - flower-prod-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # 大仓供应链异步 Worker（反向库存健康度投影计算）
+  flower-cron-worker:
+    image: flower-platform-app:latest
+    container_name: flower-cron-worker-prod
+    restart: always
+    environment:
+      - NODE_ENV=production
+      - DATABASE_URL=postgresql://flower_admin:2Ghlmcl!hblsqt@db:5432/flower_hub_prod?schema=public
+      - NEXTAUTH_URL=https://www.universe42.studio
+      - NEXTAUTH_SECRET=7bF9mQ2xK5wP8vA1zL4nT7sJ3cX6vB9d
+      - AUTH_SECRET=7bF9mQ2xK5wP8vA1zL4nT7sJ3cX6vB9d
+    entrypoint: ["npx", "tsx", "scripts/cron-inventory-daemon.ts"]
+    networks:
+      - flower-prod-network
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # 🐘 PostgreSQL 物理容器
+  db:
+    image: postgres:alpine
+    container_name: flower-postgres-prod
+    restart: always
+    environment:
+      POSTGRES_USER: flower_admin
+      POSTGRES_PASSWORD: '2Ghlmcl!hblsqt'
+      POSTGRES_DB: flower_hub_prod
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - flower-prod-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  flower-prod-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+    driver: local
+  next-cache:
+    driver: local
