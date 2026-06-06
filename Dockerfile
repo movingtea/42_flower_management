@@ -5,14 +5,16 @@
 # 构建上下文：monorepo 根目录（42_flower_management/）
 # 应用源码：flower-wms-system/
 #
+# 与 docker-compose.yml 对齐的镜像名：flower-platform-app:latest
+#
 # 本地构建（仓库根目录）：
-#   docker build -t flower-app:latest \
-#     --build-arg NEXT_PUBLIC_API_URL=https://your-domain.com \
-#     --build-arg NEXT_PUBLIC_ASSET_BASE_URL=https://your-domain.com \
+#   docker build -t flower-platform-app:latest \
+#     --build-arg NEXT_PUBLIC_API_URL=https://www.universe42.studio \
+#     --build-arg NEXT_PUBLIC_ASSET_BASE_URL=https://www.universe42.studio \
 #     .
 #
-# 运行（migrate 在 entrypoint 自动执行，可用 SKIP_DB_MIGRATE=true 跳过）：
-#   docker run -p 3000:3000 --env-file flower-wms-system/.env flower-app:latest
+# flower-web：entrypoint 自动 prisma migrate deploy
+# flower-cron-worker：compose 覆盖 entrypoint 为 cron-inventory-daemon.ts
 # ---------------------------------------------------------------------------
 
 FROM node:22-alpine AS base
@@ -24,7 +26,7 @@ FROM base AS deps
 COPY flower-wms-system/package.json flower-wms-system/package-lock.json ./
 RUN npm ci
 
-# ---------- 生产依赖（保留 prisma / bcryptjs / tsx 供 migrate 与 seed） ----------
+# ---------- 生产依赖（prisma / bcryptjs / tsx / dotenv 供 migrate、seed、cron） ----------
 FROM deps AS prod-deps
 RUN npm prune --omit=dev
 
@@ -43,7 +45,6 @@ ARG NEXT_PUBLIC_ASSET_BASE_URL=http://localhost:3000
 ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
 ENV NEXT_PUBLIC_ASSET_BASE_URL=$NEXT_PUBLIC_ASSET_BASE_URL
 
-# next build 不连接真实库；仅满足 Prisma 客户端初始化
 ARG DATABASE_URL="postgresql://build:build@127.0.0.1:5432/build?schema=public"
 ENV DATABASE_URL=$DATABASE_URL
 
@@ -78,7 +79,7 @@ RUN chmod +x ./docker-entrypoint.sh
 USER nextjs
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=40s --retries=3 \
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
   CMD wget -qO- "http://127.0.0.1:${PORT}/login" >/dev/null 2>&1 || exit 1
 
 ENTRYPOINT ["./docker-entrypoint.sh"]

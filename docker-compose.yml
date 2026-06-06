@@ -15,12 +15,10 @@ services:
     depends_on:
       - flower-web
 
-  # 主 Web 应用
+  # 主 Web 应用（镜像由 CI 构建并 docker load 为 flower-platform-app:latest，服务器无需 Dockerfile）
   flower-web:
     image: flower-platform-app:latest
-    build:
-      context: .
-      dockerfile: Dockerfile
+    pull_policy: never
     container_name: flower-web-prod
     restart: always
     environment:
@@ -40,6 +38,7 @@ services:
   # 大仓供应链异步 Worker（反向库存健康度投影计算）
   flower-cron-worker:
     image: flower-platform-app:latest
+    pull_policy: never
     container_name: flower-cron-worker-prod
     restart: always
     environment:
