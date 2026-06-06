@@ -70,7 +70,8 @@ COPY --from=prod-deps --chown=nextjs:nodejs /app/package-lock.json ./package-loc
 COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
-COPY --from=builder --chown=nextjs:nodejs /app/src/generated ./src/generated
+# Cron worker runs TypeScript scripts with tsx and imports application source modules.
+COPY --from=builder --chown=nextjs:nodejs /app/src ./src
 COPY --from=builder --chown=nextjs:nodejs /app/docker-entrypoint.sh ./docker-entrypoint.sh
 COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 
