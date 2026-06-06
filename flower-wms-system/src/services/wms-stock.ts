@@ -5,6 +5,15 @@ import { assertStockMutationOperatorMatches } from "@/lib/stock-mutation-auth";
 import { prisma } from "@/lib/prisma";
 import { generateBatchNo } from "@/utils/batch-no";
 import { generateUniqueSku } from "@/utils/skuGenerator";
+import {
+  resolveBatchExpiresAt,
+  resolveStockInQuantities,
+} from "@/lib/stock-in-calc";
+
+export {
+  resolveBatchExpiresAt,
+  resolveStockInQuantities,
+} from "@/lib/stock-in-calc";
 
 export type StockInPayload = {
   flowerWikiId: string;
@@ -14,6 +23,8 @@ export type StockInPayload = {
   stemsPerBundle: number;
   /** 每束采购价（元） */
   costPricePerBundle: number;
+  /** 本批次保质期（天）；未填则使用花材母表默认值 */
+  shelfLifeDays?: number;
   supplier?: string;
   operator: OperatorContext;
 };
@@ -37,6 +48,7 @@ export type BatchPipelineRow = {
   remainingQty: number;
   originalQty: number;
   unitCost: string;
+  expiresAt: string | null;
   supplier: string | null;
   unit: string;
 };
@@ -92,15 +104,9 @@ function parseCostPricePerBundle(raw: unknown): number {
   return n;
 }
 
-/** 束 → 支：计算入库总支数与单支成本（库存/FIFO 仍以支为基准单位） */
-export function resolveStockInQuantities(payload: {
-  bundleCount: number;
-  stemsPerBundle: number;
-  costPricePerBundle: number;
-}) {
-  const totalStems = payload.bundleCount * payload.stemsPerBundle;
-  const unitCostPerStem = payload.costPricePerBundle / payload.stemsPerBundle;
-  return { totalStems, unitCostPerStem };
+function parseOptionalShelfLifeDays(raw: unknown): number | undefined {
+  if (raw === null || raw === undefined || raw === "") return undefined;
+  return parsePositiveInt(raw, "保质期");
 }
 
 function parseReason(raw: unknown): string {
@@ -133,6 +139,7 @@ export function parseStockInBody(raw: unknown): Omit<StockInPayload, "operator">
     bundleCount: parsePositiveInt(body.bundleCount, "到货束数"),
     stemsPerBundle: parsePositiveInt(body.stemsPerBundle, "每束支数"),
     costPricePerBundle: parseCostPricePerBundle(body.costPricePerBundle),
+    shelfLifeDays: parseOptionalShelfLifeDays(body.shelfLifeDays),
     supplier:
       typeof body.supplier === "string" ? body.supplier.trim() || undefined : undefined,
   };
@@ -156,7 +163,7 @@ export function parseStockLossBody(
 async function assertWikiExists(tx: Tx, flowerWikiId: string) {
   const wiki = await tx.flowerWiki.findUnique({
     where: { id: flowerWikiId },
-    select: { id: true, chineseName: true },
+    select: { id: true, chineseName: true, defaultShelfLifeDays: true },
   });
   if (!wiki) throw new Error("花材母表记录不存在");
   return wiki;
@@ -192,10 +199,14 @@ export async function runStockInTransaction(payload: StockInPayload) {
   );
 
   return prisma.$transaction(async (tx) => {
+    const wiki = await assertWikiExists(tx, payload.flowerWikiId);
     const material = await resolveOrCreateMaterial(tx, payload.flowerWikiId);
     const batchNo = await generateBatchNo(tx);
     const now = new Date();
     const { totalStems, unitCostPerStem } = resolveStockInQuantities(payload);
+    const shelfLifeDays =
+      payload.shelfLifeDays ?? wiki.defaultShelfLifeDays ?? null;
+    const expiresAt = resolveBatchExpiresAt(now, shelfLifeDays);
     const inboundRemark = `原料到货入库（${payload.bundleCount}束×${payload.stemsPerBundle}支/束）`;
 
     const batch = await tx.batch.create({
@@ -206,6 +217,7 @@ export async function runStockInTransaction(payload: StockInPayload) {
         originalQty: totalStems,
         remainingQty: totalStems,
         unitCost: unitCostPerStem,
+        expiresAt,
         supplier: payload.supplier ?? null,
       },
     });
@@ -223,7 +235,7 @@ export async function runStockInTransaction(payload: StockInPayload) {
       },
     });
 
-    return { material, batch, totalStems };
+    return { material, batch, totalStems, shelfLifeDays, expiresAt };
   });
 }
 
@@ -403,6 +415,7 @@ export async function listActiveBatchPipeline(): Promise<BatchPipelineRow[]> {
     remainingQty: b.remainingQty,
     originalQty: b.originalQty,
     unitCost: b.unitCost.toString(),
+    expiresAt: b.expiresAt?.toISOString() ?? null,
     supplier: b.supplier,
     unit: b.material.unit,
   }));

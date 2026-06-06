@@ -33,6 +33,8 @@ export async function POST(request: Request) {
           quantity: result.batch.originalQty,
           remainingQty: result.batch.remainingQty,
           unitCost: result.batch.unitCost.toString(),
+          expiresAt: result.batch.expiresAt?.toISOString() ?? null,
+          shelfLifeDays: result.shelfLifeDays,
           supplier: result.batch.supplier,
           inboundAt: result.batch.inboundAt.toISOString(),
           createdAt: result.batch.createdAt.toISOString(),

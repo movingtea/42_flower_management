@@ -2231,6 +2231,8 @@ export const FlowerWikiScalarFieldEnum = {
   supplySeason: 'supplySeason',
   floralRole: 'floralRole',
   maintenance: 'maintenance',
+  maintenanceCare: 'maintenanceCare',
+  defaultShelfLifeDays: 'defaultShelfLifeDays',
   aliasMap: 'aliasMap',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -2252,6 +2254,14 @@ export const JsonNullValueInput = {
 } as const
 
 export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
+export const NullableJsonNullValueInput = {
+  DbNull: DbNull,
+  JsonNull: JsonNull
+} as const
+
+export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
 
 
 export const QueryMode = {

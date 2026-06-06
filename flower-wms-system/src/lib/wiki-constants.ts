@@ -1,4 +1,5 @@
 import { FloralRole } from "@/generated/prisma/enums";
+import type { WikiCareRow } from "@/lib/wiki-care";
 
 /** 角色枚举 → 中文展示 */
 export const FLORAL_ROLE_LABEL: Record<FloralRole, string> = {
@@ -36,7 +37,10 @@ export type WikiFormPayload = {
   supplySeason?: string | null;
   floralRole: FloralRole;
   maintenance: string;
+  careTable?: WikiCareRow[] | null;
   aliasMap?: Record<string, string[]>;
+  /** 默认保质期（天）；null 表示不设自动到期 */
+  defaultShelfLifeDays?: number | null;
 };
 
 export type WikiListItem = {
@@ -55,7 +59,9 @@ export type WikiListItem = {
   floralRole: FloralRole;
   role: string;
   maintenance: string;
+  careTable: WikiCareRow[] | null;
   aliasMap: Record<string, string[]>;
+  defaultShelfLifeDays: number | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -92,6 +98,7 @@ export const EMPTY_WIKI_FORM: WikiFormPayload = {
   floralRole: FloralRole.MAIN,
   maintenance: WIKI_MAINTENANCE_TEMPLATE,
   aliasMap: { zh: [] },
+  defaultShelfLifeDays: null,
 };
 
 export function roleBadgeClass(role: FloralRole): string {

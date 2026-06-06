@@ -12,6 +12,7 @@ import type {
   BatchPipelineRow,
   WikiBatchOption,
 } from "@/services/wms-stock";
+import { resolveBatchExpiresAt } from "@/lib/stock-in-calc";
 
 const LOSS_REASONS = ["自然开败", "制作折损", "运输破损", "其他"] as const;
 
@@ -44,6 +45,7 @@ export function WmsStockConsole({
   const [inboundBundleCount, setInboundBundleCount] = useState(1);
   const [stemsPerBundle, setStemsPerBundle] = useState(10);
   const [costPricePerBundle, setCostPricePerBundle] = useState("");
+  const [shelfLifeDays, setShelfLifeDays] = useState("");
   const [supplier, setSupplier] = useState("");
   const [inboundSubmitting, setInboundSubmitting] = useState(false);
 
@@ -66,6 +68,15 @@ export function WmsStockConsole({
     Number.isFinite(parsedBundlePrice) &&
     parsedBundlePrice >= 0
       ? parsedBundlePrice / stemsPerBundle
+      : null;
+  const parsedShelfLifeDays = shelfLifeDays.trim()
+    ? Number(shelfLifeDays)
+    : null;
+  const inboundExpiresAt =
+    parsedShelfLifeDays != null &&
+    Number.isFinite(parsedShelfLifeDays) &&
+    parsedShelfLifeDays > 0
+      ? resolveBatchExpiresAt(new Date(), parsedShelfLifeDays)
       : null;
 
   function showToast(message: string, type: "success" | "error") {
@@ -140,6 +151,11 @@ export function WmsStockConsole({
 
   function onInboundWikiChange(item: WikiListItem | null) {
     setInboundWikiId(item?.id ?? null);
+    setShelfLifeDays(
+      item?.defaultShelfLifeDays != null
+        ? String(item.defaultShelfLifeDays)
+        : ""
+    );
   }
 
   function onLossWikiChange(item: WikiListItem | null) {
@@ -161,19 +177,33 @@ export function WmsStockConsole({
       showToast("每束支数须大于 0", "error");
       return;
     }
+    if (
+      shelfLifeDays.trim() &&
+      (!Number.isFinite(Number(shelfLifeDays)) ||
+        Number(shelfLifeDays) <= 0 ||
+        !Number.isInteger(Number(shelfLifeDays)))
+    ) {
+      showToast("保质期须为正整数（天）", "error");
+      return;
+    }
 
     setInboundSubmitting(true);
     try {
+      const body: Record<string, unknown> = {
+        flowerWikiId: inboundWikiId,
+        bundleCount: inboundBundleCount,
+        stemsPerBundle,
+        costPricePerBundle: price,
+        supplier: supplier.trim() || undefined,
+      };
+      if (shelfLifeDays.trim()) {
+        body.shelfLifeDays = Number(shelfLifeDays);
+      }
+
       const res = await fetch("/api/admin/wms/stock-in", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          flowerWikiId: inboundWikiId,
-          bundleCount: inboundBundleCount,
-          stemsPerBundle,
-          costPricePerBundle: price,
-          supplier: supplier.trim() || undefined,
-        }),
+        body: JSON.stringify(body),
       });
       const json = (await res.json()) as {
         success?: boolean;
@@ -190,6 +220,7 @@ export function WmsStockConsole({
       setInboundBundleCount(1);
       setStemsPerBundle(10);
       setCostPricePerBundle("");
+      setShelfLifeDays("");
       setSupplier("");
       await refreshPipeline();
     } catch {
@@ -380,6 +411,30 @@ export function WmsStockConsole({
                     {inboundTotalStems} 支
                   </span>
                   ，折合单支成本 ¥{inboundUnitStemCost.toFixed(4)}
+                </p>
+              )}
+
+              <Input
+                label="保质期（天）"
+                type="number"
+                inputMode="numeric"
+                min={1}
+                step={1}
+                placeholder="选填；默认取花材母表设置"
+                value={shelfLifeDays}
+                onChange={(e) => setShelfLifeDays(e.target.value)}
+                disabled={inboundSubmitting}
+              />
+              {inboundExpiresAt && (
+                <p className="text-xs text-amber-800">
+                  预计到期：
+                  {inboundExpiresAt.toLocaleString("zh-CN", {
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
                 </p>
               )}
 

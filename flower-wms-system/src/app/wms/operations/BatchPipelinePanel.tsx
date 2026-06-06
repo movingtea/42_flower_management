@@ -164,6 +164,9 @@ export function BatchPipelinePanel({ pipeline }: Props) {
                         </div>
                         <p className="mt-2 text-xs text-zinc-500">
                           进价 ¥{row.unitCost} / {row.unit}
+                          {row.expiresAt
+                            ? ` · 到期 ${new Date(row.expiresAt).toLocaleDateString("zh-CN")}`
+                            : ""}
                         </p>
                       </li>
                     ))}

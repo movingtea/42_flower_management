@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { WikiCareTable } from "@/components/wiki/WikiCareTable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -9,6 +10,13 @@ import {
   roleBadgeClass,
   type WikiListItem,
 } from "@/lib/wiki-constants";
+import {
+  careTableToMaintenanceText,
+  emptyCareTable,
+  normalizeCareTable,
+  validateCareTableForSave,
+  type WikiCareRow,
+} from "@/lib/wiki-care";
 import { FloralRole } from "@/generated/prisma/enums";
 
 type FormState = {
@@ -16,19 +24,21 @@ type FormState = {
   englishName: string;
   role: FloralRole;
   color: string;
-  texture: string;
   availability: string;
   maintenance: string;
+  defaultShelfLifeDays: string;
 };
+
+type CareEditorMode = "text" | "table";
 
 const EMPTY_FORM: FormState = {
   name: "",
   englishName: "",
   role: FloralRole.MAIN,
   color: "",
-  texture: "",
   availability: "",
   maintenance: WIKI_MAINTENANCE_TEMPLATE,
+  defaultShelfLifeDays: "",
 };
 
 function toForm(item: WikiListItem): FormState {
@@ -37,21 +47,41 @@ function toForm(item: WikiListItem): FormState {
     englishName: item.englishName,
     role: item.floralRole,
     color: item.colorTags[0] ?? item.color ?? "",
-    texture: item.morphology ?? item.texture ?? "",
     availability: item.supplySeason ?? item.availability ?? "",
     maintenance: item.maintenance,
+    defaultShelfLifeDays:
+      item.defaultShelfLifeDays != null ? String(item.defaultShelfLifeDays) : "",
   };
 }
 
-function toPayload(form: FormState) {
+function toPayload(
+  form: FormState,
+  options: {
+    preservedMorphology?: string | null;
+    careTable: WikiCareRow[] | null;
+    careMode: CareEditorMode;
+  }
+) {
+  const defaultShelfLifeDays = form.defaultShelfLifeDays.trim();
+  const useTable =
+    options.careMode === "table" &&
+    options.careTable &&
+    validateCareTableForSave(options.careTable);
+
   return {
     name: form.name.trim(),
     englishName: form.englishName.trim(),
     role: FLORAL_ROLE_LABEL[form.role],
     color: form.color.trim(),
-    texture: form.texture.trim() || null,
+    texture: options.preservedMorphology?.trim() || null,
     availability: form.availability.trim() || null,
-    maintenance: form.maintenance.trim(),
+    maintenance: useTable
+      ? careTableToMaintenanceText(options.careTable!)
+      : form.maintenance.trim(),
+    careTable: useTable ? normalizeCareTable(options.careTable!) : null,
+    defaultShelfLifeDays: defaultShelfLifeDays
+      ? Number(defaultShelfLifeDays)
+      : null,
   };
 }
 
@@ -64,7 +94,11 @@ export function WikiMaterialConsole() {
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingMorphology, setEditingMorphology] = useState<string | null>(null);
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
+  const [careMode, setCareMode] = useState<CareEditorMode>("text");
+  const [careTable, setCareTable] = useState<WikiCareRow[]>(emptyCareTable());
+  const [aiLoading, setAiLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [toast, setToast] = useState<{
     message: string;
@@ -80,6 +114,11 @@ export function WikiMaterialConsole() {
   function showToast(message: string, type: "success" | "error") {
     setToast({ message, type });
     window.setTimeout(() => setToast(null), 2800);
+  }
+
+  function resetCareEditor(mode: CareEditorMode = "text") {
+    setCareMode(mode);
+    setCareTable(emptyCareTable());
   }
 
   const loadList = useCallback(async () => {
@@ -123,20 +162,95 @@ export function WikiMaterialConsole() {
 
   function openCreate() {
     setEditingId(null);
+    setEditingMorphology(null);
     setForm({ ...EMPTY_FORM });
+    resetCareEditor("text");
     setModalOpen(true);
   }
 
   function openEdit(item: WikiListItem) {
     setEditingId(item.id);
+    setEditingMorphology(item.morphology);
     setForm(toForm(item));
+    if (item.careTable?.length) {
+      setCareTable(normalizeCareTable(item.careTable));
+      setCareMode("table");
+    } else {
+      resetCareEditor("text");
+    }
     setModalOpen(true);
   }
 
   function closeModal() {
     setModalOpen(false);
     setEditingId(null);
+    setEditingMorphology(null);
     setForm({ ...EMPTY_FORM });
+    resetCareEditor("text");
+  }
+
+  async function handleAiComplete() {
+    const flowerName = form.name.trim();
+    if (!flowerName) {
+      showToast("请先填写中文常用名", "error");
+      return;
+    }
+
+    setAiLoading(true);
+    try {
+      const res = await fetch("/api/ai/complete-flower", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ flowerName }),
+      });
+      const json = (await res.json()) as {
+        success?: boolean;
+        error?: string;
+        data?: {
+          combinedEnglishName?: string;
+          latinName?: string;
+          englishName?: string;
+          careTable?: WikiCareRow[];
+          cachedHint?: string;
+        };
+      };
+
+      if (!res.ok || !json.success || !json.data) {
+        throw new Error(json.error ?? "AI 补全失败");
+      }
+
+      const data = json.data;
+
+      const combined =
+        data.combinedEnglishName ||
+        [data.latinName, data.englishName]
+          .filter(Boolean)
+          .join(" / ");
+
+      setForm((prev) => ({
+        ...prev,
+        englishName: combined,
+        maintenance: data.careTable
+          ? careTableToMaintenanceText(data.careTable)
+          : prev.maintenance,
+      }));
+
+      if (data.careTable?.length) {
+        setCareTable(normalizeCareTable(data.careTable));
+        setCareMode("table");
+      }
+
+      showToast(
+        data.cachedHint
+          ? `AI 补全成功（${data.cachedHint}）`
+          : "AI 智能补全成功",
+        "success"
+      );
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "AI 补全失败", "error");
+    } finally {
+      setAiLoading(false);
+    }
   }
 
   async function handleSubmit() {
@@ -152,7 +266,10 @@ export function WikiMaterialConsole() {
       showToast("请填写色系标签", "error");
       return;
     }
-    if (!form.maintenance.trim()) {
+
+    const hasTableCare =
+      careMode === "table" && validateCareTableForSave(careTable);
+    if (!hasTableCare && !form.maintenance.trim()) {
       showToast("请填写养护指南", "error");
       return;
     }
@@ -165,7 +282,13 @@ export function WikiMaterialConsole() {
       const res = await fetch(url, {
         method: editingId ? "PUT" : "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(toPayload(form)),
+        body: JSON.stringify(
+          toPayload(form, {
+            preservedMorphology: editingMorphology,
+            careTable: hasTableCare ? careTable : null,
+            careMode,
+          })
+        ),
       });
       const json = (await res.json()) as {
         success?: boolean;
@@ -240,20 +363,21 @@ export function WikiMaterialConsole() {
               <th className="px-4 py-3 font-medium">角色</th>
               <th className="px-4 py-3 font-medium">色系</th>
               <th className="px-4 py-3 font-medium">供货</th>
+              <th className="px-4 py-3 font-medium">保质期</th>
               <th className="px-4 py-3 font-medium text-right">操作</th>
             </tr>
           </thead>
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-zinc-400">
+                <td colSpan={8} className="px-4 py-8 text-center text-zinc-400">
                   加载中…
                 </td>
               </tr>
             )}
             {!loading && items.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-zinc-400">
+                <td colSpan={8} className="px-4 py-8 text-center text-zinc-400">
                   暂无物料，点击「新增物料」开始录入
                 </td>
               </tr>
@@ -283,6 +407,11 @@ export function WikiMaterialConsole() {
                   </td>
                   <td className="px-4 py-3 text-zinc-600">
                     {item.supplySeason ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 text-zinc-600">
+                    {item.defaultShelfLifeDays != null
+                      ? `${item.defaultShelfLifeDays} 天`
+                      : "—"}
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex justify-end gap-2">
@@ -336,82 +465,174 @@ export function WikiMaterialConsole() {
 
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
-            <h2 className="text-lg font-semibold text-zinc-900">
-              {editingId ? "编辑物料" : "新增物料"}
-            </h2>
-            <div className="mt-4 space-y-4">
-              <Input
-                label="中文常用名"
-                value={form.name}
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
-              <Input
-                label="拉丁学名 / 英文名"
-                value={form.englishName}
-                onChange={(e) =>
-                  setForm({ ...form, englishName: e.target.value })
-                }
-              />
-              <label className="block text-sm">
-                <span className="mb-1 block font-medium text-zinc-700">
-                  花艺核心角色
-                </span>
-                <select
-                  value={form.role}
-                  onChange={(e) =>
-                    setForm({ ...form, role: e.target.value as FloralRole })
-                  }
-                  className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-zinc-900 outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-400"
-                >
-                  {(Object.entries(FLORAL_ROLE_LABEL) as [FloralRole, string][]).map(
-                    ([role, label]) => (
-                      <option key={role} value={role}>
-                        {label}
-                      </option>
-                    )
-                  )}
-                </select>
-              </label>
-              <Input
-                label="色系标签"
-                placeholder="如：香槟色、复古粉"
-                value={form.color}
-                onChange={(e) => setForm({ ...form, color: e.target.value })}
-              />
-              <Input
-                label="形态特征"
-                placeholder="如：重瓣、杯状、多头"
-                value={form.texture}
-                onChange={(e) => setForm({ ...form, texture: e.target.value })}
-              />
-              <Input
-                label="供货周期"
-                placeholder="如：全年、4-9月"
-                value={form.availability}
-                onChange={(e) =>
-                  setForm({ ...form, availability: e.target.value })
-                }
-              />
-              <label className="block text-sm">
-                <span className="mb-1 block font-medium text-zinc-700">
-                  养护指南
-                </span>
-                <textarea
-                  rows={8}
-                  value={form.maintenance}
-                  onChange={(e) =>
-                    setForm({ ...form, maintenance: e.target.value })
-                  }
-                  className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-zinc-900 outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-400"
-                />
-              </label>
+          <div className="flex max-h-[min(90vh,760px)] w-full max-w-2xl flex-col rounded-2xl bg-white shadow-xl">
+            <div className="border-b border-zinc-100 px-6 py-4">
+              <h2 className="text-lg font-semibold text-zinc-900">
+                {editingId ? "编辑物料" : "新增物料"}
+              </h2>
             </div>
-            <div className="mt-6 flex justify-end gap-2">
+
+            <div className="flex-1 overflow-y-auto px-6 py-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="sm:col-span-2">
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
+                    <div className="min-w-0 flex-1">
+                      <Input
+                        label="中文常用名"
+                        value={form.name}
+                        onChange={(e) =>
+                          setForm({ ...form, name: e.target.value })
+                        }
+                      />
+                    </div>
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      disabled={aiLoading || saving}
+                      className="shrink-0 border-rose-200 bg-rose-50 text-rose-800 hover:bg-rose-100"
+                      onClick={() => void handleAiComplete()}
+                    >
+                      {aiLoading ? "AI 补全中…" : "✨ AI 一键智能补全"}
+                    </Button>
+                  </div>
+                </div>
+
+                <Input
+                  label="拉丁学名 / 英文名"
+                  value={form.englishName}
+                  onChange={(e) =>
+                    setForm({ ...form, englishName: e.target.value })
+                  }
+                  className="sm:col-span-2"
+                />
+
+                <label className="block text-sm">
+                  <span className="mb-1 block font-medium text-zinc-700">
+                    花艺核心角色
+                  </span>
+                  <select
+                    value={form.role}
+                    onChange={(e) =>
+                      setForm({ ...form, role: e.target.value as FloralRole })
+                    }
+                    className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-zinc-900 outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-400"
+                  >
+                    {(Object.entries(FLORAL_ROLE_LABEL) as [FloralRole, string][]).map(
+                      ([role, label]) => (
+                        <option key={role} value={role}>
+                          {label}
+                        </option>
+                      )
+                    )}
+                  </select>
+                </label>
+                <Input
+                  label="色系标签"
+                  placeholder="如：香槟色、复古粉"
+                  value={form.color}
+                  onChange={(e) => setForm({ ...form, color: e.target.value })}
+                />
+                <Input
+                  label="供货周期"
+                  placeholder="如：全年、4-9月"
+                  value={form.availability}
+                  onChange={(e) =>
+                    setForm({ ...form, availability: e.target.value })
+                  }
+                />
+                <Input
+                  label="默认保质期（天）"
+                  type="number"
+                  inputMode="numeric"
+                  min={1}
+                  step={1}
+                  placeholder="如：7；留空则不自动设到期"
+                  value={form.defaultShelfLifeDays}
+                  onChange={(e) =>
+                    setForm({ ...form, defaultShelfLifeDays: e.target.value })
+                  }
+                />
+
+                <div className="space-y-3 sm:col-span-2">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <span className="text-sm font-medium text-zinc-700">
+                      养护指南
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      {careMode === "table" ? (
+                        <>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            className="h-8 px-3 text-xs"
+                            disabled={aiLoading || saving}
+                            onClick={() => void handleAiComplete()}
+                          >
+                            重新生成
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="secondary"
+                            className="h-8 px-3 text-xs"
+                            onClick={() => {
+                              setCareMode("text");
+                              setForm((prev) => ({
+                                ...prev,
+                                maintenance: careTableToMaintenanceText(careTable),
+                              }));
+                            }}
+                          >
+                            切换为文本编辑
+                          </Button>
+                        </>
+                      ) : (
+                        <Button
+                          type="button"
+                          variant="secondary"
+                          className="h-8 px-3 text-xs"
+                          disabled={!validateCareTableForSave(careTable)}
+                          onClick={() => {
+                            setCareMode("table");
+                            if (!validateCareTableForSave(careTable)) {
+                              setCareTable(emptyCareTable());
+                            }
+                          }}
+                        >
+                          切换为表格编辑
+                        </Button>
+                      )}
+                    </div>
+                  </div>
+
+                  {careMode === "table" ? (
+                    <WikiCareTable
+                      rows={careTable}
+                      editable
+                      onChange={setCareTable}
+                    />
+                  ) : (
+                    <textarea
+                      rows={4}
+                      value={form.maintenance}
+                      onChange={(e) =>
+                        setForm({ ...form, maintenance: e.target.value })
+                      }
+                      className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-400"
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2 border-t border-zinc-100 px-6 py-4">
               <Button type="button" variant="secondary" onClick={closeModal}>
                 取消
               </Button>
-              <Button type="button" disabled={saving} onClick={() => void handleSubmit()}>
+              <Button
+                type="button"
+                disabled={saving || aiLoading}
+                onClick={() => void handleSubmit()}
+              >
                 {saving ? "保存中…" : "保存"}
               </Button>
             </div>

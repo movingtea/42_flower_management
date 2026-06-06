@@ -31,6 +31,8 @@ export interface WmsStockInBody {
   bundleCount: number;
   stemsPerBundle: number;
   costPricePerBundle: number;
+  /** 本批次保质期（天）；未填则使用花材母表默认值 */
+  shelfLifeDays?: number;
   supplier?: string;
 }
 

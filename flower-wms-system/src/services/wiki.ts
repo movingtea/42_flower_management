@@ -1,9 +1,15 @@
-import type { Prisma } from "@/generated/prisma/client";
+import { Prisma } from "@/generated/prisma/client";
 import { FloralRole } from "@/generated/prisma/enums";
 import {
   parseFloralRole,
   type WikiFormPayload,
 } from "@/lib/wiki-constants";
+import {
+  buildCareDocument,
+  careTableToMaintenanceText,
+  parseCareTable,
+  validateCareTableForSave,
+} from "@/lib/wiki-care";
 import { toPinyinIndex } from "@/lib/pinyin-index";
 import { prisma } from "@/lib/prisma";
 
@@ -70,6 +76,15 @@ function readColorTags(b: Record<string, unknown>): string[] {
   return [];
 }
 
+function parseOptionalShelfLifeDays(raw: unknown): number | null {
+  if (raw === null || raw === undefined || raw === "") return null;
+  const n = Math.round(Number(raw));
+  if (!Number.isFinite(n) || n <= 0) {
+    throw new Error("默认保质期须为正整数（天）");
+  }
+  return n;
+}
+
 export function parseWikiPayload(raw: unknown): WikiFormPayload {
   if (!raw || typeof raw !== "object") throw new Error("请求体须为 JSON 对象");
   const b = raw as Record<string, unknown>;
@@ -77,8 +92,17 @@ export function parseWikiPayload(raw: unknown): WikiFormPayload {
   const englishName =
     typeof b.englishName === "string" ? b.englishName.trim() : "";
   const chineseName = readChineseName(b);
-  const maintenance =
+  const careTableRaw = parseCareTable(b.careTable);
+  const maintenanceInput =
     typeof b.maintenance === "string" ? b.maintenance.trim() : "";
+
+  let maintenance = maintenanceInput;
+  let careTable: WikiFormPayload["careTable"] = null;
+
+  if (careTableRaw && validateCareTableForSave(careTableRaw)) {
+    careTable = careTableRaw;
+    maintenance = careTableToMaintenanceText(careTableRaw);
+  }
 
   if (!englishName) throw new Error("拉丁学名（englishName）不能为空");
   if (!chineseName) throw new Error("中文常用名不能为空");
@@ -120,8 +144,22 @@ export function parseWikiPayload(raw: unknown): WikiFormPayload {
     supplySeason: supplySeason || null,
     floralRole,
     maintenance,
+    careTable,
     aliasMap,
+    defaultShelfLifeDays: parseOptionalShelfLifeDays(
+      b.defaultShelfLifeDays ?? b.shelfLifeDays
+    ),
   };
+}
+
+function maintenanceCareInput(
+  careTable: WikiFormPayload["careTable"],
+  mode: "create" | "update"
+): Prisma.InputJsonValue | Prisma.NullableJsonNullValueInput | undefined {
+  if (careTable?.length) {
+    return buildCareDocument(careTable) as Prisma.InputJsonValue;
+  }
+  return mode === "update" ? Prisma.DbNull : undefined;
 }
 
 function toCreateData(p: WikiFormPayload): Prisma.FlowerWikiCreateInput {
@@ -135,12 +173,17 @@ function toCreateData(p: WikiFormPayload): Prisma.FlowerWikiCreateInput {
     supplySeason: p.supplySeason,
     floralRole: p.floralRole,
     maintenance: p.maintenance,
+    maintenanceCare: maintenanceCareInput(p.careTable, "create"),
+    defaultShelfLifeDays: p.defaultShelfLifeDays ?? null,
     aliasMap: p.aliasMap ?? {},
   };
 }
 
 function toUpdateData(p: WikiFormPayload): Prisma.FlowerWikiUpdateInput {
-  return toCreateData(p);
+  return {
+    ...toCreateData(p),
+    maintenanceCare: maintenanceCareInput(p.careTable, "update"),
+  };
 }
 
 function buildWhere(query: WikiListQuery): Prisma.FlowerWikiWhereInput {

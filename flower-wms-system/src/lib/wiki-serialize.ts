@@ -1,5 +1,6 @@
 import type { FlowerWiki } from "@/generated/prisma/client";
 import { FLORAL_ROLE_LABEL } from "@/lib/wiki-constants";
+import { parseStoredCareDocument } from "@/lib/wiki-care";
 
 export function serializeWiki(row: FlowerWiki) {
   const aliasMap =
@@ -28,7 +29,9 @@ export function serializeWiki(row: FlowerWiki) {
     /** UI 别名：花艺角色中文 */
     role: FLORAL_ROLE_LABEL[row.floralRole],
     maintenance: row.maintenance,
+    careTable: parseStoredCareDocument(row.maintenanceCare),
     aliasMap,
+    defaultShelfLifeDays: row.defaultShelfLifeDays,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
