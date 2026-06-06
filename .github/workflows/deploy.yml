@@ -10,9 +10,9 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # CI 构建标签；部署到服务器后 tag 为 compose 使用的 flower-platform-app:latest
-      IMAGE_BUILD_TAG: flower-app:build
-      IMAGE_RUNTIME_TAG: flower-platform-app:latest
+      ACR_REGISTRY: crpi-bp5b6vut8l4d7ebv.cn-hangzhou.personal.cr.aliyuncs.com
+      ACR_NAMESPACE: universe42
+      IMAGE_REPO: flower-platform-app
       REMOTE_PLATFORM_DIR: /root/flower-platform
 
     steps:
@@ -21,54 +21,46 @@ jobs:
         with:
           ssh-key: ${{ secrets.SSH_KEY }}
 
-      - name: Build Application Image
+      - name: Login to Alibaba Cloud ACR
+        run: |
+          echo "${{ secrets.ACR_PASSWORD }}" | docker login \
+            -u "${{ secrets.ACR_USERNAME }}" \
+            --password-stdin "${ACR_REGISTRY}"
+
+      - name: Build and Push Application Image
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
           NEXT_PUBLIC_ASSET_BASE_URL: ${{ secrets.NEXT_PUBLIC_ASSET_BASE_URL }}
         run: |
+          IMAGE="${ACR_REGISTRY}/${ACR_NAMESPACE}/${IMAGE_REPO}"
           docker build \
+            --platform linux/amd64 \
             --build-arg NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-http://localhost:3000}" \
             --build-arg NEXT_PUBLIC_ASSET_BASE_URL="${NEXT_PUBLIC_ASSET_BASE_URL:-http://localhost:3000}" \
-            -t "$IMAGE_BUILD_TAG" .
-
-      - name: Save Image to Tar File
-        run: |
-          mkdir -p /tmp
-          docker save -o /tmp/flower-app.tar "$IMAGE_BUILD_TAG"
-
-      - name: Transfer Image via Private Key SCP
-        env:
-          HOST_IP: ${{ secrets.HOST_NAME }}
-          SSH_KEY: ${{ secrets.SSH_KEY }}
-        run: |
-          echo "$SSH_KEY" > /tmp/id_rsa
-          chmod 600 /tmp/id_rsa
-          ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no "root@${HOST_IP}" "mkdir -p ${REMOTE_PLATFORM_DIR}/tmp"
-          scp -i /tmp/id_rsa -o StrictHostKeyChecking=no \
-            /tmp/flower-app.tar "root@${HOST_IP}:${REMOTE_PLATFORM_DIR}/tmp/flower-app.tar"
-          rm -f /tmp/id_rsa
+            -t "${IMAGE}:latest" \
+            -t "${IMAGE}:${{ github.sha }}" \
+            .
+          docker push "${IMAGE}:latest"
+          docker push "${IMAGE}:${{ github.sha }}"
+          echo "[verify] manifest for linux/amd64:"
+          docker manifest inspect "${IMAGE}:latest" | grep -E '"architecture"|"os"' | head -4
 
       - name: Execute Remote Deploy via Private Key SSH
         env:
           HOST_IP: ${{ secrets.HOST_NAME }}
           SSH_KEY: ${{ secrets.SSH_KEY }}
-          IMAGE_RUNTIME_TAG: ${{ env.IMAGE_RUNTIME_TAG }}
           REMOTE_PLATFORM_DIR: ${{ env.REMOTE_PLATFORM_DIR }}
         run: |
           echo "$SSH_KEY" > /tmp/id_rsa
           chmod 600 /tmp/id_rsa
 
           ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no "root@${HOST_IP}" \
-            "IMAGE_RUNTIME_TAG=${IMAGE_RUNTIME_TAG} REMOTE_PLATFORM_DIR=${REMOTE_PLATFORM_DIR} bash -s" <<'REMOTE'
+            "REMOTE_PLATFORM_DIR=${REMOTE_PLATFORM_DIR} bash -s" <<'REMOTE'
           set -euo pipefail
           cd "${REMOTE_PLATFORM_DIR}"
 
-          echo "[deploy] load image..."
-          docker load -i tmp/flower-app.tar
-          rm -f tmp/flower-app.tar
-
-          echo "[deploy] tag for docker-compose (${IMAGE_RUNTIME_TAG})..."
-          docker tag flower-app:build "${IMAGE_RUNTIME_TAG}"
+          echo "[deploy] pull latest image from ACR..."
+          docker compose pull flower-web flower-cron-worker
 
           echo "[deploy] restart app stack (db container untouched)..."
           docker compose stop flower-nginx flower-web flower-cron-worker || true

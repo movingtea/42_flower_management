@@ -15,10 +15,10 @@ services:
     depends_on:
       - flower-web
 
-  # 主 Web 应用（镜像由 CI 构建并 docker load 为 flower-platform-app:latest，服务器无需 Dockerfile）
+  # 主 Web 应用（镜像由 CI push 至阿里云 ACR，服务器 docker compose pull）
   flower-web:
-    image: flower-platform-app:latest
-    pull_policy: never
+    image: crpi-bp5b6vut8l4d7ebv.cn-hangzhou.personal.cr.aliyuncs.com/universe42/flower-platform-app:latest
+    pull_policy: always
     container_name: flower-web-prod
     restart: always
     environment:
@@ -37,8 +37,8 @@ services:
 
   # 大仓供应链异步 Worker（反向库存健康度投影计算）
   flower-cron-worker:
-    image: flower-platform-app:latest
-    pull_policy: never
+    image: crpi-bp5b6vut8l4d7ebv.cn-hangzhou.personal.cr.aliyuncs.com/universe42/flower-platform-app:latest
+    pull_policy: always
     container_name: flower-cron-worker-prod
     restart: always
     environment:

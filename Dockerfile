@@ -7,8 +7,9 @@
 #
 # 与 docker-compose.yml 对齐的镜像名：flower-platform-app:latest
 #
-# 本地构建（仓库根目录）：
-#   docker build -t flower-platform-app:latest \
+# 本地构建（仓库根目录，Mac 需指定 amd64 以匹配 ECS）：
+#   docker build --platform linux/amd64 \
+#     -t crpi-bp5b6vut8l4d7ebv.cn-hangzhou.personal.cr.aliyuncs.com/universe42/flower-platform-app:latest \
 #     --build-arg NEXT_PUBLIC_API_URL=https://www.universe42.studio \
 #     --build-arg NEXT_PUBLIC_ASSET_BASE_URL=https://www.universe42.studio \
 #     .
