@@ -2,7 +2,7 @@ import type { NextAuthConfig } from "next-auth";
 import { Role } from "@/generated/prisma/enums";
 
 /**
- * Edge 兼容的 Auth.js 配置（供 middleware 使用）。
+ * Edge / Proxy 兼容的 Auth.js 配置（供 proxy.ts 使用）。
  * 勿在此文件引入 prisma / bcrypt — 仅 Node Route Handler 在 auth.ts 中挂载 Credentials。
  */
 export const authConfig = {
