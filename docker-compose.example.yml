@@ -1,5 +1,12 @@
+# 生产 compose 模板 — 复制为 docker-compose.yml，与同目录 .env 配合使用
+# ECS 典型路径：/root/flower-platform/
+#
+#   cp docker-compose.example.yml docker-compose.yml
+#   cp .env.production.example .env
+#   # 编辑 .env 填入真实密钥后：
+#   docker compose up -d
+
 services:
-  # 网关哨兵
   flower-nginx:
     image: nginx:alpine
     container_name: flower-nginx-edge
@@ -15,7 +22,6 @@ services:
     depends_on:
       - flower-web
 
-  # 主 Web 应用（镜像由 CI push 至阿里云 ACR，服务器 docker compose pull）
   flower-web:
     image: crpi-bp5b6vut8l4d7ebv.cn-hangzhou.personal.cr.aliyuncs.com/universe42/flower-platform-app:latest
     pull_policy: always
@@ -33,7 +39,6 @@ services:
       db:
         condition: service_healthy
 
-  # 大仓供应链异步 Worker（反向库存健康度投影计算）
   flower-cron-worker:
     image: crpi-bp5b6vut8l4d7ebv.cn-hangzhou.personal.cr.aliyuncs.com/universe42/flower-platform-app:latest
     pull_policy: always
@@ -50,7 +55,6 @@ services:
       db:
         condition: service_healthy
 
-  # 🐘 PostgreSQL 物理容器
   db:
     image: postgres:alpine
     container_name: flower-postgres-prod
