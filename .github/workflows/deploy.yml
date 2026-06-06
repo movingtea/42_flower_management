@@ -14,6 +14,7 @@ jobs:
       ACR_NAMESPACE: universe42
       IMAGE_REPO: flower-platform-app
       REMOTE_PLATFORM_DIR: /root/flower-platform
+      DOCKER_CLI_HINTS: false
 
     steps:
       - name: Checkout Source Code via Private SSH
@@ -27,23 +28,36 @@ jobs:
             -u "${{ secrets.ACR_USERNAME }}" \
             --password-stdin "${ACR_REGISTRY}"
 
-      - name: Build and Push Application Image
+      - name: Build Application Image
         env:
           NEXT_PUBLIC_API_URL: ${{ secrets.NEXT_PUBLIC_API_URL }}
           NEXT_PUBLIC_ASSET_BASE_URL: ${{ secrets.NEXT_PUBLIC_ASSET_BASE_URL }}
         run: |
           IMAGE="${ACR_REGISTRY}/${ACR_NAMESPACE}/${IMAGE_REPO}"
+          echo "[build] start $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           docker build \
+            --progress=plain \
             --platform linux/amd64 \
             --build-arg NEXT_PUBLIC_API_URL="${NEXT_PUBLIC_API_URL:-http://localhost:3000}" \
             --build-arg NEXT_PUBLIC_ASSET_BASE_URL="${NEXT_PUBLIC_ASSET_BASE_URL:-http://localhost:3000}" \
             -t "${IMAGE}:latest" \
             -t "${IMAGE}:${{ github.sha }}" \
             .
+          echo "[build] done $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          docker image inspect "${IMAGE}:latest" --format 'image={{.Id}} arch={{.Os}}/{{.Architecture}} size={{.Size}}'
+
+      - name: Push Image to ACR
+        run: |
+          IMAGE="${ACR_REGISTRY}/${ACR_NAMESPACE}/${IMAGE_REPO}"
+          export DOCKER_CLIENT_TIMEOUT=300
+
+          echo "[push] latest start $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           docker push "${IMAGE}:latest"
+          echo "[push] latest done $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+
+          echo "[push] sha tag start $(date -u +%Y-%m-%dT%H:%M:%SZ)"
           docker push "${IMAGE}:${{ github.sha }}"
-          echo "[verify] manifest for linux/amd64:"
-          docker manifest inspect "${IMAGE}:latest" | grep -E '"architecture"|"os"' | head -4
+          echo "[push] sha tag done $(date -u +%Y-%m-%dT%H:%M:%SZ)"
 
       - name: Execute Remote Deploy via Private Key SSH
         env:
