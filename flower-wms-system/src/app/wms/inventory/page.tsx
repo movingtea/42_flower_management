@@ -54,9 +54,6 @@ export default async function InventoryPage() {
                 安全库存
               </th>
               <th className="px-4 py-3 font-medium text-zinc-600">
-                存储位置
-              </th>
-              <th className="px-4 py-3 font-medium text-zinc-600">
                 库存状态
               </th>
               <th className="px-4 py-3 font-medium text-zinc-600">
@@ -71,7 +68,7 @@ export default async function InventoryPage() {
             {materials.length === 0 ? (
               <tr>
                 <td
-                  colSpan={8}
+                  colSpan={7}
                   className="px-4 py-12 text-center text-zinc-500"
                 >
                   暂无库存数据
@@ -94,14 +91,6 @@ export default async function InventoryPage() {
                   isExpiringSoon(b.expiresAt, now)
                 );
                 const hasExpiring = expiringBatches.length > 0;
-
-                const locations = [
-                  ...new Set(
-                    activeBatches
-                      .map((b) => b.storageLocation)
-                      .filter((loc): loc is string => Boolean(loc))
-                  ),
-                ];
 
                 const rowTone = isLowStock
                   ? "bg-red-50 hover:bg-red-50/80"
@@ -135,11 +124,6 @@ export default async function InventoryPage() {
                     </td>
                     <td className="px-4 py-3 text-zinc-600">
                       {minStock} {material.unit}
-                    </td>
-                    <td className="px-4 py-3 text-zinc-600">
-                      {locations.length > 0
-                        ? locations.join("、")
-                        : "暂无存储位置"}
                     </td>
                     <td className="px-4 py-3">
                       {isLowStock ? (

@@ -2,12 +2,12 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { WikiCareTable } from "@/components/wiki/WikiCareTable";
+import { WikiMaterialDetailModal } from "@/components/wiki/WikiMaterialDetailModal";
+import { WikiTableTruncatedText } from "@/components/wiki/WikiTableTruncatedText";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
-  FLORAL_ROLE_LABEL,
   WIKI_MAINTENANCE_TEMPLATE,
-  roleBadgeClass,
   type WikiListItem,
 } from "@/lib/wiki-constants";
 import {
@@ -15,6 +15,7 @@ import {
   emptyCareTable,
   normalizeCareTable,
   validateCareTableForSave,
+  WIKI_CARE_ROW_SPECS,
   type WikiCareRow,
 } from "@/lib/wiki-care";
 
@@ -84,6 +85,47 @@ function toPayload(
   };
 }
 
+const WIKI_TABLE_COL_COUNT = 5 + WIKI_CARE_ROW_SPECS.length + 1;
+
+const STICKY_NAME_HEAD =
+  "sticky left-0 z-30 border-r border-zinc-200 bg-zinc-50 px-3 py-3 font-medium shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)]";
+
+const STICKY_NAME_CELL =
+  "sticky left-0 z-20 overflow-hidden border-r border-zinc-200 bg-white px-3 py-3 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)] group-hover:bg-zinc-50";
+
+const STICKY_ACTION_HEAD =
+  "sticky right-0 z-40 border-l border-zinc-200 bg-zinc-50 px-3 py-3 font-medium text-left shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]";
+
+const STICKY_ACTION_CELL =
+  "sticky right-0 z-30 border-l border-zinc-200 bg-white px-3 py-3 text-right shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)] group-hover:bg-zinc-50";
+
+/** 固定列宽 + 换行，防止文字溢出到相邻列（宽度由 colgroup 控制） */
+const WIKI_WRAP_CELL =
+  "overflow-hidden break-words whitespace-normal align-top bg-inherit px-3 py-3 text-zinc-600";
+
+const WIKI_WRAP_CELL_EMPTY =
+  "overflow-hidden align-top bg-inherit px-3 py-3 text-zinc-400";
+
+const WIKI_COMPACT_CELL =
+  "overflow-hidden break-words whitespace-normal align-top bg-inherit px-3 py-3 text-zinc-600";
+
+function careValueByKey(item: WikiListItem, key: string): string {
+  if (!item.careTable?.length) return "";
+  const row = item.careTable.find((entry) => entry.key === key);
+  return row?.value.trim() ?? "";
+}
+
+function WikiTableCell({ value }: { value: string }) {
+  if (!value) {
+    return <td className={WIKI_WRAP_CELL_EMPTY}>—</td>;
+  }
+  return (
+    <td className={WIKI_WRAP_CELL}>
+      <WikiTableTruncatedText text={value} />
+    </td>
+  );
+}
+
 export function WikiMaterialConsole() {
   const [items, setItems] = useState<WikiListItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -92,6 +134,7 @@ export function WikiMaterialConsole() {
   const [debouncedQ, setDebouncedQ] = useState("");
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
+  const [viewItem, setViewItem] = useState<WikiListItem | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingMorphology, setEditingMorphology] = useState<string | null>(null);
   const [editingColorTags, setEditingColorTags] = useState<string[] | null>(null);
@@ -162,6 +205,19 @@ export function WikiMaterialConsole() {
   useEffect(() => {
     void loadList();
   }, [loadList]);
+
+  function openView(item: WikiListItem) {
+    setViewItem(item);
+  }
+
+  function closeView() {
+    setViewItem(null);
+  }
+
+  function openEditFromView(item: WikiListItem) {
+    closeView();
+    openEdit(item);
+  }
 
   function openCreate() {
     setEditingId(null);
@@ -361,31 +417,56 @@ export function WikiMaterialConsole() {
         <p className="text-sm text-zinc-500">共 {total} 条</p>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
-        <table className="min-w-full text-sm">
-          <thead className="border-b border-zinc-100 bg-zinc-50/80 text-left text-zinc-600">
+      <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white">
+        <table className="w-full min-w-[72rem] table-fixed text-sm">
+          <colgroup>
+            <col className="w-24" />
+            <col className="w-[6%]" />
+            <col className="w-[5%]" />
+            <col className="w-[9%]" />
+            {WIKI_CARE_ROW_SPECS.map((spec) => (
+              <col key={spec.key} className="w-[9%]" />
+            ))}
+            <col className="w-36" />
+          </colgroup>
+          <thead className="border-b border-zinc-200 bg-zinc-50 text-left text-zinc-600">
             <tr>
-              <th className="px-4 py-3 font-medium">中文名</th>
-              <th className="px-4 py-3 font-medium">拉丁学名</th>
-              <th className="px-4 py-3 font-medium">简拼</th>
-              <th className="px-4 py-3 font-medium">角色</th>
-              <th className="px-4 py-3 font-medium">色系</th>
-              <th className="px-4 py-3 font-medium">供货</th>
-              <th className="px-4 py-3 font-medium">保质期</th>
-              <th className="px-4 py-3 font-medium text-right">操作</th>
+              <th className={STICKY_NAME_HEAD}>花名</th>
+              <th className={`${WIKI_COMPACT_CELL} bg-zinc-50 font-medium`}>
+                供货时间
+              </th>
+              <th className="bg-zinc-50 px-3 py-3 font-medium">保质期</th>
+              <th className={`${WIKI_WRAP_CELL} bg-zinc-50 font-medium`}>
+                花语
+              </th>
+              {WIKI_CARE_ROW_SPECS.map((spec) => (
+                <th
+                  key={spec.key}
+                  className={`${WIKI_WRAP_CELL} bg-zinc-50 font-medium`}
+                >
+                  {spec.label}
+                </th>
+              ))}
+              <th className={STICKY_ACTION_HEAD}>操作</th>
             </tr>
           </thead>
           <tbody>
             {loading && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-zinc-400">
+                <td
+                  colSpan={WIKI_TABLE_COL_COUNT}
+                  className="px-4 py-8 text-center text-zinc-400"
+                >
                   加载中…
                 </td>
               </tr>
             )}
             {!loading && items.length === 0 && (
               <tr>
-                <td colSpan={8} className="px-4 py-8 text-center text-zinc-400">
+                <td
+                  colSpan={WIKI_TABLE_COL_COUNT}
+                  className="px-4 py-8 text-center text-zinc-400"
+                >
                   暂无物料，点击「新增物料」开始录入
                 </td>
               </tr>
@@ -394,35 +475,41 @@ export function WikiMaterialConsole() {
               items.map((item) => (
                 <tr
                   key={item.id}
-                  className="border-t border-zinc-100 hover:bg-zinc-50/50"
+                  className="group border-t border-zinc-100 bg-white hover:bg-zinc-50"
                 >
-                  <td className="px-4 py-3 font-medium text-zinc-900">
-                    {item.chineseName}
-                  </td>
-                  <td className="px-4 py-3 text-zinc-600">{item.englishName}</td>
-                  <td className="px-4 py-3 font-mono text-xs text-zinc-500">
-                    {item.pinyinIndex || "—"}
-                  </td>
-                  <td className="px-4 py-3">
-                    <span
-                      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${roleBadgeClass(item.floralRole)}`}
+                  <td className={`${STICKY_NAME_CELL} align-top`}>
+                    <button
+                      type="button"
+                      onClick={() => openView(item)}
+                      className="whitespace-normal break-words text-left font-medium text-rose-700 underline-offset-2 hover:text-rose-900 hover:underline"
+                      title={item.chineseName}
                     >
-                      {FLORAL_ROLE_LABEL[item.floralRole]}
-                    </span>
+                      {item.chineseName}
+                    </button>
                   </td>
-                  <td className="px-4 py-3 text-zinc-600">
-                    {item.colorTags.join("、") || "—"}
-                  </td>
-                  <td className="px-4 py-3 text-zinc-600">
+                  <td className={WIKI_COMPACT_CELL}>
                     {item.supplySeason ?? "—"}
                   </td>
-                  <td className="px-4 py-3 text-zinc-600">
+                  <td className={`${WIKI_COMPACT_CELL} text-zinc-600`}>
                     {item.defaultShelfLifeDays != null
                       ? `${item.defaultShelfLifeDays} 天`
                       : "—"}
                   </td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex justify-end gap-2">
+                  <td className={WIKI_WRAP_CELL}>
+                    {item.flowerLanguage?.trim() ? (
+                      <WikiTableTruncatedText text={item.flowerLanguage.trim()} />
+                    ) : (
+                      "—"
+                    )}
+                  </td>
+                  {WIKI_CARE_ROW_SPECS.map((spec) => (
+                    <WikiTableCell
+                      key={spec.key}
+                      value={careValueByKey(item, spec.key)}
+                    />
+                  ))}
+                  <td className={`${STICKY_ACTION_CELL} align-top`}>
+                    <div className="flex shrink-0 justify-end gap-2 whitespace-nowrap">
                       <Button
                         type="button"
                         variant="secondary"
@@ -469,6 +556,14 @@ export function WikiMaterialConsole() {
             下一页
           </Button>
         </div>
+      )}
+
+      {viewItem && (
+        <WikiMaterialDetailModal
+          item={viewItem}
+          onClose={closeView}
+          onEdit={() => openEditFromView(viewItem)}
+        />
       )}
 
       {modalOpen && (

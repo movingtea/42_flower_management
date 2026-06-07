@@ -62,14 +62,13 @@ export default async function InventoryDetailPage({
                 <th className="px-4 py-3">入库时间</th>
                 <th className="px-4 py-3">原始 / 剩余</th>
                 <th className="px-4 py-3">瓶插期</th>
-                <th className="px-4 py-3">库位</th>
               </tr>
             </thead>
             <tbody className="divide-y">
               {product.batches.length === 0 ? (
                 <tr>
                   <td
-                    colSpan={5}
+                    colSpan={4}
                     className="px-4 py-8 text-center text-zinc-500"
                   >
                     暂无批次记录
@@ -86,7 +85,6 @@ export default async function InventoryDetailPage({
                       {b.originalQty} / {b.remainingQty}
                     </td>
                     <td className="px-4 py-3">{b.expiresAt}</td>
-                    <td className="px-4 py-3">{b.storageLocation}</td>
                   </tr>
                 ))
               )}
