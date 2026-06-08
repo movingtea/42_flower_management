@@ -1,7 +1,7 @@
 # Flower WMS System — 架构概览
 
-> 文档版本：基于代码库静态审计生成（Next.js App Router + Prisma + PostgreSQL）。  
-> 应用根目录：`flower-wms-system/`。所有物理表名以 `prisma/schema.prisma` 的 `@@map(...)` 为准。
+> 文档版本：基于当前代码库静态审计更新（Next.js App Router + Prisma + PostgreSQL）。  
+> 应用根目录：`flower-wms-system/`；微信小程序客户端：`42_mp/`。所有物理表名以 `prisma/schema.prisma` 的 `@@map(...)` 为准。
 
 ---
 
@@ -19,9 +19,12 @@
 
 | 层级 | 选型 |
 |------|------|
-| 框架 | Next.js App Router，Server / Client Component 混用 |
-| ORM | Prisma Client，输出至 `src/generated/prisma` |
+| 框架 | Next.js 16 App Router，Server / Client Component 混用 |
+| 运行时 | React 19；生产镜像基于 Node 22 Alpine，Next standalone 输出 |
+| ORM | Prisma 7 Client，输出至 `src/generated/prisma`，通过 `@prisma/adapter-pg` 连接 PostgreSQL |
 | 数据库 | PostgreSQL（`datasource db`） |
+| 后台鉴权 | Auth.js v5 Credentials + JWT Session + `StaffUser` 五级 RBAC |
+| 小程序鉴权 | 自定义 HS256 JWT（`WECHAT_JWT_SECRET`），与后台 Staff Session 隔离 |
 | 样式 | Tailwind CSS 4 |
 | 图标 | `lucide-react`（WMS 看板等 Client Component） |
 | 拼音检索 | `pinyin-pro` → `src/lib/pinyin-index.ts` |
@@ -44,14 +47,17 @@
 | 销售支付 → 物理批次 FIFO | `markOrderPaidWithFifo`（见「订单与双轨库存」）：支付成功时在 `Serializable` 事务内扣 `batches.remaining_qty` 并写 `SALE_OUT` |
 | 退款 → 物理批次原路回库 | `refundPaidOrder` → `restorePhysicalStockFromSaleOutInTx`：按历史 `SALE_OUT` 逐批 `increment` + 写 `IN_CANCEL`（`operator: SYSTEM_REFUND_AUTO`） |
 | 虚拟库存健康投影校准 | `syncPhysicalStockToVirtual`（`services/inventory-sync.ts`）：木桶原理将 `product_skus.stock` 向下截断至物理可成套上限 |
+| 定时自动库存投影 | `docker-compose.yml` 中 `flower-cron-worker` 常驻运行 `scripts/cron-inventory-daemon.ts`，默认每 15 分钟执行一次，可用 `INVENTORY_SYNC_INTERVAL_MS` 调整 |
+| 员工登录与账号管理 | Auth.js + `StaffUser` 表已落地；`/login`、`/admin/staff-users` 与 `actions/staff-users.ts` 可用 |
 | CMS SKU 营销图文白名单 API | `PATCH /api/cms/skus/[id]`：仅 `description` / `imageUrl`；`requirePermission(STORE_OPERATOR)` |
 
-**尚未实现**
+**当前未提供 / 不应假设存在**
 
 | 项 | 说明 |
 |----|------|
-| 员工登录 UI | Auth.js + `StaffUser` 表已落地；`/login` 与 `staff-users` 管理页可用 |
-| 定时自动库存投影 | `syncPhysicalStockToVirtual` 仅提供手动脚本，无 Cron / 队列 |
+| Redis / MQ / 独立任务队列 | 定时库存同步由同一镜像中的 `tsx` 常驻 Worker 完成，不依赖外部队列 |
+| 对象存储 | 上传文件写入本地 `public/uploads/`，并通过 `src/app/uploads/[[...path]]/route.ts` 兜底读取 |
+| 正式测试脚本 | 目前仅有 `src/services/order-fifo-pure.test.ts`，`package.json` 未配置 Jest / Vitest 等测试命令 |
 
 **历史命名 → 现行模型**
 
@@ -61,7 +67,20 @@ product_bom（已废弃）       →  recipes + recipe_lines + product_skus.reci
 product_spus.recipe_id      →  已删除；配方指针在 product_skus.recipe_id
 ```
 
-**Monorepo 边界**：后端与后台在 `flower-wms-system/`；微信小程序客户端在仓库根目录 `42_mp/`（API 基址见 `42_mp/miniprogram/config/index.ts` → `baseUrl` / `apiWechatBaseUrl`）。
+**Monorepo 边界**：后端与后台在 `flower-wms-system/`；微信小程序客户端在仓库根目录 `42_mp/`（API 基址见 `42_mp/miniprogram/config/index.ts` → `baseUrl` / `apiWechatBaseUrl`）。两者不是 npm workspace，构建与依赖独立；小程序通过 HTTP 调用 Next.js 暴露的 `/api/wechat/*`。
+
+#### 仓库顶层结构
+
+```text
+/workspace/
+├── flower-wms-system/             # Next.js 全栈后台、API、Prisma Schema
+├── 42_mp/                         # 原生微信小程序客户端
+├── Dockerfile                     # monorepo 根目录作为构建上下文
+├── docker-compose.yml             # 生产 compose：nginx / web / cron-worker / postgres
+├── docker-compose.example.yml     # 示例部署配置
+├── deploy/nginx/conf.d/           # Nginx 反向代理配置示例
+└── .github/workflows/deploy.yml   # master push 后构建 ACR 镜像并 SSH 部署
+```
 
 ---
 
@@ -73,8 +92,14 @@ flower-wms-system/
 │   ├── schema.prisma          # 唯一数据模型真理源
 │   └── migrations/            # 历史迁移 SQL
 ├── src/
+│   ├── auth.ts                # Node Route Handler 使用的 Auth.js Credentials + Prisma
+│   ├── auth.config.ts         # Edge / Proxy 安全配置（不引入 Prisma / bcrypt）
+│   ├── proxy.ts               # Next.js 16 Proxy：后台页面/API 登录态与 RBAC 粗拦截
+│   ├── actions/               # Server Actions（员工账号管理等）
 │   ├── app/
+│   │   ├── layout.tsx         # 根布局与 SessionProvider
 │   │   ├── page.tsx           # 工作台门户（WMS / CMS 分流）
+│   │   ├── login/             # 后台员工登录
 │   │   ├── wms/               # WMS 页面路由
 │   │   ├── cms/               # CMS 页面路由
 │   │   ├── admin/             # 管理壳（轻量）
@@ -91,8 +116,23 @@ flower-wms-system/
 │   ├── utils/                 # 无状态工具（batch-no、skuGenerator）
 │   ├── lib/                   # 工具、RBAC、CMS 白名单、库存查询 helper
 │   └── generated/prisma/      # Prisma 生成物（勿手改）
-└── scripts/                   # 种子、FIFO 试跑、库存投影校准等运维脚本
+├── scripts/                   # 种子、FIFO 试跑、库存投影校准、cron daemon
+├── next.config.ts             # standalone 输出 + legacy /admin → /wms|/cms redirects
+└── docker-entrypoint.sh       # 容器启动前执行 prisma migrate deploy
 ```
+
+#### 主要运行入口
+
+| 入口 | 文件 | 说明 |
+|------|------|------|
+| 根布局 | `src/app/layout.tsx` | 注入 Geist 字体、全局样式与 `SessionProvider` |
+| 工作台门户 | `src/app/page.tsx` | 未登录跳 `/login`；`STORE_ADMIN` 展示 WMS/CMS 双入口，其它角色跳转到 `getRoleHomePath()` |
+| 员工登录 | `src/app/login/page.tsx` | Auth.js Credentials 登录 UI |
+| Auth Route | `src/app/api/auth/[...nextauth]/route.ts` | 暴露 NextAuth handlers |
+| 请求防护 | `src/proxy.ts` | Next.js 16 Proxy matcher 覆盖 `/`、`/login`、`/wms/*`、`/cms/*`、`/admin/*`、`/api/admin/*`、`/api/cms/*`、`/api/business/*` |
+| 生产服务 | `Dockerfile` → `CMD ["node", "server.js"]` | Next standalone server，监听 `PORT=3000` |
+| 容器启动 | `docker-entrypoint.sh` | 有 `DATABASE_URL` 且未设置 `SKIP_DB_MIGRATE=true` 时执行 `npx prisma migrate deploy` |
+| 定时 Worker | `scripts/cron-inventory-daemon.ts` | compose 中 `flower-cron-worker` 覆盖 entrypoint 后循环执行库存健康投影 |
 
 #### WMS 页面路由（`src/app/wms/`）
 
@@ -153,7 +193,7 @@ flower-wms-system/
 | `FLORIST` | 订单看板、Wiki/配方只读 |
 | `STORE_OPERATOR` | CMS 商品上架、SKU 营销图文 PATCH |
 
-实现：`auth.ts`（Auth.js v5）+ `lib/rbac.ts`（`hasPermission` / `canCmsWrite` 等）+ `lib/api-auth.ts`（`requirePermission`）+ `lib/stock-mutation-auth.ts`（库存服务层 Session 鉴权）。与小程序用户 JWT（`WECHAT_JWT_SECRET`）**完全隔离**。
+实现：`auth.ts`（Auth.js v5 Credentials + `StaffUser` + bcrypt）+ `auth.config.ts`（Edge / Proxy 安全 JWT 配置）+ `proxy.ts`（页面与后台 API 粗粒度入口防护）+ `lib/rbac.ts`（`hasPermission` / `canCmsWrite` 等）+ `lib/api-auth.ts`（`requirePermission`）+ `lib/stock-mutation-auth.ts`（库存服务层 Session 鉴权）。与小程序用户 JWT（`WECHAT_JWT_SECRET`）**完全隔离**。
 
 #### WMS 后台 API（`src/app/api/admin/wms/`）
 
@@ -316,7 +356,10 @@ refundPaidOrder(orderId, { rollbackStock? })
 3. 木桶：`maxPossibleQty = min(floor(总支数 / quantityNeeded))`
 4. 若 `sku.stock > maxPossibleQty` → 强行 `update` 截断（只降不升）
 
-运维脚本：`npx tsx scripts/sync-physical-to-virtual-stock.ts`
+运维脚本：
+
+- 手动执行：`npx tsx scripts/sync-physical-to-virtual-stock.ts`
+- 常驻执行：`docker-compose.yml` 的 `flower-cron-worker` 运行 `npx tsx --tsconfig tsconfig.json scripts/cron-inventory-daemon.ts`，默认 15 分钟循环一次
 
 #### 支付成功接入点（均已调用 `markOrderPaidWithFifo`）
 
@@ -503,6 +546,57 @@ markOrderPaidWithFifo({ orderId, userId?, operator? })
 
 ---
 
+### 🏗️ 构建、部署与运行拓扑
+
+#### 本地与构建脚本
+
+| 命令 | 说明 |
+|------|------|
+| `npm run dev` | Next.js 开发服务 |
+| `npm run build` | `next build`，产物按 `next.config.ts` 的 `output: "standalone"` 生成 |
+| `npm run start` | `next start`（本地/非 standalone 运行方式） |
+| `npm run lint` | ESLint 9 + `eslint-config-next` |
+| `npm run db:seed` | `prisma db seed`，执行 `prisma/seed.ts` |
+| `npm run seed:test-products` | 用脚本生成测试商品克隆 |
+
+测试现状：仓库中已有 `src/services/order-fifo-pure.test.ts` 纯函数测试，可用 `npx tsx src/services/order-fifo-pure.test.ts` 运行；`package.json` 尚未配置统一 `test` 脚本或测试框架。
+
+#### 容器镜像
+
+`Dockerfile` 以仓库根目录作为构建上下文：
+
+1. `deps` 阶段基于 `flower-wms-system/package-lock.json` 执行 `npm ci`；
+2. `builder` 阶段复制 `flower-wms-system/`，执行 `npx prisma generate` 与 `npm run build`；
+3. `runner` 阶段复制 `.next/standalone`、`.next/static`、`public/`、`prisma/`、`scripts/`、`src/generated/` 与生产依赖；
+4. 容器以非 root 用户运行，`HEALTHCHECK` 请求 `http://127.0.0.1:${PORT}/login`；
+5. `ENTRYPOINT ["./docker-entrypoint.sh"]` 会在启动前按需执行 `npx prisma migrate deploy`，随后 `CMD ["node", "server.js"]` 启动 Next standalone。
+
+#### 生产 Compose 拓扑
+
+| 服务 | 镜像 / 入口 | 职责 |
+|------|-------------|------|
+| `flower-nginx` | `nginx:alpine` | 80/443 入口、TLS 与反向代理，依赖 `flower-web` |
+| `flower-web` | ACR 镜像 `flower-platform-app:latest` | 主 Next.js 应用：页面、后台 API、小程序 API、Auth.js |
+| `flower-cron-worker` | 同一 ACR 镜像，entrypoint 改为 `npx tsx --tsconfig tsconfig.json scripts/cron-inventory-daemon.ts` | 常驻执行虚拟库存健康投影 |
+| `db` | `postgres:alpine` | PostgreSQL，持久卷 `postgres_data`，`pg_isready` healthcheck |
+
+环境变量来源：生产 compose 读取 `.env`；示例见 `flower-wms-system/.env.example`，包括 `DATABASE_URL`、`AUTH_SECRET` / `NEXTAUTH_SECRET`、`WECHAT_*`、`DEEPSEEK_*`、`NEXT_PUBLIC_*`。
+
+#### CI/CD
+
+`.github/workflows/deploy.yml` 在 `master` push 后执行：
+
+1. 使用私钥 checkout；
+2. 登录阿里云 ACR；
+3. 按 `linux/amd64` 构建镜像，并同时打 `latest` 与 commit SHA tag；
+4. 推送镜像；
+5. SSH 到服务器后 `docker compose pull flower-web flower-cron-worker`；
+6. 重启 `flower-web`、`flower-cron-worker` 与 `flower-nginx`；
+7. 通过容器内 `/login` 健康检查；
+8. 执行 `npx prisma migrate status`，输出 web / cron worker 日志并清理旧镜像。
+
+---
+
 ### 🚧 研发红线与架构防线
 
 以下为**代码中已固化或从实现直接推导**的规矩；未在仓库中出现的策略不会写入。
@@ -542,11 +636,11 @@ markOrderPaidWithFifo({ orderId, userId?, operator? })
 
 | 项 | 说明 |
 |----|------|
-| 员工账号体系 | 部分遗留 admin 路由（`banners`、`app-config`）仍仅靠 Middleware 粗拦截 |
+| 遗留 Admin 路由授权粒度 | 部分遗留 admin 路由（`banners`、`app-config`）主要依赖 `proxy.ts` 入口拦截，未全部下沉到 Route Handler 内的细粒度 `requirePermission` |
 | 旧 BOM 商品 API | `GET /api/admin/products/bom` 只读兼容；经 `getRecipeForProduct` 查 SPU 下首个有 `recipeId` 的 SKU |
 | `productRecipeInclude` | 已废弃别名，请用 `skuRecipeInclude`（`lib/product-categories.ts`） |
 | 遗留 `inbound.ts` | 与 `wms-stock` 功能重叠，无 import 方，可删除 |
-| Schema 注释滞后 | `schema.prisma` 头部仍写「RecipeLine ↔ Material」；`WASTAGE_OUT` 注释与指定批次报损实现不符 |
+| Schema 注释滞后 | `StockLogType.WASTAGE_OUT` 注释仍写 FIFO 扣减，但当前实现是指定批次报损 |
 | 双轨库存运营 | 虚拟 SKU 与物理批次需运营对齐；**SKU 无 `recipeId`** 或 Wiki 无入库 Material 会导致支付跳过该行或 FIFO 熔断 |
 | 数据库迁移 | 部署后须执行 `npx prisma migrate deploy`（含 `20260529160000_sku_recipe_binding`） |
 
