@@ -1,6 +1,6 @@
 # Flower WMS System — 架构概览
 
-> 文档版本：基于当前代码库静态审计更新（Next.js App Router + Prisma + PostgreSQL）。  
+> 文档版本：基于当前代码库静态审计更新（Next.js App Router + Prisma + PostgreSQL）。
 > 应用根目录：`flower-wms-system/`；微信小程序客户端：`42_mp/`。所有物理表名以 `prisma/schema.prisma` 的 `@@map(...)` 为准。
 
 ---
