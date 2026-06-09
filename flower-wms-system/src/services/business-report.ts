@@ -902,7 +902,7 @@ export async function getInventoryAlertReport(): Promise<InventoryAlertReport> {
       material.safetyStockThreshold > 0
         ? material.safetyStockThreshold
         : DEFAULT_LOW_STOCK_THRESHOLD;
-    const alertLevel =
+    const alertLevel: "OUT_OF_STOCK" | "LOW" | "NORMAL" =
       remainingQty === 0 ? "OUT_OF_STOCK" : remainingQty <= threshold ? "LOW" : "NORMAL";
     const reason =
       alertLevel === "OUT_OF_STOCK"

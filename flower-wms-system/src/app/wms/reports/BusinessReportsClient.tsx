@@ -159,7 +159,10 @@ export function BusinessReportsClient() {
   );
 
   useEffect(() => {
-    void loadReports();
+    const timer = window.setTimeout(() => {
+      void loadReports();
+    }, 0);
+    return () => window.clearTimeout(timer);
   }, [loadReports]);
 
   async function backfillCostSnapshots() {

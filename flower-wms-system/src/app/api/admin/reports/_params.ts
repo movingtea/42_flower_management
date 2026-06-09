@@ -1,5 +1,23 @@
 import type { ReportPreset } from "@/services/business-report-pure";
 
+type ProductRankingSortBy =
+  | "grossProfit"
+  | "grossMargin"
+  | "paidAmount"
+  | "orderQuantity";
+
+function parseSortBy(value: string | null): ProductRankingSortBy | undefined {
+  if (
+    value === "grossProfit" ||
+    value === "grossMargin" ||
+    value === "paidAmount" ||
+    value === "orderQuantity"
+  ) {
+    return value;
+  }
+  return undefined;
+}
+
 export function parseReportSearchParams(searchParams: URLSearchParams) {
   const preset = searchParams.get("preset") as ReportPreset | null;
   const startDate = searchParams.get("startDate");
@@ -14,12 +32,6 @@ export function parseReportSearchParams(searchParams: URLSearchParams) {
     endDate,
     lowMarginThreshold,
     limit,
-    sortBy:
-      sortBy === "grossProfit" ||
-      sortBy === "grossMargin" ||
-      sortBy === "paidAmount" ||
-      sortBy === "orderQuantity"
-        ? sortBy
-        : undefined,
+    sortBy: parseSortBy(sortBy),
   };
 }
