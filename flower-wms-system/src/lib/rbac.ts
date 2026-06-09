@@ -85,6 +85,7 @@ export const BUSINESS_API_PREFIXES = [
   "/api/admin/wms",
   "/api/admin/wiki",
   "/api/admin/orders",
+  "/api/admin/reports",
   "/api/admin/batches",
   "/api/admin/wastage",
   "/api/admin/stocktake",
