@@ -63,20 +63,24 @@ ENV HOSTNAME=0.0.0.0
 RUN addgroup --system --gid 1001 nodejs \
   && adduser --system --uid 1001 nextjs
 
+# Next.js standalone（flower-web: node server.js）
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# 生产依赖（含 prisma / tsx / dotenv，供 migrate 与 cron-worker）
 COPY --from=prod-deps --chown=nextjs:nodejs /app/package.json ./package.json
 COPY --from=prod-deps --chown=nextjs:nodejs /app/package-lock.json ./package-lock.json
 COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+
+# Prisma + cron-worker TS 源码运行时（npx tsx --tsconfig tsconfig.json scripts/...）
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
 COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
 COPY --from=builder --chown=nextjs:nodejs /app/next-env.d.ts ./next-env.d.ts
-COPY --from=builder --chown=nextjs:nodejs /app/src/generated ./src/generated
-COPY --from=builder --chown=nextjs:nodejs /app/src/lib ./src/lib
-COPY --from=builder --chown=nextjs:nodejs /app/docker-entrypoint.sh ./docker-entrypoint.sh
+COPY --from=builder --chown=nextjs:nodejs /app/src ./src
 COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+COPY --from=builder --chown=nextjs:nodejs /app/docker-entrypoint.sh ./docker-entrypoint.sh
 
 RUN chmod +x ./docker-entrypoint.sh
 
