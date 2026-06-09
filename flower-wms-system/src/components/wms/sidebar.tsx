@@ -8,6 +8,8 @@ const navItems = [
   { href: "/wms/dashboard", label: "仪表盘", icon: "📊" },
   { href: "/wms/inventory", label: "库存管理", icon: "📦" },
   { href: "/wms/operations", label: "仓储日常", icon: "📥" },
+  { href: "/wms/purchase-orders", label: "采购单", icon: "🧾" },
+  { href: "/wms/suppliers", label: "供应商", icon: "🚚" },
   { href: "/wms/wiki", label: "物料母表", icon: "🌸" },
   { href: "/wms/recipes", label: "标准配方", icon: "🧪" },
   { href: "/wms/packaging-kits", label: "包装方案", icon: "🎁" },
