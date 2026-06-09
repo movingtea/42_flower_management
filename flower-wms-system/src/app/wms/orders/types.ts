@@ -31,6 +31,7 @@ export type KanbanOrder = {
   greetingCard: string | null;
   deliveryInfo: string | null;
   payAmount: string;
+  grossMargin: string | null;
   refundAmount: number | null;
   cancelSource: string | null;
   createdAt: string;

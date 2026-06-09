@@ -10,6 +10,7 @@ const navItems = [
   { href: "/wms/operations", label: "仓储日常", icon: "📥" },
   { href: "/wms/wiki", label: "物料母表", icon: "🌸" },
   { href: "/wms/recipes", label: "标准配方", icon: "🧪" },
+  { href: "/wms/packaging-kits", label: "包装方案", icon: "🎁" },
   { href: "/wms/material-categories", label: "原材料分类", icon: "🏷️" },
   { href: "/wms/orders", label: "订单履约", icon: "📋" },
 ];

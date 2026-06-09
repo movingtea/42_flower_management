@@ -1,12 +1,18 @@
 import type { KanbanOrder } from "@/app/wms/orders/types";
 import { ORDER_STATUS_LABEL } from "@/services/order-lifecycle";
-import type { Order, OrderItem, OrderStatus } from "@/generated/prisma/client";
+import type {
+  Order,
+  OrderCostSnapshot,
+  OrderItem,
+  OrderStatus,
+} from "@/generated/prisma/client";
 
 type OrderWithItems = Order & {
   items: Pick<
     OrderItem,
     "snapshotProductName" | "snapshotSpecName" | "quantity"
   >[];
+  costSnapshot: Pick<OrderCostSnapshot, "grossMargin"> | null;
 };
 
 export function mapPrismaOrderToKanban(order: OrderWithItems): KanbanOrder {
@@ -22,6 +28,7 @@ export function mapPrismaOrderToKanban(order: OrderWithItems): KanbanOrder {
     greetingCard: order.greetingCard,
     deliveryInfo: order.deliveryInfo,
     payAmount: order.payAmount.toFixed(2),
+    grossMargin: order.costSnapshot?.grossMargin.toFixed(4) ?? null,
     refundAmount: order.refundAmount,
     cancelSource: order.cancelSource ?? null,
     createdAt: order.createdAt.toISOString(),

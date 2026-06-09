@@ -396,6 +396,11 @@ export async function listKanbanOrders() {
           quantity: true,
         },
       },
+      costSnapshot: {
+        select: {
+          grossMargin: true,
+        },
+      },
     },
     orderBy: { updatedAt: "desc" },
     take: 300,

@@ -10,6 +10,7 @@ import {
   expandAndAggregateWikiDemands,
   PHYSICAL_STOCK_INSUFFICIENT,
 } from "@/services/order-fifo-pure";
+import { upsertOrderCostSnapshot } from "@/services/order-cost";
 
 export { PhysicalStockInsufficientError, PHYSICAL_STOCK_INSUFFICIENT };
 
@@ -190,11 +191,15 @@ export async function markOrderPaidWithFifo(options: MarkPaidOptions) {
           where: { id: orderId, ...(userId ? { userId } : {}) },
         });
         if (!order) throw new Error("订单不存在");
-        if (order.status === OrderStatus.PAID) return order;
+        if (order.status === OrderStatus.PAID) {
+          await upsertOrderCostSnapshot(orderId, tx);
+          return tx.order.findUniqueOrThrow({ where: { id: orderId } });
+        }
         throw new Error("当前订单状态不可支付");
       }
 
       await deductPhysicalStockForPaidOrder(tx, orderId, operator);
+      await upsertOrderCostSnapshot(orderId, tx);
 
       return tx.order.findUniqueOrThrow({ where: { id: orderId } });
     },

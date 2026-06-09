@@ -88,9 +88,9 @@ model ProductCategory {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  parent    ProductCategory?  @relation("ProdCategoryToSub", fields: [parentId], references: [id], onDelete: Cascade)
-  children  ProductCategory[] @relation("ProdCategoryToSub")
-  products  ProductCategoryRelation[]
+  parent   ProductCategory?          @relation("ProdCategoryToSub", fields: [parentId], references: [id], onDelete: Cascade)
+  children ProductCategory[]         @relation("ProdCategoryToSub")
+  products ProductCategoryRelation[]
 
   @@index([parentId])
   @@index([sortOrder])
@@ -238,10 +238,10 @@ model Material {
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
-  wiki                FlowerWiki?                @relation(fields: [wikiId], references: [id])
-  batches             Batch[]
-  stockLogs           StockLog[]
-  categoryRelations   MaterialCategoryRelation[]
+  wiki              FlowerWiki?                @relation(fields: [wikiId], references: [id])
+  batches           Batch[]
+  stockLogs         StockLog[]
+  categoryRelations MaterialCategoryRelation[]
 
   @@index([wikiId])
   @@map("materials")
@@ -252,18 +252,37 @@ model Material {
 // ---------------------------------------------------------------------------
 
 model Recipe {
-  id          String   @id @default(uuid())
-  recipeCode  String   @unique @map("recipe_code")
-  name        String
-  description String?  @db.Text
-  createdAt   DateTime @default(now()) @map("created_at")
-  updatedAt   DateTime @updatedAt @map("updated_at")
+  id             String   @id @default(uuid())
+  recipeCode     String   @unique @map("recipe_code")
+  name           String
+  description    String?  @db.Text
+  packagingKitId String?  @map("packaging_kit_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+  updatedAt      DateTime @updatedAt @map("updated_at")
 
-  lines    RecipeLine[]
-  skus     ProductSku[]
+  lines        RecipeLine[]
+  skus         ProductSku[]
+  packagingKit PackagingKit? @relation(fields: [packagingKitId], references: [id], onDelete: SetNull)
 
   @@index([name])
+  @@index([packagingKitId])
   @@map("recipes")
+}
+
+model PackagingKit {
+  id           String   @id @default(uuid())
+  name         String
+  description  String?  @db.Text
+  standardCost Decimal  @map("standard_cost") @db.Decimal(10, 2)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  recipes Recipe[]
+
+  @@index([isActive])
+  @@index([updatedAt])
+  @@map("packaging_kits")
 }
 
 model RecipeLine {
@@ -299,8 +318,8 @@ model Batch {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  material  Material   @relation(fields: [materialId], references: [id], onDelete: Restrict)
-  stockLogs StockLog[]
+  material         Material          @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  stockLogs        StockLog[]
   stockLossRecords StockLossRecord[]
 
   @@index([materialId, inboundAt])
@@ -314,25 +333,25 @@ model Batch {
 // ---------------------------------------------------------------------------
 
 model StockLog {
-  id            String       @id @default(cuid())
-  materialId    String
-  batchId       String
-  type          StockLogType
-  delta         Int
-  quantity      Int
-  orderId       String?
-  orderItemId   String?
-  wastageReason     String?
-  remark            String?  @db.Text
-  operator          String? /// 操作员快照（username）
-  operatorStaffId   String?  @map("operator_staff_id")
-  createdAt         DateTime @default(now())
+  id              String       @id @default(cuid())
+  materialId      String
+  batchId         String
+  type            StockLogType
+  delta           Int
+  quantity        Int
+  orderId         String?
+  orderItemId     String?
+  wastageReason   String?
+  remark          String?      @db.Text
+  operator        String? /// 操作员快照（username）
+  operatorStaffId String?      @map("operator_staff_id")
+  createdAt       DateTime     @default(now())
 
-  material        Material    @relation(fields: [materialId], references: [id], onDelete: Restrict)
-  batch           Batch       @relation(fields: [batchId], references: [id], onDelete: Restrict)
-  order           Order?      @relation(fields: [orderId], references: [id], onDelete: SetNull)
-  orderItem       OrderItem?  @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
-  operatorStaff   StaffUser?  @relation(fields: [operatorStaffId], references: [id], onDelete: SetNull)
+  material        Material         @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  batch           Batch            @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  order           Order?           @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  orderItem       OrderItem?       @relation(fields: [orderItemId], references: [id], onDelete: SetNull)
+  operatorStaff   StaffUser?       @relation(fields: [operatorStaffId], references: [id], onDelete: SetNull)
   stockLossRecord StockLossRecord?
 
   @@index([materialId, createdAt])
@@ -349,20 +368,20 @@ model StockLog {
 // ---------------------------------------------------------------------------
 
 model StockLossRecord {
-  id           String   @id @default(cuid())
-  flowerWikiId String   @map("flower_wiki_id")
-  batchId      String   @map("batch_id")
-  lossQuantity Int      @map("loss_quantity")
-  reason           String   @db.Text
-  operator         String? /// 操作员快照（username）
-  operatorStaffId  String?  @map("operator_staff_id")
-  stockLogId       String   @unique @map("stock_log_id")
-  createdAt        DateTime @default(now()) @map("created_at")
+  id              String   @id @default(cuid())
+  flowerWikiId    String   @map("flower_wiki_id")
+  batchId         String   @map("batch_id")
+  lossQuantity    Int      @map("loss_quantity")
+  reason          String   @db.Text
+  operator        String? /// 操作员快照（username）
+  operatorStaffId String?  @map("operator_staff_id")
+  stockLogId      String   @unique @map("stock_log_id")
+  createdAt       DateTime @default(now()) @map("created_at")
 
-  wiki           FlowerWiki @relation(fields: [flowerWikiId], references: [id], onDelete: Restrict)
-  batch          Batch      @relation(fields: [batchId], references: [id], onDelete: Restrict)
-  stockLog       StockLog   @relation(fields: [stockLogId], references: [id], onDelete: Restrict)
-  operatorStaff  StaffUser? @relation(fields: [operatorStaffId], references: [id], onDelete: SetNull)
+  wiki          FlowerWiki @relation(fields: [flowerWikiId], references: [id], onDelete: Restrict)
+  batch         Batch      @relation(fields: [batchId], references: [id], onDelete: Restrict)
+  stockLog      StockLog   @relation(fields: [stockLogId], references: [id], onDelete: Restrict)
+  operatorStaff StaffUser? @relation(fields: [operatorStaffId], references: [id], onDelete: SetNull)
 
   @@index([flowerWikiId, createdAt])
   @@index([batchId, createdAt])
@@ -385,10 +404,10 @@ model StaffUser {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  stockLogs              StockLog[]
-  stockLossRecords       StockLossRecord[]
-  auditsAsOperator       StaffAuditLog[] @relation("StaffAuditOperator")
-  auditsAsTarget         StaffAuditLog[] @relation("StaffAuditTarget")
+  stockLogs        StockLog[]
+  stockLossRecords StockLossRecord[]
+  auditsAsOperator StaffAuditLog[]   @relation("StaffAuditOperator")
+  auditsAsTarget   StaffAuditLog[]   @relation("StaffAuditTarget")
 
   @@index([role])
   @@map("staff_users")
@@ -439,29 +458,32 @@ model User {
 // ---------------------------------------------------------------------------
 
 model Order {
-  id              String      @id @default(uuid())
-  orderNo         String      @unique @map("order_no")
-  userId          String      @map("user_id")
-  totalAmount     Float       @map("total_amount")
-  deliveryFee     Float       @default(0) @map("delivery_fee")
-  payAmount       Float       @map("pay_amount")
-  receiverName    String      @map("receiver_name")
-  receiverPhone   String      @map("receiver_phone")
-  deliveryAddress String      @map("delivery_address") @db.Text
-  deliveryDate    String      @map("delivery_date")
-  greetingCard    String?     @map("greeting_card") @db.Text
-  deliveryInfo    String?     @map("delivery_info") @db.Text
-  status          OrderStatus @default(PENDING_PAYMENT)
-  paidAt          DateTime?   @map("paid_at")
-  refundAmount    Float?           @map("refund_amount")
-  refundTime      DateTime?        @map("refund_time")
-  cancelSource    OrderCancelSource? @map("cancel_source")
-  createdAt       DateTime         @default(now()) @map("created_at")
-  updatedAt       DateTime    @updatedAt @map("updated_at")
+  id                 String             @id @default(uuid())
+  orderNo            String             @unique @map("order_no")
+  userId             String             @map("user_id")
+  totalAmount        Float              @map("total_amount")
+  deliveryFee        Float              @default(0) @map("delivery_fee")
+  payAmount          Float              @map("pay_amount")
+  receiverName       String             @map("receiver_name")
+  receiverPhone      String             @map("receiver_phone")
+  deliveryAddress    String             @map("delivery_address") @db.Text
+  deliveryDate       String             @map("delivery_date")
+  greetingCard       String?            @map("greeting_card") @db.Text
+  deliveryInfo       String?            @map("delivery_info") @db.Text
+  status             OrderStatus        @default(PENDING_PAYMENT)
+  paidAt             DateTime?          @map("paid_at")
+  refundAmount       Float?             @map("refund_amount")
+  refundTime         DateTime?          @map("refund_time")
+  cancelSource       OrderCancelSource? @map("cancel_source")
+  deliveryCostActual Decimal?           @default(0) @map("delivery_cost_actual") @db.Decimal(10, 2)
+  deliveryCostNote   String?            @map("delivery_cost_note") @db.Text
+  createdAt          DateTime           @default(now()) @map("created_at")
+  updatedAt          DateTime           @updatedAt @map("updated_at")
 
-  user      User        @relation(fields: [userId], references: [id], onDelete: Restrict)
-  items     OrderItem[]
-  stockLogs StockLog[]
+  user         User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  items        OrderItem[]
+  stockLogs    StockLog[]
+  costSnapshot OrderCostSnapshot?
 
   @@index([status, createdAt])
   @@index([userId])
@@ -469,16 +491,40 @@ model Order {
   @@map("orders")
 }
 
+model OrderCostSnapshot {
+  id                 String   @id @default(uuid())
+  orderId            String   @unique @map("order_id")
+  paidAmount         Decimal  @map("paid_amount") @db.Decimal(10, 2)
+  flowerMaterialCost Decimal  @map("flower_material_cost") @db.Decimal(10, 2)
+  packagingCost      Decimal  @map("packaging_cost") @db.Decimal(10, 2)
+  deliveryCostActual Decimal  @default(0) @map("delivery_cost_actual") @db.Decimal(10, 2)
+  platformFee        Decimal  @default(0) @map("platform_fee") @db.Decimal(10, 2)
+  floristLaborCost   Decimal  @default(0) @map("florist_labor_cost") @db.Decimal(10, 2)
+  otherCost          Decimal  @default(0) @map("other_cost") @db.Decimal(10, 2)
+  totalCost          Decimal  @map("total_cost") @db.Decimal(10, 2)
+  grossProfit        Decimal  @map("gross_profit") @db.Decimal(10, 2)
+  grossMargin        Decimal  @map("gross_margin") @db.Decimal(10, 4)
+  costCalculatedAt   DateTime @map("cost_calculated_at")
+  costVersion        String   @default("v1") @map("cost_version")
+  createdAt          DateTime @default(now()) @map("created_at")
+  updatedAt          DateTime @updatedAt @map("updated_at")
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([costCalculatedAt])
+  @@map("order_cost_snapshots")
+}
+
 model OrderItem {
-  id                   String   @id @default(uuid())
-  orderId              String   @map("order_id")
-  skuId                String   @map("sku_id")
-  quantity             Int
-  snapshotProductName  String   @map("snapshot_product_name")
-  snapshotSpecName     String   @map("snapshot_spec_name")
-  snapshotPrice        Float    @map("snapshot_price")
-  snapshotImageUrl     String   @map("snapshot_image_url")
-  createdAt            DateTime @default(now()) @map("created_at")
+  id                  String   @id @default(uuid())
+  orderId             String   @map("order_id")
+  skuId               String   @map("sku_id")
+  quantity            Int
+  snapshotProductName String   @map("snapshot_product_name")
+  snapshotSpecName    String   @map("snapshot_spec_name")
+  snapshotPrice       Float    @map("snapshot_price")
+  snapshotImageUrl    String   @map("snapshot_image_url")
+  createdAt           DateTime @default(now()) @map("created_at")
 
   order     Order      @relation(fields: [orderId], references: [id], onDelete: Cascade)
   sku       ProductSku @relation(fields: [skuId], references: [id], onDelete: Restrict)
@@ -509,27 +555,27 @@ model AppConfig {
 // ---------------------------------------------------------------------------
 
 model FlowerWiki {
-  id           String     @id @default(uuid())
-  photo        String?
-  englishName  String     @unique @map("english_name")
-  chineseName  String     @map("chinese_name")
-  pinyinIndex  String     @default("") @map("pinyin_index")
-  colorTags    String[]   @default([]) @map("color_tags")
-  morphology   String?
-  supplySeason String?    @map("supply_season")
-  floralRole   FloralRole @map("floral_role")
-  maintenance  String     @db.Text
-  flowerLanguage String?   @map("flower_language") @db.Text
+  id                   String     @id @default(uuid())
+  photo                String?
+  englishName          String     @unique @map("english_name")
+  chineseName          String     @map("chinese_name")
+  pinyinIndex          String     @default("") @map("pinyin_index")
+  colorTags            String[]   @default([]) @map("color_tags")
+  morphology           String?
+  supplySeason         String?    @map("supply_season")
+  floralRole           FloralRole @map("floral_role")
+  maintenance          String     @db.Text
+  flowerLanguage       String?    @map("flower_language") @db.Text
   /// 结构化养护指南表格（AI / 表格编辑）；maintenance 保留文本摘要兼容旧数据
-  maintenanceCare Json?   @map("maintenance_care")
+  maintenanceCare      Json?      @map("maintenance_care")
   /// 默认保质期（天）；入库时用于计算 batch.expiresAt，可单次入库覆盖
-  defaultShelfLifeDays Int? @map("default_shelf_life_days")
-  aliasMap     Json       @default("{}") @map("alias_map")
-  createdAt    DateTime   @default(now()) @map("created_at")
-  updatedAt    DateTime   @updatedAt @map("updated_at")
+  defaultShelfLifeDays Int?       @map("default_shelf_life_days")
+  aliasMap             Json       @default("{}") @map("alias_map")
+  createdAt            DateTime   @default(now()) @map("created_at")
+  updatedAt            DateTime   @updatedAt @map("updated_at")
 
-  materials   Material[]
-  recipeLines RecipeLine[]
+  materials        Material[]
+  recipeLines      RecipeLine[]
   stockLossRecords StockLossRecord[]
 
   @@index([chineseName])
