@@ -82,7 +82,34 @@ export function WikiMaterialDetailModal({ item, onClose, onEdit }: Props) {
                   : "—"
               }
             />
+            <DetailField
+              label="标准成本"
+              value={
+                item.standardUnitCost
+                  ? `¥${Number(item.standardUnitCost).toFixed(2)} / ${
+                      item.costUnit || "支"
+                    }`
+                  : "未设置"
+              }
+            />
+            <DetailField
+              label="成本更新时间"
+              value={
+                item.costUpdatedAt
+                  ? new Date(item.costUpdatedAt).toLocaleString("zh-CN")
+                  : "—"
+              }
+            />
+            <DetailField
+              label="成本备注"
+              value={item.costNote?.trim() || "—"}
+              className="sm:col-span-2"
+            />
           </dl>
+
+          <p className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+            标准成本用于产品定价预估；订单实际成本仍以入库批次成本为准。
+          </p>
 
           <div className="mt-6 space-y-3">
             <h3 className="text-sm font-medium text-zinc-700">养护指南</h3>

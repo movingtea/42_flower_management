@@ -14,6 +14,7 @@ import {
   resolveSpuMinPrice,
 } from "@/lib/product-spu";
 import { prisma } from "@/lib/prisma";
+import { calculateProductMarginEstimate } from "@/services/product-margin";
 
 export const dynamic = "force-dynamic";
 
@@ -27,19 +28,46 @@ export default async function CmsProductsPage() {
     loadCmsProductCategories(),
   ]);
 
-  const rows: CmsProductListRow[] = spus.map((spu) => {
+  const marginResults = await Promise.all(
+    spus.map((spu) =>
+      calculateProductMarginEstimate(spu.id).catch(() => null)
+    )
+  );
+
+  const rows: CmsProductListRow[] = spus.map((spu, index) => {
     const minPrice = resolveSpuMinPrice(spu.skus);
     const { displayPrice, priceSuffix } = formatMinPriceLabel(
       minPrice,
       spu.skus.length
     );
     const firstSku = spu.skus[0];
+    const margin = marginResults[index];
+    const allSkusWithoutRecipe = spu.skus.every((sku) => !sku.recipeId);
+    const minMargin = margin?.summary.minGrossMargin;
+    const maxMargin = margin?.summary.maxGrossMargin;
+    const marginLabel = allSkusWithoutRecipe
+      ? "未绑定配方"
+      : margin?.summary.warningCount
+        ? "成本未完整"
+        : minMargin && maxMargin
+          ? minMargin === maxMargin
+            ? `毛利率 ${(Number(minMargin) * 100).toFixed(1)}%`
+            : `毛利率 ${(Number(minMargin) * 100).toFixed(1)}%–${(
+                Number(maxMargin) * 100
+              ).toFixed(1)}%`
+          : "成本待计算";
 
     return {
       id: spu.id,
       name: spu.name,
       sku: firstSku?.skuCode ?? "—",
       priceLabel: `¥${displayPrice}${priceSuffix}`,
+      marginLabel,
+      marginStatus: allSkusWithoutRecipe
+        ? "missing"
+        : margin?.summary.warningCount
+          ? "warning"
+          : "ok",
       quantity: spu.skus.reduce((sum, s) => sum + s.stock, 0),
       status: spu.isActive ? "PUBLISHED" : "DRAFT",
       categoryIds: categoryIdsFromProduct(spu),

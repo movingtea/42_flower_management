@@ -1,6 +1,11 @@
 import { Prisma } from "@/generated/prisma/client";
 import { formatIngredientSummary } from "../lib/recipe-display";
 import { prisma } from "@/lib/prisma";
+import { decimalToString, money } from "@/services/order-cost-pure";
+import {
+  calculateStandardMaterialLines,
+  type ProductMarginMaterialLine,
+} from "@/services/product-margin-pure";
 
 export type RecipeIngredientInput = {
   flowerWikiId: string;
@@ -29,6 +34,7 @@ export type RecipeSummary = {
   } | null;
   productCount: number;
   ingredients: RecipeIngredientRow[];
+  standardCost: RecipeCostPreview;
   createdAt: string;
   updatedAt: string;
 };
@@ -40,8 +46,22 @@ export type RecipeListItem = {
   ingredientSummary: string;
   packagingKitName: string | null;
   packagingKitStandardCost: string | null;
+  standardMaterialCost: string;
+  standardPackagingCost: string;
+  standardTotalCost: string;
+  missingStandardCostCount: number;
   productCount: number;
   ingredientCount: number;
+};
+
+export type RecipeCostPreview = {
+  materialCost: string;
+  packagingCost: string;
+  totalCost: string;
+  missingStandardCostCount: number;
+  isComplete: boolean;
+  lines: ProductMarginMaterialLine[];
+  warnings: string[];
 };
 
 type Tx = Prisma.TransactionClient;
@@ -54,6 +74,8 @@ const lineInclude = {
       chineseName: true,
       englishName: true,
       colorTags: true,
+      standardUnitCost: true,
+      costUnit: true,
     },
   },
 } as const;
@@ -68,6 +90,8 @@ function mapRecipeLines(
       chineseName: string;
       englishName: string;
       colorTags: string[];
+      standardUnitCost?: Prisma.Decimal | null;
+      costUnit?: string | null;
     };
   }>
 ): RecipeIngredientRow[] {
@@ -109,6 +133,7 @@ function serializeRecipe(
   }
 ): RecipeSummary {
   const ingredients = mapRecipeLines(recipe.lines);
+  const standardCost = buildRecipeCostPreview(recipe);
 
   return {
     id: recipe.id,
@@ -125,8 +150,52 @@ function serializeRecipe(
       : null,
     productCount: recipe._count.skus,
     ingredients,
+    standardCost,
     createdAt: recipe.createdAt.toISOString(),
     updatedAt: recipe.updatedAt.toISOString(),
+  };
+}
+
+function buildRecipeCostPreview(recipe: {
+  name: string;
+  lines: Array<{
+    flowerWikiId: string;
+    quantityNeeded: number;
+    wiki: {
+      chineseName: string;
+      standardUnitCost?: Prisma.Decimal | null;
+    };
+  }>;
+  packagingKit: { standardCost: Prisma.Decimal } | null;
+}): RecipeCostPreview {
+  const material = calculateStandardMaterialLines(
+    recipe.lines.map((line) => ({
+      flowerWikiId: line.flowerWikiId,
+      flowerName: line.wiki.chineseName,
+      quantityNeeded: line.quantityNeeded,
+      standardUnitCost: line.wiki.standardUnitCost ?? null,
+    }))
+  );
+  const packagingCost = recipe.packagingKit
+    ? money(recipe.packagingKit.standardCost)
+    : money(0);
+  const warnings = [...material.warnings];
+  if (!recipe.packagingKit) {
+    warnings.push(`配方「${recipe.name}」未绑定包装方案，包装成本按 0 计算`);
+  }
+  const missingStandardCostCount = material.lines.filter(
+    (line) => line.standardUnitCost === null
+  ).length;
+  const totalCost = money(material.materialCost.plus(packagingCost));
+
+  return {
+    materialCost: decimalToString(material.materialCost),
+    packagingCost: decimalToString(packagingCost),
+    totalCost: decimalToString(totalCost),
+    missingStandardCostCount,
+    isComplete: missingStandardCostCount === 0,
+    lines: material.lines,
+    warnings,
   };
 }
 
@@ -288,6 +357,7 @@ export async function listRecipes(): Promise<RecipeListItem[]> {
 
   return recipes.map((recipe) => {
     const ingredients = mapRecipeLines(recipe.lines);
+    const standardCost = buildRecipeCostPreview(recipe);
     return {
       id: recipe.id,
       recipeCode: recipe.recipeCode,
@@ -296,6 +366,10 @@ export async function listRecipes(): Promise<RecipeListItem[]> {
       packagingKitName: recipe.packagingKit?.name ?? null,
       packagingKitStandardCost:
         recipe.packagingKit?.standardCost.toFixed(2) ?? null,
+      standardMaterialCost: standardCost.materialCost,
+      standardPackagingCost: standardCost.packagingCost,
+      standardTotalCost: standardCost.totalCost,
+      missingStandardCostCount: standardCost.missingStandardCostCount,
       productCount: recipe._count.skus,
       ingredientCount: ingredients.length,
     };

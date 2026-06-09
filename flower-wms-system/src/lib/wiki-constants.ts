@@ -42,6 +42,10 @@ export type WikiFormPayload = {
   aliasMap?: Record<string, string[]>;
   /** 默认保质期（天）；null 表示不设自动到期 */
   defaultShelfLifeDays?: number | null;
+  /** 标准单支成本，仅用于产品定价预估 */
+  standardUnitCost?: string | null;
+  costUnit?: string | null;
+  costNote?: string | null;
 };
 
 export type WikiListItem = {
@@ -64,6 +68,10 @@ export type WikiListItem = {
   careTable: WikiCareRow[] | null;
   aliasMap: Record<string, string[]>;
   defaultShelfLifeDays: number | null;
+  standardUnitCost: string | null;
+  costUnit: string | null;
+  costUpdatedAt: string | null;
+  costNote: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -103,6 +111,9 @@ export const EMPTY_WIKI_FORM: WikiFormPayload = {
   maintenance: WIKI_MAINTENANCE_TEMPLATE,
   aliasMap: { zh: [] },
   defaultShelfLifeDays: null,
+  standardUnitCost: null,
+  costUnit: "支",
+  costNote: null,
 };
 
 export function roleBadgeClass(role: FloralRole): string {

@@ -28,10 +28,12 @@ export type AggregateFlowerWiki = {
 
 export type FlowerWikiAvgAggregateOutputType = {
   defaultShelfLifeDays: number | null
+  standardUnitCost: runtime.Decimal | null
 }
 
 export type FlowerWikiSumAggregateOutputType = {
   defaultShelfLifeDays: number | null
+  standardUnitCost: runtime.Decimal | null
 }
 
 export type FlowerWikiMinAggregateOutputType = {
@@ -46,6 +48,10 @@ export type FlowerWikiMinAggregateOutputType = {
   maintenance: string | null
   flowerLanguage: string | null
   defaultShelfLifeDays: number | null
+  standardUnitCost: runtime.Decimal | null
+  costUnit: string | null
+  costUpdatedAt: Date | null
+  costNote: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -62,6 +68,10 @@ export type FlowerWikiMaxAggregateOutputType = {
   maintenance: string | null
   flowerLanguage: string | null
   defaultShelfLifeDays: number | null
+  standardUnitCost: runtime.Decimal | null
+  costUnit: string | null
+  costUpdatedAt: Date | null
+  costNote: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -80,6 +90,10 @@ export type FlowerWikiCountAggregateOutputType = {
   flowerLanguage: number
   maintenanceCare: number
   defaultShelfLifeDays: number
+  standardUnitCost: number
+  costUnit: number
+  costUpdatedAt: number
+  costNote: number
   aliasMap: number
   createdAt: number
   updatedAt: number
@@ -89,10 +103,12 @@ export type FlowerWikiCountAggregateOutputType = {
 
 export type FlowerWikiAvgAggregateInputType = {
   defaultShelfLifeDays?: true
+  standardUnitCost?: true
 }
 
 export type FlowerWikiSumAggregateInputType = {
   defaultShelfLifeDays?: true
+  standardUnitCost?: true
 }
 
 export type FlowerWikiMinAggregateInputType = {
@@ -107,6 +123,10 @@ export type FlowerWikiMinAggregateInputType = {
   maintenance?: true
   flowerLanguage?: true
   defaultShelfLifeDays?: true
+  standardUnitCost?: true
+  costUnit?: true
+  costUpdatedAt?: true
+  costNote?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -123,6 +143,10 @@ export type FlowerWikiMaxAggregateInputType = {
   maintenance?: true
   flowerLanguage?: true
   defaultShelfLifeDays?: true
+  standardUnitCost?: true
+  costUnit?: true
+  costUpdatedAt?: true
+  costNote?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -141,6 +165,10 @@ export type FlowerWikiCountAggregateInputType = {
   flowerLanguage?: true
   maintenanceCare?: true
   defaultShelfLifeDays?: true
+  standardUnitCost?: true
+  costUnit?: true
+  costUpdatedAt?: true
+  costNote?: true
   aliasMap?: true
   createdAt?: true
   updatedAt?: true
@@ -247,6 +275,10 @@ export type FlowerWikiGroupByOutputType = {
   flowerLanguage: string | null
   maintenanceCare: runtime.JsonValue | null
   defaultShelfLifeDays: number | null
+  standardUnitCost: runtime.Decimal | null
+  costUnit: string | null
+  costUpdatedAt: Date | null
+  costNote: string | null
   aliasMap: runtime.JsonValue
   createdAt: Date
   updatedAt: Date
@@ -289,6 +321,10 @@ export type FlowerWikiWhereInput = {
   flowerLanguage?: Prisma.StringNullableFilter<"FlowerWiki"> | string | null
   maintenanceCare?: Prisma.JsonNullableFilter<"FlowerWiki">
   defaultShelfLifeDays?: Prisma.IntNullableFilter<"FlowerWiki"> | number | null
+  standardUnitCost?: Prisma.DecimalNullableFilter<"FlowerWiki"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.StringNullableFilter<"FlowerWiki"> | string | null
+  costUpdatedAt?: Prisma.DateTimeNullableFilter<"FlowerWiki"> | Date | string | null
+  costNote?: Prisma.StringNullableFilter<"FlowerWiki"> | string | null
   aliasMap?: Prisma.JsonFilter<"FlowerWiki">
   createdAt?: Prisma.DateTimeFilter<"FlowerWiki"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"FlowerWiki"> | Date | string
@@ -311,6 +347,10 @@ export type FlowerWikiOrderByWithRelationInput = {
   flowerLanguage?: Prisma.SortOrderInput | Prisma.SortOrder
   maintenanceCare?: Prisma.SortOrderInput | Prisma.SortOrder
   defaultShelfLifeDays?: Prisma.SortOrderInput | Prisma.SortOrder
+  standardUnitCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  costUnit?: Prisma.SortOrderInput | Prisma.SortOrder
+  costUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  costNote?: Prisma.SortOrderInput | Prisma.SortOrder
   aliasMap?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -336,6 +376,10 @@ export type FlowerWikiWhereUniqueInput = Prisma.AtLeast<{
   flowerLanguage?: Prisma.StringNullableFilter<"FlowerWiki"> | string | null
   maintenanceCare?: Prisma.JsonNullableFilter<"FlowerWiki">
   defaultShelfLifeDays?: Prisma.IntNullableFilter<"FlowerWiki"> | number | null
+  standardUnitCost?: Prisma.DecimalNullableFilter<"FlowerWiki"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.StringNullableFilter<"FlowerWiki"> | string | null
+  costUpdatedAt?: Prisma.DateTimeNullableFilter<"FlowerWiki"> | Date | string | null
+  costNote?: Prisma.StringNullableFilter<"FlowerWiki"> | string | null
   aliasMap?: Prisma.JsonFilter<"FlowerWiki">
   createdAt?: Prisma.DateTimeFilter<"FlowerWiki"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"FlowerWiki"> | Date | string
@@ -358,6 +402,10 @@ export type FlowerWikiOrderByWithAggregationInput = {
   flowerLanguage?: Prisma.SortOrderInput | Prisma.SortOrder
   maintenanceCare?: Prisma.SortOrderInput | Prisma.SortOrder
   defaultShelfLifeDays?: Prisma.SortOrderInput | Prisma.SortOrder
+  standardUnitCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  costUnit?: Prisma.SortOrderInput | Prisma.SortOrder
+  costUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  costNote?: Prisma.SortOrderInput | Prisma.SortOrder
   aliasMap?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -385,6 +433,10 @@ export type FlowerWikiScalarWhereWithAggregatesInput = {
   flowerLanguage?: Prisma.StringNullableWithAggregatesFilter<"FlowerWiki"> | string | null
   maintenanceCare?: Prisma.JsonNullableWithAggregatesFilter<"FlowerWiki">
   defaultShelfLifeDays?: Prisma.IntNullableWithAggregatesFilter<"FlowerWiki"> | number | null
+  standardUnitCost?: Prisma.DecimalNullableWithAggregatesFilter<"FlowerWiki"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.StringNullableWithAggregatesFilter<"FlowerWiki"> | string | null
+  costUpdatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"FlowerWiki"> | Date | string | null
+  costNote?: Prisma.StringNullableWithAggregatesFilter<"FlowerWiki"> | string | null
   aliasMap?: Prisma.JsonWithAggregatesFilter<"FlowerWiki">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"FlowerWiki"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"FlowerWiki"> | Date | string
@@ -404,6 +456,10 @@ export type FlowerWikiCreateInput = {
   flowerLanguage?: string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costUpdatedAt?: Date | string | null
+  costNote?: string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -426,6 +482,10 @@ export type FlowerWikiUncheckedCreateInput = {
   flowerLanguage?: string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costUpdatedAt?: Date | string | null
+  costNote?: string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -448,6 +508,10 @@ export type FlowerWikiUpdateInput = {
   flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -470,6 +534,10 @@ export type FlowerWikiUncheckedUpdateInput = {
   flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -492,6 +560,10 @@ export type FlowerWikiCreateManyInput = {
   flowerLanguage?: string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costUpdatedAt?: Date | string | null
+  costNote?: string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -511,6 +583,10 @@ export type FlowerWikiUpdateManyMutationInput = {
   flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -530,6 +606,10 @@ export type FlowerWikiUncheckedUpdateManyInput = {
   flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -567,6 +647,10 @@ export type FlowerWikiCountOrderByAggregateInput = {
   flowerLanguage?: Prisma.SortOrder
   maintenanceCare?: Prisma.SortOrder
   defaultShelfLifeDays?: Prisma.SortOrder
+  standardUnitCost?: Prisma.SortOrder
+  costUnit?: Prisma.SortOrder
+  costUpdatedAt?: Prisma.SortOrder
+  costNote?: Prisma.SortOrder
   aliasMap?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -574,6 +658,7 @@ export type FlowerWikiCountOrderByAggregateInput = {
 
 export type FlowerWikiAvgOrderByAggregateInput = {
   defaultShelfLifeDays?: Prisma.SortOrder
+  standardUnitCost?: Prisma.SortOrder
 }
 
 export type FlowerWikiMaxOrderByAggregateInput = {
@@ -588,6 +673,10 @@ export type FlowerWikiMaxOrderByAggregateInput = {
   maintenance?: Prisma.SortOrder
   flowerLanguage?: Prisma.SortOrder
   defaultShelfLifeDays?: Prisma.SortOrder
+  standardUnitCost?: Prisma.SortOrder
+  costUnit?: Prisma.SortOrder
+  costUpdatedAt?: Prisma.SortOrder
+  costNote?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -604,12 +693,17 @@ export type FlowerWikiMinOrderByAggregateInput = {
   maintenance?: Prisma.SortOrder
   flowerLanguage?: Prisma.SortOrder
   defaultShelfLifeDays?: Prisma.SortOrder
+  standardUnitCost?: Prisma.SortOrder
+  costUnit?: Prisma.SortOrder
+  costUpdatedAt?: Prisma.SortOrder
+  costNote?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
 
 export type FlowerWikiSumOrderByAggregateInput = {
   defaultShelfLifeDays?: Prisma.SortOrder
+  standardUnitCost?: Prisma.SortOrder
 }
 
 export type FlowerWikiCreateNestedOneWithoutMaterialsInput = {
@@ -691,6 +785,10 @@ export type FlowerWikiCreateWithoutMaterialsInput = {
   flowerLanguage?: string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costUpdatedAt?: Date | string | null
+  costNote?: string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -712,6 +810,10 @@ export type FlowerWikiUncheckedCreateWithoutMaterialsInput = {
   flowerLanguage?: string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costUpdatedAt?: Date | string | null
+  costNote?: string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -749,6 +851,10 @@ export type FlowerWikiUpdateWithoutMaterialsInput = {
   flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -770,6 +876,10 @@ export type FlowerWikiUncheckedUpdateWithoutMaterialsInput = {
   flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -791,6 +901,10 @@ export type FlowerWikiCreateWithoutRecipeLinesInput = {
   flowerLanguage?: string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costUpdatedAt?: Date | string | null
+  costNote?: string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -812,6 +926,10 @@ export type FlowerWikiUncheckedCreateWithoutRecipeLinesInput = {
   flowerLanguage?: string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costUpdatedAt?: Date | string | null
+  costNote?: string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -849,6 +967,10 @@ export type FlowerWikiUpdateWithoutRecipeLinesInput = {
   flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -870,6 +992,10 @@ export type FlowerWikiUncheckedUpdateWithoutRecipeLinesInput = {
   flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -891,6 +1017,10 @@ export type FlowerWikiCreateWithoutStockLossRecordsInput = {
   flowerLanguage?: string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costUpdatedAt?: Date | string | null
+  costNote?: string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -912,6 +1042,10 @@ export type FlowerWikiUncheckedCreateWithoutStockLossRecordsInput = {
   flowerLanguage?: string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costUpdatedAt?: Date | string | null
+  costNote?: string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -949,6 +1083,10 @@ export type FlowerWikiUpdateWithoutStockLossRecordsInput = {
   flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -970,6 +1108,10 @@ export type FlowerWikiUncheckedUpdateWithoutStockLossRecordsInput = {
   flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1040,6 +1182,10 @@ export type FlowerWikiSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   flowerLanguage?: boolean
   maintenanceCare?: boolean
   defaultShelfLifeDays?: boolean
+  standardUnitCost?: boolean
+  costUnit?: boolean
+  costUpdatedAt?: boolean
+  costNote?: boolean
   aliasMap?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1063,6 +1209,10 @@ export type FlowerWikiSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   flowerLanguage?: boolean
   maintenanceCare?: boolean
   defaultShelfLifeDays?: boolean
+  standardUnitCost?: boolean
+  costUnit?: boolean
+  costUpdatedAt?: boolean
+  costNote?: boolean
   aliasMap?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1082,6 +1232,10 @@ export type FlowerWikiSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   flowerLanguage?: boolean
   maintenanceCare?: boolean
   defaultShelfLifeDays?: boolean
+  standardUnitCost?: boolean
+  costUnit?: boolean
+  costUpdatedAt?: boolean
+  costNote?: boolean
   aliasMap?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1101,12 +1255,16 @@ export type FlowerWikiSelectScalar = {
   flowerLanguage?: boolean
   maintenanceCare?: boolean
   defaultShelfLifeDays?: boolean
+  standardUnitCost?: boolean
+  costUnit?: boolean
+  costUpdatedAt?: boolean
+  costNote?: boolean
   aliasMap?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type FlowerWikiOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "photo" | "englishName" | "chineseName" | "pinyinIndex" | "colorTags" | "morphology" | "supplySeason" | "floralRole" | "maintenance" | "flowerLanguage" | "maintenanceCare" | "defaultShelfLifeDays" | "aliasMap" | "createdAt" | "updatedAt", ExtArgs["result"]["flowerWiki"]>
+export type FlowerWikiOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "photo" | "englishName" | "chineseName" | "pinyinIndex" | "colorTags" | "morphology" | "supplySeason" | "floralRole" | "maintenance" | "flowerLanguage" | "maintenanceCare" | "defaultShelfLifeDays" | "standardUnitCost" | "costUnit" | "costUpdatedAt" | "costNote" | "aliasMap" | "createdAt" | "updatedAt", ExtArgs["result"]["flowerWiki"]>
 export type FlowerWikiInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   materials?: boolean | Prisma.FlowerWiki$materialsArgs<ExtArgs>
   recipeLines?: boolean | Prisma.FlowerWiki$recipeLinesArgs<ExtArgs>
@@ -1143,6 +1301,13 @@ export type $FlowerWikiPayload<ExtArgs extends runtime.Types.Extensions.Internal
      * 默认保质期（天）；入库时用于计算 batch.expiresAt，可单次入库覆盖
      */
     defaultShelfLifeDays: number | null
+    /**
+     * 标准单支成本：仅用于产品定价预估；订单实际成本仍以 Batch.unitCost 为准
+     */
+    standardUnitCost: runtime.Decimal | null
+    costUnit: string | null
+    costUpdatedAt: Date | null
+    costNote: string | null
     aliasMap: runtime.JsonValue
     createdAt: Date
     updatedAt: Date
@@ -1585,6 +1750,10 @@ export interface FlowerWikiFieldRefs {
   readonly flowerLanguage: Prisma.FieldRef<"FlowerWiki", 'String'>
   readonly maintenanceCare: Prisma.FieldRef<"FlowerWiki", 'Json'>
   readonly defaultShelfLifeDays: Prisma.FieldRef<"FlowerWiki", 'Int'>
+  readonly standardUnitCost: Prisma.FieldRef<"FlowerWiki", 'Decimal'>
+  readonly costUnit: Prisma.FieldRef<"FlowerWiki", 'String'>
+  readonly costUpdatedAt: Prisma.FieldRef<"FlowerWiki", 'DateTime'>
+  readonly costNote: Prisma.FieldRef<"FlowerWiki", 'String'>
   readonly aliasMap: Prisma.FieldRef<"FlowerWiki", 'Json'>
   readonly createdAt: Prisma.FieldRef<"FlowerWiki", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"FlowerWiki", 'DateTime'>

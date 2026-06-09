@@ -15,8 +15,29 @@ type RecipeListItem = {
   ingredientSummary: string;
   packagingKitName: string | null;
   packagingKitStandardCost: string | null;
+  standardMaterialCost: string;
+  standardPackagingCost: string;
+  standardTotalCost: string;
+  missingStandardCostCount: number;
   productCount: number;
   ingredientCount: number;
+};
+
+type RecipeCostPreview = {
+  materialCost: string;
+  packagingCost: string;
+  totalCost: string;
+  missingStandardCostCount: number;
+  isComplete: boolean;
+  lines: Array<{
+    flowerWikiId: string;
+    flowerName: string;
+    quantityNeeded: number;
+    standardUnitCost: string | null;
+    lineCost: string;
+    warning?: string;
+  }>;
+  warnings: string[];
 };
 
 type DraftRow = {
@@ -71,6 +92,7 @@ export function WmsRecipeConsole() {
   const [recipeName, setRecipeName] = useState("");
   const [packagingKits, setPackagingKits] = useState<PackagingKitRow[]>([]);
   const [selectedPackagingKitId, setSelectedPackagingKitId] = useState("");
+  const [costPreview, setCostPreview] = useState<RecipeCostPreview | null>(null);
   const [rows, setRows] = useState<DraftRow[]>([emptyRow()]);
   const [productCount, setProductCount] = useState(0);
   const [toast, setToast] = useState<{
@@ -148,6 +170,7 @@ export function WmsRecipeConsole() {
               recipeCode: string;
               name: string;
               packagingKitId: string | null;
+              standardCost: RecipeCostPreview;
               productCount: number;
               ingredients: Array<{
                 id: string;
@@ -169,6 +192,7 @@ export function WmsRecipeConsole() {
         setRecipeCode(recipe.recipeCode);
         setRecipeName(recipe.name);
         setSelectedPackagingKitId(recipe.packagingKitId ?? "");
+        setCostPreview(recipe.standardCost);
         setProductCount(recipe.productCount);
         setRows(
           recipe.ingredients.length > 0
@@ -193,6 +217,7 @@ export function WmsRecipeConsole() {
     setRecipeCode("");
     setRecipeName("");
     setSelectedPackagingKitId("");
+    setCostPreview(null);
     setProductCount(0);
     setRows([emptyRow()]);
   }
@@ -374,6 +399,22 @@ export function WmsRecipeConsole() {
                         ? `${item.packagingKitName} · ¥${item.packagingKitStandardCost}`
                         : "未绑定"}
                     </p>
+                    <p className="mt-1 text-xs text-zinc-600">
+                      BOM 成本：花材 ¥{item.standardMaterialCost} · 包装 ¥
+                      {item.standardPackagingCost} · 合计 ¥
+                      {item.standardTotalCost}
+                    </p>
+                    <p
+                      className={`mt-1 text-xs font-medium ${
+                        item.missingStandardCostCount > 0
+                          ? "text-amber-700"
+                          : "text-emerald-700"
+                      }`}
+                    >
+                      {item.missingStandardCostCount > 0
+                        ? `成本缺失：${item.missingStandardCostCount} 个花材未设置标准成本`
+                        : "成本完整：所有花材均已设置标准成本"}
+                    </p>
                   </button>
                 </li>
               ))}
@@ -438,6 +479,72 @@ export function WmsRecipeConsole() {
                 用于订单毛利核算，不影响花材 RecipeLine 逻辑。
               </p>
             </label>
+
+            {costPreview ? (
+              <div className="mt-4 rounded-xl border border-emerald-100 bg-emerald-50/50 p-4">
+                <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <p className="text-sm font-semibold text-emerald-950">
+                      BOM 标准成本预览
+                    </p>
+                    <p className="mt-1 text-xs text-emerald-800">
+                      花材 ¥{costPreview.materialCost} · 包装 ¥
+                      {costPreview.packagingCost} · 合计 ¥{costPreview.totalCost}
+                    </p>
+                  </div>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                      costPreview.isComplete
+                        ? "bg-emerald-100 text-emerald-800"
+                        : "bg-amber-100 text-amber-800"
+                    }`}
+                  >
+                    {costPreview.isComplete
+                      ? "成本完整"
+                      : `成本缺失 ${costPreview.missingStandardCostCount} 项`}
+                  </span>
+                </div>
+                <div className="max-h-52 overflow-y-auto rounded-lg border border-emerald-100 bg-white">
+                  <table className="w-full text-left text-xs">
+                    <thead className="bg-emerald-50 text-emerald-900">
+                      <tr>
+                        <th className="px-2 py-2">花材</th>
+                        <th className="px-2 py-2 text-right">数量</th>
+                        <th className="px-2 py-2 text-right">标准单价</th>
+                        <th className="px-2 py-2 text-right">小计</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-emerald-50">
+                      {costPreview.lines.map((line) => (
+                        <tr key={line.flowerWikiId}>
+                          <td className="px-2 py-2">
+                            <span className="font-medium text-zinc-900">
+                              {line.flowerName}
+                            </span>
+                            {line.warning ? (
+                              <p className="mt-0.5 text-amber-700">
+                                {line.warning}
+                              </p>
+                            ) : null}
+                          </td>
+                          <td className="px-2 py-2 text-right">
+                            {line.quantityNeeded}
+                          </td>
+                          <td className="px-2 py-2 text-right">
+                            {line.standardUnitCost
+                              ? `¥${Number(line.standardUnitCost).toFixed(2)}`
+                              : "未设置"}
+                          </td>
+                          <td className="px-2 py-2 text-right font-semibold">
+                            ¥{line.lineCost}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            ) : null}
 
             <div className="mt-4 space-y-4">
               {rows.map((row) => (

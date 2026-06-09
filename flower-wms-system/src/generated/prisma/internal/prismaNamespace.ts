@@ -2422,6 +2422,10 @@ export const FlowerWikiScalarFieldEnum = {
   flowerLanguage: 'flowerLanguage',
   maintenanceCare: 'maintenanceCare',
   defaultShelfLifeDays: 'defaultShelfLifeDays',
+  standardUnitCost: 'standardUnitCost',
+  costUnit: 'costUnit',
+  costUpdatedAt: 'costUpdatedAt',
+  costNote: 'costNote',
   aliasMap: 'aliasMap',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
