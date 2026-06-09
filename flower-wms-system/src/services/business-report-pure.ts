@@ -324,3 +324,133 @@ export function moneyString(value: DecimalInput): string {
 export function ratioString(value: DecimalInput): string {
   return decimalToString(ratio(value), 4);
 }
+
+export type LossModelImpactMaterialRow = {
+  flowerWikiId: string;
+  flowerName: string;
+  quantityUsed: number;
+  rawCost: DecimalInput;
+  lossAdjustedCost: DecimalInput;
+  lossModelExtraCost: DecimalInput;
+  usableRateSum: DecimalInput;
+  usableRateCount: number;
+};
+
+export type LossModelImpactAggregate = {
+  rawFlowerMaterialCost: Prisma.Decimal;
+  lossAdjustedFlowerMaterialCost: Prisma.Decimal;
+  lossModelExtraCost: Prisma.Decimal;
+  lossModelExtraCostRatioToSales: Prisma.Decimal;
+  topMaterialsByLossImpact: Array<{
+    flowerWikiId: string;
+    flowerName: string;
+    quantityUsed: number;
+    rawCost: string;
+    lossAdjustedCost: string;
+    lossModelExtraCost: string;
+    avgUsableRate: string | null;
+  }>;
+  warnings: string[];
+};
+
+export function aggregateLossModelImpact(
+  rows: LossModelImpactMaterialRow[],
+  totalPaidAmount: DecimalInput,
+  topLimit = 10
+): LossModelImpactAggregate {
+  let rawFlowerMaterialCost = money(0);
+  let lossAdjustedFlowerMaterialCost = money(0);
+  const warnings: string[] = [];
+
+  const grouped = new Map<
+    string,
+    {
+      flowerWikiId: string;
+      flowerName: string;
+      quantityUsed: number;
+      rawCost: Prisma.Decimal;
+      lossAdjustedCost: Prisma.Decimal;
+      usableRateSum: Prisma.Decimal;
+      usableRateCount: number;
+    }
+  >();
+
+  for (const row of rows) {
+    rawFlowerMaterialCost = money(
+      rawFlowerMaterialCost.plus(money(row.rawCost))
+    );
+    lossAdjustedFlowerMaterialCost = money(
+      lossAdjustedFlowerMaterialCost.plus(money(row.lossAdjustedCost))
+    );
+
+    const current =
+      grouped.get(row.flowerWikiId) ??
+      {
+        flowerWikiId: row.flowerWikiId,
+        flowerName: row.flowerName,
+        quantityUsed: 0,
+        rawCost: money(0),
+        lossAdjustedCost: money(0),
+        usableRateSum: money(0),
+        usableRateCount: 0,
+      };
+    current.quantityUsed += row.quantityUsed;
+    current.rawCost = money(current.rawCost.plus(money(row.rawCost)));
+    current.lossAdjustedCost = money(
+      current.lossAdjustedCost.plus(money(row.lossAdjustedCost))
+    );
+    if (row.usableRateCount > 0) {
+      current.usableRateSum = money(
+        current.usableRateSum.plus(money(row.usableRateSum))
+      );
+      current.usableRateCount += row.usableRateCount;
+    }
+    grouped.set(row.flowerWikiId, current);
+  }
+
+  const lossModelExtraCost = money(
+    lossAdjustedFlowerMaterialCost.minus(rawFlowerMaterialCost)
+  );
+  const paid = money(totalPaidAmount);
+  const lossModelExtraCostRatioToSales = paid.greaterThan(0)
+    ? ratio(lossModelExtraCost.div(paid))
+    : ratio(0);
+  if (!paid.greaterThan(0)) {
+    warnings.push("统计期内有效销售额为 0，损耗成本占销售额比例按 0 计算");
+  }
+  if (rows.length === 0) {
+    warnings.push("暂无可分析的销售出库数据");
+  }
+
+  const topMaterialsByLossImpact = [...grouped.values()]
+    .map((item) => {
+      const extra = money(item.lossAdjustedCost.minus(item.rawCost));
+      return {
+        flowerWikiId: item.flowerWikiId,
+        flowerName: item.flowerName,
+        quantityUsed: item.quantityUsed,
+        rawCost: moneyString(item.rawCost),
+        lossAdjustedCost: moneyString(item.lossAdjustedCost),
+        lossModelExtraCost: moneyString(extra),
+        avgUsableRate:
+          item.usableRateCount > 0
+            ? ratioString(
+                item.usableRateSum.div(item.usableRateCount)
+              )
+            : null,
+        _extra: extra,
+      };
+    })
+    .sort((a, b) => b._extra.comparedTo(a._extra))
+    .slice(0, topLimit)
+    .map(({ _extra, ...item }) => item);
+
+  return {
+    rawFlowerMaterialCost,
+    lossAdjustedFlowerMaterialCost,
+    lossModelExtraCost,
+    lossModelExtraCostRatioToSales,
+    topMaterialsByLossImpact,
+    warnings,
+  };
+}

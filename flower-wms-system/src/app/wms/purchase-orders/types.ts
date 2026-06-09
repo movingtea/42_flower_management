@@ -63,6 +63,11 @@ export type PurchaseOrderLine = {
   allocatedExtraFee: string;
   actualTotalCost: string;
   actualUnitCost: string;
+  usableRate: string | null;
+  lossRate: string | null;
+  lossAdjustedTotalCost: string | null;
+  lossAdjustedUnitCost: string | null;
+  lossModelExtraCost: string | null;
   supplierSkuName: string | null;
   note: string | null;
   inboundBatchId: string | null;
@@ -73,6 +78,9 @@ export type PurchaseOrderLine = {
     originalQty: number;
     remainingQty: number;
     unitCost: string;
+    lossAdjustedUnitCost: string | null;
+    usableRate: string | null;
+    lossRate: string | null;
   } | null;
   createdAt: string;
   updatedAt: string;
@@ -111,6 +119,11 @@ export type PurchasePreviewLine = {
   allocatedExtraFee: string;
   actualTotalCost: string;
   actualUnitCost: string;
+  usableRate: string;
+  lossRate: string;
+  lossAdjustedTotalCost: string;
+  lossAdjustedUnitCost: string;
+  lossModelExtraCost: string;
 };
 
 export type PurchasePreview = {

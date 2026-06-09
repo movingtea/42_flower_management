@@ -1,5 +1,9 @@
 import { Prisma } from "@/generated/prisma/client";
 import { PurchaseCostAllocationMethod } from "@/generated/prisma/enums";
+import {
+  calculateLossAdjustedLineCost,
+  DEFAULT_STANDARD_USABLE_RATE,
+} from "@/services/loss-model-pure";
 
 export type DecimalInput = Prisma.Decimal | number | string | null | undefined;
 
@@ -13,6 +17,7 @@ export type PurchaseOrderCalcLineInput = {
   purchaseUnit: string;
   stemsPerUnit: DecimalInput;
   unitPrice: DecimalInput;
+  usableRate?: DecimalInput;
   supplierSkuName?: string | null;
   note?: string | null;
 };
@@ -34,6 +39,11 @@ export type PurchaseOrderCalcLine = PurchaseOrderCalcLineInput & {
   allocatedExtraFee: Prisma.Decimal;
   actualTotalCost: Prisma.Decimal;
   actualUnitCost: Prisma.Decimal;
+  usableRate: Prisma.Decimal;
+  lossRate: Prisma.Decimal;
+  lossAdjustedTotalCost: Prisma.Decimal;
+  lossAdjustedUnitCost: Prisma.Decimal;
+  lossModelExtraCost: Prisma.Decimal;
 };
 
 export type PurchaseOrderTotalsResult = {
@@ -93,6 +103,10 @@ function allocationBaseForLine(
   return line.lineAmount;
 }
 
+function hasExplicitUsableRate(value: DecimalInput | undefined): boolean {
+  return value !== null && value !== undefined && value !== "";
+}
+
 export function calculatePurchaseOrderTotals(
   input: PurchaseOrderTotalsInput
 ): PurchaseOrderTotalsResult {
@@ -105,7 +119,18 @@ export function calculatePurchaseOrderTotals(
   const totalExtraFee = money(shippingFee.plus(packagingFee).plus(otherFee));
 
   let goodsAmount = money(0);
-  const baseLines: PurchaseOrderCalcLine[] = input.lines.map((line, index) => {
+  const baseLines: Array<
+    PurchaseOrderCalcLineInput & {
+      purchaseQuantity: Prisma.Decimal;
+      stemsPerUnit: Prisma.Decimal;
+      unitPrice: Prisma.Decimal;
+      totalStems: Prisma.Decimal;
+      lineAmount: Prisma.Decimal;
+      allocatedExtraFee: Prisma.Decimal;
+      actualTotalCost: Prisma.Decimal;
+      actualUnitCost: Prisma.Decimal;
+    }
+  > = input.lines.map((line, index) => {
     const purchaseQuantity = quantity(line.purchaseQuantity);
     const stemsPerUnit = quantity(line.stemsPerUnit);
     const unitPrice = money(line.unitPrice);
@@ -130,7 +155,10 @@ export function calculatePurchaseOrderTotals(
 
   const allocationTotal = goodsAmount.isZero()
     ? money(0)
-    : allocationBaseTotal(baseLines, allocationMethod);
+    : allocationBaseTotal(
+        baseLines as PurchaseOrderCalcLine[],
+        allocationMethod
+      );
   if (allocationTotal.isZero()) {
     if (!totalExtraFee.isZero()) {
       warnings.push("采购明细金额或数量为 0，附加费用暂无法分摊");
@@ -143,7 +171,7 @@ export function calculatePurchaseOrderTotals(
         ? money(totalExtraFee.minus(allocatedSoFar))
         : money(
             totalExtraFee
-              .times(allocationBaseForLine(line, allocationMethod))
+              .times(allocationBaseForLine(line as PurchaseOrderCalcLine, allocationMethod))
               .div(allocationTotal)
           );
       line.allocatedExtraFee = allocatedExtraFee;
@@ -151,12 +179,36 @@ export function calculatePurchaseOrderTotals(
     });
   }
 
-  const lines = baseLines.map((line) => {
+  const lines = baseLines.map((line, index) => {
     const actualTotalCost = money(line.lineAmount.plus(line.allocatedExtraFee));
     const actualUnitCost = line.totalStems.isZero()
       ? unitCost(0)
       : unitCost(actualTotalCost.div(line.totalStems));
-    return { ...line, actualTotalCost, actualUnitCost };
+
+    let usableRateInput = line.usableRate;
+    if (!hasExplicitUsableRate(usableRateInput)) {
+      warnings.push(`第 ${index + 1} 行花材未设置可用率，已使用默认 85%`);
+      usableRateInput = DEFAULT_STANDARD_USABLE_RATE;
+    }
+
+    const lossAdjusted = calculateLossAdjustedLineCost({
+      actualTotalCost,
+      actualUnitCost,
+      totalStems: line.totalStems,
+      usableRate: usableRateInput,
+    });
+    warnings.push(...lossAdjusted.warnings);
+
+    return {
+      ...line,
+      actualTotalCost,
+      actualUnitCost,
+      usableRate: lossAdjusted.usableRate,
+      lossRate: lossAdjusted.lossRate,
+      lossAdjustedTotalCost: lossAdjusted.lossAdjustedTotalCost,
+      lossAdjustedUnitCost: lossAdjusted.lossAdjustedUnitCost,
+      lossModelExtraCost: lossAdjusted.lossModelExtraCost,
+    };
   });
 
   return {

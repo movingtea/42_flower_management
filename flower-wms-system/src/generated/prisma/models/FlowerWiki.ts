@@ -29,11 +29,21 @@ export type AggregateFlowerWiki = {
 export type FlowerWikiAvgAggregateOutputType = {
   defaultShelfLifeDays: number | null
   standardUnitCost: runtime.Decimal | null
+  defaultUsableRate: runtime.Decimal | null
+  defaultLossRate: runtime.Decimal | null
+  optimisticUsableRate: runtime.Decimal | null
+  standardUsableRate: runtime.Decimal | null
+  conservativeUsableRate: runtime.Decimal | null
 }
 
 export type FlowerWikiSumAggregateOutputType = {
   defaultShelfLifeDays: number | null
   standardUnitCost: runtime.Decimal | null
+  defaultUsableRate: runtime.Decimal | null
+  defaultLossRate: runtime.Decimal | null
+  optimisticUsableRate: runtime.Decimal | null
+  standardUsableRate: runtime.Decimal | null
+  conservativeUsableRate: runtime.Decimal | null
 }
 
 export type FlowerWikiMinAggregateOutputType = {
@@ -52,6 +62,14 @@ export type FlowerWikiMinAggregateOutputType = {
   costUnit: string | null
   costUpdatedAt: Date | null
   costNote: string | null
+  defaultUsableRate: runtime.Decimal | null
+  defaultLossRate: runtime.Decimal | null
+  lossMode: $Enums.LossMode | null
+  optimisticUsableRate: runtime.Decimal | null
+  standardUsableRate: runtime.Decimal | null
+  conservativeUsableRate: runtime.Decimal | null
+  lossRateNote: string | null
+  lossRateUpdatedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -72,6 +90,14 @@ export type FlowerWikiMaxAggregateOutputType = {
   costUnit: string | null
   costUpdatedAt: Date | null
   costNote: string | null
+  defaultUsableRate: runtime.Decimal | null
+  defaultLossRate: runtime.Decimal | null
+  lossMode: $Enums.LossMode | null
+  optimisticUsableRate: runtime.Decimal | null
+  standardUsableRate: runtime.Decimal | null
+  conservativeUsableRate: runtime.Decimal | null
+  lossRateNote: string | null
+  lossRateUpdatedAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -94,6 +120,14 @@ export type FlowerWikiCountAggregateOutputType = {
   costUnit: number
   costUpdatedAt: number
   costNote: number
+  defaultUsableRate: number
+  defaultLossRate: number
+  lossMode: number
+  optimisticUsableRate: number
+  standardUsableRate: number
+  conservativeUsableRate: number
+  lossRateNote: number
+  lossRateUpdatedAt: number
   aliasMap: number
   createdAt: number
   updatedAt: number
@@ -104,11 +138,21 @@ export type FlowerWikiCountAggregateOutputType = {
 export type FlowerWikiAvgAggregateInputType = {
   defaultShelfLifeDays?: true
   standardUnitCost?: true
+  defaultUsableRate?: true
+  defaultLossRate?: true
+  optimisticUsableRate?: true
+  standardUsableRate?: true
+  conservativeUsableRate?: true
 }
 
 export type FlowerWikiSumAggregateInputType = {
   defaultShelfLifeDays?: true
   standardUnitCost?: true
+  defaultUsableRate?: true
+  defaultLossRate?: true
+  optimisticUsableRate?: true
+  standardUsableRate?: true
+  conservativeUsableRate?: true
 }
 
 export type FlowerWikiMinAggregateInputType = {
@@ -127,6 +171,14 @@ export type FlowerWikiMinAggregateInputType = {
   costUnit?: true
   costUpdatedAt?: true
   costNote?: true
+  defaultUsableRate?: true
+  defaultLossRate?: true
+  lossMode?: true
+  optimisticUsableRate?: true
+  standardUsableRate?: true
+  conservativeUsableRate?: true
+  lossRateNote?: true
+  lossRateUpdatedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -147,6 +199,14 @@ export type FlowerWikiMaxAggregateInputType = {
   costUnit?: true
   costUpdatedAt?: true
   costNote?: true
+  defaultUsableRate?: true
+  defaultLossRate?: true
+  lossMode?: true
+  optimisticUsableRate?: true
+  standardUsableRate?: true
+  conservativeUsableRate?: true
+  lossRateNote?: true
+  lossRateUpdatedAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -169,6 +229,14 @@ export type FlowerWikiCountAggregateInputType = {
   costUnit?: true
   costUpdatedAt?: true
   costNote?: true
+  defaultUsableRate?: true
+  defaultLossRate?: true
+  lossMode?: true
+  optimisticUsableRate?: true
+  standardUsableRate?: true
+  conservativeUsableRate?: true
+  lossRateNote?: true
+  lossRateUpdatedAt?: true
   aliasMap?: true
   createdAt?: true
   updatedAt?: true
@@ -279,6 +347,14 @@ export type FlowerWikiGroupByOutputType = {
   costUnit: string | null
   costUpdatedAt: Date | null
   costNote: string | null
+  defaultUsableRate: runtime.Decimal | null
+  defaultLossRate: runtime.Decimal | null
+  lossMode: $Enums.LossMode | null
+  optimisticUsableRate: runtime.Decimal | null
+  standardUsableRate: runtime.Decimal | null
+  conservativeUsableRate: runtime.Decimal | null
+  lossRateNote: string | null
+  lossRateUpdatedAt: Date | null
   aliasMap: runtime.JsonValue
   createdAt: Date
   updatedAt: Date
@@ -325,6 +401,14 @@ export type FlowerWikiWhereInput = {
   costUnit?: Prisma.StringNullableFilter<"FlowerWiki"> | string | null
   costUpdatedAt?: Prisma.DateTimeNullableFilter<"FlowerWiki"> | Date | string | null
   costNote?: Prisma.StringNullableFilter<"FlowerWiki"> | string | null
+  defaultUsableRate?: Prisma.DecimalNullableFilter<"FlowerWiki"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.DecimalNullableFilter<"FlowerWiki"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeNullableFilter<"FlowerWiki"> | $Enums.LossMode | null
+  optimisticUsableRate?: Prisma.DecimalNullableFilter<"FlowerWiki"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.DecimalNullableFilter<"FlowerWiki"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.DecimalNullableFilter<"FlowerWiki"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.StringNullableFilter<"FlowerWiki"> | string | null
+  lossRateUpdatedAt?: Prisma.DateTimeNullableFilter<"FlowerWiki"> | Date | string | null
   aliasMap?: Prisma.JsonFilter<"FlowerWiki">
   createdAt?: Prisma.DateTimeFilter<"FlowerWiki"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"FlowerWiki"> | Date | string
@@ -352,6 +436,14 @@ export type FlowerWikiOrderByWithRelationInput = {
   costUnit?: Prisma.SortOrderInput | Prisma.SortOrder
   costUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   costNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  defaultUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  defaultLossRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossMode?: Prisma.SortOrderInput | Prisma.SortOrder
+  optimisticUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  standardUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  conservativeUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossRateNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossRateUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   aliasMap?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -382,6 +474,14 @@ export type FlowerWikiWhereUniqueInput = Prisma.AtLeast<{
   costUnit?: Prisma.StringNullableFilter<"FlowerWiki"> | string | null
   costUpdatedAt?: Prisma.DateTimeNullableFilter<"FlowerWiki"> | Date | string | null
   costNote?: Prisma.StringNullableFilter<"FlowerWiki"> | string | null
+  defaultUsableRate?: Prisma.DecimalNullableFilter<"FlowerWiki"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.DecimalNullableFilter<"FlowerWiki"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeNullableFilter<"FlowerWiki"> | $Enums.LossMode | null
+  optimisticUsableRate?: Prisma.DecimalNullableFilter<"FlowerWiki"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.DecimalNullableFilter<"FlowerWiki"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.DecimalNullableFilter<"FlowerWiki"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.StringNullableFilter<"FlowerWiki"> | string | null
+  lossRateUpdatedAt?: Prisma.DateTimeNullableFilter<"FlowerWiki"> | Date | string | null
   aliasMap?: Prisma.JsonFilter<"FlowerWiki">
   createdAt?: Prisma.DateTimeFilter<"FlowerWiki"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"FlowerWiki"> | Date | string
@@ -409,6 +509,14 @@ export type FlowerWikiOrderByWithAggregationInput = {
   costUnit?: Prisma.SortOrderInput | Prisma.SortOrder
   costUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   costNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  defaultUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  defaultLossRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossMode?: Prisma.SortOrderInput | Prisma.SortOrder
+  optimisticUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  standardUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  conservativeUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossRateNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossRateUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   aliasMap?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -440,6 +548,14 @@ export type FlowerWikiScalarWhereWithAggregatesInput = {
   costUnit?: Prisma.StringNullableWithAggregatesFilter<"FlowerWiki"> | string | null
   costUpdatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"FlowerWiki"> | Date | string | null
   costNote?: Prisma.StringNullableWithAggregatesFilter<"FlowerWiki"> | string | null
+  defaultUsableRate?: Prisma.DecimalNullableWithAggregatesFilter<"FlowerWiki"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.DecimalNullableWithAggregatesFilter<"FlowerWiki"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeNullableWithAggregatesFilter<"FlowerWiki"> | $Enums.LossMode | null
+  optimisticUsableRate?: Prisma.DecimalNullableWithAggregatesFilter<"FlowerWiki"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.DecimalNullableWithAggregatesFilter<"FlowerWiki"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.DecimalNullableWithAggregatesFilter<"FlowerWiki"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.StringNullableWithAggregatesFilter<"FlowerWiki"> | string | null
+  lossRateUpdatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"FlowerWiki"> | Date | string | null
   aliasMap?: Prisma.JsonWithAggregatesFilter<"FlowerWiki">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"FlowerWiki"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"FlowerWiki"> | Date | string
@@ -463,6 +579,14 @@ export type FlowerWikiCreateInput = {
   costUnit?: string | null
   costUpdatedAt?: Date | string | null
   costNote?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  lossRateUpdatedAt?: Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -490,6 +614,14 @@ export type FlowerWikiUncheckedCreateInput = {
   costUnit?: string | null
   costUpdatedAt?: Date | string | null
   costNote?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  lossRateUpdatedAt?: Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -517,6 +649,14 @@ export type FlowerWikiUpdateInput = {
   costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.NullableEnumLossModeFieldUpdateOperationsInput | $Enums.LossMode | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -544,6 +684,14 @@ export type FlowerWikiUncheckedUpdateInput = {
   costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.NullableEnumLossModeFieldUpdateOperationsInput | $Enums.LossMode | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -571,6 +719,14 @@ export type FlowerWikiCreateManyInput = {
   costUnit?: string | null
   costUpdatedAt?: Date | string | null
   costNote?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  lossRateUpdatedAt?: Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -594,6 +750,14 @@ export type FlowerWikiUpdateManyMutationInput = {
   costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.NullableEnumLossModeFieldUpdateOperationsInput | $Enums.LossMode | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -617,6 +781,14 @@ export type FlowerWikiUncheckedUpdateManyInput = {
   costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.NullableEnumLossModeFieldUpdateOperationsInput | $Enums.LossMode | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -658,6 +830,14 @@ export type FlowerWikiCountOrderByAggregateInput = {
   costUnit?: Prisma.SortOrder
   costUpdatedAt?: Prisma.SortOrder
   costNote?: Prisma.SortOrder
+  defaultUsableRate?: Prisma.SortOrder
+  defaultLossRate?: Prisma.SortOrder
+  lossMode?: Prisma.SortOrder
+  optimisticUsableRate?: Prisma.SortOrder
+  standardUsableRate?: Prisma.SortOrder
+  conservativeUsableRate?: Prisma.SortOrder
+  lossRateNote?: Prisma.SortOrder
+  lossRateUpdatedAt?: Prisma.SortOrder
   aliasMap?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -666,6 +846,11 @@ export type FlowerWikiCountOrderByAggregateInput = {
 export type FlowerWikiAvgOrderByAggregateInput = {
   defaultShelfLifeDays?: Prisma.SortOrder
   standardUnitCost?: Prisma.SortOrder
+  defaultUsableRate?: Prisma.SortOrder
+  defaultLossRate?: Prisma.SortOrder
+  optimisticUsableRate?: Prisma.SortOrder
+  standardUsableRate?: Prisma.SortOrder
+  conservativeUsableRate?: Prisma.SortOrder
 }
 
 export type FlowerWikiMaxOrderByAggregateInput = {
@@ -684,6 +869,14 @@ export type FlowerWikiMaxOrderByAggregateInput = {
   costUnit?: Prisma.SortOrder
   costUpdatedAt?: Prisma.SortOrder
   costNote?: Prisma.SortOrder
+  defaultUsableRate?: Prisma.SortOrder
+  defaultLossRate?: Prisma.SortOrder
+  lossMode?: Prisma.SortOrder
+  optimisticUsableRate?: Prisma.SortOrder
+  standardUsableRate?: Prisma.SortOrder
+  conservativeUsableRate?: Prisma.SortOrder
+  lossRateNote?: Prisma.SortOrder
+  lossRateUpdatedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -704,6 +897,14 @@ export type FlowerWikiMinOrderByAggregateInput = {
   costUnit?: Prisma.SortOrder
   costUpdatedAt?: Prisma.SortOrder
   costNote?: Prisma.SortOrder
+  defaultUsableRate?: Prisma.SortOrder
+  defaultLossRate?: Prisma.SortOrder
+  lossMode?: Prisma.SortOrder
+  optimisticUsableRate?: Prisma.SortOrder
+  standardUsableRate?: Prisma.SortOrder
+  conservativeUsableRate?: Prisma.SortOrder
+  lossRateNote?: Prisma.SortOrder
+  lossRateUpdatedAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -711,6 +912,11 @@ export type FlowerWikiMinOrderByAggregateInput = {
 export type FlowerWikiSumOrderByAggregateInput = {
   defaultShelfLifeDays?: Prisma.SortOrder
   standardUnitCost?: Prisma.SortOrder
+  defaultUsableRate?: Prisma.SortOrder
+  defaultLossRate?: Prisma.SortOrder
+  optimisticUsableRate?: Prisma.SortOrder
+  standardUsableRate?: Prisma.SortOrder
+  conservativeUsableRate?: Prisma.SortOrder
 }
 
 export type FlowerWikiCreateNestedOneWithoutPurchaseOrderLinesInput = {
@@ -792,6 +998,10 @@ export type NullableIntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type NullableEnumLossModeFieldUpdateOperationsInput = {
+  set?: $Enums.LossMode | null
+}
+
 export type FlowerWikiCreateWithoutPurchaseOrderLinesInput = {
   id?: string
   photo?: string | null
@@ -810,6 +1020,14 @@ export type FlowerWikiCreateWithoutPurchaseOrderLinesInput = {
   costUnit?: string | null
   costUpdatedAt?: Date | string | null
   costNote?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  lossRateUpdatedAt?: Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -836,6 +1054,14 @@ export type FlowerWikiUncheckedCreateWithoutPurchaseOrderLinesInput = {
   costUnit?: string | null
   costUpdatedAt?: Date | string | null
   costNote?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  lossRateUpdatedAt?: Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -878,6 +1104,14 @@ export type FlowerWikiUpdateWithoutPurchaseOrderLinesInput = {
   costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.NullableEnumLossModeFieldUpdateOperationsInput | $Enums.LossMode | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -904,6 +1138,14 @@ export type FlowerWikiUncheckedUpdateWithoutPurchaseOrderLinesInput = {
   costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.NullableEnumLossModeFieldUpdateOperationsInput | $Enums.LossMode | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -930,6 +1172,14 @@ export type FlowerWikiCreateWithoutMaterialsInput = {
   costUnit?: string | null
   costUpdatedAt?: Date | string | null
   costNote?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  lossRateUpdatedAt?: Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -956,6 +1206,14 @@ export type FlowerWikiUncheckedCreateWithoutMaterialsInput = {
   costUnit?: string | null
   costUpdatedAt?: Date | string | null
   costNote?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  lossRateUpdatedAt?: Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -998,6 +1256,14 @@ export type FlowerWikiUpdateWithoutMaterialsInput = {
   costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.NullableEnumLossModeFieldUpdateOperationsInput | $Enums.LossMode | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1024,6 +1290,14 @@ export type FlowerWikiUncheckedUpdateWithoutMaterialsInput = {
   costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.NullableEnumLossModeFieldUpdateOperationsInput | $Enums.LossMode | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1050,6 +1324,14 @@ export type FlowerWikiCreateWithoutRecipeLinesInput = {
   costUnit?: string | null
   costUpdatedAt?: Date | string | null
   costNote?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  lossRateUpdatedAt?: Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1076,6 +1358,14 @@ export type FlowerWikiUncheckedCreateWithoutRecipeLinesInput = {
   costUnit?: string | null
   costUpdatedAt?: Date | string | null
   costNote?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  lossRateUpdatedAt?: Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1118,6 +1408,14 @@ export type FlowerWikiUpdateWithoutRecipeLinesInput = {
   costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.NullableEnumLossModeFieldUpdateOperationsInput | $Enums.LossMode | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1144,6 +1442,14 @@ export type FlowerWikiUncheckedUpdateWithoutRecipeLinesInput = {
   costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.NullableEnumLossModeFieldUpdateOperationsInput | $Enums.LossMode | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1170,6 +1476,14 @@ export type FlowerWikiCreateWithoutStockLossRecordsInput = {
   costUnit?: string | null
   costUpdatedAt?: Date | string | null
   costNote?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  lossRateUpdatedAt?: Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1196,6 +1510,14 @@ export type FlowerWikiUncheckedCreateWithoutStockLossRecordsInput = {
   costUnit?: string | null
   costUpdatedAt?: Date | string | null
   costNote?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  lossRateUpdatedAt?: Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1238,6 +1560,14 @@ export type FlowerWikiUpdateWithoutStockLossRecordsInput = {
   costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.NullableEnumLossModeFieldUpdateOperationsInput | $Enums.LossMode | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1264,6 +1594,14 @@ export type FlowerWikiUncheckedUpdateWithoutStockLossRecordsInput = {
   costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.NullableEnumLossModeFieldUpdateOperationsInput | $Enums.LossMode | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1348,6 +1686,14 @@ export type FlowerWikiSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   costUnit?: boolean
   costUpdatedAt?: boolean
   costNote?: boolean
+  defaultUsableRate?: boolean
+  defaultLossRate?: boolean
+  lossMode?: boolean
+  optimisticUsableRate?: boolean
+  standardUsableRate?: boolean
+  conservativeUsableRate?: boolean
+  lossRateNote?: boolean
+  lossRateUpdatedAt?: boolean
   aliasMap?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1376,6 +1722,14 @@ export type FlowerWikiSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   costUnit?: boolean
   costUpdatedAt?: boolean
   costNote?: boolean
+  defaultUsableRate?: boolean
+  defaultLossRate?: boolean
+  lossMode?: boolean
+  optimisticUsableRate?: boolean
+  standardUsableRate?: boolean
+  conservativeUsableRate?: boolean
+  lossRateNote?: boolean
+  lossRateUpdatedAt?: boolean
   aliasMap?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1399,6 +1753,14 @@ export type FlowerWikiSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   costUnit?: boolean
   costUpdatedAt?: boolean
   costNote?: boolean
+  defaultUsableRate?: boolean
+  defaultLossRate?: boolean
+  lossMode?: boolean
+  optimisticUsableRate?: boolean
+  standardUsableRate?: boolean
+  conservativeUsableRate?: boolean
+  lossRateNote?: boolean
+  lossRateUpdatedAt?: boolean
   aliasMap?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -1422,12 +1784,20 @@ export type FlowerWikiSelectScalar = {
   costUnit?: boolean
   costUpdatedAt?: boolean
   costNote?: boolean
+  defaultUsableRate?: boolean
+  defaultLossRate?: boolean
+  lossMode?: boolean
+  optimisticUsableRate?: boolean
+  standardUsableRate?: boolean
+  conservativeUsableRate?: boolean
+  lossRateNote?: boolean
+  lossRateUpdatedAt?: boolean
   aliasMap?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type FlowerWikiOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "photo" | "englishName" | "chineseName" | "pinyinIndex" | "colorTags" | "morphology" | "supplySeason" | "floralRole" | "maintenance" | "flowerLanguage" | "maintenanceCare" | "defaultShelfLifeDays" | "standardUnitCost" | "costUnit" | "costUpdatedAt" | "costNote" | "aliasMap" | "createdAt" | "updatedAt", ExtArgs["result"]["flowerWiki"]>
+export type FlowerWikiOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "photo" | "englishName" | "chineseName" | "pinyinIndex" | "colorTags" | "morphology" | "supplySeason" | "floralRole" | "maintenance" | "flowerLanguage" | "maintenanceCare" | "defaultShelfLifeDays" | "standardUnitCost" | "costUnit" | "costUpdatedAt" | "costNote" | "defaultUsableRate" | "defaultLossRate" | "lossMode" | "optimisticUsableRate" | "standardUsableRate" | "conservativeUsableRate" | "lossRateNote" | "lossRateUpdatedAt" | "aliasMap" | "createdAt" | "updatedAt", ExtArgs["result"]["flowerWiki"]>
 export type FlowerWikiInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   materials?: boolean | Prisma.FlowerWiki$materialsArgs<ExtArgs>
   recipeLines?: boolean | Prisma.FlowerWiki$recipeLinesArgs<ExtArgs>
@@ -1473,6 +1843,20 @@ export type $FlowerWikiPayload<ExtArgs extends runtime.Types.Extensions.Internal
     costUnit: string | null
     costUpdatedAt: Date | null
     costNote: string | null
+    /**
+     * 默认可用率（0–1）；用于采购损耗成本摊分
+     */
+    defaultUsableRate: runtime.Decimal | null
+    /**
+     * 默认损耗率（0–1）；= 1 - defaultUsableRate
+     */
+    defaultLossRate: runtime.Decimal | null
+    lossMode: $Enums.LossMode | null
+    optimisticUsableRate: runtime.Decimal | null
+    standardUsableRate: runtime.Decimal | null
+    conservativeUsableRate: runtime.Decimal | null
+    lossRateNote: string | null
+    lossRateUpdatedAt: Date | null
     aliasMap: runtime.JsonValue
     createdAt: Date
     updatedAt: Date
@@ -1920,6 +2304,14 @@ export interface FlowerWikiFieldRefs {
   readonly costUnit: Prisma.FieldRef<"FlowerWiki", 'String'>
   readonly costUpdatedAt: Prisma.FieldRef<"FlowerWiki", 'DateTime'>
   readonly costNote: Prisma.FieldRef<"FlowerWiki", 'String'>
+  readonly defaultUsableRate: Prisma.FieldRef<"FlowerWiki", 'Decimal'>
+  readonly defaultLossRate: Prisma.FieldRef<"FlowerWiki", 'Decimal'>
+  readonly lossMode: Prisma.FieldRef<"FlowerWiki", 'LossMode'>
+  readonly optimisticUsableRate: Prisma.FieldRef<"FlowerWiki", 'Decimal'>
+  readonly standardUsableRate: Prisma.FieldRef<"FlowerWiki", 'Decimal'>
+  readonly conservativeUsableRate: Prisma.FieldRef<"FlowerWiki", 'Decimal'>
+  readonly lossRateNote: Prisma.FieldRef<"FlowerWiki", 'String'>
+  readonly lossRateUpdatedAt: Prisma.FieldRef<"FlowerWiki", 'DateTime'>
   readonly aliasMap: Prisma.FieldRef<"FlowerWiki", 'Json'>
   readonly createdAt: Prisma.FieldRef<"FlowerWiki", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"FlowerWiki", 'DateTime'>

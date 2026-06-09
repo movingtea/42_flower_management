@@ -24,7 +24,10 @@ function testSingleLineWithoutExtraFee() {
   assert.equal(result.totalAmount.toFixed(2), "100.00");
   assert.equal(result.lines[0].totalStems.toFixed(2), "40.00");
   assert.equal(result.lines[0].actualUnitCost.toFixed(4), "2.5000");
-  assert.deepEqual(result.warnings, []);
+  assert.equal(result.lines[0].lossAdjustedUnitCost.toFixed(4), "2.9412");
+  assert.ok(
+    result.warnings.some((warning) => warning.includes("未设置可用率"))
+  );
 }
 
 function testMultiLineByAmountAllocation() {
@@ -120,6 +123,77 @@ function testDecimalPrecision() {
   assert.equal(result.lines[0].actualUnitCost.toFixed(4), "0.0200");
 }
 
+function testLossAdjustedWithExplicitUsableRate() {
+  const result = calculatePurchaseOrderTotals({
+    lines: [
+      {
+        flowerWikiId: "fw_rose",
+        purchaseQuantity: 1,
+        purchaseUnit: "扎",
+        stemsPerUnit: 1,
+        unitPrice: 2,
+        usableRate: 0.85,
+      },
+    ],
+  });
+
+  assert.equal(result.lines[0].actualUnitCost.toFixed(4), "2.0000");
+  assert.equal(result.lines[0].lossAdjustedUnitCost.toFixed(4), "2.3529");
+  assert.equal(result.lines[0].lossRate.toFixed(4), "0.1500");
+  assert.equal(result.lines[0].lossModelExtraCost.toFixed(2), "0.35");
+}
+
+function testMultiLineLossAfterAllocation() {
+  const result = calculatePurchaseOrderTotals({
+    lines: [
+      {
+        flowerWikiId: "fw_rose",
+        purchaseQuantity: 2,
+        purchaseUnit: "扎",
+        stemsPerUnit: 20,
+        unitPrice: 50,
+        usableRate: 0.85,
+      },
+      {
+        flowerWikiId: "fw_lily",
+        purchaseQuantity: 1,
+        purchaseUnit: "扎",
+        stemsPerUnit: 10,
+        unitPrice: 100,
+        usableRate: 0.85,
+      },
+    ],
+    shippingFee: 30,
+    packagingFee: 10,
+    otherFee: 10,
+    allocationMethod: PurchaseCostAllocationMethod.BY_AMOUNT,
+  });
+
+  assert.equal(result.lines[0].actualUnitCost.toFixed(4), "3.1250");
+  assert.equal(result.lines[0].lossAdjustedUnitCost.toFixed(4), "3.6765");
+  assert.equal(result.lines[1].actualUnitCost.toFixed(4), "12.5000");
+  assert.equal(result.lines[1].lossAdjustedUnitCost.toFixed(4), "14.7059");
+}
+
+function testDefaultUsableRateWhenMissing() {
+  const result = calculatePurchaseOrderTotals({
+    lines: [
+      {
+        flowerWikiId: "fw_default",
+        purchaseQuantity: 1,
+        purchaseUnit: "扎",
+        stemsPerUnit: 10,
+        unitPrice: 10,
+      },
+    ],
+  });
+
+  assert.equal(result.lines[0].usableRate.toFixed(4), "0.8500");
+  assert.ok(
+    result.warnings.some((warning) => warning.includes("默认 85%"))
+  );
+}
+
 function testMissingFeesDefaultToZero() {
   const result = calculatePurchaseOrderTotals({
     lines: [
@@ -145,6 +219,9 @@ function run() {
   testGoodsAmountZero();
   testTotalStemsZero();
   testDecimalPrecision();
+  testLossAdjustedWithExplicitUsableRate();
+  testMultiLineLossAfterAllocation();
+  testDefaultUsableRateWhenMissing();
   testMissingFeesDefaultToZero();
   console.log("purchase-pure tests passed");
 }

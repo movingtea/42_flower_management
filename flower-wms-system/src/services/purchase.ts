@@ -11,11 +11,16 @@ import { assertStockMutationOperatorMatches } from "@/lib/stock-mutation-auth";
 import { generateBatchNo } from "@/utils/batch-no";
 import { generateUniqueSku } from "@/utils/skuGenerator";
 import {
+  normalizeUsableRate,
+  resolveWikiDefaultUsableRate,
+} from "@/services/loss-model-pure";
+import {
   calculatePurchaseOrderTotals,
   money,
   quantity,
   type PurchaseOrderCalcLine,
   type PurchaseOrderTotalsInput,
+  type PurchaseOrderTotalsResult,
 } from "@/services/purchase-pure";
 
 export { calculatePurchaseOrderTotals } from "@/services/purchase-pure";
@@ -33,6 +38,7 @@ type PurchaseOrderLineWriteInput = {
   purchaseUnit: string;
   stemsPerUnit: Prisma.Decimal;
   unitPrice: Prisma.Decimal;
+  usableRate?: Prisma.Decimal;
   supplierSkuName?: string | null;
   note?: string | null;
 };
@@ -84,6 +90,9 @@ type BatchRow = {
   originalQty: number;
   remainingQty: number;
   unitCost: Prisma.Decimal;
+  lossAdjustedUnitCost: Prisma.Decimal | null;
+  usableRate: Prisma.Decimal | null;
+  lossRate: Prisma.Decimal | null;
   expiresAt: Date | null;
   supplier: string | null;
 };
@@ -115,6 +124,8 @@ const purchaseOrderInclude = {
           englishName: true,
           colorTags: true,
           defaultShelfLifeDays: true,
+          defaultUsableRate: true,
+          standardUsableRate: true,
         },
       },
       inboundBatch: {
@@ -125,6 +136,9 @@ const purchaseOrderInclude = {
           originalQty: true,
           remainingQty: true,
           unitCost: true,
+          lossAdjustedUnitCost: true,
+          usableRate: true,
+          lossRate: true,
         },
       },
     },
@@ -223,11 +237,27 @@ function parseWritableStatus(raw: unknown): PurchaseOrderStatus | undefined {
   return value as PurchaseOrderStatus;
 }
 
+function parseOptionalLineUsableRate(
+  raw: unknown
+): Prisma.Decimal | undefined {
+  if (raw === undefined) return undefined;
+  if (raw === null || raw === "") return undefined;
+  const { usableRate, warnings } = normalizeUsableRate(
+    raw as string | number,
+    { defaultRate: 0.85 }
+  );
+  if (warnings.length > 0) {
+    throw new Error(`可用率格式无效：${warnings.join("；")}`);
+  }
+  return usableRate;
+}
+
 function parsePurchaseLine(raw: unknown, index: number): PurchaseOrderLineWriteInput {
   if (!raw || typeof raw !== "object") {
     throw new Error(`第 ${index + 1} 行采购明细格式不正确`);
   }
   const row = raw as Record<string, unknown>;
+  const usableRate = parseOptionalLineUsableRate(row.usableRate);
   return {
     flowerWikiId: requiredString(row.flowerWikiId, "花材不存在，请先在花材母表中创建"),
     purchaseName: optionalString(row.purchaseName),
@@ -238,6 +268,7 @@ function parsePurchaseLine(raw: unknown, index: number): PurchaseOrderLineWriteI
     purchaseUnit: requiredString(row.purchaseUnit, "采购单位不能为空"),
     stemsPerUnit: parsePositiveQuantity(row.stemsPerUnit, "折算支数"),
     unitPrice: parseNonNegativeMoney(row.unitPrice, "采购单价"),
+    ...(usableRate !== undefined ? { usableRate } : {}),
     supplierSkuName: optionalString(row.supplierSkuName),
     note: optionalString(row.note),
   };
@@ -269,8 +300,10 @@ function parsePurchaseOrderInput(raw: unknown): PurchaseOrderWriteInput {
 }
 
 function purchaseLineForCalc(
-  line: PurchaseOrderLineWriteInput
+  line: PurchaseOrderLineWriteInput,
+  wikiUsableRate?: Prisma.Decimal
 ): PurchaseOrderTotalsInput["lines"][number] {
+  const usableRate = line.usableRate ?? wikiUsableRate;
   return {
     flowerWikiId: line.flowerWikiId,
     purchaseName: line.purchaseName,
@@ -281,9 +314,90 @@ function purchaseLineForCalc(
     purchaseUnit: line.purchaseUnit,
     stemsPerUnit: line.stemsPerUnit,
     unitPrice: line.unitPrice,
+    ...(usableRate !== undefined ? { usableRate } : {}),
     supplierSkuName: line.supplierSkuName,
     note: line.note,
   };
+}
+
+async function loadWikiUsableRateMap(
+  client: DbClient,
+  lines: PurchaseOrderLineWriteInput[]
+) {
+  const wikiIds = Array.from(new Set(lines.map((line) => line.flowerWikiId)));
+  const wikis = await client.flowerWiki.findMany({
+    where: { id: { in: wikiIds } },
+    select: {
+      id: true,
+      defaultUsableRate: true,
+      standardUsableRate: true,
+    },
+  });
+  return new Map(wikis.map((wiki) => [wiki.id, wiki]));
+}
+
+async function buildCalculatedLines(
+  input: PurchaseOrderWriteInput,
+  client: DbClient = prisma
+) {
+  const wikiMap = await loadWikiUsableRateMap(client, input.lines);
+  const lines = input.lines.map((line) => {
+    const wikiRate = resolveWikiDefaultUsableRate(
+      wikiMap.get(line.flowerWikiId) ?? null
+    );
+    const usableRate = line.usableRate ?? wikiRate ?? undefined;
+    return purchaseLineForCalc(line, usableRate);
+  });
+
+  return calculatePurchaseOrderTotals({
+    lines,
+    shippingFee: input.shippingFee,
+    packagingFee: input.packagingFee,
+    otherFee: input.otherFee,
+    allocationMethod: input.allocationMethod,
+  });
+}
+
+export function serializePurchaseTotalsResult(result: PurchaseOrderTotalsResult) {
+  return {
+    goodsAmount: result.goodsAmount.toFixed(2),
+    shippingFee: result.shippingFee.toFixed(2),
+    packagingFee: result.packagingFee.toFixed(2),
+    otherFee: result.otherFee.toFixed(2),
+    totalExtraFee: result.totalExtraFee.toFixed(2),
+    totalAmount: result.totalAmount.toFixed(2),
+    allocationMethod: result.allocationMethod,
+    warnings: result.warnings,
+    lines: result.lines.map((line) => ({
+      flowerWikiId: line.flowerWikiId,
+      purchaseName: line.purchaseName ?? null,
+      grade: line.grade ?? null,
+      color: line.color ?? null,
+      spec: line.spec ?? null,
+      purchaseQuantity: line.purchaseQuantity.toFixed(2),
+      purchaseUnit: line.purchaseUnit,
+      stemsPerUnit: line.stemsPerUnit.toFixed(2),
+      unitPrice: line.unitPrice.toFixed(2),
+      totalStems: line.totalStems.toFixed(2),
+      lineAmount: line.lineAmount.toFixed(2),
+      allocatedExtraFee: line.allocatedExtraFee.toFixed(2),
+      actualTotalCost: line.actualTotalCost.toFixed(2),
+      actualUnitCost: line.actualUnitCost.toFixed(4),
+      usableRate: line.usableRate.toFixed(4),
+      lossRate: line.lossRate.toFixed(4),
+      lossAdjustedTotalCost: line.lossAdjustedTotalCost.toFixed(2),
+      lossAdjustedUnitCost: line.lossAdjustedUnitCost.toFixed(4),
+      lossModelExtraCost: line.lossModelExtraCost.toFixed(2),
+      supplierSkuName: line.supplierSkuName ?? null,
+      note: line.note ?? null,
+    })),
+  };
+}
+
+export async function calculatePurchaseOrderPreview(raw: unknown) {
+  const input = validatePurchaseOrderInput(raw);
+  const result = await buildCalculatedLines(input);
+  return serializePurchaseTotalsResult(result);
 }
 
 export function validatePurchaseOrderInput(raw: unknown): PurchaseOrderWriteInput {
@@ -343,16 +457,6 @@ async function assertFlowerWikiIdsExist(tx: DbClient, lines: PurchaseOrderLineWr
   }
 }
 
-function buildCalculatedLines(input: PurchaseOrderWriteInput) {
-  return calculatePurchaseOrderTotals({
-    lines: input.lines.map(purchaseLineForCalc),
-    shippingFee: input.shippingFee,
-    packagingFee: input.packagingFee,
-    otherFee: input.otherFee,
-    allocationMethod: input.allocationMethod,
-  });
-}
-
 function lineCreateData(purchaseOrderId: string, line: PurchaseOrderCalcLine) {
   return {
     purchaseOrderId,
@@ -370,6 +474,10 @@ function lineCreateData(purchaseOrderId: string, line: PurchaseOrderCalcLine) {
     allocatedExtraFee: line.allocatedExtraFee,
     actualTotalCost: line.actualTotalCost,
     actualUnitCost: line.actualUnitCost,
+    usableRate: line.usableRate,
+    lossRate: line.lossRate,
+    lossAdjustedTotalCost: line.lossAdjustedTotalCost,
+    lossAdjustedUnitCost: line.lossAdjustedUnitCost,
     supplierSkuName: line.supplierSkuName ?? null,
     note: line.note ?? null,
   };
@@ -450,6 +558,14 @@ function serializePurchaseOrder(row: Prisma.PurchaseOrderGetPayload<{
       allocatedExtraFee: line.allocatedExtraFee.toFixed(2),
       actualTotalCost: line.actualTotalCost.toFixed(2),
       actualUnitCost: line.actualUnitCost.toFixed(4),
+      usableRate: line.usableRate?.toFixed(4) ?? null,
+      lossRate: line.lossRate?.toFixed(4) ?? null,
+      lossAdjustedTotalCost: line.lossAdjustedTotalCost?.toFixed(2) ?? null,
+      lossAdjustedUnitCost: line.lossAdjustedUnitCost?.toFixed(4) ?? null,
+      lossModelExtraCost:
+        line.lossAdjustedTotalCost && line.actualTotalCost
+          ? line.lossAdjustedTotalCost.minus(line.actualTotalCost).toFixed(2)
+          : null,
       supplierSkuName: line.supplierSkuName,
       note: line.note,
       inboundBatchId: line.inboundBatchId,
@@ -461,6 +577,10 @@ function serializePurchaseOrder(row: Prisma.PurchaseOrderGetPayload<{
             originalQty: line.inboundBatch.originalQty,
             remainingQty: line.inboundBatch.remainingQty,
             unitCost: line.inboundBatch.unitCost.toFixed(4),
+            lossAdjustedUnitCost:
+              line.inboundBatch.lossAdjustedUnitCost?.toFixed(4) ?? null,
+            usableRate: line.inboundBatch.usableRate?.toFixed(4) ?? null,
+            lossRate: line.inboundBatch.lossRate?.toFixed(4) ?? null,
           }
         : null,
       createdAt: line.createdAt.toISOString(),
@@ -592,7 +712,7 @@ export async function deactivateSupplier(id: string) {
 
 export async function createPurchaseOrder(raw: unknown) {
   const input = validatePurchaseOrderInput(raw);
-  const calculated = buildCalculatedLines(input);
+  const calculated = await buildCalculatedLines(input);
   const maxAttempts = 5;
   let lastError: unknown;
 
@@ -677,6 +797,7 @@ function buildUpdateInput(existing: Awaited<ReturnType<typeof getPurchaseOrderBy
         purchaseUnit: line.purchaseUnit,
         stemsPerUnit: line.stemsPerUnit,
         unitPrice: line.unitPrice,
+        usableRate: line.usableRate,
         supplierSkuName: line.supplierSkuName,
         note: line.note,
       })),
@@ -692,7 +813,7 @@ export async function updatePurchaseOrder(id: string, raw: unknown) {
     throw new Error("已取消采购单不能修改");
   }
   const input = validatePurchaseOrderInput(buildUpdateInput(existing, raw));
-  const calculated = buildCalculatedLines(input);
+  const calculated = await buildCalculatedLines(input);
 
   return prisma.$transaction(async (tx) => {
     if (input.supplierId !== existing.supplierId) {
@@ -835,6 +956,9 @@ function serializeBatch(row: BatchRow) {
     originalQty: row.originalQty,
     remainingQty: row.remainingQty,
     unitCost: row.unitCost.toFixed(4),
+    lossAdjustedUnitCost: row.lossAdjustedUnitCost?.toFixed(4) ?? null,
+    usableRate: row.usableRate?.toFixed(4) ?? null,
+    lossRate: row.lossRate?.toFixed(4) ?? null,
     expiresAt: row.expiresAt?.toISOString() ?? null,
     supplier: row.supplier,
   };
@@ -942,6 +1066,9 @@ export async function receivePurchaseOrderWithTrustedOperator(
           originalQty: totalStems,
           remainingQty: totalStems,
           unitCost: line.actualUnitCost,
+          lossAdjustedUnitCost: line.lossAdjustedUnitCost,
+          usableRate: line.usableRate,
+          lossRate: line.lossRate,
           expiresAt,
           supplier: purchaseOrder.supplier.name,
           note: remark,

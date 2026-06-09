@@ -1,4 +1,11 @@
 import { Prisma } from "@/generated/prisma/client";
+import { LossMode } from "@/generated/prisma/enums";
+import {
+  calculateLossAdjustedUnitCost,
+  getLossRateFromUsableRate,
+  getUsableRateByMode,
+  type FlowerWikiLossSource,
+} from "@/services/loss-model-pure";
 import {
   decimalToString,
   money,
@@ -13,11 +20,14 @@ export type MarginLevel =
   | "优秀"
   | "高毛利，需检查定价或成本是否漏填";
 
+export type MarginCostMode = "RAW" | "NONE" | LossMode;
+
 export type ProductMarginMaterialInput = {
   flowerWikiId: string;
   flowerName: string;
   quantityNeeded: number;
   standardUnitCost: DecimalInput;
+  lossProfile?: FlowerWikiLossSource | null;
 };
 
 export type ProductMarginMaterialLine = {
@@ -27,6 +37,16 @@ export type ProductMarginMaterialLine = {
   standardUnitCost: string | null;
   lineCost: string;
   warning?: string;
+};
+
+export type ProductMarginMaterialLineDetail = ProductMarginMaterialLine & {
+  rawUnitCost: string | null;
+  adjustedUnitCost: string | null;
+  usableRate: string | null;
+  lossRate: string | null;
+  rawLineCost: string;
+  adjustedLineCost: string;
+  lossModelExtraCost: string;
 };
 
 export type SuggestedPrice = {
@@ -118,14 +138,23 @@ export function getMarginLevel(grossMargin: DecimalInput): MarginLevel {
   return "高毛利，需检查定价或成本是否漏填";
 }
 
-export function calculateStandardMaterialLines(
-  inputs: ProductMarginMaterialInput[]
+function isRawMode(mode: MarginCostMode): boolean {
+  return mode === "RAW" || mode === "NONE";
+}
+
+export function calculateMaterialLinesByMode(
+  inputs: ProductMarginMaterialInput[],
+  mode: MarginCostMode = "RAW"
 ): {
   materialCost: Prisma.Decimal;
-  lines: ProductMarginMaterialLine[];
+  rawMaterialCost: Prisma.Decimal;
+  lossModelExtraCost: Prisma.Decimal;
+  lines: ProductMarginMaterialLineDetail[];
   warnings: string[];
 } {
   let materialCost = money(0);
+  let rawMaterialCost = money(0);
+  let lossModelExtraCost = money(0);
   const warnings: string[] = [];
 
   const lines = inputs.map((input) => {
@@ -134,8 +163,8 @@ export function calculateStandardMaterialLines(
       : 0;
     const missingCost =
       input.standardUnitCost === null || input.standardUnitCost === undefined;
-    const invalidQuantity = !Number.isFinite(input.quantityNeeded) ||
-      input.quantityNeeded <= 0;
+    const invalidQuantity =
+      !Number.isFinite(input.quantityNeeded) || input.quantityNeeded <= 0;
 
     const warningParts: string[] = [];
     if (missingCost) {
@@ -147,21 +176,79 @@ export function calculateStandardMaterialLines(
       warnings.push(`花材「${input.flowerName}」配方用量异常，已按 0 计算`);
     }
 
-    const unitCost = missingCost ? money(0) : money(input.standardUnitCost);
-    const lineCost = invalidQuantity ? money(0) : money(unitCost.times(quantityNeeded));
-    materialCost = money(materialCost.plus(lineCost));
+    const rawUnitCost = missingCost ? money(0) : money(input.standardUnitCost);
+    const rawLineCost = invalidQuantity
+      ? money(0)
+      : money(rawUnitCost.times(quantityNeeded));
+    rawMaterialCost = money(rawMaterialCost.plus(rawLineCost));
+
+    let adjustedUnitCost = rawUnitCost;
+    let usableRate: Prisma.Decimal | null = null;
+    let lossRate: Prisma.Decimal | null = null;
+    let adjustedLineCost = rawLineCost;
+
+    if (!isRawMode(mode) && !missingCost && !invalidQuantity) {
+      usableRate = getUsableRateByMode(input.lossProfile, mode as LossMode);
+      const hasWikiRate =
+        input.lossProfile?.optimisticUsableRate != null ||
+        input.lossProfile?.standardUsableRate != null ||
+        input.lossProfile?.conservativeUsableRate != null ||
+        input.lossProfile?.defaultUsableRate != null;
+      if (!hasWikiRate) {
+        warnings.push(
+          `花材「${input.flowerName}」未设置可用率，已使用默认 ${mode === LossMode.OPTIMISTIC ? "92%" : mode === LossMode.CONSERVATIVE ? "75%" : "85%"} 估算`
+        );
+      }
+      const adjusted = calculateLossAdjustedUnitCost(rawUnitCost, usableRate);
+      warnings.push(...adjusted.warnings);
+      adjustedUnitCost = adjusted.lossAdjustedUnitCost;
+      lossRate = getLossRateFromUsableRate(usableRate);
+      adjustedLineCost = money(adjustedUnitCost.times(quantityNeeded));
+    }
+
+    const lineExtraCost = money(adjustedLineCost.minus(rawLineCost));
+    lossModelExtraCost = money(lossModelExtraCost.plus(lineExtraCost));
+    materialCost = money(materialCost.plus(isRawMode(mode) ? rawLineCost : adjustedLineCost));
 
     return {
       flowerWikiId: input.flowerWikiId,
       flowerName: input.flowerName,
       quantityNeeded: invalidQuantity ? 0 : quantityNeeded,
-      standardUnitCost: missingCost ? null : decimalToString(unitCost, 4),
-      lineCost: decimalToString(lineCost),
+      standardUnitCost: missingCost ? null : decimalToString(rawUnitCost, 4),
+      lineCost: decimalToString(isRawMode(mode) ? rawLineCost : adjustedLineCost),
+      rawUnitCost: missingCost ? null : decimalToString(rawUnitCost, 4),
+      adjustedUnitCost: missingCost ? null : decimalToString(adjustedUnitCost, 4),
+      usableRate: usableRate ? decimalToString(usableRate, 4) : null,
+      lossRate: lossRate ? decimalToString(lossRate, 4) : null,
+      rawLineCost: decimalToString(rawLineCost),
+      adjustedLineCost: decimalToString(adjustedLineCost),
+      lossModelExtraCost: decimalToString(lineExtraCost),
       warning: warningParts.length ? warningParts.join("；") : undefined,
     };
   });
 
-  return { materialCost, lines, warnings };
+  return {
+    materialCost,
+    rawMaterialCost,
+    lossModelExtraCost,
+    lines,
+    warnings,
+  };
+}
+
+export function calculateStandardMaterialLines(
+  inputs: ProductMarginMaterialInput[]
+): {
+  materialCost: Prisma.Decimal;
+  lines: ProductMarginMaterialLine[];
+  warnings: string[];
+} {
+  const result = calculateMaterialLinesByMode(inputs, "RAW");
+  return {
+    materialCost: result.rawMaterialCost,
+    lines: result.lines,
+    warnings: result.warnings,
+  };
 }
 
 export function calculateMarginFromPrice(input: {
@@ -183,4 +270,34 @@ export function calculateMarginFromPrice(input: {
   const warnings = price.greaterThan(0) ? [] : ["SKU 售价为 0，毛利率按 0 计算"];
 
   return { totalCost, estimatedGrossProfit, estimatedGrossMargin, warnings };
+}
+
+export function buildMarginEstimateSlice(input: {
+  price: DecimalInput;
+  materialCost: DecimalInput;
+  packagingCost: DecimalInput;
+  lossModelExtraCost?: DecimalInput;
+  lines: ProductMarginMaterialLineDetail[];
+  warnings?: string[];
+}) {
+  const margin = calculateMarginFromPrice({
+    price: input.price,
+    materialCost: input.materialCost,
+    packagingCost: input.packagingCost,
+  });
+  const warnings = [...(input.warnings ?? []), ...margin.warnings];
+  const lossModelExtraCost = money(input.lossModelExtraCost ?? 0);
+
+  return {
+    materialCost: decimalToString(input.materialCost),
+    packagingCost: decimalToString(input.packagingCost),
+    totalCost: decimalToString(margin.totalCost),
+    estimatedGrossProfit: decimalToString(margin.estimatedGrossProfit),
+    estimatedGrossMargin: decimalToString(margin.estimatedGrossMargin, 4),
+    lossModelExtraCost: decimalToString(lossModelExtraCost),
+    suggestedPrices: suggestPriceByTargetMargin(margin.totalCost),
+    marginLevel: getMarginLevel(margin.estimatedGrossMargin),
+    lines: input.lines,
+    warnings,
+  };
 }

@@ -35,6 +35,10 @@ export type PurchaseOrderLineAvgAggregateOutputType = {
   allocatedExtraFee: runtime.Decimal | null
   actualTotalCost: runtime.Decimal | null
   actualUnitCost: runtime.Decimal | null
+  usableRate: runtime.Decimal | null
+  lossRate: runtime.Decimal | null
+  lossAdjustedTotalCost: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
 }
 
 export type PurchaseOrderLineSumAggregateOutputType = {
@@ -46,6 +50,10 @@ export type PurchaseOrderLineSumAggregateOutputType = {
   allocatedExtraFee: runtime.Decimal | null
   actualTotalCost: runtime.Decimal | null
   actualUnitCost: runtime.Decimal | null
+  usableRate: runtime.Decimal | null
+  lossRate: runtime.Decimal | null
+  lossAdjustedTotalCost: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
 }
 
 export type PurchaseOrderLineMinAggregateOutputType = {
@@ -65,6 +73,10 @@ export type PurchaseOrderLineMinAggregateOutputType = {
   allocatedExtraFee: runtime.Decimal | null
   actualTotalCost: runtime.Decimal | null
   actualUnitCost: runtime.Decimal | null
+  usableRate: runtime.Decimal | null
+  lossRate: runtime.Decimal | null
+  lossAdjustedTotalCost: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
   supplierSkuName: string | null
   note: string | null
   inboundBatchId: string | null
@@ -89,6 +101,10 @@ export type PurchaseOrderLineMaxAggregateOutputType = {
   allocatedExtraFee: runtime.Decimal | null
   actualTotalCost: runtime.Decimal | null
   actualUnitCost: runtime.Decimal | null
+  usableRate: runtime.Decimal | null
+  lossRate: runtime.Decimal | null
+  lossAdjustedTotalCost: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
   supplierSkuName: string | null
   note: string | null
   inboundBatchId: string | null
@@ -113,6 +129,10 @@ export type PurchaseOrderLineCountAggregateOutputType = {
   allocatedExtraFee: number
   actualTotalCost: number
   actualUnitCost: number
+  usableRate: number
+  lossRate: number
+  lossAdjustedTotalCost: number
+  lossAdjustedUnitCost: number
   supplierSkuName: number
   note: number
   inboundBatchId: number
@@ -131,6 +151,10 @@ export type PurchaseOrderLineAvgAggregateInputType = {
   allocatedExtraFee?: true
   actualTotalCost?: true
   actualUnitCost?: true
+  usableRate?: true
+  lossRate?: true
+  lossAdjustedTotalCost?: true
+  lossAdjustedUnitCost?: true
 }
 
 export type PurchaseOrderLineSumAggregateInputType = {
@@ -142,6 +166,10 @@ export type PurchaseOrderLineSumAggregateInputType = {
   allocatedExtraFee?: true
   actualTotalCost?: true
   actualUnitCost?: true
+  usableRate?: true
+  lossRate?: true
+  lossAdjustedTotalCost?: true
+  lossAdjustedUnitCost?: true
 }
 
 export type PurchaseOrderLineMinAggregateInputType = {
@@ -161,6 +189,10 @@ export type PurchaseOrderLineMinAggregateInputType = {
   allocatedExtraFee?: true
   actualTotalCost?: true
   actualUnitCost?: true
+  usableRate?: true
+  lossRate?: true
+  lossAdjustedTotalCost?: true
+  lossAdjustedUnitCost?: true
   supplierSkuName?: true
   note?: true
   inboundBatchId?: true
@@ -185,6 +217,10 @@ export type PurchaseOrderLineMaxAggregateInputType = {
   allocatedExtraFee?: true
   actualTotalCost?: true
   actualUnitCost?: true
+  usableRate?: true
+  lossRate?: true
+  lossAdjustedTotalCost?: true
+  lossAdjustedUnitCost?: true
   supplierSkuName?: true
   note?: true
   inboundBatchId?: true
@@ -209,6 +245,10 @@ export type PurchaseOrderLineCountAggregateInputType = {
   allocatedExtraFee?: true
   actualTotalCost?: true
   actualUnitCost?: true
+  usableRate?: true
+  lossRate?: true
+  lossAdjustedTotalCost?: true
+  lossAdjustedUnitCost?: true
   supplierSkuName?: true
   note?: true
   inboundBatchId?: true
@@ -320,6 +360,10 @@ export type PurchaseOrderLineGroupByOutputType = {
   allocatedExtraFee: runtime.Decimal
   actualTotalCost: runtime.Decimal
   actualUnitCost: runtime.Decimal
+  usableRate: runtime.Decimal | null
+  lossRate: runtime.Decimal | null
+  lossAdjustedTotalCost: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
   supplierSkuName: string | null
   note: string | null
   inboundBatchId: string | null
@@ -367,6 +411,10 @@ export type PurchaseOrderLineWhereInput = {
   allocatedExtraFee?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
   note?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
   inboundBatchId?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
@@ -394,6 +442,10 @@ export type PurchaseOrderLineOrderByWithRelationInput = {
   allocatedExtraFee?: Prisma.SortOrder
   actualTotalCost?: Prisma.SortOrder
   actualUnitCost?: Prisma.SortOrder
+  usableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossAdjustedTotalCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrderInput | Prisma.SortOrder
   supplierSkuName?: Prisma.SortOrderInput | Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   inboundBatchId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -425,6 +477,10 @@ export type PurchaseOrderLineWhereUniqueInput = Prisma.AtLeast<{
   allocatedExtraFee?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
   note?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
   createdAt?: Prisma.DateTimeFilter<"PurchaseOrderLine"> | Date | string
@@ -451,6 +507,10 @@ export type PurchaseOrderLineOrderByWithAggregationInput = {
   allocatedExtraFee?: Prisma.SortOrder
   actualTotalCost?: Prisma.SortOrder
   actualUnitCost?: Prisma.SortOrder
+  usableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossAdjustedTotalCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrderInput | Prisma.SortOrder
   supplierSkuName?: Prisma.SortOrderInput | Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   inboundBatchId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -483,6 +543,10 @@ export type PurchaseOrderLineScalarWhereWithAggregatesInput = {
   allocatedExtraFee?: Prisma.DecimalWithAggregatesFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: Prisma.DecimalWithAggregatesFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: Prisma.DecimalWithAggregatesFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.DecimalNullableWithAggregatesFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.DecimalNullableWithAggregatesFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.DecimalNullableWithAggregatesFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.DecimalNullableWithAggregatesFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: Prisma.StringNullableWithAggregatesFilter<"PurchaseOrderLine"> | string | null
   note?: Prisma.StringNullableWithAggregatesFilter<"PurchaseOrderLine"> | string | null
   inboundBatchId?: Prisma.StringNullableWithAggregatesFilter<"PurchaseOrderLine"> | string | null
@@ -505,6 +569,10 @@ export type PurchaseOrderLineCreateInput = {
   allocatedExtraFee?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: string | null
   note?: string | null
   createdAt?: Date | string
@@ -531,6 +599,10 @@ export type PurchaseOrderLineUncheckedCreateInput = {
   allocatedExtraFee?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: string | null
   note?: string | null
   inboundBatchId?: string | null
@@ -553,6 +625,10 @@ export type PurchaseOrderLineUpdateInput = {
   allocatedExtraFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -579,6 +655,10 @@ export type PurchaseOrderLineUncheckedUpdateInput = {
   allocatedExtraFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundBatchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -603,6 +683,10 @@ export type PurchaseOrderLineCreateManyInput = {
   allocatedExtraFee?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: string | null
   note?: string | null
   inboundBatchId?: string | null
@@ -625,6 +709,10 @@ export type PurchaseOrderLineUpdateManyMutationInput = {
   allocatedExtraFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -648,6 +736,10 @@ export type PurchaseOrderLineUncheckedUpdateManyInput = {
   allocatedExtraFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundBatchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -682,6 +774,10 @@ export type PurchaseOrderLineCountOrderByAggregateInput = {
   allocatedExtraFee?: Prisma.SortOrder
   actualTotalCost?: Prisma.SortOrder
   actualUnitCost?: Prisma.SortOrder
+  usableRate?: Prisma.SortOrder
+  lossRate?: Prisma.SortOrder
+  lossAdjustedTotalCost?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
   supplierSkuName?: Prisma.SortOrder
   note?: Prisma.SortOrder
   inboundBatchId?: Prisma.SortOrder
@@ -698,6 +794,10 @@ export type PurchaseOrderLineAvgOrderByAggregateInput = {
   allocatedExtraFee?: Prisma.SortOrder
   actualTotalCost?: Prisma.SortOrder
   actualUnitCost?: Prisma.SortOrder
+  usableRate?: Prisma.SortOrder
+  lossRate?: Prisma.SortOrder
+  lossAdjustedTotalCost?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
 }
 
 export type PurchaseOrderLineMaxOrderByAggregateInput = {
@@ -717,6 +817,10 @@ export type PurchaseOrderLineMaxOrderByAggregateInput = {
   allocatedExtraFee?: Prisma.SortOrder
   actualTotalCost?: Prisma.SortOrder
   actualUnitCost?: Prisma.SortOrder
+  usableRate?: Prisma.SortOrder
+  lossRate?: Prisma.SortOrder
+  lossAdjustedTotalCost?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
   supplierSkuName?: Prisma.SortOrder
   note?: Prisma.SortOrder
   inboundBatchId?: Prisma.SortOrder
@@ -741,6 +845,10 @@ export type PurchaseOrderLineMinOrderByAggregateInput = {
   allocatedExtraFee?: Prisma.SortOrder
   actualTotalCost?: Prisma.SortOrder
   actualUnitCost?: Prisma.SortOrder
+  usableRate?: Prisma.SortOrder
+  lossRate?: Prisma.SortOrder
+  lossAdjustedTotalCost?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
   supplierSkuName?: Prisma.SortOrder
   note?: Prisma.SortOrder
   inboundBatchId?: Prisma.SortOrder
@@ -757,6 +865,10 @@ export type PurchaseOrderLineSumOrderByAggregateInput = {
   allocatedExtraFee?: Prisma.SortOrder
   actualTotalCost?: Prisma.SortOrder
   actualUnitCost?: Prisma.SortOrder
+  usableRate?: Prisma.SortOrder
+  lossRate?: Prisma.SortOrder
+  lossAdjustedTotalCost?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
 }
 
 export type PurchaseOrderLineNullableScalarRelationFilter = {
@@ -804,6 +916,14 @@ export type PurchaseOrderLineUncheckedUpdateManyWithoutPurchaseOrderNestedInput 
   update?: Prisma.PurchaseOrderLineUpdateWithWhereUniqueWithoutPurchaseOrderInput | Prisma.PurchaseOrderLineUpdateWithWhereUniqueWithoutPurchaseOrderInput[]
   updateMany?: Prisma.PurchaseOrderLineUpdateManyWithWhereWithoutPurchaseOrderInput | Prisma.PurchaseOrderLineUpdateManyWithWhereWithoutPurchaseOrderInput[]
   deleteMany?: Prisma.PurchaseOrderLineScalarWhereInput | Prisma.PurchaseOrderLineScalarWhereInput[]
+}
+
+export type NullableDecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
 export type PurchaseOrderLineCreateNestedOneWithoutInboundBatchInput = {
@@ -895,6 +1015,10 @@ export type PurchaseOrderLineCreateWithoutPurchaseOrderInput = {
   allocatedExtraFee?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: string | null
   note?: string | null
   createdAt?: Date | string
@@ -919,6 +1043,10 @@ export type PurchaseOrderLineUncheckedCreateWithoutPurchaseOrderInput = {
   allocatedExtraFee?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: string | null
   note?: string | null
   inboundBatchId?: string | null
@@ -972,6 +1100,10 @@ export type PurchaseOrderLineScalarWhereInput = {
   allocatedExtraFee?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
   note?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
   inboundBatchId?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
@@ -994,6 +1126,10 @@ export type PurchaseOrderLineCreateWithoutInboundBatchInput = {
   allocatedExtraFee?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: string | null
   note?: string | null
   createdAt?: Date | string
@@ -1019,6 +1155,10 @@ export type PurchaseOrderLineUncheckedCreateWithoutInboundBatchInput = {
   allocatedExtraFee?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: string | null
   note?: string | null
   createdAt?: Date | string
@@ -1056,6 +1196,10 @@ export type PurchaseOrderLineUpdateWithoutInboundBatchInput = {
   allocatedExtraFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1081,6 +1225,10 @@ export type PurchaseOrderLineUncheckedUpdateWithoutInboundBatchInput = {
   allocatedExtraFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1102,6 +1250,10 @@ export type PurchaseOrderLineCreateWithoutFlowerWikiInput = {
   allocatedExtraFee?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: string | null
   note?: string | null
   createdAt?: Date | string
@@ -1126,6 +1278,10 @@ export type PurchaseOrderLineUncheckedCreateWithoutFlowerWikiInput = {
   allocatedExtraFee?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: string | null
   note?: string | null
   inboundBatchId?: string | null
@@ -1175,6 +1331,10 @@ export type PurchaseOrderLineCreateManyPurchaseOrderInput = {
   allocatedExtraFee?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: string | null
   note?: string | null
   inboundBatchId?: string | null
@@ -1197,6 +1357,10 @@ export type PurchaseOrderLineUpdateWithoutPurchaseOrderInput = {
   allocatedExtraFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1221,6 +1385,10 @@ export type PurchaseOrderLineUncheckedUpdateWithoutPurchaseOrderInput = {
   allocatedExtraFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundBatchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1244,6 +1412,10 @@ export type PurchaseOrderLineUncheckedUpdateManyWithoutPurchaseOrderInput = {
   allocatedExtraFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundBatchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1267,6 +1439,10 @@ export type PurchaseOrderLineCreateManyFlowerWikiInput = {
   allocatedExtraFee?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: string | null
   note?: string | null
   inboundBatchId?: string | null
@@ -1289,6 +1465,10 @@ export type PurchaseOrderLineUpdateWithoutFlowerWikiInput = {
   allocatedExtraFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1313,6 +1493,10 @@ export type PurchaseOrderLineUncheckedUpdateWithoutFlowerWikiInput = {
   allocatedExtraFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundBatchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1336,6 +1520,10 @@ export type PurchaseOrderLineUncheckedUpdateManyWithoutFlowerWikiInput = {
   allocatedExtraFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualTotalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   actualUnitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierSkuName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundBatchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1362,6 +1550,10 @@ export type PurchaseOrderLineSelect<ExtArgs extends runtime.Types.Extensions.Int
   allocatedExtraFee?: boolean
   actualTotalCost?: boolean
   actualUnitCost?: boolean
+  usableRate?: boolean
+  lossRate?: boolean
+  lossAdjustedTotalCost?: boolean
+  lossAdjustedUnitCost?: boolean
   supplierSkuName?: boolean
   note?: boolean
   inboundBatchId?: boolean
@@ -1389,6 +1581,10 @@ export type PurchaseOrderLineSelectCreateManyAndReturn<ExtArgs extends runtime.T
   allocatedExtraFee?: boolean
   actualTotalCost?: boolean
   actualUnitCost?: boolean
+  usableRate?: boolean
+  lossRate?: boolean
+  lossAdjustedTotalCost?: boolean
+  lossAdjustedUnitCost?: boolean
   supplierSkuName?: boolean
   note?: boolean
   inboundBatchId?: boolean
@@ -1416,6 +1612,10 @@ export type PurchaseOrderLineSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   allocatedExtraFee?: boolean
   actualTotalCost?: boolean
   actualUnitCost?: boolean
+  usableRate?: boolean
+  lossRate?: boolean
+  lossAdjustedTotalCost?: boolean
+  lossAdjustedUnitCost?: boolean
   supplierSkuName?: boolean
   note?: boolean
   inboundBatchId?: boolean
@@ -1443,6 +1643,10 @@ export type PurchaseOrderLineSelectScalar = {
   allocatedExtraFee?: boolean
   actualTotalCost?: boolean
   actualUnitCost?: boolean
+  usableRate?: boolean
+  lossRate?: boolean
+  lossAdjustedTotalCost?: boolean
+  lossAdjustedUnitCost?: boolean
   supplierSkuName?: boolean
   note?: boolean
   inboundBatchId?: boolean
@@ -1450,7 +1654,7 @@ export type PurchaseOrderLineSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PurchaseOrderLineOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "purchaseOrderId" | "flowerWikiId" | "purchaseName" | "grade" | "color" | "spec" | "purchaseQuantity" | "purchaseUnit" | "stemsPerUnit" | "totalStems" | "unitPrice" | "lineAmount" | "allocatedExtraFee" | "actualTotalCost" | "actualUnitCost" | "supplierSkuName" | "note" | "inboundBatchId" | "createdAt" | "updatedAt", ExtArgs["result"]["purchaseOrderLine"]>
+export type PurchaseOrderLineOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "purchaseOrderId" | "flowerWikiId" | "purchaseName" | "grade" | "color" | "spec" | "purchaseQuantity" | "purchaseUnit" | "stemsPerUnit" | "totalStems" | "unitPrice" | "lineAmount" | "allocatedExtraFee" | "actualTotalCost" | "actualUnitCost" | "usableRate" | "lossRate" | "lossAdjustedTotalCost" | "lossAdjustedUnitCost" | "supplierSkuName" | "note" | "inboundBatchId" | "createdAt" | "updatedAt", ExtArgs["result"]["purchaseOrderLine"]>
 export type PurchaseOrderLineInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   purchaseOrder?: boolean | Prisma.PurchaseOrderDefaultArgs<ExtArgs>
   flowerWiki?: boolean | Prisma.FlowerWikiDefaultArgs<ExtArgs>
@@ -1491,6 +1695,10 @@ export type $PurchaseOrderLinePayload<ExtArgs extends runtime.Types.Extensions.I
     allocatedExtraFee: runtime.Decimal
     actualTotalCost: runtime.Decimal
     actualUnitCost: runtime.Decimal
+    usableRate: runtime.Decimal | null
+    lossRate: runtime.Decimal | null
+    lossAdjustedTotalCost: runtime.Decimal | null
+    lossAdjustedUnitCost: runtime.Decimal | null
     supplierSkuName: string | null
     note: string | null
     inboundBatchId: string | null
@@ -1938,6 +2146,10 @@ export interface PurchaseOrderLineFieldRefs {
   readonly allocatedExtraFee: Prisma.FieldRef<"PurchaseOrderLine", 'Decimal'>
   readonly actualTotalCost: Prisma.FieldRef<"PurchaseOrderLine", 'Decimal'>
   readonly actualUnitCost: Prisma.FieldRef<"PurchaseOrderLine", 'Decimal'>
+  readonly usableRate: Prisma.FieldRef<"PurchaseOrderLine", 'Decimal'>
+  readonly lossRate: Prisma.FieldRef<"PurchaseOrderLine", 'Decimal'>
+  readonly lossAdjustedTotalCost: Prisma.FieldRef<"PurchaseOrderLine", 'Decimal'>
+  readonly lossAdjustedUnitCost: Prisma.FieldRef<"PurchaseOrderLine", 'Decimal'>
   readonly supplierSkuName: Prisma.FieldRef<"PurchaseOrderLine", 'String'>
   readonly note: Prisma.FieldRef<"PurchaseOrderLine", 'String'>
   readonly inboundBatchId: Prisma.FieldRef<"PurchaseOrderLine", 'String'>

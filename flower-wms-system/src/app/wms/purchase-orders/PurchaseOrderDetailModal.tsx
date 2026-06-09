@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
-import { formatCurrency } from "@/lib/format-money";
+import { formatCurrency, formatPercent } from "@/lib/format-money";
 import {
   allocationMethodLabels,
   formatDate,
@@ -125,7 +125,7 @@ export function PurchaseOrderDetailModal({
           </section>
 
           <section className="mt-5 overflow-x-auto rounded-xl border border-zinc-200">
-            <table className="w-full min-w-[1180px] text-left text-sm">
+            <table className="w-full min-w-[1480px] text-left text-sm">
               <thead className="border-b bg-zinc-50 text-xs text-zinc-600">
                 <tr>
                   <th className="px-3 py-3 font-medium">花材</th>
@@ -141,7 +141,11 @@ export function PurchaseOrderDetailModal({
                   <th className="px-3 py-3 font-medium">商品小计</th>
                   <th className="px-3 py-3 font-medium">分摊费用</th>
                   <th className="px-3 py-3 font-medium">实际总成本</th>
-                  <th className="px-3 py-3 font-medium">单支成本</th>
+                  <th className="px-3 py-3 font-medium">实际单支成本</th>
+                  <th className="px-3 py-3 font-medium">可用率</th>
+                  <th className="px-3 py-3 font-medium">损耗率</th>
+                  <th className="px-3 py-3 font-medium">损耗后单支成本</th>
+                  <th className="px-3 py-3 font-medium">损耗增加成本</th>
                   <th className="px-3 py-3 font-medium">入库批次</th>
                 </tr>
               </thead>
@@ -178,6 +182,24 @@ export function PurchaseOrderDetailModal({
                     </td>
                     <td className="px-3 py-3">
                       ¥{Number(line.actualUnitCost).toFixed(4)}
+                    </td>
+                    <td className="px-3 py-3">
+                      {line.usableRate
+                        ? formatPercent(line.usableRate)
+                        : "—"}
+                    </td>
+                    <td className="px-3 py-3">
+                      {line.lossRate ? formatPercent(line.lossRate) : "—"}
+                    </td>
+                    <td className="px-3 py-3">
+                      {line.lossAdjustedUnitCost
+                        ? `¥${Number(line.lossAdjustedUnitCost).toFixed(4)}`
+                        : "—"}
+                    </td>
+                    <td className="px-3 py-3">
+                      {line.lossModelExtraCost
+                        ? formatCurrency(line.lossModelExtraCost)
+                        : "—"}
                     </td>
                     <td className="px-3 py-3">
                       {line.inboundBatch ? (

@@ -30,12 +30,18 @@ export type BatchAvgAggregateOutputType = {
   originalQty: number | null
   remainingQty: number | null
   unitCost: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
+  usableRate: runtime.Decimal | null
+  lossRate: runtime.Decimal | null
 }
 
 export type BatchSumAggregateOutputType = {
   originalQty: number | null
   remainingQty: number | null
   unitCost: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
+  usableRate: runtime.Decimal | null
+  lossRate: runtime.Decimal | null
 }
 
 export type BatchMinAggregateOutputType = {
@@ -46,6 +52,9 @@ export type BatchMinAggregateOutputType = {
   originalQty: number | null
   remainingQty: number | null
   unitCost: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
+  usableRate: runtime.Decimal | null
+  lossRate: runtime.Decimal | null
   expiresAt: Date | null
   storageLocation: string | null
   supplier: string | null
@@ -62,6 +71,9 @@ export type BatchMaxAggregateOutputType = {
   originalQty: number | null
   remainingQty: number | null
   unitCost: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
+  usableRate: runtime.Decimal | null
+  lossRate: runtime.Decimal | null
   expiresAt: Date | null
   storageLocation: string | null
   supplier: string | null
@@ -78,6 +90,9 @@ export type BatchCountAggregateOutputType = {
   originalQty: number
   remainingQty: number
   unitCost: number
+  lossAdjustedUnitCost: number
+  usableRate: number
+  lossRate: number
   expiresAt: number
   storageLocation: number
   supplier: number
@@ -92,12 +107,18 @@ export type BatchAvgAggregateInputType = {
   originalQty?: true
   remainingQty?: true
   unitCost?: true
+  lossAdjustedUnitCost?: true
+  usableRate?: true
+  lossRate?: true
 }
 
 export type BatchSumAggregateInputType = {
   originalQty?: true
   remainingQty?: true
   unitCost?: true
+  lossAdjustedUnitCost?: true
+  usableRate?: true
+  lossRate?: true
 }
 
 export type BatchMinAggregateInputType = {
@@ -108,6 +129,9 @@ export type BatchMinAggregateInputType = {
   originalQty?: true
   remainingQty?: true
   unitCost?: true
+  lossAdjustedUnitCost?: true
+  usableRate?: true
+  lossRate?: true
   expiresAt?: true
   storageLocation?: true
   supplier?: true
@@ -124,6 +148,9 @@ export type BatchMaxAggregateInputType = {
   originalQty?: true
   remainingQty?: true
   unitCost?: true
+  lossAdjustedUnitCost?: true
+  usableRate?: true
+  lossRate?: true
   expiresAt?: true
   storageLocation?: true
   supplier?: true
@@ -140,6 +167,9 @@ export type BatchCountAggregateInputType = {
   originalQty?: true
   remainingQty?: true
   unitCost?: true
+  lossAdjustedUnitCost?: true
+  usableRate?: true
+  lossRate?: true
   expiresAt?: true
   storageLocation?: true
   supplier?: true
@@ -243,6 +273,9 @@ export type BatchGroupByOutputType = {
   originalQty: number
   remainingQty: number
   unitCost: runtime.Decimal
+  lossAdjustedUnitCost: runtime.Decimal | null
+  usableRate: runtime.Decimal | null
+  lossRate: runtime.Decimal | null
   expiresAt: Date | null
   storageLocation: string | null
   supplier: string | null
@@ -282,6 +315,9 @@ export type BatchWhereInput = {
   originalQty?: Prisma.IntFilter<"Batch"> | number
   remainingQty?: Prisma.IntFilter<"Batch"> | number
   unitCost?: Prisma.DecimalFilter<"Batch"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: Prisma.DecimalNullableFilter<"Batch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: Prisma.DecimalNullableFilter<"Batch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.DecimalNullableFilter<"Batch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Prisma.DateTimeNullableFilter<"Batch"> | Date | string | null
   storageLocation?: Prisma.StringNullableFilter<"Batch"> | string | null
   supplier?: Prisma.StringNullableFilter<"Batch"> | string | null
@@ -302,6 +338,9 @@ export type BatchOrderByWithRelationInput = {
   originalQty?: Prisma.SortOrder
   remainingQty?: Prisma.SortOrder
   unitCost?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  usableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossRate?: Prisma.SortOrderInput | Prisma.SortOrder
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   storageLocation?: Prisma.SortOrderInput | Prisma.SortOrder
   supplier?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -325,6 +364,9 @@ export type BatchWhereUniqueInput = Prisma.AtLeast<{
   originalQty?: Prisma.IntFilter<"Batch"> | number
   remainingQty?: Prisma.IntFilter<"Batch"> | number
   unitCost?: Prisma.DecimalFilter<"Batch"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: Prisma.DecimalNullableFilter<"Batch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: Prisma.DecimalNullableFilter<"Batch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.DecimalNullableFilter<"Batch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Prisma.DateTimeNullableFilter<"Batch"> | Date | string | null
   storageLocation?: Prisma.StringNullableFilter<"Batch"> | string | null
   supplier?: Prisma.StringNullableFilter<"Batch"> | string | null
@@ -345,6 +387,9 @@ export type BatchOrderByWithAggregationInput = {
   originalQty?: Prisma.SortOrder
   remainingQty?: Prisma.SortOrder
   unitCost?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  usableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossRate?: Prisma.SortOrderInput | Prisma.SortOrder
   expiresAt?: Prisma.SortOrderInput | Prisma.SortOrder
   storageLocation?: Prisma.SortOrderInput | Prisma.SortOrder
   supplier?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -369,6 +414,9 @@ export type BatchScalarWhereWithAggregatesInput = {
   originalQty?: Prisma.IntWithAggregatesFilter<"Batch"> | number
   remainingQty?: Prisma.IntWithAggregatesFilter<"Batch"> | number
   unitCost?: Prisma.DecimalWithAggregatesFilter<"Batch"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: Prisma.DecimalNullableWithAggregatesFilter<"Batch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: Prisma.DecimalNullableWithAggregatesFilter<"Batch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.DecimalNullableWithAggregatesFilter<"Batch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Batch"> | Date | string | null
   storageLocation?: Prisma.StringNullableWithAggregatesFilter<"Batch"> | string | null
   supplier?: Prisma.StringNullableWithAggregatesFilter<"Batch"> | string | null
@@ -384,6 +432,9 @@ export type BatchCreateInput = {
   originalQty: number
   remainingQty: number
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Date | string | null
   storageLocation?: string | null
   supplier?: string | null
@@ -404,6 +455,9 @@ export type BatchUncheckedCreateInput = {
   originalQty: number
   remainingQty: number
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Date | string | null
   storageLocation?: string | null
   supplier?: string | null
@@ -422,6 +476,9 @@ export type BatchUpdateInput = {
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
   remainingQty?: Prisma.IntFieldUpdateOperationsInput | number
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   storageLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supplier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -442,6 +499,9 @@ export type BatchUncheckedUpdateInput = {
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
   remainingQty?: Prisma.IntFieldUpdateOperationsInput | number
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   storageLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supplier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -461,6 +521,9 @@ export type BatchCreateManyInput = {
   originalQty: number
   remainingQty: number
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Date | string | null
   storageLocation?: string | null
   supplier?: string | null
@@ -476,6 +539,9 @@ export type BatchUpdateManyMutationInput = {
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
   remainingQty?: Prisma.IntFieldUpdateOperationsInput | number
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   storageLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supplier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -492,6 +558,9 @@ export type BatchUncheckedUpdateManyInput = {
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
   remainingQty?: Prisma.IntFieldUpdateOperationsInput | number
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   storageLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supplier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -523,6 +592,9 @@ export type BatchCountOrderByAggregateInput = {
   originalQty?: Prisma.SortOrder
   remainingQty?: Prisma.SortOrder
   unitCost?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
+  usableRate?: Prisma.SortOrder
+  lossRate?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   storageLocation?: Prisma.SortOrder
   supplier?: Prisma.SortOrder
@@ -535,6 +607,9 @@ export type BatchAvgOrderByAggregateInput = {
   originalQty?: Prisma.SortOrder
   remainingQty?: Prisma.SortOrder
   unitCost?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
+  usableRate?: Prisma.SortOrder
+  lossRate?: Prisma.SortOrder
 }
 
 export type BatchMaxOrderByAggregateInput = {
@@ -545,6 +620,9 @@ export type BatchMaxOrderByAggregateInput = {
   originalQty?: Prisma.SortOrder
   remainingQty?: Prisma.SortOrder
   unitCost?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
+  usableRate?: Prisma.SortOrder
+  lossRate?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   storageLocation?: Prisma.SortOrder
   supplier?: Prisma.SortOrder
@@ -561,6 +639,9 @@ export type BatchMinOrderByAggregateInput = {
   originalQty?: Prisma.SortOrder
   remainingQty?: Prisma.SortOrder
   unitCost?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
+  usableRate?: Prisma.SortOrder
+  lossRate?: Prisma.SortOrder
   expiresAt?: Prisma.SortOrder
   storageLocation?: Prisma.SortOrder
   supplier?: Prisma.SortOrder
@@ -573,6 +654,9 @@ export type BatchSumOrderByAggregateInput = {
   originalQty?: Prisma.SortOrder
   remainingQty?: Prisma.SortOrder
   unitCost?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
+  usableRate?: Prisma.SortOrder
+  lossRate?: Prisma.SortOrder
 }
 
 export type BatchScalarRelationFilter = {
@@ -673,6 +757,9 @@ export type BatchCreateWithoutPurchaseOrderLineInput = {
   originalQty: number
   remainingQty: number
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Date | string | null
   storageLocation?: string | null
   supplier?: string | null
@@ -692,6 +779,9 @@ export type BatchUncheckedCreateWithoutPurchaseOrderLineInput = {
   originalQty: number
   remainingQty: number
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Date | string | null
   storageLocation?: string | null
   supplier?: string | null
@@ -725,6 +815,9 @@ export type BatchUpdateWithoutPurchaseOrderLineInput = {
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
   remainingQty?: Prisma.IntFieldUpdateOperationsInput | number
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   storageLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supplier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -744,6 +837,9 @@ export type BatchUncheckedUpdateWithoutPurchaseOrderLineInput = {
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
   remainingQty?: Prisma.IntFieldUpdateOperationsInput | number
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   storageLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supplier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -761,6 +857,9 @@ export type BatchCreateWithoutMaterialInput = {
   originalQty: number
   remainingQty: number
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Date | string | null
   storageLocation?: string | null
   supplier?: string | null
@@ -779,6 +878,9 @@ export type BatchUncheckedCreateWithoutMaterialInput = {
   originalQty: number
   remainingQty: number
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Date | string | null
   storageLocation?: string | null
   supplier?: string | null
@@ -827,6 +929,9 @@ export type BatchScalarWhereInput = {
   originalQty?: Prisma.IntFilter<"Batch"> | number
   remainingQty?: Prisma.IntFilter<"Batch"> | number
   unitCost?: Prisma.DecimalFilter<"Batch"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: Prisma.DecimalNullableFilter<"Batch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: Prisma.DecimalNullableFilter<"Batch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.DecimalNullableFilter<"Batch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Prisma.DateTimeNullableFilter<"Batch"> | Date | string | null
   storageLocation?: Prisma.StringNullableFilter<"Batch"> | string | null
   supplier?: Prisma.StringNullableFilter<"Batch"> | string | null
@@ -842,6 +947,9 @@ export type BatchCreateWithoutStockLogsInput = {
   originalQty: number
   remainingQty: number
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Date | string | null
   storageLocation?: string | null
   supplier?: string | null
@@ -861,6 +969,9 @@ export type BatchUncheckedCreateWithoutStockLogsInput = {
   originalQty: number
   remainingQty: number
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Date | string | null
   storageLocation?: string | null
   supplier?: string | null
@@ -894,6 +1005,9 @@ export type BatchUpdateWithoutStockLogsInput = {
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
   remainingQty?: Prisma.IntFieldUpdateOperationsInput | number
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   storageLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supplier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -913,6 +1027,9 @@ export type BatchUncheckedUpdateWithoutStockLogsInput = {
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
   remainingQty?: Prisma.IntFieldUpdateOperationsInput | number
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   storageLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supplier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -930,6 +1047,9 @@ export type BatchCreateWithoutStockLossRecordsInput = {
   originalQty: number
   remainingQty: number
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Date | string | null
   storageLocation?: string | null
   supplier?: string | null
@@ -949,6 +1069,9 @@ export type BatchUncheckedCreateWithoutStockLossRecordsInput = {
   originalQty: number
   remainingQty: number
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Date | string | null
   storageLocation?: string | null
   supplier?: string | null
@@ -982,6 +1105,9 @@ export type BatchUpdateWithoutStockLossRecordsInput = {
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
   remainingQty?: Prisma.IntFieldUpdateOperationsInput | number
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   storageLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supplier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1001,6 +1127,9 @@ export type BatchUncheckedUpdateWithoutStockLossRecordsInput = {
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
   remainingQty?: Prisma.IntFieldUpdateOperationsInput | number
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   storageLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supplier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1018,6 +1147,9 @@ export type BatchCreateManyMaterialInput = {
   originalQty: number
   remainingQty: number
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Date | string | null
   storageLocation?: string | null
   supplier?: string | null
@@ -1033,6 +1165,9 @@ export type BatchUpdateWithoutMaterialInput = {
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
   remainingQty?: Prisma.IntFieldUpdateOperationsInput | number
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   storageLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supplier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1051,6 +1186,9 @@ export type BatchUncheckedUpdateWithoutMaterialInput = {
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
   remainingQty?: Prisma.IntFieldUpdateOperationsInput | number
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   storageLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supplier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1069,6 +1207,9 @@ export type BatchUncheckedUpdateManyWithoutMaterialInput = {
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
   remainingQty?: Prisma.IntFieldUpdateOperationsInput | number
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   storageLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   supplier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1125,6 +1266,9 @@ export type BatchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   originalQty?: boolean
   remainingQty?: boolean
   unitCost?: boolean
+  lossAdjustedUnitCost?: boolean
+  usableRate?: boolean
+  lossRate?: boolean
   expiresAt?: boolean
   storageLocation?: boolean
   supplier?: boolean
@@ -1146,6 +1290,9 @@ export type BatchSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   originalQty?: boolean
   remainingQty?: boolean
   unitCost?: boolean
+  lossAdjustedUnitCost?: boolean
+  usableRate?: boolean
+  lossRate?: boolean
   expiresAt?: boolean
   storageLocation?: boolean
   supplier?: boolean
@@ -1163,6 +1310,9 @@ export type BatchSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   originalQty?: boolean
   remainingQty?: boolean
   unitCost?: boolean
+  lossAdjustedUnitCost?: boolean
+  usableRate?: boolean
+  lossRate?: boolean
   expiresAt?: boolean
   storageLocation?: boolean
   supplier?: boolean
@@ -1180,6 +1330,9 @@ export type BatchSelectScalar = {
   originalQty?: boolean
   remainingQty?: boolean
   unitCost?: boolean
+  lossAdjustedUnitCost?: boolean
+  usableRate?: boolean
+  lossRate?: boolean
   expiresAt?: boolean
   storageLocation?: boolean
   supplier?: boolean
@@ -1188,7 +1341,7 @@ export type BatchSelectScalar = {
   updatedAt?: boolean
 }
 
-export type BatchOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "materialId" | "batchNo" | "inboundAt" | "originalQty" | "remainingQty" | "unitCost" | "expiresAt" | "storageLocation" | "supplier" | "note" | "createdAt" | "updatedAt", ExtArgs["result"]["batch"]>
+export type BatchOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "materialId" | "batchNo" | "inboundAt" | "originalQty" | "remainingQty" | "unitCost" | "lossAdjustedUnitCost" | "usableRate" | "lossRate" | "expiresAt" | "storageLocation" | "supplier" | "note" | "createdAt" | "updatedAt", ExtArgs["result"]["batch"]>
 export type BatchInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   material?: boolean | Prisma.MaterialDefaultArgs<ExtArgs>
   stockLogs?: boolean | Prisma.Batch$stockLogsArgs<ExtArgs>
@@ -1219,6 +1372,9 @@ export type $BatchPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     originalQty: number
     remainingQty: number
     unitCost: runtime.Decimal
+    lossAdjustedUnitCost: runtime.Decimal | null
+    usableRate: runtime.Decimal | null
+    lossRate: runtime.Decimal | null
     expiresAt: Date | null
     storageLocation: string | null
     supplier: string | null
@@ -1659,6 +1815,9 @@ export interface BatchFieldRefs {
   readonly originalQty: Prisma.FieldRef<"Batch", 'Int'>
   readonly remainingQty: Prisma.FieldRef<"Batch", 'Int'>
   readonly unitCost: Prisma.FieldRef<"Batch", 'Decimal'>
+  readonly lossAdjustedUnitCost: Prisma.FieldRef<"Batch", 'Decimal'>
+  readonly usableRate: Prisma.FieldRef<"Batch", 'Decimal'>
+  readonly lossRate: Prisma.FieldRef<"Batch", 'Decimal'>
   readonly expiresAt: Prisma.FieldRef<"Batch", 'DateTime'>
   readonly storageLocation: Prisma.FieldRef<"Batch", 'String'>
   readonly supplier: Prisma.FieldRef<"Batch", 'String'>
