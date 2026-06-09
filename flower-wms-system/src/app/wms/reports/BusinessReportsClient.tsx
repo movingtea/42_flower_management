@@ -357,6 +357,78 @@ export function BusinessReportsClient() {
             />
           </div>
 
+          <Section
+            title="损耗模型影响"
+            description="该分析基于批次损耗调整成本估算，用于判断哪些花材最容易吃掉利润，不要求每天精确记录损耗。"
+          >
+            <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <StatCard
+                label="原始花材成本"
+                value={formatCurrency(data.lossModelImpact.rawFlowerMaterialCost)}
+              />
+              <StatCard
+                label="损耗调整后花材成本"
+                value={formatCurrency(
+                  data.lossModelImpact.lossAdjustedFlowerMaterialCost
+                )}
+              />
+              <StatCard
+                label="损耗模型增加成本"
+                value={formatCurrency(data.lossModelImpact.lossModelExtraCost)}
+                variant="warning"
+              />
+              <StatCard
+                label="损耗成本占销售额"
+                value={formatPercent(
+                  data.lossModelImpact.lossModelExtraCostRatioToSales
+                )}
+              />
+            </div>
+            <div className="mt-4">
+              <h4 className="mb-2 text-sm font-medium text-zinc-800">
+                受损耗影响最大的花材 Top 10
+              </h4>
+              <TableShell>
+                <thead className="border-b border-zinc-100 bg-zinc-50">
+                  <tr>
+                    <th className="px-4 py-3 font-medium text-zinc-600">花材</th>
+                    <th className="px-4 py-3 font-medium text-zinc-600">使用数量</th>
+                    <th className="px-4 py-3 font-medium text-zinc-600">原始成本</th>
+                    <th className="px-4 py-3 font-medium text-zinc-600">损耗后成本</th>
+                    <th className="px-4 py-3 font-medium text-zinc-600">增加成本</th>
+                    <th className="px-4 py-3 font-medium text-zinc-600">平均可用率</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-zinc-100">
+                  {data.lossModelImpact.topMaterialsByLossImpact.length === 0 ? (
+                    <EmptyRow colSpan={6} text="暂无可分析的销售出库数据。" />
+                  ) : (
+                    data.lossModelImpact.topMaterialsByLossImpact.map((item) => (
+                      <tr key={item.flowerWikiId} className="hover:bg-zinc-50/50">
+                        <td className="px-4 py-3 font-medium text-zinc-900">
+                          {item.flowerName}
+                        </td>
+                        <td className="px-4 py-3">{item.quantityUsed}</td>
+                        <td className="px-4 py-3">{formatCurrency(item.rawCost)}</td>
+                        <td className="px-4 py-3">
+                          {formatCurrency(item.lossAdjustedCost)}
+                        </td>
+                        <td className="px-4 py-3 text-amber-700">
+                          {formatCurrency(item.lossModelExtraCost)}
+                        </td>
+                        <td className="px-4 py-3">
+                          {item.avgUsableRate
+                            ? formatPercent(item.avgUsableRate)
+                            : "—"}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </TableShell>
+            </div>
+          </Section>
+
           <Section title="销售趋势" description="按天展示销售额、订单数、成本和毛利率；无订单日期也会显示 0。">
             <TableShell>
               <thead className="border-b border-zinc-100 bg-zinc-50">

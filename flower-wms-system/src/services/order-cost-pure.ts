@@ -26,6 +26,9 @@ export type FlowerCostInput = {
   batchNo: string | null;
   quantity: number;
   unitCost: DecimalInput;
+  lossAdjustedUnitCost?: DecimalInput | null;
+  usableRate?: DecimalInput | null;
+  lossRate?: DecimalInput | null;
   materialName: string;
   wikiName: string | null;
 };
@@ -36,9 +39,24 @@ export type FlowerMaterialCostLine = {
   batchNo: string | null;
   quantity: number;
   unitCost: string;
+  lossAdjustedUnitCost: string;
+  usableRate: string | null;
+  lossRate: string | null;
   lineCost: string;
+  rawLineCost: string;
+  lossAdjustedLineCost: string;
+  lossModelExtraCost: string;
   materialName: string;
   wikiName: string;
+};
+
+export type FlowerMaterialCostResult = {
+  totalCost: Prisma.Decimal;
+  rawTotalCost: Prisma.Decimal;
+  lossAdjustedTotalCost: Prisma.Decimal;
+  lossModelExtraCost: Prisma.Decimal;
+  lines: FlowerMaterialCostLine[];
+  warnings: string[];
 };
 
 export type PackagingCostInput = {
@@ -68,14 +86,26 @@ export type PackagingCostLine = {
   lineCost: string;
 };
 
+function resolveLossAdjustedUnitCost(input: FlowerCostInput): {
+  value: Prisma.Decimal;
+  fallback: boolean;
+} {
+  const raw = money(input.unitCost);
+  if (
+    input.lossAdjustedUnitCost === null ||
+    input.lossAdjustedUnitCost === undefined ||
+    input.lossAdjustedUnitCost === ""
+  ) {
+    return { value: raw, fallback: true };
+  }
+  return { value: money(input.lossAdjustedUnitCost), fallback: false };
+}
+
 export function calculateFlowerMaterialCostFromInputs(
   inputs: FlowerCostInput[]
-): {
-  totalCost: Prisma.Decimal;
-  lines: FlowerMaterialCostLine[];
-  warnings: string[];
-} {
-  let totalCost = money(0);
+): FlowerMaterialCostResult {
+  let rawTotalCost = money(0);
+  let lossAdjustedTotalCost = money(0);
   const warnings: string[] = [];
 
   const lines = inputs.map((input) => {
@@ -87,22 +117,55 @@ export function calculateFlowerMaterialCostFromInputs(
       );
     }
     const unitCost = money(input.unitCost);
-    const lineCost = money(unitCost.times(safeQuantity));
-    totalCost = money(totalCost.plus(lineCost));
+    const { value: lossAdjustedUnitCost, fallback } =
+      resolveLossAdjustedUnitCost(input);
+    if (fallback && safeQuantity > 0 && !missingUnitCost) {
+      warnings.push(
+        `批次 ${input.batchNo ?? input.batchId} 未设置损耗调整成本，已按原始批次成本计算`
+      );
+    }
+    const rawLineCost = money(unitCost.times(safeQuantity));
+    const lossAdjustedLineCost = money(lossAdjustedUnitCost.times(safeQuantity));
+    const lossModelExtraCost = money(
+      lossAdjustedLineCost.minus(rawLineCost)
+    );
+    rawTotalCost = money(rawTotalCost.plus(rawLineCost));
+    lossAdjustedTotalCost = money(
+      lossAdjustedTotalCost.plus(lossAdjustedLineCost)
+    );
 
     return {
       stockLogId: input.stockLogId,
       batchId: input.batchId,
       batchNo: input.batchNo,
       quantity: safeQuantity,
-      unitCost: decimalToString(unitCost),
-      lineCost: decimalToString(lineCost),
+      unitCost: decimalToString(unitCost, 4),
+      lossAdjustedUnitCost: decimalToString(lossAdjustedUnitCost, 4),
+      usableRate:
+        input.usableRate === null || input.usableRate === undefined
+          ? null
+          : decimalToString(input.usableRate, 4),
+      lossRate:
+        input.lossRate === null || input.lossRate === undefined
+          ? null
+          : decimalToString(input.lossRate, 4),
+      lineCost: decimalToString(rawLineCost),
+      rawLineCost: decimalToString(rawLineCost),
+      lossAdjustedLineCost: decimalToString(lossAdjustedLineCost),
+      lossModelExtraCost: decimalToString(lossModelExtraCost),
       materialName: input.materialName,
       wikiName: input.wikiName?.trim() || input.materialName || "未知花材",
     };
   });
 
-  return { totalCost, lines, warnings };
+  return {
+    totalCost: rawTotalCost,
+    rawTotalCost,
+    lossAdjustedTotalCost,
+    lossModelExtraCost: money(lossAdjustedTotalCost.minus(rawTotalCost)),
+    lines,
+    warnings,
+  };
 }
 
 export function calculatePackagingCostFromInputs(

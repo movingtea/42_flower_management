@@ -3,6 +3,7 @@
  */
 import assert from "node:assert/strict";
 import {
+  aggregateLossModelImpact,
   calculateCostStructureRatios,
   filterLowMarginRows,
   getReportDateRange,
@@ -165,6 +166,66 @@ function testLowMarginFilter() {
   );
 }
 
+function testLossModelImpactAggregate() {
+  const result = aggregateLossModelImpact(
+    [
+      {
+        flowerWikiId: "rose",
+        flowerName: "玫瑰",
+        quantityUsed: 10,
+        rawCost: "20.00",
+        lossAdjustedCost: "23.53",
+        lossModelExtraCost: "3.53",
+        usableRateSum: "0.85",
+        usableRateCount: 1,
+      },
+      {
+        flowerWikiId: "lily",
+        flowerName: "百合",
+        quantityUsed: 5,
+        rawCost: "10.00",
+        lossAdjustedCost: "11.76",
+        lossModelExtraCost: "1.76",
+        usableRateSum: "0.85",
+        usableRateCount: 1,
+      },
+    ],
+    "200.00",
+    10
+  );
+
+  assert.equal(moneyString(result.rawFlowerMaterialCost), "30.00");
+  assert.equal(moneyString(result.lossAdjustedFlowerMaterialCost), "35.29");
+  assert.equal(moneyString(result.lossModelExtraCost), "5.29");
+  assert.equal(ratioString(result.lossModelExtraCostRatioToSales), "0.0265");
+  assert.equal(result.topMaterialsByLossImpact[0].flowerName, "玫瑰");
+  assert.equal(result.topMaterialsByLossImpact[0].lossModelExtraCost, "3.53");
+}
+
+function testLossModelImpactZeroSales() {
+  const result = aggregateLossModelImpact(
+    [
+      {
+        flowerWikiId: "rose",
+        flowerName: "玫瑰",
+        quantityUsed: 1,
+        rawCost: "2.00",
+        lossAdjustedCost: "2.35",
+        lossModelExtraCost: "0.35",
+        usableRateSum: "0.85",
+        usableRateCount: 1,
+      },
+    ],
+    "0.00",
+    10
+  );
+
+  assert.equal(ratioString(result.lossModelExtraCostRatioToSales), "0.0000");
+  assert.ok(
+    result.warnings.some((warning) => warning.includes("销售额为 0"))
+  );
+}
+
 function testDecimalSafety() {
   const summary = sumSalesSummaryRows([
     {
@@ -194,6 +255,8 @@ function run() {
   testCostStructureZeroTotal();
   testCostStructureRatios();
   testLowMarginFilter();
+  testLossModelImpactAggregate();
+  testLossModelImpactZeroSales();
   testDecimalSafety();
   console.log("business-report-pure.test.ts — 全部通过");
 }

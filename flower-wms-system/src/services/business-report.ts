@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { upsertOrderCostSnapshot } from "@/services/order-cost";
 import { decimalToString, money, ratio, type DecimalInput } from "@/services/order-cost-pure";
 import {
+  aggregateLossModelImpact,
   calculateCostStructureRatios,
   filterLowMarginRows,
   getReportDateRange,
@@ -189,6 +190,24 @@ export type InventoryAlertReport = {
   }>;
 };
 
+export type LossModelImpactReport = {
+  dateRange: DateRangeDto;
+  rawFlowerMaterialCost: string;
+  lossAdjustedFlowerMaterialCost: string;
+  lossModelExtraCost: string;
+  lossModelExtraCostRatioToSales: string;
+  topMaterialsByLossImpact: Array<{
+    flowerWikiId: string;
+    flowerName: string;
+    quantityUsed: number;
+    rawCost: string;
+    lossAdjustedCost: string;
+    lossModelExtraCost: string;
+    avgUsableRate: string | null;
+  }>;
+  warnings: string[];
+};
+
 export type BusinessDashboardReport = {
   summary: SalesSummaryReport;
   dailySalesTrend: DailySalesTrendReport;
@@ -198,6 +217,7 @@ export type BusinessDashboardReport = {
   materialUsage: MaterialUsageCostReport;
   wastage: WastageReport;
   inventoryAlerts: InventoryAlertReport;
+  lossModelImpact: LossModelImpactReport;
   warnings: string[];
 };
 
@@ -940,6 +960,80 @@ export async function getInventoryAlertReport(): Promise<InventoryAlertReport> {
   };
 }
 
+export async function getLossModelImpactReport(
+  params: BusinessReportParams = {}
+): Promise<LossModelImpactReport> {
+  const range = getReportDateRange(params);
+  const limit = safeLimit(params.limit, 10);
+  const [summary, logs] = await Promise.all([
+    getSalesSummaryReport(params),
+    prisma.stockLog.findMany({
+      where: {
+        type: StockLogType.SALE_OUT,
+        createdAt: { gte: range.startDate, lt: range.endDate },
+      },
+      select: {
+        quantity: true,
+        batch: {
+          select: {
+            unitCost: true,
+            lossAdjustedUnitCost: true,
+            usableRate: true,
+          },
+        },
+        material: {
+          select: {
+            id: true,
+            name: true,
+            wikiId: true,
+            wiki: { select: { chineseName: true } },
+          },
+        },
+      },
+    }),
+  ]);
+
+  const rows = logs.map((log) => {
+    const quantity = log.quantity;
+    const rawUnit = money(log.batch.unitCost);
+    const adjustedUnit = log.batch.lossAdjustedUnitCost
+      ? money(log.batch.lossAdjustedUnitCost)
+      : rawUnit;
+    const rawCost = money(rawUnit.times(quantity));
+    const lossAdjustedCost = money(adjustedUnit.times(quantity));
+    return {
+      flowerWikiId: log.material.wikiId ?? log.material.id,
+      flowerName: log.material.wiki?.chineseName ?? log.material.name,
+      quantityUsed: quantity,
+      rawCost,
+      lossAdjustedCost,
+      lossModelExtraCost: money(lossAdjustedCost.minus(rawCost)),
+      usableRateSum: log.batch.usableRate ?? 0,
+      usableRateCount: log.batch.usableRate ? 1 : 0,
+    };
+  });
+
+  const aggregate = aggregateLossModelImpact(
+    rows,
+    summary.totalPaidAmount,
+    limit
+  );
+
+  return {
+    dateRange: serializeRange(range),
+    rawFlowerMaterialCost: moneyString(aggregate.rawFlowerMaterialCost),
+    lossAdjustedFlowerMaterialCost: moneyString(
+      aggregate.lossAdjustedFlowerMaterialCost
+    ),
+    lossModelExtraCost: moneyString(aggregate.lossModelExtraCost),
+    lossModelExtraCostRatioToSales: ratioString(
+      aggregate.lossModelExtraCostRatioToSales
+    ),
+    topMaterialsByLossImpact: aggregate.topMaterialsByLossImpact,
+    warnings: aggregate.warnings,
+  };
+}
+
 export async function getBusinessDashboardReport(
   params: BusinessReportParams = {}
 ): Promise<BusinessDashboardReport> {
@@ -952,6 +1046,7 @@ export async function getBusinessDashboardReport(
     materialUsage,
     wastage,
     inventoryAlerts,
+    lossModelImpact,
   ] = await Promise.all([
     getSalesSummaryReport(params),
     getDailySalesTrend(params),
@@ -961,6 +1056,7 @@ export async function getBusinessDashboardReport(
     getMaterialUsageCostReport(params),
     getWastageReport(params),
     getInventoryAlertReport(),
+    getLossModelImpactReport({ ...params, limit: 10 }),
   ]);
 
   return {
@@ -972,10 +1068,12 @@ export async function getBusinessDashboardReport(
     materialUsage,
     wastage,
     inventoryAlerts,
+    lossModelImpact,
     warnings: [
       ...summary.warnings,
       ...dailySalesTrend.warnings,
       ...productProfitRanking.warnings,
+      ...lossModelImpact.warnings,
     ],
   };
 }

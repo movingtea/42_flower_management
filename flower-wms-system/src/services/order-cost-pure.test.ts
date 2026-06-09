@@ -17,14 +17,88 @@ function testFlowerSingleBatch() {
       batchNo: "B001",
       quantity: 10,
       unitCost: "1.50",
+      lossAdjustedUnitCost: "1.50",
       materialName: "玫瑰",
       wikiName: "红玫瑰",
     },
   ]);
 
   assert.equal(decimalToString(result.totalCost), "15.00");
-  assert.equal(result.lines[0].lineCost, "15.00");
+  assert.equal(decimalToString(result.rawTotalCost), "15.00");
+  assert.equal(result.lines[0].rawLineCost, "15.00");
   assert.deepEqual(result.warnings, []);
+}
+
+function testFlowerLossAdjustedCost() {
+  const result = calculateFlowerMaterialCostFromInputs([
+    {
+      stockLogId: "log-1",
+      batchId: "batch-1",
+      batchNo: "B001",
+      quantity: 10,
+      unitCost: "2.00",
+      lossAdjustedUnitCost: "2.3529",
+      usableRate: "0.8500",
+      lossRate: "0.1500",
+      materialName: "玫瑰",
+      wikiName: "红玫瑰",
+    },
+  ]);
+
+  assert.equal(decimalToString(result.rawTotalCost), "20.00");
+  assert.equal(decimalToString(result.lossAdjustedTotalCost), "23.50");
+  assert.equal(decimalToString(result.lossModelExtraCost), "3.50");
+  assert.equal(result.lines[0].lossModelExtraCost, "3.50");
+}
+
+function testFlowerFallbackWhenNoLossAdjustedUnitCost() {
+  const result = calculateFlowerMaterialCostFromInputs([
+    {
+      stockLogId: "log-1",
+      batchId: "batch-1",
+      batchNo: "B001",
+      quantity: 5,
+      unitCost: "2.00",
+      materialName: "玫瑰",
+      wikiName: "红玫瑰",
+    },
+  ]);
+
+  assert.equal(decimalToString(result.lossAdjustedTotalCost), "10.00");
+  assert.equal(decimalToString(result.lossModelExtraCost), "0.00");
+  assert.ok(
+    result.warnings.some((warning) => warning.includes("未设置损耗调整成本"))
+  );
+}
+
+function testLossAdjustedGrossPreview() {
+  const flower = calculateFlowerMaterialCostFromInputs([
+    {
+      stockLogId: "log-1",
+      batchId: "batch-1",
+      batchNo: "B001",
+      quantity: 10,
+      unitCost: "2.00",
+      lossAdjustedUnitCost: "2.3529",
+      materialName: "玫瑰",
+      wikiName: "红玫瑰",
+    },
+  ]);
+  const rawGross = calculateGrossValues({
+    paidAmount: "100.00",
+    flowerMaterialCost: flower.rawTotalCost,
+    packagingCost: "8.00",
+  });
+  const adjustedGross = calculateGrossValues({
+    paidAmount: "100.00",
+    flowerMaterialCost: flower.lossAdjustedTotalCost,
+    packagingCost: "8.00",
+  });
+
+  assert.equal(decimalToString(rawGross.totalCost), "28.00");
+  assert.equal(decimalToString(adjustedGross.totalCost), "31.50");
+  assert.equal(decimalToString(rawGross.grossMargin, 4), "0.7200");
+  assert.equal(decimalToString(adjustedGross.grossMargin, 4), "0.6850");
 }
 
 function testFlowerMultipleBatches() {
@@ -72,7 +146,7 @@ function testFlowerMissingUnitCost() {
   ]);
 
   assert.equal(decimalToString(result.totalCost), "0.00");
-  assert.equal(result.lines[0].unitCost, "0.00");
+  assert.equal(result.lines[0].unitCost, "0.0000");
   assert.match(result.warnings[0], /缺少 unitCost/);
 }
 
@@ -224,6 +298,9 @@ function testUpsertPayloadRecalculationShape() {
 
 function run() {
   testFlowerSingleBatch();
+  testFlowerLossAdjustedCost();
+  testFlowerFallbackWhenNoLossAdjustedUnitCost();
+  testLossAdjustedGrossPreview();
   testFlowerMultipleBatches();
   testFlowerNoSaleOut();
   testFlowerMissingUnitCost();

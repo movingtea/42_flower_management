@@ -3,9 +3,11 @@ import { formatIngredientSummary } from "../lib/recipe-display";
 import { prisma } from "@/lib/prisma";
 import { decimalToString, money } from "@/services/order-cost-pure";
 import {
-  calculateStandardMaterialLines,
+  calculateMaterialLinesByMode,
   type ProductMarginMaterialLine,
+  type ProductMarginMaterialLineDetail,
 } from "@/services/product-margin-pure";
+import { LossMode } from "@/generated/prisma/enums";
 
 export type RecipeIngredientInput = {
   flowerWikiId: string;
@@ -58,9 +60,13 @@ export type RecipeCostPreview = {
   materialCost: string;
   packagingCost: string;
   totalCost: string;
+  lossModelStandardMaterialCost?: string;
+  lossModelExtraCost?: string;
+  lossModelStandardTotalCost?: string;
   missingStandardCostCount: number;
   isComplete: boolean;
   lines: ProductMarginMaterialLine[];
+  lossModelLines?: ProductMarginMaterialLineDetail[];
   warnings: string[];
 };
 
@@ -76,6 +82,11 @@ const lineInclude = {
       colorTags: true,
       standardUnitCost: true,
       costUnit: true,
+      optimisticUsableRate: true,
+      standardUsableRate: true,
+      conservativeUsableRate: true,
+      defaultUsableRate: true,
+      lossMode: true,
     },
   },
 } as const;
@@ -156,6 +167,22 @@ function serializeRecipe(
   };
 }
 
+function wikiLossProfile(wiki: {
+  optimisticUsableRate?: Prisma.Decimal | null;
+  standardUsableRate?: Prisma.Decimal | null;
+  conservativeUsableRate?: Prisma.Decimal | null;
+  defaultUsableRate?: Prisma.Decimal | null;
+  lossMode?: import("@/generated/prisma/enums").LossMode | null;
+}) {
+  return {
+    optimisticUsableRate: wiki.optimisticUsableRate,
+    standardUsableRate: wiki.standardUsableRate,
+    conservativeUsableRate: wiki.conservativeUsableRate,
+    defaultUsableRate: wiki.defaultUsableRate,
+    lossMode: wiki.lossMode,
+  };
+}
+
 function buildRecipeCostPreview(recipe: {
   name: string;
   lines: Array<{
@@ -164,37 +191,53 @@ function buildRecipeCostPreview(recipe: {
     wiki: {
       chineseName: string;
       standardUnitCost?: Prisma.Decimal | null;
+      optimisticUsableRate?: Prisma.Decimal | null;
+      standardUsableRate?: Prisma.Decimal | null;
+      conservativeUsableRate?: Prisma.Decimal | null;
+      defaultUsableRate?: Prisma.Decimal | null;
+      lossMode?: import("@/generated/prisma/enums").LossMode | null;
     };
   }>;
   packagingKit: { standardCost: Prisma.Decimal } | null;
 }): RecipeCostPreview {
-  const material = calculateStandardMaterialLines(
-    recipe.lines.map((line) => ({
-      flowerWikiId: line.flowerWikiId,
-      flowerName: line.wiki.chineseName,
-      quantityNeeded: line.quantityNeeded,
-      standardUnitCost: line.wiki.standardUnitCost ?? null,
-    }))
+  const lineInputs = recipe.lines.map((line) => ({
+    flowerWikiId: line.flowerWikiId,
+    flowerName: line.wiki.chineseName,
+    quantityNeeded: line.quantityNeeded,
+    standardUnitCost: line.wiki.standardUnitCost ?? null,
+    lossProfile: wikiLossProfile(line.wiki),
+  }));
+  const material = calculateMaterialLinesByMode(lineInputs, "RAW");
+  const lossMaterial = calculateMaterialLinesByMode(
+    lineInputs,
+    LossMode.STANDARD
   );
   const packagingCost = recipe.packagingKit
     ? money(recipe.packagingKit.standardCost)
     : money(0);
-  const warnings = [...material.warnings];
+  const warnings = [...material.warnings, ...lossMaterial.warnings];
   if (!recipe.packagingKit) {
     warnings.push(`配方「${recipe.name}」未绑定包装方案，包装成本按 0 计算`);
   }
   const missingStandardCostCount = material.lines.filter(
     (line) => line.standardUnitCost === null
   ).length;
-  const totalCost = money(material.materialCost.plus(packagingCost));
+  const totalCost = money(material.rawMaterialCost.plus(packagingCost));
+  const lossModelStandardTotalCost = money(
+    lossMaterial.materialCost.plus(packagingCost)
+  );
 
   return {
-    materialCost: decimalToString(material.materialCost),
+    materialCost: decimalToString(material.rawMaterialCost),
     packagingCost: decimalToString(packagingCost),
     totalCost: decimalToString(totalCost),
+    lossModelStandardMaterialCost: decimalToString(lossMaterial.materialCost),
+    lossModelExtraCost: decimalToString(lossMaterial.lossModelExtraCost),
+    lossModelStandardTotalCost: decimalToString(lossModelStandardTotalCost),
     missingStandardCostCount,
     isComplete: missingStandardCostCount === 0,
     lines: material.lines,
+    lossModelLines: lossMaterial.lines,
     warnings,
   };
 }

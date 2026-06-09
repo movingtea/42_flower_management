@@ -8,6 +8,7 @@ import {
   decimalToString,
   money,
   type FlowerMaterialCostLine,
+  type FlowerMaterialCostResult,
   type PackagingCostLine,
 } from "@/services/order-cost-pure";
 
@@ -31,8 +32,18 @@ export type OrderCostSnapshotDto = {
   isPreview?: boolean;
 };
 
+export type LossAdjustedCostPreview = {
+  flowerMaterialCostRaw: string;
+  flowerMaterialCostLossAdjusted: string;
+  lossModelExtraCost: string;
+  totalCostLossAdjusted: string;
+  grossProfitLossAdjusted: string;
+  grossMarginLossAdjusted: string;
+};
+
 export type CalculatedOrderCost = {
   snapshot: Omit<OrderCostSnapshotDto, "id" | "isPreview">;
+  lossAdjustedPreview: LossAdjustedCostPreview;
   data: {
     orderId: string;
     paidAmount: Prisma.Decimal;
@@ -90,15 +101,20 @@ function mapSnapshot(snapshot: {
 export async function calculateFlowerMaterialCostFromSaleOut(
   orderId: string,
   tx: Tx = prisma
-): Promise<{
-  totalCost: Prisma.Decimal;
-  lines: FlowerMaterialCostLine[];
-  warnings: string[];
-}> {
+): Promise<FlowerMaterialCostResult> {
   const logs = await tx.stockLog.findMany({
     where: { orderId, type: StockLogType.SALE_OUT },
     include: {
-      batch: { select: { id: true, batchNo: true, unitCost: true } },
+      batch: {
+        select: {
+          id: true,
+          batchNo: true,
+          unitCost: true,
+          lossAdjustedUnitCost: true,
+          usableRate: true,
+          lossRate: true,
+        },
+      },
       material: {
         select: {
           name: true,
@@ -116,6 +132,9 @@ export async function calculateFlowerMaterialCostFromSaleOut(
       batchNo: log.batch.batchNo,
       quantity: log.quantity,
       unitCost: log.batch.unitCost,
+      lossAdjustedUnitCost: log.batch.lossAdjustedUnitCost,
+      usableRate: log.batch.usableRate,
+      lossRate: log.batch.lossRate,
       materialName: log.material.name,
       wikiName: log.material.wiki?.chineseName ?? null,
     }))
@@ -219,13 +238,35 @@ export async function calculateOrderCostSnapshot(
 
   const { totalCost, grossProfit, grossMargin } = calculateGrossValues({
     paidAmount,
-    flowerMaterialCost: flowerResult.totalCost,
+    flowerMaterialCost: flowerResult.rawTotalCost,
     packagingCost: packagingResult.totalCost,
     deliveryCostActual,
     platformFee,
     floristLaborCost,
     otherCost,
   });
+  const lossAdjustedGross = calculateGrossValues({
+    paidAmount,
+    flowerMaterialCost: flowerResult.lossAdjustedTotalCost,
+    packagingCost: packagingResult.totalCost,
+    deliveryCostActual,
+    platformFee,
+    floristLaborCost,
+    otherCost,
+  });
+  const lossAdjustedPreview: LossAdjustedCostPreview = {
+    flowerMaterialCostRaw: decimalToString(flowerResult.rawTotalCost),
+    flowerMaterialCostLossAdjusted: decimalToString(
+      flowerResult.lossAdjustedTotalCost
+    ),
+    lossModelExtraCost: decimalToString(flowerResult.lossModelExtraCost),
+    totalCostLossAdjusted: decimalToString(lossAdjustedGross.totalCost),
+    grossProfitLossAdjusted: decimalToString(lossAdjustedGross.grossProfit),
+    grossMarginLossAdjusted: decimalToString(
+      lossAdjustedGross.grossMargin,
+      4
+    ),
+  };
   const costCalculatedAt = new Date();
   const costVersion = "v1";
   const warnings = [...flowerResult.warnings, ...packagingResult.warnings];
@@ -237,7 +278,7 @@ export async function calculateOrderCostSnapshot(
   const data = {
     orderId,
     paidAmount,
-    flowerMaterialCost: flowerResult.totalCost,
+    flowerMaterialCost: flowerResult.rawTotalCost,
     packagingCost: packagingResult.totalCost,
     deliveryCostActual,
     platformFee,
@@ -251,10 +292,11 @@ export async function calculateOrderCostSnapshot(
   };
 
   return {
+    lossAdjustedPreview,
     snapshot: {
       orderId,
       paidAmount: decimalToString(paidAmount),
-      flowerMaterialCost: decimalToString(flowerResult.totalCost),
+      flowerMaterialCost: decimalToString(flowerResult.rawTotalCost),
       packagingCost: decimalToString(packagingResult.totalCost),
       deliveryCostActual: decimalToString(deliveryCostActual),
       platformFee: decimalToString(platformFee),
@@ -301,6 +343,7 @@ export async function upsertOrderCostSnapshot(
 
 export async function getOrderCostSnapshotDetail(orderId: string): Promise<{
   snapshot: OrderCostSnapshotDto;
+  lossAdjustedPreview: LossAdjustedCostPreview;
   flowerMaterialCostLines: FlowerMaterialCostLine[];
   packagingCostLines: PackagingCostLine[];
   warnings: string[];
@@ -313,6 +356,7 @@ export async function getOrderCostSnapshotDetail(orderId: string): Promise<{
   if (existing) {
     return {
       snapshot: mapSnapshot(existing),
+      lossAdjustedPreview: calculated.lossAdjustedPreview,
       flowerMaterialCostLines: calculated.flowerMaterialCostLines,
       packagingCostLines: calculated.packagingCostLines,
       warnings: calculated.warnings,
@@ -321,6 +365,7 @@ export async function getOrderCostSnapshotDetail(orderId: string): Promise<{
 
   return {
     snapshot: { id: null, ...calculated.snapshot, isPreview: true },
+    lossAdjustedPreview: calculated.lossAdjustedPreview,
     flowerMaterialCostLines: calculated.flowerMaterialCostLines,
     packagingCostLines: calculated.packagingCostLines,
     warnings: calculated.warnings,

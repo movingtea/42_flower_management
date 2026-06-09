@@ -5,7 +5,10 @@ import { Loader2, X } from "lucide-react";
 import { FloralRole } from "@/generated/prisma/enums";
 import { FLORAL_ROLE_LABEL } from "@/lib/wiki-constants";
 import type { OrderFulfillmentDetail } from "@/services/order-fulfillment-detail";
-import type { OrderCostSnapshotDto } from "@/services/order-cost";
+import type {
+  LossAdjustedCostPreview,
+  OrderCostSnapshotDto,
+} from "@/services/order-cost";
 import type {
   FlowerMaterialCostLine,
   PackagingCostLine,
@@ -24,6 +27,7 @@ type ApiResponse = {
 
 type CostDetail = {
   snapshot: OrderCostSnapshotDto;
+  lossAdjustedPreview: LossAdjustedCostPreview;
   flowerMaterialCostLines: FlowerMaterialCostLine[];
   packagingCostLines: PackagingCostLine[];
   warnings: string[];
@@ -65,6 +69,7 @@ export function OrderDetailModal({ orderId, onClose }: Props) {
   const [deliveryCostNote, setDeliveryCostNote] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [costError, setCostError] = useState<string | null>(null);
+  const [lossImpactOpen, setLossImpactOpen] = useState(false);
 
   const loadCost = useCallback(async () => {
     setCostLoading(true);
@@ -393,6 +398,74 @@ export function OrderDetailModal({ orderId, onClose }: Props) {
                       </ul>
                     )}
 
+                    <details
+                      open={lossImpactOpen}
+                      onToggle={(e) =>
+                        setLossImpactOpen(
+                          (e.currentTarget as HTMLDetailsElement).open
+                        )
+                      }
+                      className="rounded-xl border border-sky-100 bg-sky-50/40 p-4"
+                    >
+                      <summary className="cursor-pointer text-sm font-semibold text-sky-900">
+                        损耗模型影响
+                      </summary>
+                      <p className="mt-2 text-xs text-sky-800">
+                        损耗模型不会改变历史库存流水，只用于帮助判断真实经营毛利。
+                      </p>
+                      {costDetail.flowerMaterialCostLines.length === 0 ? (
+                        <p className="mt-3 text-sm text-zinc-500">
+                          支付后可计算损耗模型影响。
+                        </p>
+                      ) : (
+                        <div className="mt-3 grid gap-2 sm:grid-cols-3">
+                          {[
+                            [
+                              "原始花材成本",
+                              `¥${costDetail.lossAdjustedPreview.flowerMaterialCostRaw}`,
+                            ],
+                            [
+                              "损耗调整后花材成本",
+                              `¥${costDetail.lossAdjustedPreview.flowerMaterialCostLossAdjusted}`,
+                            ],
+                            [
+                              "损耗模型增加成本",
+                              `¥${costDetail.lossAdjustedPreview.lossModelExtraCost}`,
+                            ],
+                            [
+                              "原始总成本",
+                              `¥${costDetail.snapshot.totalCost}`,
+                            ],
+                            [
+                              "损耗调整后总成本",
+                              `¥${costDetail.lossAdjustedPreview.totalCostLossAdjusted}`,
+                            ],
+                            [
+                              "原始毛利率",
+                              formatPercent(costDetail.snapshot.grossMargin),
+                            ],
+                            [
+                              "损耗调整后毛利率",
+                              formatPercent(
+                                costDetail.lossAdjustedPreview
+                                  .grossMarginLossAdjusted
+                              ),
+                            ],
+                          ].map(([label, value]) => (
+                            <div
+                              key={label}
+                              className="rounded-lg border border-sky-100 bg-white px-3 py-2"
+                            >
+                              <p className="text-xs text-zinc-500">{label}</p>
+                              <p className="mt-0.5 text-sm font-semibold text-zinc-900">
+                                {value}
+                              </p>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </details>
+
                     <div className="overflow-hidden rounded-xl border border-zinc-200 shadow-sm">
                       <table className="w-full border-collapse text-left text-sm">
                         <thead>
@@ -400,15 +473,18 @@ export function OrderDetailModal({ orderId, onClose }: Props) {
                             <th className="px-3 py-2.5">花材名</th>
                             <th className="px-3 py-2.5">批次号</th>
                             <th className="px-3 py-2.5 text-right">数量</th>
-                            <th className="px-3 py-2.5 text-right">批次单价</th>
-                            <th className="px-3 py-2.5 text-right">小计</th>
+                            <th className="px-3 py-2.5 text-right">原始单价</th>
+                            <th className="px-3 py-2.5 text-right">损耗后单价</th>
+                            <th className="px-3 py-2.5 text-right">可用率</th>
+                            <th className="px-3 py-2.5 text-right">原始小计</th>
+                            <th className="px-3 py-2.5 text-right">成本差额</th>
                           </tr>
                         </thead>
                         <tbody className="divide-y divide-zinc-100">
                           {costDetail.flowerMaterialCostLines.length === 0 ? (
                             <tr>
                               <td
-                                colSpan={5}
+                                colSpan={8}
                                 className="px-3 py-4 text-center text-zinc-500"
                               >
                                 暂无花材成本明细
@@ -429,8 +505,19 @@ export function OrderDetailModal({ orderId, onClose }: Props) {
                                 <td className="px-3 py-2.5 text-right">
                                   ¥{row.unitCost}
                                 </td>
+                                <td className="px-3 py-2.5 text-right">
+                                  ¥{row.lossAdjustedUnitCost}
+                                </td>
+                                <td className="px-3 py-2.5 text-right">
+                                  {row.usableRate
+                                    ? formatPercent(row.usableRate)
+                                    : "—"}
+                                </td>
                                 <td className="px-3 py-2.5 text-right font-semibold">
-                                  ¥{row.lineCost}
+                                  ¥{row.rawLineCost}
+                                </td>
+                                <td className="px-3 py-2.5 text-right text-sky-700">
+                                  ¥{row.lossModelExtraCost}
                                 </td>
                               </tr>
                             ))

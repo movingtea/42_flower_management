@@ -3,8 +3,10 @@
  */
 import assert from "node:assert/strict";
 import { decimalToString } from "./order-cost-pure";
+import { LossMode } from "@/generated/prisma/enums";
 import {
   calculateMarginFromPrice,
+  calculateMaterialLinesByMode,
   calculateStandardMaterialLines,
   getMarginLevel,
   roundFlowerPrice,
@@ -122,6 +124,113 @@ function testRoundFlowerPrice() {
   assert.equal(decimalToString(roundFlowerPrice("642.00")), "640.00");
 }
 
+function testLossModelThreeTiers() {
+  const input = [
+    {
+      flowerWikiId: "rose",
+      flowerName: "玫瑰",
+      quantityNeeded: 10,
+      standardUnitCost: "2.00",
+      lossProfile: {
+        optimisticUsableRate: 0.92,
+        standardUsableRate: 0.85,
+        conservativeUsableRate: 0.75,
+      },
+    },
+  ];
+
+  const optimistic = calculateMaterialLinesByMode(input, LossMode.OPTIMISTIC);
+  const standard = calculateMaterialLinesByMode(input, LossMode.STANDARD);
+  const conservative = calculateMaterialLinesByMode(input, LossMode.CONSERVATIVE);
+  const raw = calculateMaterialLinesByMode(input, "RAW");
+
+  assert.equal(decimalToString(raw.rawMaterialCost), "20.00");
+  assert.ok(
+    conservative.materialCost.greaterThan(standard.materialCost)
+  );
+  assert.ok(standard.materialCost.greaterThan(optimistic.materialCost));
+  assert.ok(optimistic.materialCost.greaterThan(raw.rawMaterialCost));
+}
+
+function testLossModelMarginOrdering() {
+  const materialCost = (mode: typeof LossMode.STANDARD) =>
+    calculateMaterialLinesByMode(
+      [
+        {
+          flowerWikiId: "rose",
+          flowerName: "玫瑰",
+          quantityNeeded: 10,
+          standardUnitCost: "2.00",
+          lossProfile: {
+            optimisticUsableRate: 0.92,
+            standardUsableRate: 0.85,
+            conservativeUsableRate: 0.75,
+          },
+        },
+      ],
+      mode
+    ).materialCost;
+
+  const price = "100.00";
+  const packaging = "0.00";
+  const optimisticMargin = calculateMarginFromPrice({
+    price,
+    materialCost: materialCost(LossMode.OPTIMISTIC),
+    packagingCost: packaging,
+  }).estimatedGrossMargin;
+  const standardMargin = calculateMarginFromPrice({
+    price,
+    materialCost: materialCost(LossMode.STANDARD),
+    packagingCost: packaging,
+  }).estimatedGrossMargin;
+  const conservativeMargin = calculateMarginFromPrice({
+    price,
+    materialCost: materialCost(LossMode.CONSERVATIVE),
+    packagingCost: packaging,
+  }).estimatedGrossMargin;
+
+  assert.ok(conservativeMargin.lessThan(standardMargin));
+  assert.ok(standardMargin.lessThan(optimisticMargin));
+}
+
+function testMissingUsableRateFallback() {
+  const result = calculateMaterialLinesByMode(
+    [
+      {
+        flowerWikiId: "rose",
+        flowerName: "玫瑰",
+        quantityNeeded: 10,
+        standardUnitCost: "2.00",
+      },
+    ],
+    LossMode.STANDARD
+  );
+
+  assert.equal(result.lines[0].usableRate, "0.8500");
+  assert.ok(
+    result.warnings.some((warning) => warning.includes("未设置可用率"))
+  );
+}
+
+function testMissingStandardUnitCostWarning() {
+  const result = calculateMaterialLinesByMode(
+    [
+      {
+        flowerWikiId: "rose",
+        flowerName: "玫瑰",
+        quantityNeeded: 10,
+        standardUnitCost: null,
+      },
+    ],
+    LossMode.STANDARD
+  );
+
+  assert.equal(decimalToString(result.materialCost), "0.00");
+  assert.ok(
+    result.warnings.some((warning) => warning.includes("未设置标准单支成本"))
+  );
+}
+
 function testMarginLevel() {
   assert.equal(getMarginLevel("0.20"), "低毛利");
   assert.equal(getMarginLevel("0.50"), "健康");
@@ -142,6 +251,10 @@ function run() {
   testSuggestPriceByTargetMargin();
   testSuggestPriceZeroAndInvalidTarget();
   testRoundFlowerPrice();
+  testLossModelThreeTiers();
+  testLossModelMarginOrdering();
+  testMissingUsableRateFallback();
+  testMissingStandardUnitCostWarning();
   testMarginLevel();
   console.log("product-margin-pure.test.ts — 全部通过");
 }

@@ -1,16 +1,31 @@
 import { Prisma } from "@/generated/prisma/client";
+import { LossMode } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
 import { decimalToString, money } from "@/services/order-cost-pure";
 import {
+  buildMarginEstimateSlice,
+  calculateMaterialLinesByMode,
   calculateMarginFromPrice,
-  calculateStandardMaterialLines,
   getMarginLevel,
   suggestPriceByTargetMargin,
+  type MarginCostMode,
   type ProductMarginMaterialLine,
+  type ProductMarginMaterialLineDetail,
   type SuggestedPrice,
 } from "@/services/product-margin-pure";
 
 type Tx = Prisma.TransactionClient | typeof prisma;
+
+type WikiForMargin = {
+  chineseName: string;
+  standardUnitCost: Prisma.Decimal | null;
+  costUnit: string | null;
+  optimisticUsableRate: Prisma.Decimal | null;
+  standardUsableRate: Prisma.Decimal | null;
+  conservativeUsableRate: Prisma.Decimal | null;
+  defaultUsableRate: Prisma.Decimal | null;
+  lossMode: LossMode | null;
+};
 
 type RecipeForMargin = {
   id: string;
@@ -23,11 +38,7 @@ type RecipeForMargin = {
   lines: Array<{
     flowerWikiId: string;
     quantityNeeded: number;
-    wiki: {
-      chineseName: string;
-      standardUnitCost: Prisma.Decimal | null;
-      costUnit: string | null;
-    };
+    wiki: WikiForMargin;
   }>;
 };
 
@@ -40,13 +51,30 @@ type SkuForMargin = {
   recipe: RecipeForMargin | null;
 };
 
+export type MarginEstimateSlice = {
+  materialCost: string;
+  packagingCost: string;
+  totalCost: string;
+  estimatedGrossProfit: string;
+  estimatedGrossMargin: string;
+  lossModelExtraCost: string;
+  suggestedPrices: SuggestedPrice[];
+  marginLevel: string;
+  lines: ProductMarginMaterialLineDetail[];
+  warnings: string[];
+};
+
 export type RecipeStandardCostEstimate = {
   recipeId: string;
   recipeName: string;
   materialCost: string;
   packagingCost: string;
   totalCost: string;
+  lossModelStandardMaterialCost?: string;
+  lossModelExtraCost?: string;
+  lossModelStandardTotalCost?: string;
   lines: ProductMarginMaterialLine[];
+  lossModelLines?: ProductMarginMaterialLineDetail[];
   packagingLine: {
     packagingKitId: string;
     name: string;
@@ -72,6 +100,13 @@ export type SkuMarginEstimate = {
   suggestedPrices: SuggestedPrice[];
   lines: ProductMarginMaterialLine[];
   packagingLine: RecipeStandardCostEstimate["packagingLine"];
+  rawEstimate: MarginEstimateSlice;
+  lossModelEstimates: {
+    optimistic: MarginEstimateSlice;
+    standard: MarginEstimateSlice;
+    conservative: MarginEstimateSlice;
+  };
+  recommendedMode: "STANDARD";
   warnings: string[];
 };
 
@@ -82,41 +117,71 @@ export type ProductMarginEstimate = {
     minGrossMargin: string | null;
     maxGrossMargin: string | null;
     avgGrossMargin: string | null;
+    minLossAdjustedGrossMargin: string | null;
+    maxLossAdjustedGrossMargin: string | null;
     warningCount: number;
   };
   skus: SkuMarginEstimate[];
   warnings: string[];
 };
 
+function wikiLossProfile(wiki: WikiForMargin) {
+  return {
+    optimisticUsableRate: wiki.optimisticUsableRate,
+    standardUsableRate: wiki.standardUsableRate,
+    conservativeUsableRate: wiki.conservativeUsableRate,
+    defaultUsableRate: wiki.defaultUsableRate,
+    lossMode: wiki.lossMode,
+  };
+}
+
+function recipeLinesForMargin(recipe: RecipeForMargin) {
+  return recipe.lines.map((line) => ({
+    flowerWikiId: line.flowerWikiId,
+    flowerName: line.wiki.chineseName,
+    quantityNeeded: line.quantityNeeded,
+    standardUnitCost: line.wiki.standardUnitCost,
+    lossProfile: wikiLossProfile(line.wiki),
+  }));
+}
+
 function recipeToStandardCostEstimate(
-  recipe: RecipeForMargin
+  recipe: RecipeForMargin,
+  mode: MarginCostMode = "RAW"
 ): RecipeStandardCostEstimate {
-  const material = calculateStandardMaterialLines(
-    recipe.lines.map((line) => ({
-      flowerWikiId: line.flowerWikiId,
-      flowerName: line.wiki.chineseName,
-      quantityNeeded: line.quantityNeeded,
-      standardUnitCost: line.wiki.standardUnitCost,
-    }))
+  const rawMaterial = calculateMaterialLinesByMode(
+    recipeLinesForMargin(recipe),
+    "RAW"
+  );
+  const standardMaterial = calculateMaterialLinesByMode(
+    recipeLinesForMargin(recipe),
+    LossMode.STANDARD
   );
 
   const packagingCost = recipe.packagingKit
     ? money(recipe.packagingKit.standardCost)
     : money(0);
-  const warnings = [...material.warnings];
+  const warnings = [...rawMaterial.warnings, ...standardMaterial.warnings];
   if (!recipe.packagingKit) {
     warnings.push(`配方「${recipe.name}」未绑定包装方案，包装成本按 0 计算`);
   }
 
-  const totalCost = money(material.materialCost.plus(packagingCost));
+  const totalCost = money(rawMaterial.rawMaterialCost.plus(packagingCost));
+  const lossModelStandardTotalCost = money(
+    standardMaterial.materialCost.plus(packagingCost)
+  );
 
   return {
     recipeId: recipe.id,
     recipeName: recipe.name,
-    materialCost: decimalToString(material.materialCost),
+    materialCost: decimalToString(rawMaterial.rawMaterialCost),
     packagingCost: decimalToString(packagingCost),
     totalCost: decimalToString(totalCost),
-    lines: material.lines,
+    lossModelStandardMaterialCost: decimalToString(standardMaterial.materialCost),
+    lossModelExtraCost: decimalToString(standardMaterial.lossModelExtraCost),
+    lossModelStandardTotalCost: decimalToString(lossModelStandardTotalCost),
+    lines: rawMaterial.lines,
+    lossModelLines: standardMaterial.lines,
     packagingLine: recipe.packagingKit
       ? {
           packagingKitId: recipe.packagingKit.id,
@@ -128,25 +193,95 @@ function recipeToStandardCostEstimate(
   };
 }
 
-function skuToMarginEstimate(sku: SkuForMargin): SkuMarginEstimate {
-  const warnings: string[] = [];
-  let recipeEstimate: RecipeStandardCostEstimate | null = null;
+function buildSkuLossEstimates(
+  sku: SkuForMargin,
+  recipeEstimate: RecipeStandardCostEstimate | null
+) {
+  const packagingCost = money(recipeEstimate?.packagingCost ?? 0);
+  const emptyLines: ProductMarginMaterialLineDetail[] = [];
+  const noRecipeWarning = "该 SKU 未绑定配方，无法准确预估成本";
 
-  if (!sku.recipeId || !sku.recipe) {
-    warnings.push("该 SKU 未绑定配方，无法准确预估成本");
-  } else {
-    recipeEstimate = recipeToStandardCostEstimate(sku.recipe);
-    warnings.push(...recipeEstimate.warnings);
+  if (!sku.recipeId || !sku.recipe || !recipeEstimate) {
+    const empty = buildMarginEstimateSlice({
+      price: sku.price,
+      materialCost: 0,
+      packagingCost: 0,
+      lossModelExtraCost: 0,
+      lines: emptyLines,
+      warnings: [noRecipeWarning],
+    });
+    return {
+      rawEstimate: empty,
+      lossModelEstimates: {
+        optimistic: empty,
+        standard: empty,
+        conservative: empty,
+      },
+      warnings: [noRecipeWarning],
+    };
   }
 
-  const materialCost = money(recipeEstimate?.materialCost);
-  const packagingCost = money(recipeEstimate?.packagingCost);
-  const margin = calculateMarginFromPrice({
+  const modes = [
+    ["optimistic", LossMode.OPTIMISTIC],
+    ["standard", LossMode.STANDARD],
+    ["conservative", LossMode.CONSERVATIVE],
+  ] as const;
+
+  const rawMaterial = calculateMaterialLinesByMode(
+    recipeLinesForMargin(sku.recipe),
+    "RAW"
+  );
+  const rawEstimate = buildMarginEstimateSlice({
     price: sku.price,
-    materialCost,
+    materialCost: rawMaterial.rawMaterialCost,
     packagingCost,
+    lossModelExtraCost: 0,
+    lines: rawMaterial.lines,
+    warnings: [...rawMaterial.warnings, ...recipeEstimate.warnings],
   });
-  warnings.push(...margin.warnings);
+
+  const lossModelEstimates = Object.fromEntries(
+    modes.map(([key, mode]) => {
+      const material = calculateMaterialLinesByMode(
+        recipeLinesForMargin(sku.recipe!),
+        mode
+      );
+      return [
+        key,
+        buildMarginEstimateSlice({
+          price: sku.price,
+          materialCost: material.materialCost,
+          packagingCost,
+          lossModelExtraCost: material.lossModelExtraCost,
+          lines: material.lines,
+          warnings: [...material.warnings, ...recipeEstimate.warnings],
+        }),
+      ];
+    })
+  ) as SkuMarginEstimate["lossModelEstimates"];
+
+  return {
+    rawEstimate,
+    lossModelEstimates,
+    warnings: [
+      ...new Set([
+        ...rawEstimate.warnings,
+        ...lossModelEstimates.optimistic.warnings,
+        ...lossModelEstimates.standard.warnings,
+        ...lossModelEstimates.conservative.warnings,
+      ]),
+    ],
+  };
+}
+
+function skuToMarginEstimate(sku: SkuForMargin): SkuMarginEstimate {
+  const recipeEstimate = sku.recipe
+    ? recipeToStandardCostEstimate(sku.recipe)
+    : null;
+  const { rawEstimate, lossModelEstimates, warnings } = buildSkuLossEstimates(
+    sku,
+    recipeEstimate
+  );
 
   return {
     skuId: sku.id,
@@ -156,18 +291,32 @@ function skuToMarginEstimate(sku: SkuForMargin): SkuMarginEstimate {
     price: decimalToString(sku.price),
     recipeId: sku.recipeId,
     recipeName: recipeEstimate?.recipeName ?? null,
-    materialCost: decimalToString(materialCost),
-    packagingCost: decimalToString(packagingCost),
-    totalCost: decimalToString(margin.totalCost),
-    estimatedGrossProfit: decimalToString(margin.estimatedGrossProfit),
-    estimatedGrossMargin: decimalToString(margin.estimatedGrossMargin, 4),
-    marginLevel: getMarginLevel(margin.estimatedGrossMargin),
-    suggestedPrices: suggestPriceByTargetMargin(margin.totalCost),
-    lines: recipeEstimate?.lines ?? [],
+    materialCost: rawEstimate.materialCost,
+    packagingCost: rawEstimate.packagingCost,
+    totalCost: rawEstimate.totalCost,
+    estimatedGrossProfit: rawEstimate.estimatedGrossProfit,
+    estimatedGrossMargin: rawEstimate.estimatedGrossMargin,
+    marginLevel: rawEstimate.marginLevel,
+    suggestedPrices: rawEstimate.suggestedPrices,
+    lines: rawEstimate.lines,
     packagingLine: recipeEstimate?.packagingLine ?? null,
+    rawEstimate,
+    lossModelEstimates,
+    recommendedMode: "STANDARD",
     warnings,
   };
 }
+
+const wikiSelectForMargin = {
+  chineseName: true,
+  standardUnitCost: true,
+  costUnit: true,
+  optimisticUsableRate: true,
+  standardUsableRate: true,
+  conservativeUsableRate: true,
+  defaultUsableRate: true,
+  lossMode: true,
+} as const;
 
 const recipeIncludeForMargin = {
   packagingKit: {
@@ -175,15 +324,9 @@ const recipeIncludeForMargin = {
   },
   lines: {
     include: {
-      wiki: {
-        select: {
-          chineseName: true,
-          standardUnitCost: true,
-          costUnit: true,
-        },
-      },
+      wiki: { select: wikiSelectForMargin },
     },
-    orderBy: { quantityNeeded: "desc" },
+    orderBy: { quantityNeeded: "desc" as const },
   },
 } as const;
 
@@ -194,6 +337,7 @@ const skuIncludeForMargin = {
 
 export async function calculateRecipeStandardCost(
   recipeId: string,
+  mode: MarginCostMode = "RAW",
   client: Tx = prisma
 ): Promise<RecipeStandardCostEstimate> {
   const recipe = await client.recipe.findUnique({
@@ -201,7 +345,7 @@ export async function calculateRecipeStandardCost(
     include: recipeIncludeForMargin,
   });
   if (!recipe) throw new Error("配方不存在");
-  return recipeToStandardCostEstimate(recipe);
+  return recipeToStandardCostEstimate(recipe, mode);
 }
 
 export async function calculateSkuMarginEstimate(
@@ -245,8 +389,14 @@ export function buildProductMarginEstimate(input: {
   productName: string;
   skus: SkuMarginEstimate[];
 }): ProductMarginEstimate {
-  const margins = input.skus.map((sku) => Number(sku.estimatedGrossMargin));
-  const validMargins = margins.filter(Number.isFinite);
+  const rawMargins = input.skus.map((sku) =>
+    Number(sku.rawEstimate.estimatedGrossMargin)
+  );
+  const standardMargins = input.skus.map((sku) =>
+    Number(sku.lossModelEstimates.standard.estimatedGrossMargin)
+  );
+  const validRawMargins = rawMargins.filter(Number.isFinite);
+  const validStandardMargins = standardMargins.filter(Number.isFinite);
   const warningCount = input.skus.reduce(
     (sum, sku) => sum + sku.warnings.length,
     0
@@ -256,9 +406,9 @@ export function buildProductMarginEstimate(input: {
   );
 
   const avg =
-    validMargins.length > 0
-      ? validMargins.reduce((sum, value) => sum + value, 0) /
-        validMargins.length
+    validRawMargins.length > 0
+      ? validRawMargins.reduce((sum, value) => sum + value, 0) /
+        validRawMargins.length
       : null;
 
   return {
@@ -266,14 +416,22 @@ export function buildProductMarginEstimate(input: {
     productName: input.productName,
     summary: {
       minGrossMargin:
-        validMargins.length > 0
-          ? decimalToString(Math.min(...validMargins), 4)
+        validRawMargins.length > 0
+          ? decimalToString(Math.min(...validRawMargins), 4)
           : null,
       maxGrossMargin:
-        validMargins.length > 0
-          ? decimalToString(Math.max(...validMargins), 4)
+        validRawMargins.length > 0
+          ? decimalToString(Math.max(...validRawMargins), 4)
           : null,
       avgGrossMargin: avg === null ? null : decimalToString(avg, 4),
+      minLossAdjustedGrossMargin:
+        validStandardMargins.length > 0
+          ? decimalToString(Math.min(...validStandardMargins), 4)
+          : null,
+      maxLossAdjustedGrossMargin:
+        validStandardMargins.length > 0
+          ? decimalToString(Math.max(...validStandardMargins), 4)
+          : null,
       warningCount,
     },
     skus: input.skus,

@@ -6,6 +6,7 @@ import { QuantityStepper } from "@/components/shared/QuantityStepper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import type { PackagingKitRow } from "@/lib/packaging-kit";
+import { formatPercent } from "@/lib/format-money";
 import type { WikiListItem } from "@/lib/wiki-constants";
 
 type RecipeListItem = {
@@ -27,6 +28,9 @@ type RecipeCostPreview = {
   materialCost: string;
   packagingCost: string;
   totalCost: string;
+  lossModelStandardMaterialCost?: string;
+  lossModelExtraCost?: string;
+  lossModelStandardTotalCost?: string;
   missingStandardCostCount: number;
   isComplete: boolean;
   lines: Array<{
@@ -35,6 +39,20 @@ type RecipeCostPreview = {
     quantityNeeded: number;
     standardUnitCost: string | null;
     lineCost: string;
+    warning?: string;
+  }>;
+  lossModelLines?: Array<{
+    flowerWikiId: string;
+    flowerName: string;
+    quantityNeeded: number;
+    standardUnitCost: string | null;
+    rawUnitCost: string | null;
+    adjustedUnitCost: string | null;
+    usableRate: string | null;
+    lossRate: string | null;
+    rawLineCost: string;
+    adjustedLineCost: string;
+    lossModelExtraCost: string;
     warning?: string;
   }>;
   warnings: string[];
@@ -488,9 +506,17 @@ export function WmsRecipeConsole() {
                       BOM 标准成本预览
                     </p>
                     <p className="mt-1 text-xs text-emerald-800">
-                      花材 ¥{costPreview.materialCost} · 包装 ¥
-                      {costPreview.packagingCost} · 合计 ¥{costPreview.totalCost}
+                      原始花材 ¥{costPreview.materialCost} · 包装 ¥
+                      {costPreview.packagingCost} · 原始合计 ¥
+                      {costPreview.totalCost}
                     </p>
+                    {costPreview.lossModelStandardTotalCost ? (
+                      <p className="mt-1 text-xs text-sky-800">
+                        标准损耗模式合计 ¥
+                        {costPreview.lossModelStandardTotalCost} · 损耗增加 ¥
+                        {costPreview.lossModelExtraCost ?? "0.00"}
+                      </p>
+                    ) : null}
                   </div>
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${
@@ -504,18 +530,25 @@ export function WmsRecipeConsole() {
                       : `成本缺失 ${costPreview.missingStandardCostCount} 项`}
                   </span>
                 </div>
-                <div className="max-h-52 overflow-y-auto rounded-lg border border-emerald-100 bg-white">
+                <p className="mb-2 text-[11px] text-emerald-800">
+                  配方成本中的损耗模型基于花材档案可用率估算，用于定价和产品判断，不代表实际报损流水。
+                </p>
+                <div className="max-h-64 overflow-y-auto rounded-lg border border-emerald-100 bg-white">
                   <table className="w-full text-left text-xs">
                     <thead className="bg-emerald-50 text-emerald-900">
                       <tr>
                         <th className="px-2 py-2">花材</th>
                         <th className="px-2 py-2 text-right">数量</th>
                         <th className="px-2 py-2 text-right">标准单价</th>
-                        <th className="px-2 py-2 text-right">小计</th>
+                        <th className="px-2 py-2 text-right">可用率</th>
+                        <th className="px-2 py-2 text-right">原始行成本</th>
+                        <th className="px-2 py-2 text-right">损耗后行成本</th>
+                        <th className="px-2 py-2 text-right">增加成本</th>
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-emerald-50">
-                      {costPreview.lines.map((line) => (
+                      {(costPreview.lossModelLines ?? costPreview.lines).map(
+                        (line) => (
                         <tr key={line.flowerWikiId}>
                           <td className="px-2 py-2">
                             <span className="font-medium text-zinc-900">
@@ -535,8 +568,19 @@ export function WmsRecipeConsole() {
                               ? `¥${Number(line.standardUnitCost).toFixed(2)}`
                               : "未设置"}
                           </td>
+                          <td className="px-2 py-2 text-right">
+                            {"usableRate" in line && line.usableRate
+                              ? formatPercent(line.usableRate)
+                              : "—"}
+                          </td>
+                          <td className="px-2 py-2 text-right">
+                            ¥{"rawLineCost" in line ? line.rawLineCost : line.lineCost}
+                          </td>
                           <td className="px-2 py-2 text-right font-semibold">
-                            ¥{line.lineCost}
+                            ¥{"adjustedLineCost" in line ? line.adjustedLineCost : line.lineCost}
+                          </td>
+                          <td className="px-2 py-2 text-right text-sky-700">
+                            ¥{"lossModelExtraCost" in line ? line.lossModelExtraCost : "0.00"}
                           </td>
                         </tr>
                       ))}
