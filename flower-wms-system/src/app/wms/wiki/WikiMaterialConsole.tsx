@@ -26,6 +26,9 @@ type FormState = {
   availability: string;
   maintenance: string;
   defaultShelfLifeDays: string;
+  standardUnitCost: string;
+  costUnit: string;
+  costNote: string;
 };
 
 type CareEditorMode = "text" | "table";
@@ -37,6 +40,9 @@ const EMPTY_FORM: FormState = {
   availability: "",
   maintenance: WIKI_MAINTENANCE_TEMPLATE,
   defaultShelfLifeDays: "",
+  standardUnitCost: "",
+  costUnit: "支",
+  costNote: "",
 };
 
 function toForm(item: WikiListItem): FormState {
@@ -48,6 +54,9 @@ function toForm(item: WikiListItem): FormState {
     maintenance: item.maintenance,
     defaultShelfLifeDays:
       item.defaultShelfLifeDays != null ? String(item.defaultShelfLifeDays) : "",
+    standardUnitCost: item.standardUnitCost ?? "",
+    costUnit: item.costUnit ?? "支",
+    costNote: item.costNote ?? "",
   };
 }
 
@@ -62,6 +71,7 @@ function toPayload(
   }
 ) {
   const defaultShelfLifeDays = form.defaultShelfLifeDays.trim();
+  const standardUnitCost = form.standardUnitCost.trim();
   const useTable =
     options.careMode === "table" &&
     options.careTable &&
@@ -82,10 +92,13 @@ function toPayload(
     defaultShelfLifeDays: defaultShelfLifeDays
       ? Number(defaultShelfLifeDays)
       : null,
+    standardUnitCost: standardUnitCost ? Number(standardUnitCost) : null,
+    costUnit: form.costUnit.trim() || (standardUnitCost ? "支" : null),
+    costNote: form.costNote.trim() || null,
   };
 }
 
-const WIKI_TABLE_COL_COUNT = 5 + WIKI_CARE_ROW_SPECS.length + 1;
+const WIKI_TABLE_COL_COUNT = 6 + WIKI_CARE_ROW_SPECS.length + 1;
 
 const STICKY_NAME_HEAD =
   "sticky left-0 z-30 border-r border-zinc-200 bg-zinc-50 px-3 py-3 font-medium shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)]";
@@ -124,6 +137,11 @@ function WikiTableCell({ value }: { value: string }) {
       <WikiTableTruncatedText text={value} />
     </td>
   );
+}
+
+function formatWikiCost(item: WikiListItem) {
+  if (!item.standardUnitCost) return "未设置";
+  return `¥${Number(item.standardUnitCost).toFixed(2)} / ${item.costUnit || "支"}`;
 }
 
 export function WikiMaterialConsole() {
@@ -391,6 +409,53 @@ export function WikiMaterialConsole() {
     }
   }
 
+  async function handleQuickCostEdit(item: WikiListItem) {
+    const current = item.standardUnitCost
+      ? Number(item.standardUnitCost).toFixed(2)
+      : "";
+    const input = window.prompt(
+      `设置「${item.chineseName}」标准单支成本（元/${item.costUnit || "支"}）\n标准成本用于产品定价预估；订单实际成本仍以入库批次成本为准。`,
+      current
+    );
+    if (input === null) return;
+    const trimmed = input.trim();
+    const nextCost = trimmed ? Number(trimmed) : null;
+    if (nextCost !== null && (!Number.isFinite(nextCost) || nextCost < 0)) {
+      showToast("标准单支成本须为非负数字", "error");
+      return;
+    }
+
+    try {
+      const payload = toPayload(
+        {
+          ...toForm(item),
+          standardUnitCost: nextCost === null ? "" : nextCost.toFixed(2),
+          costUnit: item.costUnit || "支",
+        },
+        {
+          preservedMorphology: item.morphology,
+          preservedColorTags: item.colorTags,
+          preservedFloralRole: item.floralRole,
+          careTable: item.careTable,
+          careMode: item.careTable?.length ? "table" : "text",
+        }
+      );
+      const res = await fetch(`/api/admin/wiki/${item.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      const json = (await res.json()) as { success?: boolean; error?: string };
+      if (!res.ok || !json.success) {
+        throw new Error(json.error ?? "成本更新失败");
+      }
+      showToast("标准成本已更新", "success");
+      await loadList();
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "成本更新失败", "error");
+    }
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -423,6 +488,7 @@ export function WikiMaterialConsole() {
             <col className="w-24" />
             <col className="w-[6%]" />
             <col className="w-[5%]" />
+            <col className="w-[8%]" />
             <col className="w-[9%]" />
             {WIKI_CARE_ROW_SPECS.map((spec) => (
               <col key={spec.key} className="w-[9%]" />
@@ -436,6 +502,7 @@ export function WikiMaterialConsole() {
                 供货时间
               </th>
               <th className="bg-zinc-50 px-3 py-3 font-medium">保质期</th>
+              <th className="bg-zinc-50 px-3 py-3 font-medium">标准成本</th>
               <th className={`${WIKI_WRAP_CELL} bg-zinc-50 font-medium`}>
                 花语
               </th>
@@ -494,6 +561,19 @@ export function WikiMaterialConsole() {
                     {item.defaultShelfLifeDays != null
                       ? `${item.defaultShelfLifeDays} 天`
                       : "—"}
+                  </td>
+                  <td className={`${WIKI_COMPACT_CELL} text-zinc-600`}>
+                    <button
+                      type="button"
+                      onClick={() => void handleQuickCostEdit(item)}
+                      className={`text-left underline-offset-2 hover:underline ${
+                        item.standardUnitCost
+                          ? "font-semibold text-emerald-700"
+                          : "text-amber-700"
+                      }`}
+                    >
+                      {formatWikiCost(item)}
+                    </button>
                   </td>
                   <td className={WIKI_WRAP_CELL}>
                     {item.flowerLanguage?.trim() ? (
@@ -643,6 +723,53 @@ export function WikiMaterialConsole() {
                     setForm({ ...form, defaultShelfLifeDays: e.target.value })
                   }
                 />
+
+                <div className="rounded-xl border border-emerald-100 bg-emerald-50/50 p-4 sm:col-span-2">
+                  <div className="mb-3">
+                    <p className="text-sm font-semibold text-emerald-900">
+                      标准成本（产品定价预估）
+                    </p>
+                    <p className="mt-1 text-xs text-emerald-800">
+                      标准成本用于产品定价预估；订单实际成本仍以入库批次成本为准。
+                    </p>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-[1fr_8rem]">
+                    <Input
+                      label="标准单支成本（元）"
+                      type="number"
+                      inputMode="decimal"
+                      min={0}
+                      step={0.0001}
+                      placeholder="留空则视为未设置"
+                      value={form.standardUnitCost}
+                      onChange={(e) =>
+                        setForm({ ...form, standardUnitCost: e.target.value })
+                      }
+                    />
+                    <Input
+                      label="成本单位"
+                      placeholder="支"
+                      value={form.costUnit}
+                      onChange={(e) =>
+                        setForm({ ...form, costUnit: e.target.value })
+                      }
+                    />
+                  </div>
+                  <label className="mt-3 block text-sm">
+                    <span className="mb-1 block font-medium text-zinc-700">
+                      成本备注
+                    </span>
+                    <textarea
+                      rows={2}
+                      value={form.costNote}
+                      onChange={(e) =>
+                        setForm({ ...form, costNote: e.target.value })
+                      }
+                      placeholder="例如：按近 30 天常用品质采购均价估算"
+                      className="w-full rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-emerald-400"
+                    />
+                  </label>
+                </div>
 
                 <div className="space-y-3 sm:col-span-2">
                   <div className="flex flex-wrap items-center justify-between gap-2">

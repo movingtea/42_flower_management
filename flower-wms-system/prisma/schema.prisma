@@ -570,6 +570,11 @@ model FlowerWiki {
   maintenanceCare      Json?      @map("maintenance_care")
   /// 默认保质期（天）；入库时用于计算 batch.expiresAt，可单次入库覆盖
   defaultShelfLifeDays Int?       @map("default_shelf_life_days")
+  /// 标准单支成本：仅用于产品定价预估；订单实际成本仍以 Batch.unitCost 为准
+  standardUnitCost     Decimal?   @map("standard_unit_cost") @db.Decimal(12, 4)
+  costUnit             String?    @map("cost_unit")
+  costUpdatedAt        DateTime?  @map("cost_updated_at")
+  costNote             String?    @map("cost_note") @db.Text
   aliasMap             Json       @default("{}") @map("alias_map")
   createdAt            DateTime   @default(now()) @map("created_at")
   updatedAt            DateTime   @updatedAt @map("updated_at")

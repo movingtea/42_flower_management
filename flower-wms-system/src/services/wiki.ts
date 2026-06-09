@@ -85,6 +85,27 @@ function parseOptionalShelfLifeDays(raw: unknown): number | null {
   return n;
 }
 
+function parseOptionalStandardUnitCost(raw: unknown): string | null {
+  if (raw === null || raw === undefined || raw === "") return null;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 0) {
+    throw new Error("标准单支成本须为非负数字");
+  }
+  return n.toFixed(4);
+}
+
+function parseOptionalCostUnit(raw: unknown): string | null {
+  if (raw === null || raw === undefined) return null;
+  if (typeof raw !== "string") throw new Error("成本单位须为字符串");
+  return raw.trim() || null;
+}
+
+function parseOptionalCostNote(raw: unknown): string | null {
+  if (raw === null || raw === undefined) return null;
+  if (typeof raw !== "string") throw new Error("成本备注须为字符串");
+  return raw.trim() || null;
+}
+
 export function parseWikiPayload(raw: unknown): WikiFormPayload {
   if (!raw || typeof raw !== "object") throw new Error("请求体须为 JSON 对象");
   const b = raw as Record<string, unknown>;
@@ -140,6 +161,9 @@ export function parseWikiPayload(raw: unknown): WikiFormPayload {
     };
   }
 
+  const standardUnitCost = parseOptionalStandardUnitCost(b.standardUnitCost);
+  const parsedCostUnit = parseOptionalCostUnit(b.costUnit);
+
   return {
     photo: photo || null,
     englishName,
@@ -155,6 +179,9 @@ export function parseWikiPayload(raw: unknown): WikiFormPayload {
     defaultShelfLifeDays: parseOptionalShelfLifeDays(
       b.defaultShelfLifeDays ?? b.shelfLifeDays
     ),
+    standardUnitCost,
+    costUnit: parsedCostUnit ?? (standardUnitCost !== null ? "支" : null),
+    costNote: parseOptionalCostNote(b.costNote),
   };
 }
 
@@ -182,6 +209,10 @@ function toCreateData(p: WikiFormPayload): Prisma.FlowerWikiCreateInput {
     maintenance: p.maintenance,
     maintenanceCare: maintenanceCareInput(p.careTable, "create"),
     defaultShelfLifeDays: p.defaultShelfLifeDays ?? null,
+    standardUnitCost: p.standardUnitCost ?? null,
+    costUnit: p.costUnit ?? null,
+    costUpdatedAt: p.standardUnitCost !== null ? new Date() : null,
+    costNote: p.costNote ?? null,
     aliasMap: p.aliasMap ?? {},
   };
 }
@@ -297,9 +328,17 @@ export async function updateWiki(id: string, raw: unknown) {
     }
   }
 
+  const currentCost = existing.standardUnitCost?.toFixed(4) ?? null;
+  const nextCost = payload.standardUnitCost ?? null;
+  const costChanged =
+    currentCost !== nextCost || (existing.costUnit ?? null) !== (payload.costUnit ?? null);
+
   return prisma.flowerWiki.update({
     where: { id },
-    data: toUpdateData(payload),
+    data: {
+      ...toUpdateData(payload),
+      costUpdatedAt: costChanged ? new Date() : existing.costUpdatedAt,
+    },
   });
 }
 

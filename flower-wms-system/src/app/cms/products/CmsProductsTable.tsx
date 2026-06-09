@@ -12,6 +12,8 @@ export type CmsProductListRow = {
   name: string;
   sku: string;
   priceLabel: string;
+  marginLabel: string;
+  marginStatus: "ok" | "warning" | "missing";
   quantity: number;
   status: string;
   categoryIds: string[];
@@ -137,6 +139,7 @@ export function CmsProductsTable({ rows, categoryConfig }: Props) {
               <th className="px-4 py-3 font-medium text-zinc-600">品名</th>
               <th className="px-4 py-3 font-medium text-zinc-600">分类</th>
               <th className="px-4 py-3 font-medium text-zinc-600">零售价</th>
+              <th className="px-4 py-3 font-medium text-zinc-600">毛利预估</th>
               <th className="px-4 py-3 font-medium text-zinc-600">可售数量</th>
               <th className="px-4 py-3 font-medium text-zinc-600">上架状态</th>
               <th className="px-4 py-3 font-medium text-zinc-600">操作</th>
@@ -146,7 +149,7 @@ export function CmsProductsTable({ rows, categoryConfig }: Props) {
             {list.length === 0 ? (
               <tr>
                 <td
-                  colSpan={6}
+                  colSpan={7}
                   className="px-4 py-12 text-center text-zinc-500"
                 >
                   暂无商品，请点击新增商品按钮。
@@ -182,6 +185,19 @@ export function CmsProductsTable({ rows, categoryConfig }: Props) {
                     </div>
                   </td>
                   <td className="px-4 py-3">{p.priceLabel}</td>
+                  <td className="px-4 py-3">
+                    <span
+                      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                        p.marginStatus === "ok"
+                          ? "bg-emerald-50 text-emerald-700"
+                          : p.marginStatus === "missing"
+                            ? "bg-zinc-100 text-zinc-600"
+                            : "bg-amber-50 text-amber-700"
+                      }`}
+                    >
+                      {p.marginLabel}
+                    </span>
+                  </td>
                   <td className="px-4 py-3">{p.quantity}</td>
                   <td className="px-4 py-3">
                     {p.status === "PUBLISHED" ? (
