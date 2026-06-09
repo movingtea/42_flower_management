@@ -55,6 +55,9 @@ export const ModelName = {
   ProductCategoryRelation: 'ProductCategoryRelation',
   MaterialCategory: 'MaterialCategory',
   MaterialCategoryRelation: 'MaterialCategoryRelation',
+  Supplier: 'Supplier',
+  PurchaseOrder: 'PurchaseOrder',
+  PurchaseOrderLine: 'PurchaseOrderLine',
   ProductSpu: 'ProductSpu',
   ProductSku: 'ProductSku',
   Banner: 'Banner',
@@ -135,6 +138,73 @@ export const MaterialCategoryRelationScalarFieldEnum = {
 } as const
 
 export type MaterialCategoryRelationScalarFieldEnum = (typeof MaterialCategoryRelationScalarFieldEnum)[keyof typeof MaterialCategoryRelationScalarFieldEnum]
+
+
+export const SupplierScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  supplierType: 'supplierType',
+  contactName: 'contactName',
+  phone: 'phone',
+  wechat: 'wechat',
+  address: 'address',
+  note: 'note',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type SupplierScalarFieldEnum = (typeof SupplierScalarFieldEnum)[keyof typeof SupplierScalarFieldEnum]
+
+
+export const PurchaseOrderScalarFieldEnum = {
+  id: 'id',
+  purchaseNo: 'purchaseNo',
+  supplierId: 'supplierId',
+  purchaseDate: 'purchaseDate',
+  expectedArrivalDate: 'expectedArrivalDate',
+  receivedAt: 'receivedAt',
+  status: 'status',
+  goodsAmount: 'goodsAmount',
+  shippingFee: 'shippingFee',
+  packagingFee: 'packagingFee',
+  otherFee: 'otherFee',
+  totalExtraFee: 'totalExtraFee',
+  totalAmount: 'totalAmount',
+  allocationMethod: 'allocationMethod',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PurchaseOrderScalarFieldEnum = (typeof PurchaseOrderScalarFieldEnum)[keyof typeof PurchaseOrderScalarFieldEnum]
+
+
+export const PurchaseOrderLineScalarFieldEnum = {
+  id: 'id',
+  purchaseOrderId: 'purchaseOrderId',
+  flowerWikiId: 'flowerWikiId',
+  purchaseName: 'purchaseName',
+  grade: 'grade',
+  color: 'color',
+  spec: 'spec',
+  purchaseQuantity: 'purchaseQuantity',
+  purchaseUnit: 'purchaseUnit',
+  stemsPerUnit: 'stemsPerUnit',
+  totalStems: 'totalStems',
+  unitPrice: 'unitPrice',
+  lineAmount: 'lineAmount',
+  allocatedExtraFee: 'allocatedExtraFee',
+  actualTotalCost: 'actualTotalCost',
+  actualUnitCost: 'actualUnitCost',
+  supplierSkuName: 'supplierSkuName',
+  note: 'note',
+  inboundBatchId: 'inboundBatchId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PurchaseOrderLineScalarFieldEnum = (typeof PurchaseOrderLineScalarFieldEnum)[keyof typeof PurchaseOrderLineScalarFieldEnum]
 
 
 export const ProductSpuScalarFieldEnum = {

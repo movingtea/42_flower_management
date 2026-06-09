@@ -61,6 +61,35 @@ export const FloralRole = {
 export type FloralRole = (typeof FloralRole)[keyof typeof FloralRole]
 
 
+export const SupplierType = {
+  LOCAL: 'LOCAL',
+  KUNMING_ONLINE: 'KUNMING_ONLINE',
+  WHOLESALE_MARKET: 'WHOLESALE_MARKET',
+  PLATFORM: 'PLATFORM',
+  OTHER: 'OTHER'
+} as const
+
+export type SupplierType = (typeof SupplierType)[keyof typeof SupplierType]
+
+
+export const PurchaseOrderStatus = {
+  DRAFT: 'DRAFT',
+  ORDERED: 'ORDERED',
+  RECEIVED: 'RECEIVED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type PurchaseOrderStatus = (typeof PurchaseOrderStatus)[keyof typeof PurchaseOrderStatus]
+
+
+export const PurchaseCostAllocationMethod = {
+  BY_AMOUNT: 'BY_AMOUNT',
+  BY_QUANTITY: 'BY_QUANTITY'
+} as const
+
+export type PurchaseCostAllocationMethod = (typeof PurchaseCostAllocationMethod)[keyof typeof PurchaseCostAllocationMethod]
+
+
 export const Role = {
   IT_ADMIN: 'IT_ADMIN',
   STORE_ADMIN: 'STORE_ADMIN',

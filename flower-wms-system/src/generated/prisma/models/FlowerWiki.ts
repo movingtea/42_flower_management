@@ -331,6 +331,7 @@ export type FlowerWikiWhereInput = {
   materials?: Prisma.MaterialListRelationFilter
   recipeLines?: Prisma.RecipeLineListRelationFilter
   stockLossRecords?: Prisma.StockLossRecordListRelationFilter
+  purchaseOrderLines?: Prisma.PurchaseOrderLineListRelationFilter
 }
 
 export type FlowerWikiOrderByWithRelationInput = {
@@ -357,6 +358,7 @@ export type FlowerWikiOrderByWithRelationInput = {
   materials?: Prisma.MaterialOrderByRelationAggregateInput
   recipeLines?: Prisma.RecipeLineOrderByRelationAggregateInput
   stockLossRecords?: Prisma.StockLossRecordOrderByRelationAggregateInput
+  purchaseOrderLines?: Prisma.PurchaseOrderLineOrderByRelationAggregateInput
 }
 
 export type FlowerWikiWhereUniqueInput = Prisma.AtLeast<{
@@ -386,6 +388,7 @@ export type FlowerWikiWhereUniqueInput = Prisma.AtLeast<{
   materials?: Prisma.MaterialListRelationFilter
   recipeLines?: Prisma.RecipeLineListRelationFilter
   stockLossRecords?: Prisma.StockLossRecordListRelationFilter
+  purchaseOrderLines?: Prisma.PurchaseOrderLineListRelationFilter
 }, "id" | "englishName">
 
 export type FlowerWikiOrderByWithAggregationInput = {
@@ -466,6 +469,7 @@ export type FlowerWikiCreateInput = {
   materials?: Prisma.MaterialCreateNestedManyWithoutWikiInput
   recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutWikiInput
   stockLossRecords?: Prisma.StockLossRecordCreateNestedManyWithoutWikiInput
+  purchaseOrderLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutFlowerWikiInput
 }
 
 export type FlowerWikiUncheckedCreateInput = {
@@ -492,6 +496,7 @@ export type FlowerWikiUncheckedCreateInput = {
   materials?: Prisma.MaterialUncheckedCreateNestedManyWithoutWikiInput
   recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutWikiInput
   stockLossRecords?: Prisma.StockLossRecordUncheckedCreateNestedManyWithoutWikiInput
+  purchaseOrderLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutFlowerWikiInput
 }
 
 export type FlowerWikiUpdateInput = {
@@ -518,6 +523,7 @@ export type FlowerWikiUpdateInput = {
   materials?: Prisma.MaterialUpdateManyWithoutWikiNestedInput
   recipeLines?: Prisma.RecipeLineUpdateManyWithoutWikiNestedInput
   stockLossRecords?: Prisma.StockLossRecordUpdateManyWithoutWikiNestedInput
+  purchaseOrderLines?: Prisma.PurchaseOrderLineUpdateManyWithoutFlowerWikiNestedInput
 }
 
 export type FlowerWikiUncheckedUpdateInput = {
@@ -544,6 +550,7 @@ export type FlowerWikiUncheckedUpdateInput = {
   materials?: Prisma.MaterialUncheckedUpdateManyWithoutWikiNestedInput
   recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutWikiNestedInput
   stockLossRecords?: Prisma.StockLossRecordUncheckedUpdateManyWithoutWikiNestedInput
+  purchaseOrderLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutFlowerWikiNestedInput
 }
 
 export type FlowerWikiCreateManyInput = {
@@ -615,14 +622,14 @@ export type FlowerWikiUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type FlowerWikiNullableScalarRelationFilter = {
-  is?: Prisma.FlowerWikiWhereInput | null
-  isNot?: Prisma.FlowerWikiWhereInput | null
-}
-
 export type FlowerWikiScalarRelationFilter = {
   is?: Prisma.FlowerWikiWhereInput
   isNot?: Prisma.FlowerWikiWhereInput
+}
+
+export type FlowerWikiNullableScalarRelationFilter = {
+  is?: Prisma.FlowerWikiWhereInput | null
+  isNot?: Prisma.FlowerWikiWhereInput | null
 }
 
 export type StringNullableListFilter<$PrismaModel = never> = {
@@ -706,6 +713,20 @@ export type FlowerWikiSumOrderByAggregateInput = {
   standardUnitCost?: Prisma.SortOrder
 }
 
+export type FlowerWikiCreateNestedOneWithoutPurchaseOrderLinesInput = {
+  create?: Prisma.XOR<Prisma.FlowerWikiCreateWithoutPurchaseOrderLinesInput, Prisma.FlowerWikiUncheckedCreateWithoutPurchaseOrderLinesInput>
+  connectOrCreate?: Prisma.FlowerWikiCreateOrConnectWithoutPurchaseOrderLinesInput
+  connect?: Prisma.FlowerWikiWhereUniqueInput
+}
+
+export type FlowerWikiUpdateOneRequiredWithoutPurchaseOrderLinesNestedInput = {
+  create?: Prisma.XOR<Prisma.FlowerWikiCreateWithoutPurchaseOrderLinesInput, Prisma.FlowerWikiUncheckedCreateWithoutPurchaseOrderLinesInput>
+  connectOrCreate?: Prisma.FlowerWikiCreateOrConnectWithoutPurchaseOrderLinesInput
+  upsert?: Prisma.FlowerWikiUpsertWithoutPurchaseOrderLinesInput
+  connect?: Prisma.FlowerWikiWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FlowerWikiUpdateToOneWithWhereWithoutPurchaseOrderLinesInput, Prisma.FlowerWikiUpdateWithoutPurchaseOrderLinesInput>, Prisma.FlowerWikiUncheckedUpdateWithoutPurchaseOrderLinesInput>
+}
+
 export type FlowerWikiCreateNestedOneWithoutMaterialsInput = {
   create?: Prisma.XOR<Prisma.FlowerWikiCreateWithoutMaterialsInput, Prisma.FlowerWikiUncheckedCreateWithoutMaterialsInput>
   connectOrCreate?: Prisma.FlowerWikiCreateOrConnectWithoutMaterialsInput
@@ -771,6 +792,126 @@ export type NullableIntFieldUpdateOperationsInput = {
   divide?: number
 }
 
+export type FlowerWikiCreateWithoutPurchaseOrderLinesInput = {
+  id?: string
+  photo?: string | null
+  englishName: string
+  chineseName: string
+  pinyinIndex?: string
+  colorTags?: Prisma.FlowerWikiCreatecolorTagsInput | string[]
+  morphology?: string | null
+  supplySeason?: string | null
+  floralRole: $Enums.FloralRole
+  maintenance: string
+  flowerLanguage?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costUpdatedAt?: Date | string | null
+  costNote?: string | null
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  materials?: Prisma.MaterialCreateNestedManyWithoutWikiInput
+  recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutWikiInput
+  stockLossRecords?: Prisma.StockLossRecordCreateNestedManyWithoutWikiInput
+}
+
+export type FlowerWikiUncheckedCreateWithoutPurchaseOrderLinesInput = {
+  id?: string
+  photo?: string | null
+  englishName: string
+  chineseName: string
+  pinyinIndex?: string
+  colorTags?: Prisma.FlowerWikiCreatecolorTagsInput | string[]
+  morphology?: string | null
+  supplySeason?: string | null
+  floralRole: $Enums.FloralRole
+  maintenance: string
+  flowerLanguage?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costUpdatedAt?: Date | string | null
+  costNote?: string | null
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  materials?: Prisma.MaterialUncheckedCreateNestedManyWithoutWikiInput
+  recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutWikiInput
+  stockLossRecords?: Prisma.StockLossRecordUncheckedCreateNestedManyWithoutWikiInput
+}
+
+export type FlowerWikiCreateOrConnectWithoutPurchaseOrderLinesInput = {
+  where: Prisma.FlowerWikiWhereUniqueInput
+  create: Prisma.XOR<Prisma.FlowerWikiCreateWithoutPurchaseOrderLinesInput, Prisma.FlowerWikiUncheckedCreateWithoutPurchaseOrderLinesInput>
+}
+
+export type FlowerWikiUpsertWithoutPurchaseOrderLinesInput = {
+  update: Prisma.XOR<Prisma.FlowerWikiUpdateWithoutPurchaseOrderLinesInput, Prisma.FlowerWikiUncheckedUpdateWithoutPurchaseOrderLinesInput>
+  create: Prisma.XOR<Prisma.FlowerWikiCreateWithoutPurchaseOrderLinesInput, Prisma.FlowerWikiUncheckedCreateWithoutPurchaseOrderLinesInput>
+  where?: Prisma.FlowerWikiWhereInput
+}
+
+export type FlowerWikiUpdateToOneWithWhereWithoutPurchaseOrderLinesInput = {
+  where?: Prisma.FlowerWikiWhereInput
+  data: Prisma.XOR<Prisma.FlowerWikiUpdateWithoutPurchaseOrderLinesInput, Prisma.FlowerWikiUncheckedUpdateWithoutPurchaseOrderLinesInput>
+}
+
+export type FlowerWikiUpdateWithoutPurchaseOrderLinesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  photo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  englishName?: Prisma.StringFieldUpdateOperationsInput | string
+  chineseName?: Prisma.StringFieldUpdateOperationsInput | string
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  colorTags?: Prisma.FlowerWikiUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  floralRole?: Prisma.EnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole
+  maintenance?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  materials?: Prisma.MaterialUpdateManyWithoutWikiNestedInput
+  recipeLines?: Prisma.RecipeLineUpdateManyWithoutWikiNestedInput
+  stockLossRecords?: Prisma.StockLossRecordUpdateManyWithoutWikiNestedInput
+}
+
+export type FlowerWikiUncheckedUpdateWithoutPurchaseOrderLinesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  photo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  englishName?: Prisma.StringFieldUpdateOperationsInput | string
+  chineseName?: Prisma.StringFieldUpdateOperationsInput | string
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  colorTags?: Prisma.FlowerWikiUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  floralRole?: Prisma.EnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole
+  maintenance?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  materials?: Prisma.MaterialUncheckedUpdateManyWithoutWikiNestedInput
+  recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutWikiNestedInput
+  stockLossRecords?: Prisma.StockLossRecordUncheckedUpdateManyWithoutWikiNestedInput
+}
+
 export type FlowerWikiCreateWithoutMaterialsInput = {
   id?: string
   photo?: string | null
@@ -794,6 +935,7 @@ export type FlowerWikiCreateWithoutMaterialsInput = {
   updatedAt?: Date | string
   recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutWikiInput
   stockLossRecords?: Prisma.StockLossRecordCreateNestedManyWithoutWikiInput
+  purchaseOrderLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutFlowerWikiInput
 }
 
 export type FlowerWikiUncheckedCreateWithoutMaterialsInput = {
@@ -819,6 +961,7 @@ export type FlowerWikiUncheckedCreateWithoutMaterialsInput = {
   updatedAt?: Date | string
   recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutWikiInput
   stockLossRecords?: Prisma.StockLossRecordUncheckedCreateNestedManyWithoutWikiInput
+  purchaseOrderLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutFlowerWikiInput
 }
 
 export type FlowerWikiCreateOrConnectWithoutMaterialsInput = {
@@ -860,6 +1003,7 @@ export type FlowerWikiUpdateWithoutMaterialsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   recipeLines?: Prisma.RecipeLineUpdateManyWithoutWikiNestedInput
   stockLossRecords?: Prisma.StockLossRecordUpdateManyWithoutWikiNestedInput
+  purchaseOrderLines?: Prisma.PurchaseOrderLineUpdateManyWithoutFlowerWikiNestedInput
 }
 
 export type FlowerWikiUncheckedUpdateWithoutMaterialsInput = {
@@ -885,6 +1029,7 @@ export type FlowerWikiUncheckedUpdateWithoutMaterialsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutWikiNestedInput
   stockLossRecords?: Prisma.StockLossRecordUncheckedUpdateManyWithoutWikiNestedInput
+  purchaseOrderLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutFlowerWikiNestedInput
 }
 
 export type FlowerWikiCreateWithoutRecipeLinesInput = {
@@ -910,6 +1055,7 @@ export type FlowerWikiCreateWithoutRecipeLinesInput = {
   updatedAt?: Date | string
   materials?: Prisma.MaterialCreateNestedManyWithoutWikiInput
   stockLossRecords?: Prisma.StockLossRecordCreateNestedManyWithoutWikiInput
+  purchaseOrderLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutFlowerWikiInput
 }
 
 export type FlowerWikiUncheckedCreateWithoutRecipeLinesInput = {
@@ -935,6 +1081,7 @@ export type FlowerWikiUncheckedCreateWithoutRecipeLinesInput = {
   updatedAt?: Date | string
   materials?: Prisma.MaterialUncheckedCreateNestedManyWithoutWikiInput
   stockLossRecords?: Prisma.StockLossRecordUncheckedCreateNestedManyWithoutWikiInput
+  purchaseOrderLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutFlowerWikiInput
 }
 
 export type FlowerWikiCreateOrConnectWithoutRecipeLinesInput = {
@@ -976,6 +1123,7 @@ export type FlowerWikiUpdateWithoutRecipeLinesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   materials?: Prisma.MaterialUpdateManyWithoutWikiNestedInput
   stockLossRecords?: Prisma.StockLossRecordUpdateManyWithoutWikiNestedInput
+  purchaseOrderLines?: Prisma.PurchaseOrderLineUpdateManyWithoutFlowerWikiNestedInput
 }
 
 export type FlowerWikiUncheckedUpdateWithoutRecipeLinesInput = {
@@ -1001,6 +1149,7 @@ export type FlowerWikiUncheckedUpdateWithoutRecipeLinesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   materials?: Prisma.MaterialUncheckedUpdateManyWithoutWikiNestedInput
   stockLossRecords?: Prisma.StockLossRecordUncheckedUpdateManyWithoutWikiNestedInput
+  purchaseOrderLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutFlowerWikiNestedInput
 }
 
 export type FlowerWikiCreateWithoutStockLossRecordsInput = {
@@ -1026,6 +1175,7 @@ export type FlowerWikiCreateWithoutStockLossRecordsInput = {
   updatedAt?: Date | string
   materials?: Prisma.MaterialCreateNestedManyWithoutWikiInput
   recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutWikiInput
+  purchaseOrderLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutFlowerWikiInput
 }
 
 export type FlowerWikiUncheckedCreateWithoutStockLossRecordsInput = {
@@ -1051,6 +1201,7 @@ export type FlowerWikiUncheckedCreateWithoutStockLossRecordsInput = {
   updatedAt?: Date | string
   materials?: Prisma.MaterialUncheckedCreateNestedManyWithoutWikiInput
   recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutWikiInput
+  purchaseOrderLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutFlowerWikiInput
 }
 
 export type FlowerWikiCreateOrConnectWithoutStockLossRecordsInput = {
@@ -1092,6 +1243,7 @@ export type FlowerWikiUpdateWithoutStockLossRecordsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   materials?: Prisma.MaterialUpdateManyWithoutWikiNestedInput
   recipeLines?: Prisma.RecipeLineUpdateManyWithoutWikiNestedInput
+  purchaseOrderLines?: Prisma.PurchaseOrderLineUpdateManyWithoutFlowerWikiNestedInput
 }
 
 export type FlowerWikiUncheckedUpdateWithoutStockLossRecordsInput = {
@@ -1117,6 +1269,7 @@ export type FlowerWikiUncheckedUpdateWithoutStockLossRecordsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   materials?: Prisma.MaterialUncheckedUpdateManyWithoutWikiNestedInput
   recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutWikiNestedInput
+  purchaseOrderLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutFlowerWikiNestedInput
 }
 
 
@@ -1128,12 +1281,14 @@ export type FlowerWikiCountOutputType = {
   materials: number
   recipeLines: number
   stockLossRecords: number
+  purchaseOrderLines: number
 }
 
 export type FlowerWikiCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   materials?: boolean | FlowerWikiCountOutputTypeCountMaterialsArgs
   recipeLines?: boolean | FlowerWikiCountOutputTypeCountRecipeLinesArgs
   stockLossRecords?: boolean | FlowerWikiCountOutputTypeCountStockLossRecordsArgs
+  purchaseOrderLines?: boolean | FlowerWikiCountOutputTypeCountPurchaseOrderLinesArgs
 }
 
 /**
@@ -1167,6 +1322,13 @@ export type FlowerWikiCountOutputTypeCountStockLossRecordsArgs<ExtArgs extends r
   where?: Prisma.StockLossRecordWhereInput
 }
 
+/**
+ * FlowerWikiCountOutputType without action
+ */
+export type FlowerWikiCountOutputTypeCountPurchaseOrderLinesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PurchaseOrderLineWhereInput
+}
+
 
 export type FlowerWikiSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -1192,6 +1354,7 @@ export type FlowerWikiSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   materials?: boolean | Prisma.FlowerWiki$materialsArgs<ExtArgs>
   recipeLines?: boolean | Prisma.FlowerWiki$recipeLinesArgs<ExtArgs>
   stockLossRecords?: boolean | Prisma.FlowerWiki$stockLossRecordsArgs<ExtArgs>
+  purchaseOrderLines?: boolean | Prisma.FlowerWiki$purchaseOrderLinesArgs<ExtArgs>
   _count?: boolean | Prisma.FlowerWikiCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["flowerWiki"]>
 
@@ -1269,6 +1432,7 @@ export type FlowerWikiInclude<ExtArgs extends runtime.Types.Extensions.InternalA
   materials?: boolean | Prisma.FlowerWiki$materialsArgs<ExtArgs>
   recipeLines?: boolean | Prisma.FlowerWiki$recipeLinesArgs<ExtArgs>
   stockLossRecords?: boolean | Prisma.FlowerWiki$stockLossRecordsArgs<ExtArgs>
+  purchaseOrderLines?: boolean | Prisma.FlowerWiki$purchaseOrderLinesArgs<ExtArgs>
   _count?: boolean | Prisma.FlowerWikiCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type FlowerWikiIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1280,6 +1444,7 @@ export type $FlowerWikiPayload<ExtArgs extends runtime.Types.Extensions.Internal
     materials: Prisma.$MaterialPayload<ExtArgs>[]
     recipeLines: Prisma.$RecipeLinePayload<ExtArgs>[]
     stockLossRecords: Prisma.$StockLossRecordPayload<ExtArgs>[]
+    purchaseOrderLines: Prisma.$PurchaseOrderLinePayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1708,6 +1873,7 @@ export interface Prisma__FlowerWikiClient<T, Null = never, ExtArgs extends runti
   materials<T extends Prisma.FlowerWiki$materialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FlowerWiki$materialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MaterialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   recipeLines<T extends Prisma.FlowerWiki$recipeLinesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FlowerWiki$recipeLinesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RecipeLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   stockLossRecords<T extends Prisma.FlowerWiki$stockLossRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FlowerWiki$stockLossRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StockLossRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  purchaseOrderLines<T extends Prisma.FlowerWiki$purchaseOrderLinesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FlowerWiki$purchaseOrderLinesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PurchaseOrderLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2219,6 +2385,30 @@ export type FlowerWiki$stockLossRecordsArgs<ExtArgs extends runtime.Types.Extens
   take?: number
   skip?: number
   distinct?: Prisma.StockLossRecordScalarFieldEnum | Prisma.StockLossRecordScalarFieldEnum[]
+}
+
+/**
+ * FlowerWiki.purchaseOrderLines
+ */
+export type FlowerWiki$purchaseOrderLinesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PurchaseOrderLine
+   */
+  select?: Prisma.PurchaseOrderLineSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PurchaseOrderLine
+   */
+  omit?: Prisma.PurchaseOrderLineOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PurchaseOrderLineInclude<ExtArgs> | null
+  where?: Prisma.PurchaseOrderLineWhereInput
+  orderBy?: Prisma.PurchaseOrderLineOrderByWithRelationInput | Prisma.PurchaseOrderLineOrderByWithRelationInput[]
+  cursor?: Prisma.PurchaseOrderLineWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PurchaseOrderLineScalarFieldEnum | Prisma.PurchaseOrderLineScalarFieldEnum[]
 }
 
 /**

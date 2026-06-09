@@ -1,604 +1,660 @@
-# Flower WMS System — 架构概览
+# Flower WMS System — 架构说明
 
-> 文档版本：基于代码库静态审计生成（Next.js App Router + Prisma + PostgreSQL）。  
-> 应用根目录：`flower-wms-system/`。所有物理表名以 `prisma/schema.prisma` 的 `@@map(...)` 为准。
+> 文档版本：基于当前代码库静态审计更新。
+> 应用根目录：`flower-wms-system/`。物理表名以 `prisma/schema.prisma` 的 `@@map(...)` 为准。
+> 本文只描述当前代码真实存在的模型、服务、API、页面和脚本。
 
 ---
 
-### 🌿 项目技术全景定位
+## 1. 项目技术全景定位
 
-本系统是基于 **Next.js 16（App Router）+ React 19 + Tailwind CSS 4 + Prisma 7 + PostgreSQL** 的全栈数字化鲜花大仓供应链管理系统。
+Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS + 微信小程序 API** 平台，技术栈为：
 
-核心能力边界：
+| 层级 | 当前实现 |
+|---|---|
+| Web | Next.js 16 App Router |
+| UI | React 19 + Tailwind CSS 4 |
+| ORM | Prisma 7，client 输出到 `src/generated/prisma` |
+| DB | PostgreSQL |
+| Auth | Auth.js / next-auth v5 beta，后台 StaffUser RBAC |
+| 小程序 | 仓库根目录 `42_mp/` |
+| 部署 | Dockerfile + docker-compose，Next standalone，cron worker |
 
-- **WMS 端（`/wms`）**：主导物料母表、标准工艺配方（BOM）、物理批次库存、仓储日常（入库 / 指定批次报损）、库存查询、订单履约看板。
-- **CMS 端（`/cms`）**：纯粹的小程序运营货架——商品 SPU/SKU、商品分类、轮播、营销配置；通过 **`ProductSku.recipeId`** **只读绑定** WMS 配方（同 SPU 下各款式可绑不同 BOM），不在 CMS 维护 BOM 明细。
-- **微信小程序 API（`/api/wechat/*`）**：用户登录、商品浏览、购物车、下单与 mock 支付、订单查询等。
+当前已实现能力：
 
-技术栈要点：
+- WMS 花材母表、标准配方、包装方案、物理批次库存、手工入库、指定批次报损、销售 FIFO、退款回库。
+- CMS 商品 SPU/SKU、商品分类、轮播、营销配置、SKU 绑定 Recipe、SKU 毛利预估展示。
+- 微信小程序用户登录、商品浏览、购物车、下单、mock 支付、订单查询。
+- 订单真实毛利核算：`OrderCostSnapshot`。
+- 产品级毛利预估：`FlowerWiki.standardUnitCost` + `Recipe` + `PackagingKit` + SKU price。
+- 经营报表中心：销售、趋势、毛利排行、低毛利、成本结构、花材使用、损耗、库存预警。
+- 供应商与采购单：`Supplier` / `PurchaseOrder` / `PurchaseOrderLine`。
+- 采购单到货入库：生成 `Batch` + `StockLog: INBOUND`，回写 `PurchaseOrderLine.inboundBatchId`。
 
-| 层级 | 选型 |
-|------|------|
-| 框架 | Next.js App Router，Server / Client Component 混用 |
-| ORM | Prisma Client，输出至 `src/generated/prisma` |
-| 数据库 | PostgreSQL（`datasource db`） |
-| 样式 | Tailwind CSS 4 |
-| 图标 | `lucide-react`（WMS 看板等 Client Component） |
-| 拼音检索 | `pinyin-pro` → `src/lib/pinyin-index.ts` |
+### 当前不存在 / 不应假设存在
 
-#### 能力边界速查（避免与历史设计或臆造功能混淆）
+| 能力 | 当前状态 |
+|---|---|
+| 多租户 SaaS | 未实现；无 `tenantId` 或租户隔离模型 |
+| 正式微信支付 | 未实现；`mock-pay` 可用，`callback` 是占位链路 |
+| 聚合配送 / 第三方配送 | 未实现 |
+| 对象存储 | 未实现；上传写本地 `public/uploads` |
+| Redis / MQ | 未实现；`package.json` 无相关依赖 |
+| 包装物理库存扣减 | 未实现；`PackagingKit` 只代表标准包装成本 |
+| 供应商分析报表 / 采购价趋势 | 未实现 |
+| Excel 导入导出 | 未实现 |
+| CRM / SaaS 计费 | 未实现 |
 
-**本代码库不存在（请勿臆造表名或接口）**
-
-| 项 | 说明 |
-|----|------|
-| 多租户 SaaS | 无租户隔离模型 |
-| 聚合配送调度 | 无第三方配送编排 |
-| 物理表 `stock_batches` | 从未作为当前 Schema 表名；物理批次使用 **`batches`**（`Batch` 模型） |
-| 物理表 `product_bom` | 早期迁移曾存在，**当前 Schema 已移除**；配方使用 **`recipes` + `recipe_lines`**，商品通过 **`product_skus.recipe_id`** 绑定（已从 SPU 下沉至 SKU，迁移 `20260529160000_sku_recipe_binding`） |
-
-**已实现**
-
-| 项 | 说明 |
-|----|------|
-| 销售支付 → 物理批次 FIFO | `markOrderPaidWithFifo`（见「订单与双轨库存」）：支付成功时在 `Serializable` 事务内扣 `batches.remaining_qty` 并写 `SALE_OUT` |
-| 退款 → 物理批次原路回库 | `refundPaidOrder` → `restorePhysicalStockFromSaleOutInTx`：按历史 `SALE_OUT` 逐批 `increment` + 写 `IN_CANCEL`（`operator: SYSTEM_REFUND_AUTO`） |
-| 虚拟库存健康投影校准 | `syncPhysicalStockToVirtual`（`services/inventory-sync.ts`）：木桶原理将 `product_skus.stock` 向下截断至物理可成套上限 |
-| CMS SKU 营销图文白名单 API | `PATCH /api/cms/skus/[id]`：仅 `description` / `imageUrl`；`requirePermission(STORE_OPERATOR)` |
-
-**尚未实现**
-
-| 项 | 说明 |
-|----|------|
-| 员工登录 UI | Auth.js + `StaffUser` 表已落地；`/login` 与 `staff-users` 管理页可用 |
-| 定时自动库存投影 | `syncPhysicalStockToVirtual` 仅提供手动脚本，无 Cron / 队列 |
-
-**历史命名 → 现行模型**
+历史命名对照：
 
 ```text
-stock_batches（不存在）     →  batches
-product_bom（已废弃）       →  recipes + recipe_lines + product_skus.recipe_id
-product_spus.recipe_id      →  已删除；配方指针在 product_skus.recipe_id
+stock_batches（不存在）     -> batches
+product_bom（已废弃）       -> recipes + recipe_lines + product_skus.recipe_id
+product_spus.recipe_id      -> 已删除；配方绑定在 product_skus.recipe_id
 ```
-
-**Monorepo 边界**：后端与后台在 `flower-wms-system/`；微信小程序客户端在仓库根目录 `42_mp/`（API 基址见 `42_mp/miniprogram/config/index.ts` → `baseUrl` / `apiWechatBaseUrl`）。
 
 ---
 
-### 📂 目录结构与核心模块边界
+## 2. 目录结构与模块边界
 
-```
+```text
 flower-wms-system/
 ├── prisma/
-│   ├── schema.prisma          # 唯一数据模型真理源
-│   └── migrations/            # 历史迁移 SQL
+│   ├── schema.prisma
+│   └── migrations/
+├── scripts/
+│   ├── cron-inventory-daemon.ts
+│   ├── smoke-purchase-flow.ts
+│   └── sync-physical-to-virtual-stock.ts
 ├── src/
 │   ├── app/
-│   │   ├── page.tsx           # 工作台门户（WMS / CMS 分流）
-│   │   ├── wms/               # WMS 页面路由
-│   │   ├── cms/               # CMS 页面路由
-│   │   ├── admin/             # 管理壳（轻量）
-│   │   └── api/
-│   │       ├── admin/         # 后台 REST（含 wms、wiki、orders…）
-│   │       ├── cms/           # CMS 专用 API
-│   │       └── wechat/        # 小程序 API
+│   │   ├── api/
+│   │   ├── cms/
+│   │   ├── wms/
+│   │   └── admin/
 │   ├── components/
-│   │   ├── wms/               # WMS 侧栏等
-│   │   ├── cms/               # CMS 侧栏、RecipeSelect、商品编辑器
-│   │   ├── shared/            # QuantityStepper、上传区等
-│   │   └── ui/                # FlowerMaterialSelect、Input、Button…
-│   ├── services/              # 领域事务（order-fifo、fifo、wms-stock、recipe…）
-│   ├── utils/                 # 无状态工具（batch-no、skuGenerator）
-│   ├── lib/                   # 工具、RBAC、CMS 白名单、库存查询 helper
-│   └── generated/prisma/      # Prisma 生成物（勿手改）
-└── scripts/                   # 种子、FIFO 试跑、库存投影校准等运维脚本
+│   ├── generated/prisma/
+│   ├── lib/
+│   ├── services/
+│   └── utils/
+└── package.json
 ```
 
-#### WMS 页面路由（`src/app/wms/`）
+### 关键 service
 
-| 路径 | 职责 |
-|------|------|
-| `/wms/dashboard` | 仪表盘指标、低库存、今日损耗等 |
-| `/wms/inventory` | 物理库存列表（仅有 `remainingQty > 0` 批次） |
-| `/wms/inventory/[id]` | 原材料详情：批次、流水、**历史报损日志** |
-| `/wms/operations` | **仓储日常控制台**（入库 + 指定批次报损 + 左侧折叠流水线） |
-| `/wms/wiki` | 物料母表（FlowerWiki）维护 |
+| 文件 | 职责 |
+|---|---|
+| `src/services/purchase-pure.ts` | 采购成本纯计算、附加费用分摊 |
+| `src/services/purchase.ts` | 供应商 CRUD、采购单 CRUD、取消、入库、标准成本更新 |
+| `src/services/order-cost-pure.ts` | 订单成本纯计算 |
+| `src/services/order-cost.ts` | `OrderCostSnapshot` 计算、查询、重算 |
+| `src/services/product-margin-pure.ts` | 产品毛利预估纯计算 |
+| `src/services/product-margin.ts` | SKU / SPU 毛利预估服务 |
+| `src/services/business-report-pure.ts` | 报表纯函数 |
+| `src/services/business-report.ts` | 经营报表与缺失快照 backfill |
+| `src/services/order-fifo.ts` | 支付后 FIFO 扣物理库存并生成订单成本快照 |
+| `src/services/fifo.ts` | FIFO 扣减算法与 StockLog 写入 |
+| `src/services/wms-stock.ts` | 手工入库、指定批次报损、批次流水线 |
+| `src/services/inventory-sync.ts` | 物理库存向 SKU 虚拟库存投影 |
+| `src/services/recipe.ts` | Recipe / RecipeLine CRUD 和 BOM 编号 |
+| `src/services/wiki.ts` | FlowerWiki CRUD 和检索 |
+
+当前代码未发现独立 `src/services/supplier.ts`；供应商 service 逻辑在 `src/services/purchase.ts`。
+
+---
+
+## 3. WMS 页面路由
+
+| 路径 | 组件 / 职责 |
+|---|---|
+| `/wms` | redirect 到 `/wms/dashboard` |
+| `/wms/dashboard` | WMS 仪表盘 |
+| `/wms/inventory` | 物理库存列表，仅展示有可用批次的 Material |
+| `/wms/inventory/[id]` | 原材料详情：批次、库存流水、历史报损 |
+| `/wms/operations` | 仓储日常：手工入库、报损、批次流水线 |
+| `/wms/purchase-orders` | 采购单管理：列表、详情、编辑、取消、到货入库、标准成本更新 |
+| `/wms/suppliers` | 供应商管理 |
+| `/wms/wiki` | FlowerWiki 母表 |
 | `/wms/recipes` | 标准配方研发中心 |
-| `/wms/material-categories` | 原材料分类（与商品分类解耦） |
-| `/wms/orders` | 小程序订单履约看板（Trello 五列拖拽 + 卡片详情弹窗） |
-| `/wms/batches` | → 重定向至 `/wms/operations` |
-| `/wms/wastage` | → 重定向至 `/wms/operations?panel=loss` |
-| `/wms/bom` | → 重定向至 `/wms/recipes` |
+| `/wms/packaging-kits` | 包装方案管理 |
+| `/wms/material-categories` | 原材料分类 |
+| `/wms/orders` | 订单履约看板 |
+| `/wms/reports` | 经营报表中心 |
+| `/wms/batches` | redirect 到 `/wms/operations` |
+| `/wms/wastage` | redirect 到 `/wms/operations?panel=loss` |
+| `/wms/bom` | redirect 到 `/wms/recipes` |
 
 导航定义：`src/components/wms/sidebar.tsx`。
 
-#### CMS 页面路由（`src/app/cms/`）
+---
+
+## 4. CMS 页面路由
 
 | 路径 | 职责 |
-|------|------|
-| `/cms/products` | 商品列表与编辑（**每 SKU 一行**绑定 `recipeId`，`RecipeSelect` 在款式表格内） |
+|---|---|
+| `/cms/products` | 商品列表，展示 SKU 毛利预估信息 |
+| `/cms/products/[id]` | 商品编辑，SKU 绑定 Recipe，展示毛利预估和 warning |
 | `/cms/product-categories` | 商城商品分类树 |
 | `/cms/banner` | 首页轮播 |
-| `/cms/marketing` | 营销配置（`app_configs`） |
+| `/cms/marketing` | 营销配置 |
+| `/cms/carousel` | redirect 到 `/cms/banner` |
+| `/cms/categories` | redirect 到 `/cms/product-categories` |
 
-导航定义：`src/components/cms/sidebar.tsx`。CMS **不包含** BOM 编辑、入库、报损入口。
+CMS 商品编辑边界：
 
-#### CMS 商品 API（`src/app/api/cms/products/`）
+- CMS 可以维护 SPU/SKU、价格、图文、商品分类、轮播与营销配置。
+- SKU 通过 `ProductSku.recipeId` 只读绑定 WMS Recipe。
+- CMS 不维护 RecipeLine 明细，不直接修改库存。
+- `PATCH /api/cms/skus/[id]` 只允许图文白名单字段，防止 mass assignment。
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| POST | `/api/cms/products` | 创建 SPU + SKU；`recipeId` 写在各 `skus[]` 项 |
-| PUT | `/api/cms/products/[id]` | 更新 SPU 字段 + `syncProductSkus`（含 `recipeId`） |
-| DELETE | `/api/cms/products/[id]` | 软删除 SPU |
+---
 
-解析与校验：`lib/cms-products.ts`（`parseCmsProductBody`、`assertSkuRecipesExist`）；SPU 字段映射：`lib/cms-product-mapper.ts`（**不再**写 SPU 级 `recipeId`）。`POST/PUT /api/admin/products` 为 deprecated 薄封装，行为同上。
+## 5. 后台 API 边界
 
-#### CMS SKU 营销图文 API（`src/app/api/cms/skus/`）
+### WMS 采购与供应商
 
-| 方法 | 路径 | 说明 |
-|------|------|------|
-| PATCH | `/api/cms/skus/[id]` | **白名单更新**：仅 `description`、`imageUrl`；拒绝 `recipeId` / `price` / `stock` 等 mass-assignment |
+| 方法 | 路径 |
+|---|---|
+| GET / POST | `/api/admin/wms/suppliers` |
+| GET / PUT / DELETE | `/api/admin/wms/suppliers/[id]` |
+| GET / POST | `/api/admin/wms/purchase-orders` |
+| GET / PUT | `/api/admin/wms/purchase-orders/[id]` |
+| POST | `/api/admin/wms/purchase-orders/[id]/cancel` |
+| POST | `/api/admin/wms/purchase-orders/[id]/receive` |
+| POST | `/api/admin/wms/purchase-orders/calculate-preview` |
+| POST | `/api/admin/wms/purchase-orders/lines/[lineId]/update-standard-cost` |
+| POST | `/api/admin/wms/purchase-orders/[id]/update-standard-costs` |
 
-- 鉴权：`lib/api-auth.ts` → `requirePermission('cms:write')`（`STORE_OPERATOR` / `STORE_ADMIN`）；失败 **401/403**
-- 解析：`lib/cms-sku-marketing.ts` → `parseSkuMarketingPatch` + `updateSkuMarketingOnly`
-- 完整商品保存（含配方/价格）仍走 `PUT /api/cms/products/[id]`，运营改图文应优先用本接口
-
-#### 后台鉴权（五级 RBAC + Auth.js）
-
-| 角色（Prisma `Role`） | 典型能力 |
-|------------------------|----------|
-| `IT_ADMIN` | 仅员工账号管理，**业务 API 盲区** |
-| `STORE_ADMIN` | 门店主理人：WMS + CMS + 人员 + 损耗审计 |
-| `WAREHOUSE_MANAGER` | 大仓：入库、报损、Wiki、配方审定 |
-| `FLORIST` | 订单看板、Wiki/配方只读 |
-| `STORE_OPERATOR` | CMS 商品上架、SKU 营销图文 PATCH |
-
-实现：`auth.ts`（Auth.js v5）+ `lib/rbac.ts`（`hasPermission` / `canCmsWrite` 等）+ `lib/api-auth.ts`（`requirePermission`）+ `lib/stock-mutation-auth.ts`（库存服务层 Session 鉴权）。与小程序用户 JWT（`WECHAT_JWT_SECRET`）**完全隔离**。
-
-#### WMS 后台 API（`src/app/api/admin/wms/`）
-
-| 方法 | 路径 | 服务层 | 说明 |
-|------|------|--------|------|
-| GET/POST | `/api/admin/wms/recipes` | `services/recipe.ts` | 配方列表 / 创建 |
-| GET/PUT/DELETE | `/api/admin/wms/recipes/[id]` | `services/recipe.ts` | 单条配方 CRUD |
-| POST | `/api/admin/wms/stock-in` | `services/wms-stock.ts` | 原料到货入库 |
-| POST | `/api/admin/wms/stock-loss` | `services/wms-stock.ts` | **指定批次**物理报损 |
-| GET | `/api/admin/wms/stock-batches` | `services/wms-stock.ts` | 按 `flowerWikiId` 查可用批次 |
-| GET | `/api/admin/wms/stock-loss/history` | `services/wms-stock.ts` | 报损历史 |
-| GET | `/api/admin/wms/stock-pipeline` | `services/wms-stock.ts` | 在库批次流水线 |
-| GET/POST | `/api/admin/wms/material-categories` | `lib/material-category*` | 原材料分类 |
-| GET/POST | `/api/admin/wms/bom` | — | **410**，已迁移至 `recipes` |
-
-已移除的旧链路（勿再引用）：`POST /api/admin/wastage`、`POST /api/admin/batches`、`/api/admin/wms/inbound/confirm`（`wiki-inbound`）、`ai-preview`。
-
-#### 物料母表 API（WMS 数据，路径在 `admin/wiki`）
+### WMS 其他
 
 | 路径 | 说明 |
-|------|------|
-| `/api/admin/wiki` | 列表 / 创建；支持 `q` 简拼检索 |
-| `/api/admin/wiki/[id]` | 单条读写 |
+|---|---|
+| `/api/admin/wms/recipes`、`/[id]` | 配方 CRUD |
+| `/api/admin/wms/packaging-kits`、`/[id]` | 包装方案 CRUD / 停用 |
+| `/api/admin/wms/stock-in` | 手工入库 |
+| `/api/admin/wms/stock-loss` | 指定批次报损 |
+| `/api/admin/wms/stock-batches` | 按 FlowerWiki 查可用批次 |
+| `/api/admin/wms/stock-loss/history` | 报损历史 |
+| `/api/admin/wms/stock-pipeline` | 在库批次流水线 |
+| `/api/admin/wms/material-categories`、`/[id]` | 原材料分类 |
+| `/api/admin/wms/bom` | 410，旧 BOM API 已迁移至 recipes |
 
-#### 服务层职责（`src/services/`）
-
-| 模块 | 文件 | 职责 |
-|------|------|------|
-| 订单生命周期 | `order-lifecycle.ts` | 下单、关单、退款、履约流转；`closePendingOrder` / `refundPaidOrder` 均为 **Serializable** |
-| 支付 × FIFO | `order-fifo.ts` | `markOrderPaidWithFifo`、`deductPhysicalStockForPaidOrder`、`restorePhysicalStockFromSaleOutInTx`（**IN_CANCEL**） |
-| 配方展开（纯函数） | `order-fifo-pure.ts` | `expandAndAggregateWikiDemands`（`recipeId` 为空的订单行静默跳过；单测：`order-fifo-pure.test.ts`） |
-| FIFO 算法 | `fifo.ts` | `calculateFifoDeductions`、`applyFifoDeductionsInTx`、`applyFifoDeductions` |
-| 库存健康投影 | `inventory-sync.ts` | `syncPhysicalStockToVirtual`：物理批次木桶上限 → 截断 `product_skus.stock` |
-| 微信订单门面 | `wechat-order.ts` | 再导出 `order-lifecycle` 公开 API |
-| 看板状态 | `order-status.ts` | `transitionOrderStatus`（含 `PAID` 拖拽） |
-| 看板详情聚合 | `order-fulfillment-detail.ts` | `getOrderFulfillmentDetail`：订单全量字段 + 物理花材消耗清单 |
-| 仓储事务 | `wms-stock.ts` | `runStockInTransaction`、`runStockLossTransaction`、流水线查询 |
-| 配方 | `recipe.ts` | 配方 CRUD、编号生成、`getRecipeForProduct`（经 SPU → `skus` 级联查首个有配方的 SKU） |
-| 母表 | `wiki.ts` | FlowerWiki CRUD、简拼检索 |
-| 盘点 | `stocktake.ts` | `POST /api/admin/stocktake` |
-
-批次号生成已提取至 `src/utils/batch-no.ts`（`wms-stock` 入库使用）。`services/inbound.ts` 为遗留文件，**当前无引用**。
-
-#### 业务解耦原则（代码现状）
-
-```
-FlowerWiki（母表真理）
-    ├── RecipeLine（配方明细，仅工艺公式）
-    ├── Material（物理仓储 SKU，入库时按需创建）
-    │       └── Batch（物理批次，独立进价）
-    └── StockLossRecord（报损留痕）
-
-ProductSpu（CMS 商品 SPU）
-    └── ProductSku（可售库存 stock + 可选 recipeId → Recipe）
-            └── Recipe（只读引用，不反向写库存）
-```
-
----
-
-### 📡 主数据血缘与「WMS 配方中心」
-
-#### 中央真理源：`flower_wikis`
-
-Prisma 模型：`FlowerWiki` → 表 **`flower_wikis`**。
-
-| 字段（DB snake_case） | 应用层 | 用途 |
-|----------------------|--------|------|
-| `english_name` | `englishName` | 拉丁学名，唯一 |
-| `chinese_name` | `chineseName` | 中文常用名 |
-| `pinyin_index` | `pinyinIndex` | 简拼索引，写入时由 `toPinyinIndex()` 生成 |
-| `color_tags` | `colorTags` | 色系标签数组 |
-| `floral_role` | `floralRole` | 枚举：主花 / 配花 / 线条 / 叶材 |
-| `flower_language` | `flowerLanguage` | 花语 / 寓意，由 DeepSeek 补全返回，可人工调整 |
-| `alias_map` | `aliasMap` | JSON 别名 |
-
-**简拼检索流**：
-
-1. 创建 / 更新 Wiki 时：`src/lib/pinyin-index.ts` 用 `pinyin-pro` 取首字母 → 如「矢车菊」→ `scj`。
-2. 列表查询：`services/wiki.ts` 的 `buildWhere()` 对 `englishName`、`chineseName`、`pinyinIndex` 做 `contains` OR 检索。
-3. 前端组件：`src/components/ui/FlowerMaterialSelect.tsx` 调用 `GET /api/admin/wiki?q=…`，用于配方研发、仓储报损等场景。
-
-#### 标准配方：`recipes` + `recipe_lines`
-
-| 模型 | 物理表 | 说明 |
-|------|--------|------|
-| `Recipe` | `recipes` | 配方主表 |
-| `RecipeLine` | `recipe_lines` | 明细行 |
-
-**关键字段血缘**：
-
-- `recipes.recipe_code` ← 系统自动生成，格式 **`BOM-YYYYMMDD-XXX`**（见 `services/recipe.ts` → `generateNextRecipeCode()`，Serializable 事务防碰撞）。
-- `recipes.name` ← **必填**，用户输入的配方名称（非单号）。
-- `recipe_lines.flower_wiki_id` → `flower_wikis.id`（**直接关联母表**，不关联 `materials`）。
-- `recipe_lines.quantity_needed` ← 所需枝数。
-
-**与 CMS 的绑定**：`product_skus.recipe_id` → `recipes.id`（**非**已废弃的 `product_bom` 表，**非**已删除的 `product_spus.recipe_id`）。迁移 `20260529160000_sku_recipe_binding` 会将既有 SPU 级配方回填到其下所有 SKU 后删除 SPU 列。
-
-CMS 商品编辑（`src/app/cms/products/ProductEditor.tsx`）在**款式表格**内为每个 SKU 渲染 `src/components/cms/RecipeSelect.tsx`（`compact` 模式），拉取 `/api/admin/wms/recipes` 展示 `{code} - {name} ({summary})`。保存经 `parseCmsProductBody` → `syncProductSkus` / `buildSkuCreateRows` 写入 `product_skus.recipe_id`（`src/lib/cms-product-write.ts`）。请求体仍兼容顶层 `recipeId`，会自动下沉到未指定配方的 SKU。
-
-配方关联 SKU 计数：`recipe._count.skus`（`listRecipes` / `getRecipeById`）。
-
-#### 配方保存的沙盒隔离（已实现）
-
-`services/recipe.ts` 中 `writeRecipeLines()` **仅**执行：
-
-1. `recipeLine.deleteMany` + `createMany`（写 `recipe_lines`）；
-2. `assertWikiIdsExist` 校验母表 ID。
-
-**不会**创建 `materials`、**不会**写入 `batches` / `stock_logs`。因此配方研发不会产生物理库存副作用。
-
-库存列表防护：`src/lib/wms-inventory.ts` 的 `physicalStockMaterialWhere` 要求 `batches.some({ remainingQty: { gt: 0 } })`，避免「零库存幽灵 Material」出现在 `/wms/inventory`。
-
-#### UI：`/wms/recipes`
-
-- 组件：`src/app/wms/recipes/WmsRecipeConsole.tsx`
-- 能力：配方名称、简拼选花材、`QuantityStepper` 数量、保存后重置表单
-- API：`POST /api/admin/wms/recipes` body `{ name, ingredients: [{ flowerWikiId, quantity }] }`
-
----
-
-### 🛒 订单与双轨库存
-
-小程序订单涉及**两层库存**，职责分离、时点不同：
-
-| 层级 | 字段 / 表 | 扣减时点 | 实现 |
-|------|-----------|----------|------|
-| **虚拟可售库存** | `product_skus.stock` | **创建订单**（`PENDING_PAYMENT`） | `order-lifecycle.ts` → `atomicDecrementSkuStock` + `Serializable` 事务 |
-| **物理批次库存** | `batches.remaining_qty` | **支付成功**（`PAID`） | `order-fifo.ts` → `markOrderPaidWithFifo` → `applyFifoDeductionsInTx` |
-
-| 逆向操作 | 虚拟 SKU | 物理批次 | 实现 |
-|----------|----------|----------|------|
-| 关闭待支付 | `restoreOrderSkuStock` | 无（未支付无 `SALE_OUT`） | `closePendingOrder`（Serializable） |
-| 已付退款 | 可选 `restoreOrderSkuStock`（`rollbackStock`） | **原路回库** `IN_CANCEL` | `refundPaidOrder`（Serializable） |
-
-#### 退款物理原路回库（`IN_CANCEL`）
-
-`refundPaidOrder` 在 **Serializable** 事务内顺序：
-
-```text
-refundPaidOrder(orderId, { rollbackStock? })
-  → prisma.$transaction (Serializable)
-  1. restorePhysicalStockFromSaleOutInTx(orderId)
-     a. 防重复：已有 IN_CANCEL 则拒绝
-     b. 拉取该 orderId 全部 SALE_OUT 流水
-     c. 逐条：batch.remainingQty += log.quantity
-     d. 写入 stock_logs: IN_CANCEL（delta/quantity 为正，operator: SYSTEM_REFUND_AUTO）
-  2. orders → CANCELLED（refundAmount / refundTime / cancelSource）
-  3. 若 rollbackStock：restoreOrderSkuStock（虚拟 SKU）
-  → 任一步失败整笔 Rollback
-```
-
-`closePendingOrder` 仅归还虚拟 SKU，不涉及物理批次。
-
-#### 虚拟库存健康投影（木桶校准）
-
-服务：`services/inventory-sync.ts` → `syncPhysicalStockToVirtual`
-
-1. 拉取 `recipeId IS NOT NULL` 且 SPU 已上架、未软删的 SKU（含 `recipe.lines`）
-2. 对每个 `flowerWikiId`：`batch.aggregate(_sum remainingQty)`（可用批次：`remainingQty > 0` 且未过期）
-3. 木桶：`maxPossibleQty = min(floor(总支数 / quantityNeeded))`
-4. 若 `sku.stock > maxPossibleQty` → 强行 `update` 截断（只降不升）
-
-运维脚本：`npx tsx scripts/sync-physical-to-virtual-stock.ts`
-
-#### 支付成功接入点（均已调用 `markOrderPaidWithFifo`）
-
-| 入口 | 文件 | 说明 |
-|------|------|------|
-| 小程序 mock 支付 | `POST /api/wechat/orders/mock-pay` → `mockPayWechatOrder` | 物理库存不足返回 **409** |
-| 微信回调占位 | `POST /api/wechat/orders/callback` | 同事务 FIFO；已 `PAID` 幂等返回 |
-| 后台看板标记已付 | `adminMarkOrderPaid` ← `order-status.ts` | 拖拽至「已支付」 |
-
-#### 支付事务内 FIFO 步骤
-
-```text
-markOrderPaidWithFifo({ orderId, userId?, operator? })
-  → prisma.$transaction (Serializable)
-  1. orders: PENDING_PAYMENT → PAID（updateMany 防并发）
-  2. orderItem → sku（recipeId）→ recipe → recipe_lines
-  3. expandAndAggregateWikiDemands（quantityNeeded × item.quantity；无 recipeId 的 SKU 行跳过）
-  4. flower_wiki_id → materials.id（无 Material 则熔断）
-  5. calculateFifoDeductions(materialId, qty, tx)  // createdAt ASC
-  6. batch.updateMany（remainingQty >= take，防超卖）
-  7. stock_logs: SALE_OUT + orderId + orderItemId + batchId
-  → 任一步失败抛 PhysicalStockInsufficientError（「物理大仓花材库存不足」），整笔回滚
-```
-
-试跑脚本：`npx tsx scripts/draft-trigger-order-fifo-pay.ts <orderId> [userId]`。
-
-#### 微信小程序 API（`src/app/api/wechat/`）
+### 成本 / 报表 / 商品预估
 
 | 路径 | 说明 |
-|------|------|
-| `auth/login`、`login` | 用户登录（JWT） |
-| `products`、`products/[id]`、`product-categories` | 货架浏览 |
-| `homepage`、`home-banners` | 首页聚合 |
-| `cart` | 购物车 |
-| `orders/create` | 创建待支付订单（扣 SKU 库存） |
-| `orders/mock-pay` | 模拟支付（扣物理批次） |
-| `orders/callback` | 微信支付回调占位 |
-| `orders`、`orders/cancel`、`orders/confirm-receipt` | 列表 / 关单 / 确认收货 |
-| `user/profile`、`upload` | 资料与上传 |
+|---|---|
+| `GET /api/admin/orders/[id]/cost` | 订单成本详情 |
+| `POST /api/admin/orders/[id]/cost/recalculate` | 重算成本快照 |
+| `PATCH /api/admin/orders/[id]/delivery-cost` | 写实际配送成本并重算 |
+| `GET /api/admin/products/[id]/margin-estimate` | 商品毛利预估 |
+| `POST /api/admin/products/[id]/margin-estimate/recalculate` | 重新计算商品毛利预估 |
+| `GET /api/admin/cms/skus/[id]/margin-estimate` | SKU 毛利预估 |
+| `/api/admin/reports/*` | 经营报表中心 API |
 
-客户端请求封装：`42_mp/miniprogram/utils/request.ts` → `apiWechatBaseUrl`（默认 `${baseUrl}/api/wechat`）。
+报表 API：
 
-#### 后台订单 API
+- `dashboard`
+- `business-summary`
+- `daily-sales`
+- `product-profit-ranking`
+- `low-margin-orders`
+- `cost-structure`
+- `material-usage`
+- `wastage`
+- `inventory-alerts`
+- `backfill-cost-snapshots`
 
-| 路径 | 说明 |
-|------|------|
-| `PATCH /api/admin/orders` | 看板拖拽 / 按钮流转（`orderId` + `nextStatus`） |
-| `GET /api/admin/orders/[id]/detail` | 履约详情 + **WMS 物理花材消耗表**（`order-fulfillment-detail.ts`） |
-| `POST /api/admin/orders/[id]/cancel-or-close` | 关闭待支付 |
-| `POST /api/admin/orders/[id]/refund` | 退款取消（**始终**物理 `IN_CANCEL`；`rollbackStock` 控制虚拟 SKU） |
+权限：
 
-#### 订单履约看板 UI（`/wms/orders`）
-
-| 文件 | 职责 |
-|------|------|
-| `page.tsx` | Server：拉取 `listKanbanOrders` → `mapPrismaOrderToKanban` |
-| `OrdersKanban.tsx` | Client：五列瀑布流、拖拽流转、发货 / 退款弹窗 |
-| `OrderKanbanCard.tsx` | 单卡：完整换行单号、复制按钮、点击打开详情（`isModalOpen` 本地状态） |
-| `OrderDetailModal.tsx` | 详情弹窗：`orderId` 拉取详情；遮罩 / `Esc` 关闭 |
-| `CopyIconButton.tsx` | 单号 / 电话 / 地址复制（`stopPropagation`，成功 2s 变 Check） |
-| `kanban-config.ts` | 五列定义（待支付 → … → 归档） |
-| `archive-semantics.ts` | 归档列卡片语义着色 |
-
-**卡片交互**
-
-- 订单号：`break-all text-sm md:text-base font-bold`，禁止 `truncate`。
-- 复制：`navigator.clipboard.writeText` + `e.stopPropagation()`，避免触发卡片点击。
-- 点击卡片本体 → 卡片内 `isModalOpen = true` → 渲染 `OrderDetailModal`；底部履约按钮区 `stopPropagation`。
-- 拖拽：拖拽结束后短暂屏蔽点击，避免误开弹窗。
-
-**详情弹窗与物理消耗**
-
-- 弹窗：`fixed inset-0 z-50 bg-black/50 backdrop-blur-xs`；点击遮罩或 `Escape` 调用 `onClose()`。
-- 展示：履约状态、实付金额、收货人三件套、期望送达时间、贺卡寄语、商品明细。
-- 底部 **WMS 物理花材消耗表**（HTML Table）：
-
-| 列 | 数据来源 |
-|----|----------|
-| 花材母表名称 | `flower_wikis.chinese_name`（经 `materials.wiki` 或配方行） |
-| 工艺角色 | `flower_wikis.floral_role` → `FLORAL_ROLE_LABEL` |
-| 锁定批次号 | 已支付：`stock_logs`（`SALE_OUT`）→ `batches.batch_no`；待支付：显示「待支付锁定」 |
-| 消耗数量 | 已支付：流水 `quantity`；待支付：BOM 展开预估（`expandAndAggregateWikiDemands` 按 wiki 合并） |
-
-`consumptionMode`：`locked`（实扣）| `projected`（配方预估）| `empty`（无配方或无流水）。
+- 后台 API 使用 `src/lib/api-auth.ts` 的 `requirePermission`。
+- `IT_ADMIN` 不能访问业务数据。
+- `wms:write`：`STORE_ADMIN` / `WAREHOUSE_MANAGER`。
+- `orders:write`：`STORE_ADMIN` / `FLORIST`。
+- `business:read` / `business:write` 用于成本与报表相关接口。
 
 ---
 
-### 📦 WMS 库存核心：销售 FIFO 与批次精准报损
+## 6. 数据模型血缘
 
-#### 物理表模型（Schema First）
+### 关键 Prisma 模型
 
-| Prisma 模型 | 物理表 | 说明 |
-|-------------|--------|------|
-| `Material` | `materials` | 仓储原材料；`wiki_id` 可选关联母表 |
-| `Batch` | **`batches`** | 物理库存批次（勿与臆造的 `stock_batches` 混淆） |
-| `StockLog` | `stock_logs` | 全量库存流水 |
-| `StockLossRecord` | `stock_loss_records` | 报损专表留痕 |
+| 模型 | 表 | 说明 |
+|---|---|---|
+| `FlowerWiki` | `flower_wikis` | 花材母表；标准成本字段用于产品预估 |
+| `Material` | `materials` | 仓储原材料，通常通过 `wikiId` 关联 FlowerWiki |
+| `Batch` | `batches` | 物理库存批次，含 `unitCost`、`remainingQty` |
+| `StockLog` | `stock_logs` | 库存流水 |
+| `StockLossRecord` | `stock_loss_records` | 报损留痕 |
+| `Recipe` | `recipes` | 标准配方，含 `packagingKitId` |
+| `RecipeLine` | `recipe_lines` | 配方花材明细 |
+| `PackagingKit` | `packaging_kits` | 标准包装成本 |
+| `ProductSpu` | `product_spus` | 商城商品 |
+| `ProductSku` | `product_skus` | SKU，含 `recipeId` |
+| `Order` | `orders` | 小程序订单，含 `deliveryCostActual` / `deliveryCostNote` |
+| `OrderCostSnapshot` | `order_cost_snapshots` | 订单真实毛利快照 |
+| `Supplier` | `suppliers` | 供应商 |
+| `PurchaseOrder` | `purchase_orders` | 采购单 |
+| `PurchaseOrderLine` | `purchase_order_lines` | 采购明细，入库后关联 Batch |
 
-`batches` 核心字段：`original_qty`、`remaining_qty`、`unit_cost`（批次独立进价）、`inbound_at`、`created_at`、`supplier`。
-
-#### 两种扣库逻辑的本质区别
-
-| 场景 | 实现位置 | 算法 | 状态 |
-|------|----------|------|------|
-| **销售出库 FIFO** | `src/services/fifo.ts` + `src/services/order-fifo.ts` | 按 `createdAt ASC` 查 `remainingQty > 0` 的批次，跨批次扣减并写 `StockLogType.SALE_OUT` | **已接入**：支付成功（`mockPayWechatOrder` / `adminMarkOrderPaid` / 微信回调）在 `Serializable` 事务内调用 `markOrderPaidWithFifo` → `applyFifoDeductionsInTx`；下单时仍原子扣减 `product_skus.stock`（虚拟可售） |
-| **物理损耗盘点** | `src/services/wms-stock.ts` → `runStockLossTransaction()` | 操作员指定 `stockBatchId`，单批次精准扣减 | **已上线**，主路径 `/api/admin/wms/stock-loss` |
-
-##### 1. 销售 FIFO（支付成功时原子扣减）
-
-调用链详见上文「订单与双轨库存」。核心 API：
-
-- `fifo.ts`：`calculateFifoDeductions`、`applyFifoDeductionsInTx`（须在父事务内调用，禁止嵌套 `$transaction`）
-- `fifo.ts`：`applyFifoDeductions` 为独立事务薄包装（报损等单操作用）
-- `order-fifo.ts`：`markOrderPaidWithFifo` 编排订单状态 + 配方展开 + FIFO
-
-##### 2. 物理报损：指定批次精准扣减（当前生产路径）
-
-**API**：`POST /api/admin/wms/stock-loss`
-
-请求体（`src/types/index.ts` → `WmsStockLossBody`）：
-
-```json
-{
-  "flowerWikiId": "uuid",
-  "stockBatchId": "cuid",
-  "lossQuantity": 5,
-  "reason": "自然开败",
-  "operator": "可选"
-}
-```
-
-事务逻辑（`runStockLossTransaction`）：
-
-1. 校验批次存在且 `batch.material.wikiId === flowerWikiId`；
-2. 若 `lossQuantity > batch.remainingQty` → 报错 **「报损数量超出该批次可用库存」**；
-3. `batches.remaining_qty` 递减；
-4. 写 `stock_logs`（`WASTAGE_OUT`）；
-5. 写 **`stock_loss_records`**（关联 `flower_wiki_id`、`batch_id`、`stock_log_id`）。
-
-**报损历史查询**：
-
-- `GET /api/admin/wms/stock-loss/history?flowerWikiId=` 或 `?materialId=`
-
-#### 原料到货入库
-
-**API**：`POST /api/admin/wms/stock-in`  
-服务：`runStockInTransaction()` — 为每次到货创建**独立** `batches` 行 + `INBOUND` 流水；若该 Wiki 尚无 Material 则创建 `materials`（入库场景合理，与配方沙盒不同）。
-
-#### 仓储日常 UI（`/wms/operations`）
-
-| 文件 | 职责 |
-|------|------|
-| `WmsStockConsole.tsx` | 双栏：左流水线 + 右入库 / 报损 Tab |
-| `BatchPipelinePanel.tsx` | 左侧折叠流水线 |
-
-**左侧流水线（Group By & Collapse）**：
-
-- 按 `flowerWikiId`（无则退化为 `materialId`）分组；
-- **默认全部收起**；
-- 收起态展示：花材名（`text-lg` / `md:text-xl font-bold`）、批次数 Tag、库中总计支数、库存总价值（Σ 剩余 × 进价）；
-- 点击展开：CSS `grid-rows` 过渡动画，内嵌按 `createdAt` 排序的批次小卡片。
-
-**右侧报损面板**：
-
-- 文案：「请选择实际发生物理损耗的花材批次进行扣减」；
-- 流程：简拼选花材 → `GET /api/admin/wms/stock-batches` 填充 Select → 选定批次后启用 `QuantityStepper` 与提交；
-- Select Option 格式：`批次: {日期} - 剩余: {n}支 - 进价: ¥{单价} - 供应商: {名}`。
-
-#### 库存详情中的报损日志
-
-`src/app/wms/inventory/[id]/page.tsx` + `services/wms-inventory-detail.ts`：
-
-- 区块 **「📜 历史报损盘点日志」**：从 `stock_loss_records` 加载；
-- 列：报损时间 | 报损批次（单号 / 日期）| 损耗数量 | 损耗原因。
-
-#### 共享计数器组件
-
-`src/components/shared/QuantityStepper.tsx`：
-
-- 左右 ± 按钮（最小 44×44px 触控热区）；
-- 中间 `type="number"` + `inputMode="numeric"` + `pattern="[0-9]*"`；
-- `onBlur` 纠正空值 / 非法值为 `min`（默认 1）；
-- 用于：配方研发、仓储入库、仓储报损等。
-
----
-
-### 🚧 研发红线与架构防线
-
-以下为**代码中已固化或从实现直接推导**的规矩；未在仓库中出现的策略不会写入。
-
-#### 必须遵守
-
-1. **配方保存零库存副作用**  
-   `services/recipe.ts` 只写 `recipes` / `recipe_lines`，禁止在配方事务中创建 `materials` 或 `batches`。
-
-2. **库存列表只展示真实物理库存**  
-   使用 `lib/wms-inventory.ts` 的 `physicalStockMaterialWhere`，禁止对 `materials` 全表 `findMany` 作为库存展示。
-
-3. **报损必须指定批次**  
-   新链路只认 `stockBatchId`；禁止在 `stock-loss` 接口恢复「按时间戳自动 FIFO 扣损耗」。
-
-4. **计数器交互标准**  
-   WMS 数量输入统一走 `QuantityStepper`（加减 + 手动输入 + 移动端数字键盘），禁止退化为不可编辑的纯文本展示。
-
-5. **物理命名规范**  
-   DB 列 snake_case（`@@map`）；TypeScript / API JSON 使用 camelCase。
-
-6. **CMS / WMS 分类完全解耦**  
-   - 商品分类：`product_categories_list` + `product_categories`  
-   - 原材料分类：`material_categories` + `material_category_relations`  
-   二者无 `parentId` 交叉。
-
-7. **配方绑定在 SKU，禁止写回 SPU**  
-   `product_spus` 无 `recipe_id` 列；CMS 保存、FIFO 展开、`getRecipeForProduct` 均只认 `product_skus.recipe_id`。
-
-8. **CMS SKU 营销图文与供应链字段物理隔离**  
-   运营改 `description` / `imageUrl` 必须走 `PATCH /api/cms/skus/[id]`；禁止在该接口或前端向 Prisma 传入 `recipeId`、`price`、`stock` 等列。
-
-9. **退款物理回库必须可追溯**  
-   已付订单退款须经 `SALE_OUT` → `IN_CANCEL` 成对留痕；禁止直接 `UPDATE batches` 而不写 `stock_logs`。
-
-#### 已知悬空 / 待清理 `[待架构重构/Pending Refactoring]`
-
-| 项 | 说明 |
-|----|------|
-| 员工账号体系 | 部分遗留 admin 路由（`banners`、`app-config`）仍仅靠 Middleware 粗拦截 |
-| 旧 BOM 商品 API | `GET /api/admin/products/bom` 只读兼容；经 `getRecipeForProduct` 查 SPU 下首个有 `recipeId` 的 SKU |
-| `productRecipeInclude` | 已废弃别名，请用 `skuRecipeInclude`（`lib/product-categories.ts`） |
-| 遗留 `inbound.ts` | 与 `wms-stock` 功能重叠，无 import 方，可删除 |
-| Schema 注释滞后 | `schema.prisma` 头部仍写「RecipeLine ↔ Material」；`WASTAGE_OUT` 注释与指定批次报损实现不符 |
-| 双轨库存运营 | 虚拟 SKU 与物理批次需运营对齐；**SKU 无 `recipeId`** 或 Wiki 无入库 Material 会导致支付跳过该行或 FIFO 熔断 |
-| 数据库迁移 | 部署后须执行 `npx prisma migrate deploy`（含 `20260529160000_sku_recipe_binding`） |
-
-#### API 与枚举速查
-
-**`StockLogType`（`stock_logs.type`）**
-
-| 枚举 | 含义 |
-|------|------|
-| `INBOUND` | 采购入库 |
-| `SALE_OUT` | 销售出库（支付成功 FIFO，关联 `orderId` / `orderItemId`） |
-| `WASTAGE_OUT` | 损耗出库（指定批次报损，非 FIFO） |
-| `ADJUSTMENT` | 盘点调整 |
-| `IN_CANCEL` | 订单取消回库（`refundPaidOrder` 按 `SALE_OUT` 原路补偿，`operator: SYSTEM_REFUND_AUTO`） |
-
-**订单状态机**：`OrderStatus` — 待支付 → 已支付 → 制作中 → 配送中 → 已完成 / 已取消（`services/order-lifecycle.ts` + `order-status.ts`）。
-
-| 状态 | 典型触发 |
-|------|----------|
-| `PENDING_PAYMENT` | `createWechatOrder`（扣 SKU） |
-| `PAID` | `markOrderPaidWithFifo`（扣物理批次） |
-| `PRODUCTION` / `DELIVERING` / `COMPLETED` | `adminTransitionOrder` |
-| `CANCELLED` | `closePendingOrder`（仅还虚拟 SKU）或 `refundPaidOrder`（物理 `IN_CANCEL` + 可选还虚拟 SKU） |
-
----
-
-### 附录：核心 ER 关系（简图）
+### ER 简图
 
 ```mermaid
 erDiagram
-  flower_wikis ||--o{ recipe_lines : "flower_wiki_id"
-  recipes ||--o{ recipe_lines : "recipe_id"
-  recipes ||--o{ product_skus : "recipe_id"
-  flower_wikis ||--o{ materials : "wiki_id"
-  materials ||--o{ batches : "material_id"
-  batches ||--o{ stock_logs : "batch_id"
-  batches ||--o{ stock_loss_records : "batch_id"
-  flower_wikis ||--o{ stock_loss_records : "flower_wiki_id"
-  stock_logs ||--o| stock_loss_records : "stock_log_id"
-  product_spus ||--o{ product_skus : "spu_id"
-  product_skus ||--o{ order_items : "sku_id"
-  orders ||--o{ stock_logs : "order_id"
-  order_items ||--o{ stock_logs : "order_item_id"
+  flower_wikis ||--o{ recipe_lines : flower_wiki_id
+  recipes ||--o{ recipe_lines : recipe_id
+  packaging_kits ||--o{ recipes : packaging_kit_id
+
+  flower_wikis ||--o{ materials : wiki_id
+  materials ||--o{ batches : material_id
+  materials ||--o{ stock_logs : material_id
+  batches ||--o{ stock_logs : batch_id
+  batches ||--o{ stock_loss_records : batch_id
+  stock_logs ||--o| stock_loss_records : stock_log_id
+  flower_wikis ||--o{ stock_loss_records : flower_wiki_id
+
+  product_spus ||--o{ product_skus : spu_id
+  recipes ||--o{ product_skus : recipe_id
+  product_skus ||--o{ order_items : sku_id
+  orders ||--o{ order_items : order_id
+  orders ||--o{ stock_logs : order_id
+  order_items ||--o{ stock_logs : order_item_id
+  orders ||--o| order_cost_snapshots : order_id
+
+  suppliers ||--o{ purchase_orders : supplier_id
+  purchase_orders ||--o{ purchase_order_lines : purchase_order_id
+  flower_wikis ||--o{ purchase_order_lines : flower_wiki_id
+  batches ||--o| purchase_order_lines : inbound_batch_id
 ```
+
+### 三条成本链路
+
+产品预估链路：
+
+```text
+FlowerWiki.standardUnitCost
+  -> RecipeLine.quantityNeeded
+  -> Recipe + PackagingKit.standardCost
+  -> ProductSku.price
+  -> estimated gross margin / suggested prices
+```
+
+订单实际链路：
+
+```text
+Order
+  -> SALE_OUT StockLog
+  -> Batch.unitCost
+  -> OrderCostSnapshot
+  -> Business reports
+```
+
+采购成本源头链路：
+
+```text
+PurchaseOrderLine.actualUnitCost
+  -> Batch.unitCost
+  -> SALE_OUT StockLog
+  -> OrderCostSnapshot
+```
+
+必须区分：
+
+- `FlowerWiki.standardUnitCost`：产品预估成本。
+- `Batch.unitCost`：订单实际成本。
+- `PurchaseOrderLine.actualUnitCost`：采购分摊后的入库成本，receive 后写入 Batch。
 
 ---
 
-### 文档维护说明
+## 7. 订单与双轨库存
 
-- 变更 Prisma Schema 后，请同步更新本文「物理表名」与 ER 图，并执行 `npx prisma migrate deploy` + `npx prisma generate`。
-- 配方绑定层级变更（SPU → SKU）时，同步更新 CMS 写入链（`cms-products.ts` / `cms-product-write.ts` / `ProductEditor`）与 FIFO 展开链（`order-fifo.ts`）。
-- 新增 WMS API 请在 `src/app/api/admin/wms/` 落地，并在 `services/` 封装事务，避免 Route Handler 内联复杂 Prisma 逻辑。
-- 订单库存逻辑变更时，同步更新「订单与双轨库存」与 `fifo.ts` / `order-fifo.ts` / `inventory-sync.ts` 调用链说明。
-- CMS 运营接口或 RBAC 变更时，同步更新「CMS SKU 营销图文 API」与 `lib/rbac.ts` 角色表。
-- 看板 UI / 详情弹窗变更时，同步更新「订单履约看板 UI」与 `GET /api/admin/orders/[id]/detail` 说明。
+### 双轨库存
+
+| 库存 | 表/字段 | 时点 |
+|---|---|---|
+| 虚拟可售库存 | `product_skus.stock` | 创建订单时扣减 |
+| 物理批次库存 | `batches.remaining_qty` | 支付成功后 FIFO 扣减 |
+
+支付链路：
+
+```text
+markOrderPaidWithFifo
+  -> orders: PENDING_PAYMENT -> PAID
+  -> order items -> sku.recipe -> recipe_lines
+  -> expand demands by FlowerWiki
+  -> Material(wikiId)
+  -> FIFO batches by createdAt ASC
+  -> decrement Batch.remainingQty
+  -> create StockLog: SALE_OUT
+  -> upsert OrderCostSnapshot
+```
+
+订单真实毛利生成时机：
+
+- mock 支付 / 后台标记已支付 / 回调占位进入 `markOrderPaidWithFifo` 后生成或更新。
+- `deliveryCostActual` 变更后，`PATCH /api/admin/orders/[id]/delivery-cost` 会触发重算。
+- 退款后历史快照保留，报表会按退款状态排除或单独统计；库存通过 `IN_CANCEL` 原路回库。
+
+订单成本不使用 `FlowerWiki.standardUnitCost`；它只使用历史 `SALE_OUT` 对应的 `Batch.unitCost`。
+
+---
+
+## 8. 产品级毛利预估
+
+相关文件：
+
+- `src/services/product-margin-pure.ts`
+- `src/services/product-margin.ts`
+- `src/app/api/admin/products/[id]/margin-estimate/route.ts`
+- `src/app/api/admin/cms/skus/[id]/margin-estimate/route.ts`
+- `src/app/cms/products/ProductEditor.tsx`
+
+输入：
+
+- `FlowerWiki.standardUnitCost`
+- `FlowerWiki.costUnit`
+- `FlowerWiki.costNote`
+- `FlowerWiki.costUpdatedAt`
+- `RecipeLine.quantityNeeded`
+- `Recipe.packagingKitId`
+- `PackagingKit.standardCost`
+- `ProductSku.price`
+
+输出：
+
+- 标准花材成本。
+- 标准包装成本。
+- 总标准成本。
+- SKU 预估毛利。
+- SKU 预估毛利率。
+- 建议售价区间。
+- 成本完整性 warnings。
+
+warning 场景：
+
+- SKU 未绑定 Recipe。
+- Recipe 未绑定 PackagingKit。
+- Recipe 中 FlowerWiki 缺少 `standardUnitCost`。
+- SKU price 无效或缺失。
+
+产品级毛利预估是定价辅助，不覆盖历史订单真实毛利。
+
+---
+
+## 9. 经营报表中心
+
+入口：
+
+- 页面：`/wms/reports`
+- 服务：`src/services/business-report.ts`
+- API：`/api/admin/reports/*`
+
+报表：
+
+| 报表 | 数据口径 |
+|---|---|
+| Sales summary | 有效订单 + `OrderCostSnapshot` |
+| Daily sales trend | 按日期聚合销售额与成本 |
+| Product profit ranking | 优先用订单项 SALE_OUT 精确花材成本，否则按订单比例分摊 |
+| Low margin orders | 低毛利订单筛选 |
+| Cost structure | 花材、包装、配送等成本占比 |
+| Material usage cost | `SALE_OUT × Batch.unitCost` |
+| Wastage | `StockLossRecord.lossQuantity × Batch.unitCost` |
+| Inventory alerts | 当前批次剩余数量与库存价值 |
+
+库存价值公式：
+
+```text
+inventoryValue = sum(batch.remainingQty × batch.unitCost)
+```
+
+缺失快照处理：
+
+- 报表会返回 warnings。
+- `POST /api/admin/reports/backfill-cost-snapshots` 可补算缺失 `OrderCostSnapshot`。
+
+---
+
+## 10. 采购与供应商
+
+### Supplier
+
+`SupplierType`：
+
+- `LOCAL`
+- `KUNMING_ONLINE`
+- `WHOLESALE_MARKET`
+- `PLATFORM`
+- `OTHER`
+
+供应商停用是软停用：`isActive = false`。停用不影响历史采购单查看。
+
+### PurchaseOrder 状态机
+
+```text
+DRAFT -> ORDERED -> RECEIVED
+DRAFT -> CANCELLED
+ORDERED -> CANCELLED
+```
+
+约束：
+
+- `DRAFT` / `ORDERED` 可编辑。
+- `RECEIVED` 不可修改核心金额和明细。
+- `RECEIVED` 不可重复入库。
+- `CANCELLED` 不可入库。
+
+### PurchaseOrderLine 成本字段
+
+| 字段 | 说明 |
+|---|---|
+| `purchaseQuantity` | 采购数量 |
+| `purchaseUnit` | 扎 / 支 / 把 / 盒等 |
+| `stemsPerUnit` | 每单位折算支数 |
+| `totalStems` | `purchaseQuantity × stemsPerUnit` |
+| `unitPrice` | 采购单价 |
+| `lineAmount` | `purchaseQuantity × unitPrice` |
+| `allocatedExtraFee` | 分摊附加费用 |
+| `actualTotalCost` | 明细实际总成本 |
+| `actualUnitCost` | 实际单支成本 |
+| `inboundBatchId` | 到货入库后关联 Batch |
+
+BY_AMOUNT 分摊：
+
+```text
+allocatedExtraFee = totalExtraFee × lineAmount / goodsAmount
+actualTotalCost = lineAmount + allocatedExtraFee
+actualUnitCost = actualTotalCost / totalStems
+```
+
+`goodsAmount = 0` 时不分摊附加费用并返回 warning。
+
+### receivePurchaseOrder 事务
+
+服务：`src/services/purchase.ts`。
+
+流程：
+
+```text
+receivePurchaseOrder
+  -> require wms:write + operator check
+  -> transaction
+     1. load PurchaseOrder + Supplier + lines + FlowerWiki
+     2. 校验状态：非 CANCELLED / RECEIVED，且有明细
+     3. 原子状态锁：DRAFT/ORDERED + receivedAt null -> RECEIVED
+     4. 每行 resolveOrCreate Material(wikiId)
+     5. generate batchNo
+     6. create Batch
+        - originalQty = totalStems
+        - remainingQty = totalStems
+        - unitCost = actualUnitCost
+        - supplier = supplier.name
+     7. create StockLog: INBOUND
+        - materialId / batchId
+        - quantity = totalStems
+        - delta = totalStems
+        - remark 包含 purchaseNo
+     8. update PurchaseOrderLine.inboundBatchId
+  -> return purchaseOrder + createdBatches + stockLogs
+```
+
+任一步失败，整张采购单回滚，不会出现只创建 Batch 或只写状态的部分成功。
+
+### 与手工入库关系
+
+- 手工入库：`POST /api/admin/wms/stock-in`，直接录入 FlowerWiki、束数、每束支数、单束采购价。
+- 采购入库：从 PurchaseOrderLine 的分摊后 `actualUnitCost` 生成 Batch。
+- 两者最终都进入 `Batch` + `StockLog: INBOUND`，因此库存页面、FIFO、订单成本和报表可以复用同一链路。
+
+### 用采购价更新标准成本
+
+已实现：
+
+- 单行：`POST /api/admin/wms/purchase-orders/lines/[lineId]/update-standard-cost`
+- 整单：`POST /api/admin/wms/purchase-orders/[id]/update-standard-costs`
+- UI：RECEIVED 采购单详情页按钮“用本次采购价更新标准成本”
+
+该功能只更新 `FlowerWiki.standardUnitCost`，用于后续产品预估，不影响历史订单快照。
+
+---
+
+## 11. WMS 库存核心
+
+### Material / Batch / StockLog
+
+| 模型 | 角色 |
+|---|---|
+| `Material` | 仓储原材料，采购和手工入库尽量绑定 `wikiId` |
+| `Batch` | 可 FIFO 扣减的物理批次 |
+| `StockLog` | 所有库存变化的流水事实 |
+
+`StockLogType`：
+
+- `INBOUND`：入库，手工或采购。
+- `SALE_OUT`：销售出库。
+- `WASTAGE_OUT`：指定批次报损。
+- `ADJUSTMENT`：盘点调整。
+- `IN_CANCEL`：订单取消 / 退款回库。
+
+### 库存页面兼容性
+
+- `/wms/inventory` 使用 `src/lib/wms-inventory.ts`，只展示 `remainingQty > 0` 的批次对应 Material。
+- `/wms/inventory/[id]` 使用 `src/services/wms-inventory-detail.ts`，展示批次与 StockLog；`INBOUND` remark 会显示采购单号。
+- `/wms/operations` 批次流水线使用 `listActiveBatchPipeline`，展示 batchNo、supplier、unitCost、remainingQty。
+
+采购入库批次只要 `remainingQty > 0`，就会进入上述页面。
+
+---
+
+## 12. Docker / 部署
+
+Docker 文件位于仓库根目录：
+
+- `Dockerfile`
+- `docker-compose.yml`
+- `docker-compose.example.yml`
+
+compose 服务：
+
+| 服务 | 说明 |
+|---|---|
+| `flower-nginx` | Nginx 网关 |
+| `flower-web` | Next.js Web 应用 |
+| `flower-cron-worker` | 库存投影 cron worker |
+| `db` | PostgreSQL |
+
+`flower-wms-system/docker-entrypoint.sh`：
+
+- 默认执行 `npx prisma migrate deploy`。
+- `SKIP_DB_MIGRATE=true` 时跳过。
+
+Dockerfile：
+
+- builder 阶段执行 `npx prisma generate` 和 `npm run build`。
+- runner 阶段使用 Next standalone。
+- healthcheck 请求 `/login`。
+
+当前 compose 没有为 `public/uploads` 配置持久化卷；上传文件持久性需要部署层额外处理。
+
+---
+
+## 13. 脚本与测试
+
+### package scripts
+
+| 命令 | 说明 |
+|---|---|
+| `npm run dev` | 开发服务 |
+| `npm run build` | 生产构建 |
+| `npm run start` | 生产启动 |
+| `npm run lint` | ESLint |
+| `npm run test:cost` | 订单成本纯函数测试 |
+| `npm run test:reports` | 报表纯函数测试 |
+| `npm run test:purchase` | 采购成本纯函数测试 |
+| `npm run test:margin` | 产品毛利纯函数测试 |
+| `npm run db:seed` | Prisma seed |
+| `npm run smoke:purchase` | 采购入库 DB smoke |
+| `npm run seed:test-products` | 测试商品种子 |
+
+### smoke:purchase
+
+`scripts/smoke-purchase-flow.ts` 会：
+
+1. 找到或创建测试供应商。
+2. 找到或创建测试 FlowerWiki。
+3. 创建采购单：2 扎、每扎 10 支、单价 20、运费 10、包装费 5。
+4. 断言 `goodsAmount = 40`、`totalExtraFee = 15`、`actualUnitCost = 2.75`。
+5. 执行采购入库。
+6. 断言 Batch、StockLog、Material 库存和成本字段一致。
+
+运行前需要可连接的 PostgreSQL `DATABASE_URL` 且已应用 migrations。
+
+---
+
+## 14. 经营红线 / 架构防线
+
+1. 配方保存只写 `recipes` / `recipe_lines`，不能产生库存副作用。
+2. 库存变化必须通过 `StockLog` 留痕，不能绕过流水直接改 Batch。
+3. 报损必须指定批次，不能恢复为自动 FIFO 报损。
+4. 订单实际毛利必须基于历史 `SALE_OUT` 和 `Batch.unitCost`。
+5. 产品预估毛利必须基于 `FlowerWiki.standardUnitCost`，不得混用订单实际批次成本。
+6. `PackagingKit.standardCost` 用于 BOM 预估和订单包装成本快照，不代表包装物理库存。
+7. 采购单入库必须写 Batch + `StockLog: INBOUND`。
+8. 采购单不能绕过库存流水直接增加库存。
+9. `RECEIVED` 采购单不能重复入库。
+10. `RECEIVED` 采购单不能修改核心金额和明细。
+11. `CANCELLED` 采购单不能入库。
+12. 供应商停用不能影响历史采购单。
+13. 经营报表优先基于 `OrderCostSnapshot`，不应每次用当前成本重算历史毛利。
+14. CMS SKU 营销 PATCH 只能改图文白名单字段，不得 mass assignment。
+15. `stock_batches` 不是当前表名，当前批次表为 `batches`。
+16. `product_bom` 已废弃；当前配方体系为 `recipes` + `recipe_lines` + `product_skus.recipe_id`。
+17. 当前不是多租户 SaaS，新增业务代码不得假设 tenant 隔离已存在。
+
+---
+
+## 15. 已知悬空 / 待重构
+
+| 项 | 状态 |
+|---|---|
+| 多租户 SaaS | 未实现 |
+| 正式微信支付 | 未实现，当前为 mock / callback 占位 |
+| 对象存储 | 未实现，当前本地 uploads |
+| Redis / MQ | 未实现 |
+| 完整测试体系 | 当前以 tsx 轻量测试和 smoke script 为主 |
+| 采购分析 / 供应商价格趋势 | 未实现 |
+| Excel 导入导出 | 未实现 |
+| CRM | 未实现 |
+| SaaS 计费 | 未实现 |
+| 包装物理库存 | 未实现 |
+| `services/inbound.ts` | 遗留文件，当前未发现 import 方 |
+| 平台费 / 人工 / 其他成本 | 快照字段存在，但当前订单成本计算按 0 |
+
+---
+
+## 16. 文档维护规则
+
+- 变更 Prisma Schema 后，同步更新本文 ER 和模型说明。
+- 新增 WMS API 时，同步更新 API 表和服务职责。
+- 变更订单成本 / 产品预估 / 报表口径时，必须同步更新三条成本链路。
+- 变更采购入库时，必须同步更新采购事务步骤和库存红线。
+- 不要在文档中写当前代码未实现的能力。

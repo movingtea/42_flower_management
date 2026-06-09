@@ -59,6 +59,29 @@ enum FloralRole {
   FOLIAGE /// 叶材
 }
 
+/// 供应商类型
+enum SupplierType {
+  LOCAL /// 本地花农 / 门店周边供应
+  KUNMING_ONLINE /// 昆明线上采购
+  WHOLESALE_MARKET /// 批发市场
+  PLATFORM /// 平台采购
+  OTHER /// 其他
+}
+
+/// 采购单状态
+enum PurchaseOrderStatus {
+  DRAFT /// 草稿
+  ORDERED /// 已下单
+  RECEIVED /// 已到货入库
+  CANCELLED /// 已取消
+}
+
+/// 采购附加成本分摊方式
+enum PurchaseCostAllocationMethod {
+  BY_AMOUNT /// 按明细金额占比分摊
+  BY_QUANTITY /// 按采购数量占比分摊（预留）
+}
+
 /// 后台员工 RBAC 五级角色（与小程序 users 表解耦）
 enum Role {
   IT_ADMIN /// 系统运维：仅用户/权限，业务盲区
@@ -148,6 +171,91 @@ model MaterialCategoryRelation {
   @@unique([materialId, materialCategoryId])
   @@index([materialCategoryId])
   @@map("material_category_relations")
+}
+
+// ---------------------------------------------------------------------------
+// Supplier / PurchaseOrder — 供应商与采购单（采购成本分摊 + 到货入库）
+// ---------------------------------------------------------------------------
+
+model Supplier {
+  id           String       @id @default(cuid())
+  name         String
+  supplierType SupplierType @map("supplier_type")
+  contactName  String?      @map("contact_name")
+  phone        String?
+  wechat       String?
+  address      String?      @db.Text
+  note         String?      @db.Text
+  isActive     Boolean      @default(true) @map("is_active")
+  createdAt    DateTime     @default(now()) @map("created_at")
+  updatedAt    DateTime     @updatedAt @map("updated_at")
+
+  purchaseOrders PurchaseOrder[]
+
+  @@index([name])
+  @@index([supplierType])
+  @@index([isActive])
+  @@map("suppliers")
+}
+
+model PurchaseOrder {
+  id                  String                       @id @default(cuid())
+  purchaseNo          String                       @unique @map("purchase_no")
+  supplierId          String                       @map("supplier_id")
+  purchaseDate        DateTime                     @map("purchase_date")
+  expectedArrivalDate DateTime?                    @map("expected_arrival_date")
+  receivedAt          DateTime?                    @map("received_at")
+  status              PurchaseOrderStatus          @default(DRAFT)
+  goodsAmount         Decimal                      @default(0) @map("goods_amount") @db.Decimal(12, 2)
+  shippingFee         Decimal                      @default(0) @map("shipping_fee") @db.Decimal(12, 2)
+  packagingFee        Decimal                      @default(0) @map("packaging_fee") @db.Decimal(12, 2)
+  otherFee            Decimal                      @default(0) @map("other_fee") @db.Decimal(12, 2)
+  totalExtraFee       Decimal                      @default(0) @map("total_extra_fee") @db.Decimal(12, 2)
+  totalAmount         Decimal                      @default(0) @map("total_amount") @db.Decimal(12, 2)
+  allocationMethod    PurchaseCostAllocationMethod @default(BY_AMOUNT) @map("allocation_method")
+  note                String?                      @db.Text
+  createdAt           DateTime                     @default(now()) @map("created_at")
+  updatedAt           DateTime                     @updatedAt @map("updated_at")
+
+  supplier Supplier            @relation(fields: [supplierId], references: [id], onDelete: Restrict)
+  lines    PurchaseOrderLine[]
+
+  @@index([supplierId])
+  @@index([purchaseDate])
+  @@index([status])
+  @@map("purchase_orders")
+}
+
+model PurchaseOrderLine {
+  id                String   @id @default(cuid())
+  purchaseOrderId   String   @map("purchase_order_id")
+  flowerWikiId      String   @map("flower_wiki_id")
+  purchaseName      String?  @map("purchase_name")
+  grade             String?
+  color             String?
+  spec              String?
+  purchaseQuantity  Decimal  @map("purchase_quantity") @db.Decimal(12, 2)
+  purchaseUnit      String   @map("purchase_unit")
+  stemsPerUnit      Decimal  @map("stems_per_unit") @db.Decimal(12, 2)
+  totalStems        Decimal  @map("total_stems") @db.Decimal(12, 2)
+  unitPrice         Decimal  @map("unit_price") @db.Decimal(12, 2)
+  lineAmount        Decimal  @map("line_amount") @db.Decimal(12, 2)
+  allocatedExtraFee Decimal  @default(0) @map("allocated_extra_fee") @db.Decimal(12, 2)
+  actualTotalCost   Decimal  @default(0) @map("actual_total_cost") @db.Decimal(12, 2)
+  actualUnitCost    Decimal  @default(0) @map("actual_unit_cost") @db.Decimal(12, 4)
+  supplierSkuName   String?  @map("supplier_sku_name")
+  note              String?  @db.Text
+  inboundBatchId    String?  @unique @map("inbound_batch_id")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
+  flowerWiki    FlowerWiki    @relation(fields: [flowerWikiId], references: [id], onDelete: Restrict)
+  inboundBatch  Batch?        @relation("PurchaseLineInboundBatch", fields: [inboundBatchId], references: [id], onDelete: SetNull)
+
+  @@index([purchaseOrderId])
+  @@index([flowerWikiId])
+  @@map("purchase_order_lines")
 }
 
 // ---------------------------------------------------------------------------
@@ -318,9 +426,10 @@ model Batch {
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
 
-  material         Material          @relation(fields: [materialId], references: [id], onDelete: Restrict)
-  stockLogs        StockLog[]
-  stockLossRecords StockLossRecord[]
+  material          Material           @relation(fields: [materialId], references: [id], onDelete: Restrict)
+  stockLogs         StockLog[]
+  stockLossRecords  StockLossRecord[]
+  purchaseOrderLine PurchaseOrderLine? @relation("PurchaseLineInboundBatch")
 
   @@index([materialId, inboundAt])
   @@index([materialId, remainingQty])
@@ -579,9 +688,10 @@ model FlowerWiki {
   createdAt            DateTime   @default(now()) @map("created_at")
   updatedAt            DateTime   @updatedAt @map("updated_at")
 
-  materials        Material[]
-  recipeLines      RecipeLine[]
-  stockLossRecords StockLossRecord[]
+  materials          Material[]
+  recipeLines        RecipeLine[]
+  stockLossRecords   StockLossRecord[]
+  purchaseOrderLines PurchaseOrderLine[]
 
   @@index([chineseName])
   @@index([floralRole])
