@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { RecipeSelect } from "@/components/cms/RecipeSelect";
 import { ProductCategoryTreeSelect } from "@/components/cms/ProductCategoryTreeSelect";
 import { RichTextEditorLazy } from "@/components/cms/RichTextEditorLazy";
@@ -14,10 +14,17 @@ import type {
   ProductEditorProps,
   ProductSkuEditorRow,
 } from "@/app/cms/products/types";
+import type { ProductMarginEstimate, SkuMarginEstimate } from "@/services/product-margin";
 
 const SHIPPING_FEE_PATTERN = /^[0-9]+(\.[0-9]{1,2})?$/;
 const SHIPPING_FEE_ERROR_MSG =
   "请输入正确的运费金额，最多支持两位小数";
+
+type ProductMarginApiResponse = {
+  success: boolean;
+  data?: ProductMarginEstimate;
+  error?: string;
+};
 
 function emptySkuRow(sortOrder = 0): ProductSkuEditorRow {
   return {
@@ -36,6 +43,10 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
   const fileRef = useRef<HTMLInputElement>(null);
   const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [marginLoading, setMarginLoading] = useState(false);
+  const [marginEstimate, setMarginEstimate] =
+    useState<ProductMarginEstimate | null>(null);
+  const [marginError, setMarginError] = useState("");
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
@@ -61,6 +72,28 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
     setToast({ message, type });
     window.setTimeout(() => setToast(null), 2800);
   }
+
+  const loadMarginEstimate = useCallback(async () => {
+    if (isNew || productId === "new") return;
+    setMarginLoading(true);
+    setMarginError("");
+    try {
+      const res = await fetch(`/api/admin/products/${productId}/margin-estimate`);
+      const json = (await res.json()) as ProductMarginApiResponse;
+      if (!res.ok || !json.success || !json.data) {
+        throw new Error(json.error ?? "加载毛利预估失败");
+      }
+      setMarginEstimate(json.data);
+    } catch (e) {
+      setMarginError(e instanceof Error ? e.message : "加载毛利预估失败");
+    } finally {
+      setMarginLoading(false);
+    }
+  }, [isNew, productId]);
+
+  useEffect(() => {
+    void loadMarginEstimate();
+  }, [loadMarginEstimate]);
 
   async function handleSkuImageUpload(file: File, index: number) {
     setUploadingIndex(index);
@@ -228,13 +261,82 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
         return;
       }
 
-      router.push("/cms/products");
+      await loadMarginEstimate();
       router.refresh();
     } catch {
       showToast("网络异常，请检查连接后重试", "error");
     } finally {
       setSubmitting(false);
     }
+  }
+
+  function findSkuEstimate(row: ProductSkuEditorRow): SkuMarginEstimate | null {
+    if (!row.id) return null;
+    return (
+      marginEstimate?.skus.find((estimate) => estimate.skuId === row.id) ?? null
+    );
+  }
+
+  function renderSkuMargin(row: ProductSkuEditorRow) {
+    if (!row.id) {
+      return <span className="text-xs text-zinc-400">保存后计算</span>;
+    }
+    if (marginLoading) {
+      return <span className="text-xs text-zinc-400">计算中…</span>;
+    }
+    const estimate = findSkuEstimate(row);
+    if (!estimate) {
+      return <span className="text-xs text-zinc-400">暂无预估</span>;
+    }
+    if (estimate.recipeId !== row.recipeId) {
+      return (
+        <span className="text-xs text-amber-700">配方已修改，保存后刷新预估</span>
+      );
+    }
+
+    const price = Number(row.price);
+    const totalCost = Number(estimate.totalCost);
+    const profit = Number.isFinite(price) ? price - totalCost : 0;
+    const margin = Number.isFinite(price) && price > 0 ? profit / price : 0;
+    const warningText = estimate.warnings.join("；");
+
+    return (
+      <div className="min-w-48 space-y-1 text-xs">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-zinc-700">
+            成本 ¥{estimate.totalCost}
+          </span>
+          <span
+            className={`rounded-full px-2 py-0.5 font-medium ${
+              margin < 0.45
+                ? "bg-amber-100 text-amber-800"
+                : margin > 0.7
+                  ? "bg-violet-100 text-violet-800"
+                  : "bg-emerald-100 text-emerald-800"
+            }`}
+          >
+            毛利率 {(margin * 100).toFixed(1)}%
+          </span>
+        </div>
+        <p className="text-zinc-600">
+          花材 ¥{estimate.materialCost} · 包装 ¥{estimate.packagingCost} · 毛利 ¥
+          {profit.toFixed(2)}
+        </p>
+        <p className="text-zinc-500">
+          建议售价：
+          {estimate.suggestedPrices
+            .map((row) => `${(Number(row.targetMargin) * 100).toFixed(0)}% ¥${row.price}`)
+            .join(" / ")}
+        </p>
+        {warningText ? (
+          <p className="text-amber-700" title={warningText}>
+            ⚠ {warningText}
+          </p>
+        ) : (
+          <p className="text-emerald-700">{estimate.marginLevel}</p>
+        )}
+      </div>
+    );
   }
 
   const sidebarMeta = (
@@ -348,6 +450,9 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
                 <p className="mt-1 text-xs text-zinc-500">
                   指定一个「商品卡片主图」用于小程序列表封面
                 </p>
+                {marginError ? (
+                  <p className="mt-1 text-xs text-amber-700">{marginError}</p>
+                ) : null}
               </div>
               <Button type="button" variant="secondary" onClick={addSkuRow}>
                 + 添加款式
@@ -368,12 +473,13 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
             />
 
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[640px] text-left text-sm">
+              <table className="w-full min-w-[880px] text-left text-sm">
                 <thead className="border-b bg-zinc-50 text-zinc-600">
                   <tr>
                     <th className="px-3 py-2 font-medium">款式品名</th>
                     <th className="px-3 py-2 font-medium">大仓配方</th>
                     <th className="px-3 py-2 font-medium">价格</th>
+                    <th className="px-3 py-2 font-medium">毛利预估</th>
                     <th className="px-3 py-2 font-medium">库存</th>
                     <th className="px-3 py-2 font-medium">款式图</th>
                     <th className="px-3 py-2 font-medium">主图</th>
@@ -408,6 +514,7 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
                           compact
                         />
                       </td>
+                      <td className="px-3 py-3">{renderSkuMargin(row)}</td>
                       <td className="px-3 py-3">
                         <input
                           type="number"

@@ -33,6 +33,10 @@ export function serializeWiki(row: FlowerWiki) {
     careTable: parseStoredCareDocument(row.maintenanceCare),
     aliasMap,
     defaultShelfLifeDays: row.defaultShelfLifeDays,
+    standardUnitCost: row.standardUnitCost?.toFixed(4) ?? null,
+    costUnit: row.costUnit,
+    costUpdatedAt: row.costUpdatedAt?.toISOString() ?? null,
+    costNote: row.costNote,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
