@@ -291,6 +291,7 @@ export type BatchWhereInput = {
   material?: Prisma.XOR<Prisma.MaterialScalarRelationFilter, Prisma.MaterialWhereInput>
   stockLogs?: Prisma.StockLogListRelationFilter
   stockLossRecords?: Prisma.StockLossRecordListRelationFilter
+  purchaseOrderLine?: Prisma.XOR<Prisma.PurchaseOrderLineNullableScalarRelationFilter, Prisma.PurchaseOrderLineWhereInput> | null
 }
 
 export type BatchOrderByWithRelationInput = {
@@ -310,6 +311,7 @@ export type BatchOrderByWithRelationInput = {
   material?: Prisma.MaterialOrderByWithRelationInput
   stockLogs?: Prisma.StockLogOrderByRelationAggregateInput
   stockLossRecords?: Prisma.StockLossRecordOrderByRelationAggregateInput
+  purchaseOrderLine?: Prisma.PurchaseOrderLineOrderByWithRelationInput
 }
 
 export type BatchWhereUniqueInput = Prisma.AtLeast<{
@@ -332,6 +334,7 @@ export type BatchWhereUniqueInput = Prisma.AtLeast<{
   material?: Prisma.XOR<Prisma.MaterialScalarRelationFilter, Prisma.MaterialWhereInput>
   stockLogs?: Prisma.StockLogListRelationFilter
   stockLossRecords?: Prisma.StockLossRecordListRelationFilter
+  purchaseOrderLine?: Prisma.XOR<Prisma.PurchaseOrderLineNullableScalarRelationFilter, Prisma.PurchaseOrderLineWhereInput> | null
 }, "id" | "batchNo">
 
 export type BatchOrderByWithAggregationInput = {
@@ -390,6 +393,7 @@ export type BatchCreateInput = {
   material: Prisma.MaterialCreateNestedOneWithoutBatchesInput
   stockLogs?: Prisma.StockLogCreateNestedManyWithoutBatchInput
   stockLossRecords?: Prisma.StockLossRecordCreateNestedManyWithoutBatchInput
+  purchaseOrderLine?: Prisma.PurchaseOrderLineCreateNestedOneWithoutInboundBatchInput
 }
 
 export type BatchUncheckedCreateInput = {
@@ -408,6 +412,7 @@ export type BatchUncheckedCreateInput = {
   updatedAt?: Date | string
   stockLogs?: Prisma.StockLogUncheckedCreateNestedManyWithoutBatchInput
   stockLossRecords?: Prisma.StockLossRecordUncheckedCreateNestedManyWithoutBatchInput
+  purchaseOrderLine?: Prisma.PurchaseOrderLineUncheckedCreateNestedOneWithoutInboundBatchInput
 }
 
 export type BatchUpdateInput = {
@@ -426,6 +431,7 @@ export type BatchUpdateInput = {
   material?: Prisma.MaterialUpdateOneRequiredWithoutBatchesNestedInput
   stockLogs?: Prisma.StockLogUpdateManyWithoutBatchNestedInput
   stockLossRecords?: Prisma.StockLossRecordUpdateManyWithoutBatchNestedInput
+  purchaseOrderLine?: Prisma.PurchaseOrderLineUpdateOneWithoutInboundBatchNestedInput
 }
 
 export type BatchUncheckedUpdateInput = {
@@ -444,6 +450,7 @@ export type BatchUncheckedUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stockLogs?: Prisma.StockLogUncheckedUpdateManyWithoutBatchNestedInput
   stockLossRecords?: Prisma.StockLossRecordUncheckedUpdateManyWithoutBatchNestedInput
+  purchaseOrderLine?: Prisma.PurchaseOrderLineUncheckedUpdateOneWithoutInboundBatchNestedInput
 }
 
 export type BatchCreateManyInput = {
@@ -491,6 +498,11 @@ export type BatchUncheckedUpdateManyInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type BatchNullableScalarRelationFilter = {
+  is?: Prisma.BatchWhereInput | null
+  isNot?: Prisma.BatchWhereInput | null
 }
 
 export type BatchListRelationFilter = {
@@ -568,6 +580,22 @@ export type BatchScalarRelationFilter = {
   isNot?: Prisma.BatchWhereInput
 }
 
+export type BatchCreateNestedOneWithoutPurchaseOrderLineInput = {
+  create?: Prisma.XOR<Prisma.BatchCreateWithoutPurchaseOrderLineInput, Prisma.BatchUncheckedCreateWithoutPurchaseOrderLineInput>
+  connectOrCreate?: Prisma.BatchCreateOrConnectWithoutPurchaseOrderLineInput
+  connect?: Prisma.BatchWhereUniqueInput
+}
+
+export type BatchUpdateOneWithoutPurchaseOrderLineNestedInput = {
+  create?: Prisma.XOR<Prisma.BatchCreateWithoutPurchaseOrderLineInput, Prisma.BatchUncheckedCreateWithoutPurchaseOrderLineInput>
+  connectOrCreate?: Prisma.BatchCreateOrConnectWithoutPurchaseOrderLineInput
+  upsert?: Prisma.BatchUpsertWithoutPurchaseOrderLineInput
+  disconnect?: Prisma.BatchWhereInput | boolean
+  delete?: Prisma.BatchWhereInput | boolean
+  connect?: Prisma.BatchWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.BatchUpdateToOneWithWhereWithoutPurchaseOrderLineInput, Prisma.BatchUpdateWithoutPurchaseOrderLineInput>, Prisma.BatchUncheckedUpdateWithoutPurchaseOrderLineInput>
+}
+
 export type BatchCreateNestedManyWithoutMaterialInput = {
   create?: Prisma.XOR<Prisma.BatchCreateWithoutMaterialInput, Prisma.BatchUncheckedCreateWithoutMaterialInput> | Prisma.BatchCreateWithoutMaterialInput[] | Prisma.BatchUncheckedCreateWithoutMaterialInput[]
   connectOrCreate?: Prisma.BatchCreateOrConnectWithoutMaterialInput | Prisma.BatchCreateOrConnectWithoutMaterialInput[]
@@ -610,10 +638,6 @@ export type BatchUncheckedUpdateManyWithoutMaterialNestedInput = {
   deleteMany?: Prisma.BatchScalarWhereInput | Prisma.BatchScalarWhereInput[]
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type BatchCreateNestedOneWithoutStockLogsInput = {
   create?: Prisma.XOR<Prisma.BatchCreateWithoutStockLogsInput, Prisma.BatchUncheckedCreateWithoutStockLogsInput>
   connectOrCreate?: Prisma.BatchCreateOrConnectWithoutStockLogsInput
@@ -642,6 +666,94 @@ export type BatchUpdateOneRequiredWithoutStockLossRecordsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.BatchUpdateToOneWithWhereWithoutStockLossRecordsInput, Prisma.BatchUpdateWithoutStockLossRecordsInput>, Prisma.BatchUncheckedUpdateWithoutStockLossRecordsInput>
 }
 
+export type BatchCreateWithoutPurchaseOrderLineInput = {
+  id?: string
+  batchNo?: string | null
+  inboundAt?: Date | string
+  originalQty: number
+  remainingQty: number
+  unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  expiresAt?: Date | string | null
+  storageLocation?: string | null
+  supplier?: string | null
+  note?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  material: Prisma.MaterialCreateNestedOneWithoutBatchesInput
+  stockLogs?: Prisma.StockLogCreateNestedManyWithoutBatchInput
+  stockLossRecords?: Prisma.StockLossRecordCreateNestedManyWithoutBatchInput
+}
+
+export type BatchUncheckedCreateWithoutPurchaseOrderLineInput = {
+  id?: string
+  materialId: string
+  batchNo?: string | null
+  inboundAt?: Date | string
+  originalQty: number
+  remainingQty: number
+  unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  expiresAt?: Date | string | null
+  storageLocation?: string | null
+  supplier?: string | null
+  note?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  stockLogs?: Prisma.StockLogUncheckedCreateNestedManyWithoutBatchInput
+  stockLossRecords?: Prisma.StockLossRecordUncheckedCreateNestedManyWithoutBatchInput
+}
+
+export type BatchCreateOrConnectWithoutPurchaseOrderLineInput = {
+  where: Prisma.BatchWhereUniqueInput
+  create: Prisma.XOR<Prisma.BatchCreateWithoutPurchaseOrderLineInput, Prisma.BatchUncheckedCreateWithoutPurchaseOrderLineInput>
+}
+
+export type BatchUpsertWithoutPurchaseOrderLineInput = {
+  update: Prisma.XOR<Prisma.BatchUpdateWithoutPurchaseOrderLineInput, Prisma.BatchUncheckedUpdateWithoutPurchaseOrderLineInput>
+  create: Prisma.XOR<Prisma.BatchCreateWithoutPurchaseOrderLineInput, Prisma.BatchUncheckedCreateWithoutPurchaseOrderLineInput>
+  where?: Prisma.BatchWhereInput
+}
+
+export type BatchUpdateToOneWithWhereWithoutPurchaseOrderLineInput = {
+  where?: Prisma.BatchWhereInput
+  data: Prisma.XOR<Prisma.BatchUpdateWithoutPurchaseOrderLineInput, Prisma.BatchUncheckedUpdateWithoutPurchaseOrderLineInput>
+}
+
+export type BatchUpdateWithoutPurchaseOrderLineInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  batchNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inboundAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  originalQty?: Prisma.IntFieldUpdateOperationsInput | number
+  remainingQty?: Prisma.IntFieldUpdateOperationsInput | number
+  unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  storageLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  material?: Prisma.MaterialUpdateOneRequiredWithoutBatchesNestedInput
+  stockLogs?: Prisma.StockLogUpdateManyWithoutBatchNestedInput
+  stockLossRecords?: Prisma.StockLossRecordUpdateManyWithoutBatchNestedInput
+}
+
+export type BatchUncheckedUpdateWithoutPurchaseOrderLineInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  materialId?: Prisma.StringFieldUpdateOperationsInput | string
+  batchNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inboundAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  originalQty?: Prisma.IntFieldUpdateOperationsInput | number
+  remainingQty?: Prisma.IntFieldUpdateOperationsInput | number
+  unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  expiresAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  storageLocation?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  supplier?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stockLogs?: Prisma.StockLogUncheckedUpdateManyWithoutBatchNestedInput
+  stockLossRecords?: Prisma.StockLossRecordUncheckedUpdateManyWithoutBatchNestedInput
+}
+
 export type BatchCreateWithoutMaterialInput = {
   id?: string
   batchNo?: string | null
@@ -657,6 +769,7 @@ export type BatchCreateWithoutMaterialInput = {
   updatedAt?: Date | string
   stockLogs?: Prisma.StockLogCreateNestedManyWithoutBatchInput
   stockLossRecords?: Prisma.StockLossRecordCreateNestedManyWithoutBatchInput
+  purchaseOrderLine?: Prisma.PurchaseOrderLineCreateNestedOneWithoutInboundBatchInput
 }
 
 export type BatchUncheckedCreateWithoutMaterialInput = {
@@ -674,6 +787,7 @@ export type BatchUncheckedCreateWithoutMaterialInput = {
   updatedAt?: Date | string
   stockLogs?: Prisma.StockLogUncheckedCreateNestedManyWithoutBatchInput
   stockLossRecords?: Prisma.StockLossRecordUncheckedCreateNestedManyWithoutBatchInput
+  purchaseOrderLine?: Prisma.PurchaseOrderLineUncheckedCreateNestedOneWithoutInboundBatchInput
 }
 
 export type BatchCreateOrConnectWithoutMaterialInput = {
@@ -736,6 +850,7 @@ export type BatchCreateWithoutStockLogsInput = {
   updatedAt?: Date | string
   material: Prisma.MaterialCreateNestedOneWithoutBatchesInput
   stockLossRecords?: Prisma.StockLossRecordCreateNestedManyWithoutBatchInput
+  purchaseOrderLine?: Prisma.PurchaseOrderLineCreateNestedOneWithoutInboundBatchInput
 }
 
 export type BatchUncheckedCreateWithoutStockLogsInput = {
@@ -753,6 +868,7 @@ export type BatchUncheckedCreateWithoutStockLogsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   stockLossRecords?: Prisma.StockLossRecordUncheckedCreateNestedManyWithoutBatchInput
+  purchaseOrderLine?: Prisma.PurchaseOrderLineUncheckedCreateNestedOneWithoutInboundBatchInput
 }
 
 export type BatchCreateOrConnectWithoutStockLogsInput = {
@@ -786,6 +902,7 @@ export type BatchUpdateWithoutStockLogsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   material?: Prisma.MaterialUpdateOneRequiredWithoutBatchesNestedInput
   stockLossRecords?: Prisma.StockLossRecordUpdateManyWithoutBatchNestedInput
+  purchaseOrderLine?: Prisma.PurchaseOrderLineUpdateOneWithoutInboundBatchNestedInput
 }
 
 export type BatchUncheckedUpdateWithoutStockLogsInput = {
@@ -803,6 +920,7 @@ export type BatchUncheckedUpdateWithoutStockLogsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stockLossRecords?: Prisma.StockLossRecordUncheckedUpdateManyWithoutBatchNestedInput
+  purchaseOrderLine?: Prisma.PurchaseOrderLineUncheckedUpdateOneWithoutInboundBatchNestedInput
 }
 
 export type BatchCreateWithoutStockLossRecordsInput = {
@@ -820,6 +938,7 @@ export type BatchCreateWithoutStockLossRecordsInput = {
   updatedAt?: Date | string
   material: Prisma.MaterialCreateNestedOneWithoutBatchesInput
   stockLogs?: Prisma.StockLogCreateNestedManyWithoutBatchInput
+  purchaseOrderLine?: Prisma.PurchaseOrderLineCreateNestedOneWithoutInboundBatchInput
 }
 
 export type BatchUncheckedCreateWithoutStockLossRecordsInput = {
@@ -837,6 +956,7 @@ export type BatchUncheckedCreateWithoutStockLossRecordsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   stockLogs?: Prisma.StockLogUncheckedCreateNestedManyWithoutBatchInput
+  purchaseOrderLine?: Prisma.PurchaseOrderLineUncheckedCreateNestedOneWithoutInboundBatchInput
 }
 
 export type BatchCreateOrConnectWithoutStockLossRecordsInput = {
@@ -870,6 +990,7 @@ export type BatchUpdateWithoutStockLossRecordsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   material?: Prisma.MaterialUpdateOneRequiredWithoutBatchesNestedInput
   stockLogs?: Prisma.StockLogUpdateManyWithoutBatchNestedInput
+  purchaseOrderLine?: Prisma.PurchaseOrderLineUpdateOneWithoutInboundBatchNestedInput
 }
 
 export type BatchUncheckedUpdateWithoutStockLossRecordsInput = {
@@ -887,6 +1008,7 @@ export type BatchUncheckedUpdateWithoutStockLossRecordsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stockLogs?: Prisma.StockLogUncheckedUpdateManyWithoutBatchNestedInput
+  purchaseOrderLine?: Prisma.PurchaseOrderLineUncheckedUpdateOneWithoutInboundBatchNestedInput
 }
 
 export type BatchCreateManyMaterialInput = {
@@ -919,6 +1041,7 @@ export type BatchUpdateWithoutMaterialInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stockLogs?: Prisma.StockLogUpdateManyWithoutBatchNestedInput
   stockLossRecords?: Prisma.StockLossRecordUpdateManyWithoutBatchNestedInput
+  purchaseOrderLine?: Prisma.PurchaseOrderLineUpdateOneWithoutInboundBatchNestedInput
 }
 
 export type BatchUncheckedUpdateWithoutMaterialInput = {
@@ -936,6 +1059,7 @@ export type BatchUncheckedUpdateWithoutMaterialInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stockLogs?: Prisma.StockLogUncheckedUpdateManyWithoutBatchNestedInput
   stockLossRecords?: Prisma.StockLossRecordUncheckedUpdateManyWithoutBatchNestedInput
+  purchaseOrderLine?: Prisma.PurchaseOrderLineUncheckedUpdateOneWithoutInboundBatchNestedInput
 }
 
 export type BatchUncheckedUpdateManyWithoutMaterialInput = {
@@ -1010,6 +1134,7 @@ export type BatchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   material?: boolean | Prisma.MaterialDefaultArgs<ExtArgs>
   stockLogs?: boolean | Prisma.Batch$stockLogsArgs<ExtArgs>
   stockLossRecords?: boolean | Prisma.Batch$stockLossRecordsArgs<ExtArgs>
+  purchaseOrderLine?: boolean | Prisma.Batch$purchaseOrderLineArgs<ExtArgs>
   _count?: boolean | Prisma.BatchCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["batch"]>
 
@@ -1068,6 +1193,7 @@ export type BatchInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   material?: boolean | Prisma.MaterialDefaultArgs<ExtArgs>
   stockLogs?: boolean | Prisma.Batch$stockLogsArgs<ExtArgs>
   stockLossRecords?: boolean | Prisma.Batch$stockLossRecordsArgs<ExtArgs>
+  purchaseOrderLine?: boolean | Prisma.Batch$purchaseOrderLineArgs<ExtArgs>
   _count?: boolean | Prisma.BatchCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type BatchIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1083,6 +1209,7 @@ export type $BatchPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     material: Prisma.$MaterialPayload<ExtArgs>
     stockLogs: Prisma.$StockLogPayload<ExtArgs>[]
     stockLossRecords: Prisma.$StockLossRecordPayload<ExtArgs>[]
+    purchaseOrderLine: Prisma.$PurchaseOrderLinePayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1495,6 +1622,7 @@ export interface Prisma__BatchClient<T, Null = never, ExtArgs extends runtime.Ty
   material<T extends Prisma.MaterialDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MaterialDefaultArgs<ExtArgs>>): Prisma.Prisma__MaterialClient<runtime.Types.Result.GetResult<Prisma.$MaterialPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   stockLogs<T extends Prisma.Batch$stockLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Batch$stockLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StockLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   stockLossRecords<T extends Prisma.Batch$stockLossRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Batch$stockLossRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StockLossRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  purchaseOrderLine<T extends Prisma.Batch$purchaseOrderLineArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Batch$purchaseOrderLineArgs<ExtArgs>>): Prisma.Prisma__PurchaseOrderLineClient<runtime.Types.Result.GetResult<Prisma.$PurchaseOrderLinePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1983,6 +2111,25 @@ export type Batch$stockLossRecordsArgs<ExtArgs extends runtime.Types.Extensions.
   take?: number
   skip?: number
   distinct?: Prisma.StockLossRecordScalarFieldEnum | Prisma.StockLossRecordScalarFieldEnum[]
+}
+
+/**
+ * Batch.purchaseOrderLine
+ */
+export type Batch$purchaseOrderLineArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PurchaseOrderLine
+   */
+  select?: Prisma.PurchaseOrderLineSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PurchaseOrderLine
+   */
+  omit?: Prisma.PurchaseOrderLineOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PurchaseOrderLineInclude<ExtArgs> | null
+  where?: Prisma.PurchaseOrderLineWhereInput
 }
 
 /**
