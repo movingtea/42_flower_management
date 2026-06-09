@@ -71,6 +71,11 @@ export type ReceivePurchaseOrderOptions = {
   operator: OperatorContext;
 };
 
+export type TrustedReceivePurchaseOrderOptions = {
+  receivedAt?: string | Date | null;
+  operator: OperatorContext;
+};
+
 type BatchRow = {
   id: string;
   materialId: string;
@@ -863,6 +868,23 @@ export async function receivePurchaseOrder(
     ? parseDate(options.receivedAt, "到货日期格式不正确")
     : new Date();
 
+  return receivePurchaseOrderWithTrustedOperator(id, { receivedAt, operator });
+}
+
+/**
+ * 已完成调用方鉴权/操作员解析后的采购入库事务核心。
+ * API 路由必须使用 receivePurchaseOrder；smoke 脚本可直接传入明确操作员复用同一数据一致性逻辑。
+ */
+export async function receivePurchaseOrderWithTrustedOperator(
+  id: string,
+  options: TrustedReceivePurchaseOrderOptions
+) {
+  if (!options?.operator) throw new Error("操作员不能为空");
+  const operator = options.operator;
+  const receivedAt = options.receivedAt
+    ? parseDate(options.receivedAt, "到货日期格式不正确")
+    : new Date();
+
   return prisma.$transaction(async (tx) => {
     const purchaseOrder = await tx.purchaseOrder.findUnique({
       where: { id },
@@ -880,6 +902,23 @@ export async function receivePurchaseOrder(
     }
     if (purchaseOrder.lines.some((line) => line.inboundBatchId)) {
       throw new Error("采购单明细已存在入库批次，不能重复入库");
+    }
+
+    const locked = await tx.purchaseOrder.updateMany({
+      where: {
+        id,
+        status: {
+          in: [PurchaseOrderStatus.DRAFT, PurchaseOrderStatus.ORDERED],
+        },
+        receivedAt: null,
+      },
+      data: {
+        status: PurchaseOrderStatus.RECEIVED,
+        receivedAt,
+      },
+    });
+    if (locked.count !== 1) {
+      throw new Error("采购单状态已变化，请刷新后重试");
     }
 
     const createdBatches: BatchRow[] = [];
@@ -928,14 +967,6 @@ export async function receivePurchaseOrder(
       stockLogs.push(stockLog);
     }
 
-    await tx.purchaseOrder.update({
-      where: { id },
-      data: {
-        status: PurchaseOrderStatus.RECEIVED,
-        receivedAt,
-      },
-    });
-
     return {
       purchaseOrder: await loadPurchaseOrderById(id, tx),
       createdBatches: createdBatches.map(serializeBatch),
@@ -974,6 +1005,59 @@ export async function updateFlowerStandardCostFromPurchaseLine(lineId: string) {
     ...wiki,
     standardUnitCost: wiki.standardUnitCost?.toFixed(4) ?? null,
     costUpdatedAt: wiki.costUpdatedAt?.toISOString() ?? null,
+  };
+}
+
+export async function updateFlowerStandardCostsFromPurchaseOrder(id: string) {
+  const purchaseOrder = await prisma.purchaseOrder.findUnique({
+    where: { id },
+    include: {
+      lines: {
+        include: {
+          flowerWiki: { select: { chineseName: true } },
+        },
+        orderBy: { createdAt: "asc" },
+      },
+    },
+  });
+  if (!purchaseOrder) throw new Error("采购单不存在");
+  if (purchaseOrder.status !== PurchaseOrderStatus.RECEIVED) {
+    throw new Error("只有已入库采购单才能更新标准成本");
+  }
+  if (purchaseOrder.lines.length === 0) {
+    throw new Error("采购单没有明细，无法更新标准成本");
+  }
+
+  const updatedAt = new Date();
+  const updated = await prisma.$transaction(
+    purchaseOrder.lines.map((line) =>
+      prisma.flowerWiki.update({
+        where: { id: line.flowerWikiId },
+        data: {
+          standardUnitCost: line.actualUnitCost,
+          costUpdatedAt: updatedAt,
+          costNote: `来自采购单 ${purchaseOrder.purchaseNo}`,
+        },
+        select: {
+          id: true,
+          chineseName: true,
+          standardUnitCost: true,
+          costUpdatedAt: true,
+          costNote: true,
+        },
+      })
+    )
+  );
+
+  return {
+    updatedCount: updated.length,
+    items: updated.map((wiki) => ({
+      id: wiki.id,
+      chineseName: wiki.chineseName,
+      standardUnitCost: wiki.standardUnitCost?.toFixed(4) ?? null,
+      costUpdatedAt: wiki.costUpdatedAt?.toISOString() ?? null,
+      costNote: wiki.costNote,
+    })),
   };
 }
 

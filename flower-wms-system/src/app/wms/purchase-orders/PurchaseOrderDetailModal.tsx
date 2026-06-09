@@ -19,6 +19,7 @@ type Props = {
   onEdit: () => void;
   onCancelOrder: () => void;
   onReceive: () => void;
+  onUpdateStandardCosts: () => void;
   busy?: boolean;
 };
 
@@ -46,6 +47,7 @@ export function PurchaseOrderDetailModal({
   onEdit,
   onCancelOrder,
   onReceive,
+  onUpdateStandardCosts,
   busy = false,
 }: Props) {
   const actionable = isEditablePurchaseStatus(order.status);
@@ -178,9 +180,18 @@ export function PurchaseOrderDetailModal({
                       ¥{Number(line.actualUnitCost).toFixed(4)}
                     </td>
                     <td className="px-3 py-3">
-                      {line.inboundBatch?.batchNo ??
-                        line.inboundBatchId ??
-                        "未入库"}
+                      {line.inboundBatch ? (
+                        <>
+                          <span className="font-medium">
+                            {line.inboundBatch.batchNo ?? line.inboundBatch.id}
+                          </span>
+                          <p className="text-xs text-zinc-500">
+                            ID：{line.inboundBatch.id.slice(0, 8)}
+                          </p>
+                        </>
+                      ) : (
+                        line.inboundBatchId ?? "未入库"
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -204,6 +215,16 @@ export function PurchaseOrderDetailModal({
             <Button type="button" onClick={onReceive} disabled={!actionable || busy}>
               到货入库
             </Button>
+            {order.status === "RECEIVED" && (
+              <Button
+                type="button"
+                variant="secondary"
+                onClick={onUpdateStandardCosts}
+                disabled={busy}
+              >
+                用本次采购价更新标准成本
+              </Button>
+            )}
             <Button type="button" variant="ghost" onClick={onClose}>
               关闭
             </Button>

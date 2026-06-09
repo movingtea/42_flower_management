@@ -264,6 +264,37 @@ export function PurchaseOrderConsole() {
     }
   }
 
+  async function handleUpdateStandardCosts(order: PurchaseOrderDetail) {
+    if (order.status !== "RECEIVED") return;
+    if (
+      !window.confirm(
+        "这会更新产品毛利预估使用的花材标准成本，不影响历史订单实际成本。确认继续吗？"
+      )
+    ) {
+      return;
+    }
+    setActionBusy(true);
+    try {
+      const res = await fetch(
+        `/api/admin/wms/purchase-orders/${order.id}/update-standard-costs`,
+        { method: "POST" }
+      );
+      const json = (await res.json()) as {
+        success?: boolean;
+        error?: string;
+        data?: { message?: string; updatedCount?: number };
+      };
+      if (!res.ok || !json.success) {
+        throw new Error(json.error ?? "标准成本更新失败");
+      }
+      showToast(json.data?.message ?? "标准成本已更新", "success");
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "标准成本更新失败", "error");
+    } finally {
+      setActionBusy(false);
+    }
+  }
+
   if (viewMode === "create" || viewMode === "edit") {
     return (
       <div className="relative">
@@ -482,6 +513,7 @@ export function PurchaseOrderConsole() {
           onEdit={() => startEdit(detail.id)}
           onCancelOrder={() => handleCancelOrder(detail)}
           onReceive={() => handleReceive(detail)}
+          onUpdateStandardCosts={() => handleUpdateStandardCosts(detail)}
         />
       )}
     </div>

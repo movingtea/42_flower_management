@@ -12,6 +12,7 @@
     "test:purchase": "tsx src/services/purchase-pure.test.ts",
     "test:margin": "tsx src/services/product-margin-pure.test.ts",
     "db:seed": "prisma db seed",
+    "smoke:purchase": "tsx scripts/smoke-purchase-flow.ts",
     "seed:test-products": "npx tsx scripts/seed-test-spu-clones.ts"
   },
   "prisma": {
