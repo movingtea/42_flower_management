@@ -90,6 +90,15 @@ export const PurchaseCostAllocationMethod = {
 export type PurchaseCostAllocationMethod = (typeof PurchaseCostAllocationMethod)[keyof typeof PurchaseCostAllocationMethod]
 
 
+export const LossMode = {
+  OPTIMISTIC: 'OPTIMISTIC',
+  STANDARD: 'STANDARD',
+  CONSERVATIVE: 'CONSERVATIVE'
+} as const
+
+export type LossMode = (typeof LossMode)[keyof typeof LossMode]
+
+
 export const Role = {
   IT_ADMIN: 'IT_ADMIN',
   STORE_ADMIN: 'STORE_ADMIN',

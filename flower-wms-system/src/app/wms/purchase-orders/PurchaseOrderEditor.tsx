@@ -5,7 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FlowerMaterialSelect } from "@/components/ui/FlowerMaterialSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { formatCurrency } from "@/lib/format-money";
+import { formatCurrency, formatPercent } from "@/lib/format-money";
 import type { WikiListItem } from "@/lib/wiki-constants";
 import {
   allocationMethodLabels,
@@ -29,6 +29,7 @@ type DraftLine = {
   purchaseUnit: string;
   stemsPerUnit: string;
   unitPrice: string;
+  usableRate: string;
   supplierSkuName: string;
   note: string;
 };
@@ -75,9 +76,19 @@ function emptyLine(): DraftLine {
     purchaseUnit: "扎",
     stemsPerUnit: "10",
     unitPrice: "0",
+    usableRate: "",
     supplierSkuName: "",
     note: "",
   };
+}
+
+function resolveWikiUsableRateInput(item: WikiListItem | null): string {
+  if (!item) return "";
+  const rate = item.standardUsableRate ?? item.defaultUsableRate;
+  if (!rate) return "";
+  const numeric = Number(rate);
+  if (!Number.isFinite(numeric)) return "";
+  return String(Math.round(numeric * 1000) / 10);
 }
 
 function lineFromOrder(line: PurchaseOrderDetail["lines"][number]): DraftLine {
@@ -93,6 +104,9 @@ function lineFromOrder(line: PurchaseOrderDetail["lines"][number]): DraftLine {
     purchaseUnit: line.purchaseUnit,
     stemsPerUnit: line.stemsPerUnit,
     unitPrice: line.unitPrice,
+    usableRate: line.usableRate
+      ? String(Number(line.usableRate) * 100)
+      : "",
     supplierSkuName: line.supplierSkuName ?? "",
     note: line.note ?? "",
   };
@@ -125,6 +139,11 @@ function normalizePreviewResult(raw: PurchasePreview): PurchasePreview {
       allocatedExtraFee: normalizePreview(line.allocatedExtraFee),
       actualTotalCost: normalizePreview(line.actualTotalCost),
       actualUnitCost: normalizePreview(line.actualUnitCost),
+      usableRate: normalizePreview(line.usableRate),
+      lossRate: normalizePreview(line.lossRate),
+      lossAdjustedTotalCost: normalizePreview(line.lossAdjustedTotalCost),
+      lossAdjustedUnitCost: normalizePreview(line.lossAdjustedUnitCost),
+      lossModelExtraCost: normalizePreview(line.lossModelExtraCost),
     })),
   };
 }
@@ -205,6 +224,7 @@ export function PurchaseOrderEditor({
         purchaseUnit: line.purchaseUnit,
         stemsPerUnit: line.stemsPerUnit || "0",
         unitPrice: line.unitPrice || "0",
+        usableRate: line.usableRate.trim() || null,
         supplierSkuName: line.supplierSkuName.trim() || null,
         note: line.note.trim() || null,
       })),
@@ -276,6 +296,7 @@ export function PurchaseOrderEditor({
       flowerWikiId: item?.id ?? "",
       flowerName: item?.chineseName ?? "",
       purchaseName: item?.chineseName ?? "",
+      usableRate: resolveWikiUsableRateInput(item),
     });
   }
 
@@ -346,7 +367,7 @@ export function PurchaseOrderEditor({
             {order ? `编辑采购单 ${order.purchaseNo}` : "新建采购单"}
           </h3>
           <p className="mt-1 text-sm text-zinc-500">
-            保存时后端会重新计算费用分摊和实际单支成本。
+            保存时后端会重新计算费用分摊、实际单支成本与损耗后经营成本。
           </p>
         </div>
         <Button type="button" variant="ghost" onClick={onCancel}>
@@ -465,6 +486,9 @@ export function PurchaseOrderEditor({
       </div>
 
       <div className="mt-6">
+        <p className="mb-3 text-xs text-zinc-500">
+          实际单支成本用于记录采购价格；损耗后单支成本用于经营毛利分析。
+        </p>
         <div className="mb-3 flex items-center justify-between">
           <h4 className="font-semibold text-zinc-900">采购明细</h4>
           <Button
@@ -589,6 +613,15 @@ export function PurchaseOrderEditor({
                     }
                   />
                   <Input
+                    label="可用率"
+                    placeholder="如 85、85% 或 0.85"
+                    disabled={!canEdit}
+                    value={line.usableRate}
+                    onChange={(e) =>
+                      updateLine(line.key, { usableRate: e.target.value })
+                    }
+                  />
+                  <Input
                     label="供应商品名"
                     disabled={!canEdit}
                     value={line.supplierSkuName}
@@ -603,7 +636,7 @@ export function PurchaseOrderEditor({
                     onChange={(e) => updateLine(line.key, { note: e.target.value })}
                   />
                 </div>
-                <div className="mt-3 grid gap-2 rounded-lg bg-white p-3 text-xs text-zinc-600 md:grid-cols-5">
+                <div className="mt-3 grid gap-2 rounded-lg bg-white p-3 text-xs text-zinc-600 md:grid-cols-4 lg:grid-cols-8">
                   <span>总支数：{formatQuantity(previewLine?.totalStems ?? 0)}</span>
                   <span>商品小计：{formatCurrency(previewLine?.lineAmount ?? 0)}</span>
                   <span>
@@ -613,7 +646,18 @@ export function PurchaseOrderEditor({
                     实际总成本：{formatCurrency(previewLine?.actualTotalCost ?? 0)}
                   </span>
                   <span>
-                    单支成本：¥{Number(previewLine?.actualUnitCost ?? 0).toFixed(4)}
+                    实际单支成本：¥
+                    {Number(previewLine?.actualUnitCost ?? 0).toFixed(4)}
+                  </span>
+                  <span>
+                    可用率：{formatPercent(previewLine?.usableRate ?? 0.85)}
+                  </span>
+                  <span>
+                    损耗率：{formatPercent(previewLine?.lossRate ?? 0.15)}
+                  </span>
+                  <span>
+                    损耗后单支成本：¥
+                    {Number(previewLine?.lossAdjustedUnitCost ?? 0).toFixed(4)}
                   </span>
                 </div>
               </div>

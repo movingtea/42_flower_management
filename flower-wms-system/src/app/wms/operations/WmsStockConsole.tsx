@@ -470,6 +470,9 @@ export function WmsStockConsole({
                 物理报损盘点
               </h3>
               <p className="rounded-lg bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                如果无法精确记录每天损耗，可在花材档案中维护默认可用率，系统会自动把预估损耗摊入产品成本。报损更适合用于批次异常、供应商复盘和实际库存校准。
+              </p>
+              <p className="rounded-lg bg-zinc-50 px-3 py-2 text-xs text-zinc-600">
                 提示：请选择实际发生物理损耗的花材批次进行扣减。
               </p>
 

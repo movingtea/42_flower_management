@@ -82,6 +82,13 @@ enum PurchaseCostAllocationMethod {
   BY_QUANTITY /// 按采购数量占比分摊（预留）
 }
 
+/// 损耗成本估算档位
+enum LossMode {
+  OPTIMISTIC /// 乐观可用率
+  STANDARD /// 标准可用率
+  CONSERVATIVE /// 保守可用率
+}
+
 /// 后台员工 RBAC 五级角色（与小程序 users 表解耦）
 enum Role {
   IT_ADMIN /// 系统运维：仅用户/权限，业务盲区
@@ -241,9 +248,13 @@ model PurchaseOrderLine {
   unitPrice         Decimal  @map("unit_price") @db.Decimal(12, 2)
   lineAmount        Decimal  @map("line_amount") @db.Decimal(12, 2)
   allocatedExtraFee Decimal  @default(0) @map("allocated_extra_fee") @db.Decimal(12, 2)
-  actualTotalCost   Decimal  @default(0) @map("actual_total_cost") @db.Decimal(12, 2)
-  actualUnitCost    Decimal  @default(0) @map("actual_unit_cost") @db.Decimal(12, 4)
-  supplierSkuName   String?  @map("supplier_sku_name")
+  actualTotalCost        Decimal  @default(0) @map("actual_total_cost") @db.Decimal(12, 2)
+  actualUnitCost         Decimal  @default(0) @map("actual_unit_cost") @db.Decimal(12, 4)
+  usableRate             Decimal? @map("usable_rate") @db.Decimal(5, 4)
+  lossRate               Decimal? @map("loss_rate") @db.Decimal(5, 4)
+  lossAdjustedTotalCost  Decimal? @map("loss_adjusted_total_cost") @db.Decimal(12, 2)
+  lossAdjustedUnitCost   Decimal? @map("loss_adjusted_unit_cost") @db.Decimal(12, 4)
+  supplierSkuName        String?  @map("supplier_sku_name")
   note              String?  @db.Text
   inboundBatchId    String?  @unique @map("inbound_batch_id")
   createdAt         DateTime @default(now()) @map("created_at")
@@ -416,10 +427,13 @@ model Batch {
   materialId      String
   batchNo         String?   @unique
   inboundAt       DateTime  @default(now())
-  originalQty     Int
-  remainingQty    Int
-  unitCost        Decimal   @db.Decimal(12, 4)
-  expiresAt       DateTime?
+  originalQty            Int
+  remainingQty           Int
+  unitCost               Decimal   @db.Decimal(12, 4)
+  lossAdjustedUnitCost   Decimal?  @map("loss_adjusted_unit_cost") @db.Decimal(12, 4)
+  usableRate             Decimal?  @map("usable_rate") @db.Decimal(5, 4)
+  lossRate               Decimal?  @map("loss_rate") @db.Decimal(5, 4)
+  expiresAt              DateTime?
   storageLocation String?
   supplier        String?
   note            String?   @db.Text
@@ -680,11 +694,21 @@ model FlowerWiki {
   /// 默认保质期（天）；入库时用于计算 batch.expiresAt，可单次入库覆盖
   defaultShelfLifeDays Int?       @map("default_shelf_life_days")
   /// 标准单支成本：仅用于产品定价预估；订单实际成本仍以 Batch.unitCost 为准
-  standardUnitCost     Decimal?   @map("standard_unit_cost") @db.Decimal(12, 4)
-  costUnit             String?    @map("cost_unit")
-  costUpdatedAt        DateTime?  @map("cost_updated_at")
-  costNote             String?    @map("cost_note") @db.Text
-  aliasMap             Json       @default("{}") @map("alias_map")
+  standardUnitCost       Decimal?   @map("standard_unit_cost") @db.Decimal(12, 4)
+  costUnit               String?    @map("cost_unit")
+  costUpdatedAt          DateTime?  @map("cost_updated_at")
+  costNote               String?    @map("cost_note") @db.Text
+  /// 默认可用率（0–1）；用于采购损耗成本摊分
+  defaultUsableRate      Decimal?   @map("default_usable_rate") @db.Decimal(5, 4)
+  /// 默认损耗率（0–1）；= 1 - defaultUsableRate
+  defaultLossRate        Decimal?   @map("default_loss_rate") @db.Decimal(5, 4)
+  lossMode               LossMode?  @default(STANDARD) @map("loss_mode")
+  optimisticUsableRate   Decimal?   @map("optimistic_usable_rate") @db.Decimal(5, 4)
+  standardUsableRate     Decimal?   @map("standard_usable_rate") @db.Decimal(5, 4)
+  conservativeUsableRate Decimal?   @map("conservative_usable_rate") @db.Decimal(5, 4)
+  lossRateNote           String?    @map("loss_rate_note") @db.Text
+  lossRateUpdatedAt      DateTime?  @map("loss_rate_updated_at")
+  aliasMap               Json       @default("{}") @map("alias_map")
   createdAt            DateTime   @default(now()) @map("created_at")
   updatedAt            DateTime   @updatedAt @map("updated_at")
 

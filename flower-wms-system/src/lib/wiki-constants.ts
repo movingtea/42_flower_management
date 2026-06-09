@@ -1,4 +1,4 @@
-import { FloralRole } from "@/generated/prisma/enums";
+import { FloralRole, LossMode } from "@/generated/prisma/enums";
 import type { WikiCareRow } from "@/lib/wiki-care";
 
 /** 角色枚举 → 中文展示 */
@@ -46,6 +46,13 @@ export type WikiFormPayload = {
   standardUnitCost?: string | null;
   costUnit?: string | null;
   costNote?: string | null;
+  defaultUsableRate?: string | null;
+  defaultLossRate?: string | null;
+  lossMode?: LossMode | null;
+  optimisticUsableRate?: string | null;
+  standardUsableRate?: string | null;
+  conservativeUsableRate?: string | null;
+  lossRateNote?: string | null;
 };
 
 export type WikiListItem = {
@@ -72,6 +79,14 @@ export type WikiListItem = {
   costUnit: string | null;
   costUpdatedAt: string | null;
   costNote: string | null;
+  defaultUsableRate: string | null;
+  defaultLossRate: string | null;
+  lossMode: LossMode | null;
+  optimisticUsableRate: string | null;
+  standardUsableRate: string | null;
+  conservativeUsableRate: string | null;
+  lossRateNote: string | null;
+  lossRateUpdatedAt: string | null;
   createdAt: string;
   updatedAt: string;
 };
@@ -114,6 +129,13 @@ export const EMPTY_WIKI_FORM: WikiFormPayload = {
   standardUnitCost: null,
   costUnit: "支",
   costNote: null,
+  defaultUsableRate: null,
+  defaultLossRate: null,
+  lossMode: LossMode.STANDARD,
+  optimisticUsableRate: null,
+  standardUsableRate: null,
+  conservativeUsableRate: null,
+  lossRateNote: null,
 };
 
 export function roleBadgeClass(role: FloralRole): string {

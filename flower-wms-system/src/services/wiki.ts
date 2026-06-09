@@ -1,5 +1,10 @@
 import { Prisma } from "@/generated/prisma/client";
-import { FloralRole } from "@/generated/prisma/enums";
+import { FloralRole, LossMode } from "@/generated/prisma/enums";
+import {
+  buildDefaultLossProfile,
+  getLossRateFromUsableRate,
+  normalizeUsableRate,
+} from "@/services/loss-model-pure";
 import {
   parseFloralRole,
   type WikiFormPayload,
@@ -106,6 +111,65 @@ function parseOptionalCostNote(raw: unknown): string | null {
   return raw.trim() || null;
 }
 
+function parseOptionalUsableRateField(
+  raw: unknown,
+  label: string
+): string | null {
+  if (raw === null || raw === undefined || raw === "") return null;
+  const { usableRate, warnings } = normalizeUsableRate(
+    raw as string | number,
+    { defaultRate: buildDefaultLossProfile().standardUsableRate }
+  );
+  if (warnings.length > 0) {
+    throw new Error(`${label}格式无效：${warnings.join("；")}`);
+  }
+  return usableRate.toFixed(4);
+}
+
+function parseOptionalLossMode(raw: unknown): LossMode | null {
+  if (raw === null || raw === undefined || raw === "") return null;
+  const value = String(raw).trim();
+  if (!Object.values(LossMode).includes(value as LossMode)) {
+    throw new Error("损耗档位无效");
+  }
+  return value as LossMode;
+}
+
+function parseOptionalLossRateNote(raw: unknown): string | null {
+  if (raw === null || raw === undefined) return null;
+  if (typeof raw !== "string") throw new Error("损耗备注须为字符串");
+  return raw.trim() || null;
+}
+
+function buildLossProfileFields(b: Record<string, unknown>) {
+  const optimisticUsableRate = parseOptionalUsableRateField(
+    b.optimisticUsableRate,
+    "乐观可用率"
+  );
+  const standardUsableRate = parseOptionalUsableRateField(
+    b.standardUsableRate ?? b.defaultUsableRate,
+    "标准可用率"
+  );
+  const conservativeUsableRate = parseOptionalUsableRateField(
+    b.conservativeUsableRate,
+    "保守可用率"
+  );
+  const defaultUsableRate = standardUsableRate;
+  const defaultLossRate = defaultUsableRate
+    ? getLossRateFromUsableRate(defaultUsableRate).toFixed(4)
+    : null;
+
+  return {
+    defaultUsableRate,
+    defaultLossRate,
+    lossMode: parseOptionalLossMode(b.lossMode) ?? LossMode.STANDARD,
+    optimisticUsableRate,
+    standardUsableRate,
+    conservativeUsableRate,
+    lossRateNote: parseOptionalLossRateNote(b.lossRateNote),
+  };
+}
+
 export function parseWikiPayload(raw: unknown): WikiFormPayload {
   if (!raw || typeof raw !== "object") throw new Error("请求体须为 JSON 对象");
   const b = raw as Record<string, unknown>;
@@ -163,6 +227,7 @@ export function parseWikiPayload(raw: unknown): WikiFormPayload {
 
   const standardUnitCost = parseOptionalStandardUnitCost(b.standardUnitCost);
   const parsedCostUnit = parseOptionalCostUnit(b.costUnit);
+  const lossProfile = buildLossProfileFields(b);
 
   return {
     photo: photo || null,
@@ -182,6 +247,7 @@ export function parseWikiPayload(raw: unknown): WikiFormPayload {
     standardUnitCost,
     costUnit: parsedCostUnit ?? (standardUnitCost !== null ? "支" : null),
     costNote: parseOptionalCostNote(b.costNote),
+    ...lossProfile,
   };
 }
 
@@ -213,6 +279,19 @@ function toCreateData(p: WikiFormPayload): Prisma.FlowerWikiCreateInput {
     costUnit: p.costUnit ?? null,
     costUpdatedAt: p.standardUnitCost !== null ? new Date() : null,
     costNote: p.costNote ?? null,
+    defaultUsableRate: p.defaultUsableRate ?? null,
+    defaultLossRate: p.defaultLossRate ?? null,
+    lossMode: p.lossMode ?? LossMode.STANDARD,
+    optimisticUsableRate: p.optimisticUsableRate ?? null,
+    standardUsableRate: p.standardUsableRate ?? null,
+    conservativeUsableRate: p.conservativeUsableRate ?? null,
+    lossRateNote: p.lossRateNote ?? null,
+    lossRateUpdatedAt:
+      p.standardUsableRate ||
+      p.optimisticUsableRate ||
+      p.conservativeUsableRate
+        ? new Date()
+        : null,
     aliasMap: p.aliasMap ?? {},
   };
 }
@@ -332,12 +411,26 @@ export async function updateWiki(id: string, raw: unknown) {
   const nextCost = payload.standardUnitCost ?? null;
   const costChanged =
     currentCost !== nextCost || (existing.costUnit ?? null) !== (payload.costUnit ?? null);
+  const lossChanged =
+    (existing.defaultUsableRate?.toFixed(4) ?? null) !==
+      (payload.defaultUsableRate ?? null) ||
+    (existing.optimisticUsableRate?.toFixed(4) ?? null) !==
+      (payload.optimisticUsableRate ?? null) ||
+    (existing.standardUsableRate?.toFixed(4) ?? null) !==
+      (payload.standardUsableRate ?? null) ||
+    (existing.conservativeUsableRate?.toFixed(4) ?? null) !==
+      (payload.conservativeUsableRate ?? null) ||
+    (existing.lossMode ?? null) !== (payload.lossMode ?? null) ||
+    (existing.lossRateNote ?? null) !== (payload.lossRateNote ?? null);
 
   return prisma.flowerWiki.update({
     where: { id },
     data: {
       ...toUpdateData(payload),
       costUpdatedAt: costChanged ? new Date() : existing.costUpdatedAt,
+      lossRateUpdatedAt: lossChanged
+        ? new Date()
+        : existing.lossRateUpdatedAt,
     },
   });
 }

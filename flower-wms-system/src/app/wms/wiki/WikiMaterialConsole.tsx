@@ -6,6 +6,7 @@ import { WikiMaterialDetailModal } from "@/components/wiki/WikiMaterialDetailMod
 import { WikiTableTruncatedText } from "@/components/wiki/WikiTableTruncatedText";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { formatPercent } from "@/lib/format-money";
 import {
   WIKI_MAINTENANCE_TEMPLATE,
   type WikiListItem,
@@ -29,6 +30,10 @@ type FormState = {
   standardUnitCost: string;
   costUnit: string;
   costNote: string;
+  optimisticUsableRate: string;
+  standardUsableRate: string;
+  conservativeUsableRate: string;
+  lossRateNote: string;
 };
 
 type CareEditorMode = "text" | "table";
@@ -43,6 +48,10 @@ const EMPTY_FORM: FormState = {
   standardUnitCost: "",
   costUnit: "支",
   costNote: "",
+  optimisticUsableRate: "",
+  standardUsableRate: "",
+  conservativeUsableRate: "",
+  lossRateNote: "",
 };
 
 function toForm(item: WikiListItem): FormState {
@@ -57,6 +66,18 @@ function toForm(item: WikiListItem): FormState {
     standardUnitCost: item.standardUnitCost ?? "",
     costUnit: item.costUnit ?? "支",
     costNote: item.costNote ?? "",
+    optimisticUsableRate: item.optimisticUsableRate
+      ? String(Number(item.optimisticUsableRate) * 100)
+      : "",
+    standardUsableRate: item.standardUsableRate
+      ? String(Number(item.standardUsableRate) * 100)
+      : item.defaultUsableRate
+        ? String(Number(item.defaultUsableRate) * 100)
+        : "",
+    conservativeUsableRate: item.conservativeUsableRate
+      ? String(Number(item.conservativeUsableRate) * 100)
+      : "",
+    lossRateNote: item.lossRateNote ?? "",
   };
 }
 
@@ -95,10 +116,14 @@ function toPayload(
     standardUnitCost: standardUnitCost ? Number(standardUnitCost) : null,
     costUnit: form.costUnit.trim() || (standardUnitCost ? "支" : null),
     costNote: form.costNote.trim() || null,
+    optimisticUsableRate: form.optimisticUsableRate.trim() || null,
+    standardUsableRate: form.standardUsableRate.trim() || null,
+    conservativeUsableRate: form.conservativeUsableRate.trim() || null,
+    lossRateNote: form.lossRateNote.trim() || null,
   };
 }
 
-const WIKI_TABLE_COL_COUNT = 6 + WIKI_CARE_ROW_SPECS.length + 1;
+const WIKI_TABLE_COL_COUNT = 7 + WIKI_CARE_ROW_SPECS.length + 1;
 
 const STICKY_NAME_HEAD =
   "sticky left-0 z-30 border-r border-zinc-200 bg-zinc-50 px-3 py-3 font-medium shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)]";
@@ -142,6 +167,15 @@ function WikiTableCell({ value }: { value: string }) {
 function formatWikiCost(item: WikiListItem) {
   if (!item.standardUnitCost) return "未设置";
   return `¥${Number(item.standardUnitCost).toFixed(2)} / ${item.costUnit || "支"}`;
+}
+
+function formatWikiLossProfile(item: WikiListItem) {
+  const rate = item.standardUsableRate ?? item.defaultUsableRate;
+  if (!rate) return "未设置，默认按标准 85% 估算";
+  const usable = Number(rate);
+  if (!Number.isFinite(usable)) return "未设置，默认按标准 85% 估算";
+  const loss = 1 - usable;
+  return `${formatPercent(usable)} / ${formatPercent(loss)}`;
 }
 
 export function WikiMaterialConsole() {
@@ -489,6 +523,7 @@ export function WikiMaterialConsole() {
             <col className="w-[6%]" />
             <col className="w-[5%]" />
             <col className="w-[8%]" />
+            <col className="w-[10%]" />
             <col className="w-[9%]" />
             {WIKI_CARE_ROW_SPECS.map((spec) => (
               <col key={spec.key} className="w-[9%]" />
@@ -503,6 +538,9 @@ export function WikiMaterialConsole() {
               </th>
               <th className="bg-zinc-50 px-3 py-3 font-medium">保质期</th>
               <th className="bg-zinc-50 px-3 py-3 font-medium">标准成本</th>
+              <th className="bg-zinc-50 px-3 py-3 font-medium">
+                标准可用率 / 损耗率
+              </th>
               <th className={`${WIKI_WRAP_CELL} bg-zinc-50 font-medium`}>
                 花语
               </th>
@@ -574,6 +612,9 @@ export function WikiMaterialConsole() {
                     >
                       {formatWikiCost(item)}
                     </button>
+                  </td>
+                  <td className={`${WIKI_COMPACT_CELL} text-zinc-600`}>
+                    {formatWikiLossProfile(item)}
                   </td>
                   <td className={WIKI_WRAP_CELL}>
                     {item.flowerLanguage?.trim() ? (
@@ -767,6 +808,60 @@ export function WikiMaterialConsole() {
                       }
                       placeholder="例如：按近 30 天常用品质采购均价估算"
                       className="w-full rounded-lg border border-emerald-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-emerald-400"
+                    />
+                  </label>
+                </div>
+
+                <div className="rounded-xl border border-sky-100 bg-sky-50/50 p-4 sm:col-span-2">
+                  <div className="mb-3">
+                    <p className="text-sm font-semibold text-sky-900">
+                      损耗成本模型
+                    </p>
+                    <p className="mt-1 text-xs text-sky-800">
+                      可用率用于把不可避免的鲜花损耗摊进产品成本。订单实际库存流水仍按真实批次扣减。
+                    </p>
+                  </div>
+                  <div className="grid gap-3 sm:grid-cols-3">
+                    <Input
+                      label="乐观可用率"
+                      placeholder="如 92、92% 或 0.92"
+                      value={form.optimisticUsableRate}
+                      onChange={(e) =>
+                        setForm({ ...form, optimisticUsableRate: e.target.value })
+                      }
+                    />
+                    <Input
+                      label="标准可用率"
+                      placeholder="如 85、85% 或 0.85"
+                      value={form.standardUsableRate}
+                      onChange={(e) =>
+                        setForm({ ...form, standardUsableRate: e.target.value })
+                      }
+                    />
+                    <Input
+                      label="保守可用率"
+                      placeholder="如 75、75% 或 0.75"
+                      value={form.conservativeUsableRate}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          conservativeUsableRate: e.target.value,
+                        })
+                      }
+                    />
+                  </div>
+                  <label className="mt-3 block text-sm">
+                    <span className="mb-1 block font-medium text-zinc-700">
+                      损耗说明
+                    </span>
+                    <textarea
+                      rows={2}
+                      value={form.lossRateNote}
+                      onChange={(e) =>
+                        setForm({ ...form, lossRateNote: e.target.value })
+                      }
+                      placeholder="例如：夏季运输损耗偏高，标准按 80% 估算"
+                      className="w-full rounded-lg border border-sky-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-sky-400"
                     />
                   </label>
                 </div>
