@@ -1,31 +1,22 @@
-DO $$
-BEGIN
-  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'SupplierType') THEN
-    CREATE TYPE "SupplierType" AS ENUM (
-      'LOCAL',
-      'KUNMING_ONLINE',
-      'WHOLESALE_MARKET',
-      'PLATFORM',
-      'OTHER'
-    );
-  END IF;
+CREATE TYPE "SupplierType" AS ENUM (
+  'LOCAL',
+  'KUNMING_ONLINE',
+  'WHOLESALE_MARKET',
+  'PLATFORM',
+  'OTHER'
+);
 
-  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'PurchaseOrderStatus') THEN
-    CREATE TYPE "PurchaseOrderStatus" AS ENUM (
-      'DRAFT',
-      'ORDERED',
-      'RECEIVED',
-      'CANCELLED'
-    );
-  END IF;
+CREATE TYPE "PurchaseOrderStatus" AS ENUM (
+  'DRAFT',
+  'ORDERED',
+  'RECEIVED',
+  'CANCELLED'
+);
 
-  IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'PurchaseCostAllocationMethod') THEN
-    CREATE TYPE "PurchaseCostAllocationMethod" AS ENUM (
-      'BY_AMOUNT',
-      'BY_QUANTITY'
-    );
-  END IF;
-END $$;
+CREATE TYPE "PurchaseCostAllocationMethod" AS ENUM (
+  'BY_AMOUNT',
+  'BY_QUANTITY'
+);
 
 CREATE TABLE IF NOT EXISTS "suppliers" (
   "id" TEXT NOT NULL,
