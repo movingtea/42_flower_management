@@ -5,6 +5,7 @@ import { FlowerMaterialSelect } from "@/components/ui/FlowerMaterialSelect";
 import { QuantityStepper } from "@/components/shared/QuantityStepper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { PackagingKitRow } from "@/lib/packaging-kit";
 import type { WikiListItem } from "@/lib/wiki-constants";
 
 type RecipeListItem = {
@@ -12,6 +13,8 @@ type RecipeListItem = {
   recipeCode: string;
   name: string;
   ingredientSummary: string;
+  packagingKitName: string | null;
+  packagingKitStandardCost: string | null;
   productCount: number;
   ingredientCount: number;
 };
@@ -66,6 +69,8 @@ export function WmsRecipeConsole() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [recipeCode, setRecipeCode] = useState("");
   const [recipeName, setRecipeName] = useState("");
+  const [packagingKits, setPackagingKits] = useState<PackagingKitRow[]>([]);
+  const [selectedPackagingKitId, setSelectedPackagingKitId] = useState("");
   const [rows, setRows] = useState<DraftRow[]>([emptyRow()]);
   const [productCount, setProductCount] = useState(0);
   const [toast, setToast] = useState<{
@@ -113,6 +118,23 @@ export function WmsRecipeConsole() {
     }
   }, []);
 
+  const loadPackagingKits = useCallback(async () => {
+    try {
+      const res = await fetch("/api/admin/wms/packaging-kits?activeOnly=1");
+      const json = (await res.json()) as {
+        success?: boolean;
+        error?: string;
+        data?: { list?: PackagingKitRow[] };
+      };
+      if (!res.ok || !json.success) {
+        throw new Error(json.error ?? "加载包装方案失败");
+      }
+      setPackagingKits(json.data?.list ?? []);
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "加载包装方案失败", "error");
+    }
+  }, []);
+
   const loadRecipe = useCallback(
     async (id: string) => {
       try {
@@ -125,6 +147,7 @@ export function WmsRecipeConsole() {
               id: string;
               recipeCode: string;
               name: string;
+              packagingKitId: string | null;
               productCount: number;
               ingredients: Array<{
                 id: string;
@@ -145,6 +168,7 @@ export function WmsRecipeConsole() {
         setSelectedId(recipe.id);
         setRecipeCode(recipe.recipeCode);
         setRecipeName(recipe.name);
+        setSelectedPackagingKitId(recipe.packagingKitId ?? "");
         setProductCount(recipe.productCount);
         setRows(
           recipe.ingredients.length > 0
@@ -160,13 +184,15 @@ export function WmsRecipeConsole() {
 
   useEffect(() => {
     void loadList();
-  }, [loadList]);
+    void loadPackagingKits();
+  }, [loadList, loadPackagingKits]);
 
   function startCreate() {
     setMode("create");
     setSelectedId(null);
     setRecipeCode("");
     setRecipeName("");
+    setSelectedPackagingKitId("");
     setProductCount(0);
     setRows([emptyRow()]);
   }
@@ -227,7 +253,11 @@ export function WmsRecipeConsole() {
 
     setSaving(true);
     try {
-      const payload = { name, ingredients };
+      const payload = {
+        name,
+        packagingKitId: selectedPackagingKitId || null,
+        ingredients,
+      };
       const isCreate = mode === "create" || !selectedId;
       const url = isCreate
         ? "/api/admin/wms/recipes"
@@ -276,6 +306,7 @@ export function WmsRecipeConsole() {
     return (
       item.recipeCode.toLowerCase().includes(q) ||
       item.name.toLowerCase().includes(q) ||
+      (item.packagingKitName?.toLowerCase().includes(q) ?? false) ||
       item.ingredientSummary.toLowerCase().includes(q)
     );
   });
@@ -337,6 +368,12 @@ export function WmsRecipeConsole() {
                       {item.ingredientCount} 项物料 · 挂载 {item.productCount}{" "}
                       商品
                     </p>
+                    <p className="mt-1 text-xs text-emerald-700">
+                      包装：
+                      {item.packagingKitName
+                        ? `${item.packagingKitName} · ¥${item.packagingKitStandardCost}`
+                        : "未绑定"}
+                    </p>
                   </button>
                 </li>
               ))}
@@ -379,6 +416,28 @@ export function WmsRecipeConsole() {
               disabled={saving}
               required
             />
+
+            <label className="mt-4 block text-sm">
+              <span className="mb-1 block font-medium text-zinc-700">
+                🎁 包装方案
+              </span>
+              <select
+                value={selectedPackagingKitId}
+                onChange={(e) => setSelectedPackagingKitId(e.target.value)}
+                disabled={saving}
+                className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-zinc-400"
+              >
+                <option value="">不绑定包装方案</option>
+                {packagingKits.map((kit) => (
+                  <option key={kit.id} value={kit.id}>
+                    {kit.name} · ¥{kit.standardCost}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-zinc-500">
+                用于订单毛利核算，不影响花材 RecipeLine 逻辑。
+              </p>
+            </label>
 
             <div className="mt-4 space-y-4">
               {rows.map((row) => (

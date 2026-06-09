@@ -60,6 +60,7 @@ export const ModelName = {
   Banner: 'Banner',
   Material: 'Material',
   Recipe: 'Recipe',
+  PackagingKit: 'PackagingKit',
   RecipeLine: 'RecipeLine',
   Batch: 'Batch',
   StockLog: 'StockLog',
@@ -68,6 +69,7 @@ export const ModelName = {
   StaffAuditLog: 'StaffAuditLog',
   User: 'User',
   Order: 'Order',
+  OrderCostSnapshot: 'OrderCostSnapshot',
   OrderItem: 'OrderItem',
   AppConfig: 'AppConfig',
   FlowerWiki: 'FlowerWiki'
@@ -205,11 +207,25 @@ export const RecipeScalarFieldEnum = {
   recipeCode: 'recipeCode',
   name: 'name',
   description: 'description',
+  packagingKitId: 'packagingKitId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type RecipeScalarFieldEnum = (typeof RecipeScalarFieldEnum)[keyof typeof RecipeScalarFieldEnum]
+
+
+export const PackagingKitScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  description: 'description',
+  standardCost: 'standardCost',
+  isActive: 'isActive',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type PackagingKitScalarFieldEnum = (typeof PackagingKitScalarFieldEnum)[keyof typeof PackagingKitScalarFieldEnum]
 
 
 export const RecipeLineScalarFieldEnum = {
@@ -333,11 +349,35 @@ export const OrderScalarFieldEnum = {
   refundAmount: 'refundAmount',
   refundTime: 'refundTime',
   cancelSource: 'cancelSource',
+  deliveryCostActual: 'deliveryCostActual',
+  deliveryCostNote: 'deliveryCostNote',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
 
 export type OrderScalarFieldEnum = (typeof OrderScalarFieldEnum)[keyof typeof OrderScalarFieldEnum]
+
+
+export const OrderCostSnapshotScalarFieldEnum = {
+  id: 'id',
+  orderId: 'orderId',
+  paidAmount: 'paidAmount',
+  flowerMaterialCost: 'flowerMaterialCost',
+  packagingCost: 'packagingCost',
+  deliveryCostActual: 'deliveryCostActual',
+  platformFee: 'platformFee',
+  floristLaborCost: 'floristLaborCost',
+  otherCost: 'otherCost',
+  totalCost: 'totalCost',
+  grossProfit: 'grossProfit',
+  grossMargin: 'grossMargin',
+  costCalculatedAt: 'costCalculatedAt',
+  costVersion: 'costVersion',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type OrderCostSnapshotScalarFieldEnum = (typeof OrderCostSnapshotScalarFieldEnum)[keyof typeof OrderCostSnapshotScalarFieldEnum]
 
 
 export const OrderItemScalarFieldEnum = {

@@ -87,6 +87,11 @@ export type Material = Prisma.MaterialModel
  */
 export type Recipe = Prisma.RecipeModel
 /**
+ * Model PackagingKit
+ *
+ */
+export type PackagingKit = Prisma.PackagingKitModel
+/**
  * Model RecipeLine
  * 
  */
@@ -126,6 +131,11 @@ export type User = Prisma.UserModel
  * 
  */
 export type Order = Prisma.OrderModel
+/**
+ * Model OrderCostSnapshot
+ *
+ */
+export type OrderCostSnapshot = Prisma.OrderCostSnapshotModel
 /**
  * Model OrderItem
  * 

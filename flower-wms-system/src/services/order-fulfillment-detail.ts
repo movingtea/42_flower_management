@@ -28,6 +28,8 @@ export type OrderFulfillmentDetail = {
   deliveryDate: string;
   greetingCard: string | null;
   deliveryInfo: string | null;
+  deliveryCostActual: string;
+  deliveryCostNote: string | null;
   createdAt: string;
   items: { label: string; quantity: number }[];
   physicalConsumption: OrderPhysicalConsumptionRow[];
@@ -185,6 +187,8 @@ export async function getOrderFulfillmentDetail(
     deliveryDate: order.deliveryDate,
     greetingCard: order.greetingCard,
     deliveryInfo: order.deliveryInfo,
+    deliveryCostActual: Number(order.deliveryCostActual ?? 0).toFixed(2),
+    deliveryCostNote: order.deliveryCostNote,
     createdAt: order.createdAt.toISOString(),
     items: order.items.map((line) => ({
       label: `${line.snapshotProductName}（${line.snapshotSpecName}）`,

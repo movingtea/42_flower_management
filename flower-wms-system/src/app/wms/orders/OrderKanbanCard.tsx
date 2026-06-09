@@ -40,6 +40,14 @@ function formatTime(iso: string) {
   });
 }
 
+function costBadgeLabel(order: KanbanOrder) {
+  if (order.status === "PENDING_PAYMENT") return "待支付后计算";
+  if (!order.grossMargin) return "成本待计算";
+  const pct = Number(order.grossMargin) * 100;
+  if (!Number.isFinite(pct)) return "成本待计算";
+  return `毛利率 ${pct.toFixed(1)}%`;
+}
+
 export function OrderKanbanCard({
   order,
   column,
@@ -120,6 +128,10 @@ export function OrderKanbanCard({
             />
           </div>
         </div>
+
+        <p className="mb-2 inline-flex rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
+          {costBadgeLabel(order)}
+        </p>
 
         <div className="mb-2 rounded-lg bg-amber-50/90 px-2.5 py-2">
           <p className="flex items-center gap-1.5 text-xs font-medium text-amber-950">

@@ -21,6 +21,12 @@ export type RecipeSummary = {
   recipeCode: string;
   name: string;
   description: string | null;
+  packagingKitId: string | null;
+  packagingKit: {
+    id: string;
+    name: string;
+    standardCost: string;
+  } | null;
   productCount: number;
   ingredients: RecipeIngredientRow[];
   createdAt: string;
@@ -32,6 +38,8 @@ export type RecipeListItem = {
   recipeCode: string;
   name: string;
   ingredientSummary: string;
+  packagingKitName: string | null;
+  packagingKitStandardCost: string | null;
   productCount: number;
   ingredientCount: number;
 };
@@ -92,6 +100,11 @@ function serializeRecipe(
         colorTags: string[];
       };
     }>;
+    packagingKit: {
+      id: string;
+      name: string;
+      standardCost: Prisma.Decimal;
+    } | null;
     _count: { skus: number };
   }
 ): RecipeSummary {
@@ -102,6 +115,14 @@ function serializeRecipe(
     recipeCode: recipe.recipeCode,
     name: recipe.name,
     description: recipe.description,
+    packagingKitId: recipe.packagingKit?.id ?? null,
+    packagingKit: recipe.packagingKit
+      ? {
+          id: recipe.packagingKit.id,
+          name: recipe.packagingKit.name,
+          standardCost: recipe.packagingKit.standardCost.toFixed(2),
+        }
+      : null,
     productCount: recipe._count.skus,
     ingredients,
     createdAt: recipe.createdAt.toISOString(),
@@ -148,6 +169,15 @@ function parseRequiredRecipeName(raw: unknown): string {
   const name = typeof raw === "string" ? raw.trim() : "";
   if (!name) throw new Error("配方名称不能为空");
   return name;
+}
+
+function parsePackagingKitId(raw: unknown): string | null | undefined {
+  if (raw === undefined) return undefined;
+  if (raw === null) return null;
+  if (typeof raw !== "string") {
+    throw new Error("packagingKitId 须为字符串或 null");
+  }
+  return raw.trim() || null;
 }
 
 const RECIPE_CODE_PATTERN = /^BOM-(\d{8})-(\d{3})$/;
@@ -201,11 +231,24 @@ async function assertWikiIdsExist(
   }
 }
 
+async function assertPackagingKitActive(
+  tx: Tx,
+  packagingKitId: string | null | undefined
+): Promise<void> {
+  if (!packagingKitId) return;
+  const kit = await tx.packagingKit.findFirst({
+    where: { id: packagingKitId, isActive: true },
+    select: { id: true },
+  });
+  if (!kit) throw new Error("所选包装方案不存在或已停用");
+}
+
 async function loadRecipeById(id: string, tx: Tx = prisma): Promise<RecipeSummary> {
   const recipe = await tx.recipe.findUnique({
     where: { id },
     include: {
       lines: { include: lineInclude, orderBy: { quantityNeeded: "desc" } },
+      packagingKit: { select: { id: true, name: true, standardCost: true } },
       _count: { select: { skus: true } },
     },
   });
@@ -238,6 +281,7 @@ export async function listRecipes(): Promise<RecipeListItem[]> {
     orderBy: { updatedAt: "desc" },
     include: {
       lines: { include: lineInclude },
+      packagingKit: { select: { name: true, standardCost: true } },
       _count: { select: { skus: true } },
     },
   });
@@ -249,6 +293,9 @@ export async function listRecipes(): Promise<RecipeListItem[]> {
       recipeCode: recipe.recipeCode,
       name: recipe.name,
       ingredientSummary: formatIngredientSummary(ingredients),
+      packagingKitName: recipe.packagingKit?.name ?? null,
+      packagingKitStandardCost:
+        recipe.packagingKit?.standardCost.toFixed(2) ?? null,
       productCount: recipe._count.skus,
       ingredientCount: ingredients.length,
     };
@@ -269,6 +316,7 @@ export async function createRecipe(raw: unknown): Promise<RecipeSummary> {
     typeof body.description === "string"
       ? body.description.trim() || null
       : null;
+  const packagingKitId = parsePackagingKitId(body.packagingKitId) ?? null;
   const ingredients = parseRecipeIngredients(raw);
 
   if (ingredients.length === 0) {
@@ -283,9 +331,10 @@ export async function createRecipe(raw: unknown): Promise<RecipeSummary> {
       return await prisma.$transaction(
         async (tx) => {
           const recipeCode = await generateNextRecipeCode(tx);
+          await assertPackagingKitActive(tx, packagingKitId);
 
           const recipe = await tx.recipe.create({
-            data: { recipeCode, name, description },
+            data: { recipeCode, name, description, packagingKitId },
             select: { id: true },
           });
           await writeRecipeLines(tx, recipe.id, ingredients);
@@ -342,13 +391,16 @@ export async function updateRecipe(
         ? body.description.trim() || null
         : null
       : undefined;
+  const packagingKitId = parsePackagingKitId(body.packagingKitId);
 
   return prisma.$transaction(async (tx) => {
+    await assertPackagingKitActive(tx, packagingKitId);
     await tx.recipe.update({
       where: { id },
       data: {
         name,
         ...(description !== undefined ? { description } : {}),
+        ...(packagingKitId !== undefined ? { packagingKitId } : {}),
       },
     });
     await writeRecipeLines(tx, id, ingredients);
