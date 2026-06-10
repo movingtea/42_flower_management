@@ -50,6 +50,35 @@
   background: #fff;
 }
 
+.detail-tags-section {
+  margin-top: 16rpx;
+  padding: 24rpx 32rpx;
+  background: #fff;
+}
+
+.detail-tag-row {
+  margin-top: 16rpx;
+}
+
+.detail-tag-label {
+  display: block;
+  font-size: 24rpx;
+  color: #777;
+  margin-bottom: 8rpx;
+}
+
+.selling-points {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.selling-point-item {
+  font-size: 26rpx;
+  color: #444;
+  line-height: 1.5;
+}
+
 .detail-name {
   display: block;
   font-size: 36rpx;

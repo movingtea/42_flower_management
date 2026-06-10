@@ -63,6 +63,16 @@ export type ProductSpu = Prisma.ProductSpuModel
  */
 export type ProductSku = Prisma.ProductSkuModel
 /**
+ * Model CmsRecommendationSlot
+ * 
+ */
+export type CmsRecommendationSlot = Prisma.CmsRecommendationSlotModel
+/**
+ * Model CmsRecommendationItem
+ * 
+ */
+export type CmsRecommendationItem = Prisma.CmsRecommendationItemModel
+/**
  * Model Banner
  * 
  */

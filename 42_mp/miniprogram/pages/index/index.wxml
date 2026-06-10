@@ -85,6 +85,99 @@
     </view>
   </view> -->
 
+  <!-- 场景入口 -->
+  <scroll-view class="scene-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="scene-tabs">
+      <view
+        wx:for="{{sceneEntries}}"
+        wx:key="key"
+        class="scene-chip"
+        bindtap="onSceneEntryTap"
+        data-scene-type="{{item.key}}"
+      >
+        <text>{{item.label}}</text>
+      </view>
+    </view>
+  </scroll-view>
+
+  <!-- 首页主推 -->
+  <block wx:for="{{homeMainSlots}}" wx:key="key" wx:for-item="slot">
+    <view wx:if="{{slot.items.length}}" class="recommend-section">
+      <view class="section-title-row">
+        <text class="section-title">{{slot.name}}</text>
+      </view>
+      <view class="home-main-grid">
+        <view
+          wx:for="{{slot.items}}"
+          wx:key="productId"
+          wx:for-item="item"
+          class="home-main-card"
+          bindtap="onRecommendationTap"
+          data-product-id="{{item.productId}}"
+        >
+          <image class="home-main-image" src="{{baseUrl}}{{item.coverImage}}" mode="aspectFill" lazy-load />
+          <view class="home-main-info">
+            <text class="home-main-name text-ellipsis">{{item.productName}}</text>
+            <text wx:if="{{item.cardSellingPoint}}" class="home-main-point text-ellipsis text-muted">{{item.cardSellingPoint}}</text>
+            <product-tag-badges tags="{{item.cardOccasionLabels}}" />
+            <text class="price-text">¥{{item.price}}</text>
+          </view>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <!-- 新品上架 -->
+  <block wx:for="{{newArrivalSlots}}" wx:key="key" wx:for-item="slot">
+    <view wx:if="{{slot.items.length}}" class="recommend-section">
+      <view class="section-title-row">
+        <text class="section-title">{{slot.name}}</text>
+      </view>
+      <scroll-view class="recommend-h-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+        <view class="recommend-h-track">
+          <view
+            wx:for="{{slot.items}}"
+            wx:key="productId"
+            wx:for-item="item"
+            class="recommend-h-card"
+            bindtap="onRecommendationTap"
+            data-product-id="{{item.productId}}"
+          >
+            <image class="recommend-h-image" src="{{baseUrl}}{{item.coverImage}}" mode="aspectFill" lazy-load />
+            <text class="recommend-h-name text-ellipsis">{{item.productName}}</text>
+            <text class="price-text">¥{{item.price}}</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </block>
+
+  <!-- 场景推荐 -->
+  <block wx:for="{{sceneSlots}}" wx:key="key" wx:for-item="slot">
+    <view wx:if="{{slot.items.length}}" class="recommend-section">
+      <view class="section-title-row">
+        <text class="section-title">{{slot.name}}</text>
+      </view>
+      <scroll-view class="recommend-h-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+        <view class="recommend-h-track">
+          <view
+            wx:for="{{slot.items}}"
+            wx:key="productId"
+            wx:for-item="item"
+            class="recommend-h-card"
+            bindtap="onRecommendationTap"
+            data-product-id="{{item.productId}}"
+          >
+            <image class="recommend-h-image" src="{{baseUrl}}{{item.coverImage}}" mode="aspectFill" lazy-load />
+            <text class="recommend-h-name text-ellipsis">{{item.productName}}</text>
+            <product-tag-badges tags="{{item.cardOccasionLabels}}" />
+            <text class="price-text">¥{{item.price}}</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </block>
+
   <!-- 动态分类 Tab -->
   <scroll-view
     class="category-scroll"
@@ -139,9 +232,11 @@
         <view class="product-info">
           <text class="product-name text-ellipsis">{{item.name}}</text>
           <text
-            wx:if="{{item.subtitle}}"
+            wx:if="{{item.cardSellingPoint}}"
             class="product-subtitle text-ellipsis text-muted"
-          >{{item.subtitle}}</text>
+          >{{item.cardSellingPoint}}</text>
+          <product-tag-badges tags="{{item.cardOccasionLabels}}" />
+          <product-tag-badges wx:if="{{item.cardStyleColorLabels.length}}" tags="{{item.cardStyleColorLabels}}" />
           <view class="product-info-bottom">
             <text class="price-text">¥{{item.price}}{{item.priceSuffix}}</text>
             <view

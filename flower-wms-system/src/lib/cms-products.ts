@@ -1,4 +1,8 @@
 import type { CmsProductCategoryItem } from "@/lib/cms-product-categories";
+import {
+  parseCmsProductTagKeys,
+  parseSellingPoints,
+} from "@/lib/cms-product-tags";
 import { parseOccasionTags } from "@/lib/crm-tags";
 import {
   cmsCategoryIdSet,
@@ -54,6 +58,13 @@ export type CmsProductBody = {
   name: string;
   category: string[];
   occasionTags?: string[];
+  colorTags?: string[];
+  styleTags?: string[];
+  relationshipTags?: string[];
+  budgetTags?: string[];
+  positioningTags?: string[];
+  sellingPoints?: string[];
+  operationNote?: string | null;
   description?: string | null;
   maintenanceGuide?: string | null;
   isActive: boolean;
@@ -178,7 +189,40 @@ export function parseCmsProductBody(
   return {
     name,
     category,
-    occasionTags: parseOccasionTags(b.occasionTags),
+    occasionTags:
+      b.occasionTags !== undefined
+        ? parseCmsProductTagKeys("occasion", b.occasionTags)
+        : parseOccasionTags(b.occasionTags),
+    colorTags:
+      b.colorTags !== undefined
+        ? parseCmsProductTagKeys("color", b.colorTags)
+        : undefined,
+    styleTags:
+      b.styleTags !== undefined
+        ? parseCmsProductTagKeys("style", b.styleTags)
+        : undefined,
+    relationshipTags:
+      b.relationshipTags !== undefined
+        ? parseCmsProductTagKeys("relationship", b.relationshipTags)
+        : undefined,
+    budgetTags:
+      b.budgetTags !== undefined
+        ? parseCmsProductTagKeys("budget", b.budgetTags)
+        : undefined,
+    positioningTags:
+      b.positioningTags !== undefined
+        ? parseCmsProductTagKeys("positioning", b.positioningTags)
+        : undefined,
+    sellingPoints:
+      b.sellingPoints !== undefined
+        ? parseSellingPoints(b.sellingPoints)
+        : undefined,
+    operationNote:
+      b.operationNote !== undefined
+        ? typeof b.operationNote === "string"
+          ? b.operationNote.trim() || null
+          : null
+        : undefined,
     description:
       typeof b.description === "string" ? b.description.trim() || null : null,
     maintenanceGuide:

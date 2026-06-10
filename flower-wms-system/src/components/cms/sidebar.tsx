@@ -9,6 +9,7 @@ const navItems = [
   { href: "/cms/product-categories", label: "商品分类", icon: "🏷️" },
   { href: "/cms/banner", label: "首页轮播", icon: "🖼️" },
   { href: "/cms/marketing", label: "营销配置", icon: "✨" },
+  { href: "/cms/recommendations", label: "推荐位配置", icon: "📌" },
 ];
 
 export function CmsSidebar() {

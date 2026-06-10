@@ -30,6 +30,14 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 - WMS CRM 客户看板：`/wms/crm` 总览、客户列表 / 详情、复购提醒看板。
 - 小程序下单礼赠信息：`buyerInfo` / `recipientInfo` / `giftOccasion` / `reminderOptions`；常用收花人选择 / 保存。
 - CMS 商品适用礼赠场景标签：`ProductSpu.occasionTags`。
+- CMS 商品运营标签增强：`colorTags` / `styleTags` / `relationshipTags` / `budgetTags` / `positioningTags` / `sellingPoints` / `operationNote`。
+- 商品上架校验：`validateProductPublishReadiness` 纯函数 + CMS API，只提示不自动上下架。
+- CMS 推荐位配置：`CmsRecommendationSlot` / `CmsRecommendationItem`，人工配置小程序首页与场景推荐。
+- 小程序商品接口返回运营标签（key + label）；`operationNote` 不返回前台。
+- 小程序推荐位 API：`GET /api/wechat/recommendations`（别名 `/api/miniprogram/recommendations`）。
+- CMS 商品运营标签编辑 UI、上架校验提示、小程序展示预览。
+- CMS 推荐位配置页面 `/cms/recommendations`。
+- 小程序首页 / 场景推荐位展示、商品卡片运营标签展示。
 - 订单真实毛利核算：`OrderCostSnapshot`。
 - 产品级毛利预估：`FlowerWiki.standardUnitCost` + `Recipe` + `PackagingKit` + SKU price。
 - 经营报表中心：销售、趋势、毛利排行、低毛利、成本结构、花材使用、损耗、库存预警、采购复盘与供应商分析。
@@ -51,6 +59,8 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 | 供应商付款 / 对账 / 发票 | 未实现 |
 | Excel 导入导出 | 未实现 |
 | CRM 自动触达 / 会员积分 / 复杂分群 | 未实现 |
+| 优惠券 / 拼团秒杀 / A/B 测试 | 未实现 |
+| 自动推荐算法 / 自动上下架 / 自动改价 | 未实现 |
 | 微信订阅消息 / 短信自动发送 | 未实现 |
 | SaaS 计费 | 未实现 |
 
@@ -117,6 +127,9 @@ flower-wms-system/
 | `src/services/wiki.ts` | FlowerWiki CRUD 和检索 |
 | `src/services/crm-pure.ts` | CRM 纯函数：手机号规范化、客户统计、提醒日期与文案 |
 | `src/services/crm.ts` | CRM Prisma 服务：订单沉淀、客户/收花人/礼赠/提醒 CRUD |
+| `src/lib/cms-product-tags.ts` | CMS 商品运营标签 key / label 常量与解析 |
+| `src/services/cms-product-validation-pure.ts` | 商品上架校验纯函数（不访问 DB） |
+| `src/services/cms-product-operations.ts` | 商品运营画像、上架校验、推荐位 CRUD、小程序推荐位查询 |
 
 当前代码未发现独立 `src/services/supplier.ts`；供应商 service 逻辑在 `src/services/purchase.ts`。
 
@@ -160,6 +173,7 @@ flower-wms-system/
 | `/cms/product-categories` | 商城商品分类树 |
 | `/cms/banner` | 首页轮播 |
 | `/cms/marketing` | 营销配置 |
+| `/cms/recommendations` | 推荐位配置（首页与场景推荐） |
 | `/cms/carousel` | redirect 到 `/cms/banner` |
 | `/cms/categories` | redirect 到 `/cms/product-categories` |
 
@@ -171,6 +185,11 @@ CMS 商品编辑边界：
 - `PATCH /api/cms/skus/[id]` 只允许图文白名单字段，防止 mass assignment。
 - CMS 商品列表 / 编辑页展示产品决策标签和建议，仅作为经营参考；不会自动改价、上下架或修改配方。
 - CMS 商品编辑页可配置 `ProductSpu.occasionTags`（适用礼赠场景）；列表展示场景标签；用于 CRM 复购推荐参考，不自动上下架。
+- 商品编辑（`PUT /api/cms/products/[id]`）支持运营标签白名单字段：`occasionTags`、`colorTags`、`styleTags`、`relationshipTags`、`budgetTags`、`positioningTags`、`sellingPoints`、`operationNote`。
+- 商品上架前可通过 `GET /api/admin/cms/products/[id]/publish-readiness` 校验信息完整性、毛利风险、产品决策风险；只提示，不自动改状态。
+- 推荐位配置（`/cms/recommendations`、`/api/admin/cms/recommendation-slots`）用于小程序首页与场景入口；人工配置，非自动推荐算法。
+- 商品列表（`/cms/products`）通过 `operation-summaries` API 展示运营标签、上架校验状态、产品决策摘要、推荐位状态，并支持场景 / 定位 / 校验状态筛选。
+- 商品编辑页含「商品运营标签」「上架校验」「小程序展示预览」区块。
 
 ---
 
@@ -214,6 +233,13 @@ CMS 商品编辑边界：
 | `GET /api/admin/products/[id]/margin-estimate` | 商品毛利预估 |
 | `POST /api/admin/products/[id]/margin-estimate/recalculate` | 重新计算商品毛利预估 |
 | `GET /api/admin/cms/skus/[id]/margin-estimate` | SKU 毛利预估 |
+| `GET /api/admin/cms/products/[id]/operation-profile` | 商品运营画像（标签、毛利、产品决策、推荐位、上架校验） |
+| `GET /api/admin/cms/products/[id]/publish-readiness` | 商品上架校验结果 |
+| `GET /api/admin/cms/products/operation-summaries` | 商品运营摘要列表 |
+| `GET/POST /api/admin/cms/recommendation-slots` | 推荐位列表 / 创建 |
+| `GET/PATCH/DELETE /api/admin/cms/recommendation-slots/[id]` | 推荐位详情 / 更新 / 停用 |
+| `POST /api/admin/cms/recommendation-slots/[id]/items` | 添加推荐商品（返回 warnings + publishReadiness） |
+| `PATCH/DELETE /api/admin/cms/recommendation-items/[itemId]` | 更新 / 移除推荐项 |
 | `/api/admin/reports/*` | 经营报表中心 API |
 
 报表 API：
@@ -266,6 +292,21 @@ CMS 商品编辑边界：
 
 小程序下单 `POST /api/wechat/orders/create` 兼容旧 payload，并可选传入 `buyerInfo` / `recipientInfo` / `giftOccasion` / `reminderOptions` 礼赠 CRM 字段。
 
+### 小程序商品与推荐位
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/wechat/products`、`/api/wechat/products/[id]` | 商品列表 / 详情；返回运营标签（key + label），不含 `operationNote` |
+| GET | `/api/wechat/recommendations` | 推荐位与商品（`slotKey` / `sceneType` / `limit`）；仅返回已上架、有效期内商品 |
+| GET | `/api/miniprogram/recommendations` | 与 `/api/wechat/recommendations` 等价别名 |
+
+小程序行为补充：
+
+- 首页并行加载 `homepage`、`products`、`recommendations`；`recommendations` 失败不白屏，仅隐藏推荐模块。
+- 首页展示 `HOME_MAIN` 主推、`NEW_ARRIVAL` 横向列表、`SCENE`/`FESTIVAL` 场景推荐；场景入口跳转分类页 `?sceneType=`。
+- 商品列表 / 详情 / 推荐卡片展示场景、色系、风格、卖点标签；不展示 `operationNote`、成本、毛利、产品决策内部 warning。
+- 小程序组件 `42_mp/miniprogram/components/product-tag-badges/` 用于标签展示。
+
 ---
 
 ## 6. 数据模型血缘
@@ -282,8 +323,10 @@ CMS 商品编辑边界：
 | `Recipe` | `recipes` | 标准配方，含 `packagingKitId` |
 | `RecipeLine` | `recipe_lines` | 配方花材明细 |
 | `PackagingKit` | `packaging_kits` | 标准包装成本 |
-| `ProductSpu` | `product_spus` | 商城商品；含 `occasionTags` 适用礼赠场景标签 |
+| `ProductSpu` | `product_spus` | 商城商品；含运营标签（`occasionTags` + Json 标签字段 + `operationNote`） |
 | `ProductSku` | `product_skus` | SKU，含 `recipeId` |
+| `CmsRecommendationSlot` | `cms_recommendation_slots` | 小程序推荐位配置（`slotType` / `sceneType` / `maxItems`） |
+| `CmsRecommendationItem` | `cms_recommendation_items` | 推荐位商品关联（可选 SKU、有效期、覆盖图文） |
 | `User` | `users` | 小程序微信身份（openId）；不等同于 CRM Customer |
 | `Customer` | `customers` | CRM 购买人档案，通常由小程序订单自动沉淀 |
 | `Recipient` | `recipients` | 收花人档案 |
@@ -722,9 +765,11 @@ Dockerfile：
 | `npm run test:purchase` | 采购成本纯函数测试 |
 | `npm run test:margin` | 产品毛利纯函数测试 |
 | `npm run test:crm` | CRM 纯函数测试 |
+| `npm run test:cms-validation` | CMS 商品上架校验纯函数测试 |
 | `npm run db:seed` | Prisma seed |
 | `npm run smoke:purchase` | 采购入库 DB smoke |
 | `npm run smoke:crm` | CRM 订单沉淀 DB smoke |
+| `npm run smoke:cms-operations` | CMS 商品运营 DB smoke |
 | `npm run seed:test-products` | 测试商品种子 |
 
 ### smoke:purchase
@@ -779,11 +824,42 @@ Dockerfile：
 33. 删除常用收花人（`isActive=false`）不得删除历史订单和礼赠记录。
 34. 生日 / 纪念日提醒必须按 `Asia/Shanghai` 业务日期计算。
 35. `CustomerReminder` 是后台跟进提醒，不代表已经通知客户。
-36. 商品场景标签（`occasionTags`）只用于 CRM 推荐参考，不自动上下架、不自动营销。
+36. 商品场景标签（`occasionTags`）只用于展示与推荐参考，不代表自动营销触达。
+37. CMS 上架校验只提示，不自动改价、下架、改配方。
+38. 推荐位配置不得绕过商品上架状态；小程序推荐位不得返回未上架商品。
+39. `operationNote` 等内部运营备注不得返回小程序前台。
+40. CMS 不得直接维护 `RecipeLine`；商品场景标签不自动触发上下架。
+41. 推荐位是人工配置，不得包装成 AI 自动推荐。
 
 ---
 
-## 15. 已知悬空 / 待重构
+## 15. CMS 商品运营增强
+
+CMS 是小程序商品与营销内容的**运营配置中心**，与 WMS 配方/成本边界分离：
+
+| 职责方 | 负责 | 不负责 |
+|---|---|---|
+| CMS | 商品展示、分类、运营标签、推荐位、上架校验提示 | RecipeLine 明细、物理库存、订单真实毛利、自动改价/上下架 |
+| WMS | Recipe、FlowerWiki、PackagingKit、库存与成本 | 商品图文运营、推荐位展示配置 |
+| 小程序 | 展示已上架商品与有效推荐位、下单 | 成本/毛利/产品决策内部数据 |
+
+推荐位（`CmsRecommendationSlot` / `CmsRecommendationItem`）为**人工配置**，添加商品时 service 返回经营 warnings，但不自动拒绝、移除或改商品状态。上架校验（`validateProductPublishReadiness`）为纯函数，`canPublish` / `canPromote` 仅作运营参考。
+
+运营标签定义见 `src/lib/cms-product-tags.ts`；`occasionTags` 沿用 `String[]`（Sprint 8），其余标签存 `Json` 数组。
+
+CMS UI 组件（Sprint 9 Round 2）：
+
+| 组件 | 路径 |
+|---|---|
+| `ProductOperationTagsEditor` | `src/components/cms/ProductOperationTagsEditor.tsx` |
+| `ProductPublishReadinessPanel` | `src/components/cms/ProductPublishReadinessPanel.tsx` |
+| `ProductMiniProgramPreview` | `src/components/cms/ProductMiniProgramPreview.tsx` |
+| `ProductOperationSummaryBadge` | `src/components/cms/ProductOperationSummaryBadge.tsx` |
+| `RecommendationSlotsManager` | `src/app/cms/recommendations/RecommendationSlotsManager.tsx` |
+
+---
+
+## 16. 已知悬空 / 待重构
 
 | 项 | 状态 |
 |---|---|
@@ -803,7 +879,7 @@ Dockerfile：
 
 ---
 
-## 16. 文档维护规则
+## 17. 文档维护规则
 
 - 变更 Prisma Schema 后，同步更新本文 ER 和模型说明。
 - 新增 WMS API 时，同步更新 API 表和服务职责。

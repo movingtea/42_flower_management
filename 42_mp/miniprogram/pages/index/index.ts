@@ -61,6 +61,48 @@ type ProductItem = WechatProductItem & {
   category: string[];
 };
 
+interface RecommendationTag {
+  key: string;
+  label: string;
+}
+
+interface RecommendationItem {
+  productId: string;
+  skuId: string | null;
+  productName: string;
+  skuName: string | null;
+  price: string;
+  coverImage: string;
+  subtitle: string | null;
+  occasionTags?: RecommendationTag[];
+  colorTags?: RecommendationTag[];
+  styleTags?: RecommendationTag[];
+  sellingPoints?: string[];
+  cardOccasionLabels?: string[];
+  cardStyleColorLabels?: string[];
+  cardSellingPoint?: string;
+}
+
+interface RecommendationSlot {
+  key: string;
+  name: string;
+  slotType: string;
+  sceneType?: string | null;
+  items: RecommendationItem[];
+}
+
+interface RecommendationsData {
+  slots?: RecommendationSlot[];
+}
+
+const SCENE_ENTRIES = [
+  { key: 'BIRTHDAY', label: '生日' },
+  { key: 'ANNIVERSARY', label: '纪念日' },
+  { key: 'BUSINESS', label: '商务' },
+  { key: 'VISIT', label: '探望' },
+  { key: 'DAILY_SURPRISE', label: '日常惊喜' },
+];
+
 function normalizeProduct(item: WechatProductRaw & { category?: string[] }): ProductItem {
   const base = normalizeWechatProduct(item);
   return {
@@ -98,6 +140,10 @@ Page({
     specPickerVisible: false,
     specPickerProduct: null as ProductItem | null,
     baseUrl,
+    homeMainSlots: [] as RecommendationSlot[],
+    newArrivalSlots: [] as RecommendationSlot[],
+    sceneSlots: [] as RecommendationSlot[],
+    sceneEntries: SCENE_ENTRIES,
   },
 
   onLoad() {
@@ -117,7 +163,11 @@ Page({
   /** 并行拉取首页配置与全量商品，再本地按分类过滤 */
   loadPageData() {
     this.setData({ loading: true });
-    return Promise.all([this.fetchHomepage(), this.fetchProducts()])
+    return Promise.all([
+      this.fetchHomepage(),
+      this.fetchProducts(),
+      this.fetchRecommendations(),
+    ])
       .then(() => {
         this.applyCategoryFilter();
       })
@@ -164,6 +214,42 @@ Page({
         popupVisible: !!popup.enabled,
       });
     });
+  },
+
+  fetchRecommendations() {
+    return request<RecommendationsData>({ url: '/recommendations', raw: false })
+      .then((data) => {
+        const slots = (data?.slots ?? []).map((slot) => ({
+          ...slot,
+          items: (slot.items ?? []).map((item) => ({
+            ...item,
+            cardOccasionLabels: (item.occasionTags ?? [])
+              .slice(0, 2)
+              .map((t) => t.label || t.key),
+            cardStyleColorLabels: [
+              ...(item.colorTags ?? []).slice(0, 1),
+              ...(item.styleTags ?? []).slice(0, 1),
+            ].map((t) => t.label || t.key),
+            cardSellingPoint: (item.sellingPoints ?? [])[0] ?? '',
+          })),
+        }));
+
+        this.setData({
+          homeMainSlots: slots.filter((s) => s.slotType === 'HOME_MAIN'),
+          newArrivalSlots: slots.filter((s) => s.slotType === 'NEW_ARRIVAL'),
+          sceneSlots: slots.filter(
+            (s) => s.slotType === 'SCENE' || s.slotType === 'FESTIVAL'
+          ),
+        });
+      })
+      .catch((err) => {
+        console.warn('推荐位加载失败，首页将仅展示原有内容', err);
+        this.setData({
+          homeMainSlots: [],
+          newArrivalSlots: [],
+          sceneSlots: [],
+        });
+      });
   },
 
   fetchProducts() {
@@ -314,6 +400,23 @@ Page({
       url: `/pages/product-detail/product-detail?id=${productId}`,
       fail: () => {
         wx.showToast({ title: '商品详情页开发中', icon: 'none' });
+      },
+    });
+  },
+
+  onRecommendationTap(e: WechatMiniprogram.TouchEvent) {
+    const productId = e.currentTarget.dataset.productId as string;
+    if (!productId) return;
+    this.navigateToProductDetail(productId);
+  },
+
+  onSceneEntryTap(e: WechatMiniprogram.TouchEvent) {
+    const sceneType = e.currentTarget.dataset.sceneType as string;
+    if (!sceneType) return;
+    wx.navigateTo({
+      url: `/pages/category/category?sceneType=${sceneType}`,
+      fail: () => {
+        wx.showToast({ title: '场景页暂未开放', icon: 'none' });
       },
     });
   },

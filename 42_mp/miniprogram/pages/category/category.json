@@ -2,6 +2,7 @@
   "navigationBarTitleText": "分类",
   "enablePullDownRefresh": true,
   "usingComponents": {
-    "spec-picker": "/components/spec-picker/spec-picker"
+    "spec-picker": "/components/spec-picker/spec-picker",
+    "product-tag-badges": "/components/product-tag-badges/product-tag-badges"
   }
 }

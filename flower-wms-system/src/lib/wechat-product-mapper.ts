@@ -1,3 +1,4 @@
+import { buildWechatOperationTags } from "@/lib/cms-product-tags";
 import { categoryIdsFromProduct } from "@/lib/product-categories";
 import {
   formatMinPriceLabel,
@@ -38,6 +39,13 @@ export type WechatProductListItem = {
   allowPreOrder: boolean;
   productionTime: number;
   skus: WechatProductSkuItem[];
+  occasionTags: ReturnType<typeof buildWechatOperationTags>["occasionTags"];
+  colorTags: ReturnType<typeof buildWechatOperationTags>["colorTags"];
+  styleTags: ReturnType<typeof buildWechatOperationTags>["styleTags"];
+  relationshipTags: ReturnType<typeof buildWechatOperationTags>["relationshipTags"];
+  budgetTags: ReturnType<typeof buildWechatOperationTags>["budgetTags"];
+  positioningTags: ReturnType<typeof buildWechatOperationTags>["positioningTags"];
+  sellingPoints: string[];
 };
 
 function trimOrNull(value: string | null | undefined): string | null {
@@ -112,6 +120,7 @@ export function mapSpuToWechatListItem(
   );
   const imageUrl = mainImageUrl || skus[0]?.imageUrl || "";
   const bannerImages = resolveBannerImagesFromSkus(skus);
+  const operationTags = buildWechatOperationTags(spu);
 
   return {
     id: spu.id,
@@ -135,6 +144,13 @@ export function mapSpuToWechatListItem(
     allowPreOrder: spu.allowPreOrder,
     productionTime: spu.productionTime,
     skus,
+    occasionTags: operationTags.occasionTags,
+    colorTags: operationTags.colorTags,
+    styleTags: operationTags.styleTags,
+    relationshipTags: operationTags.relationshipTags,
+    budgetTags: operationTags.budgetTags,
+    positioningTags: operationTags.positioningTags,
+    sellingPoints: operationTags.sellingPoints,
   };
 }
 

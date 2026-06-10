@@ -60,6 +60,8 @@ export const ModelName = {
   PurchaseOrderLine: 'PurchaseOrderLine',
   ProductSpu: 'ProductSpu',
   ProductSku: 'ProductSku',
+  CmsRecommendationSlot: 'CmsRecommendationSlot',
+  CmsRecommendationItem: 'CmsRecommendationItem',
   Banner: 'Banner',
   Material: 'Material',
   Recipe: 'Recipe',
@@ -227,6 +229,13 @@ export const ProductSpuScalarFieldEnum = {
   allowPreOrder: 'allowPreOrder',
   productionTime: 'productionTime',
   occasionTags: 'occasionTags',
+  colorTags: 'colorTags',
+  styleTags: 'styleTags',
+  relationshipTags: 'relationshipTags',
+  budgetTags: 'budgetTags',
+  positioningTags: 'positioningTags',
+  sellingPoints: 'sellingPoints',
+  operationNote: 'operationNote',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -251,6 +260,43 @@ export const ProductSkuScalarFieldEnum = {
 } as const
 
 export type ProductSkuScalarFieldEnum = (typeof ProductSkuScalarFieldEnum)[keyof typeof ProductSkuScalarFieldEnum]
+
+
+export const CmsRecommendationSlotScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  name: 'name',
+  description: 'description',
+  slotType: 'slotType',
+  sceneType: 'sceneType',
+  isActive: 'isActive',
+  sortOrder: 'sortOrder',
+  maxItems: 'maxItems',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CmsRecommendationSlotScalarFieldEnum = (typeof CmsRecommendationSlotScalarFieldEnum)[keyof typeof CmsRecommendationSlotScalarFieldEnum]
+
+
+export const CmsRecommendationItemScalarFieldEnum = {
+  id: 'id',
+  slotId: 'slotId',
+  productId: 'productId',
+  skuId: 'skuId',
+  titleOverride: 'titleOverride',
+  subtitleOverride: 'subtitleOverride',
+  imageOverride: 'imageOverride',
+  sortOrder: 'sortOrder',
+  isActive: 'isActive',
+  startAt: 'startAt',
+  endAt: 'endAt',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CmsRecommendationItemScalarFieldEnum = (typeof CmsRecommendationItemScalarFieldEnum)[keyof typeof CmsRecommendationItemScalarFieldEnum]
 
 
 export const BannerScalarFieldEnum = {

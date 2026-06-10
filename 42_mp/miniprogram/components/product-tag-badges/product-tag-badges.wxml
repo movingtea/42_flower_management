@@ -1,0 +1,7 @@
+<view wx:if="{{tags.length}}" class="tag-badges">
+  <text
+    wx:for="{{tags}}"
+    wx:key="*this"
+    class="tag-badge"
+  >{{item}}</text>
+</view>

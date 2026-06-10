@@ -291,6 +291,7 @@ export type ProductSkuWhereInput = {
   spu?: Prisma.XOR<Prisma.ProductSpuScalarRelationFilter, Prisma.ProductSpuWhereInput>
   recipe?: Prisma.XOR<Prisma.RecipeNullableScalarRelationFilter, Prisma.RecipeWhereInput> | null
   orderItems?: Prisma.OrderItemListRelationFilter
+  recommendationItems?: Prisma.CmsRecommendationItemListRelationFilter
 }
 
 export type ProductSkuOrderByWithRelationInput = {
@@ -310,6 +311,7 @@ export type ProductSkuOrderByWithRelationInput = {
   spu?: Prisma.ProductSpuOrderByWithRelationInput
   recipe?: Prisma.RecipeOrderByWithRelationInput
   orderItems?: Prisma.OrderItemOrderByRelationAggregateInput
+  recommendationItems?: Prisma.CmsRecommendationItemOrderByRelationAggregateInput
 }
 
 export type ProductSkuWhereUniqueInput = Prisma.AtLeast<{
@@ -332,6 +334,7 @@ export type ProductSkuWhereUniqueInput = Prisma.AtLeast<{
   spu?: Prisma.XOR<Prisma.ProductSpuScalarRelationFilter, Prisma.ProductSpuWhereInput>
   recipe?: Prisma.XOR<Prisma.RecipeNullableScalarRelationFilter, Prisma.RecipeWhereInput> | null
   orderItems?: Prisma.OrderItemListRelationFilter
+  recommendationItems?: Prisma.CmsRecommendationItemListRelationFilter
 }, "id" | "skuCode">
 
 export type ProductSkuOrderByWithAggregationInput = {
@@ -389,6 +392,7 @@ export type ProductSkuCreateInput = {
   spu: Prisma.ProductSpuCreateNestedOneWithoutSkusInput
   recipe?: Prisma.RecipeCreateNestedOneWithoutSkusInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutSkuInput
+  recommendationItems?: Prisma.CmsRecommendationItemCreateNestedManyWithoutSkuInput
 }
 
 export type ProductSkuUncheckedCreateInput = {
@@ -406,6 +410,7 @@ export type ProductSkuUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutSkuInput
+  recommendationItems?: Prisma.CmsRecommendationItemUncheckedCreateNestedManyWithoutSkuInput
 }
 
 export type ProductSkuUpdateInput = {
@@ -423,6 +428,7 @@ export type ProductSkuUpdateInput = {
   spu?: Prisma.ProductSpuUpdateOneRequiredWithoutSkusNestedInput
   recipe?: Prisma.RecipeUpdateOneWithoutSkusNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutSkuNestedInput
+  recommendationItems?: Prisma.CmsRecommendationItemUpdateManyWithoutSkuNestedInput
 }
 
 export type ProductSkuUncheckedUpdateInput = {
@@ -440,6 +446,7 @@ export type ProductSkuUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutSkuNestedInput
+  recommendationItems?: Prisma.CmsRecommendationItemUncheckedUpdateManyWithoutSkuNestedInput
 }
 
 export type ProductSkuCreateManyInput = {
@@ -558,6 +565,11 @@ export type ProductSkuSumOrderByAggregateInput = {
   sortOrder?: Prisma.SortOrder
 }
 
+export type ProductSkuNullableScalarRelationFilter = {
+  is?: Prisma.ProductSkuWhereInput | null
+  isNot?: Prisma.ProductSkuWhereInput | null
+}
+
 export type ProductSkuScalarRelationFilter = {
   is?: Prisma.ProductSkuWhereInput
   isNot?: Prisma.ProductSkuWhereInput
@@ -603,6 +615,22 @@ export type ProductSkuUncheckedUpdateManyWithoutSpuNestedInput = {
   update?: Prisma.ProductSkuUpdateWithWhereUniqueWithoutSpuInput | Prisma.ProductSkuUpdateWithWhereUniqueWithoutSpuInput[]
   updateMany?: Prisma.ProductSkuUpdateManyWithWhereWithoutSpuInput | Prisma.ProductSkuUpdateManyWithWhereWithoutSpuInput[]
   deleteMany?: Prisma.ProductSkuScalarWhereInput | Prisma.ProductSkuScalarWhereInput[]
+}
+
+export type ProductSkuCreateNestedOneWithoutRecommendationItemsInput = {
+  create?: Prisma.XOR<Prisma.ProductSkuCreateWithoutRecommendationItemsInput, Prisma.ProductSkuUncheckedCreateWithoutRecommendationItemsInput>
+  connectOrCreate?: Prisma.ProductSkuCreateOrConnectWithoutRecommendationItemsInput
+  connect?: Prisma.ProductSkuWhereUniqueInput
+}
+
+export type ProductSkuUpdateOneWithoutRecommendationItemsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductSkuCreateWithoutRecommendationItemsInput, Prisma.ProductSkuUncheckedCreateWithoutRecommendationItemsInput>
+  connectOrCreate?: Prisma.ProductSkuCreateOrConnectWithoutRecommendationItemsInput
+  upsert?: Prisma.ProductSkuUpsertWithoutRecommendationItemsInput
+  disconnect?: Prisma.ProductSkuWhereInput | boolean
+  delete?: Prisma.ProductSkuWhereInput | boolean
+  connect?: Prisma.ProductSkuWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProductSkuUpdateToOneWithWhereWithoutRecommendationItemsInput, Prisma.ProductSkuUpdateWithoutRecommendationItemsInput>, Prisma.ProductSkuUncheckedUpdateWithoutRecommendationItemsInput>
 }
 
 export type ProductSkuCreateNestedManyWithoutRecipeInput = {
@@ -675,6 +703,7 @@ export type ProductSkuCreateWithoutSpuInput = {
   updatedAt?: Date | string
   recipe?: Prisma.RecipeCreateNestedOneWithoutSkusInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutSkuInput
+  recommendationItems?: Prisma.CmsRecommendationItemCreateNestedManyWithoutSkuInput
 }
 
 export type ProductSkuUncheckedCreateWithoutSpuInput = {
@@ -691,6 +720,7 @@ export type ProductSkuUncheckedCreateWithoutSpuInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutSkuInput
+  recommendationItems?: Prisma.CmsRecommendationItemUncheckedCreateNestedManyWithoutSkuInput
 }
 
 export type ProductSkuCreateOrConnectWithoutSpuInput = {
@@ -738,6 +768,90 @@ export type ProductSkuScalarWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"ProductSku"> | Date | string
 }
 
+export type ProductSkuCreateWithoutRecommendationItemsInput = {
+  id?: string
+  skuCode: string
+  specName: string
+  price: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stock?: number
+  description?: string | null
+  imageUrl?: string | null
+  isMainImage?: boolean
+  sortOrder?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  spu: Prisma.ProductSpuCreateNestedOneWithoutSkusInput
+  recipe?: Prisma.RecipeCreateNestedOneWithoutSkusInput
+  orderItems?: Prisma.OrderItemCreateNestedManyWithoutSkuInput
+}
+
+export type ProductSkuUncheckedCreateWithoutRecommendationItemsInput = {
+  id?: string
+  spuId: string
+  skuCode: string
+  specName: string
+  price: runtime.Decimal | runtime.DecimalJsLike | number | string
+  stock?: number
+  recipeId?: string | null
+  description?: string | null
+  imageUrl?: string | null
+  isMainImage?: boolean
+  sortOrder?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutSkuInput
+}
+
+export type ProductSkuCreateOrConnectWithoutRecommendationItemsInput = {
+  where: Prisma.ProductSkuWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductSkuCreateWithoutRecommendationItemsInput, Prisma.ProductSkuUncheckedCreateWithoutRecommendationItemsInput>
+}
+
+export type ProductSkuUpsertWithoutRecommendationItemsInput = {
+  update: Prisma.XOR<Prisma.ProductSkuUpdateWithoutRecommendationItemsInput, Prisma.ProductSkuUncheckedUpdateWithoutRecommendationItemsInput>
+  create: Prisma.XOR<Prisma.ProductSkuCreateWithoutRecommendationItemsInput, Prisma.ProductSkuUncheckedCreateWithoutRecommendationItemsInput>
+  where?: Prisma.ProductSkuWhereInput
+}
+
+export type ProductSkuUpdateToOneWithWhereWithoutRecommendationItemsInput = {
+  where?: Prisma.ProductSkuWhereInput
+  data: Prisma.XOR<Prisma.ProductSkuUpdateWithoutRecommendationItemsInput, Prisma.ProductSkuUncheckedUpdateWithoutRecommendationItemsInput>
+}
+
+export type ProductSkuUpdateWithoutRecommendationItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  skuCode?: Prisma.StringFieldUpdateOperationsInput | string
+  specName?: Prisma.StringFieldUpdateOperationsInput | string
+  price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stock?: Prisma.IntFieldUpdateOperationsInput | number
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isMainImage?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  spu?: Prisma.ProductSpuUpdateOneRequiredWithoutSkusNestedInput
+  recipe?: Prisma.RecipeUpdateOneWithoutSkusNestedInput
+  orderItems?: Prisma.OrderItemUpdateManyWithoutSkuNestedInput
+}
+
+export type ProductSkuUncheckedUpdateWithoutRecommendationItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  spuId?: Prisma.StringFieldUpdateOperationsInput | string
+  skuCode?: Prisma.StringFieldUpdateOperationsInput | string
+  specName?: Prisma.StringFieldUpdateOperationsInput | string
+  price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  stock?: Prisma.IntFieldUpdateOperationsInput | number
+  recipeId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isMainImage?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutSkuNestedInput
+}
+
 export type ProductSkuCreateWithoutRecipeInput = {
   id?: string
   skuCode: string
@@ -752,6 +866,7 @@ export type ProductSkuCreateWithoutRecipeInput = {
   updatedAt?: Date | string
   spu: Prisma.ProductSpuCreateNestedOneWithoutSkusInput
   orderItems?: Prisma.OrderItemCreateNestedManyWithoutSkuInput
+  recommendationItems?: Prisma.CmsRecommendationItemCreateNestedManyWithoutSkuInput
 }
 
 export type ProductSkuUncheckedCreateWithoutRecipeInput = {
@@ -768,6 +883,7 @@ export type ProductSkuUncheckedCreateWithoutRecipeInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutSkuInput
+  recommendationItems?: Prisma.CmsRecommendationItemUncheckedCreateNestedManyWithoutSkuInput
 }
 
 export type ProductSkuCreateOrConnectWithoutRecipeInput = {
@@ -810,6 +926,7 @@ export type ProductSkuCreateWithoutOrderItemsInput = {
   updatedAt?: Date | string
   spu: Prisma.ProductSpuCreateNestedOneWithoutSkusInput
   recipe?: Prisma.RecipeCreateNestedOneWithoutSkusInput
+  recommendationItems?: Prisma.CmsRecommendationItemCreateNestedManyWithoutSkuInput
 }
 
 export type ProductSkuUncheckedCreateWithoutOrderItemsInput = {
@@ -826,6 +943,7 @@ export type ProductSkuUncheckedCreateWithoutOrderItemsInput = {
   sortOrder?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  recommendationItems?: Prisma.CmsRecommendationItemUncheckedCreateNestedManyWithoutSkuInput
 }
 
 export type ProductSkuCreateOrConnectWithoutOrderItemsInput = {
@@ -858,6 +976,7 @@ export type ProductSkuUpdateWithoutOrderItemsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   spu?: Prisma.ProductSpuUpdateOneRequiredWithoutSkusNestedInput
   recipe?: Prisma.RecipeUpdateOneWithoutSkusNestedInput
+  recommendationItems?: Prisma.CmsRecommendationItemUpdateManyWithoutSkuNestedInput
 }
 
 export type ProductSkuUncheckedUpdateWithoutOrderItemsInput = {
@@ -874,6 +993,7 @@ export type ProductSkuUncheckedUpdateWithoutOrderItemsInput = {
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recommendationItems?: Prisma.CmsRecommendationItemUncheckedUpdateManyWithoutSkuNestedInput
 }
 
 export type ProductSkuCreateManySpuInput = {
@@ -905,6 +1025,7 @@ export type ProductSkuUpdateWithoutSpuInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   recipe?: Prisma.RecipeUpdateOneWithoutSkusNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutSkuNestedInput
+  recommendationItems?: Prisma.CmsRecommendationItemUpdateManyWithoutSkuNestedInput
 }
 
 export type ProductSkuUncheckedUpdateWithoutSpuInput = {
@@ -921,6 +1042,7 @@ export type ProductSkuUncheckedUpdateWithoutSpuInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutSkuNestedInput
+  recommendationItems?: Prisma.CmsRecommendationItemUncheckedUpdateManyWithoutSkuNestedInput
 }
 
 export type ProductSkuUncheckedUpdateManyWithoutSpuInput = {
@@ -967,6 +1089,7 @@ export type ProductSkuUpdateWithoutRecipeInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   spu?: Prisma.ProductSpuUpdateOneRequiredWithoutSkusNestedInput
   orderItems?: Prisma.OrderItemUpdateManyWithoutSkuNestedInput
+  recommendationItems?: Prisma.CmsRecommendationItemUpdateManyWithoutSkuNestedInput
 }
 
 export type ProductSkuUncheckedUpdateWithoutRecipeInput = {
@@ -983,6 +1106,7 @@ export type ProductSkuUncheckedUpdateWithoutRecipeInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutSkuNestedInput
+  recommendationItems?: Prisma.CmsRecommendationItemUncheckedUpdateManyWithoutSkuNestedInput
 }
 
 export type ProductSkuUncheckedUpdateManyWithoutRecipeInput = {
@@ -1007,10 +1131,12 @@ export type ProductSkuUncheckedUpdateManyWithoutRecipeInput = {
 
 export type ProductSkuCountOutputType = {
   orderItems: number
+  recommendationItems: number
 }
 
 export type ProductSkuCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   orderItems?: boolean | ProductSkuCountOutputTypeCountOrderItemsArgs
+  recommendationItems?: boolean | ProductSkuCountOutputTypeCountRecommendationItemsArgs
 }
 
 /**
@@ -1028,6 +1154,13 @@ export type ProductSkuCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.E
  */
 export type ProductSkuCountOutputTypeCountOrderItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.OrderItemWhereInput
+}
+
+/**
+ * ProductSkuCountOutputType without action
+ */
+export type ProductSkuCountOutputTypeCountRecommendationItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CmsRecommendationItemWhereInput
 }
 
 
@@ -1048,6 +1181,7 @@ export type ProductSkuSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
   recipe?: boolean | Prisma.ProductSku$recipeArgs<ExtArgs>
   orderItems?: boolean | Prisma.ProductSku$orderItemsArgs<ExtArgs>
+  recommendationItems?: boolean | Prisma.ProductSku$recommendationItemsArgs<ExtArgs>
   _count?: boolean | Prisma.ProductSkuCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["productSku"]>
 
@@ -1108,6 +1242,7 @@ export type ProductSkuInclude<ExtArgs extends runtime.Types.Extensions.InternalA
   spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
   recipe?: boolean | Prisma.ProductSku$recipeArgs<ExtArgs>
   orderItems?: boolean | Prisma.ProductSku$orderItemsArgs<ExtArgs>
+  recommendationItems?: boolean | Prisma.ProductSku$recommendationItemsArgs<ExtArgs>
   _count?: boolean | Prisma.ProductSkuCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ProductSkuIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1125,6 +1260,7 @@ export type $ProductSkuPayload<ExtArgs extends runtime.Types.Extensions.Internal
     spu: Prisma.$ProductSpuPayload<ExtArgs>
     recipe: Prisma.$RecipePayload<ExtArgs> | null
     orderItems: Prisma.$OrderItemPayload<ExtArgs>[]
+    recommendationItems: Prisma.$CmsRecommendationItemPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1537,6 +1673,7 @@ export interface Prisma__ProductSkuClient<T, Null = never, ExtArgs extends runti
   spu<T extends Prisma.ProductSpuDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductSpuDefaultArgs<ExtArgs>>): Prisma.Prisma__ProductSpuClient<runtime.Types.Result.GetResult<Prisma.$ProductSpuPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   recipe<T extends Prisma.ProductSku$recipeArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductSku$recipeArgs<ExtArgs>>): Prisma.Prisma__RecipeClient<runtime.Types.Result.GetResult<Prisma.$RecipePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   orderItems<T extends Prisma.ProductSku$orderItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductSku$orderItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  recommendationItems<T extends Prisma.ProductSku$recommendationItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductSku$recommendationItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CmsRecommendationItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2020,6 +2157,30 @@ export type ProductSku$orderItemsArgs<ExtArgs extends runtime.Types.Extensions.I
   take?: number
   skip?: number
   distinct?: Prisma.OrderItemScalarFieldEnum | Prisma.OrderItemScalarFieldEnum[]
+}
+
+/**
+ * ProductSku.recommendationItems
+ */
+export type ProductSku$recommendationItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CmsRecommendationItem
+   */
+  select?: Prisma.CmsRecommendationItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CmsRecommendationItem
+   */
+  omit?: Prisma.CmsRecommendationItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CmsRecommendationItemInclude<ExtArgs> | null
+  where?: Prisma.CmsRecommendationItemWhereInput
+  orderBy?: Prisma.CmsRecommendationItemOrderByWithRelationInput | Prisma.CmsRecommendationItemOrderByWithRelationInput[]
+  cursor?: Prisma.CmsRecommendationItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CmsRecommendationItemScalarFieldEnum | Prisma.CmsRecommendationItemScalarFieldEnum[]
 }
 
 /**

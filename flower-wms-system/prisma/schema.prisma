@@ -103,6 +103,17 @@ enum ReminderStatus {
   CANCELLED
 }
 
+/// CMS 推荐位类型
+enum RecommendationSlotType {
+  HOME_MAIN
+  HOME_SECONDARY
+  SCENE
+  FESTIVAL
+  NEW_ARRIVAL
+  HIGH_TICKET
+  CUSTOM
+}
+
 /// 首页轮播跳转类型
 enum BannerTargetType {
   PRODUCT /// 跳转商城商品详情
@@ -345,12 +356,27 @@ model ProductSpu {
   productionTime   Int      @default(30) @map("production_time")
   /// 适用礼赠场景标签（GiftOccasionType key 列表）
   occasionTags     String[] @default([]) @map("occasion_tags")
+  /// 色系标签（英文 key 数组，JSON 存储）
+  colorTags        Json?    @map("color_tags")
+  /// 风格标签
+  styleTags        Json?    @map("style_tags")
+  /// 适合关系标签
+  relationshipTags Json?    @map("relationship_tags")
+  /// 预算区间标签
+  budgetTags       Json?    @map("budget_tags")
+  /// 商品定位标签
+  positioningTags  Json?    @map("positioning_tags")
+  /// 卖点短语数组
+  sellingPoints    Json?    @map("selling_points")
+  /// 运营内部备注（不返回小程序前台）
+  operationNote    String?  @map("operation_note") @db.Text
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  skus       ProductSku[]
-  categories ProductCategoryRelation[]
-  banners    Banner[]
+  skus                 ProductSku[]
+  categories           ProductCategoryRelation[]
+  banners              Banner[]
+  recommendationItems  CmsRecommendationItem[]
 
   @@index([isActive])
   @@index([isDeleted])
@@ -372,14 +398,70 @@ model ProductSku {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  spu        ProductSpu  @relation(fields: [spuId], references: [id], onDelete: Cascade)
-  recipe     Recipe?     @relation(fields: [recipeId], references: [id], onDelete: SetNull)
-  orderItems OrderItem[]
+  spu                  ProductSpu              @relation(fields: [spuId], references: [id], onDelete: Cascade)
+  recipe               Recipe?                 @relation(fields: [recipeId], references: [id], onDelete: SetNull)
+  orderItems           OrderItem[]
+  recommendationItems  CmsRecommendationItem[]
 
   @@index([spuId])
   @@index([spuId, isMainImage])
   @@index([recipeId])
   @@map("product_skus")
+}
+
+// ---------------------------------------------------------------------------
+// CmsRecommendationSlot / CmsRecommendationItem — 小程序推荐位人工配置
+// ---------------------------------------------------------------------------
+
+model CmsRecommendationSlot {
+  id          String                 @id @default(cuid())
+  key         String                 @unique
+  name        String
+  description String?                @db.Text
+  slotType    RecommendationSlotType @map("slot_type")
+  sceneType   GiftOccasionType?      @map("scene_type")
+  isActive    Boolean                @default(true) @map("is_active")
+  sortOrder   Int                    @default(0) @map("sort_order")
+  maxItems    Int                    @default(10) @map("max_items")
+  createdAt   DateTime               @default(now()) @map("created_at")
+  updatedAt   DateTime               @updatedAt @map("updated_at")
+
+  items CmsRecommendationItem[]
+
+  @@index([slotType])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@map("cms_recommendation_slots")
+}
+
+model CmsRecommendationItem {
+  id               String    @id @default(cuid())
+  slotId           String    @map("slot_id")
+  productId        String    @map("product_id")
+  skuId            String?   @map("sku_id")
+  titleOverride    String?   @map("title_override")
+  subtitleOverride String?   @map("subtitle_override")
+  imageOverride    String?   @map("image_override")
+  sortOrder        Int       @default(0) @map("sort_order")
+  isActive         Boolean   @default(true) @map("is_active")
+  startAt          DateTime? @map("start_at")
+  endAt            DateTime? @map("end_at")
+  note             String?   @db.Text
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  slot    CmsRecommendationSlot @relation(fields: [slotId], references: [id], onDelete: Cascade)
+  product ProductSpu            @relation(fields: [productId], references: [id], onDelete: Cascade)
+  sku     ProductSku?           @relation(fields: [skuId], references: [id], onDelete: SetNull)
+
+  @@index([slotId])
+  @@index([productId])
+  @@index([skuId])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@index([startAt])
+  @@index([endAt])
+  @@map("cms_recommendation_items")
 }
 
 // ---------------------------------------------------------------------------

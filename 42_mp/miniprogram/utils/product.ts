@@ -13,6 +13,11 @@ export interface WechatProductSku {
   isMainImage: boolean;
 }
 
+export interface WechatProductTagDisplay {
+  key: string;
+  label: string;
+}
+
 export interface WechatProductRaw {
   id: string;
   name: string;
@@ -29,6 +34,13 @@ export interface WechatProductRaw {
   images?: string[];
   isOutOfStock?: boolean;
   skus?: WechatProductSku[];
+  occasionTags?: WechatProductTagDisplay[];
+  colorTags?: WechatProductTagDisplay[];
+  styleTags?: WechatProductTagDisplay[];
+  relationshipTags?: WechatProductTagDisplay[];
+  budgetTags?: WechatProductTagDisplay[];
+  positioningTags?: WechatProductTagDisplay[];
+  sellingPoints?: string[];
 }
 
 export interface WechatProductItem {
@@ -41,6 +53,17 @@ export interface WechatProductItem {
   imageUrl: string;
   isOutOfStock?: boolean;
   skus: WechatProductSku[];
+  occasionTags: WechatProductTagDisplay[];
+  colorTags: WechatProductTagDisplay[];
+  styleTags: WechatProductTagDisplay[];
+  relationshipTags: WechatProductTagDisplay[];
+  budgetTags: WechatProductTagDisplay[];
+  positioningTags: WechatProductTagDisplay[];
+  sellingPoints: string[];
+  /** 卡片展示用标签（已截断） */
+  cardOccasionLabels: string[];
+  cardStyleColorLabels: string[];
+  cardSellingPoint: string;
 }
 
 export function normalizeWechatProduct(item: WechatProductRaw): WechatProductItem {
@@ -76,6 +99,27 @@ export function normalizeWechatProduct(item: WechatProductRaw): WechatProductIte
     (item.images && item.images.length > 0 ? item.images[0] : '');
   const imageUrl = toRelativeImagePath(rawCover);
 
+  const occasionTags = Array.isArray(item.occasionTags) ? item.occasionTags : [];
+  const colorTags = Array.isArray(item.colorTags) ? item.colorTags : [];
+  const styleTags = Array.isArray(item.styleTags) ? item.styleTags : [];
+  const relationshipTags = Array.isArray(item.relationshipTags)
+    ? item.relationshipTags
+    : [];
+  const budgetTags = Array.isArray(item.budgetTags) ? item.budgetTags : [];
+  const positioningTags = Array.isArray(item.positioningTags)
+    ? item.positioningTags
+    : [];
+  const sellingPoints = Array.isArray(item.sellingPoints)
+    ? item.sellingPoints.filter((s) => typeof s === 'string' && s.trim())
+    : [];
+
+  const cardOccasionLabels = occasionTags.slice(0, 2).map((t) => t.label || t.key);
+  const cardStyleColorLabels = [
+    ...colorTags.slice(0, 1),
+    ...styleTags.slice(0, 1),
+  ].map((t) => t.label || t.key);
+  const cardSellingPoint = sellingPoints[0] ?? '';
+
   return {
     id: item.id,
     name: item.name,
@@ -86,6 +130,16 @@ export function normalizeWechatProduct(item: WechatProductRaw): WechatProductIte
     imageUrl,
     isOutOfStock: item.isOutOfStock,
     skus,
+    occasionTags,
+    colorTags,
+    styleTags,
+    relationshipTags,
+    budgetTags,
+    positioningTags,
+    sellingPoints,
+    cardOccasionLabels,
+    cardStyleColorLabels,
+    cardSellingPoint,
   };
 }
 
