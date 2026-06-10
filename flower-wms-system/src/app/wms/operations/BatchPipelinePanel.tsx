@@ -1,6 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import {
+  formatDateInAppTimezoneIso,
+  formatDateTimeInAppTimezone,
+} from "@/lib/datetime";
 import type { BatchPipelineRow } from "@/services/wms-stock";
 
 type MaterialGroup = {
@@ -15,13 +19,7 @@ type MaterialGroup = {
 };
 
 function formatTime(iso: string) {
-  return new Date(iso).toLocaleString("zh-CN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatDateTimeInAppTimezone(iso);
 }
 
 function buildGroups(pipeline: BatchPipelineRow[]): MaterialGroup[] {
@@ -165,7 +163,7 @@ export function BatchPipelinePanel({ pipeline }: Props) {
                         <p className="mt-2 text-xs text-zinc-500">
                           进价 ¥{row.unitCost} / {row.unit}
                           {row.expiresAt
-                            ? ` · 到期 ${new Date(row.expiresAt).toLocaleDateString("zh-CN")}`
+                            ? ` · 到期 ${formatDateInAppTimezoneIso(row.expiresAt)}`
                             : ""}
                         </p>
                       </li>

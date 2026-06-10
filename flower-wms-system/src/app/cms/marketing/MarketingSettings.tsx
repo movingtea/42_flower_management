@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { formatNullableDateTime } from "@/lib/datetime";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/Switch";
@@ -165,7 +166,7 @@ export function MarketingSettings({
           </p>
           {noticeUpdatedAt && (
             <p className="mt-1 text-xs text-zinc-400">
-              上次保存：{new Date(noticeUpdatedAt).toLocaleString("zh-CN")}
+              上次保存：{formatNullableDateTime(noticeUpdatedAt)}
             </p>
           )}
 
@@ -210,7 +211,7 @@ export function MarketingSettings({
           </p>
           {popupUpdatedAt && (
             <p className="mt-1 text-xs text-zinc-400">
-              上次发布：{new Date(popupUpdatedAt).toLocaleString("zh-CN")}
+              上次发布：{formatNullableDateTime(popupUpdatedAt)}
             </p>
           )}
 

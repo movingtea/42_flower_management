@@ -4,6 +4,11 @@ import {
   OrderStatus,
   StockLogType,
 } from "@/generated/prisma/enums";
+import {
+  getAppDateKey,
+  listAppDateKeysInRange,
+  serializeReportDateRange,
+} from "@/lib/datetime";
 import { prisma } from "@/lib/prisma";
 import { upsertOrderCostSnapshot } from "@/services/order-cost";
 import { decimalToString, money, ratio, type DecimalInput } from "@/services/order-cost-pure";
@@ -222,11 +227,7 @@ export type BusinessDashboardReport = {
 };
 
 function serializeRange(range: { startDate: Date; endDate: Date; label: string }): DateRangeDto {
-  return {
-    startDate: range.startDate.toISOString(),
-    endDate: range.endDate.toISOString(),
-    label: range.label,
-  };
+  return serializeReportDateRange(range);
 }
 
 function moneyString(value: DecimalInput): string {
@@ -237,19 +238,6 @@ function safeLimit(limit: BusinessReportParams["limit"], fallback = DEFAULT_RANK
   const value = Number(limit ?? fallback);
   if (!Number.isFinite(value) || value <= 0) return fallback;
   return Math.min(Math.trunc(value), 100);
-}
-
-function localDateKey(date: Date): string {
-  const y = date.getFullYear();
-  const m = `${date.getMonth() + 1}`.padStart(2, "0");
-  const d = `${date.getDate()}`.padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
-
-function addDays(date: Date, days: number): Date {
-  const d = new Date(date);
-  d.setDate(d.getDate() + days);
-  return d;
 }
 
 function reportOrderDateWhere(startDate: Date, endDate: Date): Prisma.OrderWhereInput {
@@ -411,8 +399,8 @@ export async function getDailySalesTrend(
   });
 
   const days = new Map<string, { paidAmount: Prisma.Decimal; orderCount: number; totalCost: Prisma.Decimal }>();
-  for (let d = new Date(range.startDate); d < range.endDate; d = addDays(d, 1)) {
-    days.set(localDateKey(d), {
+  for (const key of listAppDateKeysInRange(range.startDate, range.endDate)) {
+    days.set(key, {
       paidAmount: money(0),
       orderCount: 0,
       totalCost: money(0),
@@ -421,7 +409,7 @@ export async function getDailySalesTrend(
 
   let missingSnapshotCount = 0;
   for (const order of orders) {
-    const key = localDateKey(order.paidAt ?? order.createdAt);
+    const key = getAppDateKey(order.paidAt ?? order.createdAt);
     const bucket =
       days.get(key) ??
       {

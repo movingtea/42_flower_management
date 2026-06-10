@@ -12,6 +12,10 @@ import type {
   BatchPipelineRow,
   WikiBatchOption,
 } from "@/services/wms-stock";
+import {
+  formatDateInAppTimezoneIso,
+  formatDateTimeInAppTimezone,
+} from "@/lib/datetime";
 import { resolveBatchExpiresAt } from "@/lib/stock-in-calc";
 
 const LOSS_REASONS = ["自然开败", "制作折损", "运输破损", "其他"] as const;
@@ -24,7 +28,7 @@ type Props = {
 };
 
 function formatBatchOptionLabel(batch: WikiBatchOption): string {
-  const date = new Date(batch.createdAt).toLocaleDateString("zh-CN");
+  const date = formatDateInAppTimezoneIso(batch.createdAt);
   const supplier = batch.supplier?.trim() || "未知";
   return `批次: ${date} - 剩余: ${batch.remainingQty}${batch.unit} - 进价: ¥${batch.unitCost} - 供应商: ${supplier}`;
 }
@@ -427,14 +431,7 @@ export function WmsStockConsole({
               />
               {inboundExpiresAt && (
                 <p className="text-xs text-amber-800">
-                  预计到期：
-                  {inboundExpiresAt.toLocaleString("zh-CN", {
-                    year: "numeric",
-                    month: "2-digit",
-                    day: "2-digit",
-                    hour: "2-digit",
-                    minute: "2-digit",
-                  })}
+                  预计到期：{formatDateTimeInAppTimezone(inboundExpiresAt)}
                 </p>
               )}
 

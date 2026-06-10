@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/Switch";
+import { formatDateTimeInAppTimezone } from "@/lib/datetime";
 import type { PackagingKitRow } from "@/lib/packaging-kit";
 
 type Props = {
@@ -27,12 +28,7 @@ const EMPTY_FORM: FormState = {
 };
 
 function formatTime(iso: string) {
-  return new Date(iso).toLocaleString("zh-CN", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatDateTimeInAppTimezone(iso);
 }
 
 export function PackagingKitManager({ initialList }: Props) {

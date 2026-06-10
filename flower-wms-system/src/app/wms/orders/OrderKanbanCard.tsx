@@ -18,6 +18,7 @@ import {
   resolveArchiveVariant,
 } from "@/app/wms/orders/archive-semantics";
 import type { KanbanColumnDef, KanbanOrder } from "@/app/wms/orders/types";
+import { formatDateTimeInAppTimezone } from "@/lib/datetime";
 
 type Props = {
   order: KanbanOrder;
@@ -32,12 +33,7 @@ type Props = {
 };
 
 function formatTime(iso: string) {
-  return new Date(iso).toLocaleString("zh-CN", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatDateTimeInAppTimezone(iso);
 }
 
 function costBadgeLabel(order: KanbanOrder) {

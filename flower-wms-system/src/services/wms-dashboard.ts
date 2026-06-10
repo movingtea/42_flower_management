@@ -1,21 +1,10 @@
 import { OrderStatus, StockLogType } from "@/generated/prisma/enums";
+import { getAppDayRangeUtc, getTodayAppDateString } from "@/lib/datetime";
 import { listMaterialsForLowStockCheck } from "@/lib/wms-inventory";
 import { prisma } from "@/lib/prisma";
 import type { DashboardMetrics } from "@/types";
 
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
-
-function startOfToday(): Date {
-  const d = new Date();
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function endOfToday(): Date {
-  const d = new Date();
-  d.setHours(23, 59, 59, 999);
-  return d;
-}
 
 export type DashboardRecentOrder = {
   id: string;
@@ -46,8 +35,9 @@ export type WmsDashboardData = {
 export async function loadWmsDashboardData(): Promise<WmsDashboardData> {
   const now = Date.now();
   const expiringBefore = new Date(now + THREE_DAYS_MS);
-  const todayStart = startOfToday();
-  const todayEnd = endOfToday();
+  const { startUtc: todayStart, endUtcExclusive: todayEnd } = getAppDayRangeUtc(
+    getTodayAppDateString()
+  );
 
   const [
     expiringBatchCount,
@@ -68,23 +58,23 @@ export async function loadWmsDashboardData(): Promise<WmsDashboardData> {
     prisma.stockLog.aggregate({
       where: {
         type: StockLogType.WASTAGE_OUT,
-        createdAt: { gte: todayStart, lte: todayEnd },
+        createdAt: { gte: todayStart, lt: todayEnd },
       },
       _sum: { quantity: true },
     }),
     prisma.stockLog.aggregate({
       where: {
         type: StockLogType.SALE_OUT,
-        createdAt: { gte: todayStart, lte: todayEnd },
+        createdAt: { gte: todayStart, lt: todayEnd },
       },
       _sum: { quantity: true },
     }),
     prisma.order.count({
-      where: { createdAt: { gte: todayStart, lte: todayEnd } },
+      where: { createdAt: { gte: todayStart, lt: todayEnd } },
     }),
     prisma.order.aggregate({
       where: {
-        createdAt: { gte: todayStart, lte: todayEnd },
+        createdAt: { gte: todayStart, lt: todayEnd },
         status: {
           in: [
             OrderStatus.PAID,

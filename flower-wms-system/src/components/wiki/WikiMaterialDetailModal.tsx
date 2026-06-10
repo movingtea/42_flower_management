@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { WikiCareTable } from "@/components/wiki/WikiCareTable";
 import { Button } from "@/components/ui/button";
+import { formatNullableDateTime } from "@/lib/datetime";
 import type { WikiListItem } from "@/lib/wiki-constants";
 import { normalizeCareTable, validateCareTableForSave } from "@/lib/wiki-care";
 
@@ -96,7 +97,7 @@ export function WikiMaterialDetailModal({ item, onClose, onEdit }: Props) {
               label="成本更新时间"
               value={
                 item.costUpdatedAt
-                  ? new Date(item.costUpdatedAt).toLocaleString("zh-CN")
+                  ? formatNullableDateTime(item.costUpdatedAt)
                   : "—"
               }
             />

@@ -2,7 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Badge } from "@/components/ui/Badge";
 import { StockLogType } from "@/generated/prisma/enums";
+import { formatDateTimeInAppTimezone } from "@/lib/datetime";
 import { loadMaterialInventoryDetail } from "@/services/wms-inventory-detail";
+
+function formatDateTime(value: string) {
+  return formatDateTimeInAppTimezone(value);
+}
 
 export const dynamic = "force-dynamic";
 
@@ -79,7 +84,7 @@ export default async function InventoryDetailPage({
                   <tr key={b.id}>
                     <td className="px-4 py-3 font-medium">{b.batchNo}</td>
                     <td className="px-4 py-3 text-zinc-600">
-                      {new Date(b.inboundAt).toLocaleString("zh-CN")}
+                      {formatDateTime(b.inboundAt)}
                     </td>
                     <td className="px-4 py-3">
                       {b.originalQty} / {b.remainingQty}

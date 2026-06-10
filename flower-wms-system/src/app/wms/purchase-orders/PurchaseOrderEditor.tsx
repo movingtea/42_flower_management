@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { FlowerMaterialSelect } from "@/components/ui/FlowerMaterialSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getTodayAppDateString, formatDateInAppTimezoneIso } from "@/lib/datetime";
 import { formatCurrency, formatPercent } from "@/lib/format-money";
 import type { WikiListItem } from "@/lib/wiki-constants";
 import {
@@ -56,11 +57,13 @@ type Props = {
 const purchaseUnits = ["扎", "支", "把", "盒"];
 
 function todayInputValue() {
-  return new Date().toISOString().slice(0, 10);
+  return getTodayAppDateString();
 }
 
 function toDateInput(value: string | null | undefined) {
-  return value ? value.slice(0, 10) : "";
+  if (!value) return "";
+  const formatted = formatDateInAppTimezoneIso(value);
+  return formatted === "—" ? "" : formatted;
 }
 
 function emptyLine(): DraftLine {
