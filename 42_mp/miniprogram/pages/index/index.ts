@@ -227,6 +227,7 @@ Page({
       raw: false,
     })
       .then((data) => {
+        console.log(data)
         const apiEntries = data?.entries ?? [];
         if (apiEntries.length === 0) {
           this.setData({
@@ -449,9 +450,13 @@ Page({
   },
 
   onSceneEntryTap(e: WechatMiniprogram.TouchEvent) {
+    console.log('[home-scene] tap', e.currentTarget.dataset);
     const index = Number(e.currentTarget.dataset.index);
     const entry = this.data.sceneEntries[index];
-    if (!entry) return;
+    if (!entry) {
+      wx.showToast({ title: '场景入口无效', icon: 'none' });
+      return;
+    }
     navigateToSceneEntry({
       sceneType: entry.sceneType,
       targetType: entry.targetType,

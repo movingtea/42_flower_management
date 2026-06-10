@@ -23,6 +23,7 @@ import {
   sceneTitleByKey,
   type ProductFilters,
 } from '../../utils/product-filters';
+import { consumeCategoryPendingNav } from '../../utils/home-scene-entries';
 
 interface CategoryNode {
   id: string;
@@ -138,7 +139,47 @@ Page({
 
   onShow() {
     updateCartTabBarBadge();
+    this.applyPendingSceneNavigation();
     void this.loadCategories();
+  },
+
+  /** 消费首页场景入口经 switchTab 传入的筛选参数 */
+  applyPendingSceneNavigation() {
+    const pending = consumeCategoryPendingNav();
+    if (!pending) return;
+
+    console.log('[category] apply pending scene nav', pending);
+
+    const sceneType = (pending.sceneType ?? pending.occasionTag ?? '').trim();
+    const filterMode = pending.filterMode === true || !!sceneType;
+
+    if (filterMode && !sceneType) {
+      wx.showToast({ title: '缺少场景类型', icon: 'none' });
+      return;
+    }
+
+    if (pending.slotKey) {
+      console.warn('[category] slotKey not used in filter UI yet:', pending.slotKey);
+    }
+
+    const filters: ProductFilters = sceneType ? { occasion: sceneType } : {};
+
+    this.setData({
+      sceneType,
+      filterMode,
+      sceneTitle: sceneType ? sceneTitleByKey(sceneType) : '',
+      sceneDescription: sceneType ? sceneDescriptionByKey(sceneType) : '',
+      sceneIcon: sceneType ? sceneIconPath(sceneType) : '',
+      filters,
+      filterGroups: buildFilterGroupsUi(filters),
+      activeFilterChips: buildFilterChips(filters),
+      hasActiveFilters: hasActiveFilters(filters),
+      activeCategoryId: filterMode ? '' : this.data.activeCategoryId,
+    });
+
+    if (sceneType) {
+      wx.setNavigationBarTitle({ title: sceneTitleByKey(sceneType) });
+    }
   },
 
   onPullDownRefresh() {

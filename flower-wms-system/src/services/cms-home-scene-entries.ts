@@ -158,6 +158,7 @@ export async function listActiveHomeSceneEntriesForMiniProgram(): Promise<{
         targetType: row.targetType,
         targetValue: row.targetValue,
         linkedRecommendationSlotKey: row.linkedRecommendationSlotKey,
+        linkedRecommendationSlotId: row.linkedRecommendationSlotId,
         source: "CMS",
       })
     ),

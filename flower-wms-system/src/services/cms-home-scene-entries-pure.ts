@@ -147,15 +147,39 @@ const VALID_ICON_KEYS = new Set<string>(CMS_HOME_SCENE_ICON_KEYS);
 export function normalizeTargetType(
   raw?: string | null
 ): HomeSceneEntryTargetType {
+  const trimmed = (raw ?? "").trim();
+  if (!trimmed) return HomeSceneEntryTargetType.PRODUCT_FILTER;
+
   if (
-    raw &&
     Object.values(HomeSceneEntryTargetType).includes(
-      raw as HomeSceneEntryTargetType
+      trimmed as HomeSceneEntryTargetType
     )
   ) {
-    return raw as HomeSceneEntryTargetType;
+    return trimmed as HomeSceneEntryTargetType;
   }
-  return HomeSceneEntryTargetType.PRODUCT_FILTER;
+
+  const upper = trimmed.toUpperCase();
+  if (upper === HomeSceneEntryTargetType.RECOMMENDATION_SLOT) {
+    return HomeSceneEntryTargetType.RECOMMENDATION_SLOT;
+  }
+  if (upper === HomeSceneEntryTargetType.CUSTOM_URL) {
+    return HomeSceneEntryTargetType.CUSTOM_URL;
+  }
+  if (upper === HomeSceneEntryTargetType.PRODUCT_FILTER) {
+    return HomeSceneEntryTargetType.PRODUCT_FILTER;
+  }
+
+  const aliases: Record<string, HomeSceneEntryTargetType> = {
+    product_filter: HomeSceneEntryTargetType.PRODUCT_FILTER,
+    FILTER: HomeSceneEntryTargetType.PRODUCT_FILTER,
+    商品筛选结果: HomeSceneEntryTargetType.PRODUCT_FILTER,
+    recommendation_slot: HomeSceneEntryTargetType.RECOMMENDATION_SLOT,
+    推荐位: HomeSceneEntryTargetType.RECOMMENDATION_SLOT,
+    custom_url: HomeSceneEntryTargetType.CUSTOM_URL,
+    自定义路径: HomeSceneEntryTargetType.CUSTOM_URL,
+  };
+
+  return aliases[trimmed] ?? aliases[upper] ?? HomeSceneEntryTargetType.PRODUCT_FILTER;
 }
 
 export function sceneTypeToIconKey(sceneType?: string | null): string {
@@ -192,6 +216,7 @@ export type MiniProgramHomeSceneEntry = {
   targetType: HomeSceneEntryTargetType;
   targetValue: string | null;
   linkedRecommendationSlotKey: string | null;
+  linkedRecommendationSlotId: string | null;
   source: HomeSceneEntrySource;
 };
 
@@ -206,6 +231,7 @@ export function buildFallbackMiniProgramEntries(): MiniProgramHomeSceneEntry[] {
     targetType: entry.targetType,
     targetValue: null,
     linkedRecommendationSlotKey: null,
+    linkedRecommendationSlotId: null,
     source: "FALLBACK" as const,
   }));
 }
@@ -220,6 +246,7 @@ export function toMiniProgramHomeSceneEntry(input: {
   targetType: string | null;
   targetValue: string | null;
   linkedRecommendationSlotKey: string | null;
+  linkedRecommendationSlotId?: string | null;
   source: HomeSceneEntrySource;
 }): MiniProgramHomeSceneEntry {
   const targetType = normalizeTargetType(input.targetType);
@@ -241,6 +268,7 @@ export function toMiniProgramHomeSceneEntry(input: {
     targetType,
     targetValue,
     linkedRecommendationSlotKey: input.linkedRecommendationSlotKey,
+    linkedRecommendationSlotId: input.linkedRecommendationSlotId ?? null,
     source: input.source,
   };
 }

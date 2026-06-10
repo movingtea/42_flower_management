@@ -41,7 +41,7 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 - **Sprint 10 礼赠购买体验**：首页场景化购买入口（CMS 可配置 + 本地 fallback 6 大场景 + 图标）、CMS 推荐位驱动主推 / 场景 / 新品 / 高客单、`HIGH_TICKET` 区块、品牌说明区。
 - **CMS 首页场景入口配置**（`CmsHomeSceneEntry`）：`/cms/marketing`「首页场景入口」Tab；与推荐位商品配置边界分离。
 - 小程序首页动态读取 `GET /api/miniprogram/home-scene-entries`；CMS 无 active 配置时使用默认 6 个 fallback。
-- 场景入口点击后进入服务端 tag 过滤后的商品列表（`occasionTag` / `sceneType` query）。
+- 场景入口点击后进入选花 tab（`pages/category/category`）；因 tabBar 页须 `wx.switchTab`，筛选参数经 `category_pending_nav` storage 传递，选花页 `onShow` 消费后请求服务端 tag 过滤。
 - 商品列表标签筛选（场景 / 预算 / 色系 / 风格 / 关系；**服务端 tag 过滤后分页**，`GET /api/miniprogram/products`）。
 - **API 目录治理**：小程序业务数据统一 `/api/miniprogram/*`；`/api/wechat/*` 仅登录/授权/支付回调。
 - 选花页筛选条件 chips、上拉加载更多、场景上下文文案。
@@ -387,7 +387,12 @@ CMS 面向花店运营用户，主界面不要求理解 `productId` / `skuId` / 
 - 小程序定位是**礼赠购买助手**，不是普通复杂电商平台；礼赠 CRM 字段用于沉淀，但下单页不得强制填写过多扩展字段。
 - 首页并行加载 `homepage`、`products`、`recommendations`、**`home-scene-entries`**；各模块失败不白屏，场景入口失败时使用本地 fallback 6 个。
 - 首页首屏：Banner →「你想把花送给谁？」→ **CMS 配置的场景入口**（带 `iconKey` 映射图标；CMS 无 active 时用 fallback）→ `HOME_MAIN` 主推 → 场景推荐 / 新品 / 高客单。
-- 场景入口跳转：`PRODUCT_FILTER` → 选花页 `pages/category/category?sceneType=&occasionTag=&filterMode=1`（服务端 tag 过滤）；`RECOMMENDATION_SLOT` → 选花页并携带 `slotKey`；`CUSTOM_URL` → `targetValue` 路径。
+- 场景入口跳转（`utils/home-scene-entries.ts` → `navigateToSceneEntry`）：
+  - `PRODUCT_FILTER` → `wx.switchTab` 到选花 tab，pending 携带 `sceneType` / `occasionTag`，服务端 tag 过滤；
+  - `RECOMMENDATION_SLOT` → 同上，并携带 `slotKey`（选花页暂未用 slotKey 做 UI 筛选，但须跳转不静默）；
+  - `CUSTOM_URL` → tabBar 页用 `switchTab`，普通页用 `navigateTo`；选花 tab 带 query 时解析为 pending 参数；
+  - `targetType` 须为 enum key（`PRODUCT_FILTER` / `RECOMMENDATION_SLOT` / `CUSTOM_URL`），小程序端 `normalizeTargetType` 兼容旧中文/小写；
+  - 跳转失败须 `console.error` + toast，不得静默。
 - 选花页支持五维标签筛选（`occasionTag(s)` / `budgetTag(s)` / `colorTag(s)` / `styleTag(s)` / `relationshipTag(s)` / `sceneType` / `minPrice` / `maxPrice` / `sort` / `page` / `pageSize`）；**tag 过滤在 service 层于分页之前完成**，`pagination.total` 为过滤后总数。
 - **小程序前端不得只对当前页数据做 tag 筛选**；筛选变化须重新请求服务端并重置 `page=1`。
 - 商品列表 / 详情 / 推荐卡片展示场景、色系、风格、卖点标签；不展示 `operationNote`、成本、毛利、产品决策内部 warning。
@@ -954,10 +959,11 @@ Dockerfile：
 52. 小程序业务 API 须统一使用 `/api/miniprogram/*`；商品、推荐位、订单、购物车、收花人等不得放在 `/api/wechat`。
 53. `/api/wechat/*` 仅用于微信登录/授权/支付回调等平台能力；正式微信支付未来放入 `/api/wechat/orders/callback` 或独立支付模块，不与业务 API 混淆。
 54. 小程序前端业务请求通过 `utils/request.ts`（基址 `/api/miniprogram`）；登录单独走 `/api/wechat/auth/login`。
-55. 不得把开发环境 base url（localhost / 127.0.0.1 / request origin）持久化到数据库图片字段。
-56. 不得在多个 route / service 中散落拼接图片 base url；须集中使用 `src/lib/image-url.ts`。
-57. 不得对已是 absolute URL 的图片重复拼接 base url；小程序 API 不得向客户端返回 localhost 图片 URL。
-58. `operationNote`、成本、毛利等产品决策内部信息仍不得返回小程序（与第 39、42 条一致）。
+55. 首页场景入口跳转选花 tab 必须使用 `wx.switchTab`，不得对 tabBar 页使用 `wx.navigateTo`；筛选 query 经 storage pending 传递。
+56. 场景入口 `targetType` 须为 `PRODUCT_FILTER` / `RECOMMENDATION_SLOT` / `CUSTOM_URL`；跳转失败不得静默。
+57. 不得把开发环境 base url（localhost / 127.0.0.1）持久化到数据库图片字段；图片 URL 规范化见 `src/lib/image-url.ts`。
+58. 小程序 API 不得向客户端返回 localhost 图片 URL；不得重复拼接 absolute URL。
+59. `operationNote`、成本、毛利等产品决策内部信息仍不得返回小程序。
 
 ---
 
