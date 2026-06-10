@@ -81,6 +81,30 @@ function emptyRow(): DraftRow {
   };
 }
 
+function buildRecipeCostRiskHints(preview: RecipeCostPreview): string[] {
+  const total = Number(preview.lossModelStandardTotalCost ?? preview.totalCost);
+  if (!Number.isFinite(total) || total <= 0) return [];
+
+  const material = Number(preview.lossModelStandardMaterialCost ?? preview.materialCost);
+  const packaging = Number(preview.packagingCost);
+  const lossExtra = Number(preview.lossModelExtraCost ?? 0);
+  const hints: string[] = [];
+
+  if (packaging / total > 0.25) {
+    hints.push("包装成本占比偏高，建议评估包装方案是否有优化空间。");
+  }
+  if (lossExtra / total > 0.15) {
+    hints.push("损耗模型对配方成本影响偏高，关联产品可能对花材损耗较敏感。");
+  }
+  if (material / total > 0.75) {
+    hints.push("花材成本占比较高，需关注关联 SKU 的毛利空间。");
+  }
+  if (!preview.isComplete) {
+    hints.push("配方成本数据不完整，产品决策与毛利判断可能不准确。");
+  }
+  return hints;
+}
+
 function fromIngredient(item: {
   id?: string;
   flowerWikiId: string;
@@ -587,6 +611,25 @@ export function WmsRecipeConsole() {
                     </tbody>
                   </table>
                 </div>
+                {(() => {
+                  const hints = buildRecipeCostRiskHints(costPreview);
+                  if (hints.length === 0) return null;
+                  return (
+                    <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">
+                      <p className="font-medium">配方成本风险提示</p>
+                      <ul className="mt-2 space-y-1">
+                        {hints.map((hint) => (
+                          <li key={hint}>• {hint}</li>
+                        ))}
+                      </ul>
+                      {productCount > 0 ? (
+                        <p className="mt-2 text-amber-800">
+                          该配方已关联 {productCount} 个 SKU，可在产品决策中心查看关联产品健康状态。
+                        </p>
+                      ) : null}
+                    </div>
+                  );
+                })()}
               </div>
             ) : null}
 

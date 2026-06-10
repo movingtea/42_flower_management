@@ -32,6 +32,7 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 - 供应商与采购单：`Supplier` / `PurchaseOrder` / `PurchaseOrderLine`。
 - 采购单到货入库：生成 `Batch` + `StockLog: INBOUND`，回写 `PurchaseOrderLine.inboundBatchId`。
 - 采购复盘：供应商采购排行、花材采购价趋势、批次销售转化、批次销售成本贡献、采购建议标签。
+- 产品决策中心：产品健康状态、损耗敏感度、建议售价、决策标签、成本结构风险；WMS 报表 Tab + CMS 商品页提示。
 
 ### 当前不存在 / 不应假设存在
 
@@ -68,6 +69,7 @@ flower-wms-system/
 │   ├── cron-inventory-daemon.ts
 │   ├── smoke-purchase-flow.ts
 │   ├── smoke-purchase-analytics.ts
+│   ├── smoke-product-decision.ts
 │   └── sync-physical-to-virtual-stock.ts
 ├── src/
 │   ├── app/
@@ -97,7 +99,10 @@ flower-wms-system/
 | `src/services/business-report.ts` | 经营报表与缺失快照 backfill |
 | `src/services/purchase-analytics-pure.ts` | 采购复盘纯计算：summary、供应商排行、花材价趋势、批次转化、成本贡献、建议标签 |
 | `src/services/purchase-analytics.ts` | 采购复盘 Prisma 查询与 API DTO 序列化 |
+| `src/services/product-decision-pure.ts` | 产品决策纯规则：健康状态、损耗敏感度、建议售价、决策标签、成本结构风险 |
+| `src/services/product-decision.ts` | 产品决策 Prisma 聚合：SKU 销售、三档毛利、订单分摊实际毛利、Dashboard DTO |
 | `src/lib/datetime.ts` | 后台统一时区格式化与报表日期 UTC 边界转换 |
+| `src/lib/product-decision-tags.ts` | 产品决策标签 / 健康状态 / 损耗敏感度前端映射 |
 | `src/services/order-fifo.ts` | 支付后 FIFO 扣物理库存并生成订单成本快照 |
 | `src/services/fifo.ts` | FIFO 扣减算法与 StockLog 写入 |
 | `src/services/wms-stock.ts` | 手工入库、指定批次报损、批次流水线 |
@@ -125,7 +130,7 @@ flower-wms-system/
 | `/wms/packaging-kits` | 包装方案管理 |
 | `/wms/material-categories` | 原材料分类 |
 | `/wms/orders` | 订单履约看板 |
-| `/wms/reports` | 经营报表中心（Tab：经营总览、销售趋势、商品毛利、库存预警、损耗模型影响、采购复盘） |
+| `/wms/reports` | 经营报表中心（Tab：经营总览、销售趋势、商品毛利、库存预警、损耗模型影响、采购复盘、产品决策） |
 | `/wms/batches` | redirect 到 `/wms/operations` |
 | `/wms/wastage` | redirect 到 `/wms/operations?panel=loss` |
 | `/wms/bom` | redirect 到 `/wms/recipes` |
@@ -138,8 +143,8 @@ flower-wms-system/
 
 | 路径 | 职责 |
 |---|---|
-| `/cms/products` | 商品列表，展示 SKU 毛利预估信息 |
-| `/cms/products/[id]` | 商品编辑，SKU 绑定 Recipe，展示毛利预估和 warning |
+| `/cms/products` | 商品列表，展示 SKU 毛利预估与产品决策健康状态 / 关键标签 |
+| `/cms/products/[id]` | 商品编辑，SKU 绑定 Recipe，展示毛利预估、产品决策建议与 warning |
 | `/cms/product-categories` | 商城商品分类树 |
 | `/cms/banner` | 首页轮播 |
 | `/cms/marketing` | 营销配置 |
@@ -152,6 +157,7 @@ CMS 商品编辑边界：
 - SKU 通过 `ProductSku.recipeId` 只读绑定 WMS Recipe。
 - CMS 不维护 RecipeLine 明细，不直接修改库存。
 - `PATCH /api/cms/skus/[id]` 只允许图文白名单字段，防止 mass assignment。
+- CMS 商品列表 / 编辑页展示产品决策标签和建议，仅作为经营参考；不会自动改价、上下架或修改配方。
 
 ---
 
@@ -210,6 +216,8 @@ CMS 商品编辑边界：
 - `inventory-alerts`
 - `loss-model-impact`
 - `purchase-analytics`
+- `product-decisions`
+- `product-decisions/[skuId]`
 - `backfill-cost-snapshots`
 
 权限：
@@ -410,6 +418,15 @@ warning 场景：
 | Inventory alerts | 当前批次剩余数量与库存价值 |
 | Loss model impact | `SALE_OUT` 花材成本按 `Batch.lossAdjustedUnitCost`（fallback `unitCost`）估算损耗模型影响 |
 | Purchase analytics | `RECEIVED` 采购单按 `receivedAt`（fallback `purchaseDate` / `createdAt`）聚合；批次转化来自 `StockLog` |
+| Product decisions | SKU 级配方预估 + 三档损耗毛利 + 订单项销售分摊实际毛利 + 透明规则标签 |
+
+产品决策数据口径（三类成本不得混淆）：
+
+1. **产品预估成本**：`Recipe` + `FlowerWiki.standardUnitCost` + `PackagingKit.standardCost`。
+2. **损耗模式成本**：`Recipe` + `FlowerWiki` 可用率三档（乐观 / 标准 / 保守）。
+3. **订单实际毛利**：`OrderCostSnapshot` + `SALE_OUT × Batch.unitCost`（优先按 `orderItemId` 精确归属花材成本）。
+
+产品决策可能同时参考三类口径，但不得把损耗模式成本当作历史订单真实毛利，也不得在没有 SKU 收入分摊口径时伪造 SKU 实际毛利（`hasActualData=false` 时必须展示 warning）。
 
 采购复盘数据口径：
 
@@ -654,6 +671,11 @@ Dockerfile：
 22. 不得用 `toISOString().slice(0, 10)` 展示业务日期。
 23. 不得把 UTC 时间加 8 小时后写回数据库。
 24. 报表日期范围必须按 `Asia/Shanghai` 自然日转换为 UTC 查询边界（半开区间 `gte` / `lt`）。
+25. 产品决策标签只作为经营建议，不自动改价、下架或修改配方。
+26. 不得把形象款（`IMAGE_ONLY`）简单等同于低价值产品。
+27. 不得在没有 SKU 收入分摊口径时伪造 SKU 实际毛利。
+28. 不得用损耗模式成本覆盖历史订单真实毛利。
+29. 产品健康状态必须展示 warnings，不能隐藏数据不完整问题。
 
 ---
 

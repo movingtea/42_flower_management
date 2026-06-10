@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { StatCard } from "@/components/wms/stat-card";
@@ -8,6 +9,7 @@ import { getTodayAppDateString } from "@/lib/datetime";
 import { formatDateTime } from "@/lib/format-display";
 import { formatCurrency, formatPercent, safeDecimalToNumber } from "@/lib/format-money";
 import type { BusinessDashboardReport } from "@/services/business-report";
+import { ProductDecisionTab } from "./components/ProductDecisionTab";
 import { PurchaseAnalyticsTab } from "./components/PurchaseAnalyticsTab";
 import { EmptyRow, Section, TableShell } from "./components/report-ui";
 
@@ -29,7 +31,8 @@ type ReportTab =
   | "products"
   | "inventory"
   | "loss-model"
-  | "purchase";
+  | "purchase"
+  | "product-decisions";
 
 const presets = [
   { value: "today", label: "今日" },
@@ -46,6 +49,7 @@ const reportTabs: Array<{ id: ReportTab; label: string }> = [
   { id: "inventory", label: "库存预警" },
   { id: "loss-model", label: "损耗模型影响" },
   { id: "purchase", label: "采购复盘" },
+  { id: "product-decisions", label: "产品决策" },
 ];
 
 const statusLabel: Record<string, string> = {
@@ -74,8 +78,27 @@ function ratioWidth(value: string): string {
   return `${pct}%`;
 }
 
+function resolveInitialReportTab(searchParams: URLSearchParams): ReportTab {
+  const tab = searchParams.get("tab");
+  if (tab === "product-decisions") return "product-decisions";
+  if (
+    tab === "overview" ||
+    tab === "sales" ||
+    tab === "products" ||
+    tab === "inventory" ||
+    tab === "loss-model" ||
+    tab === "purchase"
+  ) {
+    return tab;
+  }
+  return "overview";
+}
+
 export function BusinessReportsClient() {
-  const [activeTab, setActiveTab] = useState<ReportTab>("overview");
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState<ReportTab>(() =>
+    resolveInitialReportTab(searchParams)
+  );
   const [preset, setPreset] = useState("thisMonth");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
@@ -112,9 +135,24 @@ export function BusinessReportsClient() {
     return params.toString();
   }, [endDate, preset, startDate]);
 
+  const productDecisionQuery = useMemo(() => {
+    const params = new URLSearchParams();
+    if (startDate || endDate) {
+      if (startDate) params.set("startDate", startDate);
+      if (endDate) params.set("endDate", endDate);
+    } else {
+      params.set("preset", preset);
+    }
+    params.set("limit", "50");
+    params.set("targetMargin", "0.6");
+    return params.toString();
+  }, [endDate, preset, startDate]);
+
+  const productIdFromUrl = searchParams.get("productId");
+
   const loadReports = useCallback(
     async (silent = false) => {
-      if (activeTab === "purchase") return;
+      if (activeTab === "purchase" || activeTab === "product-decisions") return;
       if (silent) {
         setRefreshing(true);
       } else {
@@ -176,9 +214,12 @@ export function BusinessReportsClient() {
     setEndDate(today);
   };
 
-  const showDashboardLoading = activeTab !== "purchase" && loading;
-  const showDashboardError = activeTab !== "purchase" && error;
-  const showDashboardData = activeTab !== "purchase" && data;
+  const showDashboardLoading =
+    activeTab !== "purchase" && activeTab !== "product-decisions" && loading;
+  const showDashboardError =
+    activeTab !== "purchase" && activeTab !== "product-decisions" && error;
+  const showDashboardData =
+    activeTab !== "purchase" && activeTab !== "product-decisions" && data;
 
   return (
     <div className="min-w-0">
@@ -189,7 +230,9 @@ export function BusinessReportsClient() {
             按日期复盘销售额、真实成本、毛利、花材损耗、库存预警与采购表现。
           </p>
         </div>
-        {data && activeTab !== "purchase" && (
+        {data &&
+          activeTab !== "purchase" &&
+          activeTab !== "product-decisions" && (
           <p className="text-xs text-zinc-400">当前范围：{data.summary.dateRange.label}</p>
         )}
       </header>
@@ -256,7 +299,7 @@ export function BusinessReportsClient() {
             >
               本月自定义
             </button>
-            {activeTab !== "purchase" && (
+            {activeTab !== "purchase" && activeTab !== "product-decisions" && (
               <button
                 type="button"
                 onClick={() => void loadReports(true)}
@@ -289,6 +332,11 @@ export function BusinessReportsClient() {
 
       {activeTab === "purchase" ? (
         <PurchaseAnalyticsTab query={purchaseQuery} />
+      ) : activeTab === "product-decisions" ? (
+        <ProductDecisionTab
+          query={productDecisionQuery}
+          productId={productIdFromUrl}
+        />
       ) : showDashboardLoading ? (
         <div className="rounded-xl border border-zinc-200 bg-white p-12 text-center text-sm text-zinc-500 shadow-sm">
           正在加载经营报表...
