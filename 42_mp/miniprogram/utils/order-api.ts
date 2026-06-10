@@ -12,6 +12,37 @@ export type CreateOrderLine = {
   quantity: number;
 };
 
+export type CrmBuyerInfo = {
+  name?: string;
+  phone?: string;
+};
+
+export type CrmRecipientInfo = {
+  name?: string;
+  phone?: string;
+  address?: string;
+  relationType?: string;
+  relationLabel?: string;
+  preferredColors?: string;
+  dislikedFlowers?: string;
+  preferenceNote?: string;
+  saveRecipient?: boolean;
+};
+
+export type CrmGiftOccasion = {
+  occasionType?: string;
+  occasionLabel?: string;
+  importantDate?: string;
+  giftPurpose?: string;
+  cardMessage?: string;
+  note?: string;
+};
+
+export type CrmReminderOptions = {
+  enabled?: boolean;
+  daysBefore?: number;
+};
+
 export type CreateOrderPayload = {
   receiverName: string;
   receiverPhone: string;
@@ -22,6 +53,10 @@ export type CreateOrderPayload = {
   deliveryFee: number;
   payAmount: number;
   items: CreateOrderLine[];
+  buyerInfo?: CrmBuyerInfo;
+  recipientInfo?: CrmRecipientInfo;
+  giftOccasion?: CrmGiftOccasion;
+  reminderOptions?: CrmReminderOptions;
 };
 
 export type CreateOrderResult = {

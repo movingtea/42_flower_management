@@ -14,6 +14,7 @@ import type {
   ProductEditorProps,
   ProductSkuEditorRow,
 } from "@/app/cms/products/types";
+import { ProductOccasionTagsEditor } from "@/components/cms/ProductOccasionTagsEditor";
 import { ProductDecisionPanel } from "@/components/product-decision/ProductDecisionPanel";
 import { formatPercent } from "@/lib/format-money";
 import type {
@@ -61,6 +62,9 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
   const [name, setName] = useState(initial.name);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     initial.category
+  );
+  const [occasionTags, setOccasionTags] = useState<string[]>(
+    initial.occasionTags ?? []
   );
   const [isPublished, setIsPublished] = useState(initial.isActive);
   const [description, setDescription] = useState(initial.description);
@@ -222,6 +226,7 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
     const payload = {
       name: name.trim(),
       category: selectedCategories,
+      occasionTags,
       isActive: isPublished,
       needsShipping,
       shippingFee: needsShipping ? Number(shippingFee.trim()) : 0,
@@ -530,6 +535,16 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
             placeholder="请输入养护指南，支持图文排版"
             minHeight={280}
           />
+
+          <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+            <h3 className="text-sm font-semibold text-zinc-900">适用礼赠场景</h3>
+            <div className="mt-4">
+              <ProductOccasionTagsEditor
+                value={occasionTags}
+                onChange={setOccasionTags}
+              />
+            </div>
+          </section>
 
           <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">

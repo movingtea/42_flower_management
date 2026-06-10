@@ -15,6 +15,7 @@ export const dynamic = "force-dynamic";
 const EMPTY: ProductEditorInitial = {
   name: "",
   category: [],
+  occasionTags: [],
   description: "",
   maintenanceGuide: "",
   isActive: true,

@@ -2819,6 +2819,7 @@ export const ProductSpuScalarFieldEnum = {
   shippingFee: 'shippingFee',
   allowPreOrder: 'allowPreOrder',
   productionTime: 'productionTime',
+  occasionTags: 'occasionTags',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

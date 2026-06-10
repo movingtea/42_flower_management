@@ -8,10 +8,14 @@ import {
   ReminderType,
 } from "@/generated/prisma/enums";
 import {
+  addAppCalendarDays,
   coerceDate,
   formatDateInAppTimezoneIso,
   formatDateTimeInAppTimezone,
   getAppDateRangeUtc,
+  getAppDayRangeUtc,
+  getTodayAppDateString,
+  parseAppDateString,
 } from "@/lib/datetime";
 import { prisma } from "@/lib/prisma";
 import {
@@ -1319,4 +1323,255 @@ export async function deleteMiniProgramRecipient(
   });
 
   return { success: true };
+}
+
+const HIGH_VALUE_SPENT_THRESHOLD = 500;
+const HIGH_VALUE_ORDERS_THRESHOLD = 3;
+
+export async function getCrmSummary() {
+  const todayKey = getTodayAppDateString();
+  const todayParts = parseAppDateString(todayKey)!;
+  const monthStartKey = `${todayParts.year}-${String(todayParts.month).padStart(2, "0")}-01`;
+  const weekEndParts = addAppCalendarDays(todayParts, 7);
+  const weekEndKey = `${weekEndParts.year}-${String(weekEndParts.month).padStart(2, "0")}-${String(weekEndParts.day).padStart(2, "0")}`;
+
+  const { startUtc: todayStart, endUtcExclusive: todayEnd } =
+    getAppDayRangeUtc(todayKey);
+  const { startUtc: weekStart, endUtcExclusive: weekEnd } = getAppDateRangeUtc(
+    todayKey,
+    weekEndKey
+  );
+  const { startUtc: monthStart } = getAppDayRangeUtc(monthStartKey);
+
+  const [
+    customerCount,
+    recipientCount,
+    pendingReminderCount,
+    weekPendingCount,
+    todayPendingCount,
+    miniProgramCount,
+    monthNewCustomers,
+    highValueCount,
+    spentAgg,
+    recentCustomers,
+    todayReminders,
+    weekReminders,
+  ] = await Promise.all([
+    prisma.customer.count(),
+    prisma.recipient.count(),
+    prisma.customerReminder.count({ where: { status: ReminderStatus.PENDING } }),
+    prisma.customerReminder.count({
+      where: {
+        status: ReminderStatus.PENDING,
+        remindAt: { gte: weekStart!, lt: weekEnd! },
+      },
+    }),
+    prisma.customerReminder.count({
+      where: {
+        status: ReminderStatus.PENDING,
+        remindAt: { gte: todayStart, lt: todayEnd },
+      },
+    }),
+    prisma.customer.count({ where: { source: CustomerSource.MINI_PROGRAM } }),
+    prisma.customer.count({ where: { createdAt: { gte: monthStart } } }),
+    prisma.customer.count({
+      where: {
+        OR: [
+          { totalSpent: { gte: HIGH_VALUE_SPENT_THRESHOLD } },
+          { totalOrders: { gte: HIGH_VALUE_ORDERS_THRESHOLD } },
+        ],
+      },
+    }),
+    prisma.customer.aggregate({
+      _avg: { averageOrderValue: true },
+      _sum: { totalSpent: true },
+    }),
+    prisma.customer.findMany({
+      orderBy: { createdAt: "desc" },
+      take: 8,
+      select: {
+        id: true,
+        name: true,
+        phone: true,
+        source: true,
+        totalOrders: true,
+        totalSpent: true,
+        lastOrderAt: true,
+      },
+    }),
+    prisma.customerReminder.findMany({
+      where: {
+        status: ReminderStatus.PENDING,
+        remindAt: { gte: todayStart, lt: todayEnd },
+      },
+      include: {
+        customer: { select: { id: true, name: true } },
+        recipient: { select: { id: true, name: true } },
+      },
+      orderBy: { remindAt: "asc" },
+      take: 20,
+    }),
+    prisma.customerReminder.findMany({
+      where: {
+        status: ReminderStatus.PENDING,
+        remindAt: { gte: weekStart!, lt: weekEnd! },
+      },
+      include: {
+        customer: { select: { id: true, name: true } },
+        recipient: { select: { id: true, name: true } },
+      },
+      orderBy: { remindAt: "asc" },
+      take: 30,
+    }),
+  ]);
+
+  const topCustomers = await prisma.customer.findMany({
+    orderBy: [{ totalSpent: "desc" }, { totalOrders: "desc" }],
+    take: 8,
+    select: {
+      id: true,
+      name: true,
+      phone: true,
+      source: true,
+      totalOrders: true,
+      totalSpent: true,
+      lastOrderAt: true,
+      tags: true,
+    },
+  });
+
+  return {
+    metrics: {
+      customerCount,
+      recipientCount,
+      pendingReminderCount,
+      weekPendingCount,
+      todayPendingCount,
+      highValueCount,
+      monthNewCustomers,
+      miniProgramCount,
+      averageOrderValue: Number(spentAgg._avg.averageOrderValue ?? 0),
+      totalSpent: Number(spentAgg._sum.totalSpent ?? 0),
+    },
+    recentCustomers: recentCustomers.map((c) => ({
+      ...c,
+      name: c.name ?? buildCustomerDisplayName(c),
+      phoneMasked: maskPhone(c.phone),
+      totalSpent: Number(c.totalSpent),
+    })),
+    topCustomers: topCustomers.map((c) => ({
+      ...c,
+      name: c.name ?? buildCustomerDisplayName(c),
+      phoneMasked: maskPhone(c.phone),
+      totalSpent: Number(c.totalSpent),
+    })),
+    todayReminders: todayReminders.map((r) => ({
+      id: r.id,
+      title: r.title,
+      customerId: r.customerId,
+      customerName: r.customer.name,
+      recipientName: r.recipient?.name,
+      type: r.type,
+      remindAt: r.remindAt,
+      remindAtLabel: formatDateTimeInAppTimezone(r.remindAt),
+      dueDateLabel: r.dueDate
+        ? formatDateInAppTimezoneIso(r.dueDate)
+        : null,
+    })),
+    weekReminders: weekReminders.map((r) => ({
+      id: r.id,
+      title: r.title,
+      customerId: r.customerId,
+      customerName: r.customer.name,
+      recipientName: r.recipient?.name,
+      type: r.type,
+      remindAt: r.remindAt,
+      remindAtLabel: formatDateTimeInAppTimezone(r.remindAt),
+      dueDateLabel: r.dueDate
+        ? formatDateInAppTimezoneIso(r.dueDate)
+        : null,
+    })),
+  };
+}
+
+export async function getOccasionProductRecommendations(
+  occasionType: GiftOccasionType,
+  limit = 5
+) {
+  const spus = await prisma.productSpu.findMany({
+    where: {
+      isActive: true,
+      isDeleted: false,
+      occasionTags: { has: occasionType },
+    },
+    include: {
+      skus: {
+        where: { stock: { gt: 0 } },
+        orderBy: { sortOrder: "asc" },
+        take: 3,
+      },
+    },
+    take: 20,
+  });
+
+  if (spus.length === 0) {
+    return [];
+  }
+
+  let decisionMap = new Map<
+    string,
+    { healthStatus: string; healthLabel: string; marginLabel: string }
+  >();
+
+  try {
+    const { getProductDecisionReport } = await import(
+      "@/services/product-decision"
+    );
+    const report = await getProductDecisionReport({
+      limit: 100,
+      includeInactive: false,
+      includeAll: true,
+    });
+    for (const item of report.products) {
+      if (
+        item.health.status === "RECOMMENDED" ||
+        item.health.status === "HEALTHY"
+      ) {
+        const standardMargin = item.marginEstimates.standard;
+        decisionMap.set(item.productId, {
+          healthStatus: item.health.status,
+          healthLabel: item.health.statusLabel,
+          marginLabel:
+            standardMargin != null
+              ? `${(standardMargin * 100).toFixed(1)}%`
+              : "—",
+        });
+      }
+    }
+  } catch {
+    decisionMap = new Map();
+  }
+
+  const ranked = spus
+    .map((spu) => {
+      const sku = spu.skus[0];
+      const decision = decisionMap.get(spu.id);
+      const score =
+        (decision?.healthStatus === "RECOMMENDED" ? 2 : decision ? 1 : 0) +
+        (sku ? 1 : 0);
+      return { spu, sku, decision, score };
+    })
+    .sort((a, b) => b.score - a.score)
+    .slice(0, limit);
+
+  return ranked.map(({ spu, sku, decision }) => ({
+    productId: spu.id,
+    productName: spu.name,
+    skuId: sku?.id ?? null,
+    skuName: sku?.specName ?? null,
+    price: sku ? Number(sku.price) : null,
+    healthStatus: decision?.healthStatus ?? null,
+    healthLabel: decision?.healthLabel ?? null,
+    marginLabel: decision?.marginLabel ?? null,
+  }));
 }

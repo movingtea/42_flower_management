@@ -27,6 +27,9 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 - CMS 商品 SPU/SKU、商品分类、轮播、营销配置、SKU 绑定 Recipe、SKU 毛利预估展示。
 - 微信小程序用户登录、商品浏览、购物车、下单、mock 支付、订单查询。
 - 小程序订单驱动 CRM：`Customer` / `Recipient` / `GiftOccasion` / `CustomerReminder`；常用收花人 API；后台 CRM 基础 API；支付成功后客户统计与复购提醒生成。
+- WMS CRM 客户看板：`/wms/crm` 总览、客户列表 / 详情、复购提醒看板。
+- 小程序下单礼赠信息：`buyerInfo` / `recipientInfo` / `giftOccasion` / `reminderOptions`；常用收花人选择 / 保存。
+- CMS 商品适用礼赠场景标签：`ProductSpu.occasionTags`。
 - 订单真实毛利核算：`OrderCostSnapshot`。
 - 产品级毛利预估：`FlowerWiki.standardUnitCost` + `Recipe` + `PackagingKit` + SKU price。
 - 经营报表中心：销售、趋势、毛利排行、低毛利、成本结构、花材使用、损耗、库存预警、采购复盘与供应商分析。
@@ -136,6 +139,10 @@ flower-wms-system/
 | `/wms/material-categories` | 原材料分类 |
 | `/wms/orders` | 订单履约看板 |
 | `/wms/reports` | 经营报表中心（Tab：经营总览、销售趋势、商品毛利、库存预警、损耗模型影响、采购复盘、产品决策） |
+| `/wms/crm` | 客户 CRM 总览：指标卡、今日 / 未来 7 天提醒、最近客户 |
+| `/wms/crm/customers` | CRM 客户列表 |
+| `/wms/crm/customers/[id]` | CRM 客户详情：收花人、礼赠历史、提醒、订单 |
+| `/wms/crm/reminders` | CRM 复购提醒看板 |
 | `/wms/batches` | redirect 到 `/wms/operations` |
 | `/wms/wastage` | redirect 到 `/wms/operations?panel=loss` |
 | `/wms/bom` | redirect 到 `/wms/recipes` |
@@ -163,6 +170,7 @@ CMS 商品编辑边界：
 - CMS 不维护 RecipeLine 明细，不直接修改库存。
 - `PATCH /api/cms/skus/[id]` 只允许图文白名单字段，防止 mass assignment。
 - CMS 商品列表 / 编辑页展示产品决策标签和建议，仅作为经营参考；不会自动改价、上下架或修改配方。
+- CMS 商品编辑页可配置 `ProductSpu.occasionTags`（适用礼赠场景）；列表展示场景标签；用于 CRM 复购推荐参考，不自动上下架。
 
 ---
 
@@ -237,6 +245,8 @@ CMS 商品编辑边界：
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
+| GET | `/api/admin/crm/summary` | CRM 总览指标与今日 / 7 天提醒摘要 |
+| GET | `/api/admin/crm/recommendations` | 按礼赠场景匹配商品推荐（结合产品决策健康状态） |
 | GET | `/api/admin/crm/customers` | 客户列表（keyword / source / minOrders / page） |
 | GET | `/api/admin/crm/customers/[id]` | 客户详情 |
 | GET | `/api/admin/crm/recipients` | 收花人列表 |
@@ -272,7 +282,7 @@ CMS 商品编辑边界：
 | `Recipe` | `recipes` | 标准配方，含 `packagingKitId` |
 | `RecipeLine` | `recipe_lines` | 配方花材明细 |
 | `PackagingKit` | `packaging_kits` | 标准包装成本 |
-| `ProductSpu` | `product_spus` | 商城商品 |
+| `ProductSpu` | `product_spus` | 商城商品；含 `occasionTags` 适用礼赠场景标签 |
 | `ProductSku` | `product_skus` | SKU，含 `recipeId` |
 | `User` | `users` | 小程序微信身份（openId）；不等同于 CRM Customer |
 | `Customer` | `customers` | CRM 购买人档案，通常由小程序订单自动沉淀 |
@@ -769,6 +779,7 @@ Dockerfile：
 33. 删除常用收花人（`isActive=false`）不得删除历史订单和礼赠记录。
 34. 生日 / 纪念日提醒必须按 `Asia/Shanghai` 业务日期计算。
 35. `CustomerReminder` 是后台跟进提醒，不代表已经通知客户。
+36. 商品场景标签（`occasionTags`）只用于 CRM 推荐参考，不自动上下架、不自动营销。
 
 ---
 
@@ -783,7 +794,6 @@ Dockerfile：
 | 完整测试体系 | 当前以 tsx 轻量测试和 smoke script 为主 |
 | 供应商付款 / 对账 / 发票 | 未实现 |
 | Excel 导入导出 | 未实现 |
-| CRM 后台 UI / 小程序礼赠表单 UI | 未实现；后端 API 与订单沉淀已打通 |
 | CRM 自动触达（订阅消息 / 短信 / 企微） | 未实现 |
 | 会员积分 / 优惠券 / 复杂客户分群 | 未实现 |
 | SaaS 计费 | 未实现 |

@@ -74,6 +74,7 @@ export type ProductSpuCountAggregateOutputType = {
   shippingFee: number
   allowPreOrder: number
   productionTime: number
+  occasionTags: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -128,6 +129,7 @@ export type ProductSpuCountAggregateInputType = {
   shippingFee?: true
   allowPreOrder?: true
   productionTime?: true
+  occasionTags?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -229,6 +231,7 @@ export type ProductSpuGroupByOutputType = {
   shippingFee: number
   allowPreOrder: boolean
   productionTime: number
+  occasionTags: string[]
   createdAt: Date
   updatedAt: Date
   _count: ProductSpuCountAggregateOutputType | null
@@ -266,6 +269,7 @@ export type ProductSpuWhereInput = {
   shippingFee?: Prisma.FloatFilter<"ProductSpu"> | number
   allowPreOrder?: Prisma.BoolFilter<"ProductSpu"> | boolean
   productionTime?: Prisma.IntFilter<"ProductSpu"> | number
+  occasionTags?: Prisma.StringNullableListFilter<"ProductSpu">
   createdAt?: Prisma.DateTimeFilter<"ProductSpu"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProductSpu"> | Date | string
   skus?: Prisma.ProductSkuListRelationFilter
@@ -283,6 +287,7 @@ export type ProductSpuOrderByWithRelationInput = {
   shippingFee?: Prisma.SortOrder
   allowPreOrder?: Prisma.SortOrder
   productionTime?: Prisma.SortOrder
+  occasionTags?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   skus?: Prisma.ProductSkuOrderByRelationAggregateInput
@@ -303,6 +308,7 @@ export type ProductSpuWhereUniqueInput = Prisma.AtLeast<{
   shippingFee?: Prisma.FloatFilter<"ProductSpu"> | number
   allowPreOrder?: Prisma.BoolFilter<"ProductSpu"> | boolean
   productionTime?: Prisma.IntFilter<"ProductSpu"> | number
+  occasionTags?: Prisma.StringNullableListFilter<"ProductSpu">
   createdAt?: Prisma.DateTimeFilter<"ProductSpu"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProductSpu"> | Date | string
   skus?: Prisma.ProductSkuListRelationFilter
@@ -320,6 +326,7 @@ export type ProductSpuOrderByWithAggregationInput = {
   shippingFee?: Prisma.SortOrder
   allowPreOrder?: Prisma.SortOrder
   productionTime?: Prisma.SortOrder
+  occasionTags?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ProductSpuCountOrderByAggregateInput
@@ -342,6 +349,7 @@ export type ProductSpuScalarWhereWithAggregatesInput = {
   shippingFee?: Prisma.FloatWithAggregatesFilter<"ProductSpu"> | number
   allowPreOrder?: Prisma.BoolWithAggregatesFilter<"ProductSpu"> | boolean
   productionTime?: Prisma.IntWithAggregatesFilter<"ProductSpu"> | number
+  occasionTags?: Prisma.StringNullableListFilter<"ProductSpu">
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ProductSpu"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ProductSpu"> | Date | string
 }
@@ -356,6 +364,7 @@ export type ProductSpuCreateInput = {
   shippingFee?: number
   allowPreOrder?: boolean
   productionTime?: number
+  occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
   skus?: Prisma.ProductSkuCreateNestedManyWithoutSpuInput
@@ -373,6 +382,7 @@ export type ProductSpuUncheckedCreateInput = {
   shippingFee?: number
   allowPreOrder?: boolean
   productionTime?: number
+  occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
   skus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSpuInput
@@ -390,6 +400,7 @@ export type ProductSpuUpdateInput = {
   shippingFee?: Prisma.FloatFieldUpdateOperationsInput | number
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
+  occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skus?: Prisma.ProductSkuUpdateManyWithoutSpuNestedInput
@@ -407,6 +418,7 @@ export type ProductSpuUncheckedUpdateInput = {
   shippingFee?: Prisma.FloatFieldUpdateOperationsInput | number
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
+  occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSpuNestedInput
@@ -424,6 +436,7 @@ export type ProductSpuCreateManyInput = {
   shippingFee?: number
   allowPreOrder?: boolean
   productionTime?: number
+  occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -438,6 +451,7 @@ export type ProductSpuUpdateManyMutationInput = {
   shippingFee?: Prisma.FloatFieldUpdateOperationsInput | number
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
+  occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -452,6 +466,7 @@ export type ProductSpuUncheckedUpdateManyInput = {
   shippingFee?: Prisma.FloatFieldUpdateOperationsInput | number
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
+  occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -459,6 +474,14 @@ export type ProductSpuUncheckedUpdateManyInput = {
 export type ProductSpuScalarRelationFilter = {
   is?: Prisma.ProductSpuWhereInput
   isNot?: Prisma.ProductSpuWhereInput
+}
+
+export type StringNullableListFilter<$PrismaModel = never> = {
+  equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
+  has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
+  hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
 }
 
 export type ProductSpuCountOrderByAggregateInput = {
@@ -471,6 +494,7 @@ export type ProductSpuCountOrderByAggregateInput = {
   shippingFee?: Prisma.SortOrder
   allowPreOrder?: Prisma.SortOrder
   productionTime?: Prisma.SortOrder
+  occasionTags?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -532,12 +556,21 @@ export type ProductSpuUpdateOneRequiredWithoutCategoriesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProductSpuUpdateToOneWithWhereWithoutCategoriesInput, Prisma.ProductSpuUpdateWithoutCategoriesInput>, Prisma.ProductSpuUncheckedUpdateWithoutCategoriesInput>
 }
 
+export type ProductSpuCreateoccasionTagsInput = {
+  set: string[]
+}
+
 export type FloatFieldUpdateOperationsInput = {
   set?: number
   increment?: number
   decrement?: number
   multiply?: number
   divide?: number
+}
+
+export type ProductSpuUpdateoccasionTagsInput = {
+  set?: string[]
+  push?: string | string[]
 }
 
 export type ProductSpuCreateNestedOneWithoutSkusInput = {
@@ -580,6 +613,7 @@ export type ProductSpuCreateWithoutCategoriesInput = {
   shippingFee?: number
   allowPreOrder?: boolean
   productionTime?: number
+  occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
   skus?: Prisma.ProductSkuCreateNestedManyWithoutSpuInput
@@ -596,6 +630,7 @@ export type ProductSpuUncheckedCreateWithoutCategoriesInput = {
   shippingFee?: number
   allowPreOrder?: boolean
   productionTime?: number
+  occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
   skus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSpuInput
@@ -628,6 +663,7 @@ export type ProductSpuUpdateWithoutCategoriesInput = {
   shippingFee?: Prisma.FloatFieldUpdateOperationsInput | number
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
+  occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skus?: Prisma.ProductSkuUpdateManyWithoutSpuNestedInput
@@ -644,6 +680,7 @@ export type ProductSpuUncheckedUpdateWithoutCategoriesInput = {
   shippingFee?: Prisma.FloatFieldUpdateOperationsInput | number
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
+  occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSpuNestedInput
@@ -660,6 +697,7 @@ export type ProductSpuCreateWithoutSkusInput = {
   shippingFee?: number
   allowPreOrder?: boolean
   productionTime?: number
+  occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.ProductCategoryRelationCreateNestedManyWithoutSpuInput
@@ -676,6 +714,7 @@ export type ProductSpuUncheckedCreateWithoutSkusInput = {
   shippingFee?: number
   allowPreOrder?: boolean
   productionTime?: number
+  occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.ProductCategoryRelationUncheckedCreateNestedManyWithoutSpuInput
@@ -708,6 +747,7 @@ export type ProductSpuUpdateWithoutSkusInput = {
   shippingFee?: Prisma.FloatFieldUpdateOperationsInput | number
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
+  occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.ProductCategoryRelationUpdateManyWithoutSpuNestedInput
@@ -724,6 +764,7 @@ export type ProductSpuUncheckedUpdateWithoutSkusInput = {
   shippingFee?: Prisma.FloatFieldUpdateOperationsInput | number
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
+  occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.ProductCategoryRelationUncheckedUpdateManyWithoutSpuNestedInput
@@ -740,6 +781,7 @@ export type ProductSpuCreateWithoutBannersInput = {
   shippingFee?: number
   allowPreOrder?: boolean
   productionTime?: number
+  occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
   skus?: Prisma.ProductSkuCreateNestedManyWithoutSpuInput
@@ -756,6 +798,7 @@ export type ProductSpuUncheckedCreateWithoutBannersInput = {
   shippingFee?: number
   allowPreOrder?: boolean
   productionTime?: number
+  occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
   createdAt?: Date | string
   updatedAt?: Date | string
   skus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSpuInput
@@ -788,6 +831,7 @@ export type ProductSpuUpdateWithoutBannersInput = {
   shippingFee?: Prisma.FloatFieldUpdateOperationsInput | number
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
+  occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skus?: Prisma.ProductSkuUpdateManyWithoutSpuNestedInput
@@ -804,6 +848,7 @@ export type ProductSpuUncheckedUpdateWithoutBannersInput = {
   shippingFee?: Prisma.FloatFieldUpdateOperationsInput | number
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
+  occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSpuNestedInput
@@ -869,6 +914,7 @@ export type ProductSpuSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   shippingFee?: boolean
   allowPreOrder?: boolean
   productionTime?: boolean
+  occasionTags?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   skus?: boolean | Prisma.ProductSpu$skusArgs<ExtArgs>
@@ -887,6 +933,7 @@ export type ProductSpuSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   shippingFee?: boolean
   allowPreOrder?: boolean
   productionTime?: boolean
+  occasionTags?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["productSpu"]>
@@ -901,6 +948,7 @@ export type ProductSpuSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   shippingFee?: boolean
   allowPreOrder?: boolean
   productionTime?: boolean
+  occasionTags?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["productSpu"]>
@@ -915,11 +963,12 @@ export type ProductSpuSelectScalar = {
   shippingFee?: boolean
   allowPreOrder?: boolean
   productionTime?: boolean
+  occasionTags?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProductSpuOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "maintenanceGuide" | "isActive" | "isDeleted" | "shippingFee" | "allowPreOrder" | "productionTime" | "createdAt" | "updatedAt", ExtArgs["result"]["productSpu"]>
+export type ProductSpuOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "maintenanceGuide" | "isActive" | "isDeleted" | "shippingFee" | "allowPreOrder" | "productionTime" | "occasionTags" | "createdAt" | "updatedAt", ExtArgs["result"]["productSpu"]>
 export type ProductSpuInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   skus?: boolean | Prisma.ProductSpu$skusArgs<ExtArgs>
   categories?: boolean | Prisma.ProductSpu$categoriesArgs<ExtArgs>
@@ -946,6 +995,10 @@ export type $ProductSpuPayload<ExtArgs extends runtime.Types.Extensions.Internal
     shippingFee: number
     allowPreOrder: boolean
     productionTime: number
+    /**
+     * 适用礼赠场景标签（GiftOccasionType key 列表）
+     */
+    occasionTags: string[]
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["productSpu"]>
@@ -1383,6 +1436,7 @@ export interface ProductSpuFieldRefs {
   readonly shippingFee: Prisma.FieldRef<"ProductSpu", 'Float'>
   readonly allowPreOrder: Prisma.FieldRef<"ProductSpu", 'Boolean'>
   readonly productionTime: Prisma.FieldRef<"ProductSpu", 'Int'>
+  readonly occasionTags: Prisma.FieldRef<"ProductSpu", 'String[]'>
   readonly createdAt: Prisma.FieldRef<"ProductSpu", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ProductSpu", 'DateTime'>
 }

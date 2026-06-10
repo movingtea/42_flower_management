@@ -343,6 +343,8 @@ model ProductSpu {
   shippingFee      Float    @default(0) @map("shipping_fee")
   allowPreOrder    Boolean  @default(true) @map("allow_pre_order")
   productionTime   Int      @default(30) @map("production_time")
+  /// 适用礼赠场景标签（GiftOccasionType key 列表）
+  occasionTags     String[] @default([]) @map("occasion_tags")
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
