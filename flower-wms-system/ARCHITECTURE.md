@@ -15,7 +15,8 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 | Web | Next.js 16 App Router |
 | UI | React 19 + Tailwind CSS 4 |
 | ORM | Prisma 7，client 输出到 `src/generated/prisma` |
-| DB | PostgreSQL |
+| DB | PostgreSQL（`DateTime` 按 UTC / ISO 存储） |
+| 后台展示时区 | `Asia/Shanghai`（UTC+8）；统一使用 `src/lib/datetime.ts` |
 | Auth | Auth.js / next-auth v5 beta，后台 StaffUser RBAC |
 | 小程序 | 仓库根目录 `42_mp/` |
 | 部署 | Dockerfile + docker-compose，Next standalone，cron worker |
@@ -96,6 +97,7 @@ flower-wms-system/
 | `src/services/business-report.ts` | 经营报表与缺失快照 backfill |
 | `src/services/purchase-analytics-pure.ts` | 采购复盘纯计算：summary、供应商排行、花材价趋势、批次转化、成本贡献、建议标签 |
 | `src/services/purchase-analytics.ts` | 采购复盘 Prisma 查询与 API DTO 序列化 |
+| `src/lib/datetime.ts` | 后台统一时区格式化与报表日期 UTC 边界转换 |
 | `src/services/order-fifo.ts` | 支付后 FIFO 扣物理库存并生成订单成本快照 |
 | `src/services/fifo.ts` | FIFO 扣减算法与 StockLog 写入 |
 | `src/services/wms-stock.ts` | 手工入库、指定批次报损、批次流水线 |
@@ -415,6 +417,7 @@ warning 场景：
 - 批次销售转化：`SALE_OUT` / `WASTAGE_OUT` / `IN_CANCEL` / `ADJUSTMENT` 流水；`actualWastageRate` 仅来自真实 `WASTAGE_OUT`。
 - 损耗模型影响：来自 `Batch.lossAdjustedUnitCost` 或 `PurchaseOrderLine.lossAdjustedUnitCost`，是经营估算，不等同于真实报损。
 - 批次销售成本贡献：`soldQty × Batch.unitCost` / `lossAdjustedUnitCost`；不做订单收入分摊，因此不是批次毛利。
+- 采购复盘 `latestPurchaseDate` / `inboundDate` 等日期字段前端按 UTC+8 展示；报表 `startDate` / `endDate` 参数按上海自然日解释后转 UTC 查询。
 
 库存价值公式：
 
@@ -647,6 +650,10 @@ Dockerfile：
 18. 采购复盘不得把 `lossAdjustedUnitCost` 当作真实采购成本覆盖 `Batch.unitCost`。
 19. 实际报损率（`WASTAGE_OUT`）不得与模型损耗率（`lossRate` / `usableRate`）混用。
 20. 批次成本贡献不得命名为批次毛利，除非未来实现收入分摊。
+21. 不得直接使用浏览器本地时区格式化后台业务时间；统一使用 `Asia/Shanghai`。
+22. 不得用 `toISOString().slice(0, 10)` 展示业务日期。
+23. 不得把 UTC 时间加 8 小时后写回数据库。
+24. 报表日期范围必须按 `Asia/Shanghai` 自然日转换为 UTC 查询边界（半开区间 `gte` / `lt`）。
 
 ---
 
