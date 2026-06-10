@@ -1,6 +1,7 @@
-import { RecommendationSlotType } from "@/generated/prisma/enums";
+import { RecommendationSlotType, AuditModule } from "@/generated/prisma/enums";
 import { jsonError, jsonSuccess } from "@/lib/api";
 import { isResponse, requirePermission } from "@/lib/api-auth";
+import { safeLogAuditFromStaff } from "@/lib/audit-helpers";
 import {
   createRecommendationSlot,
   listRecommendationSlots,
@@ -73,6 +74,19 @@ export async function POST(request: Request) {
       sortOrder: Number(body.sortOrder ?? 0),
       maxItems: Number(body.maxItems ?? 10),
     });
+
+    safeLogAuditFromStaff(
+      staff,
+      {
+        module: AuditModule.CMS,
+        action: "RECOMMENDATION_SLOT_CREATE",
+        entityType: "CmsRecommendationSlot",
+        entityId: slot.id,
+        summary: `创建推荐位「${slot.name}」`,
+        afterSnapshot: { key: slot.key, slotType: slot.slotType },
+      },
+      request
+    );
 
     return jsonSuccess({ slot });
   } catch (err) {

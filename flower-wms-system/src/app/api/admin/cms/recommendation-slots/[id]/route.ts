@@ -1,6 +1,7 @@
-import { RecommendationSlotType } from "@/generated/prisma/enums";
+import { AuditModule, RecommendationSlotType } from "@/generated/prisma/enums";
 import { jsonError, jsonSuccess } from "@/lib/api";
 import { isResponse, requirePermission } from "@/lib/api-auth";
+import { safeLogAuditFromStaff } from "@/lib/audit-helpers";
 import {
   deleteRecommendationSlot,
   getRecommendationSlotDetail,
@@ -69,6 +70,19 @@ export async function PATCH(request: Request, context: RouteContext) {
         body.maxItems !== undefined ? Number(body.maxItems) : undefined,
     });
 
+    safeLogAuditFromStaff(
+      staff,
+      {
+        module: AuditModule.CMS,
+        action: "RECOMMENDATION_SLOT_UPDATE",
+        entityType: "CmsRecommendationSlot",
+        entityId: slot.id,
+        summary: `更新推荐位「${slot.name}」`,
+        afterSnapshot: { isActive: slot.isActive, key: slot.key },
+      },
+      request
+    );
+
     return jsonSuccess({ slot });
   } catch (err) {
     const message =
@@ -82,13 +96,27 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 }
 
-export async function DELETE(_request: Request, context: RouteContext) {
+export async function DELETE(request: Request, context: RouteContext) {
   try {
     const staff = await requirePermission("cms:write");
     if (isResponse(staff)) return staff;
 
     const { id } = await context.params;
     const slot = await deleteRecommendationSlot(id);
+
+    safeLogAuditFromStaff(
+      staff,
+      {
+        module: AuditModule.CMS,
+        action: "RECOMMENDATION_SLOT_DEACTIVATE",
+        entityType: "CmsRecommendationSlot",
+        entityId: slot.id,
+        summary: `停用推荐位「${slot.name}」`,
+        afterSnapshot: { isActive: slot.isActive },
+      },
+      request
+    );
+
     return jsonSuccess({ slot, message: "推荐位已停用" });
   } catch (err) {
     const message =

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { ActionEmptyState } from "@/components/admin/ActionEmptyState";
 import { ProductOccasionTagsBadge } from "@/components/cms/ProductOccasionTagsBadge";
 import { ProductOperationSummaryBadge } from "@/components/cms/ProductOperationSummaryBadge";
 import { ProductDecisionHealthBadge } from "@/components/product-decision/ProductDecisionBadge";
@@ -68,6 +69,15 @@ export function CmsProductsOperationsList({ categoryConfig }: Props) {
   const [page, setPage] = useState(1);
   const [total, setTotal] = useState(0);
   const pageSize = 20;
+
+  const hasActiveFilters = Boolean(
+    keyword.trim() ||
+      categoryId ||
+      status ||
+      occasionTag ||
+      positioningTag ||
+      readinessStatus
+  );
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -231,6 +241,15 @@ export function CmsProductsOperationsList({ categoryConfig }: Props) {
             重试
           </button>
         </div>
+      ) : items.length === 0 && !hasActiveFilters && total === 0 ? (
+        <ActionEmptyState
+          title="还没有商品"
+          description="请先创建商品 SPU/SKU，并为 SKU 绑定 WMS Recipe。"
+          primaryActionLabel="新建商品"
+          primaryActionHref="/cms/products/new"
+          secondaryActionLabel="查看配方"
+          secondaryActionHref="/wms/recipes"
+        />
       ) : (
         <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
           <table className="w-full text-left text-sm">

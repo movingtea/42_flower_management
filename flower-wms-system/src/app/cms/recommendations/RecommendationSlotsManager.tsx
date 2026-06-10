@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { ActionEmptyState } from "@/components/admin/ActionEmptyState";
 import { AutoKeyField } from "@/components/cms/pickers/AutoKeyField";
 import { ProductPicker } from "@/components/cms/pickers/ProductPicker";
 import { SkuPicker } from "@/components/cms/pickers/SkuPicker";
@@ -356,9 +357,12 @@ export function RecommendationSlotsManager() {
           </button>
         </div>
       ) : slots.length === 0 ? (
-        <p className="rounded-xl border border-dashed border-zinc-200 bg-white p-8 text-center text-sm text-zinc-500">
-          暂无推荐位，请先创建首页或场景推荐位。
-        </p>
+        <ActionEmptyState
+          title="暂无推荐位"
+          description="小程序首页和场景推荐需要通过推荐位配置展示商品。"
+          primaryActionLabel="新建推荐位"
+          primaryActionHref="/cms/recommendations"
+        />
       ) : (
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
           <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">

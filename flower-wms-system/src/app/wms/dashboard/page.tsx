@@ -1,4 +1,5 @@
 import { StatCard } from "@/components/wms/stat-card";
+import { TrialOperationStatusCard } from "@/components/wms/TrialOperationStatusCard";
 import { Badge } from "@/components/ui/Badge";
 import { OrderStatus } from "@/generated/prisma/enums";
 import { loadWmsDashboardData } from "@/services/wms-dashboard";
@@ -28,6 +29,8 @@ export default async function DashboardPage() {
           仪表盘，用于展示仓库的运营情况（数据来自 PostgreSQL 实时统计）。
         </p>
       </header>
+
+      <TrialOperationStatusCard />
 
       <div className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard

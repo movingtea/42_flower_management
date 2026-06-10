@@ -200,6 +200,20 @@ export const StaffAuditAction = {
 export type StaffAuditAction = (typeof StaffAuditAction)[keyof typeof StaffAuditAction]
 
 
+export const AuditModule = {
+  WMS: 'WMS',
+  CMS: 'CMS',
+  CRM: 'CRM',
+  ORDER: 'ORDER',
+  INVENTORY: 'INVENTORY',
+  PURCHASE: 'PURCHASE',
+  REPORT: 'REPORT',
+  SYSTEM: 'SYSTEM'
+} as const
+
+export type AuditModule = (typeof AuditModule)[keyof typeof AuditModule]
+
+
 export const HomeSceneEntryTargetType = {
   PRODUCT_FILTER: 'PRODUCT_FILTER',
   RECOMMENDATION_SLOT: 'RECOMMENDATION_SLOT',

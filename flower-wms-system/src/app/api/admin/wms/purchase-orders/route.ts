@@ -1,5 +1,7 @@
+import { AuditModule } from "@/generated/prisma/enums";
 import { jsonError, jsonSuccess } from "@/lib/api";
 import { isResponse, requirePermission } from "@/lib/api-auth";
+import { safeLogAuditFromStaff } from "@/lib/audit-helpers";
 import { mapPurchaseApiError } from "@/lib/purchase-api-error";
 import {
   createPurchaseOrder,
@@ -31,6 +33,21 @@ export async function POST(request: Request) {
     if (isResponse(staff)) return staff;
 
     const purchaseOrder = await createPurchaseOrder(await request.json());
+    safeLogAuditFromStaff(
+      staff,
+      {
+        module: AuditModule.PURCHASE,
+        action: "PURCHASE_ORDER_CREATE",
+        entityType: "PurchaseOrder",
+        entityId: purchaseOrder.id,
+        summary: `创建采购单 ${purchaseOrder.purchaseNo}`,
+        afterSnapshot: {
+          purchaseNo: purchaseOrder.purchaseNo,
+          status: purchaseOrder.status,
+        },
+      },
+      request
+    );
     return jsonSuccess(
       {
         message: `采购单创建成功，系统单号：${purchaseOrder.purchaseNo}`,

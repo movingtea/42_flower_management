@@ -6,6 +6,10 @@ import { StaffAccountBar } from "@/components/shared/StaffAccountBar";
 
 const navItems = [
   { href: "/wms/dashboard", label: "仪表盘", icon: "📊" },
+  { href: "/wms/setup", label: "试运营准备", icon: "🚀" },
+  { href: "/wms/data-quality", label: "数据质量", icon: "🔍" },
+  { href: "/wms/system-health", label: "系统健康", icon: "💚" },
+  { href: "/wms/audit-logs", label: "操作日志", icon: "📝" },
   { href: "/wms/inventory", label: "库存管理", icon: "📦" },
   { href: "/wms/operations", label: "仓储日常", icon: "📥" },
   { href: "/wms/purchase-orders", label: "采购单", icon: "🧾" },

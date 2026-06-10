@@ -1,4 +1,6 @@
+import { AuditModule } from "@/generated/prisma/enums";
 import { jsonError } from "@/lib/api";
+import { safeLogAudit } from "@/lib/audit-helpers";
 import { requireUserFromRequest } from "@/lib/wechat-auth-request";
 import { jsonWechatSuccess } from "@/lib/wechat-api";
 import {
@@ -33,6 +35,17 @@ export async function POST(request: Request) {
 
     const { orderId } = parseBody(raw);
     const order = await mockPayWechatOrder(user.id, orderId);
+
+    safeLogAudit({
+      actorId: user.id,
+      actorName: "小程序用户",
+      module: AuditModule.ORDER,
+      action: "ORDER_MOCK_PAY",
+      entityType: "Order",
+      entityId: order.id,
+      summary: `订单 ${order.orderNo} mock 支付成功`,
+      afterSnapshot: { status: order.status, paidAt: order.paidAt },
+    });
 
     return jsonWechatSuccess({
       orderId: order.id,

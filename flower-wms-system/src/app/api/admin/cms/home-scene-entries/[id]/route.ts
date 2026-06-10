@@ -1,6 +1,7 @@
-import { GiftOccasionType, HomeSceneEntryTargetType } from "@/generated/prisma/enums";
+import { AuditModule, GiftOccasionType, HomeSceneEntryTargetType } from "@/generated/prisma/enums";
 import { jsonError, jsonSuccess } from "@/lib/api";
 import { isResponse, requirePermission } from "@/lib/api-auth";
+import { safeLogAuditFromStaff } from "@/lib/audit-helpers";
 import {
   deleteHomeSceneEntry,
   getHomeSceneEntryById,
@@ -102,6 +103,19 @@ export async function PATCH(request: Request, context: RouteContext) {
           : undefined,
     });
 
+    safeLogAuditFromStaff(
+      staff,
+      {
+        module: AuditModule.CMS,
+        action: "HOME_SCENE_ENTRY_UPDATE",
+        entityType: "CmsHomeSceneEntry",
+        entityId: entry.id,
+        summary: `更新首页场景入口「${entry.title}」`,
+        afterSnapshot: { isActive: entry.isActive, sortOrder: entry.sortOrder },
+      },
+      request
+    );
+
     return jsonSuccess({ entry });
   } catch (err) {
     const message =
@@ -110,13 +124,26 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 }
 
-export async function DELETE(_request: Request, context: RouteContext) {
+export async function DELETE(request: Request, context: RouteContext) {
   try {
     const staff = await requirePermission("cms:write");
     if (isResponse(staff)) return staff;
 
     const { id } = await context.params;
     await deleteHomeSceneEntry(id);
+
+    safeLogAuditFromStaff(
+      staff,
+      {
+        module: AuditModule.CMS,
+        action: "HOME_SCENE_ENTRY_DELETE",
+        entityType: "CmsHomeSceneEntry",
+        entityId: id,
+        summary: `删除首页场景入口`,
+      },
+      request
+    );
+
     return jsonSuccess({ ok: true });
   } catch (err) {
     const message =

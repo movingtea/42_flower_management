@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { ActionEmptyState } from "@/components/admin/ActionEmptyState";
 import { RecommendationSlotPicker } from "@/components/cms/pickers/RecommendationSlotPicker";
 import type { RecommendationSlotPickerItem } from "@/components/cms/pickers/types";
 import { Badge } from "@/components/ui/Badge";
@@ -329,9 +330,12 @@ export function HomeSceneEntriesManager() {
       {loading ? (
         <p className="text-sm text-zinc-500">加载中…</p>
       ) : entries.length === 0 ? (
-        <p className="text-sm text-zinc-500">
-          暂无配置。小程序将使用默认 6 个场景入口 fallback。
-        </p>
+        <ActionEmptyState
+          title="暂无首页场景入口"
+          description="小程序会使用默认 6 个场景入口，但建议你在 CMS 中确认展示内容。可点击上方「使用默认 6 个场景入口」或「新建场景入口」。"
+          primaryActionLabel="查看试运营准备"
+          primaryActionHref="/wms/setup"
+        />
       ) : (
         <div className="overflow-x-auto rounded-xl border border-zinc-200">
           <table className="min-w-full text-left text-sm">

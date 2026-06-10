@@ -1,6 +1,8 @@
 import { Prisma } from "@/generated/prisma/client";
+import { AuditModule } from "@/generated/prisma/enums";
 import { jsonError, jsonSuccess } from "@/lib/api";
 import { isResponse, requirePermission } from "@/lib/api-auth";
+import { safeLogAuditFromStaff } from "@/lib/audit-helpers";
 import { transitionOrderStatus } from "@/services/order-status";
 
 export const dynamic = "force-dynamic";
@@ -75,6 +77,22 @@ export async function PATCH(request: Request) {
       body.orderId,
       body.nextStatus,
       { deliveryInfo: body.deliveryInfo }
+    );
+
+    safeLogAuditFromStaff(
+      staff,
+      {
+        module: AuditModule.ORDER,
+        action: "ORDER_STATUS_UPDATE",
+        entityType: "Order",
+        entityId: result.order.id,
+        summary: `订单 ${result.order.orderNo} 状态更新为 ${result.status}`,
+        afterSnapshot: {
+          status: result.status,
+          dbStatus: result.dbStatus,
+        },
+      },
+      request
     );
 
     return jsonSuccess({

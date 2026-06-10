@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { ActionEmptyState } from "@/components/admin/ActionEmptyState";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -424,8 +425,16 @@ export function PurchaseOrderConsole() {
                 </tr>
               ) : items.length === 0 ? (
                 <tr>
-                  <td colSpan={12} className="px-4 py-12 text-center text-zinc-500">
-                    暂无采购单，请先创建采购单。
+                  <td colSpan={12} className="p-0">
+                    <ActionEmptyState
+                      title="还没有采购单"
+                      description="试运营前建议先录入供应商，并创建第一张采购单。"
+                      primaryActionLabel="创建供应商"
+                      primaryActionHref="/wms/suppliers"
+                      secondaryActionLabel="新建采购单"
+                      secondaryActionHref="/wms/purchase-orders"
+                      className="border-0 shadow-none"
+                    />
                   </td>
                 </tr>
               ) : (

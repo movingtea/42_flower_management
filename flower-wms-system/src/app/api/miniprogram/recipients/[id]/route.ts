@@ -1,5 +1,7 @@
 import { RecipientRelationType } from "@/generated/prisma/enums";
+import { AuditModule } from "@/generated/prisma/enums";
 import { jsonError } from "@/lib/api";
+import { safeLogAudit } from "@/lib/audit-helpers";
 import { requireUserFromRequest } from "@/lib/wechat-auth-request";
 import { jsonWechatSuccess } from "@/lib/wechat-api";
 import {
@@ -96,6 +98,17 @@ export async function DELETE(
     const user = await requireUserFromRequest(request);
     const { id } = await context.params;
     const result = await deleteMiniProgramRecipient(user.id, id);
+
+    safeLogAudit({
+      actorId: user.id,
+      actorName: "小程序用户",
+      module: AuditModule.CRM,
+      action: "RECIPIENT_DELETE",
+      entityType: "CustomerRecipientRelation",
+      entityId: id,
+      summary: `删除常用收花人`,
+    });
+
     return jsonWechatSuccess(result);
   } catch (err) {
     const message = err instanceof Error ? err.message : "删除收花人失败";

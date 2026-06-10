@@ -1,6 +1,8 @@
 import { Prisma } from "@/generated/prisma/client";
+import { AuditModule } from "@/generated/prisma/enums";
 import { jsonError, jsonSuccess } from "@/lib/api";
 import { isResponse, requirePermission } from "@/lib/api-auth";
+import { safeLogAuditFromStaff } from "@/lib/audit-helpers";
 import { cmsSpuUpdateData, syncProductSkus } from "@/lib/cms-product-write";
 import { loadCmsProductCategories } from "@/lib/cms-product-categories.server";
 import { parseCmsProductBody, assertSkuRecipesExist } from "@/lib/cms-products";
@@ -70,6 +72,20 @@ export async function PUT(
         include: productSpuInclude,
       });
     });
+
+    safeLogAuditFromStaff(
+      staff,
+      {
+        module: AuditModule.CMS,
+        action: "PRODUCT_UPDATE",
+        entityType: "ProductSpu",
+        entityId: product.id,
+        summary: `更新商品「${product.name}」`,
+        beforeSnapshot: { isActive: existing.isActive },
+        afterSnapshot: { isActive: product.isActive },
+      },
+      request
+    );
 
     return jsonSuccess({
       message: "商品已更新",

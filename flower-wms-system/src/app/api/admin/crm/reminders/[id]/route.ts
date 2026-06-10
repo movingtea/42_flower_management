@@ -1,6 +1,7 @@
-import { ReminderStatus } from "@/generated/prisma/enums";
+import { AuditModule, ReminderStatus } from "@/generated/prisma/enums";
 import { jsonError, jsonSuccess } from "@/lib/api";
 import { requirePermission, isResponse } from "@/lib/api-auth";
+import { safeLogAuditFromStaff } from "@/lib/audit-helpers";
 import { coerceDate } from "@/lib/datetime";
 import { updateReminderStatus } from "@/services/crm";
 
@@ -55,6 +56,19 @@ export async function PATCH(
       note: body.note,
       snoozedUntil: body.snoozedUntil,
     });
+
+    safeLogAuditFromStaff(
+      staff,
+      {
+        module: AuditModule.CRM,
+        action: "REMINDER_STATUS_UPDATE",
+        entityType: "CustomerReminder",
+        entityId: reminder.id,
+        summary: `复购提醒状态更新为 ${body.status}`,
+        afterSnapshot: { status: reminder.status },
+      },
+      request
+    );
 
     return jsonSuccess({ reminder });
   } catch (err) {

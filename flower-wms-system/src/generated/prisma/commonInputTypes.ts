@@ -674,6 +674,23 @@ export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
   _max?: Prisma.NestedJsonFilter<$PrismaModel>
 }
 
+export type EnumAuditModuleFilter<$PrismaModel = never> = {
+  equals?: $Enums.AuditModule | Prisma.EnumAuditModuleFieldRefInput<$PrismaModel>
+  in?: $Enums.AuditModule[] | Prisma.ListEnumAuditModuleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AuditModule[] | Prisma.ListEnumAuditModuleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAuditModuleFilter<$PrismaModel> | $Enums.AuditModule
+}
+
+export type EnumAuditModuleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AuditModule | Prisma.EnumAuditModuleFieldRefInput<$PrismaModel>
+  in?: $Enums.AuditModule[] | Prisma.ListEnumAuditModuleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AuditModule[] | Prisma.ListEnumAuditModuleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAuditModuleWithAggregatesFilter<$PrismaModel> | $Enums.AuditModule
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAuditModuleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAuditModuleFilter<$PrismaModel>
+}
+
 export type EnumFloralRoleFilter<$PrismaModel = never> = {
   equals?: $Enums.FloralRole | Prisma.EnumFloralRoleFieldRefInput<$PrismaModel>
   in?: $Enums.FloralRole[] | Prisma.ListEnumFloralRoleFieldRefInput<$PrismaModel>
@@ -1341,6 +1358,23 @@ export type NestedJsonFilterBase<$PrismaModel = never> = {
   gt?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   gte?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel>
   not?: runtime.InputJsonValue | Prisma.JsonFieldRefInput<$PrismaModel> | Prisma.JsonNullValueFilter
+}
+
+export type NestedEnumAuditModuleFilter<$PrismaModel = never> = {
+  equals?: $Enums.AuditModule | Prisma.EnumAuditModuleFieldRefInput<$PrismaModel>
+  in?: $Enums.AuditModule[] | Prisma.ListEnumAuditModuleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AuditModule[] | Prisma.ListEnumAuditModuleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAuditModuleFilter<$PrismaModel> | $Enums.AuditModule
+}
+
+export type NestedEnumAuditModuleWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.AuditModule | Prisma.EnumAuditModuleFieldRefInput<$PrismaModel>
+  in?: $Enums.AuditModule[] | Prisma.ListEnumAuditModuleFieldRefInput<$PrismaModel>
+  notIn?: $Enums.AuditModule[] | Prisma.ListEnumAuditModuleFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumAuditModuleWithAggregatesFilter<$PrismaModel> | $Enums.AuditModule
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumAuditModuleFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumAuditModuleFilter<$PrismaModel>
 }
 
 export type NestedEnumFloralRoleFilter<$PrismaModel = never> = {

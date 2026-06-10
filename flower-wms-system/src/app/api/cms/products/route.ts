@@ -1,6 +1,8 @@
 import { Prisma } from "@/generated/prisma/client";
+import { AuditModule } from "@/generated/prisma/enums";
 import { jsonError, jsonSuccess } from "@/lib/api";
 import { isResponse, requirePermission } from "@/lib/api-auth";
+import { safeLogAuditFromStaff } from "@/lib/audit-helpers";
 import {
   buildSkuCreateRows,
   cmsSpuCreateData,
@@ -64,6 +66,19 @@ export async function POST(request: Request) {
         include: productSpuInclude,
       });
     });
+
+    safeLogAuditFromStaff(
+      staff,
+      {
+        module: AuditModule.CMS,
+        action: "PRODUCT_CREATE",
+        entityType: "ProductSpu",
+        entityId: product.id,
+        summary: `创建商品「${product.name}」`,
+        afterSnapshot: { isActive: product.isActive },
+      },
+      request
+    );
 
     return jsonSuccess(
       {

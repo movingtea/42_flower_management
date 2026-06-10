@@ -202,6 +202,11 @@ export type CustomerReminder = Prisma.CustomerReminderModel
  */
 export type AppConfig = Prisma.AppConfigModel
 /**
+ * Model AuditLog
+ * 
+ */
+export type AuditLog = Prisma.AuditLogModel
+/**
  * Model FlowerWiki
  * 
  */

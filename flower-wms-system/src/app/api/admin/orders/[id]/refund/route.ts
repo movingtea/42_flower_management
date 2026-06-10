@@ -1,4 +1,7 @@
+import { AuditModule } from "@/generated/prisma/enums";
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
+import { safeLogAuditFromStaff } from "@/lib/audit-helpers";
 import { refundPaidOrder, ORDER_STATUS_LABEL } from "@/services/order-lifecycle";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +27,9 @@ function parseBody(raw: unknown): { rollbackStock: boolean; refundAmount?: numbe
 
 export async function POST(request: Request, ctx: RouteCtx) {
   try {
+    const staff = await requirePermission("orders:write");
+    if (isResponse(staff)) return staff;
+
     const { id } = await ctx.params;
     const orderId = id?.trim();
     if (!orderId) return jsonError("订单 ID 无效", 400);
@@ -37,6 +43,25 @@ export async function POST(request: Request, ctx: RouteCtx) {
 
     const body = parseBody(raw);
     const order = await refundPaidOrder(orderId, body);
+
+    safeLogAuditFromStaff(
+      staff,
+      {
+        module: AuditModule.ORDER,
+        action: body.rollbackStock ? "ORDER_REFUND_WITH_STOCK" : "ORDER_REFUND",
+        entityType: "Order",
+        entityId: order.id,
+        summary: body.rollbackStock
+          ? `订单 ${order.orderNo} 退款取消并回库`
+          : `订单 ${order.orderNo} 退款取消`,
+        afterSnapshot: {
+          status: order.status,
+          refundAmount: order.refundAmount,
+          rollbackStock: body.rollbackStock,
+        },
+      },
+      request
+    );
 
     return jsonSuccess({
       message: body.rollbackStock

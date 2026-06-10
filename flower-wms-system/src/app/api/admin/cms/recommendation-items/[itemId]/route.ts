@@ -1,5 +1,7 @@
+import { AuditModule } from "@/generated/prisma/enums";
 import { jsonError, jsonSuccess } from "@/lib/api";
 import { isResponse, requirePermission } from "@/lib/api-auth";
+import { safeLogAuditFromStaff } from "@/lib/audit-helpers";
 import {
   removeRecommendationItem,
   updateRecommendationItem,
@@ -68,6 +70,19 @@ export async function PATCH(request: Request, context: RouteContext) {
           : undefined,
     });
 
+    safeLogAuditFromStaff(
+      staff,
+      {
+        module: AuditModule.CMS,
+        action: "RECOMMENDATION_ITEM_UPDATE",
+        entityType: "CmsRecommendationItem",
+        entityId: item.id,
+        summary: `更新推荐位商品项`,
+        afterSnapshot: { isActive: item.isActive, productId: item.productId },
+      },
+      request
+    );
+
     return jsonSuccess({ item });
   } catch (err) {
     const message =
@@ -77,13 +92,27 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 }
 
-export async function DELETE(_request: Request, context: RouteContext) {
+export async function DELETE(request: Request, context: RouteContext) {
   try {
     const staff = await requirePermission("cms:write");
     if (isResponse(staff)) return staff;
 
     const { itemId } = await context.params;
     const item = await removeRecommendationItem(itemId);
+
+    safeLogAuditFromStaff(
+      staff,
+      {
+        module: AuditModule.CMS,
+        action: "RECOMMENDATION_ITEM_REMOVE",
+        entityType: "CmsRecommendationItem",
+        entityId: itemId,
+        summary: `停用推荐位商品项`,
+        afterSnapshot: { isActive: item.isActive },
+      },
+      request
+    );
+
     return jsonSuccess({ item, message: "推荐项已移除" });
   } catch (err) {
     const message =

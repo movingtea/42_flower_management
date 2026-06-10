@@ -1,4 +1,6 @@
+import { AuditModule } from "@/generated/prisma/enums";
 import { jsonError } from "@/lib/api";
+import { safeLogAudit } from "@/lib/audit-helpers";
 import { requireUserFromRequest } from "@/lib/wechat-auth-request";
 import { jsonWechatSuccess } from "@/lib/wechat-api";
 import { confirmWechatOrderReceipt } from "@/services/order-lifecycle";
@@ -22,6 +24,17 @@ export async function POST(request: Request) {
     const raw = await request.json();
     const { orderId } = parseBody(raw);
     const order = await confirmWechatOrderReceipt(user.id, orderId);
+
+    safeLogAudit({
+      actorId: user.id,
+      actorName: "小程序用户",
+      module: AuditModule.ORDER,
+      action: "ORDER_CONFIRM_RECEIPT",
+      entityType: "Order",
+      entityId: order.id,
+      summary: `用户确认收货 ${order.orderNo}`,
+      afterSnapshot: { status: order.status },
+    });
 
     return jsonWechatSuccess({
       orderId: order.id,

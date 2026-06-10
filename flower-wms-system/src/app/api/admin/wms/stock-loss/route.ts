@@ -1,5 +1,7 @@
+import { AuditModule } from "@/generated/prisma/enums";
 import { jsonError, jsonSuccess } from "@/lib/api";
 import { isResponse, requirePermission } from "@/lib/api-auth";
+import { safeLogAuditFromStaff } from "@/lib/audit-helpers";
 import { resolveOperatorContext } from "@/lib/operator-context";
 import {
   attachOperatorToStockLossPayload,
@@ -19,6 +21,19 @@ export async function POST(request: Request) {
     const operator = await resolveOperatorContext(staff.id);
     const payload = attachOperatorToStockLossPayload(base, operator);
     const result = await runStockLossTransaction(payload);
+
+    safeLogAuditFromStaff(
+      staff,
+      {
+        module: AuditModule.INVENTORY,
+        action: "STOCK_LOSS",
+        entityType: "Batch",
+        entityId: result.batchId,
+        summary: `批次报损 ${result.lossQuantity}（批次 ${result.batchNo ?? result.batchId}）`,
+        afterSnapshot: { remainingQty: result.remainingQty },
+      },
+      request
+    );
 
     return jsonSuccess({
       message: "指定批次报损核销成功",

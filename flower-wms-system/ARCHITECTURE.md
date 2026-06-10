@@ -59,6 +59,8 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 - 采购单到货入库：生成 `Batch` + `StockLog: INBOUND`，回写 `PurchaseOrderLine.inboundBatchId`。
 - 采购复盘：供应商采购排行、花材采购价趋势、批次销售转化、批次销售成本贡献、采购建议标签。
 - 产品决策中心：产品健康状态、损耗敏感度、建议售价、决策标签、成本结构风险；WMS 报表 Tab + CMS 商品页提示。
+- **Sprint 11 试运营稳定性（后端 MVP）**：试运营初始化检查、数据质量检查、系统健康检查、端到端试运营链路检查、`AuditLog` 操作日志与后台查询 API；只读诊断，不自动改业务数据。
+- **Sprint 11 试运营稳定性 UI**：`/wms/setup` 试运营向导、`/wms/data-quality` 数据质量中心、`/wms/system-health` 系统健康、`/wms/audit-logs` 操作日志、Dashboard 试运营状态卡片、关键页面空状态引导。
 
 ### 当前不存在 / 不应假设存在
 
@@ -100,6 +102,7 @@ flower-wms-system/
 │   ├── smoke-purchase-flow.ts
 │   ├── smoke-purchase-analytics.ts
 │   ├── smoke-product-decision.ts
+│   ├── smoke-trial-run.ts
 │   └── sync-physical-to-virtual-stock.ts
 ├── src/
 │   ├── app/
@@ -146,6 +149,17 @@ flower-wms-system/
 | `src/services/cms-product-operations.ts` | 商品运营画像、上架校验、推荐位 CRUD、小程序推荐位查询 |
 | `src/services/miniprogram-product-filter-pure.ts` | 小程序商品 tag / 价格 / 排序 / 分页纯函数 |
 | `src/services/miniprogram-products.ts` | 小程序商品列表 Prisma 查询 + service 层 tag 过滤后分页 |
+| `src/services/setup-checklist-pure.ts` | 试运营准备检查纯函数：根据统计结果生成 checklist 状态 |
+| `src/services/setup-checklist.ts` | 试运营准备检查：Prisma 聚合 FlowerWiki / 供应商 / 配方 / CMS 商品 / 推荐位 / 场景入口等 |
+| `src/services/data-quality-pure.ts` | 数据质量检查纯函数：问题分级 CRITICAL / WARNING / SUGGESTION / PASS |
+| `src/services/data-quality.ts` | 数据质量检查：Prisma 扫描缺成本、缺 Recipe、localhost 图片、缺 cost snapshot 等 |
+| `src/services/system-health-pure.ts` | 系统健康状态聚合纯函数 |
+| `src/services/system-health.ts` | 系统健康检查：数据库、上传目录、环境变量、cron UNKNOWN、关键配置统计 |
+| `src/services/trial-run-check-pure.ts` | 端到端试运营检查状态聚合纯函数 |
+| `src/services/trial-run-check.ts` | 端到端试运营 dry-run：WMS → CMS → 小程序 → 订单 → CRM → 报表链路 |
+| `src/services/audit-log.ts` | `AuditLog` 写入与查询；`logAuditEvent` 失败不影响主业务 |
+| `src/lib/audit-helpers.ts` | `safeLogAudit` / `safeLogAuditFromStaff` 路由层异步写入封装 |
+| `src/lib/empty-state-copy.ts` | 后台空状态中文文案常量（供第二轮 UI 使用） |
 
 当前代码未发现独立 `src/services/supplier.ts`；供应商 service 逻辑在 `src/services/purchase.ts`。
 
@@ -168,6 +182,10 @@ flower-wms-system/
 | `/wms/material-categories` | 原材料分类 |
 | `/wms/orders` | 订单履约看板 |
 | `/wms/reports` | 经营报表中心（Tab：经营总览、销售趋势、商品毛利、库存预警、损耗模型影响、采购复盘、产品决策） |
+| `/wms/setup` | 试运营准备向导：setup checklist、next actions、trial-run 链路检查 |
+| `/wms/data-quality` | 数据质量中心：按 severity / domain 筛选问题列表 |
+| `/wms/system-health` | 系统健康检查：数据库、uploads、环境变量、cron 等 |
+| `/wms/audit-logs` | 操作日志查询与 snapshot 详情 |
 | `/wms/crm` | 客户 CRM 总览：指标卡、今日 / 未来 7 天提醒、最近客户 |
 | `/wms/crm/customers` | CRM 客户列表 |
 | `/wms/crm/customers/[id]` | CRM 客户详情：收花人、礼赠历史、提醒、订单 |
@@ -176,7 +194,24 @@ flower-wms-system/
 | `/wms/wastage` | redirect 到 `/wms/operations?panel=loss` |
 | `/wms/bom` | redirect 到 `/wms/recipes` |
 
-导航定义：`src/components/wms/sidebar.tsx`。
+导航定义：`src/components/wms/sidebar.tsx`（含试运营准备、数据质量、系统健康、操作日志入口）。
+
+Dashboard 试运营状态卡片：`src/components/wms/TrialOperationStatusCard.tsx`（并行调用 setup / data-quality / health / trial-run API；部分失败不阻塞其余展示）。
+
+### 试运营 UI 组件（Sprint 11 第 2 轮）
+
+| 组件 | 路径 |
+|---|---|
+| `StatusBadge` | `src/components/admin/StatusBadge.tsx` |
+| `MetricCard` | `src/components/admin/MetricCard.tsx` |
+| `ActionEmptyState` | `src/components/admin/ActionEmptyState.tsx` |
+| `JsonPreview` | `src/components/admin/JsonPreview.tsx` |
+| `SetupChecklistSection` | `src/components/wms/setup/SetupChecklistSection.tsx` |
+| `DataQualityIssueCard` | `src/components/wms/data-quality/DataQualityIssueCard.tsx` |
+| `AuditLogTable` | `src/components/wms/audit/AuditLogTable.tsx` |
+| `TrialOperationStatusCard` | `src/components/wms/TrialOperationStatusCard.tsx` |
+
+空状态文案常量：`src/lib/empty-state-copy.ts`；关键页面优先使用 `ActionEmptyState` 提供下一步跳转。
 
 ---
 
@@ -329,6 +364,22 @@ CMS 面向花店运营用户，主界面不要求理解 `productId` / `skuId` / 
 
 权限：`business:read` 查询；`business:write` 更新提醒。
 
+### 试运营稳定性 / 诊断（Sprint 11）
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/admin/setup/checklist` | 试运营准备清单（FlowerWiki / 供应商 / 配方 / CMS 商品 / 推荐位 / 场景入口 / 图片 URL 等） |
+| GET | `/api/admin/data-quality` | 数据质量问题列表（`severity` / `domain` / 分页） |
+| GET | `/api/admin/system/health` | 系统健康检查（数据库、uploads、环境变量、cron UNKNOWN；不返回 secret 明文） |
+| GET | `/api/admin/trial-run/check` | 端到端试运营 dry-run 链路检查 |
+| GET | `/api/admin/audit-logs` | 操作日志查询（`module` / `action` / 日期范围 / 分页） |
+
+权限：`business:read` 或 `STORE_ADMIN`；不允许小程序用户访问。日期范围使用 `src/lib/datetime.ts` 的 `Asia/Shanghai` 自然日 UTC 边界。
+
+Smoke 脚本：
+
+- `npm run smoke:trial-run` — 汇总 setup / data quality / health / trial-run；默认不写库。
+
 ### 小程序常用收花人
 
 | 方法 | 路径 | 说明 |
@@ -433,6 +484,17 @@ CMS 面向花店运营用户，主界面不要求理解 `productId` / `skuId` / 
 | `Supplier` | `suppliers` | 供应商 |
 | `PurchaseOrder` | `purchase_orders` | 采购单 |
 | `PurchaseOrderLine` | `purchase_order_lines` | 采购明细，入库后关联 Batch |
+| `AuditLog` | `audit_logs` | 后台关键操作审计日志（module / action / entity / snapshot） |
+
+`AuditModule` 枚举：`WMS` / `CMS` / `CRM` / `ORDER` / `INVENTORY` / `PURCHASE` / `REPORT` / `SYSTEM`。
+
+首批接入审计的关键动作（route 成功后异步写入，失败不回滚主业务）：
+
+- 采购：创建 / 取消 / 到货入库
+- 库存：手工入库 / 指定批次报损
+- 订单：mock 支付、关闭待支付、退款回库、后台状态流转
+- CMS：商品创建 / 更新、推荐位创建 / 更新 / 停用、推荐项添加 / 更新 / 移除、首页场景入口创建 / 更新 / 删除
+- CRM：提醒状态更新、小程序常用收花人软删除
 
 ### ER 简图
 
@@ -964,6 +1026,15 @@ Dockerfile：
 57. 不得把开发环境 base url（localhost / 127.0.0.1）持久化到数据库图片字段；图片 URL 规范化见 `src/lib/image-url.ts`。
 58. 小程序 API 不得向客户端返回 localhost 图片 URL；不得重复拼接 absolute URL。
 59. `operationNote`、成本、毛利等产品决策内部信息仍不得返回小程序。
+60. `AuditLog` 写入失败不得影响采购、库存、订单支付、FIFO、CRM 等主链路；不得在敏感事务内同步写入审计导致回滚风险。
+61. 试运营检查（setup / data-quality / trial-run）只提示和辅助，**不得自动修改**业务数据（不下架、不改价、不改配方）。
+62. 数据质量检查不得自动改价、自动下架、自动修改配方或批量修复数据。
+63. 系统健康检查不得返回 secret / token / 完整 openid 等敏感信息明文。
+64. E2E smoke 默认不得污染生产数据；若未来支持 `--create-test-order`，测试订单须显式标记 `E2E_TEST_ORDER`。
+65. 试运营 UI 只提示和引导，**不得自动修复**业务数据（不下架、不改价、不改配方、不回填库存）。
+66. 数据质量中心 UI 不得提供批量自动修复或一键改价 / 上下架操作。
+67. Dashboard 试运营状态卡片为辅助信息，**不得阻塞**正常 WMS / CMS 业务操作。
+68. AuditLog 查询页不得展示 token / password 等敏感字段；系统健康页不得展示 secret 明文。
 
 ---
 

@@ -1,5 +1,6 @@
 "use client";
 
+import { ActionEmptyState } from "@/components/admin/ActionEmptyState";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -349,6 +350,16 @@ export function BusinessReportsClient() {
         <div className="space-y-6">
           {activeTab === "overview" && (
             <>
+              {data.summary.paidOrderCount === 0 ? (
+                <ActionEmptyState
+                  title="暂无订单数据"
+                  description="完成一笔测试订单后，即可查看销售、毛利和产品决策表现。"
+                  primaryActionLabel="查看试运营检查"
+                  primaryActionHref="/wms/setup"
+                  secondaryActionLabel="查看订单"
+                  secondaryActionHref="/wms/orders"
+                />
+              ) : null}
               {data.summary.missingSnapshotOrderCount > 0 && (
                 <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">

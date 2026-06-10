@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { ActionEmptyState } from "@/components/admin/ActionEmptyState";
 import { Badge } from "@/components/ui/Badge";
 import { formatDateTimeInAppTimezone } from "@/lib/datetime";
 import { listPhysicalInventoryMaterials } from "@/lib/wms-inventory";
@@ -34,6 +35,16 @@ export default async function InventoryPage() {
         </p>
       </header>
 
+      {materials.length === 0 ? (
+        <ActionEmptyState
+          title="还没有可用库存"
+          description="还没有可用库存。你可以先创建采购单并到货入库，或在仓储日常中手工入库。"
+          primaryActionLabel="创建采购单"
+          primaryActionHref="/wms/purchase-orders"
+          secondaryActionLabel="手工入库"
+          secondaryActionHref="/wms/operations"
+        />
+      ) : (
       <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
         <table className="w-full text-left text-sm">
           <thead className="border-b border-zinc-100 bg-zinc-50">
@@ -62,17 +73,7 @@ export default async function InventoryPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-zinc-100">
-            {materials.length === 0 ? (
-              <tr>
-                <td
-                  colSpan={7}
-                  className="px-4 py-12 text-center text-zinc-500"
-                >
-                  暂无库存数据
-                </td>
-              </tr>
-            ) : (
-              materials.map((material) => {
+            {materials.map((material) => {
                 const totalQty = material.batches.reduce(
                   (sum, b) => sum + b.remainingQty,
                   0
@@ -169,11 +170,11 @@ export default async function InventoryPage() {
                     </td>
                   </tr>
                 );
-              })
-            )}
+              })}
           </tbody>
         </table>
       </div>
+      )}
       <p className="mt-3 text-xs text-zinc-400">
         数据更新时间：{formatDateTime(updatedAt)} · 共 {materials.length} 种原材料
       </p>

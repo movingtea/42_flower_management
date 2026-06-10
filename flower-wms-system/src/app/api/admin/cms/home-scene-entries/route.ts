@@ -1,9 +1,11 @@
 import {
   GiftOccasionType,
   HomeSceneEntryTargetType,
+  AuditModule,
 } from "@/generated/prisma/enums";
 import { jsonError, jsonSuccess } from "@/lib/api";
 import { isResponse, requirePermission } from "@/lib/api-auth";
+import { safeLogAuditFromStaff } from "@/lib/audit-helpers";
 import {
   createHomeSceneEntry,
   listHomeSceneEntries,
@@ -90,6 +92,22 @@ export async function POST(request: Request) {
           : null,
       note: typeof body.note === "string" ? body.note : null,
     });
+
+    safeLogAuditFromStaff(
+      staff,
+      {
+        module: AuditModule.CMS,
+        action: "HOME_SCENE_ENTRY_CREATE",
+        entityType: "CmsHomeSceneEntry",
+        entityId: entry.id,
+        summary: `创建首页场景入口「${entry.title}」`,
+        afterSnapshot: {
+          sceneType: entry.sceneType,
+          targetType: entry.targetType,
+        },
+      },
+      request
+    );
 
     return jsonSuccess({ entry });
   } catch (err) {

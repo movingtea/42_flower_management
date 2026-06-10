@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { ActionEmptyState } from "@/components/admin/ActionEmptyState";
 import { FlowerMaterialSelect } from "@/components/ui/FlowerMaterialSelect";
 import { QuantityStepper } from "@/components/shared/QuantityStepper";
 import { Button } from "@/components/ui/button";
@@ -408,9 +409,19 @@ export function WmsRecipeConsole() {
 
           {loading ? (
             <p className="py-12 text-center text-sm text-zinc-400">加载中…</p>
+          ) : items.length === 0 ? (
+            <ActionEmptyState
+              title="还没有标准配方"
+              description="配方用于连接花材成本、包装成本和 CMS 商品 SKU。"
+              primaryActionLabel="新建配方"
+              primaryActionHref="/wms/recipes"
+              secondaryActionLabel="创建包装方案"
+              secondaryActionHref="/wms/packaging-kits"
+              className="border-0 shadow-none"
+            />
           ) : filtered.length === 0 ? (
             <p className="py-12 text-center text-sm text-zinc-400">
-              暂无配方，点击右上角开始研发
+              没有匹配的配方，请调整搜索条件
             </p>
           ) : (
             <ul className="divide-y divide-zinc-100">

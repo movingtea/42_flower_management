@@ -1,5 +1,7 @@
+import { AuditModule } from "@/generated/prisma/enums";
 import { jsonError, jsonSuccess } from "@/lib/api";
 import { isResponse, requirePermission } from "@/lib/api-auth";
+import { safeLogAuditFromStaff } from "@/lib/audit-helpers";
 import { addRecommendationItem } from "@/services/cms-product-operations";
 
 export const dynamic = "force-dynamic";
@@ -40,6 +42,19 @@ export async function POST(request: Request, context: RouteContext) {
       endAt: typeof body.endAt === "string" ? body.endAt : null,
       note: typeof body.note === "string" ? body.note : null,
     });
+
+    safeLogAuditFromStaff(
+      staff,
+      {
+        module: AuditModule.CMS,
+        action: "RECOMMENDATION_ITEM_ADD",
+        entityType: "CmsRecommendationItem",
+        entityId: result.item.id,
+        summary: `推荐位添加商品 ${productId}`,
+        metadata: { slotId, warnings: result.warnings },
+      },
+      request
+    );
 
     return jsonSuccess(result);
   } catch (err) {

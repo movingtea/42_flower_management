@@ -1,5 +1,7 @@
+import { AuditModule } from "@/generated/prisma/enums";
 import { jsonError, jsonSuccess } from "@/lib/api";
 import { isResponse, requirePermission } from "@/lib/api-auth";
+import { safeLogAuditFromStaff } from "@/lib/audit-helpers";
 import { resolveOperatorContext } from "@/lib/operator-context";
 import { mapPurchaseApiError } from "@/lib/purchase-api-error";
 import { receivePurchaseOrder } from "@/services/purchase";
@@ -28,6 +30,18 @@ export async function POST(
           ? receivedAt
           : undefined,
     });
+    safeLogAuditFromStaff(
+      staff,
+      {
+        module: AuditModule.PURCHASE,
+        action: "PURCHASE_ORDER_RECEIVE",
+        entityType: "PurchaseOrder",
+        entityId: id,
+        summary: `采购单到货入库`,
+        metadata: { purchaseOrderId: id },
+      },
+      request
+    );
     return jsonSuccess({ message: "采购单已到货入库", ...result });
   } catch (err) {
     const { message, status } = mapPurchaseApiError(err, "采购单入库失败");

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { ActionEmptyState } from "@/components/admin/ActionEmptyState";
 import { CustomerTable } from "@/app/wms/crm/components/CustomerTable";
 import { getCustomerSourceLabel } from "@/lib/crm-tags";
 import { CustomerSource } from "@/generated/prisma/enums";
@@ -139,7 +140,16 @@ export function CrmCustomersClient() {
         </div>
       ) : (
         <>
-          <CustomerTable rows={data?.customers ?? []} />
+          {(data?.customers ?? []).length === 0 ? (
+            <ActionEmptyState
+              title="暂无客户数据"
+              description="小程序订单创建后会自动沉淀客户和收花人。"
+              primaryActionLabel="查看小程序订单"
+              primaryActionHref="/wms/orders"
+            />
+          ) : (
+            <CustomerTable rows={data?.customers ?? []} />
+          )}
           {data && data.pagination.totalPages > 1 && (
             <div className="flex items-center justify-between text-sm text-zinc-600">
               <span>
