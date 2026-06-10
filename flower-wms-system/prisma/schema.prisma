@@ -426,7 +426,8 @@ model CmsRecommendationSlot {
   createdAt   DateTime               @default(now()) @map("created_at")
   updatedAt   DateTime               @updatedAt @map("updated_at")
 
-  items CmsRecommendationItem[]
+  items            CmsRecommendationItem[]
+  homeSceneEntries CmsHomeSceneEntry[]
 
   @@index([slotType])
   @@index([isActive])
@@ -462,6 +463,43 @@ model CmsRecommendationItem {
   @@index([startAt])
   @@index([endAt])
   @@map("cms_recommendation_items")
+}
+
+/// 首页场景入口跳转方式
+enum HomeSceneEntryTargetType {
+  PRODUCT_FILTER
+  RECOMMENDATION_SLOT
+  CUSTOM_URL
+}
+
+// ---------------------------------------------------------------------------
+// CmsHomeSceneEntry — 小程序首页场景入口（与推荐位商品配置分离）
+// ---------------------------------------------------------------------------
+
+model CmsHomeSceneEntry {
+  id                          String                   @id @default(cuid())
+  title                       String
+  subtitle                    String?
+  sceneType                   GiftOccasionType         @map("scene_type")
+  iconKey                     String                   @map("icon_key")
+  sortOrder                   Int                      @default(0) @map("sort_order")
+  isActive                    Boolean                  @default(true) @map("is_active")
+  targetType                  HomeSceneEntryTargetType @default(PRODUCT_FILTER) @map("target_type")
+  targetValue                 String?                  @map("target_value")
+  linkedRecommendationSlotId  String?                  @map("linked_recommendation_slot_id")
+  linkedRecommendationSlotKey String?                  @map("linked_recommendation_slot_key")
+  note                        String?                  @db.Text
+  createdAt                   DateTime                 @default(now()) @map("created_at")
+  updatedAt                   DateTime                 @updatedAt @map("updated_at")
+
+  linkedRecommendationSlot CmsRecommendationSlot? @relation(fields: [linkedRecommendationSlotId], references: [id], onDelete: SetNull)
+
+  @@index([sceneType])
+  @@index([isActive])
+  @@index([sortOrder])
+  @@index([linkedRecommendationSlotId])
+  @@index([linkedRecommendationSlotKey])
+  @@map("cms_home_scene_entries")
 }
 
 // ---------------------------------------------------------------------------

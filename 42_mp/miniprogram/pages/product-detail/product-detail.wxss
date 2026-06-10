@@ -87,6 +87,89 @@
   line-height: 1.4;
 }
 
+.detail-subtitle {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 26rpx;
+}
+
+.gift-section {
+  margin-top: 16rpx;
+  padding: 24rpx 32rpx;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+}
+
+.gift-block-head,
+.info-block-head {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 12rpx;
+}
+
+.gift-block-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: #222;
+}
+
+.gift-block-text {
+  font-size: 26rpx;
+  color: #555;
+  line-height: 1.6;
+}
+
+.gift-block--note {
+  padding: 20rpx;
+  background: rgba(143, 168, 155, 0.08);
+  border-radius: 12rpx;
+}
+
+.gift-note {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.6;
+}
+
+.info-section {
+  margin-top: 16rpx;
+  padding: 24rpx 32rpx;
+  background: #fff;
+}
+
+.section-title--inline {
+  margin-bottom: 0;
+}
+
+.info-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.info-line {
+  font-size: 24rpx;
+  color: #666;
+  line-height: 1.5;
+}
+
+.brand-footer {
+  padding: 24rpx 32rpx;
+  text-align: center;
+}
+
+.brand-footer-text {
+  font-size: 22rpx;
+}
+
+.detail-banner--placeholder {
+  flex-direction: column;
+  gap: 12rpx;
+}
+
 .detail-price {
   display: block;
   margin-top: 16rpx;

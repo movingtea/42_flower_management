@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
+    "icons:export": "node scripts/export-lucide-icons.mjs"
   },
   "keywords": [],
   "author": "",
@@ -10,6 +11,8 @@
   "dependencies": {
   },
   "devDependencies": {
-    "miniprogram-api-typings": "^2.8.3-1"
+    "lucide-static": "^0.511.0",
+    "miniprogram-api-typings": "^2.8.3-1",
+    "sharp": "^0.34.2"
   }
 }

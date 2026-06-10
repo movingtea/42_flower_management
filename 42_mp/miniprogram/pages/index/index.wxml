@@ -47,58 +47,29 @@
     <text class="text-muted">暂无轮播内容</text>
   </view>
 
-  <!-- 金刚区 -->
-  <!-- <view class="kingkong-section">
-    <view class="kingkong-grid">
-      <view
-        class="kingkong-card"
-        bindtap="onKingkongTap"
-        data-type="pickup"
-      >
-        <text class="kingkong-icon">🌿</text>
-        <text class="kingkong-title">到店自提</text>
-      </view>
-      <view
-        class="kingkong-card"
-        bindtap="onKingkongTap"
-        data-type="romance"
-      >
-        <text class="kingkong-icon">💐</text>
-        <text class="kingkong-title">浪漫告白</text>
-      </view>
-      <view
-        class="kingkong-card"
-        bindtap="onKingkongTap"
-        data-type="business"
-      >
-        <text class="kingkong-icon">✨</text>
-        <text class="kingkong-title">商务定制</text>
-      </view>
-      <view
-        class="kingkong-card"
-        bindtap="onKingkongTap"
-        data-type="guide"
-      >
-        <text class="kingkong-icon">📖</text>
-        <text class="kingkong-title">养护指南</text>
-      </view>
-    </view>
-  </view> -->
+  <!-- 礼赠入口引导 -->
+  <view class="hero-section">
+    <text class="hero-title">你想把花送给谁？</text>
+    <text class="hero-subtitle">让花说话，是我们的超能力。</text>
+  </view>
 
-  <!-- 场景入口 -->
-  <scroll-view class="scene-scroll" scroll-x enhanced show-scrollbar="{{false}}">
-    <view class="scene-tabs">
+  <!-- 快速场景入口 -->
+  <view class="scene-section">
+    <text class="scene-section-title">按场景选花</text>
+    <view class="scene-grid">
       <view
         wx:for="{{sceneEntries}}"
-        wx:key="key"
-        class="scene-chip"
+        wx:key="id"
+        class="scene-entry"
         bindtap="onSceneEntryTap"
-        data-scene-type="{{item.key}}"
+        data-index="{{index}}"
       >
-        <text>{{item.label}}</text>
+        <image class="scene-entry-icon" src="{{item.icon}}" mode="aspectFit" />
+        <text class="scene-entry-label">{{item.title}}</text>
+        <text wx:if="{{item.subtitle}}" class="scene-entry-sub text-muted">{{item.subtitle}}</text>
       </view>
     </view>
-  </scroll-view>
+  </view>
 
   <!-- 首页主推 -->
   <block wx:for="{{homeMainSlots}}" wx:key="key" wx:for-item="slot">
@@ -156,6 +127,35 @@
   <block wx:for="{{sceneSlots}}" wx:key="key" wx:for-item="slot">
     <view wx:if="{{slot.items.length}}" class="recommend-section">
       <view class="section-title-row">
+        <view>
+          <text class="section-title">{{slot.name}}</text>
+          <text class="section-sub text-muted">这一次，想表达什么？</text>
+        </view>
+      </view>
+      <scroll-view class="recommend-h-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+        <view class="recommend-h-track">
+          <view
+            wx:for="{{slot.items}}"
+            wx:key="productId"
+            wx:for-item="item"
+            class="recommend-h-card"
+            bindtap="onRecommendationTap"
+            data-product-id="{{item.productId}}"
+          >
+            <image class="recommend-h-image" src="{{baseUrl}}{{item.coverImage}}" mode="aspectFill" lazy-load />
+            <text class="recommend-h-name text-ellipsis">{{item.productName}}</text>
+            <product-tag-badges tags="{{item.cardOccasionLabels}}" />
+            <text class="price-text">¥{{item.price}}</text>
+          </view>
+        </view>
+      </scroll-view>
+    </view>
+  </block>
+
+  <!-- 高客单形象款 -->
+  <block wx:for="{{highTicketSlots}}" wx:key="key" wx:for-item="slot">
+    <view wx:if="{{slot.items.length}}" class="recommend-section">
+      <view class="section-title-row">
         <text class="section-title">{{slot.name}}</text>
       </view>
       <scroll-view class="recommend-h-scroll" scroll-x enhanced show-scrollbar="{{false}}">
@@ -177,6 +177,14 @@
       </scroll-view>
     </view>
   </block>
+
+  <!-- 品牌说明 -->
+  <view class="brand-section">
+    <text class="brand-name">Universe42 · 万物肆贰</text>
+    <text class="brand-line">让花说话，是我们的超能力。</text>
+    <text class="brand-line text-muted">每一束花，都为一次具体的表达而设计。</text>
+    <text class="brand-note text-muted">花材会因季节与到货状态微调，但我们会保持整体色系、风格和价值感一致。</text>
+  </view>
 
   <!-- 动态分类 Tab -->
   <scroll-view

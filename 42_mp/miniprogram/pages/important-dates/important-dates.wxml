@@ -1,0 +1,33 @@
+<!-- pages/important-dates/important-dates.wxml -->
+<view class="dates-page">
+  <view class="dates-tip">
+    <mp-icon name="dates" size="36" />
+    <text class="dates-tip-text text-muted">重要日期会用于花店后台复购提醒，不会自动给对方发送消息。</text>
+  </view>
+
+  <view wx:if="{{loading}}" class="state-box flex-center">
+    <text class="text-muted">正在加载…</text>
+  </view>
+
+  <view wx:elif="{{error}}" class="state-box flex-center">
+    <text class="text-muted">{{error}}</text>
+  </view>
+
+  <view wx:elif="{{!items.length}}" class="state-box flex-center">
+    <mp-icon name="dates" size="96" />
+    <text class="empty-title">暂无重要日期</text>
+    <text class="empty-desc text-muted">在「我的收花人」中填写生日或纪念日后，会在这里展示。</text>
+    <button class="primary-btn" bindtap="onGoRecipients">去管理收花人</button>
+  </view>
+
+  <view wx:else class="dates-list">
+    <view wx:for="{{items}}" wx:key="id" class="date-card">
+      <mp-icon name="importantDate" size="40" />
+      <view class="date-info">
+        <text class="date-name">{{item.name}} · {{item.dateType}}</text>
+        <text class="date-meta text-muted">{{item.relationLabel}} · {{item.date}}</text>
+        <text wx:if="{{item.daysUntil !== null}}" class="date-countdown">距离下次还有 {{item.daysUntil}} 天</text>
+      </view>
+    </view>
+  </view>
+</view>

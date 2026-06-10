@@ -7,12 +7,14 @@
     "pages/checkout/checkout",
     "pages/order-list/order-list",
     "pages/mine/mine",
-    "pages/profile/profile"
+    "pages/profile/profile",
+    "pages/recipients/recipients",
+    "pages/important-dates/important-dates"
   ],
   "requiredPrivateInfos": ["chooseAddress"],
   "window": {
     "navigationBarTextStyle": "black",
-    "navigationBarTitleText": "花艺工作室",
+    "navigationBarTitleText": "Universe42",
     "navigationBarBackgroundColor": "#ffffff",
     "backgroundColor": "#fcfcfc",
     "backgroundTextStyle": "dark",
@@ -32,15 +34,15 @@
       },
       {
         "pagePath": "pages/category/category",
-        "text": "分类",
+        "text": "选花",
         "iconPath": "images/tabbar/category.png",
         "selectedIconPath": "images/tabbar/category-active.png"
       },
       {
         "pagePath": "pages/cart/cart",
         "text": "购物车",
-        "iconPath": "images/tabbar/category.png",
-        "selectedIconPath": "images/tabbar/category-active.png"
+        "iconPath": "images/tabbar/cart.png",
+        "selectedIconPath": "images/tabbar/cart-active.png"
       },
       {
         "pagePath": "pages/mine/mine",

@@ -85,28 +85,110 @@
   letter-spacing: 1rpx;
 }
 
-/* —— 场景入口 —— */
-.scene-scroll {
-  width: 100%;
-  white-space: nowrap;
-  padding: 16rpx 0 0;
+/* —— 礼赠入口 —— */
+.hero-section {
+  padding: 28rpx 32rpx 8rpx;
 }
 
-.scene-tabs {
-  display: inline-flex;
-  padding: 0 24rpx;
+.hero-title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 600;
+  color: var(--text-main);
+  letter-spacing: 1rpx;
+}
+
+.hero-subtitle {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 24rpx;
+  color: var(--primary-color);
+}
+
+/* —— 场景入口 —— */
+.scene-section {
+  padding: 16rpx 24rpx 8rpx;
+}
+
+.scene-section-title {
+  display: block;
+  margin-bottom: 16rpx;
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--text-primary, #333);
+}
+
+.scene-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 16rpx;
 }
 
-.scene-chip {
-  display: inline-flex;
-  padding: 12rpx 24rpx;
-  border-radius: 999rpx;
-  background-color: #ffffff;
-  border: 1rpx solid rgba(143, 168, 155, 0.25);
+.scene-entry {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20rpx 8rpx;
+  background: #fff;
+  border-radius: 16rpx;
+  box-shadow: 0 6rpx 20rpx rgba(0, 0, 0, 0.04);
+}
+
+.scene-entry-icon {
+  width: 56rpx;
+  height: 56rpx;
+  margin-bottom: 8rpx;
+}
+
+.scene-entry-label {
+  font-size: 26rpx;
+  color: var(--text-main);
+  font-weight: 500;
+}
+
+.scene-entry-sub {
+  font-size: 20rpx;
+  margin-top: 4rpx;
+  text-align: center;
+}
+
+.section-sub {
+  display: block;
+  font-size: 22rpx;
+  margin-top: 4rpx;
+}
+
+/* —— 品牌说明 —— */
+.brand-section {
+  margin: 24rpx 24rpx 0;
+  padding: 32rpx;
+  background: linear-gradient(135deg, rgba(143, 168, 155, 0.08), rgba(220, 165, 151, 0.06));
+  border-radius: 16rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+}
+
+.brand-name {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.brand-line {
   font-size: 24rpx;
-  color: var(--primary-color);
-  flex-shrink: 0;
+  line-height: 1.6;
+}
+
+.brand-note {
+  font-size: 22rpx;
+  line-height: 1.6;
+  margin-top: 4rpx;
+}
+
+/* —— 场景入口（旧 chip 已移除） —— */
+.scene-scroll {
+  display: none;
 }
 
 /* —— 推荐位 —— */

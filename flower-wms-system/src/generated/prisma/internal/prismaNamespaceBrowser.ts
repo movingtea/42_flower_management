@@ -62,6 +62,7 @@ export const ModelName = {
   ProductSku: 'ProductSku',
   CmsRecommendationSlot: 'CmsRecommendationSlot',
   CmsRecommendationItem: 'CmsRecommendationItem',
+  CmsHomeSceneEntry: 'CmsHomeSceneEntry',
   Banner: 'Banner',
   Material: 'Material',
   Recipe: 'Recipe',
@@ -297,6 +298,26 @@ export const CmsRecommendationItemScalarFieldEnum = {
 } as const
 
 export type CmsRecommendationItemScalarFieldEnum = (typeof CmsRecommendationItemScalarFieldEnum)[keyof typeof CmsRecommendationItemScalarFieldEnum]
+
+
+export const CmsHomeSceneEntryScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  subtitle: 'subtitle',
+  sceneType: 'sceneType',
+  iconKey: 'iconKey',
+  sortOrder: 'sortOrder',
+  isActive: 'isActive',
+  targetType: 'targetType',
+  targetValue: 'targetValue',
+  linkedRecommendationSlotId: 'linkedRecommendationSlotId',
+  linkedRecommendationSlotKey: 'linkedRecommendationSlotKey',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CmsHomeSceneEntryScalarFieldEnum = (typeof CmsHomeSceneEntryScalarFieldEnum)[keyof typeof CmsHomeSceneEntryScalarFieldEnum]
 
 
 export const BannerScalarFieldEnum = {

@@ -1,0 +1,98 @@
+<!-- pages/recipients/recipients.wxml — 我的收花人 -->
+<view class="recipients-page">
+  <view wx:if="{{loading}}" class="state-box flex-center">
+    <text class="text-muted">正在加载…</text>
+  </view>
+
+  <view wx:elif="{{error}}" class="state-box flex-center">
+    <text class="text-muted">{{error}}</text>
+  </view>
+
+  <view wx:elif="{{!recipients.length && !showForm}}" class="state-box flex-center">
+    <mp-icon name="emptyRecipient" size="96" />
+    <text class="empty-title">暂无常用收花人</text>
+    <text class="empty-desc text-muted">还没有常用收花人。下单时保存后，下次就可以一键选择。</text>
+    <button class="primary-btn" bindtap="onAddTap">新增收花人</button>
+  </view>
+
+  <block wx:else>
+    <view class="list-header">
+      <text class="list-title">常用收花人</text>
+      <button class="link-btn" size="mini" bindtap="onAddTap">+ 新增</button>
+    </view>
+
+    <view class="recipient-list">
+      <view wx:for="{{recipients}}" wx:key="relationId" class="recipient-card">
+        <view class="recipient-main">
+          <mp-icon name="recipient" size="40" />
+          <view class="recipient-info">
+            <text class="recipient-name">{{item.name}}</text>
+            <text wx:if="{{item.relationLabel || item.relationType}}" class="recipient-meta text-muted">{{item.relationLabel || item.relationType}}</text>
+            <text wx:if="{{item.phone}}" class="recipient-meta text-muted">{{item.phone}}</text>
+            <text wx:if="{{item.birthday}}" class="recipient-meta text-muted">生日 {{item.birthday}}</text>
+            <text wx:if="{{item.anniversary}}" class="recipient-meta text-muted">纪念日 {{item.anniversary}}</text>
+            <text wx:if="{{item.address}}" class="recipient-meta text-muted text-ellipsis">{{item.address}}</text>
+          </view>
+        </view>
+        <view class="recipient-actions">
+          <text class="action-link" bindtap="onEditTap" data-id="{{item.relationId}}">编辑</text>
+          <text class="action-link action-link--danger" bindtap="onDeleteTap" data-id="{{item.relationId}}">删除</text>
+        </view>
+      </view>
+    </view>
+  </block>
+
+  <view wx:if="{{showForm}}" class="form-mask" catchtap="onCloseForm">
+    <view class="form-sheet" catchtap="onFormSheetTap">
+      <text class="form-title">{{editingId ? '编辑收花人' : '新增收花人'}}</text>
+
+      <view class="form-field">
+        <text class="field-label">姓名</text>
+        <input class="field-input" value="{{form.name}}" data-field="name" bindinput="onFormInput" placeholder="收花人姓名" />
+      </view>
+      <view class="form-field">
+        <text class="field-label">电话</text>
+        <input class="field-input" type="number" value="{{form.phone}}" data-field="phone" bindinput="onFormInput" placeholder="联系电话" />
+      </view>
+      <view class="form-field">
+        <text class="field-label">地址</text>
+        <input class="field-input" value="{{form.address}}" data-field="address" bindinput="onFormInput" placeholder="配送地址" />
+      </view>
+      <view class="form-field picker-field">
+        <text class="field-label">关系</text>
+        <picker mode="selector" range="{{relationOptions}}" value="{{form.relationIndex >= 0 ? form.relationIndex : 0}}" bindchange="onRelationChange">
+          <view class="picker-value">{{form.relationIndex >= 0 ? relationOptions[form.relationIndex] : '请选择'}}</view>
+        </picker>
+      </view>
+      <view class="form-field picker-field">
+        <text class="field-label">生日</text>
+        <picker mode="date" value="{{form.birthday}}" bindchange="onBirthdayChange">
+          <view class="picker-value">{{form.birthday || '可选'}}</view>
+        </picker>
+      </view>
+      <view class="form-field picker-field">
+        <text class="field-label">纪念日</text>
+        <picker mode="date" value="{{form.anniversary}}" bindchange="onAnniversaryChange">
+          <view class="picker-value">{{form.anniversary || '可选'}}</view>
+        </picker>
+      </view>
+      <view class="form-field">
+        <text class="field-label">偏好色系</text>
+        <input class="field-input" value="{{form.preferredColors}}" data-field="preferredColors" bindinput="onFormInput" placeholder="如：粉色" />
+      </view>
+      <view class="form-field">
+        <text class="field-label">忌讳花材</text>
+        <input class="field-input" value="{{form.dislikedFlowers}}" data-field="dislikedFlowers" bindinput="onFormInput" placeholder="如：百合" />
+      </view>
+      <view class="form-field">
+        <text class="field-label">备注</text>
+        <textarea class="field-textarea" value="{{form.preferenceNote}}" data-field="preferenceNote" bindinput="onFormInput" placeholder="其他偏好" />
+      </view>
+
+      <view class="form-actions">
+        <button class="ghost-btn" bindtap="onCloseForm">取消</button>
+        <button class="primary-btn" loading="{{submitting}}" bindtap="onSaveForm">保存</button>
+      </view>
+    </view>
+  </view>
+</view>

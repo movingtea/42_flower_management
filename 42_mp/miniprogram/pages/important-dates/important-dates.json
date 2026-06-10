@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "重要日期",
+  "enablePullDownRefresh": true,
+  "usingComponents": {
+    "mp-icon": "/components/mp-icon/mp-icon"
+  }
+}

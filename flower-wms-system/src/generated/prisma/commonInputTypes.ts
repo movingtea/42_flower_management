@@ -392,6 +392,40 @@ export type EnumGiftOccasionTypeNullableWithAggregatesFilter<$PrismaModel = neve
   _max?: Prisma.NestedEnumGiftOccasionTypeNullableFilter<$PrismaModel>
 }
 
+export type EnumGiftOccasionTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.GiftOccasionType | Prisma.EnumGiftOccasionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.GiftOccasionType[] | Prisma.ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GiftOccasionType[] | Prisma.ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGiftOccasionTypeFilter<$PrismaModel> | $Enums.GiftOccasionType
+}
+
+export type EnumHomeSceneEntryTargetTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.HomeSceneEntryTargetType | Prisma.EnumHomeSceneEntryTargetTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.HomeSceneEntryTargetType[] | Prisma.ListEnumHomeSceneEntryTargetTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HomeSceneEntryTargetType[] | Prisma.ListEnumHomeSceneEntryTargetTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHomeSceneEntryTargetTypeFilter<$PrismaModel> | $Enums.HomeSceneEntryTargetType
+}
+
+export type EnumGiftOccasionTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.GiftOccasionType | Prisma.EnumGiftOccasionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.GiftOccasionType[] | Prisma.ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GiftOccasionType[] | Prisma.ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGiftOccasionTypeWithAggregatesFilter<$PrismaModel> | $Enums.GiftOccasionType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumGiftOccasionTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumGiftOccasionTypeFilter<$PrismaModel>
+}
+
+export type EnumHomeSceneEntryTargetTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.HomeSceneEntryTargetType | Prisma.EnumHomeSceneEntryTargetTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.HomeSceneEntryTargetType[] | Prisma.ListEnumHomeSceneEntryTargetTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HomeSceneEntryTargetType[] | Prisma.ListEnumHomeSceneEntryTargetTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHomeSceneEntryTargetTypeWithAggregatesFilter<$PrismaModel> | $Enums.HomeSceneEntryTargetType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumHomeSceneEntryTargetTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumHomeSceneEntryTargetTypeFilter<$PrismaModel>
+}
+
 export type EnumBannerTargetTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.BannerTargetType | Prisma.EnumBannerTargetTypeFieldRefInput<$PrismaModel>
   in?: $Enums.BannerTargetType[] | Prisma.ListEnumBannerTargetTypeFieldRefInput<$PrismaModel>
@@ -553,23 +587,6 @@ export type EnumRecipientRelationTypeNullableWithAggregatesFilter<$PrismaModel =
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumRecipientRelationTypeNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumRecipientRelationTypeNullableFilter<$PrismaModel>
-}
-
-export type EnumGiftOccasionTypeFilter<$PrismaModel = never> = {
-  equals?: $Enums.GiftOccasionType | Prisma.EnumGiftOccasionTypeFieldRefInput<$PrismaModel>
-  in?: $Enums.GiftOccasionType[] | Prisma.ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel>
-  notIn?: $Enums.GiftOccasionType[] | Prisma.ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumGiftOccasionTypeFilter<$PrismaModel> | $Enums.GiftOccasionType
-}
-
-export type EnumGiftOccasionTypeWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.GiftOccasionType | Prisma.EnumGiftOccasionTypeFieldRefInput<$PrismaModel>
-  in?: $Enums.GiftOccasionType[] | Prisma.ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel>
-  notIn?: $Enums.GiftOccasionType[] | Prisma.ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumGiftOccasionTypeWithAggregatesFilter<$PrismaModel> | $Enums.GiftOccasionType
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumGiftOccasionTypeFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumGiftOccasionTypeFilter<$PrismaModel>
 }
 
 export type EnumReminderTypeFilter<$PrismaModel = never> = {
@@ -1071,6 +1088,40 @@ export type NestedEnumGiftOccasionTypeNullableWithAggregatesFilter<$PrismaModel 
   _max?: Prisma.NestedEnumGiftOccasionTypeNullableFilter<$PrismaModel>
 }
 
+export type NestedEnumGiftOccasionTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.GiftOccasionType | Prisma.EnumGiftOccasionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.GiftOccasionType[] | Prisma.ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GiftOccasionType[] | Prisma.ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGiftOccasionTypeFilter<$PrismaModel> | $Enums.GiftOccasionType
+}
+
+export type NestedEnumHomeSceneEntryTargetTypeFilter<$PrismaModel = never> = {
+  equals?: $Enums.HomeSceneEntryTargetType | Prisma.EnumHomeSceneEntryTargetTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.HomeSceneEntryTargetType[] | Prisma.ListEnumHomeSceneEntryTargetTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HomeSceneEntryTargetType[] | Prisma.ListEnumHomeSceneEntryTargetTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHomeSceneEntryTargetTypeFilter<$PrismaModel> | $Enums.HomeSceneEntryTargetType
+}
+
+export type NestedEnumGiftOccasionTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.GiftOccasionType | Prisma.EnumGiftOccasionTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.GiftOccasionType[] | Prisma.ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.GiftOccasionType[] | Prisma.ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumGiftOccasionTypeWithAggregatesFilter<$PrismaModel> | $Enums.GiftOccasionType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumGiftOccasionTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumGiftOccasionTypeFilter<$PrismaModel>
+}
+
+export type NestedEnumHomeSceneEntryTargetTypeWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.HomeSceneEntryTargetType | Prisma.EnumHomeSceneEntryTargetTypeFieldRefInput<$PrismaModel>
+  in?: $Enums.HomeSceneEntryTargetType[] | Prisma.ListEnumHomeSceneEntryTargetTypeFieldRefInput<$PrismaModel>
+  notIn?: $Enums.HomeSceneEntryTargetType[] | Prisma.ListEnumHomeSceneEntryTargetTypeFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumHomeSceneEntryTargetTypeWithAggregatesFilter<$PrismaModel> | $Enums.HomeSceneEntryTargetType
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumHomeSceneEntryTargetTypeFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumHomeSceneEntryTargetTypeFilter<$PrismaModel>
+}
+
 export type NestedEnumBannerTargetTypeFilter<$PrismaModel = never> = {
   equals?: $Enums.BannerTargetType | Prisma.EnumBannerTargetTypeFieldRefInput<$PrismaModel>
   in?: $Enums.BannerTargetType[] | Prisma.ListEnumBannerTargetTypeFieldRefInput<$PrismaModel>
@@ -1232,23 +1283,6 @@ export type NestedEnumRecipientRelationTypeNullableWithAggregatesFilter<$PrismaM
   _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
   _min?: Prisma.NestedEnumRecipientRelationTypeNullableFilter<$PrismaModel>
   _max?: Prisma.NestedEnumRecipientRelationTypeNullableFilter<$PrismaModel>
-}
-
-export type NestedEnumGiftOccasionTypeFilter<$PrismaModel = never> = {
-  equals?: $Enums.GiftOccasionType | Prisma.EnumGiftOccasionTypeFieldRefInput<$PrismaModel>
-  in?: $Enums.GiftOccasionType[] | Prisma.ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel>
-  notIn?: $Enums.GiftOccasionType[] | Prisma.ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumGiftOccasionTypeFilter<$PrismaModel> | $Enums.GiftOccasionType
-}
-
-export type NestedEnumGiftOccasionTypeWithAggregatesFilter<$PrismaModel = never> = {
-  equals?: $Enums.GiftOccasionType | Prisma.EnumGiftOccasionTypeFieldRefInput<$PrismaModel>
-  in?: $Enums.GiftOccasionType[] | Prisma.ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel>
-  notIn?: $Enums.GiftOccasionType[] | Prisma.ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel>
-  not?: Prisma.NestedEnumGiftOccasionTypeWithAggregatesFilter<$PrismaModel> | $Enums.GiftOccasionType
-  _count?: Prisma.NestedIntFilter<$PrismaModel>
-  _min?: Prisma.NestedEnumGiftOccasionTypeFilter<$PrismaModel>
-  _max?: Prisma.NestedEnumGiftOccasionTypeFilter<$PrismaModel>
 }
 
 export type NestedEnumReminderTypeFilter<$PrismaModel = never> = {

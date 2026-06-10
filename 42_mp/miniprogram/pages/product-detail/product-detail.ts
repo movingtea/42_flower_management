@@ -1,6 +1,6 @@
 // pages/product-detail/product-detail.ts — 商品详情
 import { baseUrl } from '../../config/index';
-import { addPayloadToCart } from '../../utils/cart-add';
+import { addPayloadToCart, buyNow } from '../../utils/cart-add';
 import { updateCartTabBarBadge } from '../../utils/cart';
 import {
   toRelativeImagePathList,
@@ -16,6 +16,13 @@ import {
   type WechatProductItem,
   type WechatProductRaw,
 } from '../../utils/product';
+import {
+  buildOccasionSummary,
+  buildRelationshipSummary,
+  buildStoryText,
+  FLOWER_ADJUSTMENT_NOTE,
+  DELIVERY_NOTES,
+} from '../../utils/gift-copy';
 
 interface DetailPayload {
   product: WechatProductRaw;
@@ -49,7 +56,13 @@ Page({
     relationshipLabels: [] as string[],
     sellingPoints: [] as string[],
     specPickerVisible: false,
+    specPickerMode: 'cart' as 'cart' | 'buy',
     baseUrl,
+    occasionSummary: '',
+    relationshipSummary: '',
+    storyText: '',
+    flowerAdjustmentNote: FLOWER_ADJUSTMENT_NOTE,
+    deliveryNotes: Object.values(DELIVERY_NOTES),
   },
 
   onLoad(options: Record<string, string | undefined>) {
@@ -125,6 +138,9 @@ Page({
         ],
         relationshipLabels: tagLabels(product.relationshipTags),
         sellingPoints: product.sellingPoints ?? [],
+        occasionSummary: buildOccasionSummary(tagLabels(product.occasionTags)),
+        relationshipSummary: buildRelationshipSummary(tagLabels(product.relationshipTags)),
+        storyText: buildStoryText(product.sellingPoints ?? []),
       });
 
       wx.setNavigationBarTitle({ title: product.name });
@@ -139,7 +155,9 @@ Page({
     this.setData({ bannerCurrent: e.detail.current });
   },
 
-  onOpenSpecPicker() {
+  onOpenSpecPicker(e?: WechatMiniprogram.TouchEvent) {
+    const mode =
+      (e?.currentTarget?.dataset?.mode as 'cart' | 'buy' | undefined) ?? 'cart';
     const { product } = this.data;
     if (!product) return;
 
@@ -154,17 +172,27 @@ Page({
         wx.showToast({ title: '暂无可售款式', icon: 'none' });
         return;
       }
-      this.addSkuToCart(
-        sku.id,
-        sku.skuCode,
-        sku.specName,
-        sku.price,
-        sku.imageUrl ?? product.imageUrl
-      );
+      if (mode === 'buy') {
+        this.buySku(
+          sku.id,
+          sku.skuCode,
+          sku.specName,
+          sku.price,
+          sku.imageUrl ?? product.imageUrl
+        );
+      } else {
+        this.addSkuToCart(
+          sku.id,
+          sku.skuCode,
+          sku.specName,
+          sku.price,
+          sku.imageUrl ?? product.imageUrl
+        );
+      }
       return;
     }
 
-    this.setData({ specPickerVisible: true });
+    this.setData({ specPickerVisible: true, specPickerMode: mode });
   },
 
   onSpecPickerClose() {
@@ -179,7 +207,20 @@ Page({
       price: string;
       imageUrl: string;
     };
+    const mode = this.data.specPickerMode;
     this.setData({ specPickerVisible: false });
+
+    if (mode === 'buy') {
+      this.buySku(
+        detail.skuId,
+        detail.skuCode,
+        detail.specName,
+        detail.price,
+        detail.imageUrl
+      );
+      return;
+    }
+
     this.addSkuToCart(
       detail.skuId,
       detail.skuCode,
@@ -187,6 +228,28 @@ Page({
       detail.price,
       detail.imageUrl
     );
+  },
+
+  buySku(
+    skuId: string,
+    skuCode: string,
+    specName: string,
+    price: string,
+    imageUrl: string
+  ) {
+    const { product } = this.data;
+    if (!product) return;
+
+    buyNow({
+      spuId: product.id,
+      skuId,
+      skuCode,
+      specName,
+      name: product.name,
+      price,
+      imageUrl: imageUrl || product.imageUrl,
+      shippingFee: product.shippingFee,
+    });
   },
 
   addSkuToCart(

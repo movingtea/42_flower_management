@@ -1,4 +1,4 @@
-<!-- pages/product-detail/product-detail.wxml — 商品详情 -->
+<!-- pages/product-detail/product-detail.wxml — 商品详情 · 礼赠说服 -->
 <view class="detail-page">
   <view wx:if="{{loading}}" class="detail-loading flex-center">
     <text class="text-muted">正在加载商品详情…</text>
@@ -6,7 +6,6 @@
 
   <block wx:else>
     <scroll-view class="detail-scroll" scroll-y enhanced show-scrollbar="{{false}}">
-      <!-- 款式多图轮播 4:3 -->
       <view class="banner-wrap">
         <swiper
           wx:if="{{bannerImages.length}}"
@@ -22,44 +21,69 @@
           </swiper-item>
         </swiper>
         <view wx:else class="detail-banner detail-banner--placeholder flex-center">
+          <mp-icon name="flower" size="64" />
           <text class="text-muted">暂无商品图片</text>
         </view>
-        <view
-          wx:if="{{bannerImages.length > 1}}"
-          class="banner-indicator"
-        >{{bannerCurrent + 1}} / {{bannerImages.length}}</view>
+        <view wx:if="{{bannerImages.length > 1}}" class="banner-indicator">{{bannerCurrent + 1}} / {{bannerImages.length}}</view>
       </view>
 
-      <!-- 名称与价格区间 -->
       <view class="detail-head">
         <text class="detail-name">{{product.name}}</text>
+        <text wx:if="{{product.subtitle}}" class="detail-subtitle text-muted">{{product.subtitle}}</text>
         <text class="detail-price">{{priceLabel}}</text>
         <text wx:if="{{product.isOutOfStock}}" class="detail-stock-tag">今日售罄</text>
       </view>
 
-      <view wx:if="{{occasionLabels.length || styleColorLabels.length || relationshipLabels.length || sellingPoints.length}}" class="detail-tags-section">
-        <text class="section-title">商品标签</text>
-        <view wx:if="{{occasionLabels.length}}" class="detail-tag-row">
-          <text class="detail-tag-label">适用场景</text>
-          <product-tag-badges tags="{{occasionLabels}}" />
+      <!-- 礼赠表达 -->
+      <view class="gift-section">
+        <view wx:if="{{occasionSummary}}" class="gift-block">
+          <view class="gift-block-head">
+            <mp-icon name="scene" size="36" />
+            <text class="gift-block-title">适合场景</text>
+          </view>
+          <text class="gift-block-text">{{occasionSummary}}</text>
         </view>
-        <view wx:if="{{styleColorLabels.length}}" class="detail-tag-row">
-          <text class="detail-tag-label">色系风格</text>
+
+        <view wx:if="{{relationshipSummary}}" class="gift-block">
+          <view class="gift-block-head">
+            <mp-icon name="relationship" size="36" />
+            <text class="gift-block-title">适合对象</text>
+          </view>
+          <text class="gift-block-text">{{relationshipSummary}}</text>
+        </view>
+
+        <view class="gift-block">
+          <view class="gift-block-head">
+            <mp-icon name="flower" size="36" />
+            <text class="gift-block-title">情绪表达</text>
+          </view>
+          <text class="gift-block-text">{{storyText}}</text>
+        </view>
+
+        <view wx:if="{{styleColorLabels.length}}" class="gift-block">
+          <view class="gift-block-head">
+            <mp-icon name="preference" size="36" />
+            <text class="gift-block-title">花材与风格</text>
+          </view>
           <product-tag-badges tags="{{styleColorLabels}}" />
         </view>
-        <view wx:if="{{relationshipLabels.length}}" class="detail-tag-row">
-          <text class="detail-tag-label">适合关系</text>
-          <product-tag-badges tags="{{relationshipLabels}}" />
-        </view>
-        <view wx:if="{{sellingPoints.length}}" class="detail-tag-row">
-          <text class="detail-tag-label">卖点</text>
-          <view class="selling-points">
-            <text wx:for="{{sellingPoints}}" wx:key="*this" class="selling-point-item">{{item}}</text>
-          </view>
+
+        <view class="gift-block gift-block--note">
+          <text class="gift-note">{{flowerAdjustmentNote}}</text>
         </view>
       </view>
 
-      <!-- 推荐商品（描述上方） -->
+      <!-- 配送说明 -->
+      <view class="info-section">
+        <view class="info-block-head">
+          <mp-icon name="deliveryInfo" size="36" />
+          <text class="section-title section-title--inline">配送与下单说明</text>
+        </view>
+        <view class="info-list">
+          <text wx:for="{{deliveryNotes}}" wx:key="*this" class="info-line">· {{item}}</text>
+        </view>
+      </view>
+
       <view wx:if="{{recommendList.length}}" class="recommend-section">
         <view class="section-title-row">
           <text class="section-title">推荐商品</text>
@@ -74,12 +98,7 @@
               bindtap="onRecommendTap"
               data-id="{{item.id}}"
             >
-              <image
-                class="recommend-image"
-                src="{{baseUrl}}{{item.imageUrl}}"
-                mode="aspectFill"
-                lazy-load
-              />
+              <image class="recommend-image" src="{{baseUrl}}{{item.imageUrl}}" mode="aspectFill" lazy-load />
               <text class="recommend-name text-ellipsis">{{item.name}}</text>
               <text class="recommend-price">¥{{item.price}}{{item.priceSuffix}}</text>
             </view>
@@ -87,36 +106,34 @@
         </scroll-view>
       </view>
 
-      <!-- 商品描述 -->
       <view wx:if="{{descriptionHtml}}" class="rich-section">
         <text class="section-title">商品描述</text>
         <rich-text class="rich-body" nodes="{{descriptionHtml}}"></rich-text>
       </view>
 
-      <!-- 花艺养护指南 -->
       <view wx:if="{{maintenanceHtml}}" class="rich-section">
-        <text class="section-title">花艺养护指南</text>
+        <view class="info-block-head">
+          <mp-icon name="care" size="36" />
+          <text class="section-title section-title--inline">花艺养护指南</text>
+        </view>
         <rich-text class="rich-body" nodes="{{maintenanceHtml}}"></rich-text>
+      </view>
+
+      <view class="brand-footer">
+        <text class="brand-footer-text text-muted">Universe42 · 让花说话，是我们的超能力。</text>
       </view>
 
       <view class="detail-scroll-spacer safe-area-bottom"></view>
     </scroll-view>
 
-    <!-- 底部操作栏 -->
     <view class="detail-footer safe-area-bottom">
       <view class="footer-icon-btn flex-center" bindtap="onGoCart">
-        <text class="footer-icon">🛒</text>
+        <mp-icon name="cart" size="40" />
         <text class="footer-icon-label">购物车</text>
       </view>
       <view class="footer-actions">
-        <view
-          class="footer-btn footer-btn--cart flex-center"
-          bindtap="onOpenSpecPicker"
-        >加入购物车</view>
-        <view
-          class="footer-btn footer-btn--buy flex-center"
-          bindtap="onOpenSpecPicker"
-        >选规格</view>
+        <view class="footer-btn footer-btn--cart flex-center" bindtap="onOpenSpecPicker" data-mode="cart">加入购物车</view>
+        <view class="footer-btn footer-btn--buy flex-center" bindtap="onOpenSpecPicker" data-mode="buy">立即预订</view>
       </view>
     </view>
   </block>

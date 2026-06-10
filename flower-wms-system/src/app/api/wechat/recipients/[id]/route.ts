@@ -43,6 +43,8 @@ function parsePatchBody(raw: unknown) {
       typeof b.dislikedFlowers === "string" ? b.dislikedFlowers : undefined,
     preferenceNote:
       typeof b.preferenceNote === "string" ? b.preferenceNote : undefined,
+    birthday: typeof b.birthday === "string" ? b.birthday : undefined,
+    anniversary: typeof b.anniversary === "string" ? b.anniversary : undefined,
     isDefault: typeof b.isDefault === "boolean" ? b.isDefault : undefined,
   };
 }

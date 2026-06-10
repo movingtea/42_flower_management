@@ -10,6 +10,13 @@ import {
   type WechatProductItem,
   type WechatProductRaw,
 } from '../../utils/product';
+import {
+  getLocalFallbackSceneEntries,
+  mapApiSceneEntries,
+  navigateToSceneEntry,
+  type HomeSceneEntriesResponse,
+} from '../../utils/home-scene-entries';
+import type { HomeSceneEntryDisplay } from '../../utils/icons';
 
 interface NoticeConfig {
   enabled: boolean;
@@ -95,13 +102,7 @@ interface RecommendationsData {
   slots?: RecommendationSlot[];
 }
 
-const SCENE_ENTRIES = [
-  { key: 'BIRTHDAY', label: '生日' },
-  { key: 'ANNIVERSARY', label: '纪念日' },
-  { key: 'BUSINESS', label: '商务' },
-  { key: 'VISIT', label: '探望' },
-  { key: 'DAILY_SURPRISE', label: '日常惊喜' },
-];
+const DEFAULT_SCENE_ENTRIES = getLocalFallbackSceneEntries();
 
 function normalizeProduct(item: WechatProductRaw & { category?: string[] }): ProductItem {
   const base = normalizeWechatProduct(item);
@@ -142,8 +143,11 @@ Page({
     baseUrl,
     homeMainSlots: [] as RecommendationSlot[],
     newArrivalSlots: [] as RecommendationSlot[],
+    highTicketSlots: [] as RecommendationSlot[],
     sceneSlots: [] as RecommendationSlot[],
-    sceneEntries: SCENE_ENTRIES,
+    sceneEntries: DEFAULT_SCENE_ENTRIES as HomeSceneEntryDisplay[],
+    sceneEntriesFailed: false,
+    recommendationsFailed: false,
   },
 
   onLoad() {
@@ -167,6 +171,7 @@ Page({
       this.fetchHomepage(),
       this.fetchProducts(),
       this.fetchRecommendations(),
+      this.fetchHomeSceneEntries(),
     ])
       .then(() => {
         this.applyCategoryFilter();
@@ -216,6 +221,34 @@ Page({
     });
   },
 
+  fetchHomeSceneEntries() {
+    return request<HomeSceneEntriesResponse>({
+      url: '/home-scene-entries',
+      raw: false,
+    })
+      .then((data) => {
+        const apiEntries = data?.entries ?? [];
+        if (apiEntries.length === 0) {
+          this.setData({
+            sceneEntries: getLocalFallbackSceneEntries(),
+            sceneEntriesFailed: false,
+          });
+          return;
+        }
+        this.setData({
+          sceneEntries: mapApiSceneEntries(apiEntries),
+          sceneEntriesFailed: false,
+        });
+      })
+      .catch((err) => {
+        console.warn('首页场景入口加载失败，使用本地 fallback', err);
+        this.setData({
+          sceneEntries: getLocalFallbackSceneEntries(),
+          sceneEntriesFailed: true,
+        });
+      });
+  },
+
   fetchRecommendations() {
     return request<RecommendationsData>({ url: '/recommendations', raw: false })
       .then((data) => {
@@ -237,9 +270,11 @@ Page({
         this.setData({
           homeMainSlots: slots.filter((s) => s.slotType === 'HOME_MAIN'),
           newArrivalSlots: slots.filter((s) => s.slotType === 'NEW_ARRIVAL'),
+          highTicketSlots: slots.filter((s) => s.slotType === 'HIGH_TICKET'),
           sceneSlots: slots.filter(
             (s) => s.slotType === 'SCENE' || s.slotType === 'FESTIVAL'
           ),
+          recommendationsFailed: false,
         });
       })
       .catch((err) => {
@@ -247,7 +282,9 @@ Page({
         this.setData({
           homeMainSlots: [],
           newArrivalSlots: [],
+          highTicketSlots: [],
           sceneSlots: [],
+          recommendationsFailed: true,
         });
       });
   },
@@ -411,13 +448,14 @@ Page({
   },
 
   onSceneEntryTap(e: WechatMiniprogram.TouchEvent) {
-    const sceneType = e.currentTarget.dataset.sceneType as string;
-    if (!sceneType) return;
-    wx.navigateTo({
-      url: `/pages/category/category?sceneType=${sceneType}`,
-      fail: () => {
-        wx.showToast({ title: '场景页暂未开放', icon: 'none' });
-      },
+    const index = Number(e.currentTarget.dataset.index);
+    const entry = this.data.sceneEntries[index];
+    if (!entry) return;
+    navigateToSceneEntry({
+      sceneType: entry.sceneType,
+      targetType: entry.targetType,
+      targetValue: entry.targetValue,
+      linkedRecommendationSlotKey: entry.linkedRecommendationSlotKey,
     });
   },
 

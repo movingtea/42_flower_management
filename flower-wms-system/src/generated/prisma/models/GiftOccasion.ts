@@ -674,10 +674,6 @@ export type GiftOccasionUncheckedUpdateManyWithoutRelationNestedInput = {
   deleteMany?: Prisma.GiftOccasionScalarWhereInput | Prisma.GiftOccasionScalarWhereInput[]
 }
 
-export type EnumGiftOccasionTypeFieldUpdateOperationsInput = {
-  set?: $Enums.GiftOccasionType
-}
-
 export type GiftOccasionCreateNestedOneWithoutRemindersInput = {
   create?: Prisma.XOR<Prisma.GiftOccasionCreateWithoutRemindersInput, Prisma.GiftOccasionUncheckedCreateWithoutRemindersInput>
   connectOrCreate?: Prisma.GiftOccasionCreateOrConnectWithoutRemindersInput

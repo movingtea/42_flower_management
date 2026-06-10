@@ -269,6 +269,7 @@ export type CmsRecommendationSlotWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"CmsRecommendationSlot"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CmsRecommendationSlot"> | Date | string
   items?: Prisma.CmsRecommendationItemListRelationFilter
+  homeSceneEntries?: Prisma.CmsHomeSceneEntryListRelationFilter
 }
 
 export type CmsRecommendationSlotOrderByWithRelationInput = {
@@ -284,6 +285,7 @@ export type CmsRecommendationSlotOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   items?: Prisma.CmsRecommendationItemOrderByRelationAggregateInput
+  homeSceneEntries?: Prisma.CmsHomeSceneEntryOrderByRelationAggregateInput
 }
 
 export type CmsRecommendationSlotWhereUniqueInput = Prisma.AtLeast<{
@@ -302,6 +304,7 @@ export type CmsRecommendationSlotWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"CmsRecommendationSlot"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"CmsRecommendationSlot"> | Date | string
   items?: Prisma.CmsRecommendationItemListRelationFilter
+  homeSceneEntries?: Prisma.CmsHomeSceneEntryListRelationFilter
 }, "id" | "key">
 
 export type CmsRecommendationSlotOrderByWithAggregationInput = {
@@ -353,6 +356,7 @@ export type CmsRecommendationSlotCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.CmsRecommendationItemCreateNestedManyWithoutSlotInput
+  homeSceneEntries?: Prisma.CmsHomeSceneEntryCreateNestedManyWithoutLinkedRecommendationSlotInput
 }
 
 export type CmsRecommendationSlotUncheckedCreateInput = {
@@ -368,6 +372,7 @@ export type CmsRecommendationSlotUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.CmsRecommendationItemUncheckedCreateNestedManyWithoutSlotInput
+  homeSceneEntries?: Prisma.CmsHomeSceneEntryUncheckedCreateNestedManyWithoutLinkedRecommendationSlotInput
 }
 
 export type CmsRecommendationSlotUpdateInput = {
@@ -383,6 +388,7 @@ export type CmsRecommendationSlotUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.CmsRecommendationItemUpdateManyWithoutSlotNestedInput
+  homeSceneEntries?: Prisma.CmsHomeSceneEntryUpdateManyWithoutLinkedRecommendationSlotNestedInput
 }
 
 export type CmsRecommendationSlotUncheckedUpdateInput = {
@@ -398,6 +404,7 @@ export type CmsRecommendationSlotUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.CmsRecommendationItemUncheckedUpdateManyWithoutSlotNestedInput
+  homeSceneEntries?: Prisma.CmsHomeSceneEntryUncheckedUpdateManyWithoutLinkedRecommendationSlotNestedInput
 }
 
 export type CmsRecommendationSlotCreateManyInput = {
@@ -499,6 +506,11 @@ export type CmsRecommendationSlotScalarRelationFilter = {
   isNot?: Prisma.CmsRecommendationSlotWhereInput
 }
 
+export type CmsRecommendationSlotNullableScalarRelationFilter = {
+  is?: Prisma.CmsRecommendationSlotWhereInput | null
+  isNot?: Prisma.CmsRecommendationSlotWhereInput | null
+}
+
 export type EnumRecommendationSlotTypeFieldUpdateOperationsInput = {
   set?: $Enums.RecommendationSlotType
 }
@@ -521,6 +533,22 @@ export type CmsRecommendationSlotUpdateOneRequiredWithoutItemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.CmsRecommendationSlotUpdateToOneWithWhereWithoutItemsInput, Prisma.CmsRecommendationSlotUpdateWithoutItemsInput>, Prisma.CmsRecommendationSlotUncheckedUpdateWithoutItemsInput>
 }
 
+export type CmsRecommendationSlotCreateNestedOneWithoutHomeSceneEntriesInput = {
+  create?: Prisma.XOR<Prisma.CmsRecommendationSlotCreateWithoutHomeSceneEntriesInput, Prisma.CmsRecommendationSlotUncheckedCreateWithoutHomeSceneEntriesInput>
+  connectOrCreate?: Prisma.CmsRecommendationSlotCreateOrConnectWithoutHomeSceneEntriesInput
+  connect?: Prisma.CmsRecommendationSlotWhereUniqueInput
+}
+
+export type CmsRecommendationSlotUpdateOneWithoutHomeSceneEntriesNestedInput = {
+  create?: Prisma.XOR<Prisma.CmsRecommendationSlotCreateWithoutHomeSceneEntriesInput, Prisma.CmsRecommendationSlotUncheckedCreateWithoutHomeSceneEntriesInput>
+  connectOrCreate?: Prisma.CmsRecommendationSlotCreateOrConnectWithoutHomeSceneEntriesInput
+  upsert?: Prisma.CmsRecommendationSlotUpsertWithoutHomeSceneEntriesInput
+  disconnect?: Prisma.CmsRecommendationSlotWhereInput | boolean
+  delete?: Prisma.CmsRecommendationSlotWhereInput | boolean
+  connect?: Prisma.CmsRecommendationSlotWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.CmsRecommendationSlotUpdateToOneWithWhereWithoutHomeSceneEntriesInput, Prisma.CmsRecommendationSlotUpdateWithoutHomeSceneEntriesInput>, Prisma.CmsRecommendationSlotUncheckedUpdateWithoutHomeSceneEntriesInput>
+}
+
 export type CmsRecommendationSlotCreateWithoutItemsInput = {
   id?: string
   key: string
@@ -533,6 +561,7 @@ export type CmsRecommendationSlotCreateWithoutItemsInput = {
   maxItems?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  homeSceneEntries?: Prisma.CmsHomeSceneEntryCreateNestedManyWithoutLinkedRecommendationSlotInput
 }
 
 export type CmsRecommendationSlotUncheckedCreateWithoutItemsInput = {
@@ -547,6 +576,7 @@ export type CmsRecommendationSlotUncheckedCreateWithoutItemsInput = {
   maxItems?: number
   createdAt?: Date | string
   updatedAt?: Date | string
+  homeSceneEntries?: Prisma.CmsHomeSceneEntryUncheckedCreateNestedManyWithoutLinkedRecommendationSlotInput
 }
 
 export type CmsRecommendationSlotCreateOrConnectWithoutItemsInput = {
@@ -577,6 +607,7 @@ export type CmsRecommendationSlotUpdateWithoutItemsInput = {
   maxItems?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  homeSceneEntries?: Prisma.CmsHomeSceneEntryUpdateManyWithoutLinkedRecommendationSlotNestedInput
 }
 
 export type CmsRecommendationSlotUncheckedUpdateWithoutItemsInput = {
@@ -591,6 +622,83 @@ export type CmsRecommendationSlotUncheckedUpdateWithoutItemsInput = {
   maxItems?: Prisma.IntFieldUpdateOperationsInput | number
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  homeSceneEntries?: Prisma.CmsHomeSceneEntryUncheckedUpdateManyWithoutLinkedRecommendationSlotNestedInput
+}
+
+export type CmsRecommendationSlotCreateWithoutHomeSceneEntriesInput = {
+  id?: string
+  key: string
+  name: string
+  description?: string | null
+  slotType: $Enums.RecommendationSlotType
+  sceneType?: $Enums.GiftOccasionType | null
+  isActive?: boolean
+  sortOrder?: number
+  maxItems?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.CmsRecommendationItemCreateNestedManyWithoutSlotInput
+}
+
+export type CmsRecommendationSlotUncheckedCreateWithoutHomeSceneEntriesInput = {
+  id?: string
+  key: string
+  name: string
+  description?: string | null
+  slotType: $Enums.RecommendationSlotType
+  sceneType?: $Enums.GiftOccasionType | null
+  isActive?: boolean
+  sortOrder?: number
+  maxItems?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.CmsRecommendationItemUncheckedCreateNestedManyWithoutSlotInput
+}
+
+export type CmsRecommendationSlotCreateOrConnectWithoutHomeSceneEntriesInput = {
+  where: Prisma.CmsRecommendationSlotWhereUniqueInput
+  create: Prisma.XOR<Prisma.CmsRecommendationSlotCreateWithoutHomeSceneEntriesInput, Prisma.CmsRecommendationSlotUncheckedCreateWithoutHomeSceneEntriesInput>
+}
+
+export type CmsRecommendationSlotUpsertWithoutHomeSceneEntriesInput = {
+  update: Prisma.XOR<Prisma.CmsRecommendationSlotUpdateWithoutHomeSceneEntriesInput, Prisma.CmsRecommendationSlotUncheckedUpdateWithoutHomeSceneEntriesInput>
+  create: Prisma.XOR<Prisma.CmsRecommendationSlotCreateWithoutHomeSceneEntriesInput, Prisma.CmsRecommendationSlotUncheckedCreateWithoutHomeSceneEntriesInput>
+  where?: Prisma.CmsRecommendationSlotWhereInput
+}
+
+export type CmsRecommendationSlotUpdateToOneWithWhereWithoutHomeSceneEntriesInput = {
+  where?: Prisma.CmsRecommendationSlotWhereInput
+  data: Prisma.XOR<Prisma.CmsRecommendationSlotUpdateWithoutHomeSceneEntriesInput, Prisma.CmsRecommendationSlotUncheckedUpdateWithoutHomeSceneEntriesInput>
+}
+
+export type CmsRecommendationSlotUpdateWithoutHomeSceneEntriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slotType?: Prisma.EnumRecommendationSlotTypeFieldUpdateOperationsInput | $Enums.RecommendationSlotType
+  sceneType?: Prisma.NullableEnumGiftOccasionTypeFieldUpdateOperationsInput | $Enums.GiftOccasionType | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  maxItems?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.CmsRecommendationItemUpdateManyWithoutSlotNestedInput
+}
+
+export type CmsRecommendationSlotUncheckedUpdateWithoutHomeSceneEntriesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  key?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  slotType?: Prisma.EnumRecommendationSlotTypeFieldUpdateOperationsInput | $Enums.RecommendationSlotType
+  sceneType?: Prisma.NullableEnumGiftOccasionTypeFieldUpdateOperationsInput | $Enums.GiftOccasionType | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
+  maxItems?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.CmsRecommendationItemUncheckedUpdateManyWithoutSlotNestedInput
 }
 
 
@@ -600,10 +708,12 @@ export type CmsRecommendationSlotUncheckedUpdateWithoutItemsInput = {
 
 export type CmsRecommendationSlotCountOutputType = {
   items: number
+  homeSceneEntries: number
 }
 
 export type CmsRecommendationSlotCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   items?: boolean | CmsRecommendationSlotCountOutputTypeCountItemsArgs
+  homeSceneEntries?: boolean | CmsRecommendationSlotCountOutputTypeCountHomeSceneEntriesArgs
 }
 
 /**
@@ -623,6 +733,13 @@ export type CmsRecommendationSlotCountOutputTypeCountItemsArgs<ExtArgs extends r
   where?: Prisma.CmsRecommendationItemWhereInput
 }
 
+/**
+ * CmsRecommendationSlotCountOutputType without action
+ */
+export type CmsRecommendationSlotCountOutputTypeCountHomeSceneEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CmsHomeSceneEntryWhereInput
+}
+
 
 export type CmsRecommendationSlotSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -637,6 +754,7 @@ export type CmsRecommendationSlotSelect<ExtArgs extends runtime.Types.Extensions
   createdAt?: boolean
   updatedAt?: boolean
   items?: boolean | Prisma.CmsRecommendationSlot$itemsArgs<ExtArgs>
+  homeSceneEntries?: boolean | Prisma.CmsRecommendationSlot$homeSceneEntriesArgs<ExtArgs>
   _count?: boolean | Prisma.CmsRecommendationSlotCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["cmsRecommendationSlot"]>
 
@@ -685,6 +803,7 @@ export type CmsRecommendationSlotSelectScalar = {
 export type CmsRecommendationSlotOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "key" | "name" | "description" | "slotType" | "sceneType" | "isActive" | "sortOrder" | "maxItems" | "createdAt" | "updatedAt", ExtArgs["result"]["cmsRecommendationSlot"]>
 export type CmsRecommendationSlotInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   items?: boolean | Prisma.CmsRecommendationSlot$itemsArgs<ExtArgs>
+  homeSceneEntries?: boolean | Prisma.CmsRecommendationSlot$homeSceneEntriesArgs<ExtArgs>
   _count?: boolean | Prisma.CmsRecommendationSlotCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type CmsRecommendationSlotIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -694,6 +813,7 @@ export type $CmsRecommendationSlotPayload<ExtArgs extends runtime.Types.Extensio
   name: "CmsRecommendationSlot"
   objects: {
     items: Prisma.$CmsRecommendationItemPayload<ExtArgs>[]
+    homeSceneEntries: Prisma.$CmsHomeSceneEntryPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1102,6 +1222,7 @@ readonly fields: CmsRecommendationSlotFieldRefs;
 export interface Prisma__CmsRecommendationSlotClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   items<T extends Prisma.CmsRecommendationSlot$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CmsRecommendationSlot$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CmsRecommendationItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  homeSceneEntries<T extends Prisma.CmsRecommendationSlot$homeSceneEntriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.CmsRecommendationSlot$homeSceneEntriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CmsHomeSceneEntryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1556,6 +1677,30 @@ export type CmsRecommendationSlot$itemsArgs<ExtArgs extends runtime.Types.Extens
   take?: number
   skip?: number
   distinct?: Prisma.CmsRecommendationItemScalarFieldEnum | Prisma.CmsRecommendationItemScalarFieldEnum[]
+}
+
+/**
+ * CmsRecommendationSlot.homeSceneEntries
+ */
+export type CmsRecommendationSlot$homeSceneEntriesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CmsHomeSceneEntry
+   */
+  select?: Prisma.CmsHomeSceneEntrySelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CmsHomeSceneEntry
+   */
+  omit?: Prisma.CmsHomeSceneEntryOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CmsHomeSceneEntryInclude<ExtArgs> | null
+  where?: Prisma.CmsHomeSceneEntryWhereInput
+  orderBy?: Prisma.CmsHomeSceneEntryOrderByWithRelationInput | Prisma.CmsHomeSceneEntryOrderByWithRelationInput[]
+  cursor?: Prisma.CmsHomeSceneEntryWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CmsHomeSceneEntryScalarFieldEnum | Prisma.CmsHomeSceneEntryScalarFieldEnum[]
 }
 
 /**

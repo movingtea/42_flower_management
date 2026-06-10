@@ -2,6 +2,7 @@
   "navigationBarTitleText": "商品详情",
   "usingComponents": {
     "spec-picker": "/components/spec-picker/spec-picker",
-    "product-tag-badges": "/components/product-tag-badges/product-tag-badges"
+    "product-tag-badges": "/components/product-tag-badges/product-tag-badges",
+    "mp-icon": "/components/mp-icon/mp-icon"
   }
 }

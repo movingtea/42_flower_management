@@ -97,6 +97,11 @@ export type CmsRecommendationSlot = Prisma.CmsRecommendationSlotModel
  */
 export type CmsRecommendationItem = Prisma.CmsRecommendationItemModel
 /**
+ * Model CmsHomeSceneEntry
+ * 
+ */
+export type CmsHomeSceneEntry = Prisma.CmsHomeSceneEntryModel
+/**
  * Model Banner
  * 
  */

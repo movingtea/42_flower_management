@@ -395,6 +395,7 @@ export const ModelName = {
   ProductSku: 'ProductSku',
   CmsRecommendationSlot: 'CmsRecommendationSlot',
   CmsRecommendationItem: 'CmsRecommendationItem',
+  CmsHomeSceneEntry: 'CmsHomeSceneEntry',
   Banner: 'Banner',
   Material: 'Material',
   Recipe: 'Recipe',
@@ -431,7 +432,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "productCategory" | "productCategoryRelation" | "materialCategory" | "materialCategoryRelation" | "supplier" | "purchaseOrder" | "purchaseOrderLine" | "productSpu" | "productSku" | "cmsRecommendationSlot" | "cmsRecommendationItem" | "banner" | "material" | "recipe" | "packagingKit" | "recipeLine" | "batch" | "stockLog" | "stockLossRecord" | "staffUser" | "staffAuditLog" | "user" | "order" | "orderCostSnapshot" | "orderItem" | "customer" | "recipient" | "customerRecipientRelation" | "giftOccasion" | "customerReminder" | "appConfig" | "flowerWiki"
+    modelProps: "productCategory" | "productCategoryRelation" | "materialCategory" | "materialCategoryRelation" | "supplier" | "purchaseOrder" | "purchaseOrderLine" | "productSpu" | "productSku" | "cmsRecommendationSlot" | "cmsRecommendationItem" | "cmsHomeSceneEntry" | "banner" | "material" | "recipe" | "packagingKit" | "recipeLine" | "batch" | "stockLog" | "stockLossRecord" | "staffUser" | "staffAuditLog" | "user" | "order" | "orderCostSnapshot" | "orderItem" | "customer" | "recipient" | "customerRecipientRelation" | "giftOccasion" | "customerReminder" | "appConfig" | "flowerWiki"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1246,6 +1247,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.CmsRecommendationItemCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.CmsRecommendationItemCountAggregateOutputType> | number
+        }
+      }
+    }
+    CmsHomeSceneEntry: {
+      payload: Prisma.$CmsHomeSceneEntryPayload<ExtArgs>
+      fields: Prisma.CmsHomeSceneEntryFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CmsHomeSceneEntryFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsHomeSceneEntryPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CmsHomeSceneEntryFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsHomeSceneEntryPayload>
+        }
+        findFirst: {
+          args: Prisma.CmsHomeSceneEntryFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsHomeSceneEntryPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CmsHomeSceneEntryFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsHomeSceneEntryPayload>
+        }
+        findMany: {
+          args: Prisma.CmsHomeSceneEntryFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsHomeSceneEntryPayload>[]
+        }
+        create: {
+          args: Prisma.CmsHomeSceneEntryCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsHomeSceneEntryPayload>
+        }
+        createMany: {
+          args: Prisma.CmsHomeSceneEntryCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CmsHomeSceneEntryCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsHomeSceneEntryPayload>[]
+        }
+        delete: {
+          args: Prisma.CmsHomeSceneEntryDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsHomeSceneEntryPayload>
+        }
+        update: {
+          args: Prisma.CmsHomeSceneEntryUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsHomeSceneEntryPayload>
+        }
+        deleteMany: {
+          args: Prisma.CmsHomeSceneEntryDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CmsHomeSceneEntryUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CmsHomeSceneEntryUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsHomeSceneEntryPayload>[]
+        }
+        upsert: {
+          args: Prisma.CmsHomeSceneEntryUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsHomeSceneEntryPayload>
+        }
+        aggregate: {
+          args: Prisma.CmsHomeSceneEntryAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCmsHomeSceneEntry>
+        }
+        groupBy: {
+          args: Prisma.CmsHomeSceneEntryGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CmsHomeSceneEntryGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CmsHomeSceneEntryCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CmsHomeSceneEntryCountAggregateOutputType> | number
         }
       }
     }
@@ -3040,6 +3115,26 @@ export const CmsRecommendationItemScalarFieldEnum = {
 export type CmsRecommendationItemScalarFieldEnum = (typeof CmsRecommendationItemScalarFieldEnum)[keyof typeof CmsRecommendationItemScalarFieldEnum]
 
 
+export const CmsHomeSceneEntryScalarFieldEnum = {
+  id: 'id',
+  title: 'title',
+  subtitle: 'subtitle',
+  sceneType: 'sceneType',
+  iconKey: 'iconKey',
+  sortOrder: 'sortOrder',
+  isActive: 'isActive',
+  targetType: 'targetType',
+  targetValue: 'targetValue',
+  linkedRecommendationSlotId: 'linkedRecommendationSlotId',
+  linkedRecommendationSlotKey: 'linkedRecommendationSlotKey',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CmsHomeSceneEntryScalarFieldEnum = (typeof CmsHomeSceneEntryScalarFieldEnum)[keyof typeof CmsHomeSceneEntryScalarFieldEnum]
+
+
 export const BannerScalarFieldEnum = {
   id: 'id',
   imageUrl: 'imageUrl',
@@ -3629,6 +3724,20 @@ export type ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel> = FieldRefInputT
 
 
 /**
+ * Reference to a field of type 'HomeSceneEntryTargetType'
+ */
+export type EnumHomeSceneEntryTargetTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'HomeSceneEntryTargetType'>
+    
+
+
+/**
+ * Reference to a field of type 'HomeSceneEntryTargetType[]'
+ */
+export type ListEnumHomeSceneEntryTargetTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'HomeSceneEntryTargetType[]'>
+    
+
+
+/**
  * Reference to a field of type 'BannerTargetType'
  */
 export type EnumBannerTargetTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BannerTargetType'>
@@ -3916,6 +4025,7 @@ export type GlobalOmitConfig = {
   productSku?: Prisma.ProductSkuOmit
   cmsRecommendationSlot?: Prisma.CmsRecommendationSlotOmit
   cmsRecommendationItem?: Prisma.CmsRecommendationItemOmit
+  cmsHomeSceneEntry?: Prisma.CmsHomeSceneEntryOmit
   banner?: Prisma.BannerOmit
   material?: Prisma.MaterialOmit
   recipe?: Prisma.RecipeOmit

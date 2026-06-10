@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { HomeSceneEntriesManager } from "@/app/cms/marketing/HomeSceneEntriesManager";
 import { formatNullableDateTime } from "@/lib/datetime";
 import { ProductPicker } from "@/components/cms/pickers/ProductPicker";
 import { Button } from "@/components/ui/button";
@@ -23,6 +24,8 @@ type Props = {
   popupUpdatedAt: string | null;
 };
 
+type MarketingTab = "notice" | "home-scenes";
+
 export function MarketingSettings({
   initialNotice,
   initialPopup,
@@ -31,6 +34,7 @@ export function MarketingSettings({
 }: Props) {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
+  const [activeTab, setActiveTab] = useState<MarketingTab>("notice");
 
   const [notice, setNotice] = useState(initialNotice);
   const [popup, setPopup] = useState(initialPopup);
@@ -154,10 +158,38 @@ export function MarketingSettings({
       <header className="mb-8">
         <h2 className="text-2xl font-semibold text-rose-900">营销配置</h2>
         <p className="mt-1 text-sm text-zinc-500">
-          全局公告栏与首页活动弹窗，保存后由小程序首页超级接口统一拉取
+          全局公告栏、首页活动弹窗与小程序首页场景入口
         </p>
       </header>
 
+      <div className="mb-8 flex gap-2 border-b border-zinc-200">
+        <button
+          type="button"
+          onClick={() => setActiveTab("notice")}
+          className={`border-b-2 px-4 py-2 text-sm font-medium transition ${
+            activeTab === "notice"
+              ? "border-rose-600 text-rose-900"
+              : "border-transparent text-zinc-500 hover:text-zinc-800"
+          }`}
+        >
+          公告与弹窗
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("home-scenes")}
+          className={`border-b-2 px-4 py-2 text-sm font-medium transition ${
+            activeTab === "home-scenes"
+              ? "border-rose-600 text-rose-900"
+              : "border-transparent text-zinc-500 hover:text-zinc-800"
+          }`}
+        >
+          首页场景入口
+        </button>
+      </div>
+
+      {activeTab === "home-scenes" ? (
+        <HomeSceneEntriesManager />
+      ) : (
       <div className="grid gap-8 lg:grid-cols-2">
         <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
           <h3 className="text-lg font-semibold text-zinc-900">全局通知公告栏</h3>
@@ -292,6 +324,7 @@ export function MarketingSettings({
           </div>
         </section>
       </div>
+      )}
     </div>
   );
 }

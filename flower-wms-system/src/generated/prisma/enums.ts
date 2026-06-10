@@ -198,3 +198,12 @@ export const StaffAuditAction = {
 } as const
 
 export type StaffAuditAction = (typeof StaffAuditAction)[keyof typeof StaffAuditAction]
+
+
+export const HomeSceneEntryTargetType = {
+  PRODUCT_FILTER: 'PRODUCT_FILTER',
+  RECOMMENDATION_SLOT: 'RECOMMENDATION_SLOT',
+  CUSTOM_URL: 'CUSTOM_URL'
+} as const
+
+export type HomeSceneEntryTargetType = (typeof HomeSceneEntryTargetType)[keyof typeof HomeSceneEntryTargetType]

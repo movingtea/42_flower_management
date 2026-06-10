@@ -1,9 +1,8 @@
-<!-- pages/category/category.wxml — 商品分类 -->
+<!-- pages/category/category.wxml — 选花 · 服务端筛选 -->
 <view class="category-page">
-  <!-- 吸顶搜索 -->
   <view class="search-sticky">
     <view class="search-bar">
-      <text class="search-icon">🔍</text>
+      <mp-icon name="filter" size="32" />
       <input
         class="search-input"
         type="text"
@@ -14,22 +13,64 @@
         bindinput="onSearchInput"
         bindconfirm="onSearchConfirm"
       />
-      <text
-        wx:if="{{keyword}}"
-        class="search-clear"
-        catchtap="onClearSearch"
-      >清除</text>
+      <text wx:if="{{keyword}}" class="search-clear" catchtap="onClearSearch">清除</text>
+    </view>
+    <view class="filter-bar">
+      <view class="filter-toggle" bindtap="onToggleFilterPanel">
+        <mp-icon name="filter" size="28" />
+        <text>按场景选花</text>
+        <text wx:if="{{hasActiveFilters}}" class="filter-active-dot"></text>
+      </view>
+      <text wx:if="{{hasActiveFilters}}" class="filter-clear" catchtap="onClearFilters">清空筛选</text>
+    </view>
+    <scroll-view wx:if="{{activeFilterChips.length}}" class="active-chips-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="active-chips">
+        <view
+          wx:for="{{activeFilterChips}}"
+          wx:key="key"
+          class="active-chip"
+          catchtap="onRemoveFilterChip"
+          data-group-id="{{item.groupId}}"
+        >
+          <text>{{item.label}}</text>
+          <text class="active-chip-close">×</text>
+        </view>
+      </view>
+    </scroll-view>
+  </view>
+
+  <view wx:if="{{sceneTitle && filterMode}}" class="scene-banner">
+    <view class="scene-banner-head">
+      <image wx:if="{{sceneIcon}}" class="scene-banner-icon" src="{{sceneIcon}}" mode="aspectFit" />
+      <view>
+        <text class="scene-banner-title">{{sceneTitle}}</text>
+        <text class="scene-banner-sub text-muted">{{sceneDescription}}</text>
+      </view>
     </view>
   </view>
 
-  <view wx:if="{{sceneMode && sceneTitle}}" class="scene-banner">
-    <text class="scene-banner-title">{{sceneTitle}}</text>
+  <view wx:if="{{showFilterPanel}}" class="filter-panel">
+    <block wx:for="{{filterGroups}}" wx:key="id" wx:for-item="group">
+      <view class="filter-group">
+        <text class="filter-group-title">{{group.title}}</text>
+        <view class="filter-chips">
+          <view
+            wx:for="{{group.options}}"
+            wx:key="key"
+            wx:for-item="opt"
+            class="filter-chip {{opt.active ? 'filter-chip--active' : ''}}"
+            bindtap="onFilterChipTap"
+            data-group-id="{{group.id}}"
+            data-key="{{opt.key}}"
+          >{{opt.label}}</view>
+        </view>
+      </view>
+    </block>
   </view>
 
-  <!-- 左导航 + 右商品 -->
   <view class="main-body">
     <scroll-view
-      wx:if="{{!sceneMode}}"
+      wx:if="{{!filterMode}}"
       class="nav-scroll"
       scroll-y
       enhanced
@@ -56,13 +97,15 @@
     </scroll-view>
 
     <scroll-view
-      class="product-scroll"
+      class="product-scroll {{filterMode ? 'product-scroll--full' : ''}}"
       scroll-y
       enhanced
       show-scrollbar="{{false}}"
+      bindscrolltolower="onReachBottom"
+      lower-threshold="120"
     >
       <view class="product-scroll-inner safe-area-bottom">
-        <view wx:if="{{loadingProducts}}" class="state-hint flex-center">
+        <view wx:if="{{loadingProducts && !products.length}}" class="state-hint flex-center">
           <text class="text-muted">正在加载商品…</text>
         </view>
 
@@ -76,33 +119,19 @@
             data-out-of-stock="{{item.isOutOfStock}}"
           >
             <view class="product-image-wrap">
-              <image
-                class="product-image"
-                src="{{baseUrl}}{{item.imageUrl}}"
-                mode="aspectFill"
-                lazy-load="{{true}}"
-              />
-              <view
-                wx:if="{{item.isOutOfStock}}"
-                class="out-of-stock-mask flex-center"
-              >
+              <image class="product-image" src="{{baseUrl}}{{item.imageUrl}}" mode="aspectFill" lazy-load="{{true}}" />
+              <view wx:if="{{item.isOutOfStock}}" class="out-of-stock-mask flex-center">
                 <text class="out-of-stock-text">今日售罄</text>
               </view>
             </view>
             <view class="product-info">
               <text class="product-name text-ellipsis">{{item.name}}</text>
-              <text
-                wx:if="{{item.cardSellingPoint}}"
-                class="product-subtitle text-ellipsis text-muted"
-              >{{item.cardSellingPoint}}</text>
+              <text wx:if="{{item.cardSellingPoint}}" class="product-subtitle text-ellipsis text-muted">{{item.cardSellingPoint}}</text>
               <product-tag-badges tags="{{item.cardOccasionLabels}}" />
+              <product-tag-badges wx:if="{{item.cardStyleColorLabels.length}}" tags="{{item.cardStyleColorLabels}}" />
               <view class="product-info-bottom">
                 <text class="price-text">¥{{item.price}}{{item.priceSuffix}}</text>
-                <view
-                  class="cart-add-btn flex-center"
-                  catchtap="onAddCart"
-                  data-product="{{item}}"
-                >
+                <view class="cart-add-btn flex-center" catchtap="onAddCart" data-product="{{item}}">
                   <text class="cart-add-icon">+</text>
                 </view>
               </view>
@@ -111,7 +140,16 @@
         </view>
 
         <view wx:else class="state-hint flex-center product-empty">
-          <text class="product-empty-text">该分类下暂无商品</text>
+          <mp-icon name="emptyProduct" size="80" />
+          <text class="product-empty-text">{{hasActiveFilters || filterMode ? filterEmptyText : '该分类下暂无商品'}}</text>
+          <text wx:if="{{hasActiveFilters || filterMode}}" class="product-empty-hint text-muted">换个场景或预算看看</text>
+        </view>
+
+        <view wx:if="{{loadingMore}}" class="load-more-hint flex-center">
+          <text class="text-muted">加载更多…</text>
+        </view>
+        <view wx:elif="{{noMore && products.length}}" class="load-more-hint flex-center">
+          <text class="text-muted">已加载全部 {{pagination.total}} 件</text>
         </view>
       </view>
     </scroll-view>

@@ -1,8 +1,9 @@
 {
-  "navigationBarTitleText": "植物工作室",
+  "navigationBarTitleText": "Universe42",
   "enablePullDownRefresh": true,
   "usingComponents": {
     "spec-picker": "/components/spec-picker/spec-picker",
-    "product-tag-badges": "/components/product-tag-badges/product-tag-badges"
+    "product-tag-badges": "/components/product-tag-badges/product-tag-badges",
+    "mp-icon": "/components/mp-icon/mp-icon"
   }
 }

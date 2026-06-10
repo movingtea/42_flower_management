@@ -38,6 +38,19 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 - CMS 商品运营标签编辑 UI、上架校验提示、小程序展示预览。
 - CMS 推荐位配置页面 `/cms/recommendations`。
 - 小程序首页 / 场景推荐位展示、商品卡片运营标签展示。
+- **Sprint 10 礼赠购买体验**：首页场景化购买入口（CMS 可配置 + 本地 fallback 6 大场景 + 图标）、CMS 推荐位驱动主推 / 场景 / 新品 / 高客单、`HIGH_TICKET` 区块、品牌说明区。
+- **CMS 首页场景入口配置**（`CmsHomeSceneEntry`）：`/cms/marketing`「首页场景入口」Tab；与推荐位商品配置边界分离。
+- 小程序首页动态读取 `GET /api/wechat/home-scene-entries`（别名 `/api/miniprogram/home-scene-entries`）；CMS 无 active 配置时使用默认 6 个 fallback。
+- 场景入口点击后进入服务端 tag 过滤后的商品列表（`occasionTag` / `sceneType` query）。
+- 商品列表标签筛选（场景 / 预算 / 色系 / 风格 / 关系；**服务端 tag 过滤后分页**，`GET /api/wechat/products` 别名 `/api/miniprogram/products`）。
+- 选花页筛选条件 chips、上拉加载更多、场景上下文文案。
+- 常用收花人独立管理（含生日 / 纪念日）；个人中心「重要日期」入口。
+- 配送时段「傍晚」与花材微调说明统一文案。
+- 商品详情礼赠表达模块（适合场景 / 对象 / 情绪故事 / 花材微调说明 / 配送说明）。
+- 商品详情「立即预订」直跳下单；下单页礼赠字段三层（必填 / 建议 / 可展开）。
+- 常用收花人：下单页选择回填、个人中心「我的收花人」列表 / 新增 / 编辑 / 删除（对接 POST/PATCH/DELETE recipients API）。
+- 配送时间选择提示（当日单 / 节日高峰 / 特殊时段）。
+- 小程序图标体系统一：**Lucide Icons** 风格 PNG（`42_mp/scripts/export-lucide-icons.mjs` 导出）；资源在 `42_mp/miniprogram/assets/icons/`；页面通过 `utils/icons.ts` + `mp-icon` 引用；禁止 Python 自绘正式 UI 图标；缺失 fallback。
 - 订单真实毛利核算：`OrderCostSnapshot`。
 - 产品级毛利预估：`FlowerWiki.standardUnitCost` + `Recipe` + `PackagingKit` + SKU price。
 - 经营报表中心：销售、趋势、毛利排行、低毛利、成本结构、花材使用、损耗、库存预警、采购复盘与供应商分析。
@@ -130,6 +143,8 @@ flower-wms-system/
 | `src/lib/cms-product-tags.ts` | CMS 商品运营标签 key / label 常量与解析 |
 | `src/services/cms-product-validation-pure.ts` | 商品上架校验纯函数（不访问 DB） |
 | `src/services/cms-product-operations.ts` | 商品运营画像、上架校验、推荐位 CRUD、小程序推荐位查询 |
+| `src/services/miniprogram-product-filter-pure.ts` | 小程序商品 tag / 价格 / 排序 / 分页纯函数 |
+| `src/services/miniprogram-products.ts` | 小程序商品列表 Prisma 查询 + service 层 tag 过滤后分页 |
 
 当前代码未发现独立 `src/services/supplier.ts`；供应商 service 逻辑在 `src/services/purchase.ts`。
 
@@ -172,7 +187,7 @@ flower-wms-system/
 | `/cms/products/[id]` | 商品编辑，SKU 绑定 Recipe，展示毛利预估、产品决策建议与 warning |
 | `/cms/product-categories` | 商城商品分类树 |
 | `/cms/banner` | 首页轮播 |
-| `/cms/marketing` | 营销配置 |
+| `/cms/marketing` | 营销配置（公告 / 弹窗 + **首页场景入口** Tab） |
 | `/cms/recommendations` | 推荐位配置（首页与场景推荐） |
 | `/cms/carousel` | redirect 到 `/cms/banner` |
 | `/cms/categories` | redirect 到 `/cms/product-categories` |
@@ -187,7 +202,8 @@ CMS 商品编辑边界：
 - CMS 商品编辑页可配置 `ProductSpu.occasionTags`（适用礼赠场景）；列表展示场景标签；用于 CRM 复购推荐参考，不自动上下架。
 - 商品编辑（`PUT /api/cms/products/[id]`）支持运营标签白名单字段：`occasionTags`、`colorTags`、`styleTags`、`relationshipTags`、`budgetTags`、`positioningTags`、`sellingPoints`、`operationNote`。
 - 商品上架前可通过 `GET /api/admin/cms/products/[id]/publish-readiness` 校验信息完整性、毛利风险、产品决策风险；只提示，不自动改状态。
-- 推荐位配置（`/cms/recommendations`、`/api/admin/cms/recommendation-slots`）用于小程序首页与场景入口；人工配置，非自动推荐算法。
+- 推荐位配置（`/cms/recommendations`、`/api/admin/cms/recommendation-slots`）用于小程序首页与场景**商品**推荐；人工配置，非自动推荐算法。
+- **首页场景入口**（`/cms/marketing` 首页场景入口 Tab、`/api/admin/cms/home-scene-entries`）决定小程序首页展示哪些送花场景卡片；与推荐位商品配置不得混为一谈。
 - 商品列表（`/cms/products`）通过 `operation-summaries` API 展示运营标签、上架校验状态、产品决策摘要、推荐位状态，并支持场景 / 定位 / 校验状态筛选。
 - 商品编辑页含「商品运营标签」「上架校验」「小程序展示预览」区块。
 
@@ -327,16 +343,37 @@ CMS 面向花店运营用户，主界面不要求理解 `productId` / `skuId` / 
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/api/wechat/products`、`/api/wechat/products/[id]` | 商品列表 / 详情；返回运营标签（key + label），不含 `operationNote` |
+| GET | `/api/wechat/products`、`/api/wechat/products/[id]` | 商品列表 / 详情；列表支持 tag / 价格 / 排序 / 分页 query（见下）；返回运营标签（key + label），不含 `operationNote` |
+| GET | `/api/miniprogram/products` | 与 `/api/wechat/products` 等价别名 |
 | GET | `/api/wechat/recommendations` | 推荐位与商品（`slotKey` / `sceneType` / `limit`）；仅返回已上架、有效期内商品 |
 | GET | `/api/miniprogram/recommendations` | 与 `/api/wechat/recommendations` 等价别名 |
+| GET | `/api/wechat/home-scene-entries` | 小程序首页场景入口（active entries；无配置时 fallback 6 个）；不含 `note` |
+| GET | `/api/miniprogram/home-scene-entries` | 与 `/api/wechat/home-scene-entries` 等价别名 |
+
+**CMS 首页场景入口 Admin API**（需 `cms:read` / `cms:write`）：
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/admin/cms/home-scene-entries` | 列表（含 `fallbackEntries` / `warnings`） |
+| POST | `/api/admin/cms/home-scene-entries` | 创建；`action: seed-defaults` 一键补全默认 6 个 |
+| GET/PATCH/DELETE | `/api/admin/cms/home-scene-entries/[id]` | 详情 / 更新 / 删除 |
+| POST | `/api/admin/cms/home-scene-entries/reorder` | 批量更新 `sortOrder` |
+
+**商品列表 query（Sprint 10.2）**：`occasionTag` / `occasionTags`、`colorTag(s)`、`styleTag(s)`、`relationshipTag(s)`、`budgetTag(s)`、`positioningTag(s)`、`sceneType`、`minPrice`、`maxPrice`、`keyword`、`categoryId`（或 `category`）、`sort`（`default` | `newest` | `price_asc` | `price_desc` | `recommended`）、`page`、`pageSize`。过滤逻辑见 `src/services/miniprogram-product-filter-pure.ts` + `src/services/miniprogram-products.ts`（当前为 service 层 filter 后分页，商品量增大后可优化为 DB 层 JSON 查询）。
 
 小程序行为补充：
 
-- 首页并行加载 `homepage`、`products`、`recommendations`；`recommendations` 失败不白屏，仅隐藏推荐模块。
-- 首页展示 `HOME_MAIN` 主推、`NEW_ARRIVAL` 横向列表、`SCENE`/`FESTIVAL` 场景推荐；场景入口跳转分类页 `?sceneType=`。
+- 小程序定位是**礼赠购买助手**，不是普通复杂电商平台；礼赠 CRM 字段用于沉淀，但下单页不得强制填写过多扩展字段。
+- 首页并行加载 `homepage`、`products`、`recommendations`、**`home-scene-entries`**；各模块失败不白屏，场景入口失败时使用本地 fallback 6 个。
+- 首页首屏：Banner →「你想把花送给谁？」→ **CMS 配置的场景入口**（带 `iconKey` 映射图标；CMS 无 active 时用 fallback）→ `HOME_MAIN` 主推 → 场景推荐 / 新品 / 高客单。
+- 场景入口跳转：`PRODUCT_FILTER` → 选花页 `pages/category/category?sceneType=&occasionTag=&filterMode=1`（服务端 tag 过滤）；`RECOMMENDATION_SLOT` → 选花页并携带 `slotKey`；`CUSTOM_URL` → `targetValue` 路径。
+- 选花页支持五维标签筛选（`occasionTag(s)` / `budgetTag(s)` / `colorTag(s)` / `styleTag(s)` / `relationshipTag(s)` / `sceneType` / `minPrice` / `maxPrice` / `sort` / `page` / `pageSize`）；**tag 过滤在 service 层于分页之前完成**，`pagination.total` 为过滤后总数。
+- **小程序前端不得只对当前页数据做 tag 筛选**；筛选变化须重新请求服务端并重置 `page=1`。
 - 商品列表 / 详情 / 推荐卡片展示场景、色系、风格、卖点标签；不展示 `operationNote`、成本、毛利、产品决策内部 warning。
-- 小程序组件 `42_mp/miniprogram/components/product-tag-badges/` 用于标签展示。
+- 商品详情含花材微调说明（不承诺 100% 复刻图片）；「立即预订」写入 `checkout_products` 直跳下单。
+- 下单页字段分层：① 收花与配送（必填）② 送礼信息（建议）③ 偏好与提醒（默认折叠）；payload 仍用 Sprint 8 的 `buyerInfo` / `recipientInfo` / `giftOccasion` / `reminderOptions`。
+- 图标资源集中在 `42_mp/miniprogram/assets/icons/`（`scenes/`、`product/`、`order/`、`profile/`、`common/`、`tabs/`）；TabBar 使用 `42_mp/miniprogram/images/tabbar/`（Lucide 导出）。页面通过 `42_mp/miniprogram/utils/icons.ts`（`ICON_KEY_MAP` / `TAG_ICONS` / `getIconByKey` / `getIconPath`）与 `home-scene-entries.ts` 引用，**禁止硬编码路径**；CMS 返回 `iconKey` 时小程序本地 mapping 解析；未知 `iconKey` / `sceneType` → fallback。新增图标：`cd 42_mp && npm run icons:export`（勿用 `gen_icons.py`）。
+- 小程序组件 `42_mp/miniprogram/components/product-tag-badges/` 用于标签展示；`42_mp/miniprogram/components/mp-icon/` 用于统一图标。
 
 ---
 
@@ -357,6 +394,7 @@ CMS 面向花店运营用户，主界面不要求理解 `productId` / `skuId` / 
 | `ProductSpu` | `product_spus` | 商城商品；含运营标签（`occasionTags` + Json 标签字段 + `operationNote`） |
 | `ProductSku` | `product_skus` | SKU，含 `recipeId` |
 | `CmsRecommendationSlot` | `cms_recommendation_slots` | 小程序推荐位配置（`slotType` / `sceneType` / `maxItems`） |
+| `CmsHomeSceneEntry` | `cms_home_scene_entries` | 小程序首页场景入口（标题 / 图标 / 排序 / 跳转方式；与推荐位商品配置分离） |
 | `CmsRecommendationItem` | `cms_recommendation_items` | 推荐位商品关联（可选 SKU、有效期、覆盖图文） |
 | `User` | `users` | 小程序微信身份（openId）；不等同于 CRM Customer |
 | `Customer` | `customers` | CRM 购买人档案，通常由小程序订单自动沉淀 |
@@ -861,6 +899,16 @@ Dockerfile：
 39. `operationNote` 等内部运营备注不得返回小程序前台。
 40. CMS 不得直接维护 `RecipeLine`；商品场景标签不自动触发上下架。
 41. 推荐位是人工配置，不得包装成 AI 自动推荐。
+42. 小程序不得展示后台运营备注（`operationNote`）、成本、毛利、产品决策内部 warning。
+43. 小程序下单表单不得强制填写礼赠扩展字段（场景 / 关系 / 偏好 / 提醒均为可选，仅收花与配送必填）。
+44. 小程序图标路径不得在页面中大量散落硬编码；须通过 `utils/icons.ts` 映射引用；正式 UI 图标须为 Lucide 导出 PNG，禁止 Python 自绘。
+45. 花材展示不得承诺 100% 复刻图片；须提示季节与到货状态可能微调。
+46. 小程序推荐位来自 CMS 人工配置（`CmsRecommendationSlot`），不是自动推荐算法。
+47. 小程序商品筛选必须**服务端过滤后分页**，不得先分页再在前端对当前页做 tag 筛选。
+48. 小程序首页场景入口不得长期写死在前端；须优先读取 CMS 配置，CMS 无 active 配置时必须有 fallback，不能导致首页空白。
+49. CMS 场景入口配置（`CmsHomeSceneEntry`）不得与推荐位商品配置（`CmsRecommendationSlot`）混淆。
+50. 场景入口点击后的商品筛选必须服务端过滤后分页；`note` 等后台备注不得返回小程序。
+51. 首页场景入口图标须通过 `iconKey` + `utils/icons.ts` 统一映射，不得在首页页面散落硬编码路径。
 
 ---
 

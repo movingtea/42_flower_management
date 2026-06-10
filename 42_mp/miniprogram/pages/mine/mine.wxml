@@ -8,7 +8,7 @@
       mode="aspectFill"
     />
     <view wx:else class="mine-avatar mine-avatar--placeholder flex-center">
-      <text>头像</text>
+      <mp-icon name="profile" size="48" />
     </view>
     <view class="mine-header-text">
       <text class="mine-name">{{nickName}}</text>
@@ -19,12 +19,37 @@
 
   <view class="mine-menu">
     <view class="mine-menu-item" bindtap="onGoOrders">
-      <text>我的订单</text>
+      <view class="mine-menu-left">
+        <mp-icon name="orders" size="36" />
+        <text>我的订单</text>
+      </view>
+      <text class="mine-arrow">›</text>
+    </view>
+    <view class="mine-menu-item" bindtap="onGoRecipients">
+      <view class="mine-menu-left">
+        <mp-icon name="recipients" size="36" />
+        <text>我的收花人</text>
+      </view>
+      <text class="mine-arrow">›</text>
+    </view>
+    <view class="mine-menu-item" bindtap="onGoImportantDates">
+      <view class="mine-menu-left">
+        <mp-icon name="dates" size="36" />
+        <text>重要日期</text>
+      </view>
       <text class="mine-arrow">›</text>
     </view>
     <view class="mine-menu-item" bindtap="onGoProfile">
-      <text>个人资料</text>
+      <view class="mine-menu-left">
+        <mp-icon name="profile" size="36" />
+        <text>个人资料</text>
+      </view>
       <text class="mine-arrow">›</text>
     </view>
+  </view>
+
+  <view class="mine-brand">
+    <text class="mine-brand-name">Universe42 · 万物肆贰</text>
+    <text class="mine-brand-slogan text-muted">让花说话，是我们的超能力。</text>
   </view>
 </view>

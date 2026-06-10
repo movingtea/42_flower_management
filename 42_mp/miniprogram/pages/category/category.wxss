@@ -13,10 +13,135 @@
   background: #fff;
 }
 
-.scene-banner-title {
-  font-size: 32rpx;
-  font-weight: 600;
+.scene-banner-sub {
+  display: block;
+  margin-top: 6rpx;
+  font-size: 24rpx;
+}
+
+.scene-banner-head {
+  display: flex;
+  gap: 16rpx;
+  align-items: flex-start;
+}
+
+.scene-banner-icon {
+  width: 56rpx;
+  height: 56rpx;
+  flex-shrink: 0;
+}
+
+.active-chips-scroll {
+  margin-top: 12rpx;
+  white-space: nowrap;
+}
+
+.active-chips {
+  display: inline-flex;
+  gap: 12rpx;
+}
+
+.active-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8rpx;
+  padding: 8rpx 16rpx;
+  background: rgba(143, 168, 155, 0.12);
+  border-radius: 999rpx;
+  font-size: 22rpx;
+  color: var(--primary-color);
+}
+
+.active-chip-close {
+  font-size: 28rpx;
+  line-height: 1;
+}
+
+.load-more-hint {
+  padding: 24rpx 0;
+  min-height: auto;
+}
+
+.product-empty-hint {
+  font-size: 24rpx;
+  margin-top: 8rpx;
+}
+
+.filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 12rpx;
+}
+
+.filter-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  font-size: 26rpx;
+  color: var(--primary-color);
+  position: relative;
+}
+
+.filter-active-dot {
+  width: 12rpx;
+  height: 12rpx;
+  border-radius: 50%;
+  background: var(--accent-color);
+}
+
+.filter-clear {
+  font-size: 24rpx;
+  color: var(--text-muted);
+}
+
+.filter-panel {
+  padding: 16rpx 24rpx;
+  background: #fff;
+  border-bottom: 1rpx solid rgba(0, 0, 0, 0.06);
+  max-height: 480rpx;
+  overflow-y: auto;
+}
+
+.filter-group {
+  margin-bottom: 20rpx;
+}
+
+.filter-group-title {
+  font-size: 24rpx;
+  color: var(--text-muted);
+  margin-bottom: 12rpx;
+  display: block;
+}
+
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.filter-chip {
+  padding: 10rpx 20rpx;
+  border-radius: 999rpx;
+  font-size: 24rpx;
   color: var(--text-main);
+  background: #f5f5f5;
+  border: 1rpx solid transparent;
+}
+
+.filter-chip--active {
+  color: var(--primary-color);
+  background: rgba(143, 168, 155, 0.12);
+  border-color: rgba(143, 168, 155, 0.4);
+}
+
+.product-scroll--full {
+  width: 100%;
+}
+
+.product-empty {
+  flex-direction: column;
+  gap: 16rpx;
 }
 
 /* —— 吸顶搜索 —— */

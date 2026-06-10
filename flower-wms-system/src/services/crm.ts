@@ -1143,6 +1143,10 @@ export async function listMiniProgramRecipients(userId: string) {
       preferredColors: row.recipient.preferredColors,
       dislikedFlowers: row.recipient.dislikedFlowers,
       preferenceNote: row.recipient.preferenceNote,
+      birthday: row.recipient.birthday
+        ? formatDateInAppTimezoneIso(row.recipient.birthday).slice(0, 10)
+        : null,
+      anniversary: row.recipient.note?.trim() || null,
       lastUsedAt: row.lastUsedAt,
     })),
   };
@@ -1159,6 +1163,8 @@ export async function createMiniProgramRecipient(
     preferredColors?: string | null;
     dislikedFlowers?: string | null;
     preferenceNote?: string | null;
+    birthday?: string | null;
+    anniversary?: string | null;
     isDefault?: boolean;
   }
 ) {
@@ -1193,6 +1199,25 @@ export async function createMiniProgramRecipient(
     saveRecipient: true,
   });
 
+  const birthdayDate = input.birthday?.trim()
+    ? getAppDayRangeUtc(input.birthday.trim()).startUtc
+    : null;
+
+  const recipientUpdates: { birthday?: Date | null; note?: string | null } = {};
+  if (birthdayDate) {
+    recipientUpdates.birthday = birthdayDate;
+  }
+  if (input.anniversary !== undefined) {
+    recipientUpdates.note = input.anniversary?.trim() || null;
+  }
+
+  if (Object.keys(recipientUpdates).length > 0) {
+    await prisma.recipient.update({
+      where: { id: recipient.id },
+      data: recipientUpdates,
+    });
+  }
+
   if (input.isDefault) {
     await prisma.customerRecipientRelation.updateMany({
       where: { customerId: customer.id, id: { not: relation.id } },
@@ -1219,6 +1244,8 @@ export async function updateMiniProgramRecipient(
     preferredColors?: string | null;
     dislikedFlowers?: string | null;
     preferenceNote?: string | null;
+    birthday?: string | null;
+    anniversary?: string | null;
     isDefault?: boolean;
   }
 ) {
@@ -1265,6 +1292,16 @@ export async function updateMiniProgramRecipient(
         input.preferenceNote !== undefined
           ? input.preferenceNote
           : relation.recipient.preferenceNote,
+      ...(input.birthday !== undefined
+        ? {
+            birthday: input.birthday?.trim()
+              ? getAppDayRangeUtc(input.birthday.trim()).startUtc
+              : null,
+          }
+        : {}),
+      ...(input.anniversary !== undefined
+        ? { note: input.anniversary?.trim() || null }
+        : {}),
     },
   });
 

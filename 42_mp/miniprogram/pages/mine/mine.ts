@@ -35,4 +35,12 @@ Page({
   onGoOrders() {
     wx.navigateTo({ url: '/pages/order-list/order-list' });
   },
+
+  onGoRecipients() {
+    wx.navigateTo({ url: '/pages/recipients/recipients' });
+  },
+
+  onGoImportantDates() {
+    wx.navigateTo({ url: '/pages/important-dates/important-dates' });
+  },
 });

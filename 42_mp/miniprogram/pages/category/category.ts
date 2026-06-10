@@ -1,6 +1,5 @@
-// pages/category/category.ts — 商品分类：树形导航 + 搜索 + 商品列表
+// pages/category/category.ts — 选花：服务端 tag 过滤 + 分页
 import { baseUrl } from '../../config/index';
-import { toRelativeImagePath } from '../../utils/image';
 import { request } from '../../utils/request';
 import { addPayloadToCart } from '../../utils/cart-add';
 import { updateCartTabBarBadge } from '../../utils/cart';
@@ -10,6 +9,20 @@ import {
   type WechatProductItem,
   type WechatProductRaw,
 } from '../../utils/product';
+import {
+  DEFAULT_PAGE_SIZE,
+  fetchProductList,
+  type ProductListPagination,
+} from '../../utils/product-api';
+import {
+  buildFilterChips,
+  buildFilterGroupsUi,
+  hasActiveFilters,
+  sceneDescriptionByKey,
+  sceneIconPath,
+  sceneTitleByKey,
+  type ProductFilters,
+} from '../../utils/product-filters';
 
 interface CategoryNode {
   id: string;
@@ -20,9 +33,6 @@ interface CategoryNode {
   children: CategoryNode[];
 }
 
-type ProductItem = WechatProductItem;
-
-/** 左侧导航扁平列表（便于 WXML 渲染展开态） */
 interface NavDisplayItem {
   id: string;
   name: string;
@@ -33,7 +43,7 @@ interface NavDisplayItem {
 
 const SEARCH_DEBOUNCE_MS = 500;
 
-function normalizeProduct(item: WechatProductRaw): ProductItem {
+function normalizeProduct(item: WechatProductRaw): WechatProductItem {
   return normalizeWechatProduct(item);
 }
 
@@ -68,17 +78,6 @@ function buildNavList(
   return list;
 }
 
-function buildProductsQuery(categoryId: string, keyword: string): string {
-  const parts: string[] = [];
-  if (categoryId) {
-    parts.push(`category=${encodeURIComponent(categoryId)}`);
-  }
-  if (keyword.trim()) {
-    parts.push(`keyword=${encodeURIComponent(keyword.trim())}`);
-  }
-  return parts.length ? `?${parts.join('&')}` : '';
-}
-
 Page({
   data: {
     categories: [] as CategoryNode[],
@@ -86,106 +85,71 @@ Page({
     expandedMap: {} as Record<string, boolean>,
     activeCategoryId: '',
     keyword: '',
-    products: [] as ProductItem[],
+    products: [] as WechatProductItem[],
     loadingCategories: true,
     loadingProducts: false,
+    loadingMore: false,
     specPickerVisible: false,
-    specPickerProduct: null as ProductItem | null,
+    specPickerProduct: null as WechatProductItem | null,
     baseUrl,
     sceneType: '',
     sceneTitle: '',
-    sceneMode: false,
+    sceneDescription: '',
+    sceneIcon: '',
+    filterMode: false,
+    showFilterPanel: false,
+    filters: {} as ProductFilters,
+    filterGroups: buildFilterGroupsUi({}),
+    activeFilterChips: [] as Array<{ groupId: string; key: string; label: string }>,
+    hasActiveFilters: false,
+    filterEmptyText: '暂时没有适合这个场景的花束，可以换个预算或色系看看。',
+    page: 1,
+    pageSize: DEFAULT_PAGE_SIZE,
+    pagination: null as ProductListPagination | null,
+    hasMore: false,
+    noMore: false,
   },
 
   searchTimer: null as ReturnType<typeof setTimeout> | null,
   productsRequestId: 0,
 
   onLoad(options: Record<string, string | undefined>) {
-    const sceneType = (options.sceneType ?? '').trim();
+    const sceneType = (options.sceneType ?? options.occasionTag ?? '').trim();
+    const filterMode = options.filterMode === '1' || !!sceneType;
+
+    const filters: ProductFilters = sceneType ? { occasion: sceneType } : {};
+
+    this.setData({
+      sceneType,
+      filterMode,
+      sceneTitle: sceneType ? sceneTitleByKey(sceneType) : '',
+      sceneDescription: sceneType ? sceneDescriptionByKey(sceneType) : '',
+      sceneIcon: sceneType ? sceneIconPath(sceneType) : '',
+      filters,
+      filterGroups: buildFilterGroupsUi(filters),
+      activeFilterChips: buildFilterChips(filters),
+      hasActiveFilters: hasActiveFilters(filters),
+    });
+
     if (sceneType) {
-      const sceneLabels: Record<string, string> = {
-        BIRTHDAY: '生日推荐',
-        ANNIVERSARY: '纪念日推荐',
-        BUSINESS: '商务礼赠',
-        VISIT: '探望慰问',
-        DAILY_SURPRISE: '日常惊喜',
-      };
-      this.setData({
-        sceneType,
-        sceneMode: true,
-        sceneTitle: sceneLabels[sceneType] ?? '场景推荐',
-      });
-      wx.setNavigationBarTitle({ title: sceneLabels[sceneType] ?? '场景推荐' });
-      void this.loadSceneRecommendations(sceneType);
-    }
-  },
-
-  async loadSceneRecommendations(sceneType: string) {
-    this.setData({ loadingProducts: true });
-    try {
-      const data = await request<{
-        slots?: Array<{
-          items: Array<{
-            productId: string;
-            productName: string;
-            price: string;
-            coverImage: string;
-            sellingPoints?: string[];
-            occasionTags?: Array<{ label: string; key: string }>;
-            colorTags?: Array<{ label: string; key: string }>;
-            styleTags?: Array<{ label: string; key: string }>;
-          }>;
-        }>;
-      }>({
-        url: `/recommendations?sceneType=${encodeURIComponent(sceneType)}&limit=20`,
-      });
-
-      const items = (data?.slots ?? []).flatMap((slot) => slot.items ?? []);
-      const products: ProductItem[] = items.map((item) => ({
-        id: item.productId,
-        name: item.productName,
-        price: item.price,
-        priceSuffix: '',
-        shippingFee: 0,
-        imageUrl: toRelativeImagePath(item.coverImage ?? ''),
-        isOutOfStock: false,
-        skus: [],
-        occasionTags: item.occasionTags ?? [],
-        colorTags: item.colorTags ?? [],
-        styleTags: item.styleTags ?? [],
-        relationshipTags: [],
-        budgetTags: [],
-        positioningTags: [],
-        sellingPoints: item.sellingPoints ?? [],
-        cardOccasionLabels: (item.occasionTags ?? [])
-          .slice(0, 2)
-          .map((t) => t.label || t.key),
-        cardStyleColorLabels: [
-          ...(item.colorTags ?? []).slice(0, 1),
-          ...(item.styleTags ?? []).slice(0, 1),
-        ].map((t) => t.label || t.key),
-        cardSellingPoint: (item.sellingPoints ?? [])[0] ?? '',
-      }));
-
-      this.setData({ products, loadingProducts: false });
-    } catch {
-      this.setData({ loadingProducts: false, products: [] });
-      wx.showToast({ title: '场景推荐加载失败', icon: 'none' });
+      wx.setNavigationBarTitle({ title: sceneTitleByKey(sceneType) });
     }
   },
 
   onShow() {
     updateCartTabBarBadge();
-    if (!this.data.sceneMode) {
-      void this.loadCategories();
-    }
+    void this.loadCategories();
   },
 
   onPullDownRefresh() {
-    Promise.all([this.loadCategories(), this.fetchProducts()])
+    Promise.all([this.loadCategories(), this.reloadProducts()])
       .finally(() => {
         wx.stopPullDownRefresh();
       });
+  },
+
+  onReachBottom() {
+    void this.loadMoreProducts();
   },
 
   onUnload() {
@@ -193,6 +157,15 @@ Page({
       clearTimeout(this.searchTimer);
       this.searchTimer = null;
     }
+  },
+
+  syncFilterUi(filters: ProductFilters) {
+    this.setData({
+      filters,
+      filterGroups: buildFilterGroupsUi(filters),
+      activeFilterChips: buildFilterChips(filters),
+      hasActiveFilters: hasActiveFilters(filters),
+    });
   },
 
   async loadCategories() {
@@ -210,12 +183,15 @@ Page({
       }
 
       const categories = data.categories ?? data.tree ?? [];
-      const firstId = this.pickFirstCategoryId(categories);
-      const activeCategoryId =
-        this.data.activeCategoryId &&
-        this.categoryExists(categories, this.data.activeCategoryId)
-          ? this.data.activeCategoryId
-          : firstId;
+      let activeCategoryId = this.data.activeCategoryId;
+
+      if (!this.data.filterMode) {
+        const firstId = this.pickFirstCategoryId(categories);
+        activeCategoryId =
+          activeCategoryId && this.categoryExists(categories, activeCategoryId)
+            ? activeCategoryId
+            : firstId;
+      }
 
       const expandedMap = { ...this.data.expandedMap };
       if (activeCategoryId) {
@@ -233,11 +209,7 @@ Page({
         loadingCategories: false,
       });
 
-      if (activeCategoryId) {
-        await this.fetchProducts();
-      } else {
-        this.setData({ products: [], loadingProducts: false });
-      }
+      await this.reloadProducts();
     } catch {
       this.setData({ loadingCategories: false, categories: [] });
       wx.showToast({ title: '分类加载失败', icon: 'none' });
@@ -270,19 +242,37 @@ Page({
     return null;
   },
 
-  async fetchProducts() {
-    const { activeCategoryId, keyword } = this.data;
-    const requestId = ++this.productsRequestId;
+  async reloadProducts() {
+    this.setData({ page: 1, noMore: false, hasMore: false });
+    return this.fetchProducts({ append: false, page: 1 });
+  },
 
-    this.setData({ loadingProducts: true });
+  async loadMoreProducts() {
+    const { loadingMore, loadingProducts, hasMore, page } = this.data;
+    if (loadingMore || loadingProducts || !hasMore) return;
+    await this.fetchProducts({ append: true, page: page + 1 });
+  },
+
+  async fetchProducts(options: { append: boolean; page: number }) {
+    const { append, page } = options;
+    const requestId = ++this.productsRequestId;
+    const { activeCategoryId, keyword, filterMode, filters, sceneType, pageSize } =
+      this.data;
+
+    this.setData({
+      loadingProducts: !append,
+      loadingMore: append,
+    });
 
     try {
-      const query = buildProductsQuery(activeCategoryId, keyword);
-      const data = await request<{
-        list?: WechatProductRaw[];
-        products?: WechatProductRaw[];
-      }>({
-        url: `/products${query}`,
+      const categoryId = filterMode ? '' : activeCategoryId;
+      const data = await fetchProductList({
+        keyword,
+        categoryId: categoryId || undefined,
+        filters,
+        sceneType: filterMode && sceneType ? sceneType : undefined,
+        page,
+        pageSize,
       });
 
       if (requestId !== this.productsRequestId) {
@@ -294,16 +284,85 @@ Page({
       }
 
       const rawList = data.products ?? data.list ?? [];
-      const products = rawList.map(normalizeProduct);
+      const mapped = rawList.map(normalizeProduct);
+      const pagination = data.pagination ?? {
+        page,
+        pageSize,
+        total: data.total ?? mapped.length,
+        totalPages: Math.ceil((data.total ?? mapped.length) / pageSize) || 0,
+      };
 
-      this.setData({ products, loadingProducts: false });
+      const products = append ? [...this.data.products, ...mapped] : mapped;
+      const hasMore = pagination.page < pagination.totalPages;
+
+      this.setData({
+        products,
+        pagination,
+        page: pagination.page,
+        hasMore,
+        noMore: !hasMore && products.length > 0,
+        loadingProducts: false,
+        loadingMore: false,
+      });
     } catch {
       if (requestId !== this.productsRequestId) {
         return;
       }
-      this.setData({ products: [], loadingProducts: false });
+      this.setData({
+        products: append ? this.data.products : [],
+        loadingProducts: false,
+        loadingMore: false,
+        hasMore: false,
+      });
       wx.showToast({ title: '商品加载失败', icon: 'none' });
     }
+  },
+
+  onToggleFilterPanel() {
+    this.setData({ showFilterPanel: !this.data.showFilterPanel });
+  },
+
+  onFilterChipTap(e: WechatMiniprogram.TouchEvent) {
+    const groupId = e.currentTarget.dataset.groupId as keyof ProductFilters;
+    const key = e.currentTarget.dataset.key as string;
+    if (!groupId || !key) return;
+
+    const filters = { ...this.data.filters };
+    if (filters[groupId] === key) {
+      delete filters[groupId];
+    } else {
+      filters[groupId] = key;
+    }
+
+    this.setData({ filters, filterMode: true });
+    this.syncFilterUi(filters);
+    void this.reloadProducts();
+  },
+
+  onRemoveFilterChip(e: WechatMiniprogram.TouchEvent) {
+    const groupId = e.currentTarget.dataset.groupId as keyof ProductFilters;
+    if (!groupId) return;
+    const filters = { ...this.data.filters };
+    delete filters[groupId];
+    const stillFilterMode = hasActiveFilters(filters) || !!this.data.sceneType;
+    this.setData({ filters, filterMode: stillFilterMode });
+    this.syncFilterUi(filters);
+    void this.reloadProducts();
+  },
+
+  onClearFilters() {
+    const filters = {};
+    this.setData({
+      filters,
+      filterMode: false,
+      sceneType: '',
+      sceneTitle: '',
+      sceneDescription: '',
+      sceneIcon: '',
+    });
+    this.syncFilterUi(filters);
+    wx.setNavigationBarTitle({ title: '选花' });
+    void this.reloadProducts();
   },
 
   onCategoryTap(e: WechatMiniprogram.TouchEvent) {
@@ -322,9 +381,16 @@ Page({
       activeCategoryId: id,
       expandedMap,
       navList: buildNavList(this.data.categories, expandedMap),
+      filterMode: false,
+      filters: {},
+      sceneType: '',
+      sceneTitle: '',
+      sceneDescription: '',
+      sceneIcon: '',
     });
-
-    void this.fetchProducts();
+    this.syncFilterUi({});
+    wx.setNavigationBarTitle({ title: '选花' });
+    void this.reloadProducts();
   },
 
   onSearchInput(e: WechatMiniprogram.Input) {
@@ -336,7 +402,7 @@ Page({
     }
 
     this.searchTimer = setTimeout(() => {
-      void this.fetchProducts();
+      void this.reloadProducts();
     }, SEARCH_DEBOUNCE_MS);
   },
 
@@ -345,7 +411,7 @@ Page({
       clearTimeout(this.searchTimer);
       this.searchTimer = null;
     }
-    void this.fetchProducts();
+    void this.reloadProducts();
   },
 
   onClearSearch() {
@@ -354,11 +420,11 @@ Page({
       this.searchTimer = null;
     }
     this.setData({ keyword: '' });
-    void this.fetchProducts();
+    void this.reloadProducts();
   },
 
   onAddCart(e: WechatMiniprogram.TouchEvent) {
-    const product = e.currentTarget.dataset.product as ProductItem | undefined;
+    const product = e.currentTarget.dataset.product as WechatProductItem | undefined;
     if (!product?.id) {
       wx.showToast({ title: '商品信息无效', icon: 'none' });
       return;

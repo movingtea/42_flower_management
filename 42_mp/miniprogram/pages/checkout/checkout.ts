@@ -22,7 +22,9 @@ import {
   RELATION_OPTIONS,
   OCCASION_OPTIONS,
   relationLabelByKey,
+  occasionLabelByKey,
 } from '../../utils/crm-options';
+import { getDeliveryHints, FLOWER_ADJUSTMENT_NOTE } from '../../utils/gift-copy';
 
 interface CheckoutDisplayItem {
   lineKey: string;
@@ -37,7 +39,7 @@ interface CheckoutDisplayItem {
   imageUrl: string;
 }
 
-const TIME_BUCKETS = ['上午', '下午', '晚上'];
+const TIME_BUCKETS = ['上午', '下午', '傍晚', '晚上'];
 
 function todayString(): string {
   const d = new Date();
@@ -101,6 +103,8 @@ Page({
     reminderEnabled: true,
     reminderDaysBefore: 7,
     showPreferencePanel: false,
+    deliveryHints: [] as string[],
+    flowerAdjustmentNote: FLOWER_ADJUSTMENT_NOTE,
     savedRecipients: [] as SavedRecipient[],
     recipientsLoading: false,
     recipientsError: '',
@@ -409,14 +413,20 @@ Page({
   },
 
   onDeliveryDateChange(e: WechatMiniprogram.PickerChange) {
-    this.setData({ deliveryDate: e.detail.value as string });
+    const deliveryDate = e.detail.value as string;
+    this.setData({
+      deliveryDate,
+      deliveryHints: getDeliveryHints(deliveryDate, this.data.deliveryTimeBucket),
+    });
   },
 
   onDeliveryTimeBucketChange(e: WechatMiniprogram.PickerChange) {
     const index = Number(e.detail.value);
+    const deliveryTimeBucket = TIME_BUCKETS[index];
     this.setData({
       deliveryTimeBucketIndex: index,
-      deliveryTimeBucket: TIME_BUCKETS[index],
+      deliveryTimeBucket,
+      deliveryHints: getDeliveryHints(this.data.deliveryDate, deliveryTimeBucket),
     });
   },
 
@@ -499,6 +509,7 @@ Page({
       };
       payload.giftOccasion = {
         occasionType: occasionType || undefined,
+        occasionLabel: occasionType ? occasionLabelByKey(occasionType) : undefined,
         importantDate: importantDate || undefined,
         cardMessage: card || undefined,
       };

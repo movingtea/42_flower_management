@@ -1,132 +1,147 @@
-<!-- pages/checkout/checkout.wxml — 结算与礼赠 CRM -->
+<!-- pages/checkout/checkout.wxml — 礼赠字段分层下单 -->
 <view class="checkout-page">
 
   <view wx:if="{{emptyCheckout}}" class="checkout-empty">
+    <mp-icon name="emptyOrder" size="96" />
     <text class="checkout-empty-title">暂无待结算商品</text>
     <text class="checkout-empty-desc">请先在购物车中勾选要购买的商品</text>
     <button class="checkout-empty-btn" bindtap="onGoCart">返回购物车</button>
   </view>
 
   <view wx:if="{{!emptyCheckout}}">
-    <!-- 收货地址 -->
-    <view class="section section--address" bindtap="onChooseWechatAddress">
-      <view class="address-main">
-        <view wx:if="{{receiverName && deliveryAddress}}" class="address-filled">
-          <view class="address-row">
-            <text class="address-name">{{receiverName}}</text>
-            <text class="address-phone">{{receiverPhone}}</text>
+    <!-- 第一层：收花与配送（必填） -->
+    <view class="section">
+      <view class="section-head">
+        <mp-icon name="recipient" size="36" />
+        <text class="section-title section-title--inline">收花与配送</text>
+        <text class="section-badge">必填</text>
+      </view>
+
+      <view class="address-card" bindtap="onChooseWechatAddress">
+        <view class="address-main">
+          <view wx:if="{{receiverName && deliveryAddress}}" class="address-filled">
+            <view class="address-row">
+              <text class="address-name">{{receiverName}}</text>
+              <text class="address-phone">{{receiverPhone}}</text>
+            </view>
+            <text class="address-detail">{{deliveryAddress}}</text>
           </view>
-          <text class="address-detail">{{deliveryAddress}}</text>
+          <view wx:else class="address-empty">
+            <text class="address-empty-title">点击选择微信收货地址</text>
+            <text class="address-empty-desc">收花人姓名、电话与配送地址</text>
+          </view>
         </view>
-        <view wx:else class="address-empty">
-          <text class="address-empty-title">点击选择微信收货地址</text>
-          <text class="address-empty-desc">一键导入收件人、电话与详细地址</text>
+        <text class="address-arrow">›</text>
+      </view>
+
+      <view class="form-row picker-row">
+        <view class="form-label-row">
+          <mp-icon name="importantDate" size="32" />
+          <text class="form-label">配送日期</text>
         </view>
-      </view>
-      <text class="address-arrow">›</text>
-    </view>
-
-    <!-- 礼赠信息 -->
-    <view class="section">
-      <view class="section-title-row">
-        <text class="section-title section-title--inline">礼赠信息</text>
-        <button class="link-btn" size="mini" bindtap="onChooseSavedRecipient">选择常用收花人</button>
-      </view>
-      <text wx:if="{{recipientsLoading}}" class="hint-text">正在加载常用收花人…</text>
-      <text wx:if="{{recipientsError}}" class="hint-text hint-text--warn">{{recipientsError}}</text>
-      <text wx:if="{{!recipientsLoading && !savedRecipients.length}}" class="hint-text">暂无常用收花人，本次下单后可保存。</text>
-
-      <view class="form-row picker-row">
-        <text class="form-label">与收花人关系</text>
-        <picker
-          mode="selector"
-          range="{{relationOptions}}"
-          value="{{relationIndex >= 0 ? relationIndex : 0}}"
-          bindchange="onRelationChange"
-        >
-          <view class="picker-value">{{relationIndex >= 0 ? relationOptions[relationIndex] : '请选择关系（可选）'}}</view>
-        </picker>
-      </view>
-
-      <view class="form-row picker-row">
-        <text class="form-label">送花场景</text>
-        <picker
-          mode="selector"
-          range="{{occasionOptions}}"
-          value="{{occasionIndex >= 0 ? occasionIndex : 0}}"
-          bindchange="onOccasionChange"
-        >
-          <view class="picker-value">{{occasionIndex >= 0 ? occasionOptions[occasionIndex] : '请选择场景（可选）'}}</view>
-        </picker>
-      </view>
-
-      <view class="form-row picker-row">
-        <text class="form-label">重要日期</text>
-        <picker mode="date" value="{{importantDate}}" bindchange="onImportantDateChange">
-          <view class="picker-value">{{importantDate || '生日 / 纪念日（可选）'}}</view>
-        </picker>
-      </view>
-    </view>
-
-    <!-- 配送与贺卡 -->
-    <view class="section">
-      <view class="section-title">配送与贺卡</view>
-
-      <view class="form-row picker-row">
-        <text class="form-label">配送日期</text>
         <picker mode="date" value="{{deliveryDate}}" start="{{minDeliveryDate}}" bindchange="onDeliveryDateChange">
           <view class="picker-value">{{deliveryDate || '请选择日期'}}</view>
         </picker>
       </view>
 
       <view class="form-row picker-row">
-        <text class="form-label">配送时段</text>
-        <picker
-          mode="selector"
-          range="{{timeBuckets}}"
-          value="{{deliveryTimeBucketIndex}}"
-          bindchange="onDeliveryTimeBucketChange"
-        >
+        <view class="form-label-row">
+          <mp-icon name="deliveryTime" size="32" />
+          <text class="form-label">配送时段</text>
+        </view>
+        <picker mode="selector" range="{{timeBuckets}}" value="{{deliveryTimeBucketIndex}}" bindchange="onDeliveryTimeBucketChange">
           <view class="picker-value">{{deliveryTimeBucket}}</view>
         </picker>
       </view>
 
-      <view class="form-row form-row--column">
-        <text class="form-label">贺卡留言</text>
-        <textarea
-          class="form-textarea"
-          placeholder="可填写手写贺卡内容，留空则不需要贺卡"
-          value="{{greetingCard}}"
-          maxlength="200"
-          bindinput="onGreetingCardInput"
-        />
+      <view wx:if="{{deliveryHints.length}}" class="delivery-hints">
+        <text wx:for="{{deliveryHints}}" wx:key="*this" class="delivery-hint-line">{{item}}</text>
       </view>
     </view>
 
-    <!-- 偏好与提醒（折叠） -->
+    <!-- 第二层：送礼信息（建议填写） -->
     <view class="section">
-      <view class="section-title-row" bindtap="onTogglePreferencePanel">
+      <view class="section-head">
+        <mp-icon name="occasion" size="36" />
+        <text class="section-title section-title--inline">送礼信息</text>
+        <text class="section-badge section-badge--soft">选填</text>
+      </view>
+      <text class="section-hint">多填一点，我们可以帮你把这份心意记住。</text>
+
+      <view class="recipient-picker-row">
+        <button class="link-btn" size="mini" bindtap="onChooseSavedRecipient">
+          <mp-icon name="recipients" size="28" />
+          <text>选择常用收花人</text>
+        </button>
+      </view>
+      <text wx:if="{{recipientsLoading}}" class="hint-text">正在加载常用收花人…</text>
+      <text wx:if="{{recipientsError}}" class="hint-text hint-text--warn">{{recipientsError}} · <text catchtap="loadSavedRecipients" class="retry-link">重试</text></text>
+      <text wx:if="{{!recipientsLoading && !savedRecipients.length}}" class="hint-text">暂无常用收花人，本次下单后可以保存。</text>
+
+      <view class="form-row picker-row">
+        <view class="form-label-row">
+          <mp-icon name="relation" size="32" />
+          <text class="form-label">与收花人关系</text>
+        </view>
+        <picker mode="selector" range="{{relationOptions}}" value="{{relationIndex >= 0 ? relationIndex : 0}}" bindchange="onRelationChange">
+          <view class="picker-value">{{relationIndex >= 0 ? relationOptions[relationIndex] : '请选择（可选）'}}</view>
+        </picker>
+      </view>
+
+      <view class="form-row picker-row">
+        <view class="form-label-row">
+          <mp-icon name="occasion" size="32" />
+          <text class="form-label">送花场景</text>
+        </view>
+        <picker mode="selector" range="{{occasionOptions}}" value="{{occasionIndex >= 0 ? occasionIndex : 0}}" bindchange="onOccasionChange">
+          <view class="picker-value">{{occasionIndex >= 0 ? occasionOptions[occasionIndex] : '请选择（可选）'}}</view>
+        </picker>
+      </view>
+
+      <view class="form-row form-row--column">
+        <view class="form-label-row">
+          <mp-icon name="cardMessage" size="32" />
+          <text class="form-label">贺卡内容</text>
+        </view>
+        <textarea class="form-textarea" placeholder="可填写手写贺卡内容，留空则不需要贺卡" value="{{greetingCard}}" maxlength="200" bindinput="onGreetingCardInput" />
+      </view>
+    </view>
+
+    <!-- 第三层：偏好与提醒（默认折叠） -->
+    <view class="section">
+      <view class="section-head section-head--tap" bindtap="onTogglePreferencePanel">
+        <mp-icon name="preference" size="36" />
         <text class="section-title section-title--inline">偏好与提醒</text>
         <text class="collapse-arrow">{{showPreferencePanel ? '收起' : '展开'}}</text>
       </view>
 
       <view wx:if="{{showPreferencePanel}}">
-        <view class="form-row form-row--column">
-          <text class="form-label">购买人姓名</text>
-          <input class="form-input" placeholder="默认使用收货人信息" value="{{buyerName}}" bindinput="onBuyerNameInput" />
+        <view class="form-row picker-row">
+          <view class="form-label-row">
+            <mp-icon name="importantDate" size="32" />
+            <text class="form-label">重要日期</text>
+          </view>
+          <picker mode="date" value="{{importantDate}}" bindchange="onImportantDateChange">
+            <view class="picker-value">{{importantDate || '生日 / 纪念日（可选）'}}</view>
+          </picker>
         </view>
+
         <view class="form-row form-row--column">
-          <text class="form-label">购买人电话</text>
-          <input class="form-input" type="number" placeholder="默认使用收货电话" value="{{buyerPhone}}" bindinput="onBuyerPhoneInput" />
-        </view>
-        <view class="form-row form-row--column">
-          <text class="form-label">偏好色系</text>
+          <view class="form-label-row">
+            <mp-icon name="preference" size="32" />
+            <text class="form-label">偏好色系</text>
+          </view>
           <input class="form-input" placeholder="如：粉色、白色" value="{{preferredColors}}" bindinput="onPreferredColorsInput" />
         </view>
+
         <view class="form-row form-row--column">
-          <text class="form-label">忌讳花材</text>
+          <view class="form-label-row">
+            <mp-icon name="dislikedFlowers" size="32" />
+            <text class="form-label">忌讳花材</text>
+          </view>
           <input class="form-input" placeholder="如：百合、满天星" value="{{dislikedFlowers}}" bindinput="onDislikedFlowersInput" />
         </view>
+
         <view class="form-row form-row--column">
           <text class="form-label">备注</text>
           <textarea class="form-textarea form-textarea--small" placeholder="其他偏好或注意事项" value="{{preferenceNote}}" bindinput="onPreferenceNoteInput" />
@@ -143,29 +158,17 @@
         <view class="switch-row">
           <view>
             <text class="switch-label">提前提醒</text>
-            <text class="switch-desc">开启后花店会在重要日期前看到复购跟进提醒，不会自动给收花人发消息</text>
+            <text class="switch-desc">重要日期前 {{reminderDaysBefore}} 天提醒花店跟进，不会自动给收花人发消息</text>
           </view>
           <switch checked="{{reminderEnabled}}" color="#8fa89b" bindchange="onReminderEnabledChange" />
         </view>
       </view>
     </view>
 
-    <!-- 商品清单 -->
     <view class="section">
       <view class="section-title">商品清单</view>
-      <view
-        class="checkout-line"
-        wx:for="{{checkoutItems}}"
-        wx:for-item="item"
-        wx:key="lineKey"
-      >
-        <image
-          wx:if="{{item.imageUrl}}"
-          class="checkout-line-image"
-          src="{{baseUrl}}{{item.imageUrl}}"
-          mode="aspectFill"
-          lazy-load
-        />
+      <view class="checkout-line" wx:for="{{checkoutItems}}" wx:for-item="item" wx:key="lineKey">
+        <image wx:if="{{item.imageUrl}}" class="checkout-line-image" src="{{baseUrl}}{{item.imageUrl}}" mode="aspectFill" lazy-load />
         <view class="checkout-line-body">
           <text class="checkout-line-name">{{item.name}}</text>
           <text class="checkout-line-spec">{{item.specName}}</text>
@@ -177,7 +180,6 @@
       </view>
     </view>
 
-    <!-- 金额汇总 -->
     <view class="section section--summary">
       <view class="summary-row">
         <text>商品总额</text>
@@ -192,14 +194,9 @@
         <text>实付款</text>
         <text class="price-text">¥{{payableTotal}}</text>
       </view>
-      <button
-        class="submit-btn"
-        type="primary"
-        loading="{{submitting}}"
-        disabled="{{submitting}}"
-        bindtap="onSubmitOrder"
-      >提交订单</button>
+      <text class="checkout-brand-hint text-muted">Universe42 · 帮你把爱意做成花</text>
+      <text class="flower-adjustment-note text-muted">{{flowerAdjustmentNote}}</text>
+      <button class="submit-btn" type="primary" loading="{{submitting}}" disabled="{{submitting}}" bindtap="onSubmitOrder">提交订单</button>
     </view>
   </view>
-
 </view>
