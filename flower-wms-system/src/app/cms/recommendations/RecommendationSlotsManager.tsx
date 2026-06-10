@@ -2,10 +2,17 @@
 
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
+import { AutoKeyField } from "@/components/cms/pickers/AutoKeyField";
+import { ProductPicker } from "@/components/cms/pickers/ProductPicker";
+import { SkuPicker } from "@/components/cms/pickers/SkuPicker";
 import { RecommendationWarnings } from "@/components/cms/RecommendationWarnings";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import {
+  generateRecommendationSlotKey,
+  validateCmsKey,
+} from "@/lib/cms-auto-key";
 import { formatDateTimeInAppTimezone } from "@/lib/datetime";
 import {
   CMS_OCCASION_TAG_OPTIONS,
@@ -66,19 +73,8 @@ type SlotDetail = Omit<SlotRow, "items" | "_count"> & {
   items: SlotDetailItem[];
 };
 
-type ProductSearchItem = {
-  id: string;
-  name: string;
-  isActive: boolean;
-};
-
 type ApiList = { success: boolean; data?: { slots: SlotRow[] }; error?: string };
 type ApiSlot = { success: boolean; data?: { slot: SlotDetail }; error?: string };
-type ApiProducts = {
-  success: boolean;
-  data?: { items: ProductSearchItem[] };
-  error?: string;
-};
 
 export function RecommendationSlotsManager() {
   const [slots, setSlots] = useState<SlotRow[]>([]);
@@ -101,8 +97,6 @@ export function RecommendationSlotsManager() {
     maxItems: 10,
   });
   const [addOpen, setAddOpen] = useState(false);
-  const [productKeyword, setProductKeyword] = useState("");
-  const [productResults, setProductResults] = useState<ProductSearchItem[]>([]);
   const [addForm, setAddForm] = useState({
     productId: "",
     skuId: "",
@@ -197,9 +191,31 @@ export function RecommendationSlotsManager() {
     setEditorOpen(true);
   }
 
+  const autoSlotKey = generateRecommendationSlotKey({
+    slotType: form.slotType,
+    sceneType: form.sceneType || null,
+    name: form.name,
+  });
+
+  const existingKeys = slots.map((s) => s.key);
+
   async function saveSlot() {
-    if (!form.key.trim() || !form.name.trim()) {
-      showToast("请填写 key 和名称");
+    if (!form.name.trim()) {
+      showToast("请填写推荐位名称");
+      return;
+    }
+    const key = (form.key.trim() || autoSlotKey).trim();
+    const keyError = validateCmsKey(key);
+    if (keyError) {
+      showToast(keyError);
+      return;
+    }
+    if (
+      existingKeys.some(
+        (k) => k === key && (editorMode === "create" || k !== form.key)
+      )
+    ) {
+      showToast("该 key 已被使用，请更换。");
       return;
     }
     if (form.maxItems <= 0) {
@@ -208,7 +224,7 @@ export function RecommendationSlotsManager() {
     }
 
     const payload = {
-      key: form.key.trim(),
+      key,
       name: form.name.trim(),
       description: form.description.trim() || null,
       slotType: form.slotType,
@@ -253,17 +269,6 @@ export function RecommendationSlotsManager() {
     showToast("推荐位已停用");
     if (selectedId === id) setSelectedId(null);
     await loadSlots();
-  }
-
-  async function searchProducts() {
-    const params = new URLSearchParams();
-    if (productKeyword.trim()) params.set("keyword", productKeyword.trim());
-    params.set("pageSize", "20");
-    const res = await fetch(
-      `/api/admin/cms/products/operation-summaries?${params}`
-    );
-    const json = (await res.json()) as ApiProducts;
-    setProductResults(json.data?.items ?? []);
   }
 
   async function addItem() {
@@ -382,7 +387,9 @@ export function RecommendationSlotsManager() {
                       >
                         {slot.name}
                       </button>
-                      <p className="text-xs text-zinc-400">{slot.key}</p>
+                      <p className="text-xs text-zinc-400" title="内部标识">
+                        {slot.key}
+                      </p>
                     </td>
                     <td className="px-4 py-3">
                       <p>{SLOT_TYPE_LABELS[slot.slotType] ?? slot.slotType}</p>
@@ -537,8 +544,21 @@ export function RecommendationSlotsManager() {
       {editorOpen ? (
         <Modal title={editorMode === "create" ? "新建推荐位" : "编辑推荐位"} onClose={() => setEditorOpen(false)}>
           <div className="space-y-4">
-            <Input label="key（唯一标识）" value={form.key} onChange={(e) => setForm({ ...form, key: e.target.value })} disabled={editorMode === "edit"} />
-            <Input label="名称" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <Input label="推荐位名称" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            {editorMode === "create" ? (
+              <AutoKeyField
+                value={form.key || autoSlotKey}
+                autoValue={autoSlotKey}
+                onChange={(key) => setForm({ ...form, key })}
+                existingKeys={existingKeys}
+                label="推荐位标识"
+              />
+            ) : (
+              <div className="rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-600">
+                <span className="font-mono">{form.key}</span>
+                <p className="mt-1 text-xs text-zinc-400">创建后标识不可修改</p>
+              </div>
+            )}
             <Input label="描述" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
             <label className="block text-sm">
               <span className="mb-1 block font-medium text-zinc-700">类型</span>
@@ -584,32 +604,23 @@ export function RecommendationSlotsManager() {
       {addOpen && selectedId ? (
         <Modal title="添加推荐商品" onClose={() => setAddOpen(false)}>
           <div className="space-y-4">
-            <div className="flex gap-2">
-              <Input label="搜索商品" value={productKeyword} onChange={(e) => setProductKeyword(e.target.value)} />
-              <Button type="button" variant="secondary" className="mt-6" onClick={() => void searchProducts()}>搜索</Button>
-            </div>
-            <label className="block text-sm">
-              <span className="mb-1 block font-medium">选择商品</span>
-              <select
-                className="w-full rounded-lg border border-zinc-200 px-3 py-2"
-                value={addForm.productId}
-                onChange={(e) => setAddForm({ ...addForm, productId: e.target.value })}
-              >
-                <option value="">请选择</option>
-                {productResults.map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}{p.isActive ? "" : "（未上架）"}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <ProductPicker
+              value={addForm.productId || null}
+              onChange={(productId) =>
+                setAddForm({ ...addForm, productId: productId ?? "", skuId: "" })
+              }
+            />
+            <SkuPicker
+              productId={addForm.productId || null}
+              value={addForm.skuId || null}
+              onChange={(skuId) =>
+                setAddForm({ ...addForm, skuId: skuId ?? "" })
+              }
+            />
             <Input label="覆盖标题" value={addForm.titleOverride} onChange={(e) => setAddForm({ ...addForm, titleOverride: e.target.value })} />
             <Input label="覆盖副标题" value={addForm.subtitleOverride} onChange={(e) => setAddForm({ ...addForm, subtitleOverride: e.target.value })} />
             <Input label="覆盖图片 URL" value={addForm.imageOverride} onChange={(e) => setAddForm({ ...addForm, imageOverride: e.target.value })} />
-            <div className="grid grid-cols-2 gap-3">
-              <Input label="排序" type="number" value={String(addForm.sortOrder)} onChange={(e) => setAddForm({ ...addForm, sortOrder: Number(e.target.value) })} />
-              <Input label="SKU ID（可选）" value={addForm.skuId} onChange={(e) => setAddForm({ ...addForm, skuId: e.target.value })} />
-            </div>
+            <Input label="排序" type="number" value={String(addForm.sortOrder)} onChange={(e) => setAddForm({ ...addForm, sortOrder: Number(e.target.value) })} />
             <div className="grid grid-cols-2 gap-3">
               <Input label="生效开始" type="datetime-local" value={addForm.startAt} onChange={(e) => setAddForm({ ...addForm, startAt: e.target.value })} />
               <Input label="生效结束" type="datetime-local" value={addForm.endAt} onChange={(e) => setAddForm({ ...addForm, endAt: e.target.value })} />

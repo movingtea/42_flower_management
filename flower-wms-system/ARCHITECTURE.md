@@ -191,6 +191,34 @@ CMS 商品编辑边界：
 - 商品列表（`/cms/products`）通过 `operation-summaries` API 展示运营标签、上架校验状态、产品决策摘要、推荐位状态，并支持场景 / 定位 / 校验状态筛选。
 - 商品编辑页含「商品运营标签」「上架校验」「小程序展示预览」区块。
 
+### CMS 易用性增强（运营配置无需手填内部 ID）
+
+CMS 面向花店运营用户，主界面不要求理解 `productId` / `skuId` / `recipeId` / `categoryId` 等数据库标识：
+
+| 能力 | 实现 |
+|---|---|
+| 商品 / SKU / 配方 / 分类 / 推荐位 | 通过 `src/components/cms/pickers/` 下选择器配置，内部仍保存 id/key |
+| 推荐位 key / 营销 key | 默认由 `src/lib/cms-auto-key.ts` 自动生成；手动编辑仅在「高级设置」 |
+| Banner / 营销跳转 | `CmsLinkTargetSelector`（`src/lib/cms-link-target.ts`）按目标类型选择商品、分类、场景、推荐位或自定义链接 |
+| 运营标签 | `ProductOperationTagsEditor` 中文 pill 多选，内部保存稳定英文 key |
+| 旧数据 | 无法解析的 `linkUrl` / 已删除关联对象显示「关联对象不存在或已删除」，页面不崩溃 |
+
+轻量选择器 API：
+
+| 方法 | 路径 |
+|---|---|
+| GET | `/api/admin/cms/products/search?keyword=` |
+| GET | `/api/admin/cms/products/[id]/skus` |
+| GET | `/api/admin/wms/recipes/search?keyword=` |
+| GET | `/api/admin/cms/recommendation-slots?lite=true` |
+
+### CMS 经营红线（易用性）
+
+- CMS 主界面不得要求运营用户手填 `productId` / `skuId` / `recipeId` / `categoryId`。
+- 自定义 key 必须校验格式（小写字母、数字、下划线、短横线）与唯一性；冲突提示：「该 key 已被使用，请更换。」
+- 小程序跳转配置优先使用目标类型 + 目标对象，不鼓励直接写路径；自定义链接须显式 warning。
+- 旧 Banner `linkUrl` / `targetParam`、旧推荐位 key 必须兼容，不能因历史数据导致 CMS 崩溃。
+
 ---
 
 ## 5. 后台 API 边界
@@ -236,7 +264,10 @@ CMS 商品编辑边界：
 | `GET /api/admin/cms/products/[id]/operation-profile` | 商品运营画像（标签、毛利、产品决策、推荐位、上架校验） |
 | `GET /api/admin/cms/products/[id]/publish-readiness` | 商品上架校验结果 |
 | `GET /api/admin/cms/products/operation-summaries` | 商品运营摘要列表 |
-| `GET/POST /api/admin/cms/recommendation-slots` | 推荐位列表 / 创建 |
+| `GET /api/admin/cms/products/search` | 商品选择器轻量搜索 |
+| `GET /api/admin/cms/products/[id]/skus` | 商品 SKU 选择器列表 |
+| `GET /api/admin/wms/recipes/search` | 配方选择器轻量搜索 |
+| `GET/POST /api/admin/cms/recommendation-slots` | 推荐位列表 / 创建（`?lite=true` 返回轻量列表） |
 | `GET/PATCH/DELETE /api/admin/cms/recommendation-slots/[id]` | 推荐位详情 / 更新 / 停用 |
 | `POST /api/admin/cms/recommendation-slots/[id]/items` | 添加推荐商品（返回 warnings + publishReadiness） |
 | `PATCH/DELETE /api/admin/cms/recommendation-items/[itemId]` | 更新 / 移除推荐项 |
@@ -847,7 +878,7 @@ CMS 是小程序商品与营销内容的**运营配置中心**，与 WMS 配方/
 
 运营标签定义见 `src/lib/cms-product-tags.ts`；`occasionTags` 沿用 `String[]`（Sprint 8），其余标签存 `Json` 数组。
 
-CMS UI 组件（Sprint 9 Round 2）：
+CMS UI 组件（Sprint 9 Round 2 + 易用性增强）：
 
 | 组件 | 路径 |
 |---|---|
@@ -856,6 +887,13 @@ CMS UI 组件（Sprint 9 Round 2）：
 | `ProductMiniProgramPreview` | `src/components/cms/ProductMiniProgramPreview.tsx` |
 | `ProductOperationSummaryBadge` | `src/components/cms/ProductOperationSummaryBadge.tsx` |
 | `RecommendationSlotsManager` | `src/app/cms/recommendations/RecommendationSlotsManager.tsx` |
+| `ProductPicker` / `ProductMultiPicker` | `src/components/cms/pickers/ProductPicker.tsx` 等 |
+| `SkuPicker` | `src/components/cms/pickers/SkuPicker.tsx` |
+| `RecipePicker` | `src/components/cms/pickers/RecipePicker.tsx` |
+| `CategoryPicker` | `src/components/cms/pickers/CategoryPicker.tsx` |
+| `RecommendationSlotPicker` | `src/components/cms/pickers/RecommendationSlotPicker.tsx` |
+| `CmsLinkTargetSelector` | `src/components/cms/pickers/CmsLinkTargetSelector.tsx` |
+| `AutoKeyField` | `src/components/cms/pickers/AutoKeyField.tsx` |
 
 ---
 

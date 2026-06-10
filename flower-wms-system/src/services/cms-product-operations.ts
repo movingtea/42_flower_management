@@ -645,11 +645,29 @@ export type CreateRecommendationSlotInput = {
   maxItems?: number;
 };
 
+export async function isRecommendationSlotKeyTaken(
+  key: string,
+  excludeId?: string | null
+): Promise<boolean> {
+  const trimmed = key.trim();
+  if (!trimmed) return false;
+  const existing = await prisma.cmsRecommendationSlot.findUnique({
+    where: { key: trimmed },
+    select: { id: true },
+  });
+  if (!existing) return false;
+  if (excludeId && existing.id === excludeId) return false;
+  return true;
+}
+
 export async function createRecommendationSlot(
   input: CreateRecommendationSlotInput
 ) {
   const key = input.key.trim();
   if (!key) throw new Error("推荐位 key 不能为空");
+  if (await isRecommendationSlotKeyTaken(key)) {
+    throw new Error("该 key 已被使用，请更换。");
+  }
 
   return prisma.cmsRecommendationSlot.create({
     data: {
@@ -672,7 +690,13 @@ export async function updateRecommendationSlot(
   input: UpdateRecommendationSlotInput
 ) {
   const data: Prisma.CmsRecommendationSlotUpdateInput = {};
-  if (input.key !== undefined) data.key = input.key.trim();
+  if (input.key !== undefined) {
+    const nextKey = input.key.trim();
+    if (await isRecommendationSlotKeyTaken(nextKey, id)) {
+      throw new Error("该 key 已被使用，请更换。");
+    }
+    data.key = nextKey;
+  }
   if (input.name !== undefined) data.name = input.name.trim();
   if (input.description !== undefined) {
     data.description = input.description?.trim() || null;
@@ -1108,4 +1132,189 @@ export function operationTagsToPrismaData(
   if (tags.sellingPoints !== undefined) data.sellingPoints = tags.sellingPoints;
   if (tags.operationNote !== undefined) data.operationNote = tags.operationNote;
   return data;
+}
+
+// --- Picker search APIs ---
+
+export type ProductPickerItem = {
+  id: string;
+  name: string;
+  categoryName: string | null;
+  status: "active" | "inactive";
+  coverImage: string;
+  priceRange: string;
+  skuCount: number;
+  readinessStatus: string;
+  productDecisionSummary: {
+    healthStatus: string;
+    healthStatusLabel: string;
+  };
+};
+
+export async function searchProductsForPicker(
+  keyword?: string | null,
+  limit = 20
+): Promise<ProductPickerItem[]> {
+  const take = Math.min(50, Math.max(1, limit));
+  const where: Prisma.ProductSpuWhereInput = { ...activeSpuWhere };
+
+  if (keyword?.trim()) {
+    where.name = { contains: keyword.trim(), mode: "insensitive" };
+  }
+
+  const spus = await prisma.productSpu.findMany({
+    where,
+    take,
+    orderBy: [{ updatedAt: "desc" }],
+    include: {
+      categories: { include: { productCategory: { select: { name: true } } } },
+      skus: { orderBy: { sortOrder: "asc" } },
+    },
+  });
+
+  const skuIds = spus.flatMap((s) => s.skus.map((sk) => sk.id));
+  const skusWithRecipe =
+    skuIds.length > 0
+      ? await prisma.productSku.findMany({
+          where: { id: { in: skuIds } },
+          include: productMarginSkuInclude,
+        })
+      : [];
+  const marginBySkuId = new Map(
+    skusWithRecipe.map((sku) => [sku.id, estimateSkuMarginFromRecord(sku)])
+  );
+
+  return spus.map((spu) => {
+    const mainImage = resolveSpuCardImageUrl(spu.skus);
+    const prices = spu.skus.map((s) => Number(s.price));
+    const minPrice = prices.length ? Math.min(...prices) : 0;
+    const maxPrice = prices.length ? Math.max(...prices) : 0;
+    const priceRange =
+      prices.length === 0
+        ? "—"
+        : minPrice === maxPrice
+          ? `¥${minPrice.toFixed(2)}`
+          : `¥${minPrice.toFixed(2)}–¥${maxPrice.toFixed(2)}`;
+
+    const skuRows = spu.skus.map((sku) => {
+      const margin = marginBySkuId.get(sku.id) ?? null;
+      return buildSkuDecisionSummary(sku, margin);
+    });
+    const decision = aggregateDecisionSummary(skuRows);
+
+    const publishReadiness = validateProductPublishReadiness(
+      buildValidationInput(
+        {
+          ...spu,
+          categories: spu.categories.map((c) => ({
+            productCategoryId: c.productCategoryId,
+          })),
+        },
+        spu.skus.map((sku) => ({
+          sku,
+          margin: marginBySkuId.get(sku.id) ?? null,
+          decision: buildSkuDecisionSummary(
+            sku,
+            marginBySkuId.get(sku.id) ?? null
+          ),
+        }))
+      )
+    );
+
+    return {
+      id: spu.id,
+      name: spu.name,
+      categoryName: spu.categories[0]?.productCategory?.name ?? null,
+      status: spu.isActive ? "active" : "inactive",
+      coverImage: mainImage,
+      priceRange,
+      skuCount: spu.skus.length,
+      readinessStatus: publishReadiness.overallStatus,
+      productDecisionSummary: {
+        healthStatus: decision.healthStatus ?? "UNKNOWN",
+        healthStatusLabel: decision.healthStatusLabel ?? "未知",
+      },
+    };
+  });
+}
+
+export type ProductSkuPickerItem = {
+  id: string;
+  name: string;
+  price: string;
+  isActive: boolean;
+  recipeId: string | null;
+  recipeName: string | null;
+  marginSummary: string | null;
+};
+
+export async function listProductSkusForPicker(
+  productId: string
+): Promise<ProductSkuPickerItem[]> {
+  const spu = await prisma.productSpu.findFirst({
+    where: { id: productId, ...activeSpuWhere },
+    include: {
+      skus: {
+        orderBy: { sortOrder: "asc" },
+        include: { recipe: { select: { id: true, name: true } } },
+      },
+    },
+  });
+
+  if (!spu) return [];
+
+  const skusWithRecipe = await prisma.productSku.findMany({
+    where: { id: { in: spu.skus.map((s) => s.id) } },
+    include: productMarginSkuInclude,
+  });
+  const marginBySkuId = new Map(
+    skusWithRecipe.map((sku) => [sku.id, estimateSkuMarginFromRecord(sku)])
+  );
+
+  return spu.skus.map((sku) => {
+    const margin = marginBySkuId.get(sku.id) ?? null;
+    const decision = buildSkuDecisionSummary(sku, margin);
+    const gross = margin?.estimatedGrossMargin
+      ? `${margin.estimatedGrossMargin}%`
+      : null;
+
+    return {
+      id: sku.id,
+      name: sku.specName,
+      price: Number(sku.price).toFixed(2),
+      isActive: spu.isActive,
+      recipeId: sku.recipeId,
+      recipeName: sku.recipe?.name ?? null,
+      marginSummary: gross
+        ? `${decision.healthStatusLabel}${gross ? ` · 毛利 ${gross}` : ""}`
+        : decision.healthStatusLabel,
+    };
+  });
+}
+
+export type RecommendationSlotPickerItem = {
+  id: string;
+  key: string;
+  name: string;
+  slotType: string;
+  sceneType: string | null;
+  isActive: boolean;
+};
+
+export async function listRecommendationSlotsLite(): Promise<
+  RecommendationSlotPickerItem[]
+> {
+  const slots = await prisma.cmsRecommendationSlot.findMany({
+    where: { isActive: true },
+    orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
+    select: {
+      id: true,
+      key: true,
+      name: true,
+      slotType: true,
+      sceneType: true,
+      isActive: true,
+    },
+  });
+  return slots;
 }
