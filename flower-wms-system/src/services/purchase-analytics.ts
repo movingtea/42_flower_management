@@ -25,6 +25,7 @@ import {
 const DEFAULT_LIMIT = 20;
 
 export type PurchaseAnalyticsParams = {
+  preset?: string | null;
   startDate?: string | null;
   endDate?: string | null;
   supplierId?: string | null;
@@ -221,6 +222,7 @@ function mapPurchaseLineRow(
 
 export async function getPurchaseAnalyticsReport(params: PurchaseAnalyticsParams = {}) {
   const range = getReportDateRange({
+    preset: params.preset,
     startDate: params.startDate,
     endDate: params.endDate,
     now: params.now,

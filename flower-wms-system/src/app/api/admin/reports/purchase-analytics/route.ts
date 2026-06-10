@@ -5,6 +5,7 @@ import { getPurchaseAnalyticsReport } from "@/services/purchase-analytics";
 export const dynamic = "force-dynamic";
 
 function parsePurchaseAnalyticsParams(searchParams: URLSearchParams) {
+  const preset = searchParams.get("preset");
   const startDate = searchParams.get("startDate");
   const endDate = searchParams.get("endDate");
   const supplierId = searchParams.get("supplierId");
@@ -20,6 +21,7 @@ function parsePurchaseAnalyticsParams(searchParams: URLSearchParams) {
   }
 
   return {
+    preset,
     startDate,
     endDate,
     supplierId,

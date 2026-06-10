@@ -27,9 +27,10 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 - 微信小程序用户登录、商品浏览、购物车、下单、mock 支付、订单查询。
 - 订单真实毛利核算：`OrderCostSnapshot`。
 - 产品级毛利预估：`FlowerWiki.standardUnitCost` + `Recipe` + `PackagingKit` + SKU price。
-- 经营报表中心：销售、趋势、毛利排行、低毛利、成本结构、花材使用、损耗、库存预警。
+- 经营报表中心：销售、趋势、毛利排行、低毛利、成本结构、花材使用、损耗、库存预警、采购复盘与供应商分析。
 - 供应商与采购单：`Supplier` / `PurchaseOrder` / `PurchaseOrderLine`。
 - 采购单到货入库：生成 `Batch` + `StockLog: INBOUND`，回写 `PurchaseOrderLine.inboundBatchId`。
+- 采购复盘：供应商采购排行、花材采购价趋势、批次销售转化、批次销售成本贡献、采购建议标签。
 
 ### 当前不存在 / 不应假设存在
 
@@ -41,7 +42,7 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 | 对象存储 | 未实现；上传写本地 `public/uploads` |
 | Redis / MQ | 未实现；`package.json` 无相关依赖 |
 | 包装物理库存扣减 | 未实现；`PackagingKit` 只代表标准包装成本 |
-| 供应商分析报表 / 采购价趋势 | 未实现 |
+| 供应商付款 / 对账 / 发票 | 未实现 |
 | Excel 导入导出 | 未实现 |
 | CRM / SaaS 计费 | 未实现 |
 
@@ -65,6 +66,7 @@ flower-wms-system/
 ├── scripts/
 │   ├── cron-inventory-daemon.ts
 │   ├── smoke-purchase-flow.ts
+│   ├── smoke-purchase-analytics.ts
 │   └── sync-physical-to-virtual-stock.ts
 ├── src/
 │   ├── app/
@@ -92,6 +94,8 @@ flower-wms-system/
 | `src/services/product-margin.ts` | SKU / SPU 毛利预估服务 |
 | `src/services/business-report-pure.ts` | 报表纯函数 |
 | `src/services/business-report.ts` | 经营报表与缺失快照 backfill |
+| `src/services/purchase-analytics-pure.ts` | 采购复盘纯计算：summary、供应商排行、花材价趋势、批次转化、成本贡献、建议标签 |
+| `src/services/purchase-analytics.ts` | 采购复盘 Prisma 查询与 API DTO 序列化 |
 | `src/services/order-fifo.ts` | 支付后 FIFO 扣物理库存并生成订单成本快照 |
 | `src/services/fifo.ts` | FIFO 扣减算法与 StockLog 写入 |
 | `src/services/wms-stock.ts` | 手工入库、指定批次报损、批次流水线 |
@@ -119,7 +123,7 @@ flower-wms-system/
 | `/wms/packaging-kits` | 包装方案管理 |
 | `/wms/material-categories` | 原材料分类 |
 | `/wms/orders` | 订单履约看板 |
-| `/wms/reports` | 经营报表中心 |
+| `/wms/reports` | 经营报表中心（Tab：经营总览、销售趋势、商品毛利、库存预警、损耗模型影响、采购复盘） |
 | `/wms/batches` | redirect 到 `/wms/operations` |
 | `/wms/wastage` | redirect 到 `/wms/operations?panel=loss` |
 | `/wms/bom` | redirect 到 `/wms/recipes` |
@@ -202,6 +206,8 @@ CMS 商品编辑边界：
 - `material-usage`
 - `wastage`
 - `inventory-alerts`
+- `loss-model-impact`
+- `purchase-analytics`
 - `backfill-cost-snapshots`
 
 权限：
@@ -400,6 +406,15 @@ warning 场景：
 | Material usage cost | `SALE_OUT × Batch.unitCost` |
 | Wastage | `StockLossRecord.lossQuantity × Batch.unitCost` |
 | Inventory alerts | 当前批次剩余数量与库存价值 |
+| Loss model impact | `SALE_OUT` 花材成本按 `Batch.lossAdjustedUnitCost`（fallback `unitCost`）估算损耗模型影响 |
+| Purchase analytics | `RECEIVED` 采购单按 `receivedAt`（fallback `purchaseDate` / `createdAt`）聚合；批次转化来自 `StockLog` |
+
+采购复盘数据口径：
+
+- 采购金额与成本：优先 `PurchaseOrder` / `PurchaseOrderLine` 已入库数据。
+- 批次销售转化：`SALE_OUT` / `WASTAGE_OUT` / `IN_CANCEL` / `ADJUSTMENT` 流水；`actualWastageRate` 仅来自真实 `WASTAGE_OUT`。
+- 损耗模型影响：来自 `Batch.lossAdjustedUnitCost` 或 `PurchaseOrderLine.lossAdjustedUnitCost`，是经营估算，不等同于真实报损。
+- 批次销售成本贡献：`soldQty × Batch.unitCost` / `lossAdjustedUnitCost`；不做订单收入分摊，因此不是批次毛利。
 
 库存价值公式：
 
@@ -629,6 +644,9 @@ Dockerfile：
 15. `stock_batches` 不是当前表名，当前批次表为 `batches`。
 16. `product_bom` 已废弃；当前配方体系为 `recipes` + `recipe_lines` + `product_skus.recipe_id`。
 17. 当前不是多租户 SaaS，新增业务代码不得假设 tenant 隔离已存在。
+18. 采购复盘不得把 `lossAdjustedUnitCost` 当作真实采购成本覆盖 `Batch.unitCost`。
+19. 实际报损率（`WASTAGE_OUT`）不得与模型损耗率（`lossRate` / `usableRate`）混用。
+20. 批次成本贡献不得命名为批次毛利，除非未来实现收入分摊。
 
 ---
 
@@ -641,7 +659,7 @@ Dockerfile：
 | 对象存储 | 未实现，当前本地 uploads |
 | Redis / MQ | 未实现 |
 | 完整测试体系 | 当前以 tsx 轻量测试和 smoke script 为主 |
-| 采购分析 / 供应商价格趋势 | 未实现 |
+| 供应商付款 / 对账 / 发票 | 未实现 |
 | Excel 导入导出 | 未实现 |
 | CRM | 未实现 |
 | SaaS 计费 | 未实现 |
