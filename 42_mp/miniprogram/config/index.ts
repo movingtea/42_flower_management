@@ -4,7 +4,7 @@
  * apiMiniprogramBaseUrl：小程序业务 API 前缀（商品、订单、购物车等）
  * apiWechatBaseUrl：微信平台能力（登录、未来支付回调等）
  */
-export const baseUrl = 'http://localhost:3000';
+export const baseUrl = 'https://www.universe42.studio';
 
 /** @deprecated 请使用 baseUrl */
 export const assetBaseUrl = baseUrl;

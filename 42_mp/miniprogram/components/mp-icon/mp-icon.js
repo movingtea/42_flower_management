@@ -17,7 +17,7 @@ Component({
   },
 
   observers: {
-    name(name: string) {
+    name(name) {
       this.setData({ src: getIconPath(name) });
     },
   },
