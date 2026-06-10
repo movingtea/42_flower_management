@@ -111,6 +111,19 @@ export const ReminderStatus = {
 export type ReminderStatus = (typeof ReminderStatus)[keyof typeof ReminderStatus]
 
 
+export const RecommendationSlotType = {
+  HOME_MAIN: 'HOME_MAIN',
+  HOME_SECONDARY: 'HOME_SECONDARY',
+  SCENE: 'SCENE',
+  FESTIVAL: 'FESTIVAL',
+  NEW_ARRIVAL: 'NEW_ARRIVAL',
+  HIGH_TICKET: 'HIGH_TICKET',
+  CUSTOM: 'CUSTOM'
+} as const
+
+export type RecommendationSlotType = (typeof RecommendationSlotType)[keyof typeof RecommendationSlotType]
+
+
 export const BannerTargetType = {
   PRODUCT: 'PRODUCT',
   ACTIVITY: 'ACTIVITY',

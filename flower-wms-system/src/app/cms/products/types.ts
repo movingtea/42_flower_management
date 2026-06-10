@@ -14,6 +14,13 @@ export type ProductEditorInitial = {
   name: string;
   category: string[];
   occasionTags: string[];
+  colorTags?: string[];
+  styleTags?: string[];
+  relationshipTags?: string[];
+  budgetTags?: string[];
+  positioningTags?: string[];
+  sellingPoints?: string[];
+  operationNote?: string;
   description: string;
   maintenanceGuide: string;
   isActive: boolean;

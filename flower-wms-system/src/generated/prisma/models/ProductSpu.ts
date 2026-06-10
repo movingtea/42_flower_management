@@ -46,6 +46,7 @@ export type ProductSpuMinAggregateOutputType = {
   shippingFee: number | null
   allowPreOrder: boolean | null
   productionTime: number | null
+  operationNote: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -60,6 +61,7 @@ export type ProductSpuMaxAggregateOutputType = {
   shippingFee: number | null
   allowPreOrder: boolean | null
   productionTime: number | null
+  operationNote: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -75,6 +77,13 @@ export type ProductSpuCountAggregateOutputType = {
   allowPreOrder: number
   productionTime: number
   occasionTags: number
+  colorTags: number
+  styleTags: number
+  relationshipTags: number
+  budgetTags: number
+  positioningTags: number
+  sellingPoints: number
+  operationNote: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -101,6 +110,7 @@ export type ProductSpuMinAggregateInputType = {
   shippingFee?: true
   allowPreOrder?: true
   productionTime?: true
+  operationNote?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -115,6 +125,7 @@ export type ProductSpuMaxAggregateInputType = {
   shippingFee?: true
   allowPreOrder?: true
   productionTime?: true
+  operationNote?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -130,6 +141,13 @@ export type ProductSpuCountAggregateInputType = {
   allowPreOrder?: true
   productionTime?: true
   occasionTags?: true
+  colorTags?: true
+  styleTags?: true
+  relationshipTags?: true
+  budgetTags?: true
+  positioningTags?: true
+  sellingPoints?: true
+  operationNote?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -232,6 +250,13 @@ export type ProductSpuGroupByOutputType = {
   allowPreOrder: boolean
   productionTime: number
   occasionTags: string[]
+  colorTags: runtime.JsonValue | null
+  styleTags: runtime.JsonValue | null
+  relationshipTags: runtime.JsonValue | null
+  budgetTags: runtime.JsonValue | null
+  positioningTags: runtime.JsonValue | null
+  sellingPoints: runtime.JsonValue | null
+  operationNote: string | null
   createdAt: Date
   updatedAt: Date
   _count: ProductSpuCountAggregateOutputType | null
@@ -270,11 +295,19 @@ export type ProductSpuWhereInput = {
   allowPreOrder?: Prisma.BoolFilter<"ProductSpu"> | boolean
   productionTime?: Prisma.IntFilter<"ProductSpu"> | number
   occasionTags?: Prisma.StringNullableListFilter<"ProductSpu">
+  colorTags?: Prisma.JsonNullableFilter<"ProductSpu">
+  styleTags?: Prisma.JsonNullableFilter<"ProductSpu">
+  relationshipTags?: Prisma.JsonNullableFilter<"ProductSpu">
+  budgetTags?: Prisma.JsonNullableFilter<"ProductSpu">
+  positioningTags?: Prisma.JsonNullableFilter<"ProductSpu">
+  sellingPoints?: Prisma.JsonNullableFilter<"ProductSpu">
+  operationNote?: Prisma.StringNullableFilter<"ProductSpu"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ProductSpu"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProductSpu"> | Date | string
   skus?: Prisma.ProductSkuListRelationFilter
   categories?: Prisma.ProductCategoryRelationListRelationFilter
   banners?: Prisma.BannerListRelationFilter
+  recommendationItems?: Prisma.CmsRecommendationItemListRelationFilter
 }
 
 export type ProductSpuOrderByWithRelationInput = {
@@ -288,11 +321,19 @@ export type ProductSpuOrderByWithRelationInput = {
   allowPreOrder?: Prisma.SortOrder
   productionTime?: Prisma.SortOrder
   occasionTags?: Prisma.SortOrder
+  colorTags?: Prisma.SortOrderInput | Prisma.SortOrder
+  styleTags?: Prisma.SortOrderInput | Prisma.SortOrder
+  relationshipTags?: Prisma.SortOrderInput | Prisma.SortOrder
+  budgetTags?: Prisma.SortOrderInput | Prisma.SortOrder
+  positioningTags?: Prisma.SortOrderInput | Prisma.SortOrder
+  sellingPoints?: Prisma.SortOrderInput | Prisma.SortOrder
+  operationNote?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   skus?: Prisma.ProductSkuOrderByRelationAggregateInput
   categories?: Prisma.ProductCategoryRelationOrderByRelationAggregateInput
   banners?: Prisma.BannerOrderByRelationAggregateInput
+  recommendationItems?: Prisma.CmsRecommendationItemOrderByRelationAggregateInput
 }
 
 export type ProductSpuWhereUniqueInput = Prisma.AtLeast<{
@@ -309,11 +350,19 @@ export type ProductSpuWhereUniqueInput = Prisma.AtLeast<{
   allowPreOrder?: Prisma.BoolFilter<"ProductSpu"> | boolean
   productionTime?: Prisma.IntFilter<"ProductSpu"> | number
   occasionTags?: Prisma.StringNullableListFilter<"ProductSpu">
+  colorTags?: Prisma.JsonNullableFilter<"ProductSpu">
+  styleTags?: Prisma.JsonNullableFilter<"ProductSpu">
+  relationshipTags?: Prisma.JsonNullableFilter<"ProductSpu">
+  budgetTags?: Prisma.JsonNullableFilter<"ProductSpu">
+  positioningTags?: Prisma.JsonNullableFilter<"ProductSpu">
+  sellingPoints?: Prisma.JsonNullableFilter<"ProductSpu">
+  operationNote?: Prisma.StringNullableFilter<"ProductSpu"> | string | null
   createdAt?: Prisma.DateTimeFilter<"ProductSpu"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProductSpu"> | Date | string
   skus?: Prisma.ProductSkuListRelationFilter
   categories?: Prisma.ProductCategoryRelationListRelationFilter
   banners?: Prisma.BannerListRelationFilter
+  recommendationItems?: Prisma.CmsRecommendationItemListRelationFilter
 }, "id">
 
 export type ProductSpuOrderByWithAggregationInput = {
@@ -327,6 +376,13 @@ export type ProductSpuOrderByWithAggregationInput = {
   allowPreOrder?: Prisma.SortOrder
   productionTime?: Prisma.SortOrder
   occasionTags?: Prisma.SortOrder
+  colorTags?: Prisma.SortOrderInput | Prisma.SortOrder
+  styleTags?: Prisma.SortOrderInput | Prisma.SortOrder
+  relationshipTags?: Prisma.SortOrderInput | Prisma.SortOrder
+  budgetTags?: Prisma.SortOrderInput | Prisma.SortOrder
+  positioningTags?: Prisma.SortOrderInput | Prisma.SortOrder
+  sellingPoints?: Prisma.SortOrderInput | Prisma.SortOrder
+  operationNote?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ProductSpuCountOrderByAggregateInput
@@ -350,6 +406,13 @@ export type ProductSpuScalarWhereWithAggregatesInput = {
   allowPreOrder?: Prisma.BoolWithAggregatesFilter<"ProductSpu"> | boolean
   productionTime?: Prisma.IntWithAggregatesFilter<"ProductSpu"> | number
   occasionTags?: Prisma.StringNullableListFilter<"ProductSpu">
+  colorTags?: Prisma.JsonNullableWithAggregatesFilter<"ProductSpu">
+  styleTags?: Prisma.JsonNullableWithAggregatesFilter<"ProductSpu">
+  relationshipTags?: Prisma.JsonNullableWithAggregatesFilter<"ProductSpu">
+  budgetTags?: Prisma.JsonNullableWithAggregatesFilter<"ProductSpu">
+  positioningTags?: Prisma.JsonNullableWithAggregatesFilter<"ProductSpu">
+  sellingPoints?: Prisma.JsonNullableWithAggregatesFilter<"ProductSpu">
+  operationNote?: Prisma.StringNullableWithAggregatesFilter<"ProductSpu"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ProductSpu"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ProductSpu"> | Date | string
 }
@@ -365,11 +428,19 @@ export type ProductSpuCreateInput = {
   allowPreOrder?: boolean
   productionTime?: number
   occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   skus?: Prisma.ProductSkuCreateNestedManyWithoutSpuInput
   categories?: Prisma.ProductCategoryRelationCreateNestedManyWithoutSpuInput
   banners?: Prisma.BannerCreateNestedManyWithoutSpuInput
+  recommendationItems?: Prisma.CmsRecommendationItemCreateNestedManyWithoutProductInput
 }
 
 export type ProductSpuUncheckedCreateInput = {
@@ -383,11 +454,19 @@ export type ProductSpuUncheckedCreateInput = {
   allowPreOrder?: boolean
   productionTime?: number
   occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   skus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSpuInput
   categories?: Prisma.ProductCategoryRelationUncheckedCreateNestedManyWithoutSpuInput
   banners?: Prisma.BannerUncheckedCreateNestedManyWithoutSpuInput
+  recommendationItems?: Prisma.CmsRecommendationItemUncheckedCreateNestedManyWithoutProductInput
 }
 
 export type ProductSpuUpdateInput = {
@@ -401,11 +480,19 @@ export type ProductSpuUpdateInput = {
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
   occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skus?: Prisma.ProductSkuUpdateManyWithoutSpuNestedInput
   categories?: Prisma.ProductCategoryRelationUpdateManyWithoutSpuNestedInput
   banners?: Prisma.BannerUpdateManyWithoutSpuNestedInput
+  recommendationItems?: Prisma.CmsRecommendationItemUpdateManyWithoutProductNestedInput
 }
 
 export type ProductSpuUncheckedUpdateInput = {
@@ -419,11 +506,19 @@ export type ProductSpuUncheckedUpdateInput = {
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
   occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSpuNestedInput
   categories?: Prisma.ProductCategoryRelationUncheckedUpdateManyWithoutSpuNestedInput
   banners?: Prisma.BannerUncheckedUpdateManyWithoutSpuNestedInput
+  recommendationItems?: Prisma.CmsRecommendationItemUncheckedUpdateManyWithoutProductNestedInput
 }
 
 export type ProductSpuCreateManyInput = {
@@ -437,6 +532,13 @@ export type ProductSpuCreateManyInput = {
   allowPreOrder?: boolean
   productionTime?: number
   occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -452,6 +554,13 @@ export type ProductSpuUpdateManyMutationInput = {
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
   occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -467,6 +576,13 @@ export type ProductSpuUncheckedUpdateManyInput = {
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
   occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -495,6 +611,13 @@ export type ProductSpuCountOrderByAggregateInput = {
   allowPreOrder?: Prisma.SortOrder
   productionTime?: Prisma.SortOrder
   occasionTags?: Prisma.SortOrder
+  colorTags?: Prisma.SortOrder
+  styleTags?: Prisma.SortOrder
+  relationshipTags?: Prisma.SortOrder
+  budgetTags?: Prisma.SortOrder
+  positioningTags?: Prisma.SortOrder
+  sellingPoints?: Prisma.SortOrder
+  operationNote?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -514,6 +637,7 @@ export type ProductSpuMaxOrderByAggregateInput = {
   shippingFee?: Prisma.SortOrder
   allowPreOrder?: Prisma.SortOrder
   productionTime?: Prisma.SortOrder
+  operationNote?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -528,6 +652,7 @@ export type ProductSpuMinOrderByAggregateInput = {
   shippingFee?: Prisma.SortOrder
   allowPreOrder?: Prisma.SortOrder
   productionTime?: Prisma.SortOrder
+  operationNote?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -587,6 +712,20 @@ export type ProductSpuUpdateOneRequiredWithoutSkusNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.ProductSpuUpdateToOneWithWhereWithoutSkusInput, Prisma.ProductSpuUpdateWithoutSkusInput>, Prisma.ProductSpuUncheckedUpdateWithoutSkusInput>
 }
 
+export type ProductSpuCreateNestedOneWithoutRecommendationItemsInput = {
+  create?: Prisma.XOR<Prisma.ProductSpuCreateWithoutRecommendationItemsInput, Prisma.ProductSpuUncheckedCreateWithoutRecommendationItemsInput>
+  connectOrCreate?: Prisma.ProductSpuCreateOrConnectWithoutRecommendationItemsInput
+  connect?: Prisma.ProductSpuWhereUniqueInput
+}
+
+export type ProductSpuUpdateOneRequiredWithoutRecommendationItemsNestedInput = {
+  create?: Prisma.XOR<Prisma.ProductSpuCreateWithoutRecommendationItemsInput, Prisma.ProductSpuUncheckedCreateWithoutRecommendationItemsInput>
+  connectOrCreate?: Prisma.ProductSpuCreateOrConnectWithoutRecommendationItemsInput
+  upsert?: Prisma.ProductSpuUpsertWithoutRecommendationItemsInput
+  connect?: Prisma.ProductSpuWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.ProductSpuUpdateToOneWithWhereWithoutRecommendationItemsInput, Prisma.ProductSpuUpdateWithoutRecommendationItemsInput>, Prisma.ProductSpuUncheckedUpdateWithoutRecommendationItemsInput>
+}
+
 export type ProductSpuCreateNestedOneWithoutBannersInput = {
   create?: Prisma.XOR<Prisma.ProductSpuCreateWithoutBannersInput, Prisma.ProductSpuUncheckedCreateWithoutBannersInput>
   connectOrCreate?: Prisma.ProductSpuCreateOrConnectWithoutBannersInput
@@ -614,10 +753,18 @@ export type ProductSpuCreateWithoutCategoriesInput = {
   allowPreOrder?: boolean
   productionTime?: number
   occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   skus?: Prisma.ProductSkuCreateNestedManyWithoutSpuInput
   banners?: Prisma.BannerCreateNestedManyWithoutSpuInput
+  recommendationItems?: Prisma.CmsRecommendationItemCreateNestedManyWithoutProductInput
 }
 
 export type ProductSpuUncheckedCreateWithoutCategoriesInput = {
@@ -631,10 +778,18 @@ export type ProductSpuUncheckedCreateWithoutCategoriesInput = {
   allowPreOrder?: boolean
   productionTime?: number
   occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   skus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSpuInput
   banners?: Prisma.BannerUncheckedCreateNestedManyWithoutSpuInput
+  recommendationItems?: Prisma.CmsRecommendationItemUncheckedCreateNestedManyWithoutProductInput
 }
 
 export type ProductSpuCreateOrConnectWithoutCategoriesInput = {
@@ -664,10 +819,18 @@ export type ProductSpuUpdateWithoutCategoriesInput = {
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
   occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skus?: Prisma.ProductSkuUpdateManyWithoutSpuNestedInput
   banners?: Prisma.BannerUpdateManyWithoutSpuNestedInput
+  recommendationItems?: Prisma.CmsRecommendationItemUpdateManyWithoutProductNestedInput
 }
 
 export type ProductSpuUncheckedUpdateWithoutCategoriesInput = {
@@ -681,10 +844,18 @@ export type ProductSpuUncheckedUpdateWithoutCategoriesInput = {
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
   occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSpuNestedInput
   banners?: Prisma.BannerUncheckedUpdateManyWithoutSpuNestedInput
+  recommendationItems?: Prisma.CmsRecommendationItemUncheckedUpdateManyWithoutProductNestedInput
 }
 
 export type ProductSpuCreateWithoutSkusInput = {
@@ -698,10 +869,18 @@ export type ProductSpuCreateWithoutSkusInput = {
   allowPreOrder?: boolean
   productionTime?: number
   occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.ProductCategoryRelationCreateNestedManyWithoutSpuInput
   banners?: Prisma.BannerCreateNestedManyWithoutSpuInput
+  recommendationItems?: Prisma.CmsRecommendationItemCreateNestedManyWithoutProductInput
 }
 
 export type ProductSpuUncheckedCreateWithoutSkusInput = {
@@ -715,10 +894,18 @@ export type ProductSpuUncheckedCreateWithoutSkusInput = {
   allowPreOrder?: boolean
   productionTime?: number
   occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   categories?: Prisma.ProductCategoryRelationUncheckedCreateNestedManyWithoutSpuInput
   banners?: Prisma.BannerUncheckedCreateNestedManyWithoutSpuInput
+  recommendationItems?: Prisma.CmsRecommendationItemUncheckedCreateNestedManyWithoutProductInput
 }
 
 export type ProductSpuCreateOrConnectWithoutSkusInput = {
@@ -748,10 +935,18 @@ export type ProductSpuUpdateWithoutSkusInput = {
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
   occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   categories?: Prisma.ProductCategoryRelationUpdateManyWithoutSpuNestedInput
   banners?: Prisma.BannerUpdateManyWithoutSpuNestedInput
+  recommendationItems?: Prisma.CmsRecommendationItemUpdateManyWithoutProductNestedInput
 }
 
 export type ProductSpuUncheckedUpdateWithoutSkusInput = {
@@ -765,8 +960,132 @@ export type ProductSpuUncheckedUpdateWithoutSkusInput = {
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
   occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  categories?: Prisma.ProductCategoryRelationUncheckedUpdateManyWithoutSpuNestedInput
+  banners?: Prisma.BannerUncheckedUpdateManyWithoutSpuNestedInput
+  recommendationItems?: Prisma.CmsRecommendationItemUncheckedUpdateManyWithoutProductNestedInput
+}
+
+export type ProductSpuCreateWithoutRecommendationItemsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  maintenanceGuide?: string | null
+  isActive?: boolean
+  isDeleted?: boolean
+  shippingFee?: number
+  allowPreOrder?: boolean
+  productionTime?: number
+  occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  skus?: Prisma.ProductSkuCreateNestedManyWithoutSpuInput
+  categories?: Prisma.ProductCategoryRelationCreateNestedManyWithoutSpuInput
+  banners?: Prisma.BannerCreateNestedManyWithoutSpuInput
+}
+
+export type ProductSpuUncheckedCreateWithoutRecommendationItemsInput = {
+  id?: string
+  name: string
+  description?: string | null
+  maintenanceGuide?: string | null
+  isActive?: boolean
+  isDeleted?: boolean
+  shippingFee?: number
+  allowPreOrder?: boolean
+  productionTime?: number
+  occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  skus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSpuInput
+  categories?: Prisma.ProductCategoryRelationUncheckedCreateNestedManyWithoutSpuInput
+  banners?: Prisma.BannerUncheckedCreateNestedManyWithoutSpuInput
+}
+
+export type ProductSpuCreateOrConnectWithoutRecommendationItemsInput = {
+  where: Prisma.ProductSpuWhereUniqueInput
+  create: Prisma.XOR<Prisma.ProductSpuCreateWithoutRecommendationItemsInput, Prisma.ProductSpuUncheckedCreateWithoutRecommendationItemsInput>
+}
+
+export type ProductSpuUpsertWithoutRecommendationItemsInput = {
+  update: Prisma.XOR<Prisma.ProductSpuUpdateWithoutRecommendationItemsInput, Prisma.ProductSpuUncheckedUpdateWithoutRecommendationItemsInput>
+  create: Prisma.XOR<Prisma.ProductSpuCreateWithoutRecommendationItemsInput, Prisma.ProductSpuUncheckedCreateWithoutRecommendationItemsInput>
+  where?: Prisma.ProductSpuWhereInput
+}
+
+export type ProductSpuUpdateToOneWithWhereWithoutRecommendationItemsInput = {
+  where?: Prisma.ProductSpuWhereInput
+  data: Prisma.XOR<Prisma.ProductSpuUpdateWithoutRecommendationItemsInput, Prisma.ProductSpuUncheckedUpdateWithoutRecommendationItemsInput>
+}
+
+export type ProductSpuUpdateWithoutRecommendationItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceGuide?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shippingFee?: Prisma.FloatFieldUpdateOperationsInput | number
+  allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  productionTime?: Prisma.IntFieldUpdateOperationsInput | number
+  occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  skus?: Prisma.ProductSkuUpdateManyWithoutSpuNestedInput
+  categories?: Prisma.ProductCategoryRelationUpdateManyWithoutSpuNestedInput
+  banners?: Prisma.BannerUpdateManyWithoutSpuNestedInput
+}
+
+export type ProductSpuUncheckedUpdateWithoutRecommendationItemsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceGuide?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  shippingFee?: Prisma.FloatFieldUpdateOperationsInput | number
+  allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  productionTime?: Prisma.IntFieldUpdateOperationsInput | number
+  occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  skus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSpuNestedInput
   categories?: Prisma.ProductCategoryRelationUncheckedUpdateManyWithoutSpuNestedInput
   banners?: Prisma.BannerUncheckedUpdateManyWithoutSpuNestedInput
 }
@@ -782,10 +1101,18 @@ export type ProductSpuCreateWithoutBannersInput = {
   allowPreOrder?: boolean
   productionTime?: number
   occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   skus?: Prisma.ProductSkuCreateNestedManyWithoutSpuInput
   categories?: Prisma.ProductCategoryRelationCreateNestedManyWithoutSpuInput
+  recommendationItems?: Prisma.CmsRecommendationItemCreateNestedManyWithoutProductInput
 }
 
 export type ProductSpuUncheckedCreateWithoutBannersInput = {
@@ -799,10 +1126,18 @@ export type ProductSpuUncheckedCreateWithoutBannersInput = {
   allowPreOrder?: boolean
   productionTime?: number
   occasionTags?: Prisma.ProductSpuCreateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   skus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSpuInput
   categories?: Prisma.ProductCategoryRelationUncheckedCreateNestedManyWithoutSpuInput
+  recommendationItems?: Prisma.CmsRecommendationItemUncheckedCreateNestedManyWithoutProductInput
 }
 
 export type ProductSpuCreateOrConnectWithoutBannersInput = {
@@ -832,10 +1167,18 @@ export type ProductSpuUpdateWithoutBannersInput = {
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
   occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skus?: Prisma.ProductSkuUpdateManyWithoutSpuNestedInput
   categories?: Prisma.ProductCategoryRelationUpdateManyWithoutSpuNestedInput
+  recommendationItems?: Prisma.CmsRecommendationItemUpdateManyWithoutProductNestedInput
 }
 
 export type ProductSpuUncheckedUpdateWithoutBannersInput = {
@@ -849,10 +1192,18 @@ export type ProductSpuUncheckedUpdateWithoutBannersInput = {
   allowPreOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
   productionTime?: Prisma.IntFieldUpdateOperationsInput | number
   occasionTags?: Prisma.ProductSpuUpdateoccasionTagsInput | string[]
+  colorTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  styleTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  relationshipTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  budgetTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  positioningTags?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  sellingPoints?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  operationNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   skus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSpuNestedInput
   categories?: Prisma.ProductCategoryRelationUncheckedUpdateManyWithoutSpuNestedInput
+  recommendationItems?: Prisma.CmsRecommendationItemUncheckedUpdateManyWithoutProductNestedInput
 }
 
 
@@ -864,12 +1215,14 @@ export type ProductSpuCountOutputType = {
   skus: number
   categories: number
   banners: number
+  recommendationItems: number
 }
 
 export type ProductSpuCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   skus?: boolean | ProductSpuCountOutputTypeCountSkusArgs
   categories?: boolean | ProductSpuCountOutputTypeCountCategoriesArgs
   banners?: boolean | ProductSpuCountOutputTypeCountBannersArgs
+  recommendationItems?: boolean | ProductSpuCountOutputTypeCountRecommendationItemsArgs
 }
 
 /**
@@ -903,6 +1256,13 @@ export type ProductSpuCountOutputTypeCountBannersArgs<ExtArgs extends runtime.Ty
   where?: Prisma.BannerWhereInput
 }
 
+/**
+ * ProductSpuCountOutputType without action
+ */
+export type ProductSpuCountOutputTypeCountRecommendationItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CmsRecommendationItemWhereInput
+}
+
 
 export type ProductSpuSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -915,11 +1275,19 @@ export type ProductSpuSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   allowPreOrder?: boolean
   productionTime?: boolean
   occasionTags?: boolean
+  colorTags?: boolean
+  styleTags?: boolean
+  relationshipTags?: boolean
+  budgetTags?: boolean
+  positioningTags?: boolean
+  sellingPoints?: boolean
+  operationNote?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   skus?: boolean | Prisma.ProductSpu$skusArgs<ExtArgs>
   categories?: boolean | Prisma.ProductSpu$categoriesArgs<ExtArgs>
   banners?: boolean | Prisma.ProductSpu$bannersArgs<ExtArgs>
+  recommendationItems?: boolean | Prisma.ProductSpu$recommendationItemsArgs<ExtArgs>
   _count?: boolean | Prisma.ProductSpuCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["productSpu"]>
 
@@ -934,6 +1302,13 @@ export type ProductSpuSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   allowPreOrder?: boolean
   productionTime?: boolean
   occasionTags?: boolean
+  colorTags?: boolean
+  styleTags?: boolean
+  relationshipTags?: boolean
+  budgetTags?: boolean
+  positioningTags?: boolean
+  sellingPoints?: boolean
+  operationNote?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["productSpu"]>
@@ -949,6 +1324,13 @@ export type ProductSpuSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   allowPreOrder?: boolean
   productionTime?: boolean
   occasionTags?: boolean
+  colorTags?: boolean
+  styleTags?: boolean
+  relationshipTags?: boolean
+  budgetTags?: boolean
+  positioningTags?: boolean
+  sellingPoints?: boolean
+  operationNote?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["productSpu"]>
@@ -964,15 +1346,23 @@ export type ProductSpuSelectScalar = {
   allowPreOrder?: boolean
   productionTime?: boolean
   occasionTags?: boolean
+  colorTags?: boolean
+  styleTags?: boolean
+  relationshipTags?: boolean
+  budgetTags?: boolean
+  positioningTags?: boolean
+  sellingPoints?: boolean
+  operationNote?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProductSpuOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "maintenanceGuide" | "isActive" | "isDeleted" | "shippingFee" | "allowPreOrder" | "productionTime" | "occasionTags" | "createdAt" | "updatedAt", ExtArgs["result"]["productSpu"]>
+export type ProductSpuOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "maintenanceGuide" | "isActive" | "isDeleted" | "shippingFee" | "allowPreOrder" | "productionTime" | "occasionTags" | "colorTags" | "styleTags" | "relationshipTags" | "budgetTags" | "positioningTags" | "sellingPoints" | "operationNote" | "createdAt" | "updatedAt", ExtArgs["result"]["productSpu"]>
 export type ProductSpuInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   skus?: boolean | Prisma.ProductSpu$skusArgs<ExtArgs>
   categories?: boolean | Prisma.ProductSpu$categoriesArgs<ExtArgs>
   banners?: boolean | Prisma.ProductSpu$bannersArgs<ExtArgs>
+  recommendationItems?: boolean | Prisma.ProductSpu$recommendationItemsArgs<ExtArgs>
   _count?: boolean | Prisma.ProductSpuCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type ProductSpuIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -984,6 +1374,7 @@ export type $ProductSpuPayload<ExtArgs extends runtime.Types.Extensions.Internal
     skus: Prisma.$ProductSkuPayload<ExtArgs>[]
     categories: Prisma.$ProductCategoryRelationPayload<ExtArgs>[]
     banners: Prisma.$BannerPayload<ExtArgs>[]
+    recommendationItems: Prisma.$CmsRecommendationItemPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -999,6 +1390,34 @@ export type $ProductSpuPayload<ExtArgs extends runtime.Types.Extensions.Internal
      * 适用礼赠场景标签（GiftOccasionType key 列表）
      */
     occasionTags: string[]
+    /**
+     * 色系标签（英文 key 数组，JSON 存储）
+     */
+    colorTags: runtime.JsonValue | null
+    /**
+     * 风格标签
+     */
+    styleTags: runtime.JsonValue | null
+    /**
+     * 适合关系标签
+     */
+    relationshipTags: runtime.JsonValue | null
+    /**
+     * 预算区间标签
+     */
+    budgetTags: runtime.JsonValue | null
+    /**
+     * 商品定位标签
+     */
+    positioningTags: runtime.JsonValue | null
+    /**
+     * 卖点短语数组
+     */
+    sellingPoints: runtime.JsonValue | null
+    /**
+     * 运营内部备注（不返回小程序前台）
+     */
+    operationNote: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["productSpu"]>
@@ -1398,6 +1817,7 @@ export interface Prisma__ProductSpuClient<T, Null = never, ExtArgs extends runti
   skus<T extends Prisma.ProductSpu$skusArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductSpu$skusArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductSkuPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   categories<T extends Prisma.ProductSpu$categoriesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductSpu$categoriesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductCategoryRelationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   banners<T extends Prisma.ProductSpu$bannersArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductSpu$bannersArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BannerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  recommendationItems<T extends Prisma.ProductSpu$recommendationItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductSpu$recommendationItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CmsRecommendationItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1437,6 +1857,13 @@ export interface ProductSpuFieldRefs {
   readonly allowPreOrder: Prisma.FieldRef<"ProductSpu", 'Boolean'>
   readonly productionTime: Prisma.FieldRef<"ProductSpu", 'Int'>
   readonly occasionTags: Prisma.FieldRef<"ProductSpu", 'String[]'>
+  readonly colorTags: Prisma.FieldRef<"ProductSpu", 'Json'>
+  readonly styleTags: Prisma.FieldRef<"ProductSpu", 'Json'>
+  readonly relationshipTags: Prisma.FieldRef<"ProductSpu", 'Json'>
+  readonly budgetTags: Prisma.FieldRef<"ProductSpu", 'Json'>
+  readonly positioningTags: Prisma.FieldRef<"ProductSpu", 'Json'>
+  readonly sellingPoints: Prisma.FieldRef<"ProductSpu", 'Json'>
+  readonly operationNote: Prisma.FieldRef<"ProductSpu", 'String'>
   readonly createdAt: Prisma.FieldRef<"ProductSpu", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ProductSpu", 'DateTime'>
 }
@@ -1901,6 +2328,30 @@ export type ProductSpu$bannersArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.BannerScalarFieldEnum | Prisma.BannerScalarFieldEnum[]
+}
+
+/**
+ * ProductSpu.recommendationItems
+ */
+export type ProductSpu$recommendationItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CmsRecommendationItem
+   */
+  select?: Prisma.CmsRecommendationItemSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CmsRecommendationItem
+   */
+  omit?: Prisma.CmsRecommendationItemOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CmsRecommendationItemInclude<ExtArgs> | null
+  where?: Prisma.CmsRecommendationItemWhereInput
+  orderBy?: Prisma.CmsRecommendationItemOrderByWithRelationInput | Prisma.CmsRecommendationItemOrderByWithRelationInput[]
+  cursor?: Prisma.CmsRecommendationItemWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CmsRecommendationItemScalarFieldEnum | Prisma.CmsRecommendationItemScalarFieldEnum[]
 }
 
 /**

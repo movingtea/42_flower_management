@@ -393,6 +393,8 @@ export const ModelName = {
   PurchaseOrderLine: 'PurchaseOrderLine',
   ProductSpu: 'ProductSpu',
   ProductSku: 'ProductSku',
+  CmsRecommendationSlot: 'CmsRecommendationSlot',
+  CmsRecommendationItem: 'CmsRecommendationItem',
   Banner: 'Banner',
   Material: 'Material',
   Recipe: 'Recipe',
@@ -429,7 +431,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "productCategory" | "productCategoryRelation" | "materialCategory" | "materialCategoryRelation" | "supplier" | "purchaseOrder" | "purchaseOrderLine" | "productSpu" | "productSku" | "banner" | "material" | "recipe" | "packagingKit" | "recipeLine" | "batch" | "stockLog" | "stockLossRecord" | "staffUser" | "staffAuditLog" | "user" | "order" | "orderCostSnapshot" | "orderItem" | "customer" | "recipient" | "customerRecipientRelation" | "giftOccasion" | "customerReminder" | "appConfig" | "flowerWiki"
+    modelProps: "productCategory" | "productCategoryRelation" | "materialCategory" | "materialCategoryRelation" | "supplier" | "purchaseOrder" | "purchaseOrderLine" | "productSpu" | "productSku" | "cmsRecommendationSlot" | "cmsRecommendationItem" | "banner" | "material" | "recipe" | "packagingKit" | "recipeLine" | "batch" | "stockLog" | "stockLossRecord" | "staffUser" | "staffAuditLog" | "user" | "order" | "orderCostSnapshot" | "orderItem" | "customer" | "recipient" | "customerRecipientRelation" | "giftOccasion" | "customerReminder" | "appConfig" | "flowerWiki"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1096,6 +1098,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.ProductSkuCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.ProductSkuCountAggregateOutputType> | number
+        }
+      }
+    }
+    CmsRecommendationSlot: {
+      payload: Prisma.$CmsRecommendationSlotPayload<ExtArgs>
+      fields: Prisma.CmsRecommendationSlotFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CmsRecommendationSlotFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationSlotPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CmsRecommendationSlotFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationSlotPayload>
+        }
+        findFirst: {
+          args: Prisma.CmsRecommendationSlotFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationSlotPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CmsRecommendationSlotFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationSlotPayload>
+        }
+        findMany: {
+          args: Prisma.CmsRecommendationSlotFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationSlotPayload>[]
+        }
+        create: {
+          args: Prisma.CmsRecommendationSlotCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationSlotPayload>
+        }
+        createMany: {
+          args: Prisma.CmsRecommendationSlotCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CmsRecommendationSlotCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationSlotPayload>[]
+        }
+        delete: {
+          args: Prisma.CmsRecommendationSlotDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationSlotPayload>
+        }
+        update: {
+          args: Prisma.CmsRecommendationSlotUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationSlotPayload>
+        }
+        deleteMany: {
+          args: Prisma.CmsRecommendationSlotDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CmsRecommendationSlotUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CmsRecommendationSlotUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationSlotPayload>[]
+        }
+        upsert: {
+          args: Prisma.CmsRecommendationSlotUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationSlotPayload>
+        }
+        aggregate: {
+          args: Prisma.CmsRecommendationSlotAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCmsRecommendationSlot>
+        }
+        groupBy: {
+          args: Prisma.CmsRecommendationSlotGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CmsRecommendationSlotGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CmsRecommendationSlotCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CmsRecommendationSlotCountAggregateOutputType> | number
+        }
+      }
+    }
+    CmsRecommendationItem: {
+      payload: Prisma.$CmsRecommendationItemPayload<ExtArgs>
+      fields: Prisma.CmsRecommendationItemFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.CmsRecommendationItemFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationItemPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.CmsRecommendationItemFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationItemPayload>
+        }
+        findFirst: {
+          args: Prisma.CmsRecommendationItemFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationItemPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.CmsRecommendationItemFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationItemPayload>
+        }
+        findMany: {
+          args: Prisma.CmsRecommendationItemFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationItemPayload>[]
+        }
+        create: {
+          args: Prisma.CmsRecommendationItemCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationItemPayload>
+        }
+        createMany: {
+          args: Prisma.CmsRecommendationItemCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.CmsRecommendationItemCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationItemPayload>[]
+        }
+        delete: {
+          args: Prisma.CmsRecommendationItemDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationItemPayload>
+        }
+        update: {
+          args: Prisma.CmsRecommendationItemUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationItemPayload>
+        }
+        deleteMany: {
+          args: Prisma.CmsRecommendationItemDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.CmsRecommendationItemUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.CmsRecommendationItemUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationItemPayload>[]
+        }
+        upsert: {
+          args: Prisma.CmsRecommendationItemUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$CmsRecommendationItemPayload>
+        }
+        aggregate: {
+          args: Prisma.CmsRecommendationItemAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateCmsRecommendationItem>
+        }
+        groupBy: {
+          args: Prisma.CmsRecommendationItemGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CmsRecommendationItemGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.CmsRecommendationItemCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.CmsRecommendationItemCountAggregateOutputType> | number
         }
       }
     }
@@ -2820,6 +2970,13 @@ export const ProductSpuScalarFieldEnum = {
   allowPreOrder: 'allowPreOrder',
   productionTime: 'productionTime',
   occasionTags: 'occasionTags',
+  colorTags: 'colorTags',
+  styleTags: 'styleTags',
+  relationshipTags: 'relationshipTags',
+  budgetTags: 'budgetTags',
+  positioningTags: 'positioningTags',
+  sellingPoints: 'sellingPoints',
+  operationNote: 'operationNote',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -2844,6 +3001,43 @@ export const ProductSkuScalarFieldEnum = {
 } as const
 
 export type ProductSkuScalarFieldEnum = (typeof ProductSkuScalarFieldEnum)[keyof typeof ProductSkuScalarFieldEnum]
+
+
+export const CmsRecommendationSlotScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  name: 'name',
+  description: 'description',
+  slotType: 'slotType',
+  sceneType: 'sceneType',
+  isActive: 'isActive',
+  sortOrder: 'sortOrder',
+  maxItems: 'maxItems',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CmsRecommendationSlotScalarFieldEnum = (typeof CmsRecommendationSlotScalarFieldEnum)[keyof typeof CmsRecommendationSlotScalarFieldEnum]
+
+
+export const CmsRecommendationItemScalarFieldEnum = {
+  id: 'id',
+  slotId: 'slotId',
+  productId: 'productId',
+  skuId: 'skuId',
+  titleOverride: 'titleOverride',
+  subtitleOverride: 'subtitleOverride',
+  imageOverride: 'imageOverride',
+  sortOrder: 'sortOrder',
+  isActive: 'isActive',
+  startAt: 'startAt',
+  endAt: 'endAt',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CmsRecommendationItemScalarFieldEnum = (typeof CmsRecommendationItemScalarFieldEnum)[keyof typeof CmsRecommendationItemScalarFieldEnum]
 
 
 export const BannerScalarFieldEnum = {
@@ -3393,6 +3587,48 @@ export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaMode
 
 
 /**
+ * Reference to a field of type 'Json'
+ */
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+/**
+ * Reference to a field of type 'QueryMode'
+ */
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+/**
+ * Reference to a field of type 'RecommendationSlotType'
+ */
+export type EnumRecommendationSlotTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RecommendationSlotType'>
+    
+
+
+/**
+ * Reference to a field of type 'RecommendationSlotType[]'
+ */
+export type ListEnumRecommendationSlotTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RecommendationSlotType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'GiftOccasionType'
+ */
+export type EnumGiftOccasionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GiftOccasionType'>
+    
+
+
+/**
+ * Reference to a field of type 'GiftOccasionType[]'
+ */
+export type ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GiftOccasionType[]'>
+    
+
+
+/**
  * Reference to a field of type 'BannerTargetType'
  */
 export type EnumBannerTargetTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'BannerTargetType'>
@@ -3501,34 +3737,6 @@ export type EnumRecipientRelationTypeFieldRefInput<$PrismaModel> = FieldRefInput
  * Reference to a field of type 'RecipientRelationType[]'
  */
 export type ListEnumRecipientRelationTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'RecipientRelationType[]'>
-    
-
-
-/**
- * Reference to a field of type 'GiftOccasionType'
- */
-export type EnumGiftOccasionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GiftOccasionType'>
-    
-
-
-/**
- * Reference to a field of type 'GiftOccasionType[]'
- */
-export type ListEnumGiftOccasionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'GiftOccasionType[]'>
-    
-
-
-/**
- * Reference to a field of type 'Json'
- */
-export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-/**
- * Reference to a field of type 'QueryMode'
- */
-export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -3706,6 +3914,8 @@ export type GlobalOmitConfig = {
   purchaseOrderLine?: Prisma.PurchaseOrderLineOmit
   productSpu?: Prisma.ProductSpuOmit
   productSku?: Prisma.ProductSkuOmit
+  cmsRecommendationSlot?: Prisma.CmsRecommendationSlotOmit
+  cmsRecommendationItem?: Prisma.CmsRecommendationItemOmit
   banner?: Prisma.BannerOmit
   material?: Prisma.MaterialOmit
   recipe?: Prisma.RecipeOmit
