@@ -3,9 +3,14 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ProductDecisionHealthBadge } from "@/components/product-decision/ProductDecisionBadge";
+import { ProductDecisionTags } from "@/components/product-decision/ProductDecisionTags";
 import { Badge } from "@/components/ui/Badge";
 import { formatCmsCategoryLabels } from "@/lib/cms-product-categories";
 import type { CmsProductCategoryItem } from "@/lib/cms-product-categories";
+import { formatNullable } from "@/lib/format-display";
+import { formatPercent } from "@/lib/format-money";
+import type { ProductDecisionTagLike } from "@/lib/product-decision-tags";
 
 export type CmsProductListRow = {
   id: string;
@@ -17,6 +22,11 @@ export type CmsProductListRow = {
   quantity: number;
   status: string;
   categoryIds: string[];
+  decisionHealthStatus?: string | null;
+  decisionHealthLabel?: string | null;
+  decisionTags?: ProductDecisionTagLike[];
+  decisionStandardMargin?: number | null;
+  decisionConservativeMargin?: number | null;
 };
 
 type Props = {
@@ -140,6 +150,7 @@ export function CmsProductsTable({ rows, categoryConfig }: Props) {
               <th className="px-4 py-3 font-medium text-zinc-600">分类</th>
               <th className="px-4 py-3 font-medium text-zinc-600">零售价</th>
               <th className="px-4 py-3 font-medium text-zinc-600">毛利预估</th>
+              <th className="px-4 py-3 font-medium text-zinc-600">产品决策</th>
               <th className="px-4 py-3 font-medium text-zinc-600">可售数量</th>
               <th className="px-4 py-3 font-medium text-zinc-600">上架状态</th>
               <th className="px-4 py-3 font-medium text-zinc-600">操作</th>
@@ -149,7 +160,7 @@ export function CmsProductsTable({ rows, categoryConfig }: Props) {
             {list.length === 0 ? (
               <tr>
                 <td
-                  colSpan={7}
+                  colSpan={8}
                   className="px-4 py-12 text-center text-zinc-500"
                 >
                   暂无商品，请点击新增商品按钮。
@@ -197,6 +208,34 @@ export function CmsProductsTable({ rows, categoryConfig }: Props) {
                     >
                       {p.marginLabel}
                     </span>
+                  </td>
+                  <td className="px-4 py-3">
+                    {p.decisionHealthStatus ? (
+                      <div className="space-y-2">
+                        <ProductDecisionHealthBadge
+                          status={p.decisionHealthStatus}
+                          statusLabel={p.decisionHealthLabel}
+                        />
+                        <ProductDecisionTags tags={p.decisionTags ?? []} limit={2} />
+                        <p className="text-[11px] text-zinc-500">
+                          标准{" "}
+                          {formatNullable(p.decisionStandardMargin, (value) =>
+                            formatPercent(value)
+                          )}{" "}
+                          / 保守{" "}
+                          {formatNullable(p.decisionConservativeMargin, (value) =>
+                            formatPercent(value)
+                          )}
+                        </p>
+                      </div>
+                    ) : (
+                      <Link
+                        href={`/wms/reports?tab=product-decisions&productId=${p.id}`}
+                        className="text-xs text-rose-600 hover:underline"
+                      >
+                        查看产品决策
+                      </Link>
+                    )}
                   </td>
                   <td className="px-4 py-3">{p.quantity}</td>
                   <td className="px-4 py-3">

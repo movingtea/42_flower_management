@@ -26,6 +26,7 @@ function parseProductDecisionParams(searchParams: URLSearchParams) {
     status: searchParams.get("status") as "active" | "inactive" | null,
     limit: searchParams.get("limit"),
     includeInactive: searchParams.get("includeInactive"),
+    includeAll: searchParams.get("includeAll"),
     targetMargin: searchParams.get("targetMargin"),
   };
 }

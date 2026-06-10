@@ -37,6 +37,7 @@ export type ProductDecisionParams = ReportDateRangeParams & {
   status?: "active" | "inactive" | null;
   limit?: number | string | null;
   includeInactive?: boolean | string | null;
+  includeAll?: boolean | string | null;
   targetMargin?: number | string | null;
 };
 
@@ -159,6 +160,10 @@ function parseTargetMargin(value: ProductDecisionParams["targetMargin"]): number
 }
 
 function parseIncludeInactive(value: ProductDecisionParams["includeInactive"]): boolean {
+  return value === true || value === "true" || value === "1";
+}
+
+function parseIncludeAll(value: ProductDecisionParams["includeAll"]): boolean {
   return value === true || value === "true" || value === "1";
 }
 
@@ -548,6 +553,7 @@ export async function getProductDecisionReport(
   const limit = safeLimit(params.limit);
   const targetMargin = parseTargetMargin(params.targetMargin);
   const includeInactive = parseIncludeInactive(params.includeInactive);
+  const includeAll = parseIncludeAll(params.includeAll);
   const windowDays = dataWindowDays(range);
 
   const spuWhere: Prisma.ProductSpuWhereInput = {
@@ -618,9 +624,10 @@ export async function getProductDecisionReport(
     })
   );
 
-  const products = [...allProducts]
-    .sort((a, b) => b.health.score - a.health.score)
-    .slice(0, limit);
+  const sortedProducts = [...allProducts].sort((a, b) => b.health.score - a.health.score);
+  const products = includeAll || params.productId || params.skuId
+    ? sortedProducts
+    : sortedProducts.slice(0, limit);
 
   const summary = buildSummary(allProducts);
   const rankings = buildProductDecisionRankings(allProducts, targetMargin);

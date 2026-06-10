@@ -14,6 +14,7 @@ import type {
   ProductEditorProps,
   ProductSkuEditorRow,
 } from "@/app/cms/products/types";
+import { ProductDecisionPanel } from "@/components/product-decision/ProductDecisionPanel";
 import { formatPercent } from "@/lib/format-money";
 import type {
   MarginEstimateSlice,
@@ -687,6 +688,15 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
               </table>
             </div>
           </section>
+
+          {!isNew && productId !== "new" ? (
+            <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+              <h3 className="text-sm font-semibold text-zinc-900">产品决策建议</h3>
+              <div className="mt-4">
+                <ProductDecisionPanel productId={productId} compact />
+              </div>
+            </section>
+          ) : null}
 
           <div className="space-y-4 lg:hidden">{sidebarMeta}</div>
         </div>
