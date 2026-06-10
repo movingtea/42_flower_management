@@ -1,5 +1,14 @@
 import { Prisma } from "@/generated/prisma/client";
 import {
+  addAppCalendarDays,
+  appDateStringFromParts,
+  getAppCalendarParts,
+  getAppDateRangeUtc,
+  getAppDayRangeUtc,
+  getTodayAppDateString,
+  normalizeReportDateParam,
+} from "@/lib/datetime";
+import {
   decimalToString,
   money,
   ratio,
@@ -92,36 +101,6 @@ export type LowMarginInput = {
   grossMargin: DecimalInput;
 };
 
-function startOfDay(date: Date): Date {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  return d;
-}
-
-function addDays(date: Date, days: number): Date {
-  const d = new Date(date);
-  d.setDate(d.getDate() + days);
-  return d;
-}
-
-function parseDateOnly(value: string | Date): Date {
-  if (value instanceof Date) return startOfDay(value);
-  const trimmed = value.trim();
-  if (!trimmed) return startOfDay(new Date());
-  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
-  if (match) {
-    return new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
-  }
-  return startOfDay(new Date(trimmed));
-}
-
-function formatDateLabel(date: Date): string {
-  const y = date.getFullYear();
-  const m = `${date.getMonth() + 1}`.padStart(2, "0");
-  const d = `${date.getDate()}`.padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
-
 function normalizePreset(preset?: string | null): ReportPreset {
   const allowed = new Set<ReportPreset>([
     "today",
@@ -139,61 +118,70 @@ export function getReportDateRange(
   params: ReportDateRangeParams = {}
 ): ReportDateRange {
   const now = params.now ?? new Date();
-  const today = startOfDay(now);
+  const todayParts = getAppCalendarParts(now);
+  const todayStr = getTodayAppDateString(now);
 
   if (params.startDate || params.endDate) {
-    const startDate = params.startDate ? parseDateOnly(params.startDate) : today;
-    const inclusiveEnd = params.endDate
-      ? parseDateOnly(params.endDate)
-      : startDate;
-    const endDate = addDays(inclusiveEnd, 1);
+    const startStr = normalizeReportDateParam(params.startDate, now);
+    const endStr = normalizeReportDateParam(params.endDate ?? params.startDate, now);
+    const { startUtc, endUtcExclusive } = getAppDateRangeUtc(startStr, endStr);
     return {
-      startDate,
-      endDate,
-      label: `${formatDateLabel(startDate)} 至 ${formatDateLabel(inclusiveEnd)}`,
+      startDate: startUtc!,
+      endDate: endUtcExclusive!,
+      label: `${startStr} 至 ${endStr}`,
     };
   }
 
   const preset = normalizePreset(params.preset);
   if (preset === "today") {
+    const { startUtc, endUtcExclusive } = getAppDayRangeUtc(todayStr);
     return {
-      startDate: today,
-      endDate: addDays(today, 1),
+      startDate: startUtc,
+      endDate: endUtcExclusive,
       label: "今日",
     };
   }
   if (preset === "yesterday") {
-    const startDate = addDays(today, -1);
+    const yesterdayStr = appDateStringFromParts(addAppCalendarDays(todayParts, -1));
+    const { startUtc, endUtcExclusive } = getAppDayRangeUtc(yesterdayStr);
     return {
-      startDate,
-      endDate: today,
+      startDate: startUtc,
+      endDate: endUtcExclusive,
       label: "昨日",
     };
   }
   if (preset === "thisWeek") {
-    const day = today.getDay();
-    const mondayOffset = day === 0 ? -6 : 1 - day;
-    const startDate = addDays(today, mondayOffset);
+    const mondayOffset = todayParts.weekday === 0 ? -6 : 1 - todayParts.weekday;
+    const weekStartStr = appDateStringFromParts(addAppCalendarDays(todayParts, mondayOffset));
+    const { startUtc } = getAppDayRangeUtc(weekStartStr);
+    const { endUtcExclusive } = getAppDayRangeUtc(todayStr);
     return {
-      startDate,
-      endDate: addDays(today, 1),
+      startDate: startUtc,
+      endDate: endUtcExclusive,
       label: "本周",
     };
   }
   if (preset === "lastMonth") {
-    const startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
-    const endDate = new Date(today.getFullYear(), today.getMonth(), 1);
+    const lastMonthStart =
+      todayParts.month === 1
+        ? { year: todayParts.year - 1, month: 12, day: 1 }
+        : { year: todayParts.year, month: todayParts.month - 1, day: 1 };
+    const thisMonthStart = { year: todayParts.year, month: todayParts.month, day: 1 };
+    const { startUtc } = getAppDayRangeUtc(appDateStringFromParts(lastMonthStart));
+    const { startUtc: endUtcExclusive } = getAppDayRangeUtc(appDateStringFromParts(thisMonthStart));
     return {
-      startDate,
-      endDate,
+      startDate: startUtc,
+      endDate: endUtcExclusive,
       label: "上月",
     };
   }
 
-  const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+  const thisMonthStart = { year: todayParts.year, month: todayParts.month, day: 1 };
+  const { startUtc } = getAppDayRangeUtc(appDateStringFromParts(thisMonthStart));
+  const { endUtcExclusive } = getAppDayRangeUtc(todayStr);
   return {
-    startDate,
-    endDate: addDays(today, 1),
+    startDate: startUtc,
+    endDate: endUtcExclusive,
     label: "本月",
   };
 }

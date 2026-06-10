@@ -2,6 +2,7 @@
  * 纯函数单测（无数据库）— 运行：npx tsx src/services/business-report-pure.test.ts
  */
 import assert from "node:assert/strict";
+import { formatDateInAppTimezoneIso } from "@/lib/datetime";
 import {
   aggregateLossModelImpact,
   calculateCostStructureRatios,
@@ -14,35 +15,36 @@ import {
 
 function testDateRangeThisMonth() {
   const range = getReportDateRange({
-    now: new Date(2026, 5, 9, 10, 30, 0),
+    now: new Date("2026-06-09T18:00:00.000Z"),
   });
 
   assert.equal(range.label, "本月");
-  assert.equal(range.startDate.toISOString(), new Date(2026, 5, 1).toISOString());
-  assert.equal(range.endDate.toISOString(), new Date(2026, 5, 10).toISOString());
+  assert.equal(range.startDate.toISOString(), "2026-05-31T16:00:00.000Z");
+  assert.equal(range.endDate.toISOString(), "2026-06-10T16:00:00.000Z");
 }
 
 function testDateRangeToday() {
   const range = getReportDateRange({
     preset: "today",
-    now: new Date(2026, 5, 9, 10, 30, 0),
+    now: new Date("2026-06-09T18:00:00.000Z"),
   });
 
   assert.equal(range.label, "今日");
-  assert.equal(range.startDate.toISOString(), new Date(2026, 5, 9).toISOString());
-  assert.equal(range.endDate.toISOString(), new Date(2026, 5, 10).toISOString());
+  assert.equal(range.startDate.toISOString(), "2026-06-09T16:00:00.000Z");
+  assert.equal(range.endDate.toISOString(), "2026-06-10T16:00:00.000Z");
+  assert.equal(formatDateInAppTimezoneIso(range.startDate), "2026-06-10");
 }
 
 function testDateRangeCustom() {
   const range = getReportDateRange({
     startDate: "2026-06-01",
     endDate: "2026-06-09",
-    now: new Date(2026, 5, 9, 10, 30, 0),
+    now: new Date("2026-06-09T18:00:00.000Z"),
   });
 
   assert.equal(range.label, "2026-06-01 至 2026-06-09");
-  assert.equal(range.startDate.toISOString(), new Date(2026, 5, 1).toISOString());
-  assert.equal(range.endDate.toISOString(), new Date(2026, 5, 10).toISOString());
+  assert.equal(range.startDate.toISOString(), "2026-05-31T16:00:00.000Z");
+  assert.equal(range.endDate.toISOString(), "2026-06-09T16:00:00.000Z");
 }
 
 function testSalesSummary() {

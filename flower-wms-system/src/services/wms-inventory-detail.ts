@@ -1,4 +1,8 @@
 import { StockLogType } from "@/generated/prisma/enums";
+import {
+  formatDateInAppTimezoneIso,
+  formatDateTimeInAppTimezone,
+} from "@/lib/datetime";
 import { prisma } from "@/lib/prisma";
 import { listStockLossHistoryByMaterialId } from "@/services/wms-stock";
 
@@ -42,16 +46,6 @@ const STOCK_LOG_LABEL: Record<StockLogType, string> = {
   ADJUSTMENT: "盘点调整",
   IN_CANCEL: "订单取消回库",
 };
-
-function formatDateTime(d: Date): string {
-  return d.toLocaleString("zh-CN", {
-    year: "numeric",
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 function stockLogRef(
   type: StockLogType,
@@ -122,12 +116,12 @@ export async function loadMaterialInventoryDetail(
       originalQty: b.originalQty,
       remainingQty: b.remainingQty,
       expiresAt: b.expiresAt
-        ? b.expiresAt.toLocaleDateString("zh-CN")
+        ? formatDateInAppTimezoneIso(b.expiresAt)
         : "未设置",
       storageLocation: b.storageLocation?.trim() || "未分配库位",
     })),
     fifoFlows: material.stockLogs.map((log) => ({
-      at: formatDateTime(log.createdAt),
+      at: formatDateTimeInAppTimezone(log.createdAt),
       type: log.type,
       typeLabel: STOCK_LOG_LABEL[log.type] ?? log.type,
       batchNo: log.batch.batchNo ?? log.batchId.slice(0, 8),
@@ -141,10 +135,10 @@ export async function loadMaterialInventoryDetail(
     })),
     lossHistory: lossRows.map((row) => ({
       id: row.id,
-      at: formatDateTime(new Date(row.createdAt)),
+      at: formatDateTimeInAppTimezone(row.createdAt),
       batchLabel: row.batchNo
-        ? `${row.batchNo}（${new Date(row.batchCreatedAt).toLocaleDateString("zh-CN")}）`
-        : new Date(row.batchCreatedAt).toLocaleDateString("zh-CN"),
+        ? `${row.batchNo}（${formatDateInAppTimezoneIso(row.batchCreatedAt)}）`
+        : formatDateInAppTimezoneIso(row.batchCreatedAt),
       lossQuantity: row.lossQuantity,
       reason: row.reason,
     })),

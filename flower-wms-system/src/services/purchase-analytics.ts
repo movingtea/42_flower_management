@@ -3,6 +3,7 @@ import {
   PurchaseOrderStatus,
   StockLogType,
 } from "@/generated/prisma/enums";
+import { formatDateInAppTimezoneIso, serializeReportDateRange } from "@/lib/datetime";
 import { prisma } from "@/lib/prisma";
 import { decimalToString, money } from "@/services/order-cost-pure";
 import { getReportDateRange } from "@/services/business-report-pure";
@@ -59,11 +60,12 @@ function serializeTags(tags: PurchaseRecommendationTag[]): TagDto[] {
 }
 
 function serializeRange(range: { startDate: Date; endDate: Date; label: string }): DateRangeDto {
-  return {
-    startDate: range.startDate.toISOString(),
-    endDate: range.endDate.toISOString(),
-    label: range.label,
-  };
+  return serializeReportDateRange(range);
+}
+
+function serializeAppDate(value: Date | null | undefined): string | null {
+  if (!value) return null;
+  return formatDateInAppTimezoneIso(value);
 }
 
 function safeLimit(limit: PurchaseAnalyticsParams["limit"], fallback = DEFAULT_LIMIT): number {
@@ -459,14 +461,14 @@ export async function getPurchaseAnalyticsReport(params: PurchaseAnalyticsParams
           ? unitCostString(row.averageLossAdjustedUnitCost)
           : null,
       lossImpactRate: row.lossImpactRate,
-      latestPurchaseDate: row.latestPurchaseDate?.toISOString() ?? null,
+      latestPurchaseDate: serializeAppDate(row.latestPurchaseDate),
       tags: serializeTags(row.tags),
       warnings: row.warnings,
     })),
     flowerPriceTrends: flowerPriceTrends.map((row) => ({
       flowerWikiId: row.flowerWikiId,
       flowerName: row.flowerName,
-      latestPurchaseDate: row.latestPurchaseDate?.toISOString() ?? null,
+      latestPurchaseDate: serializeAppDate(row.latestPurchaseDate),
       latestSupplierName: row.latestSupplierName,
       latestActualUnitCost:
         row.latestActualUnitCost !== null
@@ -507,7 +509,7 @@ export async function getPurchaseAnalyticsReport(params: PurchaseAnalyticsParams
       flowerWikiId: row.flowerWikiId,
       flowerName: row.flowerName,
       supplierName: row.supplierName,
-      inboundDate: row.inboundDate.toISOString(),
+      inboundDate: serializeAppDate(row.inboundDate) ?? "",
       originalQty: row.originalQty,
       remainingQty: row.remainingQty,
       soldQty: row.soldQty,
@@ -562,10 +564,9 @@ export async function getPurchaseAnalyticsReport(params: PurchaseAnalyticsParams
       fallbackDateFields: ["purchaseDate", "createdAt"],
       includedStatuses: [PurchaseOrderStatus.RECEIVED],
       includeDraft,
-      latestPurchaseSampleDate:
-        receivedPurchaseOrders[0]
-          ? getEffectivePurchaseDate(receivedPurchaseOrders[0]).toISOString()
-          : null,
+      latestPurchaseSampleDate: receivedPurchaseOrders[0]
+        ? serializeAppDate(getEffectivePurchaseDate(receivedPurchaseOrders[0]))
+        : null,
     },
   };
 }

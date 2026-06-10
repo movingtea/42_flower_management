@@ -6,6 +6,11 @@ import {
   SupplierType,
 } from "@/generated/prisma/enums";
 import type { OperatorContext } from "@/lib/operator-context";
+import {
+  getAppDateRangeUtc,
+  getTodayAppDateString,
+  normalizeReportDateParam,
+} from "@/lib/datetime";
 import { prisma } from "@/lib/prisma";
 import { assertStockMutationOperatorMatches } from "@/lib/stock-mutation-auth";
 import { generateBatchNo } from "@/utils/batch-no";
@@ -405,10 +410,7 @@ export function validatePurchaseOrderInput(raw: unknown): PurchaseOrderWriteInpu
 }
 
 export function formatPurchaseDateKey(date = new Date()): string {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}${m}${d}`;
+  return getTodayAppDateString(date).replace(/-/g, "");
 }
 
 export async function generatePurchaseNo(
@@ -860,13 +862,18 @@ export async function listPurchaseOrders(params: PurchaseOrderListParams = {}) {
   if (params.status) where.status = params.status;
   if (params.supplierId?.trim()) where.supplierId = params.supplierId.trim();
   if (params.startDate || params.endDate) {
+    const startDate =
+      params.startDate !== undefined && params.startDate !== null
+        ? normalizeReportDateParam(params.startDate)
+        : undefined;
+    const endDate =
+      params.endDate !== undefined && params.endDate !== null
+        ? normalizeReportDateParam(params.endDate)
+        : undefined;
+    const { startUtc, endUtcExclusive } = getAppDateRangeUtc(startDate, endDate);
     where.purchaseDate = {};
-    if (params.startDate) {
-      where.purchaseDate.gte = parseDate(params.startDate, "开始日期格式不正确");
-    }
-    if (params.endDate) {
-      where.purchaseDate.lte = parseDate(params.endDate, "结束日期格式不正确");
-    }
+    if (startUtc) where.purchaseDate.gte = startUtc;
+    if (endUtcExclusive) where.purchaseDate.lt = endUtcExclusive;
   }
 
   const [items, total] = await prisma.$transaction([
