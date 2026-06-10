@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { ProductOccasionTagsBadge } from "@/components/cms/ProductOccasionTagsBadge";
 import { ProductDecisionHealthBadge } from "@/components/product-decision/ProductDecisionBadge";
 import { ProductDecisionTags } from "@/components/product-decision/ProductDecisionTags";
 import { Badge } from "@/components/ui/Badge";
@@ -27,6 +28,7 @@ export type CmsProductListRow = {
   decisionTags?: ProductDecisionTagLike[];
   decisionStandardMargin?: number | null;
   decisionConservativeMargin?: number | null;
+  occasionTags?: string[];
 };
 
 type Props = {
@@ -148,6 +150,7 @@ export function CmsProductsTable({ rows, categoryConfig }: Props) {
             <tr>
               <th className="px-4 py-3 font-medium text-zinc-600">品名</th>
               <th className="px-4 py-3 font-medium text-zinc-600">分类</th>
+              <th className="px-4 py-3 font-medium text-zinc-600">礼赠场景</th>
               <th className="px-4 py-3 font-medium text-zinc-600">零售价</th>
               <th className="px-4 py-3 font-medium text-zinc-600">毛利预估</th>
               <th className="px-4 py-3 font-medium text-zinc-600">产品决策</th>
@@ -160,7 +163,7 @@ export function CmsProductsTable({ rows, categoryConfig }: Props) {
             {list.length === 0 ? (
               <tr>
                 <td
-                  colSpan={8}
+                  colSpan={9}
                   className="px-4 py-12 text-center text-zinc-500"
                 >
                   暂无商品，请点击新增商品按钮。
@@ -194,6 +197,9 @@ export function CmsProductsTable({ rows, categoryConfig }: Props) {
                         ))
                       )}
                     </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <ProductOccasionTagsBadge tags={p.occasionTags} />
                   </td>
                   <td className="px-4 py-3">{p.priceLabel}</td>
                   <td className="px-4 py-3">

@@ -62,6 +62,9 @@ export type OrderMinAggregateOutputType = {
   cancelSource: $Enums.OrderCancelSource | null
   deliveryCostActual: runtime.Decimal | null
   deliveryCostNote: string | null
+  customerId: string | null
+  recipientId: string | null
+  giftOccasionId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -86,6 +89,9 @@ export type OrderMaxAggregateOutputType = {
   cancelSource: $Enums.OrderCancelSource | null
   deliveryCostActual: runtime.Decimal | null
   deliveryCostNote: string | null
+  customerId: string | null
+  recipientId: string | null
+  giftOccasionId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -110,6 +116,9 @@ export type OrderCountAggregateOutputType = {
   cancelSource: number
   deliveryCostActual: number
   deliveryCostNote: number
+  customerId: number
+  recipientId: number
+  giftOccasionId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -152,6 +161,9 @@ export type OrderMinAggregateInputType = {
   cancelSource?: true
   deliveryCostActual?: true
   deliveryCostNote?: true
+  customerId?: true
+  recipientId?: true
+  giftOccasionId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -176,6 +188,9 @@ export type OrderMaxAggregateInputType = {
   cancelSource?: true
   deliveryCostActual?: true
   deliveryCostNote?: true
+  customerId?: true
+  recipientId?: true
+  giftOccasionId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -200,6 +215,9 @@ export type OrderCountAggregateInputType = {
   cancelSource?: true
   deliveryCostActual?: true
   deliveryCostNote?: true
+  customerId?: true
+  recipientId?: true
+  giftOccasionId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -311,6 +329,9 @@ export type OrderGroupByOutputType = {
   cancelSource: $Enums.OrderCancelSource | null
   deliveryCostActual: runtime.Decimal | null
   deliveryCostNote: string | null
+  customerId: string | null
+  recipientId: string | null
+  giftOccasionId: string | null
   createdAt: Date
   updatedAt: Date
   _count: OrderCountAggregateOutputType | null
@@ -358,9 +379,15 @@ export type OrderWhereInput = {
   cancelSource?: Prisma.EnumOrderCancelSourceNullableFilter<"Order"> | $Enums.OrderCancelSource | null
   deliveryCostActual?: Prisma.DecimalNullableFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deliveryCostNote?: Prisma.StringNullableFilter<"Order"> | string | null
+  customerId?: Prisma.StringNullableFilter<"Order"> | string | null
+  recipientId?: Prisma.StringNullableFilter<"Order"> | string | null
+  giftOccasionId?: Prisma.StringNullableFilter<"Order"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  customer?: Prisma.XOR<Prisma.CustomerNullableScalarRelationFilter, Prisma.CustomerWhereInput> | null
+  recipient?: Prisma.XOR<Prisma.RecipientNullableScalarRelationFilter, Prisma.RecipientWhereInput> | null
+  giftOccasion?: Prisma.XOR<Prisma.GiftOccasionNullableScalarRelationFilter, Prisma.GiftOccasionWhereInput> | null
   items?: Prisma.OrderItemListRelationFilter
   stockLogs?: Prisma.StockLogListRelationFilter
   costSnapshot?: Prisma.XOR<Prisma.OrderCostSnapshotNullableScalarRelationFilter, Prisma.OrderCostSnapshotWhereInput> | null
@@ -386,9 +413,15 @@ export type OrderOrderByWithRelationInput = {
   cancelSource?: Prisma.SortOrderInput | Prisma.SortOrder
   deliveryCostActual?: Prisma.SortOrderInput | Prisma.SortOrder
   deliveryCostNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  recipientId?: Prisma.SortOrderInput | Prisma.SortOrder
+  giftOccasionId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   user?: Prisma.UserOrderByWithRelationInput
+  customer?: Prisma.CustomerOrderByWithRelationInput
+  recipient?: Prisma.RecipientOrderByWithRelationInput
+  giftOccasion?: Prisma.GiftOccasionOrderByWithRelationInput
   items?: Prisma.OrderItemOrderByRelationAggregateInput
   stockLogs?: Prisma.StockLogOrderByRelationAggregateInput
   costSnapshot?: Prisma.OrderCostSnapshotOrderByWithRelationInput
@@ -417,9 +450,15 @@ export type OrderWhereUniqueInput = Prisma.AtLeast<{
   cancelSource?: Prisma.EnumOrderCancelSourceNullableFilter<"Order"> | $Enums.OrderCancelSource | null
   deliveryCostActual?: Prisma.DecimalNullableFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deliveryCostNote?: Prisma.StringNullableFilter<"Order"> | string | null
+  customerId?: Prisma.StringNullableFilter<"Order"> | string | null
+  recipientId?: Prisma.StringNullableFilter<"Order"> | string | null
+  giftOccasionId?: Prisma.StringNullableFilter<"Order"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   user?: Prisma.XOR<Prisma.UserScalarRelationFilter, Prisma.UserWhereInput>
+  customer?: Prisma.XOR<Prisma.CustomerNullableScalarRelationFilter, Prisma.CustomerWhereInput> | null
+  recipient?: Prisma.XOR<Prisma.RecipientNullableScalarRelationFilter, Prisma.RecipientWhereInput> | null
+  giftOccasion?: Prisma.XOR<Prisma.GiftOccasionNullableScalarRelationFilter, Prisma.GiftOccasionWhereInput> | null
   items?: Prisma.OrderItemListRelationFilter
   stockLogs?: Prisma.StockLogListRelationFilter
   costSnapshot?: Prisma.XOR<Prisma.OrderCostSnapshotNullableScalarRelationFilter, Prisma.OrderCostSnapshotWhereInput> | null
@@ -445,6 +484,9 @@ export type OrderOrderByWithAggregationInput = {
   cancelSource?: Prisma.SortOrderInput | Prisma.SortOrder
   deliveryCostActual?: Prisma.SortOrderInput | Prisma.SortOrder
   deliveryCostNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  customerId?: Prisma.SortOrderInput | Prisma.SortOrder
+  recipientId?: Prisma.SortOrderInput | Prisma.SortOrder
+  giftOccasionId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.OrderCountOrderByAggregateInput
@@ -477,6 +519,9 @@ export type OrderScalarWhereWithAggregatesInput = {
   cancelSource?: Prisma.EnumOrderCancelSourceNullableWithAggregatesFilter<"Order"> | $Enums.OrderCancelSource | null
   deliveryCostActual?: Prisma.DecimalNullableWithAggregatesFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deliveryCostNote?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
+  customerId?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
+  recipientId?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
+  giftOccasionId?: Prisma.StringNullableWithAggregatesFilter<"Order"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Order"> | Date | string
 }
@@ -503,6 +548,9 @@ export type OrderCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutOrdersInput
+  recipient?: Prisma.RecipientCreateNestedOneWithoutOrdersInput
+  giftOccasion?: Prisma.GiftOccasionCreateNestedOneWithoutOrdersInput
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   stockLogs?: Prisma.StockLogCreateNestedManyWithoutOrderInput
   costSnapshot?: Prisma.OrderCostSnapshotCreateNestedOneWithoutOrderInput
@@ -528,6 +576,9 @@ export type OrderUncheckedCreateInput = {
   cancelSource?: $Enums.OrderCancelSource | null
   deliveryCostActual?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deliveryCostNote?: string | null
+  customerId?: string | null
+  recipientId?: string | null
+  giftOccasionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -557,6 +608,9 @@ export type OrderUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutOrdersNestedInput
+  recipient?: Prisma.RecipientUpdateOneWithoutOrdersNestedInput
+  giftOccasion?: Prisma.GiftOccasionUpdateOneWithoutOrdersNestedInput
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   stockLogs?: Prisma.StockLogUpdateManyWithoutOrderNestedInput
   costSnapshot?: Prisma.OrderCostSnapshotUpdateOneWithoutOrderNestedInput
@@ -582,6 +636,9 @@ export type OrderUncheckedUpdateInput = {
   cancelSource?: Prisma.NullableEnumOrderCancelSourceFieldUpdateOperationsInput | $Enums.OrderCancelSource | null
   deliveryCostActual?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deliveryCostNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  giftOccasionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -609,6 +666,9 @@ export type OrderCreateManyInput = {
   cancelSource?: $Enums.OrderCancelSource | null
   deliveryCostActual?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deliveryCostNote?: string | null
+  customerId?: string | null
+  recipientId?: string | null
+  giftOccasionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -656,6 +716,9 @@ export type OrderUncheckedUpdateManyInput = {
   cancelSource?: Prisma.NullableEnumOrderCancelSourceFieldUpdateOperationsInput | $Enums.OrderCancelSource | null
   deliveryCostActual?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deliveryCostNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  giftOccasionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -695,6 +758,9 @@ export type OrderCountOrderByAggregateInput = {
   cancelSource?: Prisma.SortOrder
   deliveryCostActual?: Prisma.SortOrder
   deliveryCostNote?: Prisma.SortOrder
+  customerId?: Prisma.SortOrder
+  recipientId?: Prisma.SortOrder
+  giftOccasionId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -727,6 +793,9 @@ export type OrderMaxOrderByAggregateInput = {
   cancelSource?: Prisma.SortOrder
   deliveryCostActual?: Prisma.SortOrder
   deliveryCostNote?: Prisma.SortOrder
+  customerId?: Prisma.SortOrder
+  recipientId?: Prisma.SortOrder
+  giftOccasionId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -751,6 +820,9 @@ export type OrderMinOrderByAggregateInput = {
   cancelSource?: Prisma.SortOrder
   deliveryCostActual?: Prisma.SortOrder
   deliveryCostNote?: Prisma.SortOrder
+  customerId?: Prisma.SortOrder
+  recipientId?: Prisma.SortOrder
+  giftOccasionId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -870,6 +942,132 @@ export type OrderUpdateOneRequiredWithoutItemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.OrderUpdateToOneWithWhereWithoutItemsInput, Prisma.OrderUpdateWithoutItemsInput>, Prisma.OrderUncheckedUpdateWithoutItemsInput>
 }
 
+export type OrderCreateNestedManyWithoutCustomerInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutCustomerInput, Prisma.OrderUncheckedCreateWithoutCustomerInput> | Prisma.OrderCreateWithoutCustomerInput[] | Prisma.OrderUncheckedCreateWithoutCustomerInput[]
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutCustomerInput | Prisma.OrderCreateOrConnectWithoutCustomerInput[]
+  createMany?: Prisma.OrderCreateManyCustomerInputEnvelope
+  connect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+}
+
+export type OrderUncheckedCreateNestedManyWithoutCustomerInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutCustomerInput, Prisma.OrderUncheckedCreateWithoutCustomerInput> | Prisma.OrderCreateWithoutCustomerInput[] | Prisma.OrderUncheckedCreateWithoutCustomerInput[]
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutCustomerInput | Prisma.OrderCreateOrConnectWithoutCustomerInput[]
+  createMany?: Prisma.OrderCreateManyCustomerInputEnvelope
+  connect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+}
+
+export type OrderUpdateManyWithoutCustomerNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutCustomerInput, Prisma.OrderUncheckedCreateWithoutCustomerInput> | Prisma.OrderCreateWithoutCustomerInput[] | Prisma.OrderUncheckedCreateWithoutCustomerInput[]
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutCustomerInput | Prisma.OrderCreateOrConnectWithoutCustomerInput[]
+  upsert?: Prisma.OrderUpsertWithWhereUniqueWithoutCustomerInput | Prisma.OrderUpsertWithWhereUniqueWithoutCustomerInput[]
+  createMany?: Prisma.OrderCreateManyCustomerInputEnvelope
+  set?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  disconnect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  delete?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  connect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  update?: Prisma.OrderUpdateWithWhereUniqueWithoutCustomerInput | Prisma.OrderUpdateWithWhereUniqueWithoutCustomerInput[]
+  updateMany?: Prisma.OrderUpdateManyWithWhereWithoutCustomerInput | Prisma.OrderUpdateManyWithWhereWithoutCustomerInput[]
+  deleteMany?: Prisma.OrderScalarWhereInput | Prisma.OrderScalarWhereInput[]
+}
+
+export type OrderUncheckedUpdateManyWithoutCustomerNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutCustomerInput, Prisma.OrderUncheckedCreateWithoutCustomerInput> | Prisma.OrderCreateWithoutCustomerInput[] | Prisma.OrderUncheckedCreateWithoutCustomerInput[]
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutCustomerInput | Prisma.OrderCreateOrConnectWithoutCustomerInput[]
+  upsert?: Prisma.OrderUpsertWithWhereUniqueWithoutCustomerInput | Prisma.OrderUpsertWithWhereUniqueWithoutCustomerInput[]
+  createMany?: Prisma.OrderCreateManyCustomerInputEnvelope
+  set?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  disconnect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  delete?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  connect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  update?: Prisma.OrderUpdateWithWhereUniqueWithoutCustomerInput | Prisma.OrderUpdateWithWhereUniqueWithoutCustomerInput[]
+  updateMany?: Prisma.OrderUpdateManyWithWhereWithoutCustomerInput | Prisma.OrderUpdateManyWithWhereWithoutCustomerInput[]
+  deleteMany?: Prisma.OrderScalarWhereInput | Prisma.OrderScalarWhereInput[]
+}
+
+export type OrderCreateNestedManyWithoutRecipientInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutRecipientInput, Prisma.OrderUncheckedCreateWithoutRecipientInput> | Prisma.OrderCreateWithoutRecipientInput[] | Prisma.OrderUncheckedCreateWithoutRecipientInput[]
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutRecipientInput | Prisma.OrderCreateOrConnectWithoutRecipientInput[]
+  createMany?: Prisma.OrderCreateManyRecipientInputEnvelope
+  connect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+}
+
+export type OrderUncheckedCreateNestedManyWithoutRecipientInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutRecipientInput, Prisma.OrderUncheckedCreateWithoutRecipientInput> | Prisma.OrderCreateWithoutRecipientInput[] | Prisma.OrderUncheckedCreateWithoutRecipientInput[]
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutRecipientInput | Prisma.OrderCreateOrConnectWithoutRecipientInput[]
+  createMany?: Prisma.OrderCreateManyRecipientInputEnvelope
+  connect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+}
+
+export type OrderUpdateManyWithoutRecipientNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutRecipientInput, Prisma.OrderUncheckedCreateWithoutRecipientInput> | Prisma.OrderCreateWithoutRecipientInput[] | Prisma.OrderUncheckedCreateWithoutRecipientInput[]
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutRecipientInput | Prisma.OrderCreateOrConnectWithoutRecipientInput[]
+  upsert?: Prisma.OrderUpsertWithWhereUniqueWithoutRecipientInput | Prisma.OrderUpsertWithWhereUniqueWithoutRecipientInput[]
+  createMany?: Prisma.OrderCreateManyRecipientInputEnvelope
+  set?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  disconnect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  delete?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  connect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  update?: Prisma.OrderUpdateWithWhereUniqueWithoutRecipientInput | Prisma.OrderUpdateWithWhereUniqueWithoutRecipientInput[]
+  updateMany?: Prisma.OrderUpdateManyWithWhereWithoutRecipientInput | Prisma.OrderUpdateManyWithWhereWithoutRecipientInput[]
+  deleteMany?: Prisma.OrderScalarWhereInput | Prisma.OrderScalarWhereInput[]
+}
+
+export type OrderUncheckedUpdateManyWithoutRecipientNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutRecipientInput, Prisma.OrderUncheckedCreateWithoutRecipientInput> | Prisma.OrderCreateWithoutRecipientInput[] | Prisma.OrderUncheckedCreateWithoutRecipientInput[]
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutRecipientInput | Prisma.OrderCreateOrConnectWithoutRecipientInput[]
+  upsert?: Prisma.OrderUpsertWithWhereUniqueWithoutRecipientInput | Prisma.OrderUpsertWithWhereUniqueWithoutRecipientInput[]
+  createMany?: Prisma.OrderCreateManyRecipientInputEnvelope
+  set?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  disconnect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  delete?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  connect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  update?: Prisma.OrderUpdateWithWhereUniqueWithoutRecipientInput | Prisma.OrderUpdateWithWhereUniqueWithoutRecipientInput[]
+  updateMany?: Prisma.OrderUpdateManyWithWhereWithoutRecipientInput | Prisma.OrderUpdateManyWithWhereWithoutRecipientInput[]
+  deleteMany?: Prisma.OrderScalarWhereInput | Prisma.OrderScalarWhereInput[]
+}
+
+export type OrderCreateNestedManyWithoutGiftOccasionInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutGiftOccasionInput, Prisma.OrderUncheckedCreateWithoutGiftOccasionInput> | Prisma.OrderCreateWithoutGiftOccasionInput[] | Prisma.OrderUncheckedCreateWithoutGiftOccasionInput[]
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutGiftOccasionInput | Prisma.OrderCreateOrConnectWithoutGiftOccasionInput[]
+  createMany?: Prisma.OrderCreateManyGiftOccasionInputEnvelope
+  connect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+}
+
+export type OrderUncheckedCreateNestedManyWithoutGiftOccasionInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutGiftOccasionInput, Prisma.OrderUncheckedCreateWithoutGiftOccasionInput> | Prisma.OrderCreateWithoutGiftOccasionInput[] | Prisma.OrderUncheckedCreateWithoutGiftOccasionInput[]
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutGiftOccasionInput | Prisma.OrderCreateOrConnectWithoutGiftOccasionInput[]
+  createMany?: Prisma.OrderCreateManyGiftOccasionInputEnvelope
+  connect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+}
+
+export type OrderUpdateManyWithoutGiftOccasionNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutGiftOccasionInput, Prisma.OrderUncheckedCreateWithoutGiftOccasionInput> | Prisma.OrderCreateWithoutGiftOccasionInput[] | Prisma.OrderUncheckedCreateWithoutGiftOccasionInput[]
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutGiftOccasionInput | Prisma.OrderCreateOrConnectWithoutGiftOccasionInput[]
+  upsert?: Prisma.OrderUpsertWithWhereUniqueWithoutGiftOccasionInput | Prisma.OrderUpsertWithWhereUniqueWithoutGiftOccasionInput[]
+  createMany?: Prisma.OrderCreateManyGiftOccasionInputEnvelope
+  set?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  disconnect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  delete?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  connect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  update?: Prisma.OrderUpdateWithWhereUniqueWithoutGiftOccasionInput | Prisma.OrderUpdateWithWhereUniqueWithoutGiftOccasionInput[]
+  updateMany?: Prisma.OrderUpdateManyWithWhereWithoutGiftOccasionInput | Prisma.OrderUpdateManyWithWhereWithoutGiftOccasionInput[]
+  deleteMany?: Prisma.OrderScalarWhereInput | Prisma.OrderScalarWhereInput[]
+}
+
+export type OrderUncheckedUpdateManyWithoutGiftOccasionNestedInput = {
+  create?: Prisma.XOR<Prisma.OrderCreateWithoutGiftOccasionInput, Prisma.OrderUncheckedCreateWithoutGiftOccasionInput> | Prisma.OrderCreateWithoutGiftOccasionInput[] | Prisma.OrderUncheckedCreateWithoutGiftOccasionInput[]
+  connectOrCreate?: Prisma.OrderCreateOrConnectWithoutGiftOccasionInput | Prisma.OrderCreateOrConnectWithoutGiftOccasionInput[]
+  upsert?: Prisma.OrderUpsertWithWhereUniqueWithoutGiftOccasionInput | Prisma.OrderUpsertWithWhereUniqueWithoutGiftOccasionInput[]
+  createMany?: Prisma.OrderCreateManyGiftOccasionInputEnvelope
+  set?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  disconnect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  delete?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  connect?: Prisma.OrderWhereUniqueInput | Prisma.OrderWhereUniqueInput[]
+  update?: Prisma.OrderUpdateWithWhereUniqueWithoutGiftOccasionInput | Prisma.OrderUpdateWithWhereUniqueWithoutGiftOccasionInput[]
+  updateMany?: Prisma.OrderUpdateManyWithWhereWithoutGiftOccasionInput | Prisma.OrderUpdateManyWithWhereWithoutGiftOccasionInput[]
+  deleteMany?: Prisma.OrderScalarWhereInput | Prisma.OrderScalarWhereInput[]
+}
+
 export type OrderCreateWithoutStockLogsInput = {
   id?: string
   orderNo: string
@@ -892,6 +1090,9 @@ export type OrderCreateWithoutStockLogsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutOrdersInput
+  recipient?: Prisma.RecipientCreateNestedOneWithoutOrdersInput
+  giftOccasion?: Prisma.GiftOccasionCreateNestedOneWithoutOrdersInput
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   costSnapshot?: Prisma.OrderCostSnapshotCreateNestedOneWithoutOrderInput
 }
@@ -916,6 +1117,9 @@ export type OrderUncheckedCreateWithoutStockLogsInput = {
   cancelSource?: $Enums.OrderCancelSource | null
   deliveryCostActual?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deliveryCostNote?: string | null
+  customerId?: string | null
+  recipientId?: string | null
+  giftOccasionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -960,6 +1164,9 @@ export type OrderUpdateWithoutStockLogsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutOrdersNestedInput
+  recipient?: Prisma.RecipientUpdateOneWithoutOrdersNestedInput
+  giftOccasion?: Prisma.GiftOccasionUpdateOneWithoutOrdersNestedInput
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   costSnapshot?: Prisma.OrderCostSnapshotUpdateOneWithoutOrderNestedInput
 }
@@ -984,6 +1191,9 @@ export type OrderUncheckedUpdateWithoutStockLogsInput = {
   cancelSource?: Prisma.NullableEnumOrderCancelSourceFieldUpdateOperationsInput | $Enums.OrderCancelSource | null
   deliveryCostActual?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deliveryCostNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  giftOccasionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -1011,6 +1221,9 @@ export type OrderCreateWithoutUserInput = {
   deliveryCostNote?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  customer?: Prisma.CustomerCreateNestedOneWithoutOrdersInput
+  recipient?: Prisma.RecipientCreateNestedOneWithoutOrdersInput
+  giftOccasion?: Prisma.GiftOccasionCreateNestedOneWithoutOrdersInput
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   stockLogs?: Prisma.StockLogCreateNestedManyWithoutOrderInput
   costSnapshot?: Prisma.OrderCostSnapshotCreateNestedOneWithoutOrderInput
@@ -1035,6 +1248,9 @@ export type OrderUncheckedCreateWithoutUserInput = {
   cancelSource?: $Enums.OrderCancelSource | null
   deliveryCostActual?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deliveryCostNote?: string | null
+  customerId?: string | null
+  recipientId?: string | null
+  giftOccasionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -1091,6 +1307,9 @@ export type OrderScalarWhereInput = {
   cancelSource?: Prisma.EnumOrderCancelSourceNullableFilter<"Order"> | $Enums.OrderCancelSource | null
   deliveryCostActual?: Prisma.DecimalNullableFilter<"Order"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deliveryCostNote?: Prisma.StringNullableFilter<"Order"> | string | null
+  customerId?: Prisma.StringNullableFilter<"Order"> | string | null
+  recipientId?: Prisma.StringNullableFilter<"Order"> | string | null
+  giftOccasionId?: Prisma.StringNullableFilter<"Order"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Order"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Order"> | Date | string
 }
@@ -1117,6 +1336,9 @@ export type OrderCreateWithoutCostSnapshotInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutOrdersInput
+  recipient?: Prisma.RecipientCreateNestedOneWithoutOrdersInput
+  giftOccasion?: Prisma.GiftOccasionCreateNestedOneWithoutOrdersInput
   items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
   stockLogs?: Prisma.StockLogCreateNestedManyWithoutOrderInput
 }
@@ -1141,6 +1363,9 @@ export type OrderUncheckedCreateWithoutCostSnapshotInput = {
   cancelSource?: $Enums.OrderCancelSource | null
   deliveryCostActual?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deliveryCostNote?: string | null
+  customerId?: string | null
+  recipientId?: string | null
+  giftOccasionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
@@ -1185,6 +1410,9 @@ export type OrderUpdateWithoutCostSnapshotInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutOrdersNestedInput
+  recipient?: Prisma.RecipientUpdateOneWithoutOrdersNestedInput
+  giftOccasion?: Prisma.GiftOccasionUpdateOneWithoutOrdersNestedInput
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   stockLogs?: Prisma.StockLogUpdateManyWithoutOrderNestedInput
 }
@@ -1209,6 +1437,9 @@ export type OrderUncheckedUpdateWithoutCostSnapshotInput = {
   cancelSource?: Prisma.NullableEnumOrderCancelSourceFieldUpdateOperationsInput | $Enums.OrderCancelSource | null
   deliveryCostActual?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deliveryCostNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  giftOccasionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -1237,6 +1468,9 @@ export type OrderCreateWithoutItemsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   user: Prisma.UserCreateNestedOneWithoutOrdersInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutOrdersInput
+  recipient?: Prisma.RecipientCreateNestedOneWithoutOrdersInput
+  giftOccasion?: Prisma.GiftOccasionCreateNestedOneWithoutOrdersInput
   stockLogs?: Prisma.StockLogCreateNestedManyWithoutOrderInput
   costSnapshot?: Prisma.OrderCostSnapshotCreateNestedOneWithoutOrderInput
 }
@@ -1261,6 +1495,9 @@ export type OrderUncheckedCreateWithoutItemsInput = {
   cancelSource?: $Enums.OrderCancelSource | null
   deliveryCostActual?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deliveryCostNote?: string | null
+  customerId?: string | null
+  recipientId?: string | null
+  giftOccasionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   stockLogs?: Prisma.StockLogUncheckedCreateNestedManyWithoutOrderInput
@@ -1305,6 +1542,9 @@ export type OrderUpdateWithoutItemsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutOrdersNestedInput
+  recipient?: Prisma.RecipientUpdateOneWithoutOrdersNestedInput
+  giftOccasion?: Prisma.GiftOccasionUpdateOneWithoutOrdersNestedInput
   stockLogs?: Prisma.StockLogUpdateManyWithoutOrderNestedInput
   costSnapshot?: Prisma.OrderCostSnapshotUpdateOneWithoutOrderNestedInput
 }
@@ -1329,10 +1569,265 @@ export type OrderUncheckedUpdateWithoutItemsInput = {
   cancelSource?: Prisma.NullableEnumOrderCancelSourceFieldUpdateOperationsInput | $Enums.OrderCancelSource | null
   deliveryCostActual?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deliveryCostNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  giftOccasionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stockLogs?: Prisma.StockLogUncheckedUpdateManyWithoutOrderNestedInput
   costSnapshot?: Prisma.OrderCostSnapshotUncheckedUpdateOneWithoutOrderNestedInput
+}
+
+export type OrderCreateWithoutCustomerInput = {
+  id?: string
+  orderNo: string
+  totalAmount: number
+  deliveryFee?: number
+  payAmount: number
+  receiverName: string
+  receiverPhone: string
+  deliveryAddress: string
+  deliveryDate: string
+  greetingCard?: string | null
+  deliveryInfo?: string | null
+  status?: $Enums.OrderStatus
+  paidAt?: Date | string | null
+  refundAmount?: number | null
+  refundTime?: Date | string | null
+  cancelSource?: $Enums.OrderCancelSource | null
+  deliveryCostActual?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveryCostNote?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutOrdersInput
+  recipient?: Prisma.RecipientCreateNestedOneWithoutOrdersInput
+  giftOccasion?: Prisma.GiftOccasionCreateNestedOneWithoutOrdersInput
+  items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
+  stockLogs?: Prisma.StockLogCreateNestedManyWithoutOrderInput
+  costSnapshot?: Prisma.OrderCostSnapshotCreateNestedOneWithoutOrderInput
+}
+
+export type OrderUncheckedCreateWithoutCustomerInput = {
+  id?: string
+  orderNo: string
+  userId: string
+  totalAmount: number
+  deliveryFee?: number
+  payAmount: number
+  receiverName: string
+  receiverPhone: string
+  deliveryAddress: string
+  deliveryDate: string
+  greetingCard?: string | null
+  deliveryInfo?: string | null
+  status?: $Enums.OrderStatus
+  paidAt?: Date | string | null
+  refundAmount?: number | null
+  refundTime?: Date | string | null
+  cancelSource?: $Enums.OrderCancelSource | null
+  deliveryCostActual?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveryCostNote?: string | null
+  recipientId?: string | null
+  giftOccasionId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
+  stockLogs?: Prisma.StockLogUncheckedCreateNestedManyWithoutOrderInput
+  costSnapshot?: Prisma.OrderCostSnapshotUncheckedCreateNestedOneWithoutOrderInput
+}
+
+export type OrderCreateOrConnectWithoutCustomerInput = {
+  where: Prisma.OrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderCreateWithoutCustomerInput, Prisma.OrderUncheckedCreateWithoutCustomerInput>
+}
+
+export type OrderCreateManyCustomerInputEnvelope = {
+  data: Prisma.OrderCreateManyCustomerInput | Prisma.OrderCreateManyCustomerInput[]
+  skipDuplicates?: boolean
+}
+
+export type OrderUpsertWithWhereUniqueWithoutCustomerInput = {
+  where: Prisma.OrderWhereUniqueInput
+  update: Prisma.XOR<Prisma.OrderUpdateWithoutCustomerInput, Prisma.OrderUncheckedUpdateWithoutCustomerInput>
+  create: Prisma.XOR<Prisma.OrderCreateWithoutCustomerInput, Prisma.OrderUncheckedCreateWithoutCustomerInput>
+}
+
+export type OrderUpdateWithWhereUniqueWithoutCustomerInput = {
+  where: Prisma.OrderWhereUniqueInput
+  data: Prisma.XOR<Prisma.OrderUpdateWithoutCustomerInput, Prisma.OrderUncheckedUpdateWithoutCustomerInput>
+}
+
+export type OrderUpdateManyWithWhereWithoutCustomerInput = {
+  where: Prisma.OrderScalarWhereInput
+  data: Prisma.XOR<Prisma.OrderUpdateManyMutationInput, Prisma.OrderUncheckedUpdateManyWithoutCustomerInput>
+}
+
+export type OrderCreateWithoutRecipientInput = {
+  id?: string
+  orderNo: string
+  totalAmount: number
+  deliveryFee?: number
+  payAmount: number
+  receiverName: string
+  receiverPhone: string
+  deliveryAddress: string
+  deliveryDate: string
+  greetingCard?: string | null
+  deliveryInfo?: string | null
+  status?: $Enums.OrderStatus
+  paidAt?: Date | string | null
+  refundAmount?: number | null
+  refundTime?: Date | string | null
+  cancelSource?: $Enums.OrderCancelSource | null
+  deliveryCostActual?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveryCostNote?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutOrdersInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutOrdersInput
+  giftOccasion?: Prisma.GiftOccasionCreateNestedOneWithoutOrdersInput
+  items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
+  stockLogs?: Prisma.StockLogCreateNestedManyWithoutOrderInput
+  costSnapshot?: Prisma.OrderCostSnapshotCreateNestedOneWithoutOrderInput
+}
+
+export type OrderUncheckedCreateWithoutRecipientInput = {
+  id?: string
+  orderNo: string
+  userId: string
+  totalAmount: number
+  deliveryFee?: number
+  payAmount: number
+  receiverName: string
+  receiverPhone: string
+  deliveryAddress: string
+  deliveryDate: string
+  greetingCard?: string | null
+  deliveryInfo?: string | null
+  status?: $Enums.OrderStatus
+  paidAt?: Date | string | null
+  refundAmount?: number | null
+  refundTime?: Date | string | null
+  cancelSource?: $Enums.OrderCancelSource | null
+  deliveryCostActual?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveryCostNote?: string | null
+  customerId?: string | null
+  giftOccasionId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
+  stockLogs?: Prisma.StockLogUncheckedCreateNestedManyWithoutOrderInput
+  costSnapshot?: Prisma.OrderCostSnapshotUncheckedCreateNestedOneWithoutOrderInput
+}
+
+export type OrderCreateOrConnectWithoutRecipientInput = {
+  where: Prisma.OrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderCreateWithoutRecipientInput, Prisma.OrderUncheckedCreateWithoutRecipientInput>
+}
+
+export type OrderCreateManyRecipientInputEnvelope = {
+  data: Prisma.OrderCreateManyRecipientInput | Prisma.OrderCreateManyRecipientInput[]
+  skipDuplicates?: boolean
+}
+
+export type OrderUpsertWithWhereUniqueWithoutRecipientInput = {
+  where: Prisma.OrderWhereUniqueInput
+  update: Prisma.XOR<Prisma.OrderUpdateWithoutRecipientInput, Prisma.OrderUncheckedUpdateWithoutRecipientInput>
+  create: Prisma.XOR<Prisma.OrderCreateWithoutRecipientInput, Prisma.OrderUncheckedCreateWithoutRecipientInput>
+}
+
+export type OrderUpdateWithWhereUniqueWithoutRecipientInput = {
+  where: Prisma.OrderWhereUniqueInput
+  data: Prisma.XOR<Prisma.OrderUpdateWithoutRecipientInput, Prisma.OrderUncheckedUpdateWithoutRecipientInput>
+}
+
+export type OrderUpdateManyWithWhereWithoutRecipientInput = {
+  where: Prisma.OrderScalarWhereInput
+  data: Prisma.XOR<Prisma.OrderUpdateManyMutationInput, Prisma.OrderUncheckedUpdateManyWithoutRecipientInput>
+}
+
+export type OrderCreateWithoutGiftOccasionInput = {
+  id?: string
+  orderNo: string
+  totalAmount: number
+  deliveryFee?: number
+  payAmount: number
+  receiverName: string
+  receiverPhone: string
+  deliveryAddress: string
+  deliveryDate: string
+  greetingCard?: string | null
+  deliveryInfo?: string | null
+  status?: $Enums.OrderStatus
+  paidAt?: Date | string | null
+  refundAmount?: number | null
+  refundTime?: Date | string | null
+  cancelSource?: $Enums.OrderCancelSource | null
+  deliveryCostActual?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveryCostNote?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  user: Prisma.UserCreateNestedOneWithoutOrdersInput
+  customer?: Prisma.CustomerCreateNestedOneWithoutOrdersInput
+  recipient?: Prisma.RecipientCreateNestedOneWithoutOrdersInput
+  items?: Prisma.OrderItemCreateNestedManyWithoutOrderInput
+  stockLogs?: Prisma.StockLogCreateNestedManyWithoutOrderInput
+  costSnapshot?: Prisma.OrderCostSnapshotCreateNestedOneWithoutOrderInput
+}
+
+export type OrderUncheckedCreateWithoutGiftOccasionInput = {
+  id?: string
+  orderNo: string
+  userId: string
+  totalAmount: number
+  deliveryFee?: number
+  payAmount: number
+  receiverName: string
+  receiverPhone: string
+  deliveryAddress: string
+  deliveryDate: string
+  greetingCard?: string | null
+  deliveryInfo?: string | null
+  status?: $Enums.OrderStatus
+  paidAt?: Date | string | null
+  refundAmount?: number | null
+  refundTime?: Date | string | null
+  cancelSource?: $Enums.OrderCancelSource | null
+  deliveryCostActual?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveryCostNote?: string | null
+  customerId?: string | null
+  recipientId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  items?: Prisma.OrderItemUncheckedCreateNestedManyWithoutOrderInput
+  stockLogs?: Prisma.StockLogUncheckedCreateNestedManyWithoutOrderInput
+  costSnapshot?: Prisma.OrderCostSnapshotUncheckedCreateNestedOneWithoutOrderInput
+}
+
+export type OrderCreateOrConnectWithoutGiftOccasionInput = {
+  where: Prisma.OrderWhereUniqueInput
+  create: Prisma.XOR<Prisma.OrderCreateWithoutGiftOccasionInput, Prisma.OrderUncheckedCreateWithoutGiftOccasionInput>
+}
+
+export type OrderCreateManyGiftOccasionInputEnvelope = {
+  data: Prisma.OrderCreateManyGiftOccasionInput | Prisma.OrderCreateManyGiftOccasionInput[]
+  skipDuplicates?: boolean
+}
+
+export type OrderUpsertWithWhereUniqueWithoutGiftOccasionInput = {
+  where: Prisma.OrderWhereUniqueInput
+  update: Prisma.XOR<Prisma.OrderUpdateWithoutGiftOccasionInput, Prisma.OrderUncheckedUpdateWithoutGiftOccasionInput>
+  create: Prisma.XOR<Prisma.OrderCreateWithoutGiftOccasionInput, Prisma.OrderUncheckedCreateWithoutGiftOccasionInput>
+}
+
+export type OrderUpdateWithWhereUniqueWithoutGiftOccasionInput = {
+  where: Prisma.OrderWhereUniqueInput
+  data: Prisma.XOR<Prisma.OrderUpdateWithoutGiftOccasionInput, Prisma.OrderUncheckedUpdateWithoutGiftOccasionInput>
+}
+
+export type OrderUpdateManyWithWhereWithoutGiftOccasionInput = {
+  where: Prisma.OrderScalarWhereInput
+  data: Prisma.XOR<Prisma.OrderUpdateManyMutationInput, Prisma.OrderUncheckedUpdateManyWithoutGiftOccasionInput>
 }
 
 export type OrderCreateManyUserInput = {
@@ -1354,6 +1849,9 @@ export type OrderCreateManyUserInput = {
   cancelSource?: $Enums.OrderCancelSource | null
   deliveryCostActual?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deliveryCostNote?: string | null
+  customerId?: string | null
+  recipientId?: string | null
+  giftOccasionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1379,6 +1877,9 @@ export type OrderUpdateWithoutUserInput = {
   deliveryCostNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  customer?: Prisma.CustomerUpdateOneWithoutOrdersNestedInput
+  recipient?: Prisma.RecipientUpdateOneWithoutOrdersNestedInput
+  giftOccasion?: Prisma.GiftOccasionUpdateOneWithoutOrdersNestedInput
   items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
   stockLogs?: Prisma.StockLogUpdateManyWithoutOrderNestedInput
   costSnapshot?: Prisma.OrderCostSnapshotUpdateOneWithoutOrderNestedInput
@@ -1403,6 +1904,9 @@ export type OrderUncheckedUpdateWithoutUserInput = {
   cancelSource?: Prisma.NullableEnumOrderCancelSourceFieldUpdateOperationsInput | $Enums.OrderCancelSource | null
   deliveryCostActual?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deliveryCostNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  giftOccasionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
@@ -1429,6 +1933,339 @@ export type OrderUncheckedUpdateManyWithoutUserInput = {
   cancelSource?: Prisma.NullableEnumOrderCancelSourceFieldUpdateOperationsInput | $Enums.OrderCancelSource | null
   deliveryCostActual?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   deliveryCostNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  giftOccasionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type OrderCreateManyCustomerInput = {
+  id?: string
+  orderNo: string
+  userId: string
+  totalAmount: number
+  deliveryFee?: number
+  payAmount: number
+  receiverName: string
+  receiverPhone: string
+  deliveryAddress: string
+  deliveryDate: string
+  greetingCard?: string | null
+  deliveryInfo?: string | null
+  status?: $Enums.OrderStatus
+  paidAt?: Date | string | null
+  refundAmount?: number | null
+  refundTime?: Date | string | null
+  cancelSource?: $Enums.OrderCancelSource | null
+  deliveryCostActual?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveryCostNote?: string | null
+  recipientId?: string | null
+  giftOccasionId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type OrderUpdateWithoutCustomerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNo?: Prisma.StringFieldUpdateOperationsInput | string
+  totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  deliveryFee?: Prisma.FloatFieldUpdateOperationsInput | number
+  payAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  receiverName?: Prisma.StringFieldUpdateOperationsInput | string
+  receiverPhone?: Prisma.StringFieldUpdateOperationsInput | string
+  deliveryAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  deliveryDate?: Prisma.StringFieldUpdateOperationsInput | string
+  greetingCard?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  refundAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  refundTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelSource?: Prisma.NullableEnumOrderCancelSourceFieldUpdateOperationsInput | $Enums.OrderCancelSource | null
+  deliveryCostActual?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveryCostNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
+  recipient?: Prisma.RecipientUpdateOneWithoutOrdersNestedInput
+  giftOccasion?: Prisma.GiftOccasionUpdateOneWithoutOrdersNestedInput
+  items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
+  stockLogs?: Prisma.StockLogUpdateManyWithoutOrderNestedInput
+  costSnapshot?: Prisma.OrderCostSnapshotUpdateOneWithoutOrderNestedInput
+}
+
+export type OrderUncheckedUpdateWithoutCustomerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNo?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  deliveryFee?: Prisma.FloatFieldUpdateOperationsInput | number
+  payAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  receiverName?: Prisma.StringFieldUpdateOperationsInput | string
+  receiverPhone?: Prisma.StringFieldUpdateOperationsInput | string
+  deliveryAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  deliveryDate?: Prisma.StringFieldUpdateOperationsInput | string
+  greetingCard?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  refundAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  refundTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelSource?: Prisma.NullableEnumOrderCancelSourceFieldUpdateOperationsInput | $Enums.OrderCancelSource | null
+  deliveryCostActual?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveryCostNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  giftOccasionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
+  stockLogs?: Prisma.StockLogUncheckedUpdateManyWithoutOrderNestedInput
+  costSnapshot?: Prisma.OrderCostSnapshotUncheckedUpdateOneWithoutOrderNestedInput
+}
+
+export type OrderUncheckedUpdateManyWithoutCustomerInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNo?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  deliveryFee?: Prisma.FloatFieldUpdateOperationsInput | number
+  payAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  receiverName?: Prisma.StringFieldUpdateOperationsInput | string
+  receiverPhone?: Prisma.StringFieldUpdateOperationsInput | string
+  deliveryAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  deliveryDate?: Prisma.StringFieldUpdateOperationsInput | string
+  greetingCard?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  refundAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  refundTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelSource?: Prisma.NullableEnumOrderCancelSourceFieldUpdateOperationsInput | $Enums.OrderCancelSource | null
+  deliveryCostActual?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveryCostNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  giftOccasionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type OrderCreateManyRecipientInput = {
+  id?: string
+  orderNo: string
+  userId: string
+  totalAmount: number
+  deliveryFee?: number
+  payAmount: number
+  receiverName: string
+  receiverPhone: string
+  deliveryAddress: string
+  deliveryDate: string
+  greetingCard?: string | null
+  deliveryInfo?: string | null
+  status?: $Enums.OrderStatus
+  paidAt?: Date | string | null
+  refundAmount?: number | null
+  refundTime?: Date | string | null
+  cancelSource?: $Enums.OrderCancelSource | null
+  deliveryCostActual?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveryCostNote?: string | null
+  customerId?: string | null
+  giftOccasionId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type OrderUpdateWithoutRecipientInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNo?: Prisma.StringFieldUpdateOperationsInput | string
+  totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  deliveryFee?: Prisma.FloatFieldUpdateOperationsInput | number
+  payAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  receiverName?: Prisma.StringFieldUpdateOperationsInput | string
+  receiverPhone?: Prisma.StringFieldUpdateOperationsInput | string
+  deliveryAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  deliveryDate?: Prisma.StringFieldUpdateOperationsInput | string
+  greetingCard?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  refundAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  refundTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelSource?: Prisma.NullableEnumOrderCancelSourceFieldUpdateOperationsInput | $Enums.OrderCancelSource | null
+  deliveryCostActual?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveryCostNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutOrdersNestedInput
+  giftOccasion?: Prisma.GiftOccasionUpdateOneWithoutOrdersNestedInput
+  items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
+  stockLogs?: Prisma.StockLogUpdateManyWithoutOrderNestedInput
+  costSnapshot?: Prisma.OrderCostSnapshotUpdateOneWithoutOrderNestedInput
+}
+
+export type OrderUncheckedUpdateWithoutRecipientInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNo?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  deliveryFee?: Prisma.FloatFieldUpdateOperationsInput | number
+  payAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  receiverName?: Prisma.StringFieldUpdateOperationsInput | string
+  receiverPhone?: Prisma.StringFieldUpdateOperationsInput | string
+  deliveryAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  deliveryDate?: Prisma.StringFieldUpdateOperationsInput | string
+  greetingCard?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  refundAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  refundTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelSource?: Prisma.NullableEnumOrderCancelSourceFieldUpdateOperationsInput | $Enums.OrderCancelSource | null
+  deliveryCostActual?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveryCostNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  giftOccasionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
+  stockLogs?: Prisma.StockLogUncheckedUpdateManyWithoutOrderNestedInput
+  costSnapshot?: Prisma.OrderCostSnapshotUncheckedUpdateOneWithoutOrderNestedInput
+}
+
+export type OrderUncheckedUpdateManyWithoutRecipientInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNo?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  deliveryFee?: Prisma.FloatFieldUpdateOperationsInput | number
+  payAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  receiverName?: Prisma.StringFieldUpdateOperationsInput | string
+  receiverPhone?: Prisma.StringFieldUpdateOperationsInput | string
+  deliveryAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  deliveryDate?: Prisma.StringFieldUpdateOperationsInput | string
+  greetingCard?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  refundAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  refundTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelSource?: Prisma.NullableEnumOrderCancelSourceFieldUpdateOperationsInput | $Enums.OrderCancelSource | null
+  deliveryCostActual?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveryCostNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  giftOccasionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type OrderCreateManyGiftOccasionInput = {
+  id?: string
+  orderNo: string
+  userId: string
+  totalAmount: number
+  deliveryFee?: number
+  payAmount: number
+  receiverName: string
+  receiverPhone: string
+  deliveryAddress: string
+  deliveryDate: string
+  greetingCard?: string | null
+  deliveryInfo?: string | null
+  status?: $Enums.OrderStatus
+  paidAt?: Date | string | null
+  refundAmount?: number | null
+  refundTime?: Date | string | null
+  cancelSource?: $Enums.OrderCancelSource | null
+  deliveryCostActual?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveryCostNote?: string | null
+  customerId?: string | null
+  recipientId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type OrderUpdateWithoutGiftOccasionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNo?: Prisma.StringFieldUpdateOperationsInput | string
+  totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  deliveryFee?: Prisma.FloatFieldUpdateOperationsInput | number
+  payAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  receiverName?: Prisma.StringFieldUpdateOperationsInput | string
+  receiverPhone?: Prisma.StringFieldUpdateOperationsInput | string
+  deliveryAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  deliveryDate?: Prisma.StringFieldUpdateOperationsInput | string
+  greetingCard?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  refundAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  refundTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelSource?: Prisma.NullableEnumOrderCancelSourceFieldUpdateOperationsInput | $Enums.OrderCancelSource | null
+  deliveryCostActual?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveryCostNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  user?: Prisma.UserUpdateOneRequiredWithoutOrdersNestedInput
+  customer?: Prisma.CustomerUpdateOneWithoutOrdersNestedInput
+  recipient?: Prisma.RecipientUpdateOneWithoutOrdersNestedInput
+  items?: Prisma.OrderItemUpdateManyWithoutOrderNestedInput
+  stockLogs?: Prisma.StockLogUpdateManyWithoutOrderNestedInput
+  costSnapshot?: Prisma.OrderCostSnapshotUpdateOneWithoutOrderNestedInput
+}
+
+export type OrderUncheckedUpdateWithoutGiftOccasionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNo?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  deliveryFee?: Prisma.FloatFieldUpdateOperationsInput | number
+  payAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  receiverName?: Prisma.StringFieldUpdateOperationsInput | string
+  receiverPhone?: Prisma.StringFieldUpdateOperationsInput | string
+  deliveryAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  deliveryDate?: Prisma.StringFieldUpdateOperationsInput | string
+  greetingCard?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  refundAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  refundTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelSource?: Prisma.NullableEnumOrderCancelSourceFieldUpdateOperationsInput | $Enums.OrderCancelSource | null
+  deliveryCostActual?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveryCostNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.OrderItemUncheckedUpdateManyWithoutOrderNestedInput
+  stockLogs?: Prisma.StockLogUncheckedUpdateManyWithoutOrderNestedInput
+  costSnapshot?: Prisma.OrderCostSnapshotUncheckedUpdateOneWithoutOrderNestedInput
+}
+
+export type OrderUncheckedUpdateManyWithoutGiftOccasionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  orderNo?: Prisma.StringFieldUpdateOperationsInput | string
+  userId?: Prisma.StringFieldUpdateOperationsInput | string
+  totalAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  deliveryFee?: Prisma.FloatFieldUpdateOperationsInput | number
+  payAmount?: Prisma.FloatFieldUpdateOperationsInput | number
+  receiverName?: Prisma.StringFieldUpdateOperationsInput | string
+  receiverPhone?: Prisma.StringFieldUpdateOperationsInput | string
+  deliveryAddress?: Prisma.StringFieldUpdateOperationsInput | string
+  deliveryDate?: Prisma.StringFieldUpdateOperationsInput | string
+  greetingCard?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deliveryInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumOrderStatusFieldUpdateOperationsInput | $Enums.OrderStatus
+  paidAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  refundAmount?: Prisma.NullableFloatFieldUpdateOperationsInput | number | null
+  refundTime?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelSource?: Prisma.NullableEnumOrderCancelSourceFieldUpdateOperationsInput | $Enums.OrderCancelSource | null
+  deliveryCostActual?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  deliveryCostNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  recipientId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1493,9 +2330,15 @@ export type OrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   cancelSource?: boolean
   deliveryCostActual?: boolean
   deliveryCostNote?: boolean
+  customerId?: boolean
+  recipientId?: boolean
+  giftOccasionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  customer?: boolean | Prisma.Order$customerArgs<ExtArgs>
+  recipient?: boolean | Prisma.Order$recipientArgs<ExtArgs>
+  giftOccasion?: boolean | Prisma.Order$giftOccasionArgs<ExtArgs>
   items?: boolean | Prisma.Order$itemsArgs<ExtArgs>
   stockLogs?: boolean | Prisma.Order$stockLogsArgs<ExtArgs>
   costSnapshot?: boolean | Prisma.Order$costSnapshotArgs<ExtArgs>
@@ -1522,9 +2365,15 @@ export type OrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   cancelSource?: boolean
   deliveryCostActual?: boolean
   deliveryCostNote?: boolean
+  customerId?: boolean
+  recipientId?: boolean
+  giftOccasionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  customer?: boolean | Prisma.Order$customerArgs<ExtArgs>
+  recipient?: boolean | Prisma.Order$recipientArgs<ExtArgs>
+  giftOccasion?: boolean | Prisma.Order$giftOccasionArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
 export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -1547,9 +2396,15 @@ export type OrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   cancelSource?: boolean
   deliveryCostActual?: boolean
   deliveryCostNote?: boolean
+  customerId?: boolean
+  recipientId?: boolean
+  giftOccasionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  customer?: boolean | Prisma.Order$customerArgs<ExtArgs>
+  recipient?: boolean | Prisma.Order$recipientArgs<ExtArgs>
+  giftOccasion?: boolean | Prisma.Order$giftOccasionArgs<ExtArgs>
 }, ExtArgs["result"]["order"]>
 
 export type OrderSelectScalar = {
@@ -1572,13 +2427,19 @@ export type OrderSelectScalar = {
   cancelSource?: boolean
   deliveryCostActual?: boolean
   deliveryCostNote?: boolean
+  customerId?: boolean
+  recipientId?: boolean
+  giftOccasionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderNo" | "userId" | "totalAmount" | "deliveryFee" | "payAmount" | "receiverName" | "receiverPhone" | "deliveryAddress" | "deliveryDate" | "greetingCard" | "deliveryInfo" | "status" | "paidAt" | "refundAmount" | "refundTime" | "cancelSource" | "deliveryCostActual" | "deliveryCostNote" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
+export type OrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "orderNo" | "userId" | "totalAmount" | "deliveryFee" | "payAmount" | "receiverName" | "receiverPhone" | "deliveryAddress" | "deliveryDate" | "greetingCard" | "deliveryInfo" | "status" | "paidAt" | "refundAmount" | "refundTime" | "cancelSource" | "deliveryCostActual" | "deliveryCostNote" | "customerId" | "recipientId" | "giftOccasionId" | "createdAt" | "updatedAt", ExtArgs["result"]["order"]>
 export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  customer?: boolean | Prisma.Order$customerArgs<ExtArgs>
+  recipient?: boolean | Prisma.Order$recipientArgs<ExtArgs>
+  giftOccasion?: boolean | Prisma.Order$giftOccasionArgs<ExtArgs>
   items?: boolean | Prisma.Order$itemsArgs<ExtArgs>
   stockLogs?: boolean | Prisma.Order$stockLogsArgs<ExtArgs>
   costSnapshot?: boolean | Prisma.Order$costSnapshotArgs<ExtArgs>
@@ -1586,15 +2447,24 @@ export type OrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 }
 export type OrderIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  customer?: boolean | Prisma.Order$customerArgs<ExtArgs>
+  recipient?: boolean | Prisma.Order$recipientArgs<ExtArgs>
+  giftOccasion?: boolean | Prisma.Order$giftOccasionArgs<ExtArgs>
 }
 export type OrderIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   user?: boolean | Prisma.UserDefaultArgs<ExtArgs>
+  customer?: boolean | Prisma.Order$customerArgs<ExtArgs>
+  recipient?: boolean | Prisma.Order$recipientArgs<ExtArgs>
+  giftOccasion?: boolean | Prisma.Order$giftOccasionArgs<ExtArgs>
 }
 
 export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   name: "Order"
   objects: {
     user: Prisma.$UserPayload<ExtArgs>
+    customer: Prisma.$CustomerPayload<ExtArgs> | null
+    recipient: Prisma.$RecipientPayload<ExtArgs> | null
+    giftOccasion: Prisma.$GiftOccasionPayload<ExtArgs> | null
     items: Prisma.$OrderItemPayload<ExtArgs>[]
     stockLogs: Prisma.$StockLogPayload<ExtArgs>[]
     costSnapshot: Prisma.$OrderCostSnapshotPayload<ExtArgs> | null
@@ -1619,6 +2489,9 @@ export type $OrderPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     cancelSource: $Enums.OrderCancelSource | null
     deliveryCostActual: runtime.Decimal | null
     deliveryCostNote: string | null
+    customerId: string | null
+    recipientId: string | null
+    giftOccasionId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["order"]>
@@ -2016,6 +2889,9 @@ readonly fields: OrderFieldRefs;
 export interface Prisma__OrderClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   user<T extends Prisma.UserDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.UserDefaultArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  customer<T extends Prisma.Order$customerArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$customerArgs<ExtArgs>>): Prisma.Prisma__CustomerClient<runtime.Types.Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  recipient<T extends Prisma.Order$recipientArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$recipientArgs<ExtArgs>>): Prisma.Prisma__RecipientClient<runtime.Types.Result.GetResult<Prisma.$RecipientPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  giftOccasion<T extends Prisma.Order$giftOccasionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$giftOccasionArgs<ExtArgs>>): Prisma.Prisma__GiftOccasionClient<runtime.Types.Result.GetResult<Prisma.$GiftOccasionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   items<T extends Prisma.Order$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   stockLogs<T extends Prisma.Order$stockLogsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$stockLogsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StockLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   costSnapshot<T extends Prisma.Order$costSnapshotArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Order$costSnapshotArgs<ExtArgs>>): Prisma.Prisma__OrderCostSnapshotClient<runtime.Types.Result.GetResult<Prisma.$OrderCostSnapshotPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
@@ -2067,6 +2943,9 @@ export interface OrderFieldRefs {
   readonly cancelSource: Prisma.FieldRef<"Order", 'OrderCancelSource'>
   readonly deliveryCostActual: Prisma.FieldRef<"Order", 'Decimal'>
   readonly deliveryCostNote: Prisma.FieldRef<"Order", 'String'>
+  readonly customerId: Prisma.FieldRef<"Order", 'String'>
+  readonly recipientId: Prisma.FieldRef<"Order", 'String'>
+  readonly giftOccasionId: Prisma.FieldRef<"Order", 'String'>
   readonly createdAt: Prisma.FieldRef<"Order", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Order", 'DateTime'>
 }
@@ -2467,6 +3346,63 @@ export type OrderDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Interna
    * Limit how many Orders to delete.
    */
   limit?: number
+}
+
+/**
+ * Order.customer
+ */
+export type Order$customerArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Customer
+   */
+  select?: Prisma.CustomerSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Customer
+   */
+  omit?: Prisma.CustomerOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CustomerInclude<ExtArgs> | null
+  where?: Prisma.CustomerWhereInput
+}
+
+/**
+ * Order.recipient
+ */
+export type Order$recipientArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Recipient
+   */
+  select?: Prisma.RecipientSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Recipient
+   */
+  omit?: Prisma.RecipientOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RecipientInclude<ExtArgs> | null
+  where?: Prisma.RecipientWhereInput
+}
+
+/**
+ * Order.giftOccasion
+ */
+export type Order$giftOccasionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the GiftOccasion
+   */
+  select?: Prisma.GiftOccasionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the GiftOccasion
+   */
+  omit?: Prisma.GiftOccasionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.GiftOccasionInclude<ExtArgs> | null
+  where?: Prisma.GiftOccasionWhereInput
 }
 
 /**

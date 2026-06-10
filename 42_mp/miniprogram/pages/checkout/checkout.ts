@@ -1,4 +1,4 @@
-// pages/checkout/checkout.ts — 结算与模拟支付闭环
+// pages/checkout/checkout.ts — 结算与模拟支付闭环（含礼赠 CRM）
 import { baseUrl } from '../../config/index';
 import { toRelativeImagePath } from '../../utils/image';
 import { isLoggedIn } from '../../utils/auth';
@@ -17,6 +17,12 @@ import {
   FREE_SHIPPING_THRESHOLD,
   DEFAULT_DELIVERY_FEE,
 } from '../../utils/order-api';
+import { fetchSavedRecipients, type SavedRecipient } from '../../utils/recipient-api';
+import {
+  RELATION_OPTIONS,
+  OCCASION_OPTIONS,
+  relationLabelByKey,
+} from '../../utils/crm-options';
 
 interface CheckoutDisplayItem {
   lineKey: string;
@@ -70,12 +76,34 @@ Page({
     receiverName: '',
     receiverPhone: '',
     deliveryAddress: '',
+    buyerName: '',
+    buyerPhone: '',
     deliveryDate: '',
     minDeliveryDate: todayString(),
     timeBuckets: TIME_BUCKETS,
     deliveryTimeBucketIndex: 0,
     deliveryTimeBucket: TIME_BUCKETS[0],
     greetingCard: '',
+    relationOptions: RELATION_OPTIONS.map((item) => item.label),
+    relationKeys: RELATION_OPTIONS.map((item) => item.key),
+    relationIndex: -1,
+    relationType: '',
+    relationLabel: '',
+    occasionOptions: OCCASION_OPTIONS.map((item) => item.label),
+    occasionKeys: OCCASION_OPTIONS.map((item) => item.key),
+    occasionIndex: -1,
+    occasionType: '',
+    importantDate: '',
+    preferredColors: '',
+    dislikedFlowers: '',
+    preferenceNote: '',
+    saveRecipient: true,
+    reminderEnabled: true,
+    reminderDaysBefore: 7,
+    showPreferencePanel: false,
+    savedRecipients: [] as SavedRecipient[],
+    recipientsLoading: false,
+    recipientsError: '',
     checkoutItems: [] as CheckoutDisplayItem[],
     checkoutSourceItems: [] as CartItem[],
     productTotal: '0.00',
@@ -92,11 +120,13 @@ Page({
   onLoad() {
     this.loadCheckoutProducts();
     void this.prefillDefaultAddress();
+    void this.loadSavedRecipients();
   },
 
   onShow() {
     this.loadCheckoutProducts();
     void this.prefillDefaultAddress();
+    void this.loadSavedRecipients();
   },
 
   async prefillDefaultAddress() {
@@ -116,6 +146,12 @@ Page({
       if (!this.data.deliveryAddress && user.defaultAddress) {
         patch.deliveryAddress = user.defaultAddress;
       }
+      if (!this.data.buyerName && user.defaultReceiverName) {
+        patch.buyerName = user.defaultReceiverName;
+      }
+      if (!this.data.buyerPhone && user.defaultReceiverPhone) {
+        patch.buyerPhone = user.defaultReceiverPhone;
+      }
 
       if (Object.keys(patch).length) {
         this.setData(patch);
@@ -123,6 +159,122 @@ Page({
     } catch {
       /* 忽略 */
     }
+  },
+
+  async loadSavedRecipients() {
+    if (!isLoggedIn()) return;
+    this.setData({ recipientsLoading: true, recipientsError: '' });
+    try {
+      const data = await fetchSavedRecipients();
+      this.setData({
+        savedRecipients: data?.recipients ?? [],
+        recipientsLoading: false,
+      });
+    } catch (err) {
+      console.error('加载常用收花人失败', err);
+      this.setData({
+        recipientsLoading: false,
+        recipientsError: '常用收花人加载失败',
+      });
+    }
+  },
+
+  onChooseSavedRecipient() {
+    const list = this.data.savedRecipients;
+    if (!list.length) {
+      wx.showToast({
+        title: '暂无常用收花人，本次下单后可保存',
+        icon: 'none',
+      });
+      return;
+    }
+
+    wx.showActionSheet({
+      itemList: list.map(
+        (item) =>
+          `${item.name}${item.relationLabel || item.relationType ? `（${item.relationLabel || relationLabelByKey(item.relationType || '')}）` : ''}`
+      ),
+      success: (res) => {
+        const selected = list[res.tapIndex];
+        if (!selected) return;
+        this.applySavedRecipient(selected);
+      },
+    });
+  },
+
+  applySavedRecipient(recipient: SavedRecipient) {
+    const relationIndex = this.data.relationKeys.indexOf(
+      recipient.relationType || ''
+    );
+
+    this.setData({
+      receiverName: recipient.name || this.data.receiverName,
+      receiverPhone: recipient.phone || this.data.receiverPhone,
+      deliveryAddress: recipient.address || this.data.deliveryAddress,
+      relationIndex: relationIndex >= 0 ? relationIndex : -1,
+      relationType: recipient.relationType || '',
+      relationLabel: recipient.relationLabel || '',
+      preferredColors: recipient.preferredColors || '',
+      dislikedFlowers: recipient.dislikedFlowers || '',
+      preferenceNote: recipient.preferenceNote || '',
+    });
+
+    wx.showToast({ title: '已填入收花人', icon: 'success' });
+  },
+
+  onTogglePreferencePanel() {
+    this.setData({ showPreferencePanel: !this.data.showPreferencePanel });
+  },
+
+  onRelationChange(e: WechatMiniprogram.PickerChange) {
+    const index = Number(e.detail.value);
+    const key = this.data.relationKeys[index] || '';
+    this.setData({
+      relationIndex: index,
+      relationType: key,
+      relationLabel: relationLabelByKey(key),
+    });
+  },
+
+  onOccasionChange(e: WechatMiniprogram.PickerChange) {
+    const index = Number(e.detail.value);
+    const key = this.data.occasionKeys[index] || '';
+    this.setData({
+      occasionIndex: index,
+      occasionType: key,
+    });
+  },
+
+  onImportantDateChange(e: WechatMiniprogram.PickerChange) {
+    this.setData({ importantDate: e.detail.value as string });
+  },
+
+  onPreferredColorsInput(e: WechatMiniprogram.Input) {
+    this.setData({ preferredColors: e.detail.value });
+  },
+
+  onDislikedFlowersInput(e: WechatMiniprogram.Input) {
+    this.setData({ dislikedFlowers: e.detail.value });
+  },
+
+  onPreferenceNoteInput(e: WechatMiniprogram.Input) {
+    this.setData({ preferenceNote: e.detail.value });
+  },
+
+  onBuyerNameInput(e: WechatMiniprogram.Input) {
+    this.setData({ buyerName: e.detail.value });
+  },
+
+  onBuyerPhoneInput(e: WechatMiniprogram.Input) {
+    this.setData({ buyerPhone: e.detail.value });
+  },
+
+  onSaveRecipientChange(e: WechatMiniprogram.SwitchChange) {
+    this.setData({ saveRecipient: e.detail.value });
+  },
+
+  onReminderEnabledChange(e: WechatMiniprogram.SwitchChange) {
+    this.setData({ reminderEnabled: e.detail.value });
   },
 
   onChooseWechatAddress() {
@@ -143,6 +295,8 @@ Page({
           receiverName,
           receiverPhone,
           deliveryAddress,
+          buyerName: this.data.buyerName || receiverName,
+          buyerPhone: this.data.buyerPhone || receiverPhone,
         });
 
         void patchUserProfile({
@@ -277,6 +431,18 @@ Page({
       deliveryAddress,
       greetingCard,
       checkoutItems,
+      buyerName,
+      buyerPhone,
+      relationType,
+      relationLabel,
+      occasionType,
+      importantDate,
+      preferredColors,
+      dislikedFlowers,
+      preferenceNote,
+      saveRecipient,
+      reminderEnabled,
+      reminderDaysBefore,
     } = this.data;
 
     const totalAmount = Number(
@@ -287,17 +453,7 @@ Page({
     const deliveryFee = calcDeliveryFee(totalAmount);
     const payAmount = Number((totalAmount + deliveryFee).toFixed(2));
 
-    const payload: {
-      receiverName: string;
-      receiverPhone: string;
-      deliveryAddress: string;
-      deliveryDate: string;
-      greetingCard?: string;
-      totalAmount: number;
-      deliveryFee: number;
-      payAmount: number;
-      items: { skuId: string; quantity: number }[];
-    } = {
+    const payload: import('../../utils/order-api').CreateOrderPayload = {
       receiverName: receiverName.trim(),
       receiverPhone: receiverPhone.trim(),
       deliveryAddress: deliveryAddress.trim(),
@@ -314,6 +470,44 @@ Page({
     const card = greetingCard.trim();
     if (card) payload.greetingCard = card;
 
+    const hasCrmExtras =
+      buyerName.trim() ||
+      buyerPhone.trim() ||
+      relationType ||
+      occasionType ||
+      importantDate ||
+      preferredColors.trim() ||
+      dislikedFlowers.trim() ||
+      preferenceNote.trim() ||
+      card;
+
+    if (hasCrmExtras || saveRecipient || reminderEnabled) {
+      payload.buyerInfo = {
+        name: buyerName.trim() || receiverName.trim(),
+        phone: buyerPhone.trim() || receiverPhone.trim(),
+      };
+      payload.recipientInfo = {
+        name: receiverName.trim(),
+        phone: receiverPhone.trim(),
+        address: deliveryAddress.trim(),
+        relationType: relationType || undefined,
+        relationLabel: relationLabel || undefined,
+        preferredColors: preferredColors.trim() || undefined,
+        dislikedFlowers: dislikedFlowers.trim() || undefined,
+        preferenceNote: preferenceNote.trim() || undefined,
+        saveRecipient,
+      };
+      payload.giftOccasion = {
+        occasionType: occasionType || undefined,
+        importantDate: importantDate || undefined,
+        cardMessage: card || undefined,
+      };
+      payload.reminderOptions = {
+        enabled: reminderEnabled,
+        daysBefore: reminderDaysBefore,
+      };
+    }
+
     return payload;
   },
 
@@ -325,7 +519,7 @@ Page({
     wx.redirectTo({ url: '/pages/order-list/order-list' });
   },
 
-  showMockPayModal(orderId: string, orderNo: string) {
+  showMockPayModal(orderId: string) {
     wx.showModal({
       title: '模拟支付',
       content:
@@ -394,7 +588,7 @@ Page({
           wx.showToast({ title: '创建订单失败', icon: 'none' });
           return;
         }
-        this.showMockPayModal(data.orderId, data.orderNo);
+        this.showMockPayModal(data.orderId);
       })
       .catch((err) => {
         wx.hideLoading();

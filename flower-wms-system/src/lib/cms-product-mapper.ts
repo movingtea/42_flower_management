@@ -23,6 +23,7 @@ export function cmsBodyToSpuData(
     shippingFee: body.shippingFee,
     allowPreOrder: body.allowPreOrder ?? true,
     productionTime: body.productionTime ?? 30,
+    occasionTags: body.occasionTags ?? [],
   };
 }
 
@@ -53,6 +54,7 @@ export function productToEditorInitial(
   return {
     name: spu.name,
     category: categoryForEditor,
+    occasionTags: spu.occasionTags ?? [],
     description: spu.description ?? "",
     maintenanceGuide: spu.maintenanceGuide ?? "",
     isActive: spu.isActive,

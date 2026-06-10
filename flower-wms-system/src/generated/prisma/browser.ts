@@ -133,6 +133,31 @@ export type OrderCostSnapshot = Prisma.OrderCostSnapshotModel
  */
 export type OrderItem = Prisma.OrderItemModel
 /**
+ * Model Customer
+ * 
+ */
+export type Customer = Prisma.CustomerModel
+/**
+ * Model Recipient
+ * 
+ */
+export type Recipient = Prisma.RecipientModel
+/**
+ * Model CustomerRecipientRelation
+ * 
+ */
+export type CustomerRecipientRelation = Prisma.CustomerRecipientRelationModel
+/**
+ * Model GiftOccasion
+ * 
+ */
+export type GiftOccasion = Prisma.GiftOccasionModel
+/**
+ * Model CustomerReminder
+ * 
+ */
+export type CustomerReminder = Prisma.CustomerReminderModel
+/**
  * Model AppConfig
  * 
  */

@@ -98,6 +98,7 @@ export default async function CmsProductsPage() {
       decisionTags: topDecision ? pickKeyDecisionTags(topDecision.health.tags, 2) : [],
       decisionStandardMargin: topDecision?.marginEstimates.standard ?? null,
       decisionConservativeMargin: topDecision?.marginEstimates.conservative ?? null,
+      occasionTags: spu.occasionTags ?? [],
     };
   });
 

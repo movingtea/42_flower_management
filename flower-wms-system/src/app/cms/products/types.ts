@@ -13,6 +13,7 @@ export type ProductSkuEditorRow = {
 export type ProductEditorInitial = {
   name: string;
   category: string[];
+  occasionTags: string[];
   description: string;
   maintenanceGuide: string;
   isActive: boolean;

@@ -41,6 +41,76 @@ export const OrderCancelSource = {
 export type OrderCancelSource = (typeof OrderCancelSource)[keyof typeof OrderCancelSource]
 
 
+export const CustomerSource = {
+  MINI_PROGRAM: 'MINI_PROGRAM',
+  WECHAT: 'WECHAT',
+  XIAOHONGSHU: 'XIAOHONGSHU',
+  DOUYIN: 'DOUYIN',
+  FRIEND_REFERRAL: 'FRIEND_REFERRAL',
+  OFFLINE: 'OFFLINE',
+  MANUAL: 'MANUAL',
+  OTHER: 'OTHER'
+} as const
+
+export type CustomerSource = (typeof CustomerSource)[keyof typeof CustomerSource]
+
+
+export const RecipientRelationType = {
+  SELF: 'SELF',
+  PARTNER: 'PARTNER',
+  MOTHER: 'MOTHER',
+  FATHER: 'FATHER',
+  FAMILY: 'FAMILY',
+  FRIEND: 'FRIEND',
+  COLLEAGUE: 'COLLEAGUE',
+  CLIENT: 'CLIENT',
+  TEACHER: 'TEACHER',
+  OTHER: 'OTHER'
+} as const
+
+export type RecipientRelationType = (typeof RecipientRelationType)[keyof typeof RecipientRelationType]
+
+
+export const GiftOccasionType = {
+  BIRTHDAY: 'BIRTHDAY',
+  ANNIVERSARY: 'ANNIVERSARY',
+  VALENTINE: 'VALENTINE',
+  QIXI: 'QIXI',
+  MOTHERS_DAY: 'MOTHERS_DAY',
+  GRADUATION: 'GRADUATION',
+  VISIT: 'VISIT',
+  APOLOGY: 'APOLOGY',
+  BUSINESS: 'BUSINESS',
+  OPENING: 'OPENING',
+  WEDDING: 'WEDDING',
+  DAILY_SURPRISE: 'DAILY_SURPRISE',
+  OTHER: 'OTHER'
+} as const
+
+export type GiftOccasionType = (typeof GiftOccasionType)[keyof typeof GiftOccasionType]
+
+
+export const ReminderType = {
+  BIRTHDAY: 'BIRTHDAY',
+  ANNIVERSARY: 'ANNIVERSARY',
+  FOLLOW_UP: 'FOLLOW_UP',
+  FESTIVAL: 'FESTIVAL',
+  CUSTOM: 'CUSTOM'
+} as const
+
+export type ReminderType = (typeof ReminderType)[keyof typeof ReminderType]
+
+
+export const ReminderStatus = {
+  PENDING: 'PENDING',
+  DONE: 'DONE',
+  SNOOZED: 'SNOOZED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type ReminderStatus = (typeof ReminderStatus)[keyof typeof ReminderStatus]
+
+
 export const BannerTargetType = {
   PRODUCT: 'PRODUCT',
   ACTIVITY: 'ACTIVITY',

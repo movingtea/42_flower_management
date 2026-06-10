@@ -1,4 +1,4 @@
-<!-- pages/checkout/checkout.wxml — 结算与模拟支付 -->
+<!-- pages/checkout/checkout.wxml — 结算与礼赠 CRM -->
 <view class="checkout-page">
 
   <view wx:if="{{emptyCheckout}}" class="checkout-empty">
@@ -24,6 +24,48 @@
         </view>
       </view>
       <text class="address-arrow">›</text>
+    </view>
+
+    <!-- 礼赠信息 -->
+    <view class="section">
+      <view class="section-title-row">
+        <text class="section-title section-title--inline">礼赠信息</text>
+        <button class="link-btn" size="mini" bindtap="onChooseSavedRecipient">选择常用收花人</button>
+      </view>
+      <text wx:if="{{recipientsLoading}}" class="hint-text">正在加载常用收花人…</text>
+      <text wx:if="{{recipientsError}}" class="hint-text hint-text--warn">{{recipientsError}}</text>
+      <text wx:if="{{!recipientsLoading && !savedRecipients.length}}" class="hint-text">暂无常用收花人，本次下单后可保存。</text>
+
+      <view class="form-row picker-row">
+        <text class="form-label">与收花人关系</text>
+        <picker
+          mode="selector"
+          range="{{relationOptions}}"
+          value="{{relationIndex >= 0 ? relationIndex : 0}}"
+          bindchange="onRelationChange"
+        >
+          <view class="picker-value">{{relationIndex >= 0 ? relationOptions[relationIndex] : '请选择关系（可选）'}}</view>
+        </picker>
+      </view>
+
+      <view class="form-row picker-row">
+        <text class="form-label">送花场景</text>
+        <picker
+          mode="selector"
+          range="{{occasionOptions}}"
+          value="{{occasionIndex >= 0 ? occasionIndex : 0}}"
+          bindchange="onOccasionChange"
+        >
+          <view class="picker-value">{{occasionIndex >= 0 ? occasionOptions[occasionIndex] : '请选择场景（可选）'}}</view>
+        </picker>
+      </view>
+
+      <view class="form-row picker-row">
+        <text class="form-label">重要日期</text>
+        <picker mode="date" value="{{importantDate}}" bindchange="onImportantDateChange">
+          <view class="picker-value">{{importantDate || '生日 / 纪念日（可选）'}}</view>
+        </picker>
+      </view>
     </view>
 
     <!-- 配送与贺卡 -->
@@ -58,6 +100,53 @@
           maxlength="200"
           bindinput="onGreetingCardInput"
         />
+      </view>
+    </view>
+
+    <!-- 偏好与提醒（折叠） -->
+    <view class="section">
+      <view class="section-title-row" bindtap="onTogglePreferencePanel">
+        <text class="section-title section-title--inline">偏好与提醒</text>
+        <text class="collapse-arrow">{{showPreferencePanel ? '收起' : '展开'}}</text>
+      </view>
+
+      <view wx:if="{{showPreferencePanel}}">
+        <view class="form-row form-row--column">
+          <text class="form-label">购买人姓名</text>
+          <input class="form-input" placeholder="默认使用收货人信息" value="{{buyerName}}" bindinput="onBuyerNameInput" />
+        </view>
+        <view class="form-row form-row--column">
+          <text class="form-label">购买人电话</text>
+          <input class="form-input" type="number" placeholder="默认使用收货电话" value="{{buyerPhone}}" bindinput="onBuyerPhoneInput" />
+        </view>
+        <view class="form-row form-row--column">
+          <text class="form-label">偏好色系</text>
+          <input class="form-input" placeholder="如：粉色、白色" value="{{preferredColors}}" bindinput="onPreferredColorsInput" />
+        </view>
+        <view class="form-row form-row--column">
+          <text class="form-label">忌讳花材</text>
+          <input class="form-input" placeholder="如：百合、满天星" value="{{dislikedFlowers}}" bindinput="onDislikedFlowersInput" />
+        </view>
+        <view class="form-row form-row--column">
+          <text class="form-label">备注</text>
+          <textarea class="form-textarea form-textarea--small" placeholder="其他偏好或注意事项" value="{{preferenceNote}}" bindinput="onPreferenceNoteInput" />
+        </view>
+
+        <view class="switch-row">
+          <view>
+            <text class="switch-label">保存为常用收花人</text>
+            <text class="switch-desc">保存后下次下单可直接选择</text>
+          </view>
+          <switch checked="{{saveRecipient}}" color="#8fa89b" bindchange="onSaveRecipientChange" />
+        </view>
+
+        <view class="switch-row">
+          <view>
+            <text class="switch-label">提前提醒</text>
+            <text class="switch-desc">开启后花店会在重要日期前看到复购跟进提醒，不会自动给收花人发消息</text>
+          </view>
+          <switch checked="{{reminderEnabled}}" color="#8fa89b" bindchange="onReminderEnabledChange" />
+        </view>
       </view>
     </view>
 

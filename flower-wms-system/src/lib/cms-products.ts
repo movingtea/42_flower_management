@@ -1,4 +1,5 @@
 import type { CmsProductCategoryItem } from "@/lib/cms-product-categories";
+import { parseOccasionTags } from "@/lib/crm-tags";
 import {
   cmsCategoryIdSet,
   parseProductCategoryPayload,
@@ -52,6 +53,7 @@ export type CmsProductSkuInput = {
 export type CmsProductBody = {
   name: string;
   category: string[];
+  occasionTags?: string[];
   description?: string | null;
   maintenanceGuide?: string | null;
   isActive: boolean;
@@ -176,6 +178,7 @@ export function parseCmsProductBody(
   return {
     name,
     category,
+    occasionTags: parseOccasionTags(b.occasionTags),
     description:
       typeof b.description === "string" ? b.description.trim() || null : null,
     maintenanceGuide:

@@ -15,6 +15,8 @@
     "test:purchase-analytics": "tsx src/services/purchase-analytics-pure.test.ts",
     "test:product-decision": "tsx src/services/product-decision-pure.test.ts",
     "test:datetime": "tsx src/lib/datetime.test.ts",
+    "test:crm": "tsx src/services/crm-pure.test.ts",
+    "smoke:crm": "tsx scripts/smoke-crm-flow.ts",
     "db:seed": "prisma db seed",
     "smoke:purchase": "tsx scripts/smoke-purchase-flow.ts",
     "seed:test-products": "npx tsx scripts/seed-test-spu-clones.ts"

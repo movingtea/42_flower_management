@@ -15,6 +15,7 @@ const navItems = [
   { href: "/wms/packaging-kits", label: "包装方案", icon: "🎁" },
   { href: "/wms/material-categories", label: "原材料分类", icon: "🏷️" },
   { href: "/wms/orders", label: "订单履约", icon: "📋" },
+  { href: "/wms/crm", label: "客户 CRM", icon: "💐" },
   { href: "/wms/reports", label: "经营报表", icon: "📈" },
 ];
 

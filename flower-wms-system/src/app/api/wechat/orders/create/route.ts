@@ -9,6 +9,7 @@ import {
   type CreateOrderLineInput,
   type CreateWechatOrderPayload,
 } from "@/services/order-lifecycle";
+import { parseCrmPayloadFromBody, syncCrmFromOrder } from "@/services/crm";
 
 export const dynamic = "force-dynamic";
 
@@ -133,6 +134,43 @@ export async function POST(request: Request) {
 
     const payload = parseCreateBody(raw);
     const order = await createWechatOrder(user.id, payload);
+
+    const crmRaw =
+      raw && typeof raw === "object" ? (raw as Record<string, unknown>) : {};
+    const crmPayload = parseCrmPayloadFromBody(crmRaw);
+
+    try {
+      await syncCrmFromOrder({
+        orderId: order.id,
+        miniProgramUserId: user.id,
+        wechatOpenid: user.openId,
+        wechatNickname: user.nickName,
+        buyerInfo: {
+          name: crmPayload.buyerInfo?.name,
+          phone: crmPayload.buyerInfo?.phone,
+        },
+        recipientInfo: {
+          name: crmPayload.recipientInfo?.name ?? payload.receiverName,
+          phone: crmPayload.recipientInfo?.phone ?? payload.receiverPhone,
+          address: crmPayload.recipientInfo?.address ?? payload.deliveryAddress,
+          relationType: crmPayload.recipientInfo?.relationType,
+          relationLabel: crmPayload.recipientInfo?.relationLabel,
+          preferredColors: crmPayload.recipientInfo?.preferredColors,
+          dislikedFlowers: crmPayload.recipientInfo?.dislikedFlowers,
+          preferenceNote: crmPayload.recipientInfo?.preferenceNote,
+          saveRecipient: crmPayload.recipientInfo?.saveRecipient,
+        },
+        giftOccasion: {
+          ...crmPayload.giftOccasion,
+          cardMessage:
+            crmPayload.giftOccasion?.cardMessage ?? payload.greetingCard,
+        },
+        reminderOptions: crmPayload.reminderOptions,
+        createReminder: false,
+      });
+    } catch (crmErr) {
+      console.error("[CRM] syncCrmFromOrder on create failed", order.id, crmErr);
+    }
 
     return jsonWechatSuccess(
       {
