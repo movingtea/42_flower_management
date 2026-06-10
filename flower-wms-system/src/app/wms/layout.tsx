@@ -1,4 +1,4 @@
-import { IcpFooter } from "@/components/shared/IcpFooter";
+import { StaffAppShell } from "@/components/shared/StaffAppShell";
 import { WmsForbiddenNotice } from "@/components/wms/WmsForbiddenNotice";
 import { WmsSidebar } from "@/components/wms/sidebar";
 import { auth } from "@/auth";
@@ -20,14 +20,12 @@ export default async function WmsLayout({
   const hasWmsMenu = role ? getVisibleNavGroups(role).length > 0 : false;
 
   return (
-    <div className="flex min-h-screen bg-zinc-50/80">
-      <WmsSidebar />
-      <main className="flex min-h-screen flex-1 flex-col overflow-auto p-4 md:p-8">
-        <div className="flex-1">
-          {hasWmsMenu ? children : <WmsForbiddenNotice role={role} />}
-        </div>
-        <IcpFooter />
-      </main>
-    </div>
+    <StaffAppShell
+      variant="wms"
+      sidebar={<WmsSidebar />}
+      showFooter
+    >
+      {hasWmsMenu ? children : <WmsForbiddenNotice role={role} />}
+    </StaffAppShell>
   );
 }

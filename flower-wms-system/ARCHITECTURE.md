@@ -196,6 +196,14 @@ flower-wms-system/
 
 导航定义：`src/components/wms/sidebar.tsx` + `src/lib/wms-nav.ts`（5 组分组 + permission 过滤）。
 
+后台 Layout（WMS / CMS / Admin 共用 shell）：
+
+- `src/components/shared/StaffAppShell.tsx`：`h-screen overflow-hidden` 固定高度 shell；左侧 sidebar + 右侧 Topbar + 独立滚动 main。
+- `src/components/shared/StaffTopbar.tsx`：右上角账号、角色 badge、返回工作台（`href="/"`，门店门户总工作台）、退出登录（Auth.js `signOut`）；WMS 根据 pathname 显示当前页面标题。
+- Sidebar 仅含品牌区 + 分组导航（`min-h-0 flex-1 overflow-y-auto` 独立滚动）；**不**承载账号操作。
+- Main content 区域 `overflow-y-auto` 独立滚动；Topbar 固定不随内容滚动。
+- 菜单权限、页面权限、API 权限不因布局调整而改变。
+
 ### WMS Sidebar 分组与权限
 
 配置源：`src/lib/wms-nav.ts`（`WMS_NAV_GROUPS`）。Sidebar 按 permission / `anyPermissions` 过滤菜单；空分组不展示。页面级保护：`src/proxy.ts` 调用 `canAccessWmsPath`；无可见菜单时 `src/app/wms/layout.tsx` 展示 `WmsForbiddenNotice`。

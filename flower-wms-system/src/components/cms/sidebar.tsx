@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { StaffAccountBar } from "@/components/shared/StaffAccountBar";
 
 const navItems = [
   { href: "/cms/products", label: "商城商品", icon: "🌸" },
@@ -16,8 +15,8 @@ export function CmsSidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="flex w-56 shrink-0 flex-col border-r border-rose-100 bg-white">
-      <div className="border-b border-rose-100 px-5 py-6">
+    <aside className="flex h-screen w-56 shrink-0 flex-col overflow-hidden border-r border-rose-100 bg-white">
+      <div className="shrink-0 border-b border-rose-100 px-5 py-6">
         <p className="text-xs font-medium uppercase tracking-wider text-rose-400">
           CMS
         </p>
@@ -25,27 +24,30 @@ export function CmsSidebar() {
           小程序运营内容
         </h1>
       </div>
-      <nav className="flex flex-1 flex-col gap-1 p-3">
-        {navItems.map((item) => {
-          const isActive =
-            pathname === item.href || pathname.startsWith(`${item.href}/`);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-rose-50 text-rose-700"
-                  : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
-              }`}
-            >
-              <span aria-hidden>{item.icon}</span>
-              {item.label}
-            </Link>
-          );
-        })}
+      <nav className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-3">
+        <ul className="flex flex-col gap-0.5">
+          {navItems.map((item) => {
+            const isActive =
+              pathname === item.href || pathname.startsWith(`${item.href}/`);
+            return (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  aria-current={isActive ? "page" : undefined}
+                  className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                    isActive
+                      ? "bg-rose-50 text-rose-700"
+                      : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+                  }`}
+                >
+                  <span aria-hidden>{item.icon}</span>
+                  {item.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
       </nav>
-      <StaffAccountBar variant="cms" />
     </aside>
   );
 }

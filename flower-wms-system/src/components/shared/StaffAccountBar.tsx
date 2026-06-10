@@ -1,3 +1,6 @@
+/**
+ * @deprecated 账号操作已迁移至 StaffTopbar。仅保留供尚未迁移的调用方；新代码请使用 StaffTopbar。
+ */
 "use client";
 
 import { signOut, useSession } from "next-auth/react";
@@ -48,7 +51,7 @@ export function StaffAccountBar({ variant = "wms" }: StaffAccountBarProps) {
             href="/"
             className="text-xs text-zinc-500 hover:text-zinc-800"
           >
-            ← 工作台
+            ← 返回工作台
           </Link>
         )}
         <button

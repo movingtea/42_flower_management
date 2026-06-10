@@ -1,4 +1,5 @@
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { StaffAppShell } from "@/components/shared/StaffAppShell";
 
 export default function AdminLayout({
   children,
@@ -6,9 +7,12 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="flex min-h-screen bg-zinc-50/80">
-      <AdminSidebar />
-      <main className="flex-1 overflow-auto">{children}</main>
-    </div>
+    <StaffAppShell
+      variant="admin"
+      sidebar={<AdminSidebar />}
+      mainClassName="p-6 md:p-8"
+    >
+      {children}
+    </StaffAppShell>
   );
 }
