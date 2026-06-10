@@ -1,4 +1,9 @@
 import { formatCurrency, formatPercent, safeDecimalToNumber } from "@/lib/format-money";
+import {
+  formatDateInAppTimezoneIso,
+  formatNullableDate,
+  formatNullableDateTime,
+} from "@/lib/datetime";
 
 export function formatNumber(value: unknown): string {
   if (value === null || value === undefined || value === "") return "—";
@@ -13,13 +18,16 @@ export function formatNumber(value: unknown): string {
 }
 
 export function formatDate(value: unknown): string {
-  if (value === null || value === undefined || value === "") return "—";
-  const date = value instanceof Date ? value : new Date(String(value));
-  if (Number.isNaN(date.getTime())) return "—";
-  const y = date.getFullYear();
-  const m = `${date.getMonth() + 1}`.padStart(2, "0");
-  const d = `${date.getDate()}`.padStart(2, "0");
-  return `${y}-${m}-${d}`;
+  return formatNullableDate(value);
+}
+
+export function formatDateTime(value: unknown): string {
+  return formatNullableDateTime(value);
+}
+
+export function formatDateIso(value: unknown): string {
+  const formatted = formatDateInAppTimezoneIso(value);
+  return formatted || "—";
 }
 
 export function formatNullable<T>(

@@ -13,6 +13,7 @@
     "test:loss": "tsx src/services/loss-model-pure.test.ts",
     "test:margin": "tsx src/services/product-margin-pure.test.ts",
     "test:purchase-analytics": "tsx src/services/purchase-analytics-pure.test.ts",
+    "test:datetime": "tsx src/lib/datetime.test.ts",
     "db:seed": "prisma db seed",
     "smoke:purchase": "tsx scripts/smoke-purchase-flow.ts",
     "seed:test-products": "npx tsx scripts/seed-test-spu-clones.ts"

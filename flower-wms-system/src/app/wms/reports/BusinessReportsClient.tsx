@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { StatCard } from "@/components/wms/stat-card";
+import { getTodayAppDateString } from "@/lib/datetime";
+import { formatDateTime } from "@/lib/format-display";
 import { formatCurrency, formatPercent, safeDecimalToNumber } from "@/lib/format-money";
 import type { BusinessDashboardReport } from "@/services/business-report";
 import { PurchaseAnalyticsTab } from "./components/PurchaseAnalyticsTab";
@@ -66,22 +68,6 @@ const alertLabel: Record<string, string> = {
   LOW: "低库存",
   NORMAL: "正常",
 };
-
-function toDateInputValue(date: Date): string {
-  const y = date.getFullYear();
-  const m = `${date.getMonth() + 1}`.padStart(2, "0");
-  const d = `${date.getDate()}`.padStart(2, "0");
-  return `${y}-${m}-${d}`;
-}
-
-function formatDateTime(value: string): string {
-  return new Date(value).toLocaleString("zh-CN", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
 
 function ratioWidth(value: string): string {
   const pct = Math.max(0, Math.min(100, safeDecimalToNumber(value) * 100));
@@ -184,9 +170,10 @@ export function BusinessReportsClient() {
 
   const defaultCustomRange = () => {
     const now = new Date();
-    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-    setStartDate(toDateInputValue(firstDay));
-    setEndDate(toDateInputValue(now));
+    const today = getTodayAppDateString(now);
+    const monthStart = `${today.slice(0, 8)}01`;
+    setStartDate(monthStart);
+    setEndDate(today);
   };
 
   const showDashboardLoading = activeTab !== "purchase" && loading;

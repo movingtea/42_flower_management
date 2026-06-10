@@ -162,20 +162,20 @@ export function isEditablePurchaseStatus(status: PurchaseOrderStatus) {
   return status === "DRAFT" || status === "ORDERED";
 }
 
+import {
+  formatNullableDate,
+  formatNullableDateTime,
+} from "@/lib/datetime";
+
 export function formatDate(value: string | null | undefined) {
-  if (!value) return "—";
-  return new Date(value).toLocaleDateString("zh-CN");
+  return formatNullableDate(value);
 }
 
 export function formatDateTime(value: string | null | undefined) {
-  if (!value) return "—";
-  return new Date(value).toLocaleString("zh-CN", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatNullableDateTime(value);
 }
+
+export { formatNullableDate, formatNullableDateTime };
 
 export function formatQuantity(value: unknown) {
   const number = Number(value);

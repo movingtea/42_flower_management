@@ -1,17 +1,14 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
+import { formatDateTimeInAppTimezone } from "@/lib/datetime";
 import { listPhysicalInventoryMaterials } from "@/lib/wms-inventory";
+
 export const dynamic = "force-dynamic";
 
 const THREE_DAYS_MS = 3 * 24 * 60 * 60 * 1000;
 
 function formatDateTime(d: Date) {
-  return d.toLocaleString("zh-CN", {
-    month: "2-digit",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  return formatDateTimeInAppTimezone(d);
 }
 
 function isExpiringSoon(expiresAt: Date | null, now: number): boolean {
