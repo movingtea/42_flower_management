@@ -203,12 +203,19 @@ export function ProductCategoryTreeSelect({ value, onChange }: Props) {
 
       {value.length > 0 && (
         <div className="mt-2 flex flex-wrap gap-2">
-          {value.map((id) => (
+          {value.map((id) => {
+            const label = titleMap.get(id);
+            const missing = !label;
+            return (
             <span
               key={id}
-              className="inline-flex items-center gap-1 rounded-full bg-rose-100 px-2.5 py-0.5 text-xs font-medium text-rose-800"
+              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium ${
+                missing
+                  ? "bg-amber-100 text-amber-800"
+                  : "bg-rose-100 text-rose-800"
+              }`}
             >
-              {titleMap.get(id) ?? id}
+              {label ?? "关联分类不存在或已删除"}
               <button
                 type="button"
                 onClick={() => onChange(value.filter((v) => v !== id))}
@@ -218,7 +225,8 @@ export function ProductCategoryTreeSelect({ value, onChange }: Props) {
                 ×
               </button>
             </span>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

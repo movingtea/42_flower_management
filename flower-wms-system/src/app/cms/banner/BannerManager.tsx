@@ -5,12 +5,18 @@ import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { CmsLinkTargetSelector } from "@/components/cms/pickers/CmsLinkTargetSelector";
 import {
   BANNER_TARGET_TYPE_LABELS,
-  BANNER_TARGET_TYPES,
-  type BannerTargetTypeValue,
   type BannerWriteItem,
 } from "@/lib/banner";
+import {
+  bannerToLinkTarget,
+  CMS_LINK_TARGET_LABELS,
+  linkTargetToBannerFields,
+  validateCmsLinkTarget,
+  type CmsLinkTarget,
+} from "@/lib/cms-link-target";
 import { createBannerId } from "@/lib/home-banner";
 
 export type ProductOption = {
@@ -34,9 +40,7 @@ const emptyDraft = (): BannerWriteItem => ({
   isActive: true,
 });
 
-function targetTypeLabel(type: BannerTargetTypeValue): string {
-  return BANNER_TARGET_TYPE_LABELS[type] ?? type;
-}
+const emptyLinkTarget = (): CmsLinkTarget => ({ targetType: "NONE" });
 
 export function BannerManager({ initialItems, products }: Props) {
   const router = useRouter();
@@ -47,6 +51,7 @@ export function BannerManager({ initialItems, products }: Props) {
   const [saving, setSaving] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [draft, setDraft] = useState<BannerWriteItem>(emptyDraft);
+  const [linkTarget, setLinkTarget] = useState<CmsLinkTarget>(emptyLinkTarget);
   const [uploading, setUploading] = useState(false);
   const [toast, setToast] = useState<{
     type: "success" | "error";
@@ -66,12 +71,14 @@ export function BannerManager({ initialItems, products }: Props) {
   function openAddModal() {
     const maxSort = items.reduce((m, i) => Math.max(m, i.sortOrder), 0);
     setDraft({ ...emptyDraft(), sortOrder: maxSort + 10 });
+    setLinkTarget(emptyLinkTarget());
     setModalOpen(true);
   }
 
   function closeModal() {
     setModalOpen(false);
     setDraft(emptyDraft());
+    setLinkTarget(emptyLinkTarget());
   }
 
   async function handleUpload(file: File) {
@@ -102,22 +109,22 @@ export function BannerManager({ initialItems, products }: Props) {
       alert("请上传轮播海报");
       return;
     }
-    if (draft.targetType === "PRODUCT" && !draft.productId) {
-      alert("请选择跳转商品");
-      return;
-    }
-    if (
-      (draft.targetType === "ACTIVITY" || draft.targetType === "COUPON") &&
-      !draft.targetParam?.trim()
-    ) {
-      alert("请填写跳转参数");
+    const linkError = validateCmsLinkTarget(linkTarget);
+    if (linkError) {
+      alert(linkError);
       return;
     }
 
+    const jumpFields = linkTargetToBannerFields(linkTarget);
     setItems((prev) =>
-      [...prev, { ...draft, imageUrl: draft.imageUrl.trim() }].sort(
-        (a, b) => a.sortOrder - b.sortOrder
-      )
+      [
+        ...prev,
+        {
+          ...draft,
+          imageUrl: draft.imageUrl.trim(),
+          ...jumpFields,
+        },
+      ].sort((a, b) => a.sortOrder - b.sortOrder)
     );
     closeModal();
   }
@@ -136,9 +143,11 @@ export function BannerManager({ initialItems, products }: Props) {
   }
 
   function renderJumpSummary(item: BannerWriteItem) {
-    if (item.targetType === "PRODUCT") {
-      const product = item.productId
-        ? productMap.get(item.productId)
+    const target = bannerToLinkTarget(item);
+
+    if (target.targetType === "PRODUCT") {
+      const product = target.productId
+        ? productMap.get(target.productId)
         : undefined;
       return product ? (
         <>
@@ -146,18 +155,27 @@ export function BannerManager({ initialItems, products }: Props) {
           <p className="text-xs text-zinc-500">{product.sku}</p>
         </>
       ) : (
-        <span className="text-amber-600">商品已下架或不存在</span>
+        <span className="text-amber-600">关联对象不存在或已删除</span>
       );
     }
-    if (item.targetType === "NONE") {
+
+    if (target.targetType === "NONE") {
       return <span className="text-zinc-500">不跳转</span>;
     }
+
     return (
       <>
         <p className="font-medium text-zinc-800">
-          {targetTypeLabel(item.targetType)}
+          {CMS_LINK_TARGET_LABELS[target.targetType]}
         </p>
-        <p className="text-xs text-zinc-500">{item.targetParam || "—"}</p>
+        <p className="text-xs text-zinc-500">
+          {target.customUrl ||
+            target.couponCode ||
+            target.sceneType ||
+            target.slotKey ||
+            target.categoryId ||
+            "—"}
+        </p>
       </>
     );
   }
@@ -168,15 +186,9 @@ export function BannerManager({ initialItems, products }: Props) {
         alert("存在未上传海报的轮播项");
         return;
       }
-      if (item.targetType === "PRODUCT" && !item.productId) {
-        alert("存在未选择商品的轮播项");
-        return;
-      }
-      if (
-        (item.targetType === "ACTIVITY" || item.targetType === "COUPON") &&
-        !item.targetParam?.trim()
-      ) {
-        alert("存在未填写跳转参数的轮播项");
+      const linkError = validateCmsLinkTarget(bannerToLinkTarget(item));
+      if (linkError) {
+        alert(linkError);
         return;
       }
     }
@@ -295,7 +307,8 @@ export function BannerManager({ initialItems, products }: Props) {
                     <p className="mt-0.5 text-xs text-zinc-400">越小越靠前</p>
                   </td>
                   <td className="px-4 py-3">
-                    {targetTypeLabel(item.targetType)}
+                    {CMS_LINK_TARGET_LABELS[bannerToLinkTarget(item).targetType] ??
+                      BANNER_TARGET_TYPE_LABELS[item.targetType]}
                   </td>
                   <td className="px-4 py-3">{renderJumpSummary(item)}</td>
                   <td className="px-4 py-3">
@@ -384,83 +397,11 @@ export function BannerManager({ initialItems, products }: Props) {
                 }
               />
 
-              <label className="block text-sm">
-                <span className="mb-1 block font-medium text-zinc-700">
-                  跳转类型
-                </span>
-                <select
-                  value={draft.targetType}
-                  onChange={(e) => {
-                    const targetType = e.target
-                      .value as BannerTargetTypeValue;
-                    setDraft((d) => ({
-                      ...d,
-                      targetType,
-                      productId:
-                        targetType === "PRODUCT" ? d.productId : null,
-                      targetParam:
-                        targetType === "ACTIVITY" || targetType === "COUPON"
-                          ? d.targetParam
-                          : null,
-                    }));
-                  }}
-                  className="w-full rounded-lg border border-zinc-200 px-3 py-2"
-                >
-                  {BANNER_TARGET_TYPES.map((t) => (
-                    <option key={t} value={t}>
-                      {BANNER_TARGET_TYPE_LABELS[t]}
-                    </option>
-                  ))}
-                </select>
-              </label>
-
-              {draft.targetType === "PRODUCT" && (
-                <label className="block text-sm">
-                  <span className="mb-1 block font-medium text-zinc-700">
-                    跳转商品
-                  </span>
-                  <select
-                    value={draft.productId ?? ""}
-                    onChange={(e) =>
-                      setDraft((d) => ({
-                        ...d,
-                        productId: e.target.value || null,
-                      }))
-                    }
-                    className="w-full rounded-lg border border-zinc-200 px-3 py-2"
-                  >
-                    <option value="">请选择成品商品</option>
-                    {products.map((p) => (
-                      <option key={p.id} value={p.id}>
-                        {p.name}（{p.sku}）
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              )}
-
-              {(draft.targetType === "ACTIVITY" ||
-                draft.targetType === "COUPON") && (
-                <Input
-                  label={
-                    draft.targetType === "ACTIVITY"
-                      ? "活动页路径或标识"
-                      : "优惠券 ID 或活动码"
-                  }
-                  value={draft.targetParam ?? ""}
-                  onChange={(e) =>
-                    setDraft((d) => ({
-                      ...d,
-                      targetParam: e.target.value,
-                    }))
-                  }
-                  placeholder={
-                    draft.targetType === "ACTIVITY"
-                      ? "例如 /pages/activity/spring"
-                      : "例如 COUPON_2026_SPRING"
-                  }
-                />
-              )}
+              <CmsLinkTargetSelector
+                value={linkTarget}
+                onChange={setLinkTarget}
+                showCoupon
+              />
             </div>
 
             <div className="mt-6 flex justify-end gap-2">

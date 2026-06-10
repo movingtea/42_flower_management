@@ -388,6 +388,55 @@ async function writeRecipeLines(
   });
 }
 
+export type RecipePickerItem = {
+  id: string;
+  name: string;
+  bomNo: string;
+  packagingKitName: string | null;
+  estimatedCost: string;
+  ingredientSummary: string;
+};
+
+export async function searchRecipesForPicker(
+  keyword?: string | null,
+  limit = 30
+): Promise<RecipePickerItem[]> {
+  const take = Math.min(50, Math.max(1, limit));
+  const where: Prisma.RecipeWhereInput = {};
+
+  if (keyword?.trim()) {
+    const kw = keyword.trim();
+    where.OR = [
+      { name: { contains: kw, mode: "insensitive" } },
+      { recipeCode: { contains: kw, mode: "insensitive" } },
+      { description: { contains: kw, mode: "insensitive" } },
+    ];
+  }
+
+  const recipes = await prisma.recipe.findMany({
+    where,
+    take,
+    orderBy: { updatedAt: "desc" },
+    include: {
+      lines: { include: lineInclude },
+      packagingKit: { select: { name: true, standardCost: true } },
+    },
+  });
+
+  return recipes.map((recipe) => {
+    const ingredients = mapRecipeLines(recipe.lines);
+    const standardCost = buildRecipeCostPreview(recipe);
+    return {
+      id: recipe.id,
+      name: recipe.name,
+      bomNo: recipe.recipeCode,
+      packagingKitName: recipe.packagingKit?.name ?? null,
+      estimatedCost: standardCost.totalCost,
+      ingredientSummary: formatIngredientSummary(ingredients),
+    };
+  });
+}
+
 export async function listRecipes(): Promise<RecipeListItem[]> {
   const recipes = await prisma.recipe.findMany({
     orderBy: { updatedAt: "desc" },

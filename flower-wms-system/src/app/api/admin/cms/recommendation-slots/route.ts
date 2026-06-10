@@ -4,6 +4,7 @@ import { isResponse, requirePermission } from "@/lib/api-auth";
 import {
   createRecommendationSlot,
   listRecommendationSlots,
+  listRecommendationSlotsLite,
 } from "@/services/cms-product-operations";
 
 export const dynamic = "force-dynamic";
@@ -24,6 +25,11 @@ export async function GET(request: Request) {
     if (isResponse(staff)) return staff;
 
     const params = new URL(request.url).searchParams;
+    if (params.get("lite") === "true") {
+      const slots = await listRecommendationSlotsLite();
+      return jsonSuccess({ slots });
+    }
+
     const isActiveRaw = params.get("isActive");
     const slotTypeRaw = params.get("slotType");
 
@@ -73,7 +79,11 @@ export async function POST(request: Request) {
     const message =
       err instanceof Error ? err.message : "创建推荐位失败";
     const status =
-      message.includes("不能为空") || message.includes("无效") ? 400 : 500;
+      message.includes("不能为空") ||
+      message.includes("无效") ||
+      message.includes("已被使用")
+        ? 400
+        : 500;
     return jsonError(message, status);
   }
 }

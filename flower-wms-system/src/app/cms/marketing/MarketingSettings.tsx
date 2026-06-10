@@ -4,8 +4,8 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { formatNullableDateTime } from "@/lib/datetime";
+import { ProductPicker } from "@/components/cms/pickers/ProductPicker";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/Switch";
 import {
   GLOBAL_NOTICE_KEY,
@@ -270,14 +270,16 @@ export function MarketingSettings({
               )}
             </div>
 
-            <Input
-              label="跳转商品 ID（可选）"
-              value={popup.linkProductId}
-              onChange={(e) =>
-                setPopup((p) => ({ ...p, linkProductId: e.target.value }))
+            <ProductPicker
+              label="跳转商品（可选）"
+              value={popup.linkProductId || null}
+              onChange={(productId) =>
+                setPopup((p) => ({
+                  ...p,
+                  linkProductId: productId ?? "",
+                }))
               }
               disabled={savingPopup}
-              placeholder="成品 Product 的 cuid，留空则不跳转商品"
             />
 
             <Button

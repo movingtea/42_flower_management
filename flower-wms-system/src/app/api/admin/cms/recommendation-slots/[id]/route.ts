@@ -75,7 +75,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       err instanceof Error ? err.message : "更新推荐位失败";
     const status = message.includes("不存在")
       ? 404
-      : message.includes("无效")
+      : message.includes("无效") || message.includes("已被使用")
         ? 400
         : 500;
     return jsonError(message, status);
