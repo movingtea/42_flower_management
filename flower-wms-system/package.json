@@ -24,6 +24,7 @@
     "test:data-quality": "tsx src/services/data-quality-pure.test.ts",
     "test:system-health": "tsx src/services/system-health.test.ts",
     "test:trial-run-check": "tsx src/services/trial-run-check.test.ts",
+    "test:wms-nav": "tsx src/lib/wms-nav.test.ts",
     "smoke:trial-run": "tsx scripts/smoke-trial-run.ts",
     "test:cms-pickers": "tsx src/lib/cms-auto-key.test.ts && tsx src/lib/cms-link-target.test.ts",
     "smoke:crm": "tsx scripts/smoke-crm-flow.ts",

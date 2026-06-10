@@ -55,6 +55,13 @@ export type ApiPermission =
   | "loss:audit"
   | "staff:manage";
 
+export function hasAnyPermission(
+  role: StaffRole,
+  permissions: ApiPermission[]
+): boolean {
+  return permissions.some((p) => hasPermission(role, p));
+}
+
 export function hasPermission(role: StaffRole, permission: ApiPermission): boolean {
   switch (permission) {
     case "staff:manage":
@@ -94,6 +101,11 @@ export const BUSINESS_API_PREFIXES = [
   "/api/admin/banners",
   "/api/admin/product-categories",
   "/api/admin/categories",
+  "/api/admin/setup",
+  "/api/admin/data-quality",
+  "/api/admin/system",
+  "/api/admin/trial-run",
+  "/api/admin/audit-logs",
   "/api/cms",
   "/api/business",
 ] as const;

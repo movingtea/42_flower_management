@@ -14,6 +14,7 @@ import {
   isBusinessApiPath,
   isStaffAdminApiPath,
 } from "@/lib/rbac";
+import { canAccessWmsPath } from "@/lib/wms-nav";
 
 const { auth } = NextAuth(authConfig);
 
@@ -87,7 +88,10 @@ export default auth((req) => {
 
   // 前台运营：仅 CMS；配方 API 仅 GET
   if (role === Role.STORE_OPERATOR) {
-    if (pathname.startsWith("/wms") || pathname.startsWith("/admin")) {
+    if (
+      pathname.startsWith("/wms") ||
+      pathname.startsWith("/admin")
+    ) {
       return NextResponse.redirect(new URL("/cms/products", req.nextUrl));
     }
     const recipeReadOnly =
@@ -105,15 +109,17 @@ export default auth((req) => {
     }
   }
 
-  // 花艺师：订单看板 + WMS 只读 GET
+  // WMS 页面：permission + 角色路径门控（与 sidebar 一致）
+  if (
+    pathname.startsWith("/wms") &&
+    pathname !== "/wms" &&
+    !canAccessWmsPath(role!, pathname)
+  ) {
+    return NextResponse.redirect(new URL(getRoleHomePath(role!), req.nextUrl));
+  }
+
+  // 花艺师：WMS 只读 GET API
   if (role === Role.FLORIST) {
-    if (
-      isStaffProtectedPage(pathname) &&
-      pathname.startsWith("/wms") &&
-      !pathname.startsWith("/wms/orders")
-    ) {
-      return NextResponse.redirect(new URL("/wms/orders", req.nextUrl));
-    }
     if (
       (pathname.startsWith("/api/admin/wms") ||
         pathname.startsWith("/api/admin/wiki")) &&

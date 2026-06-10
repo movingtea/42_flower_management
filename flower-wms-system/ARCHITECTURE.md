@@ -169,7 +169,7 @@ flower-wms-system/
 
 | 路径 | 组件 / 职责 |
 |---|---|
-| `/wms` | redirect 到 `/wms/dashboard` |
+| `/wms` | redirect 到当前角色首个可访问 WMS 菜单（见 `src/lib/wms-nav.ts`） |
 | `/wms/dashboard` | WMS 仪表盘 |
 | `/wms/inventory` | 物理库存列表，仅展示有可用批次的 Material |
 | `/wms/inventory/[id]` | 原材料详情：批次、库存流水、历史报损 |
@@ -194,7 +194,41 @@ flower-wms-system/
 | `/wms/wastage` | redirect 到 `/wms/operations?panel=loss` |
 | `/wms/bom` | redirect 到 `/wms/recipes` |
 
-导航定义：`src/components/wms/sidebar.tsx`（含试运营准备、数据质量、系统健康、操作日志入口）。
+导航定义：`src/components/wms/sidebar.tsx` + `src/lib/wms-nav.ts`（5 组分组 + permission 过滤）。
+
+### WMS Sidebar 分组与权限
+
+配置源：`src/lib/wms-nav.ts`（`WMS_NAV_GROUPS`）。Sidebar 按 permission / `anyPermissions` 过滤菜单；空分组不展示。页面级保护：`src/proxy.ts` 调用 `canAccessWmsPath`；无可见菜单时 `src/app/wms/layout.tsx` 展示 `WmsForbiddenNotice`。
+
+当前 permission key（`src/lib/rbac.ts`）：`business:read` / `business:write` / `wms:read` / `wms:write` / `cms:read` / `cms:write` / `orders:write` / `loss:audit` / `staff:manage`。**尚无** `orders:read`、`system:read`；订单菜单暂用 `orders:write`，系统健康暂用 `business:read`。
+
+| 分组 | 菜单 | 路径 | 菜单 permission | 页面 / API 对齐 |
+|---|---|---|---|---|
+| 经营概览 | 仪表盘 | `/wms/dashboard` | `wms:read` | 报表 dashboard API `wms:read` |
+| 经营概览 | 经营报表 | `/wms/reports` | `wms:read` | 多数报表 API `wms:read` |
+| 试运营与系统 | 试运营准备 | `/wms/setup` | `business:read` | `GET /api/admin/setup/checklist` |
+| 试运营与系统 | 数据质量 | `/wms/data-quality` | `business:read` | `GET /api/admin/data-quality` |
+| 试运营与系统 | 系统健康 | `/wms/system-health` | `business:read` | `GET /api/admin/system/health` |
+| 试运营与系统 | 操作日志 | `/wms/audit-logs` | `business:read` | `GET /api/admin/audit-logs` |
+| 库存与采购 | 库存管理 | `/wms/inventory` | `wms:read` | 库存 / 批次 API `wms:read` |
+| 库存与采购 | 仓储日常 | `/wms/operations` | `wms:write` | 入库 / 报损 API `wms:write` |
+| 库存与采购 | 采购单 | `/wms/purchase-orders` | `wms:read` \|\| `wms:write` | 列表 `wms:read`，写入 `wms:write` |
+| 库存与采购 | 供应商 | `/wms/suppliers` | `wms:read` \|\| `wms:write` | 同上 |
+| 库存与采购 | 物料母表 | `/wms/wiki` | `wms:read` \|\| `wms:write` | GET `wms:read`，POST `wms:write` |
+| 库存与采购 | 原材料分类 | `/wms/material-categories` | `wms:write` | material-categories API `wms:write` |
+| 商品与成本 | 标准配方 | `/wms/recipes` | `wms:write` | recipes API |
+| 商品与成本 | 包装方案 | `/wms/packaging-kits` | `wms:write` | packaging-kits API |
+| 客户与订单 | 订单履约 | `/wms/orders` | `orders:write` | orders API `orders:write` |
+| 客户与订单 | 客户 CRM | `/wms/crm` | `business:read` | CRM API `business:read` |
+
+角色补充门控（与 proxy 一致，非 permission 可表达）：
+
+- `IT_ADMIN`：不展示任何 WMS 业务菜单；访问 `/wms/*` 重定向 `/admin/staff-users`。
+- `STORE_OPERATOR`：不展示 WMS；访问 `/wms/*` 重定向 CMS。
+- `FLORIST`：仅「订单履约」菜单；访问其他 `/wms/*` 重定向 `/wms/orders`。
+- `WAREHOUSE_MANAGER`：可见库存 / 采购 / 配方 / 报表（有 `wms:read` / `wms:write` / `business:read`）；不可见 CMS。
+
+`business:read` 当前粒度较粗（凡非 `IT_ADMIN` 均具备），细分 read 权限待后续迭代。
 
 Dashboard 试运营状态卡片：`src/components/wms/TrialOperationStatusCard.tsx`（并行调用 setup / data-quality / health / trial-run API；部分失败不阻塞其余展示）。
 
@@ -345,10 +379,12 @@ CMS 面向花店运营用户，主界面不要求理解 `productId` / `skuId` / 
 权限：
 
 - 后台 API 使用 `src/lib/api-auth.ts` 的 `requirePermission`。
-- `IT_ADMIN` 不能访问业务数据。
+- `IT_ADMIN` 不能访问业务数据（`canAccessBusinessData` + proxy 业务 API 403）。
+- `wms:read`：`STORE_ADMIN` / `WAREHOUSE_MANAGER` / `FLORIST` / `STORE_OPERATOR`（Florist 对 WMS 写 API 仅 GET）。
 - `wms:write`：`STORE_ADMIN` / `WAREHOUSE_MANAGER`。
 - `orders:write`：`STORE_ADMIN` / `FLORIST`。
-- `business:read` / `business:write` 用于成本与报表相关接口。
+- `business:read`：凡非 `IT_ADMIN`（粒度较粗，见 WMS Sidebar 表）。
+- WMS 菜单与页面权限：`src/lib/wms-nav.ts`；勿仅依赖 sidebar 隐藏。
 
 ### CRM（后台）
 
@@ -1035,6 +1071,13 @@ Dockerfile：
 66. 数据质量中心 UI 不得提供批量自动修复或一键改价 / 上下架操作。
 67. Dashboard 试运营状态卡片为辅助信息，**不得阻塞**正常 WMS / CMS 业务操作。
 68. AuditLog 查询页不得展示 token / password 等敏感字段；系统健康页不得展示 secret 明文。
+69. Sidebar 隐藏**不是**权限控制的唯一手段；WMS 页面（`proxy.ts` + `canAccessWmsPath`）与 API（`requirePermission`）必须同步校验。
+70. 无 permission 的 WMS 菜单项不得开放；空分组不显示标题。
+71. `IT_ADMIN` 不得看到业务数据 WMS 菜单；试运营 / 日志 / 数据质量含业务实体，同样不开放。
+72. 新增 WMS 菜单项必须在 `src/lib/wms-nav.ts` 声明 `permission` / `anyPermissions`，并同步 `WMS_ROUTE_PERMISSION_RULES`。
+73. 新增后台 API 必须使用 `requirePermission`；API 权限不得弱于对应页面。
+74. 不得为导航展示而放宽 `requirePermission` 或绕过 `canAccessBusinessData`。
+75. 系统健康若含业务统计，不得仅凭技术角色访问；当前 MVP 统一 `business:read`。
 
 ---
 

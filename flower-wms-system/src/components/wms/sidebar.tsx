@@ -2,29 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { Role } from "@/generated/prisma/enums";
 import { StaffAccountBar } from "@/components/shared/StaffAccountBar";
-
-const navItems = [
-  { href: "/wms/dashboard", label: "仪表盘", icon: "📊" },
-  { href: "/wms/setup", label: "试运营准备", icon: "🚀" },
-  { href: "/wms/data-quality", label: "数据质量", icon: "🔍" },
-  { href: "/wms/system-health", label: "系统健康", icon: "💚" },
-  { href: "/wms/audit-logs", label: "操作日志", icon: "📝" },
-  { href: "/wms/inventory", label: "库存管理", icon: "📦" },
-  { href: "/wms/operations", label: "仓储日常", icon: "📥" },
-  { href: "/wms/purchase-orders", label: "采购单", icon: "🧾" },
-  { href: "/wms/suppliers", label: "供应商", icon: "🚚" },
-  { href: "/wms/wiki", label: "物料母表", icon: "🌸" },
-  { href: "/wms/recipes", label: "标准配方", icon: "🧪" },
-  { href: "/wms/packaging-kits", label: "包装方案", icon: "🎁" },
-  { href: "/wms/material-categories", label: "原材料分类", icon: "🏷️" },
-  { href: "/wms/orders", label: "订单履约", icon: "📋" },
-  { href: "/wms/crm", label: "客户 CRM", icon: "💐" },
-  { href: "/wms/reports", label: "经营报表", icon: "📈" },
-];
+import {
+  getVisibleNavGroups,
+  isNavItemActive,
+} from "@/lib/wms-nav";
 
 export function WmsSidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const role = session?.user?.role as Role | undefined;
+
+  const visibleGroups = role ? getVisibleNavGroups(role) : [];
 
   return (
     <aside className="flex w-56 shrink-0 flex-col border-r border-zinc-200 bg-white">
@@ -36,25 +27,46 @@ export function WmsSidebar() {
           仓储物流与履约
         </h1>
       </div>
-      <nav className="flex flex-1 flex-col gap-1 p-3">
-        {navItems.map((item) => {
-          const isActive =
-            pathname === item.href || pathname.startsWith(`${item.href}/`);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-zinc-100 text-zinc-900"
-                  : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
-              }`}
+      <nav className="flex flex-1 flex-col overflow-y-auto p-3">
+        {visibleGroups.length === 0 ? (
+          <p className="rounded-lg bg-zinc-50 px-3 py-4 text-sm text-zinc-500">
+            当前账号没有可访问的 WMS 菜单。如有疑问请联系门店管理员。
+          </p>
+        ) : (
+          visibleGroups.map((group, groupIndex) => (
+            <div
+              key={group.title}
+              className={groupIndex > 0 ? "mt-5 border-t border-zinc-100 pt-4" : ""}
             >
-              <span aria-hidden>{item.icon}</span>
-              {item.label}
-            </Link>
-          );
-        })}
+              <p className="mb-2 px-3 text-[11px] font-medium uppercase tracking-wider text-zinc-400">
+                {group.title}
+              </p>
+              <ul className="flex flex-col gap-0.5">
+                {group.items.map((item) => {
+                  const isActive = isNavItemActive(pathname, item);
+                  return (
+                    <li key={item.href}>
+                      <Link
+                        href={item.href}
+                        aria-current={isActive ? "page" : undefined}
+                        className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
+                          isActive
+                            ? "bg-zinc-100 text-zinc-900"
+                            : "text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900"
+                        }`}
+                      >
+                        <span aria-hidden className="shrink-0">
+                          {item.icon}
+                        </span>
+                        {item.label}
+                      </Link>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          ))
+        )}
       </nav>
       <StaffAccountBar variant="wms" />
     </aside>
