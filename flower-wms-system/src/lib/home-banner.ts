@@ -1,3 +1,5 @@
+import { normalizeStoredImagePathRequired } from "@/lib/image-url";
+
 /** AppConfig.key：小程序首页轮播 */
 export const HOME_BANNER_KEY = "HOME_BANNER";
 
@@ -38,7 +40,7 @@ export function parseHomeBannerValue(value: unknown): HomeBannerItem[] {
 
     items.push({
       id,
-      imageUrl,
+      imageUrl: normalizeStoredImagePathRequired(imageUrl),
       productId,
       sort: Math.round(sort),
     });

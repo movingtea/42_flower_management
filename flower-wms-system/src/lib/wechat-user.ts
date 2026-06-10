@@ -1,5 +1,5 @@
 import type { User } from "@/generated/prisma/client";
-import { resolveImageUrl } from "@/utils/imageUrlFormatter";
+import { normalizeStoredImagePath, toPublicImageUrl } from "@/lib/image-url";
 
 export type WechatUserProfile = {
   id: string;
@@ -16,7 +16,7 @@ export function mapUserToWechatProfile(user: User): WechatUserProfile {
     id: user.id,
     openId: user.openId,
     nickName: user.nickName,
-    avatarUrl: user.avatarUrl ? resolveImageUrl(user.avatarUrl) ?? user.avatarUrl : null,
+    avatarUrl: user.avatarUrl ? toPublicImageUrl(user.avatarUrl) : null,
     defaultReceiverName: user.defaultReceiverName,
     defaultReceiverPhone: user.defaultReceiverPhone,
     defaultAddress: user.defaultAddress,
@@ -49,8 +49,8 @@ export function parseProfileUpdateBody(body: unknown): {
   }
 
   if ("avatarUrl" in b) {
-    const v = typeof b.avatarUrl === "string" ? b.avatarUrl.trim() : "";
-    out.avatarUrl = v || null;
+    const v = typeof b.avatarUrl === "string" ? b.avatarUrl : "";
+    out.avatarUrl = normalizeStoredImagePath(v);
   }
 
   if ("defaultReceiverName" in b) {

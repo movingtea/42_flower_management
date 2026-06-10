@@ -838,6 +838,26 @@ Dockerfile：
 
 当前 compose 没有为 `public/uploads` 配置持久化卷；上传文件持久性需要部署层额外处理。
 
+### 12.1 图片路径规范
+
+本地上传图片（`public/uploads`）与外部 CDN 图片的存储、API 返回、小程序展示须统一：
+
+| 环节 | 规范 |
+|---|---|
+| 数据库存储 | 本地上传保存相对路径 `/uploads/xxx.jpg`；**不得**保存 `http://localhost:3000/uploads/...` 或 request origin |
+| 外部图片 | 真正的 OSS / CDN `https://...` 可保存完整绝对 URL |
+| 上传 API | `POST /api/admin/upload`、`POST /api/miniprogram/upload` 返回 `path` / `url` 均为相对路径 |
+| CMS 写入 | 商品 SKU `imageUrl`、Banner、推荐位 `imageOverride`、营销弹窗等在写库前经 `normalizeStoredImagePath` |
+| 小程序 API | `/api/miniprogram/*` 经 `imageUrlFormatter` → `toPublicImageUrl`：剥离 localhost，本地路径保持相对，**不得**默认拼接 localhost |
+| 小程序前端 | `42_mp/miniprogram/utils/image.ts` 的 `toRelativeImagePath` / `resolveImageUrl` 统一处理；WXML 用 `{{baseUrl}}{{path}}` 时 API 须返回相对路径 |
+
+核心工具：`src/lib/image-url.ts`（`isAbsoluteUrl`、`isLocalhostUrl`、`normalizeStoredImagePath`、`stripLocalDevOrigin`、`toPublicImageUrl`）。
+
+数据巡检与清理（可选）：
+
+- `npx tsx scripts/check-image-url-data.ts` — 只读扫描含 localhost 的图片字段
+- `npx tsx scripts/fix-localhost-image-urls.ts` — 默认 dry-run；`--write` 写库修正
+
 ---
 
 ## 13. 脚本与测试
@@ -856,6 +876,7 @@ Dockerfile：
 | `npm run test:margin` | 产品毛利纯函数测试 |
 | `npm run test:crm` | CRM 纯函数测试 |
 | `npm run test:cms-validation` | CMS 商品上架校验纯函数测试 |
+| `npm run test:image-url` | 图片 URL 规范化工具测试 |
 | `npm run db:seed` | Prisma seed |
 | `npm run smoke:purchase` | 采购入库 DB smoke |
 | `npm run smoke:crm` | CRM 订单沉淀 DB smoke |
@@ -933,6 +954,10 @@ Dockerfile：
 52. 小程序业务 API 须统一使用 `/api/miniprogram/*`；商品、推荐位、订单、购物车、收花人等不得放在 `/api/wechat`。
 53. `/api/wechat/*` 仅用于微信登录/授权/支付回调等平台能力；正式微信支付未来放入 `/api/wechat/orders/callback` 或独立支付模块，不与业务 API 混淆。
 54. 小程序前端业务请求通过 `utils/request.ts`（基址 `/api/miniprogram`）；登录单独走 `/api/wechat/auth/login`。
+55. 不得把开发环境 base url（localhost / 127.0.0.1 / request origin）持久化到数据库图片字段。
+56. 不得在多个 route / service 中散落拼接图片 base url；须集中使用 `src/lib/image-url.ts`。
+57. 不得对已是 absolute URL 的图片重复拼接 base url；小程序 API 不得向客户端返回 localhost 图片 URL。
+58. `operationNote`、成本、毛利等产品决策内部信息仍不得返回小程序（与第 39、42 条一致）。
 
 ---
 

@@ -1,4 +1,6 @@
-/** 需要拼接为绝对 URL 的字符串字段名 */
+import { toPublicImageUrl } from "@/lib/image-url";
+
+/** 需要规范化输出的字符串字段名 */
 const IMAGE_STRING_KEYS = new Set([
   "imageUrl",
   "coverImage",
@@ -8,8 +10,10 @@ const IMAGE_STRING_KEYS = new Set([
   "bannerUrl",
   "detailImage",
   "mainImage",
+  "mainImageUrl",
   "picUrl",
   "snapshotProductImage",
+  "imageOverride",
 ]);
 
 /** 图片 URL 字符串数组字段名 */
@@ -20,7 +24,7 @@ const IMAGE_ARRAY_KEYS = new Set([
   "bannerImages",
 ]);
 
-/** 静态资源对外基址（用于拼接 /uploads，不含 /api/wechat） */
+/** @deprecated 小程序 API 不再拼接 localhost；请使用 toPublicImageUrl */
 export function getAssetBaseUrl(): string {
   const asset = process.env.NEXT_PUBLIC_ASSET_BASE_URL?.trim();
   if (asset) {
@@ -44,28 +48,18 @@ export function getWechatApiBaseUrl(): string {
 }
 
 /**
- * 将单条图片路径转为绝对 URL。
- * - 已是 http(s) 开头：原样返回
- * - 以 / 开头：拼接 NEXT_PUBLIC_API_URL（缺省为 http://localhost:3000）
+ * 小程序 API 图片字段规范化：剥离 localhost，本地路径保持相对，外部 CDN 保持绝对。
+ * 不再默认拼接 http://localhost:3000。
  */
 export function resolveImageUrl(
   value: string | null | undefined
 ): string | null | undefined {
   if (value == null) return value;
   if (typeof value !== "string") return value;
-
+  const out = toPublicImageUrl(value);
+  if (out) return out;
   const trimmed = value.trim();
-  if (!trimmed) return trimmed;
-
-  if (/^https?:\/\//i.test(trimmed)) {
-    return trimmed;
-  }
-
-  if (trimmed.startsWith("/")) {
-    return `${getAssetBaseUrl()}${trimmed}`;
-  }
-
-  return trimmed;
+  return trimmed || null;
 }
 
 function formatImageArray(value: unknown): unknown {
@@ -112,7 +106,7 @@ function walkUnknown(value: unknown): unknown {
 }
 
 /**
- * 深度清洗 JSON 结构中的图片相对路径，供 /api/miniprogram/* 下发前使用。
+ * 深度清洗 JSON 结构中的图片路径，供 /api/miniprogram/* 下发前使用。
  * 返回新对象，不修改入参引用。
  */
 export function imageUrlFormatter<T>(input: T): T {

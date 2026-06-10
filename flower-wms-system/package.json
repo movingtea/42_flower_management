@@ -19,6 +19,7 @@
     "test:cms-validation": "tsx src/services/cms-product-validation-pure.test.ts",
     "test:miniprogram-products": "tsx src/services/miniprogram-product-filter-pure.test.ts",
     "test:cms-home-scene-entries": "tsx src/services/cms-home-scene-entries-pure.test.ts",
+    "test:image-url": "tsx src/lib/image-url.test.ts",
     "test:cms-pickers": "tsx src/lib/cms-auto-key.test.ts && tsx src/lib/cms-link-target.test.ts",
     "smoke:crm": "tsx scripts/smoke-crm-flow.ts",
     "smoke:cms-operations": "tsx scripts/smoke-cms-operations.ts",

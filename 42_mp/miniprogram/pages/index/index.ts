@@ -252,11 +252,11 @@ Page({
   fetchRecommendations() {
     return request<RecommendationsData>({ url: '/recommendations', raw: false })
       .then((data) => {
-        console.log(data)
         const slots = (data?.slots ?? []).map((slot) => ({
           ...slot,
           items: (slot.items ?? []).map((item) => ({
             ...item,
+            coverImage: toRelativeImagePath(item.coverImage),
             cardOccasionLabels: (item.occasionTags ?? [])
               .slice(0, 2)
               .map((t) => t.label || t.key),
@@ -292,7 +292,6 @@ Page({
 
   fetchProducts() {
     return request<ProductsData>({ url: '/products' }).then((data) => {
-      console.log(data)
       if (!data) {
         console.warn('商品列表接口未返回有效数据', data);
         return;

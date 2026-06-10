@@ -17,6 +17,7 @@ import {
   resolveSpuMinPrice,
 } from "@/lib/product-spu";
 import { prisma } from "@/lib/prisma";
+import { normalizeStoredImagePathRequired } from "@/lib/image-url";
 
 export type BannerRow = {
   id: string;
@@ -216,7 +217,7 @@ export async function syncBannersFromWriteItems(
 
     for (const item of sorted) {
       const data: Prisma.BannerUncheckedCreateInput = {
-        imageUrl: item.imageUrl.trim(),
+        imageUrl: normalizeStoredImagePathRequired(item.imageUrl),
         sortOrder: Math.round(item.sortOrder),
         targetType: parseBannerTargetType(item.targetType) as BannerTargetType,
         targetParam: item.targetParam?.trim() || null,

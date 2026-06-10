@@ -15,7 +15,7 @@ function pathnameFromAbsoluteUrl(absolute: string): string {
 
 /**
  * 规范为相对路径（供 WXML：{{baseUrl}}{{imagePath}}）。
- * 绝对 URL 会提取 pathname；空值返回占位图路径。
+ * 绝对 URL（含 localhost）会提取 pathname；空值返回占位图路径。
  */
 export function toRelativeImagePath(src?: string | null): string {
   if (src == null) return placeholderImagePath;

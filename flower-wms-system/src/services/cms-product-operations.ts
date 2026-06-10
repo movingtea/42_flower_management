@@ -19,6 +19,10 @@ import {
 } from "@/lib/product-spu";
 import { prisma } from "@/lib/prisma";
 import {
+  normalizeStoredImagePath,
+  toPublicImageUrl,
+} from "@/lib/image-url";
+import {
   evaluateProductHealth,
   PRODUCT_HEALTH_STATUS_LABELS,
   calculateLossSensitivity,
@@ -860,7 +864,7 @@ export async function addRecommendationItem(
       skuId: input.skuId ?? null,
       titleOverride: input.titleOverride?.trim() || null,
       subtitleOverride: input.subtitleOverride?.trim() || null,
-      imageOverride: input.imageOverride?.trim() || null,
+      imageOverride: normalizeStoredImagePath(input.imageOverride),
       sortOrder: input.sortOrder ?? 0,
       isActive: input.isActive ?? true,
       startAt: parseOptionalDate(input.startAt),
@@ -919,7 +923,7 @@ export async function updateRecommendationItem(
         ? { subtitleOverride: input.subtitleOverride?.trim() || null }
         : {}),
       ...(input.imageOverride !== undefined
-        ? { imageOverride: input.imageOverride?.trim() || null }
+        ? { imageOverride: normalizeStoredImagePath(input.imageOverride) }
         : {}),
       ...(input.sortOrder !== undefined ? { sortOrder: input.sortOrder } : {}),
       ...(input.isActive !== undefined ? { isActive: input.isActive } : {}),
@@ -1030,10 +1034,11 @@ export async function listActiveRecommendationsForMiniProgram(
       if (!sku) continue;
 
       const price = sku.price.toString();
-      const coverImage =
+      const rawCover =
         item.imageOverride?.trim() ||
         sku.imageUrl?.trim() ||
         resolveSpuCardImageUrl(product.skus);
+      const coverImage = toPublicImageUrl(rawCover) ?? "";
 
       const opTags = buildWechatOperationTags(product);
 

@@ -1,4 +1,5 @@
 import type { Prisma } from "@/generated/prisma/client";
+import { normalizeStoredImagePath } from "@/lib/image-url";
 import { prisma } from "@/lib/prisma";
 import { activeSpuWhere } from "@/lib/product-query";
 
@@ -51,7 +52,8 @@ export function parseSkuMarketingPatch(raw: unknown): SkuMarketingPatch {
     if (value !== null && typeof value !== "string") {
       throw new Error("imageUrl 须为字符串或 null");
     }
-    patch.imageUrl = typeof value === "string" ? value.trim() || null : null;
+    patch.imageUrl =
+      typeof value === "string" ? normalizeStoredImagePath(value) : null;
   }
 
   if (patch.description === undefined && patch.imageUrl === undefined) {

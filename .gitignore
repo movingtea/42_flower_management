@@ -30,3 +30,5 @@ docker-compose.yml
 .env
 !.env.production.example
 !docker-compose.example.yml
+
+flower-wms-system/public/uploads/

@@ -1,3 +1,5 @@
+import { normalizeStoredImagePathRequired } from "@/lib/image-url";
+
 /** AppConfig.key：全局顶部走马灯公告 */
 export const GLOBAL_NOTICE_KEY = "GLOBAL_NOTICE";
 
@@ -51,7 +53,9 @@ export function parseHomePopupValue(value: unknown): HomePopupConfig {
   const o = value as Record<string, unknown>;
   return {
     enabled: o.enabled === true,
-    imageUrl: typeof o.imageUrl === "string" ? o.imageUrl.trim() : "",
+    imageUrl: normalizeStoredImagePathRequired(
+      typeof o.imageUrl === "string" ? o.imageUrl : ""
+    ),
     linkProductId:
       typeof o.linkProductId === "string" ? o.linkProductId.trim() : "",
   };

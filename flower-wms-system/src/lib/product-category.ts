@@ -1,3 +1,5 @@
+import { normalizeStoredImagePath } from "@/lib/image-url";
+
 /** 商品分类树节点（CMS / 小程序） */
 export type ProductCategoryTreeNode = {
   id: string;
@@ -55,11 +57,9 @@ export function parseProductCategoryWriteBody(raw: unknown): ProductCategoryWrit
       ? b.description.trim()
       : null;
 
-  let imageUrl: string | null = null;
-  if (typeof b.imageUrl === "string") {
-    const url = b.imageUrl.trim();
-    imageUrl = url.length > 0 ? url : null;
-  }
+  const imageUrl = normalizeStoredImagePath(
+    typeof b.imageUrl === "string" ? b.imageUrl : null
+  );
 
   return {
     name,

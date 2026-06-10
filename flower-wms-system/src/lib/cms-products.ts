@@ -1,4 +1,5 @@
 import type { CmsProductCategoryItem } from "@/lib/cms-product-categories";
+import { normalizeStoredImagePath } from "@/lib/image-url";
 import {
   parseCmsProductTagKeys,
   parseSellingPoints,
@@ -103,10 +104,9 @@ function parseSkuRows(raw: unknown): CmsProductSkuInput[] {
       throw new Error(`款式第 ${i + 1} 行库存须为非负整数`);
     }
 
-    const imageUrl =
-      typeof r.imageUrl === "string" && r.imageUrl.trim()
-        ? r.imageUrl.trim()
-        : null;
+    const imageUrl = normalizeStoredImagePath(
+      typeof r.imageUrl === "string" ? r.imageUrl : null
+    );
 
     const recipeId =
       typeof r.recipeId === "string" && r.recipeId.trim()
