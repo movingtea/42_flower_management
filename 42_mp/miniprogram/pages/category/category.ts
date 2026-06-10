@@ -1,5 +1,6 @@
 // pages/category/category.ts — 商品分类：树形导航 + 搜索 + 商品列表
 import { baseUrl } from '../../config/index';
+import { toRelativeImagePath } from '../../utils/image';
 import { request } from '../../utils/request';
 import { addPayloadToCart } from '../../utils/cart-add';
 import { updateCartTabBarBadge } from '../../utils/cart';
@@ -91,14 +92,93 @@ Page({
     specPickerVisible: false,
     specPickerProduct: null as ProductItem | null,
     baseUrl,
+    sceneType: '',
+    sceneTitle: '',
+    sceneMode: false,
   },
 
   searchTimer: null as ReturnType<typeof setTimeout> | null,
   productsRequestId: 0,
 
+  onLoad(options: Record<string, string | undefined>) {
+    const sceneType = (options.sceneType ?? '').trim();
+    if (sceneType) {
+      const sceneLabels: Record<string, string> = {
+        BIRTHDAY: '生日推荐',
+        ANNIVERSARY: '纪念日推荐',
+        BUSINESS: '商务礼赠',
+        VISIT: '探望慰问',
+        DAILY_SURPRISE: '日常惊喜',
+      };
+      this.setData({
+        sceneType,
+        sceneMode: true,
+        sceneTitle: sceneLabels[sceneType] ?? '场景推荐',
+      });
+      wx.setNavigationBarTitle({ title: sceneLabels[sceneType] ?? '场景推荐' });
+      void this.loadSceneRecommendations(sceneType);
+    }
+  },
+
+  async loadSceneRecommendations(sceneType: string) {
+    this.setData({ loadingProducts: true });
+    try {
+      const data = await request<{
+        slots?: Array<{
+          items: Array<{
+            productId: string;
+            productName: string;
+            price: string;
+            coverImage: string;
+            sellingPoints?: string[];
+            occasionTags?: Array<{ label: string; key: string }>;
+            colorTags?: Array<{ label: string; key: string }>;
+            styleTags?: Array<{ label: string; key: string }>;
+          }>;
+        }>;
+      }>({
+        url: `/recommendations?sceneType=${encodeURIComponent(sceneType)}&limit=20`,
+      });
+
+      const items = (data?.slots ?? []).flatMap((slot) => slot.items ?? []);
+      const products: ProductItem[] = items.map((item) => ({
+        id: item.productId,
+        name: item.productName,
+        price: item.price,
+        priceSuffix: '',
+        shippingFee: 0,
+        imageUrl: toRelativeImagePath(item.coverImage ?? ''),
+        isOutOfStock: false,
+        skus: [],
+        occasionTags: item.occasionTags ?? [],
+        colorTags: item.colorTags ?? [],
+        styleTags: item.styleTags ?? [],
+        relationshipTags: [],
+        budgetTags: [],
+        positioningTags: [],
+        sellingPoints: item.sellingPoints ?? [],
+        cardOccasionLabels: (item.occasionTags ?? [])
+          .slice(0, 2)
+          .map((t) => t.label || t.key),
+        cardStyleColorLabels: [
+          ...(item.colorTags ?? []).slice(0, 1),
+          ...(item.styleTags ?? []).slice(0, 1),
+        ].map((t) => t.label || t.key),
+        cardSellingPoint: (item.sellingPoints ?? [])[0] ?? '',
+      }));
+
+      this.setData({ products, loadingProducts: false });
+    } catch {
+      this.setData({ loadingProducts: false, products: [] });
+      wx.showToast({ title: '场景推荐加载失败', icon: 'none' });
+    }
+  },
+
   onShow() {
     updateCartTabBarBadge();
-    void this.loadCategories();
+    if (!this.data.sceneMode) {
+      void this.loadCategories();
+    }
   },
 
   onPullDownRefresh() {

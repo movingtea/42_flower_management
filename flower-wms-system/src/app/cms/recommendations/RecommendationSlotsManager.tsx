@@ -1,0 +1,648 @@
+"use client";
+
+import Link from "next/link";
+import { useCallback, useEffect, useState } from "react";
+import { RecommendationWarnings } from "@/components/cms/RecommendationWarnings";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { formatDateTimeInAppTimezone } from "@/lib/datetime";
+import {
+  CMS_OCCASION_TAG_OPTIONS,
+  getCmsProductTagLabel,
+} from "@/lib/cms-product-tags";
+
+const SLOT_TYPE_LABELS: Record<string, string> = {
+  HOME_MAIN: "首页主推",
+  HOME_SECONDARY: "首页次级推荐",
+  SCENE: "场景推荐",
+  FESTIVAL: "节日推荐",
+  NEW_ARRIVAL: "新品上架",
+  HIGH_TICKET: "高客单",
+  CUSTOM: "自定义",
+};
+
+type SlotRow = {
+  id: string;
+  key: string;
+  name: string;
+  description: string | null;
+  slotType: string;
+  sceneType: string | null;
+  isActive: boolean;
+  sortOrder: number;
+  maxItems: number;
+  _count?: { items: number };
+  items?: Array<{
+    id: string;
+    productId: string;
+    sortOrder: number;
+    product: { name: string; isActive: boolean };
+  }>;
+};
+
+type SlotDetailItem = {
+    id: string;
+    productId: string;
+    skuId: string | null;
+    titleOverride: string | null;
+    subtitleOverride: string | null;
+    imageOverride: string | null;
+    sortOrder: number;
+    isActive: boolean;
+    startAt: string | null;
+    endAt: string | null;
+    note: string | null;
+    product: {
+      id: string;
+      name: string;
+      isActive: boolean;
+      occasionTags: string[];
+    };
+    sku: { id: string; specName: string; price: unknown } | null;
+};
+
+type SlotDetail = Omit<SlotRow, "items" | "_count"> & {
+  items: SlotDetailItem[];
+};
+
+type ProductSearchItem = {
+  id: string;
+  name: string;
+  isActive: boolean;
+};
+
+type ApiList = { success: boolean; data?: { slots: SlotRow[] }; error?: string };
+type ApiSlot = { success: boolean; data?: { slot: SlotDetail }; error?: string };
+type ApiProducts = {
+  success: boolean;
+  data?: { items: ProductSearchItem[] };
+  error?: string;
+};
+
+export function RecommendationSlotsManager() {
+  const [slots, setSlots] = useState<SlotRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [detail, setDetail] = useState<SlotDetail | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [editorOpen, setEditorOpen] = useState(false);
+  const [editorMode, setEditorMode] = useState<"create" | "edit">("create");
+  const [form, setForm] = useState({
+    id: "",
+    key: "",
+    name: "",
+    description: "",
+    slotType: "HOME_MAIN",
+    sceneType: "",
+    isActive: true,
+    sortOrder: 0,
+    maxItems: 10,
+  });
+  const [addOpen, setAddOpen] = useState(false);
+  const [productKeyword, setProductKeyword] = useState("");
+  const [productResults, setProductResults] = useState<ProductSearchItem[]>([]);
+  const [addForm, setAddForm] = useState({
+    productId: "",
+    skuId: "",
+    titleOverride: "",
+    subtitleOverride: "",
+    imageOverride: "",
+    sortOrder: 0,
+    isActive: true,
+    startAt: "",
+    endAt: "",
+  });
+  const [addWarnings, setAddWarnings] = useState<string[]>([]);
+  const [toast, setToast] = useState("");
+
+  const showToast = (msg: string) => {
+    setToast(msg);
+    window.setTimeout(() => setToast(""), 2800);
+  };
+
+  const loadSlots = useCallback(async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/admin/cms/recommendation-slots");
+      const json = (await res.json()) as ApiList;
+      if (!res.ok || !json.success) {
+        throw new Error(json.error ?? "推荐位数据加载失败，请稍后重试。");
+      }
+      setSlots(json.data?.slots ?? []);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "加载失败");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const loadDetail = useCallback(async (id: string) => {
+    setDetailLoading(true);
+    try {
+      const res = await fetch(`/api/admin/cms/recommendation-slots/${id}`);
+      const json = (await res.json()) as ApiSlot;
+      if (!res.ok || !json.success || !json.data?.slot) {
+        throw new Error(json.error ?? "加载推荐位详情失败");
+      }
+      setDetail(json.data.slot);
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "加载详情失败");
+      setDetail(null);
+    } finally {
+      setDetailLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadSlots();
+  }, [loadSlots]);
+
+  useEffect(() => {
+    if (selectedId) void loadDetail(selectedId);
+    else setDetail(null);
+  }, [selectedId, loadDetail]);
+
+  function openCreate() {
+    setEditorMode("create");
+    setForm({
+      id: "",
+      key: "",
+      name: "",
+      description: "",
+      slotType: "HOME_MAIN",
+      sceneType: "",
+      isActive: true,
+      sortOrder: 0,
+      maxItems: 10,
+    });
+    setEditorOpen(true);
+  }
+
+  function openEdit(slot: SlotRow) {
+    setEditorMode("edit");
+    setForm({
+      id: slot.id,
+      key: slot.key,
+      name: slot.name,
+      description: slot.description ?? "",
+      slotType: slot.slotType,
+      sceneType: slot.sceneType ?? "",
+      isActive: slot.isActive,
+      sortOrder: slot.sortOrder,
+      maxItems: slot.maxItems,
+    });
+    setEditorOpen(true);
+  }
+
+  async function saveSlot() {
+    if (!form.key.trim() || !form.name.trim()) {
+      showToast("请填写 key 和名称");
+      return;
+    }
+    if (form.maxItems <= 0) {
+      showToast("最大商品数须大于 0");
+      return;
+    }
+
+    const payload = {
+      key: form.key.trim(),
+      name: form.name.trim(),
+      description: form.description.trim() || null,
+      slotType: form.slotType,
+      sceneType: form.sceneType.trim() || null,
+      isActive: form.isActive,
+      sortOrder: Number(form.sortOrder) || 0,
+      maxItems: Number(form.maxItems) || 10,
+    };
+
+    const url =
+      editorMode === "create"
+        ? "/api/admin/cms/recommendation-slots"
+        : `/api/admin/cms/recommendation-slots/${form.id}`;
+    const method = editorMode === "create" ? "POST" : "PATCH";
+
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const json = (await res.json()) as { success: boolean; error?: string };
+    if (!res.ok || !json.success) {
+      showToast(json.error ?? "保存失败");
+      return;
+    }
+
+    setEditorOpen(false);
+    showToast("推荐位已保存");
+    await loadSlots();
+    if (form.id) setSelectedId(form.id);
+  }
+
+  async function deactivateSlot(id: string) {
+    const res = await fetch(`/api/admin/cms/recommendation-slots/${id}`, {
+      method: "DELETE",
+    });
+    const json = (await res.json()) as { success: boolean; error?: string };
+    if (!res.ok || !json.success) {
+      showToast(json.error ?? "停用失败");
+      return;
+    }
+    showToast("推荐位已停用");
+    if (selectedId === id) setSelectedId(null);
+    await loadSlots();
+  }
+
+  async function searchProducts() {
+    const params = new URLSearchParams();
+    if (productKeyword.trim()) params.set("keyword", productKeyword.trim());
+    params.set("pageSize", "20");
+    const res = await fetch(
+      `/api/admin/cms/products/operation-summaries?${params}`
+    );
+    const json = (await res.json()) as ApiProducts;
+    setProductResults(json.data?.items ?? []);
+  }
+
+  async function addItem() {
+    if (!selectedId || !addForm.productId) {
+      showToast("请选择商品");
+      return;
+    }
+    setAddWarnings([]);
+    const res = await fetch(
+      `/api/admin/cms/recommendation-slots/${selectedId}/items`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          productId: addForm.productId,
+          skuId: addForm.skuId.trim() || null,
+          titleOverride: addForm.titleOverride.trim() || null,
+          subtitleOverride: addForm.subtitleOverride.trim() || null,
+          imageOverride: addForm.imageOverride.trim() || null,
+          sortOrder: Number(addForm.sortOrder) || 0,
+          isActive: addForm.isActive,
+          startAt: addForm.startAt || null,
+          endAt: addForm.endAt || null,
+        }),
+      }
+    );
+    const json = (await res.json()) as {
+      success: boolean;
+      error?: string;
+      data?: { warnings?: string[] };
+    };
+    if (!res.ok || !json.success) {
+      showToast(json.error ?? "添加失败");
+      return;
+    }
+    setAddWarnings(json.data?.warnings ?? []);
+    setAddOpen(false);
+    showToast("商品已添加到推荐位");
+    await loadDetail(selectedId);
+    await loadSlots();
+  }
+
+  async function removeItem(itemId: string) {
+    const res = await fetch(`/api/admin/cms/recommendation-items/${itemId}`, {
+      method: "DELETE",
+    });
+    const json = (await res.json()) as { success: boolean; error?: string };
+    if (!res.ok || !json.success) {
+      showToast(json.error ?? "移除失败");
+      return;
+    }
+    showToast("推荐商品已停用");
+    if (selectedId) await loadDetail(selectedId);
+    await loadSlots();
+  }
+
+  return (
+    <div className="space-y-6">
+      {toast ? (
+        <div className="fixed right-6 top-6 z-50 rounded-lg bg-emerald-600 px-4 py-2 text-sm text-white shadow-lg">
+          {toast}
+        </div>
+      ) : null}
+
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <p className="text-sm text-zinc-600">
+          用于配置小程序首页和场景入口展示的商品。推荐位为人工配置，系统只提供上架校验和经营风险提示。
+        </p>
+        <Button type="button" onClick={openCreate}>
+          + 新建推荐位
+        </Button>
+      </div>
+
+      {loading ? (
+        <p className="text-sm text-zinc-500">正在加载推荐位…</p>
+      ) : error ? (
+        <div className="rounded-lg border border-red-100 bg-red-50 p-4 text-sm text-red-700">
+          {error}
+          <button
+            type="button"
+            className="ml-2 underline"
+            onClick={() => void loadSlots()}
+          >
+            重试
+          </button>
+        </div>
+      ) : slots.length === 0 ? (
+        <p className="rounded-xl border border-dashed border-zinc-200 bg-white p-8 text-center text-sm text-zinc-500">
+          暂无推荐位，请先创建首页或场景推荐位。
+        </p>
+      ) : (
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
+          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+            <table className="w-full text-left text-sm">
+              <thead className="border-b bg-zinc-50">
+                <tr>
+                  <th className="px-4 py-3 font-medium text-zinc-600">名称</th>
+                  <th className="px-4 py-3 font-medium text-zinc-600">类型</th>
+                  <th className="px-4 py-3 font-medium text-zinc-600">商品数</th>
+                  <th className="px-4 py-3 font-medium text-zinc-600">操作</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y">
+                {slots.map((slot) => (
+                  <tr
+                    key={slot.id}
+                    className={
+                      selectedId === slot.id ? "bg-rose-50/60" : "hover:bg-zinc-50/50"
+                    }
+                  >
+                    <td className="px-4 py-3">
+                      <button
+                        type="button"
+                        className="text-left font-medium text-zinc-900 hover:text-rose-700"
+                        onClick={() => setSelectedId(slot.id)}
+                      >
+                        {slot.name}
+                      </button>
+                      <p className="text-xs text-zinc-400">{slot.key}</p>
+                    </td>
+                    <td className="px-4 py-3">
+                      <p>{SLOT_TYPE_LABELS[slot.slotType] ?? slot.slotType}</p>
+                      {slot.sceneType ? (
+                        <p className="text-xs text-zinc-500">
+                          {getCmsProductTagLabel("occasion", slot.sceneType)}
+                        </p>
+                      ) : null}
+                    </td>
+                    <td className="px-4 py-3">{slot._count?.items ?? 0}</td>
+                    <td className="px-4 py-3">
+                      <div className="flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          className="text-rose-600 hover:underline"
+                          onClick={() => openEdit(slot)}
+                        >
+                          编辑
+                        </button>
+                        <button
+                          type="button"
+                          className="text-zinc-600 hover:underline"
+                          onClick={() => setSelectedId(slot.id)}
+                        >
+                          商品
+                        </button>
+                        <button
+                          type="button"
+                          className="text-red-600 hover:underline"
+                          onClick={() => void deactivateSlot(slot.id)}
+                        >
+                          停用
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+            {!selectedId ? (
+              <p className="text-sm text-zinc-500">选择推荐位查看商品配置</p>
+            ) : detailLoading ? (
+              <p className="text-sm text-zinc-500">加载中…</p>
+            ) : detail ? (
+              <div className="space-y-4">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h3 className="text-lg font-semibold text-zinc-900">
+                      {detail.name}
+                    </h3>
+                    <p className="text-xs text-zinc-500">
+                      {SLOT_TYPE_LABELS[detail.slotType]} · 最多 {detail.maxItems}{" "}
+                      个
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    onClick={() => {
+                      setAddForm({
+                        productId: "",
+                        skuId: "",
+                        titleOverride: "",
+                        subtitleOverride: "",
+                        imageOverride: "",
+                        sortOrder: (detail.items?.length ?? 0) * 10,
+                        isActive: true,
+                        startAt: "",
+                        endAt: "",
+                      });
+                      setAddWarnings([]);
+                      setAddOpen(true);
+                    }}
+                  >
+                    添加商品
+                  </Button>
+                </div>
+
+                <RecommendationWarnings warnings={addWarnings} />
+
+                {!detail.items?.length ? (
+                  <p className="text-sm text-zinc-500">该推荐位暂无商品。</p>
+                ) : (
+                  <div className="space-y-3">
+                    {detail.items.map((item) => (
+                      <div
+                        key={item.id}
+                        className="rounded-lg border border-zinc-100 p-3 text-sm"
+                      >
+                        <div className="flex flex-wrap items-start justify-between gap-2">
+                          <div>
+                            <p className="font-medium">
+                              {item.titleOverride || item.product.name}
+                            </p>
+                            {item.sku ? (
+                              <p className="text-xs text-zinc-500">
+                                SKU：{item.sku.specName}
+                              </p>
+                            ) : null}
+                            <div className="mt-1 flex flex-wrap gap-1">
+                              {item.product.isActive ? (
+                                <Badge variant="success">已上架</Badge>
+                              ) : (
+                                <Badge variant="warning">未上架</Badge>
+                              )}
+                              {!item.isActive ? (
+                                <Badge variant="default">已停用</Badge>
+                              ) : null}
+                            </div>
+                            {item.startAt || item.endAt ? (
+                              <p className="mt-1 text-xs text-zinc-500">
+                                生效：
+                                {item.startAt
+                                  ? formatDateTimeInAppTimezone(item.startAt)
+                                  : "—"}{" "}
+                                ~{" "}
+                                {item.endAt
+                                  ? formatDateTimeInAppTimezone(item.endAt)
+                                  : "—"}
+                              </p>
+                            ) : null}
+                          </div>
+                          <div className="flex gap-2">
+                            <Link
+                              href={`/cms/products/${item.productId}`}
+                              className="text-rose-600 hover:underline"
+                            >
+                              编辑商品
+                            </Link>
+                            <button
+                              type="button"
+                              className="text-red-600 hover:underline"
+                              onClick={() => void removeItem(item.id)}
+                            >
+                              停用
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            ) : null}
+          </div>
+        </div>
+      )}
+
+      {editorOpen ? (
+        <Modal title={editorMode === "create" ? "新建推荐位" : "编辑推荐位"} onClose={() => setEditorOpen(false)}>
+          <div className="space-y-4">
+            <Input label="key（唯一标识）" value={form.key} onChange={(e) => setForm({ ...form, key: e.target.value })} disabled={editorMode === "edit"} />
+            <Input label="名称" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+            <Input label="描述" value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />
+            <label className="block text-sm">
+              <span className="mb-1 block font-medium text-zinc-700">类型</span>
+              <select
+                className="w-full rounded-lg border border-zinc-200 px-3 py-2"
+                value={form.slotType}
+                onChange={(e) => setForm({ ...form, slotType: e.target.value })}
+              >
+                {Object.entries(SLOT_TYPE_LABELS).map(([k, v]) => (
+                  <option key={k} value={k}>{v}</option>
+                ))}
+              </select>
+            </label>
+            <label className="block text-sm">
+              <span className="mb-1 block font-medium text-zinc-700">关联场景（可选）</span>
+              <select
+                className="w-full rounded-lg border border-zinc-200 px-3 py-2"
+                value={form.sceneType}
+                onChange={(e) => setForm({ ...form, sceneType: e.target.value })}
+              >
+                <option value="">不关联</option>
+                {CMS_OCCASION_TAG_OPTIONS.map((o) => (
+                  <option key={o.key} value={o.key}>{o.label}</option>
+                ))}
+              </select>
+            </label>
+            <div className="grid grid-cols-2 gap-3">
+              <Input label="排序" type="number" value={String(form.sortOrder)} onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })} />
+              <Input label="最大商品数" type="number" value={String(form.maxItems)} onChange={(e) => setForm({ ...form, maxItems: Number(e.target.value) })} />
+            </div>
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
+              启用
+            </label>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="secondary" onClick={() => setEditorOpen(false)}>取消</Button>
+              <Button type="button" onClick={() => void saveSlot()}>保存</Button>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
+
+      {addOpen && selectedId ? (
+        <Modal title="添加推荐商品" onClose={() => setAddOpen(false)}>
+          <div className="space-y-4">
+            <div className="flex gap-2">
+              <Input label="搜索商品" value={productKeyword} onChange={(e) => setProductKeyword(e.target.value)} />
+              <Button type="button" variant="secondary" className="mt-6" onClick={() => void searchProducts()}>搜索</Button>
+            </div>
+            <label className="block text-sm">
+              <span className="mb-1 block font-medium">选择商品</span>
+              <select
+                className="w-full rounded-lg border border-zinc-200 px-3 py-2"
+                value={addForm.productId}
+                onChange={(e) => setAddForm({ ...addForm, productId: e.target.value })}
+              >
+                <option value="">请选择</option>
+                {productResults.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}{p.isActive ? "" : "（未上架）"}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <Input label="覆盖标题" value={addForm.titleOverride} onChange={(e) => setAddForm({ ...addForm, titleOverride: e.target.value })} />
+            <Input label="覆盖副标题" value={addForm.subtitleOverride} onChange={(e) => setAddForm({ ...addForm, subtitleOverride: e.target.value })} />
+            <Input label="覆盖图片 URL" value={addForm.imageOverride} onChange={(e) => setAddForm({ ...addForm, imageOverride: e.target.value })} />
+            <div className="grid grid-cols-2 gap-3">
+              <Input label="排序" type="number" value={String(addForm.sortOrder)} onChange={(e) => setAddForm({ ...addForm, sortOrder: Number(e.target.value) })} />
+              <Input label="SKU ID（可选）" value={addForm.skuId} onChange={(e) => setAddForm({ ...addForm, skuId: e.target.value })} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <Input label="生效开始" type="datetime-local" value={addForm.startAt} onChange={(e) => setAddForm({ ...addForm, startAt: e.target.value })} />
+              <Input label="生效结束" type="datetime-local" value={addForm.endAt} onChange={(e) => setAddForm({ ...addForm, endAt: e.target.value })} />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button type="button" variant="secondary" onClick={() => setAddOpen(false)}>取消</Button>
+              <Button type="button" onClick={() => void addItem()}>添加</Button>
+            </div>
+          </div>
+        </Modal>
+      ) : null}
+    </div>
+  );
+}
+
+function Modal({
+  title,
+  children,
+  onClose,
+}: {
+  title: string;
+  children: React.ReactNode;
+  onClose: () => void;
+}) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-semibold">{title}</h3>
+          <button type="button" onClick={onClose} className="text-zinc-500">×</button>
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}

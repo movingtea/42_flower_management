@@ -27,6 +27,10 @@ type DetailProduct = WechatProductItem & {
   maintenanceGuide: string | null;
 };
 
+function tagLabels(tags: Array<{ label?: string; key?: string }> = []): string[] {
+  return tags.map((t) => t.label || t.key || '').filter(Boolean);
+}
+
 Page({
   data: {
     loading: true,
@@ -40,6 +44,10 @@ Page({
     descriptionHtml: '',
     maintenanceHtml: '',
     recommendList: [] as WechatProductItem[],
+    occasionLabels: [] as string[],
+    styleColorLabels: [] as string[],
+    relationshipLabels: [] as string[],
+    sellingPoints: [] as string[],
     specPickerVisible: false,
     baseUrl,
   },
@@ -110,6 +118,13 @@ Page({
         descriptionHtml: rewriteRichTextImageSrc(effectiveDescription ?? ''),
         maintenanceHtml: rewriteRichTextImageSrc(product.maintenanceGuide ?? ''),
         recommendList,
+        occasionLabels: tagLabels(product.occasionTags),
+        styleColorLabels: [
+          ...tagLabels(product.colorTags),
+          ...tagLabels(product.styleTags),
+        ],
+        relationshipLabels: tagLabels(product.relationshipTags),
+        sellingPoints: product.sellingPoints ?? [],
       });
 
       wx.setNavigationBarTitle({ title: product.name });

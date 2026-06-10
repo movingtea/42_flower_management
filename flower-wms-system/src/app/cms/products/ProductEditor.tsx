@@ -14,7 +14,12 @@ import type {
   ProductEditorProps,
   ProductSkuEditorRow,
 } from "@/app/cms/products/types";
-import { ProductOccasionTagsEditor } from "@/components/cms/ProductOccasionTagsEditor";
+import {
+  ProductOperationTagsEditor,
+  type ProductOperationTagsValue,
+} from "@/components/cms/ProductOperationTagsEditor";
+import { ProductMiniProgramPreview } from "@/components/cms/ProductMiniProgramPreview";
+import { ProductPublishReadinessPanel } from "@/components/cms/ProductPublishReadinessPanel";
 import { ProductDecisionPanel } from "@/components/product-decision/ProductDecisionPanel";
 import { formatPercent } from "@/lib/format-money";
 import type {
@@ -63,9 +68,17 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     initial.category
   );
-  const [occasionTags, setOccasionTags] = useState<string[]>(
-    initial.occasionTags ?? []
-  );
+  const [operationTags, setOperationTags] = useState<ProductOperationTagsValue>({
+    occasionTags: initial.occasionTags ?? [],
+    colorTags: initial.colorTags ?? [],
+    styleTags: initial.styleTags ?? [],
+    relationshipTags: initial.relationshipTags ?? [],
+    budgetTags: initial.budgetTags ?? [],
+    positioningTags: initial.positioningTags ?? [],
+    sellingPoints: initial.sellingPoints ?? [],
+    operationNote: initial.operationNote ?? "",
+  });
+  const [readinessRefreshKey, setReadinessRefreshKey] = useState(0);
   const [isPublished, setIsPublished] = useState(initial.isActive);
   const [description, setDescription] = useState(initial.description);
   const [maintenanceGuideline, setMaintenanceGuideline] = useState(
@@ -226,7 +239,14 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
     const payload = {
       name: name.trim(),
       category: selectedCategories,
-      occasionTags,
+      occasionTags: operationTags.occasionTags,
+      colorTags: operationTags.colorTags,
+      styleTags: operationTags.styleTags,
+      relationshipTags: operationTags.relationshipTags,
+      budgetTags: operationTags.budgetTags,
+      positioningTags: operationTags.positioningTags,
+      sellingPoints: operationTags.sellingPoints,
+      operationNote: operationTags.operationNote.trim() || null,
       isActive: isPublished,
       needsShipping,
       shippingFee: needsShipping ? Number(shippingFee.trim()) : 0,
@@ -273,6 +293,7 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
       }
 
       await loadMarginEstimate();
+      setReadinessRefreshKey((k) => k + 1);
       router.refresh();
     } catch {
       showToast("网络异常，请检查连接后重试", "error");
@@ -537,14 +558,26 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
           />
 
           <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
-            <h3 className="text-sm font-semibold text-zinc-900">适用礼赠场景</h3>
+            <h3 className="text-sm font-semibold text-zinc-900">商品运营标签</h3>
             <div className="mt-4">
-              <ProductOccasionTagsEditor
-                value={occasionTags}
-                onChange={setOccasionTags}
+              <ProductOperationTagsEditor
+                value={operationTags}
+                onChange={setOperationTags}
               />
             </div>
           </section>
+
+          {!isNew && productId !== "new" ? (
+            <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+              <h3 className="text-sm font-semibold text-zinc-900">上架校验</h3>
+              <div className="mt-4">
+                <ProductPublishReadinessPanel
+                  productId={productId}
+                  refreshKey={readinessRefreshKey}
+                />
+              </div>
+            </section>
+          ) : null}
 
           <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
             <div className="mb-4 flex items-center justify-between">
@@ -619,7 +652,6 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
                           compact
                         />
                       </td>
-                      <td className="px-3 py-3">{renderSkuMargin(row)}</td>
                       <td className="px-3 py-3">
                         <input
                           type="number"
@@ -632,6 +664,7 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
                           }
                         />
                       </td>
+                      <td className="px-3 py-3">{renderSkuMargin(row)}</td>
                       <td className="px-3 py-3">
                         <input
                           type="number"
@@ -713,10 +746,46 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
             </section>
           ) : null}
 
-          <div className="space-y-4 lg:hidden">{sidebarMeta}</div>
+          <div className="space-y-4 lg:hidden">
+            <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+              <h3 className="text-sm font-semibold text-zinc-900">小程序展示预览</h3>
+              <div className="mt-4">
+                <ProductMiniProgramPreview
+                  name={name}
+                  description={description}
+                  maintenanceGuide={maintenanceGuideline}
+                  tags={operationTags}
+                  skus={skus.map((s) => ({
+                    specName: s.specName,
+                    price: s.price,
+                    imageUrl: s.imageUrl,
+                    isMainImage: s.isMainImage,
+                  }))}
+                />
+              </div>
+            </section>
+            {sidebarMeta}
+          </div>
         </div>
 
         <aside className="space-y-4 lg:sticky lg:top-4 lg:self-start">
+          <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+            <h3 className="text-sm font-semibold text-zinc-900">小程序展示预览</h3>
+            <div className="mt-4">
+              <ProductMiniProgramPreview
+                name={name}
+                description={description}
+                maintenanceGuide={maintenanceGuideline}
+                tags={operationTags}
+                skus={skus.map((s) => ({
+                  specName: s.specName,
+                  price: s.price,
+                  imageUrl: s.imageUrl,
+                  isMainImage: s.isMainImage,
+                }))}
+              />
+            </div>
+          </section>
           <div className="hidden space-y-4 lg:block">{sidebarMeta}</div>
         </aside>
       </div>

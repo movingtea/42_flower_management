@@ -559,9 +559,31 @@ export async function listProductOperationSummaries(
   });
   const recSet = new Set(recCounts.map((r) => r.productId));
 
+  const allSkuIds = spus.flatMap((s) => s.skus.map((sku) => sku.id));
+  const skusWithRecipe =
+    allSkuIds.length > 0
+      ? await prisma.productSku.findMany({
+          where: { id: { in: allSkuIds } },
+          include: productMarginSkuInclude,
+        })
+      : [];
+  const marginBySkuId = new Map(
+    skusWithRecipe.map((sku) => [sku.id, estimateSkuMarginFromRecord(sku)])
+  );
+
   let items: ProductOperationSummaryItem[] = spus.map((spu) => {
     const mainImage = resolveSpuCardImageUrl(spu.skus);
     const minPrice = resolveSpuMinPrice(spu.skus);
+
+    const skuRows = spu.skus.map((sku) => {
+      const margin = marginBySkuId.get(sku.id) ?? null;
+      const decision = buildSkuDecisionSummary(sku, margin);
+      return { sku, margin, decision };
+    });
+
+    const productDecisionSummary = aggregateDecisionSummary(
+      skuRows.map((r) => r.decision)
+    );
 
     const publishReadiness = validateProductPublishReadiness(
       buildValidationInput(
@@ -571,19 +593,7 @@ export async function listProductOperationSummaries(
             productCategoryId: c.productCategoryId,
           })),
         },
-        spu.skus.map((sku) => ({
-          sku,
-          margin: null,
-          decision: {
-            healthStatus: null,
-            healthStatusLabel: null,
-            keyTags: [],
-            standardGrossMargin: null,
-            conservativeGrossMargin: null,
-            suggestedPrice: null,
-            warnings: [],
-          },
-        }))
+        skuRows
       )
     );
 
@@ -605,9 +615,9 @@ export async function listProductOperationSummaries(
         canPromote: publishReadiness.canPromote,
       },
       productDecisionSummary: {
-        healthStatus: null,
-        healthStatusLabel: null,
-        standardGrossMargin: null,
+        healthStatus: productDecisionSummary.healthStatus,
+        healthStatusLabel: productDecisionSummary.healthStatusLabel,
+        standardGrossMargin: productDecisionSummary.standardGrossMargin,
       },
       hasRecommendationSlot: recSet.has(spu.id),
     };

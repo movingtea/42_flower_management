@@ -22,9 +22,14 @@
     </view>
   </view>
 
+  <view wx:if="{{sceneMode && sceneTitle}}" class="scene-banner">
+    <text class="scene-banner-title">{{sceneTitle}}</text>
+  </view>
+
   <!-- 左导航 + 右商品 -->
   <view class="main-body">
     <scroll-view
+      wx:if="{{!sceneMode}}"
       class="nav-scroll"
       scroll-y
       enhanced
@@ -87,9 +92,10 @@
             <view class="product-info">
               <text class="product-name text-ellipsis">{{item.name}}</text>
               <text
-                wx:if="{{item.subtitle}}"
+                wx:if="{{item.cardSellingPoint}}"
                 class="product-subtitle text-ellipsis text-muted"
-              >{{item.subtitle}}</text>
+              >{{item.cardSellingPoint}}</text>
+              <product-tag-badges tags="{{item.cardOccasionLabels}}" />
               <view class="product-info-bottom">
                 <text class="price-text">¥{{item.price}}{{item.priceSuffix}}</text>
                 <view

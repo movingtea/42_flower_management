@@ -1,0 +1,18 @@
+.tag-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8rpx;
+  margin-top: 8rpx;
+}
+
+.tag-badge {
+  font-size: 20rpx;
+  color: var(--primary-color);
+  background-color: rgba(143, 168, 155, 0.12);
+  padding: 4rpx 12rpx;
+  border-radius: 8rpx;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

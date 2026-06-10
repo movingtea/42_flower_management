@@ -37,6 +37,28 @@
         <text wx:if="{{product.isOutOfStock}}" class="detail-stock-tag">今日售罄</text>
       </view>
 
+      <view wx:if="{{occasionLabels.length || styleColorLabels.length || relationshipLabels.length || sellingPoints.length}}" class="detail-tags-section">
+        <text class="section-title">商品标签</text>
+        <view wx:if="{{occasionLabels.length}}" class="detail-tag-row">
+          <text class="detail-tag-label">适用场景</text>
+          <product-tag-badges tags="{{occasionLabels}}" />
+        </view>
+        <view wx:if="{{styleColorLabels.length}}" class="detail-tag-row">
+          <text class="detail-tag-label">色系风格</text>
+          <product-tag-badges tags="{{styleColorLabels}}" />
+        </view>
+        <view wx:if="{{relationshipLabels.length}}" class="detail-tag-row">
+          <text class="detail-tag-label">适合关系</text>
+          <product-tag-badges tags="{{relationshipLabels}}" />
+        </view>
+        <view wx:if="{{sellingPoints.length}}" class="detail-tag-row">
+          <text class="detail-tag-label">卖点</text>
+          <view class="selling-points">
+            <text wx:for="{{sellingPoints}}" wx:key="*this" class="selling-point-item">{{item}}</text>
+          </view>
+        </view>
+      </view>
+
       <!-- 推荐商品（描述上方） -->
       <view wx:if="{{recommendList.length}}" class="recommend-section">
         <view class="section-title-row">

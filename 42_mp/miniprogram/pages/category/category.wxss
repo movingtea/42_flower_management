@@ -8,6 +8,17 @@
   background-color: #fcfcfc;
 }
 
+.scene-banner {
+  padding: 20rpx 24rpx 8rpx;
+  background: #fff;
+}
+
+.scene-banner-title {
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
 /* —— 吸顶搜索 —— */
 .search-sticky {
   position: sticky;

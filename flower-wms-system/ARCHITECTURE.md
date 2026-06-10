@@ -35,6 +35,9 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 - CMS 推荐位配置：`CmsRecommendationSlot` / `CmsRecommendationItem`，人工配置小程序首页与场景推荐。
 - 小程序商品接口返回运营标签（key + label）；`operationNote` 不返回前台。
 - 小程序推荐位 API：`GET /api/wechat/recommendations`（别名 `/api/miniprogram/recommendations`）。
+- CMS 商品运营标签编辑 UI、上架校验提示、小程序展示预览。
+- CMS 推荐位配置页面 `/cms/recommendations`。
+- 小程序首页 / 场景推荐位展示、商品卡片运营标签展示。
 - 订单真实毛利核算：`OrderCostSnapshot`。
 - 产品级毛利预估：`FlowerWiki.standardUnitCost` + `Recipe` + `PackagingKit` + SKU price。
 - 经营报表中心：销售、趋势、毛利排行、低毛利、成本结构、花材使用、损耗、库存预警、采购复盘与供应商分析。
@@ -170,6 +173,7 @@ flower-wms-system/
 | `/cms/product-categories` | 商城商品分类树 |
 | `/cms/banner` | 首页轮播 |
 | `/cms/marketing` | 营销配置 |
+| `/cms/recommendations` | 推荐位配置（首页与场景推荐） |
 | `/cms/carousel` | redirect 到 `/cms/banner` |
 | `/cms/categories` | redirect 到 `/cms/product-categories` |
 
@@ -183,7 +187,9 @@ CMS 商品编辑边界：
 - CMS 商品编辑页可配置 `ProductSpu.occasionTags`（适用礼赠场景）；列表展示场景标签；用于 CRM 复购推荐参考，不自动上下架。
 - 商品编辑（`PUT /api/cms/products/[id]`）支持运营标签白名单字段：`occasionTags`、`colorTags`、`styleTags`、`relationshipTags`、`budgetTags`、`positioningTags`、`sellingPoints`、`operationNote`。
 - 商品上架前可通过 `GET /api/admin/cms/products/[id]/publish-readiness` 校验信息完整性、毛利风险、产品决策风险；只提示，不自动改状态。
-- 推荐位配置（`/api/admin/cms/recommendation-slots`）用于小程序首页与场景入口；人工配置，非自动推荐算法。
+- 推荐位配置（`/cms/recommendations`、`/api/admin/cms/recommendation-slots`）用于小程序首页与场景入口；人工配置，非自动推荐算法。
+- 商品列表（`/cms/products`）通过 `operation-summaries` API 展示运营标签、上架校验状态、产品决策摘要、推荐位状态，并支持场景 / 定位 / 校验状态筛选。
+- 商品编辑页含「商品运营标签」「上架校验」「小程序展示预览」区块。
 
 ---
 
@@ -293,6 +299,13 @@ CMS 商品编辑边界：
 | GET | `/api/wechat/products`、`/api/wechat/products/[id]` | 商品列表 / 详情；返回运营标签（key + label），不含 `operationNote` |
 | GET | `/api/wechat/recommendations` | 推荐位与商品（`slotKey` / `sceneType` / `limit`）；仅返回已上架、有效期内商品 |
 | GET | `/api/miniprogram/recommendations` | 与 `/api/wechat/recommendations` 等价别名 |
+
+小程序行为补充：
+
+- 首页并行加载 `homepage`、`products`、`recommendations`；`recommendations` 失败不白屏，仅隐藏推荐模块。
+- 首页展示 `HOME_MAIN` 主推、`NEW_ARRIVAL` 横向列表、`SCENE`/`FESTIVAL` 场景推荐；场景入口跳转分类页 `?sceneType=`。
+- 商品列表 / 详情 / 推荐卡片展示场景、色系、风格、卖点标签；不展示 `operationNote`、成本、毛利、产品决策内部 warning。
+- 小程序组件 `42_mp/miniprogram/components/product-tag-badges/` 用于标签展示。
 
 ---
 
@@ -816,6 +829,7 @@ Dockerfile：
 38. 推荐位配置不得绕过商品上架状态；小程序推荐位不得返回未上架商品。
 39. `operationNote` 等内部运营备注不得返回小程序前台。
 40. CMS 不得直接维护 `RecipeLine`；商品场景标签不自动触发上下架。
+41. 推荐位是人工配置，不得包装成 AI 自动推荐。
 
 ---
 
@@ -832,6 +846,16 @@ CMS 是小程序商品与营销内容的**运营配置中心**，与 WMS 配方/
 推荐位（`CmsRecommendationSlot` / `CmsRecommendationItem`）为**人工配置**，添加商品时 service 返回经营 warnings，但不自动拒绝、移除或改商品状态。上架校验（`validateProductPublishReadiness`）为纯函数，`canPublish` / `canPromote` 仅作运营参考。
 
 运营标签定义见 `src/lib/cms-product-tags.ts`；`occasionTags` 沿用 `String[]`（Sprint 8），其余标签存 `Json` 数组。
+
+CMS UI 组件（Sprint 9 Round 2）：
+
+| 组件 | 路径 |
+|---|---|
+| `ProductOperationTagsEditor` | `src/components/cms/ProductOperationTagsEditor.tsx` |
+| `ProductPublishReadinessPanel` | `src/components/cms/ProductPublishReadinessPanel.tsx` |
+| `ProductMiniProgramPreview` | `src/components/cms/ProductMiniProgramPreview.tsx` |
+| `ProductOperationSummaryBadge` | `src/components/cms/ProductOperationSummaryBadge.tsx` |
+| `RecommendationSlotsManager` | `src/app/cms/recommendations/RecommendationSlotsManager.tsx` |
 
 ---
 
