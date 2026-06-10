@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic";
 
 const CONFIG_KEYS = [GLOBAL_NOTICE_KEY, HOME_POPUP_KEY] as const;
 
-/** GET：小程序首页超级接口（轮播 + 公告 + 弹窗 + 分类） */
+/** GET：小程序首页聚合（轮播 + 公告 + 弹窗 + 分类） */
 export async function GET() {
   try {
     const [banners, rows, categories] = await Promise.all([

@@ -53,7 +53,7 @@ export interface StocktakeInput {
   operator?: string;
 }
 
-/** 小程序下单 POST /api/wechat/orders/create */
+/** 小程序下单 POST /api/miniprogram/orders/create */
 export interface WechatCreateOrderInput {
   receiverName: string;
   receiverPhone: string;
@@ -64,7 +64,7 @@ export interface WechatCreateOrderInput {
   items: { skuId: string; quantity: number }[];
 }
 
-/** 模拟支付 POST /api/wechat/orders/mock-pay */
+/** 模拟支付 POST /api/miniprogram/orders/mock-pay */
 export interface WechatMockPayBody {
   orderId: string;
 }
@@ -75,7 +75,7 @@ export interface WechatPayCallbackInput {
   wechatTransactionId: string;
 }
 
-/** 取消订单 POST /api/wechat/orders/cancel */
+/** 取消订单 POST /api/miniprogram/orders/cancel */
 export interface WechatCancelOrderBody {
   orderId: string;
 }

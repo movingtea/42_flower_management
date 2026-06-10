@@ -15,6 +15,7 @@ function parseBody(raw: unknown): { orderId: string } {
   return { orderId };
 }
 
+/** POST：小程序确认收货 */
 export async function POST(request: Request) {
   try {
     const user = await requireUserFromRequest(request);

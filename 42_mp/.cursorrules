@@ -10,9 +10,9 @@ You are an expert developer specializing in WeChat Native Mini Programs using Ty
 ## 2. Architecture & Backend Integration Constraints
 - **NO WECHAT CLOUD DEVELOPMENT (云开发):** This project **DOES NOT** use WeChat CloudBase, Cloud Functions, or Cloud Databases.
 - **SELF-HOSTED BACKEND:** All data features interact with our self-hosted Next.js full-stack backend via HTTPS network requests.
-- **API ROUTE STANDARDS:** Always utilize the encapsulated network utility in `utils/request.ts` to fetch data.
-  - Base URL maps to the Next.js service: `http://localhost:3000/api/wechat` (or LAN IP for physical device testing).
-  - Main endpoints include: `/homepage` (Banners & categories combo), `/products` (Filtered active items), and `/orders` (FIFO locking & status checking).
+- **API ROUTE STANDARDS:** Business requests use `utils/request.ts` (base: `/api/miniprogram`). WeChat login uses `utils/wechat-auth.ts` (`/api/wechat/auth/login`).
+  - Base URL maps to the Next.js service: `http://localhost:3000/api/miniprogram` (or LAN IP for physical device testing).
+  - Main endpoints include: `/homepage`, `/products`, `/recommendations`, `/home-scene-entries`, `/orders`, `/cart`, `/recipients`.
 
 ## 3. WeChat Native TypeScript Coding Standards
 - **FILE STRUCTURE:** Every page or component must strictly consist of four parallel files with matching names:

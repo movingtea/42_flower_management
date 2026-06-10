@@ -1,8 +1,7 @@
 // app.ts — 应用入口：静默登录
 import { baseUrl } from './config/index';
-import { request } from './utils/request';
 import { setOpenId, setStoredUser, setToken } from './utils/auth';
-import type { WechatUserProfile } from './utils/user';
+import { loginWithWechatCode } from './utils/wechat-auth';
 
 App<IAppOption>({
   globalData: {
@@ -14,7 +13,7 @@ App<IAppOption>({
     this.performSilentLogin();
   },
 
-  /** 无感登录：wx.login → /auth/login → 缓存 token 与 openId */
+  /** 无感登录：wx.login → /api/wechat/auth/login → 缓存 token 与 openId */
   performSilentLogin() {
     wx.login({
       success: (loginRes) => {
@@ -23,11 +22,7 @@ App<IAppOption>({
           return;
         }
 
-        request<{ token: string; user: WechatUserProfile }>({
-          url: '/auth/login',
-          method: 'POST',
-          data: { code: loginRes.code },
-        })
+        loginWithWechatCode(loginRes.code)
           .then((data) => {
             if (!data?.token || !data?.user?.openId) {
               console.warn('登录响应缺少 token 或 openId');

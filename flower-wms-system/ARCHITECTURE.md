@@ -34,15 +34,16 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 - 商品上架校验：`validateProductPublishReadiness` 纯函数 + CMS API，只提示不自动上下架。
 - CMS 推荐位配置：`CmsRecommendationSlot` / `CmsRecommendationItem`，人工配置小程序首页与场景推荐。
 - 小程序商品接口返回运营标签（key + label）；`operationNote` 不返回前台。
-- 小程序推荐位 API：`GET /api/wechat/recommendations`（别名 `/api/miniprogram/recommendations`）。
+- 小程序推荐位 API：`GET /api/miniprogram/recommendations`。
 - CMS 商品运营标签编辑 UI、上架校验提示、小程序展示预览。
 - CMS 推荐位配置页面 `/cms/recommendations`。
 - 小程序首页 / 场景推荐位展示、商品卡片运营标签展示。
 - **Sprint 10 礼赠购买体验**：首页场景化购买入口（CMS 可配置 + 本地 fallback 6 大场景 + 图标）、CMS 推荐位驱动主推 / 场景 / 新品 / 高客单、`HIGH_TICKET` 区块、品牌说明区。
 - **CMS 首页场景入口配置**（`CmsHomeSceneEntry`）：`/cms/marketing`「首页场景入口」Tab；与推荐位商品配置边界分离。
-- 小程序首页动态读取 `GET /api/wechat/home-scene-entries`（别名 `/api/miniprogram/home-scene-entries`）；CMS 无 active 配置时使用默认 6 个 fallback。
+- 小程序首页动态读取 `GET /api/miniprogram/home-scene-entries`；CMS 无 active 配置时使用默认 6 个 fallback。
 - 场景入口点击后进入服务端 tag 过滤后的商品列表（`occasionTag` / `sceneType` query）。
-- 商品列表标签筛选（场景 / 预算 / 色系 / 风格 / 关系；**服务端 tag 过滤后分页**，`GET /api/wechat/products` 别名 `/api/miniprogram/products`）。
+- 商品列表标签筛选（场景 / 预算 / 色系 / 风格 / 关系；**服务端 tag 过滤后分页**，`GET /api/miniprogram/products`）。
+- **API 目录治理**：小程序业务数据统一 `/api/miniprogram/*`；`/api/wechat/*` 仅登录/授权/支付回调。
 - 选花页筛选条件 chips、上拉加载更多、场景上下文文案。
 - 常用收花人独立管理（含生日 / 纪念日）；个人中心「重要日期」入口。
 - 配送时段「傍晚」与花材微调说明统一文案。
@@ -332,23 +333,43 @@ CMS 面向花店运营用户，主界面不要求理解 `productId` / `skuId` / 
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/api/wechat/recipients` | 当前登录用户关联 Customer 的常用收花人 |
-| POST | `/api/wechat/recipients` | 创建常用收花人 |
-| PATCH | `/api/wechat/recipients/[id]` | 更新（`id` 为 `CustomerRecipientRelation.id`） |
-| DELETE | `/api/wechat/recipients/[id]` | 软删除 relation（`isActive=false`），不删历史订单与礼赠记录 |
+| GET | `/api/miniprogram/recipients` | 当前登录用户关联 Customer 的常用收花人 |
+| POST | `/api/miniprogram/recipients` | 创建常用收花人 |
+| PATCH | `/api/miniprogram/recipients/[id]` | 更新（`id` 为 `CustomerRecipientRelation.id`） |
+| DELETE | `/api/miniprogram/recipients/[id]` | 软删除 relation（`isActive=false`），不删历史订单与礼赠记录 |
 
-小程序下单 `POST /api/wechat/orders/create` 兼容旧 payload，并可选传入 `buyerInfo` / `recipientInfo` / `giftOccasion` / `reminderOptions` 礼赠 CRM 字段。
+小程序下单 `POST /api/miniprogram/orders/create` 兼容旧 payload，并可选传入 `buyerInfo` / `recipientInfo` / `giftOccasion` / `reminderOptions` 礼赠 CRM 字段。
 
-### 小程序商品与推荐位
+### 小程序业务 API（`/api/miniprogram/*`）
+
+小程序前台业务数据**唯一**入口目录。前端 `42_mp/miniprogram/utils/request.ts` 基址为 `/api/miniprogram`。
 
 | 方法 | 路径 | 说明 |
 |---|---|---|
-| GET | `/api/wechat/products`、`/api/wechat/products/[id]` | 商品列表 / 详情；列表支持 tag / 价格 / 排序 / 分页 query（见下）；返回运营标签（key + label），不含 `operationNote` |
-| GET | `/api/miniprogram/products` | 与 `/api/wechat/products` 等价别名 |
-| GET | `/api/wechat/recommendations` | 推荐位与商品（`slotKey` / `sceneType` / `limit`）；仅返回已上架、有效期内商品 |
-| GET | `/api/miniprogram/recommendations` | 与 `/api/wechat/recommendations` 等价别名 |
-| GET | `/api/wechat/home-scene-entries` | 小程序首页场景入口（active entries；无配置时 fallback 6 个）；不含 `note` |
-| GET | `/api/miniprogram/home-scene-entries` | 与 `/api/wechat/home-scene-entries` 等价别名 |
+| GET | `/api/miniprogram/products`、`/api/miniprogram/products/[id]` | 商品列表 / 详情；列表支持 tag / 价格 / 排序 / 分页；不含 `operationNote` |
+| GET | `/api/miniprogram/product-categories` | 商品分类树 |
+| GET | `/api/miniprogram/recommendations` | CMS 推荐位（`slotKey` / `sceneType` / `limit`） |
+| GET | `/api/miniprogram/home-scene-entries` | 首页场景入口（CMS + fallback） |
+| GET | `/api/miniprogram/homepage` | 首页聚合（Banner + 公告 + 弹窗 + 分类） |
+| GET | `/api/miniprogram/home-banners` | 首页轮播 |
+| GET/POST | `/api/miniprogram/cart` | 购物车校验 |
+| GET | `/api/miniprogram/orders` | 订单列表 |
+| POST | `/api/miniprogram/orders/create` | 创建订单 |
+| POST | `/api/miniprogram/orders/mock-pay` | Mock 支付 |
+| POST | `/api/miniprogram/orders/cancel` | 取消待支付订单 |
+| POST | `/api/miniprogram/orders/confirm-receipt` | 确认收货 |
+| GET/PATCH | `/api/miniprogram/user/profile` | 用户资料 |
+| POST | `/api/miniprogram/upload` | 头像上传 |
+
+### 微信平台 API（`/api/wechat/*`）
+
+仅微信平台能力，**不承载**商品/订单/购物车等业务数据：
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| POST | `/api/wechat/auth/login` | 小程序登录（code2Session + JWT） |
+| POST | `/api/wechat/login` | 重定向至 `auth/login`（deprecated） |
+| POST | `/api/wechat/orders/callback` | 微信支付回调占位（未来正式支付） |
 
 **CMS 首页场景入口 Admin API**（需 `cms:read` / `cms:write`）：
 
@@ -515,7 +536,7 @@ markOrderPaidWithFifo
 CRM 沉淀时机：
 
 ```text
-POST /api/wechat/orders/create
+POST /api/miniprogram/orders/create
   -> createWechatOrder（库存主链路）
   -> syncCrmFromOrder（Customer / Recipient / GiftOccasion；不生成 Reminder）
 
@@ -909,6 +930,9 @@ Dockerfile：
 49. CMS 场景入口配置（`CmsHomeSceneEntry`）不得与推荐位商品配置（`CmsRecommendationSlot`）混淆。
 50. 场景入口点击后的商品筛选必须服务端过滤后分页；`note` 等后台备注不得返回小程序。
 51. 首页场景入口图标须通过 `iconKey` + `utils/icons.ts` 统一映射，不得在首页页面散落硬编码路径。
+52. 小程序业务 API 须统一使用 `/api/miniprogram/*`；商品、推荐位、订单、购物车、收花人等不得放在 `/api/wechat`。
+53. `/api/wechat/*` 仅用于微信登录/授权/支付回调等平台能力；正式微信支付未来放入 `/api/wechat/orders/callback` 或独立支付模块，不与业务 API 混淆。
+54. 小程序前端业务请求通过 `utils/request.ts`（基址 `/api/miniprogram`）；登录单独走 `/api/wechat/auth/login`。
 
 ---
 

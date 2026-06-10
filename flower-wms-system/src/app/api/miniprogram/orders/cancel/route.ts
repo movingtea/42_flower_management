@@ -51,6 +51,7 @@ function mapErrorStatus(err: unknown): { message: string; status: number } {
   return { message: "订单取消失败", status: 500 };
 }
 
+/** POST：小程序取消待支付订单 */
 export async function POST(request: Request) {
   try {
     const user = await requireUserFromRequest(request);

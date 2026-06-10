@@ -19,6 +19,7 @@ function parseBody(raw: unknown): { orderId: string } {
   return { orderId };
 }
 
+/** POST：小程序 mock 支付 */
 export async function POST(request: Request) {
   try {
     const user = await requireUserFromRequest(request);

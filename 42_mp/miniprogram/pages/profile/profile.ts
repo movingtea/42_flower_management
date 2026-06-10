@@ -1,5 +1,5 @@
 // pages/profile/profile.ts — 头像昵称自愿填写
-import { apiWechatBaseUrl, baseUrl } from '../../config/index';
+import { apiMiniprogramBaseUrl, baseUrl } from '../../config/index';
 import { getToken, setStoredUser } from '../../utils/auth';
 import { toRelativeImagePath } from '../../utils/image';
 import { fetchUserProfile, patchUserProfile } from '../../utils/user-api';
@@ -54,7 +54,7 @@ Page({
     wx.showLoading({ title: '上传中…', mask: true });
 
     wx.uploadFile({
-      url: `${apiWechatBaseUrl}/upload`,
+      url: `${apiMiniprogramBaseUrl}/upload`,
       filePath: tempPath,
       name: 'file',
       header: {

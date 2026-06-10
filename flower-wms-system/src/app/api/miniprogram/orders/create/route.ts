@@ -121,6 +121,7 @@ function mapErrorStatus(err: unknown): { message: string; status: number } {
   return { message: "创建订单失败", status: 500 };
 }
 
+/** POST：小程序创建订单 */
 export async function POST(request: Request) {
   try {
     const user = await requireUserFromRequest(request);

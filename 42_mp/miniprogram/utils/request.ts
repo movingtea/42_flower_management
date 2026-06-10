@@ -1,7 +1,7 @@
-import { apiWechatBaseUrl } from '../config/index';
+import { apiMiniprogramBaseUrl } from '../config/index';
 import { getToken } from './auth';
 
-const BASE_URL = apiWechatBaseUrl;
+const BASE_URL = apiMiniprogramBaseUrl;
 
 type Method = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
 

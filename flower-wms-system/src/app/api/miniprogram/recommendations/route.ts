@@ -13,7 +13,7 @@ function parseSceneType(raw: string | null): GiftOccasionType | null {
   return null;
 }
 
-/** GET：小程序推荐位别名路径（与 /api/wechat/recommendations 一致） */
+/** GET：小程序推荐位（?slotKey= &sceneType= &limit=） */
 export async function GET(request: Request) {
   try {
     const params = new URL(request.url).searchParams;

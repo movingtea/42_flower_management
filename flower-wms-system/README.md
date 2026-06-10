@@ -88,15 +88,19 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 
 ### 微信小程序 API
 
-当前存在：
+**业务数据**（`/api/miniprogram/*`）：
 
-- 登录：`/api/wechat/auth/login`、`/api/wechat/login`
-- 商品浏览：`/api/wechat/products`、`/api/wechat/products/[id]`、分类、首页
-- 购物车：`/api/wechat/cart`
-- 下单：`/api/wechat/orders/create`
-- 支付：`/api/wechat/orders/mock-pay`；`/api/wechat/orders/callback` 是回调占位，不是正式微信支付 SDK 接入
+- 商品：`/api/miniprogram/products`、`/api/miniprogram/products/[id]`、分类、首页、推荐位、场景入口
+- 购物车：`/api/miniprogram/cart`
+- 下单：`/api/miniprogram/orders/create`
+- Mock 支付：`/api/miniprogram/orders/mock-pay`
 - 订单：列表、取消、确认收货
-- 上传：本地 `public/uploads`，当前未接对象存储
+- 收花人、用户资料、上传
+
+**微信平台能力**（`/api/wechat/*`）：
+
+- 登录：`/api/wechat/auth/login`、`/api/wechat/login`（重定向）
+- 支付回调：`/api/wechat/orders/callback`（占位，非正式微信支付 SDK）
 
 ## 5. 成本与毛利体系
 

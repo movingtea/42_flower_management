@@ -112,7 +112,7 @@ function walkUnknown(value: unknown): unknown {
 }
 
 /**
- * 深度清洗 JSON 结构中的图片相对路径，供 /api/wechat/* 下发前使用。
+ * 深度清洗 JSON 结构中的图片相对路径，供 /api/miniprogram/* 下发前使用。
  * 返回新对象，不修改入参引用。
  */
 export function imageUrlFormatter<T>(input: T): T {

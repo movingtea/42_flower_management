@@ -50,5 +50,5 @@ export async function GET(request: Request) {
 }
 
 export async function POST() {
-  return jsonError("请使用 POST /api/wechat/orders/create 创建订单", 405);
+  return jsonError("请使用 POST /api/miniprogram/orders/create 创建订单", 405);
 }

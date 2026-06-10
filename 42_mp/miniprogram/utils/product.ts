@@ -1,6 +1,6 @@
 import { toRelativeImagePath, toRelativeImagePathList } from './image';
 
-/** 小程序端 SPU 列表项（与 GET /api/wechat/products 对齐） */
+/** 小程序端 SPU 列表项（与 GET /api/miniprogram/products 对齐） */
 export interface WechatProductSku {
   id: string;
   skuCode: string;
