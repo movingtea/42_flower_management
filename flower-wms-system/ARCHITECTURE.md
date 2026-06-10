@@ -26,6 +26,7 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 - WMS 花材母表、标准配方、包装方案、物理批次库存、手工入库、指定批次报损、销售 FIFO、退款回库。
 - CMS 商品 SPU/SKU、商品分类、轮播、营销配置、SKU 绑定 Recipe、SKU 毛利预估展示。
 - 微信小程序用户登录、商品浏览、购物车、下单、mock 支付、订单查询。
+- 小程序订单驱动 CRM：`Customer` / `Recipient` / `GiftOccasion` / `CustomerReminder`；常用收花人 API；后台 CRM 基础 API；支付成功后客户统计与复购提醒生成。
 - 订单真实毛利核算：`OrderCostSnapshot`。
 - 产品级毛利预估：`FlowerWiki.standardUnitCost` + `Recipe` + `PackagingKit` + SKU price。
 - 经营报表中心：销售、趋势、毛利排行、低毛利、成本结构、花材使用、损耗、库存预警、采购复盘与供应商分析。
@@ -46,7 +47,9 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 | 包装物理库存扣减 | 未实现；`PackagingKit` 只代表标准包装成本 |
 | 供应商付款 / 对账 / 发票 | 未实现 |
 | Excel 导入导出 | 未实现 |
-| CRM / SaaS 计费 | 未实现 |
+| CRM 自动触达 / 会员积分 / 复杂分群 | 未实现 |
+| 微信订阅消息 / 短信自动发送 | 未实现 |
+| SaaS 计费 | 未实现 |
 
 历史命名对照：
 
@@ -109,6 +112,8 @@ flower-wms-system/
 | `src/services/inventory-sync.ts` | 物理库存向 SKU 虚拟库存投影 |
 | `src/services/recipe.ts` | Recipe / RecipeLine CRUD 和 BOM 编号 |
 | `src/services/wiki.ts` | FlowerWiki CRUD 和检索 |
+| `src/services/crm-pure.ts` | CRM 纯函数：手机号规范化、客户统计、提醒日期与文案 |
+| `src/services/crm.ts` | CRM Prisma 服务：订单沉淀、客户/收花人/礼赠/提醒 CRUD |
 
 当前代码未发现独立 `src/services/supplier.ts`；供应商 service 逻辑在 `src/services/purchase.ts`。
 
@@ -228,6 +233,29 @@ CMS 商品编辑边界：
 - `orders:write`：`STORE_ADMIN` / `FLORIST`。
 - `business:read` / `business:write` 用于成本与报表相关接口。
 
+### CRM（后台）
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/admin/crm/customers` | 客户列表（keyword / source / minOrders / page） |
+| GET | `/api/admin/crm/customers/[id]` | 客户详情 |
+| GET | `/api/admin/crm/recipients` | 收花人列表 |
+| GET | `/api/admin/crm/reminders` | 复购提醒列表（status / type / customerId / 日期范围） |
+| PATCH | `/api/admin/crm/reminders/[id]` | 更新提醒状态（DONE / SNOOZED / CANCELLED / PENDING） |
+
+权限：`business:read` 查询；`business:write` 更新提醒。
+
+### 小程序常用收花人
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/wechat/recipients` | 当前登录用户关联 Customer 的常用收花人 |
+| POST | `/api/wechat/recipients` | 创建常用收花人 |
+| PATCH | `/api/wechat/recipients/[id]` | 更新（`id` 为 `CustomerRecipientRelation.id`） |
+| DELETE | `/api/wechat/recipients/[id]` | 软删除 relation（`isActive=false`），不删历史订单与礼赠记录 |
+
+小程序下单 `POST /api/wechat/orders/create` 兼容旧 payload，并可选传入 `buyerInfo` / `recipientInfo` / `giftOccasion` / `reminderOptions` 礼赠 CRM 字段。
+
 ---
 
 ## 6. 数据模型血缘
@@ -246,7 +274,13 @@ CMS 商品编辑边界：
 | `PackagingKit` | `packaging_kits` | 标准包装成本 |
 | `ProductSpu` | `product_spus` | 商城商品 |
 | `ProductSku` | `product_skus` | SKU，含 `recipeId` |
-| `Order` | `orders` | 小程序订单，含 `deliveryCostActual` / `deliveryCostNote` |
+| `User` | `users` | 小程序微信身份（openId）；不等同于 CRM Customer |
+| `Customer` | `customers` | CRM 购买人档案，通常由小程序订单自动沉淀 |
+| `Recipient` | `recipients` | 收花人档案 |
+| `CustomerRecipientRelation` | `customer_recipient_relations` | 购买人与收花人关系；`isActive` 软删除 |
+| `GiftOccasion` | `gift_occasions` | 礼赠场景记录，通常关联订单 |
+| `CustomerReminder` | `customer_reminders` | 后台复购提醒，不自动触达客户 |
+| `Order` | `orders` | 小程序订单；含 `customerId` / `recipientId` / `giftOccasionId` 及配送成本字段 |
 | `OrderCostSnapshot` | `order_cost_snapshots` | 订单真实毛利快照 |
 | `Supplier` | `suppliers` | 供应商 |
 | `PurchaseOrder` | `purchase_orders` | 采购单 |
@@ -275,6 +309,17 @@ erDiagram
   orders ||--o{ stock_logs : order_id
   order_items ||--o{ stock_logs : order_item_id
   orders ||--o| order_cost_snapshots : order_id
+
+  users ||--o| customers : mini_program_user_id
+  customers ||--o{ customer_recipient_relations : customer_id
+  recipients ||--o{ customer_recipient_relations : recipient_id
+  customers ||--o{ gift_occasions : customer_id
+  recipients ||--o{ gift_occasions : recipient_id
+  customers ||--o{ customer_reminders : customer_id
+  gift_occasions ||--o{ customer_reminders : occasion_id
+  customers ||--o{ orders : customer_id
+  recipients ||--o{ orders : recipient_id
+  gift_occasions ||--o{ orders : gift_occasion_id
 
   suppliers ||--o{ purchase_orders : supplier_id
   purchase_orders ||--o{ purchase_order_lines : purchase_order_id
@@ -342,6 +387,21 @@ markOrderPaidWithFifo
   -> decrement Batch.remainingQty
   -> create StockLog: SALE_OUT
   -> upsert OrderCostSnapshot
+  -> completeCrmOnOrderPaid（事务外；失败仅 log，不回滚支付与库存）
+```
+
+CRM 沉淀时机：
+
+```text
+POST /api/wechat/orders/create
+  -> createWechatOrder（库存主链路）
+  -> syncCrmFromOrder（Customer / Recipient / GiftOccasion；不生成 Reminder）
+
+markOrderPaidWithFifo / mock-pay / admin-mark-paid
+  -> FIFO + OrderCostSnapshot（主链路事务）
+  -> completeCrmOnOrderPaid
+       -> recalculateCustomerStats
+       -> createReminderFromOccasion（若 importantDate 存在且 reminder 启用）
 ```
 
 订单真实毛利生成时机：
@@ -351,6 +411,31 @@ markOrderPaidWithFifo
 - 退款后历史快照保留，报表会按退款状态排除或单独统计；库存通过 `IN_CANCEL` 原路回库。
 
 订单成本不使用 `FlowerWiki.standardUnitCost`；它只使用历史 `SALE_OUT` 对应的 `Batch.unitCost`。
+
+---
+
+## 7.1 小程序订单驱动 CRM
+
+设计原则：不做传统后台手工录入型 CRM；以微信小程序礼赠订单自动沉淀客户资产。
+
+对象区分：
+
+| 对象 | 说明 |
+|---|---|
+| `User` | 小程序微信身份（openId），不等同于 CRM 客户 |
+| `Customer` | 真实购买人档案，通常一个小程序用户对应一个 Customer |
+| `Recipient` | 收花人档案；买花人与收花人经常不是同一人 |
+| `CustomerRecipientRelation` | 购买人与收花人关系（女友、妈妈、客户等） |
+| `GiftOccasion` | 礼赠场景（生日、纪念日等），通常关联订单 |
+| `CustomerReminder` | 后台复购提醒；第一版只提醒后台，不自动通知客户 |
+
+合并规则（保守，避免误合并）：
+
+- Customer 匹配优先级：`miniProgramUserId` / `wechatOpenid` → `buyerPhone`；不用模糊姓名合并。
+- Recipient 匹配：同 Customer 下按 phone → name+phone → name。
+- Reminder 去重：同 customer + recipient + type + dueDate 月日 + `PENDING` 不重复创建。
+
+生日 / 纪念日提醒按 `Asia/Shanghai` 业务日期计算下一次同月同日，存储仍为 UTC `DateTime`。
 
 ---
 
@@ -626,8 +711,10 @@ Dockerfile：
 | `npm run test:reports` | 报表纯函数测试 |
 | `npm run test:purchase` | 采购成本纯函数测试 |
 | `npm run test:margin` | 产品毛利纯函数测试 |
+| `npm run test:crm` | CRM 纯函数测试 |
 | `npm run db:seed` | Prisma seed |
 | `npm run smoke:purchase` | 采购入库 DB smoke |
+| `npm run smoke:crm` | CRM 订单沉淀 DB smoke |
 | `npm run seed:test-products` | 测试商品种子 |
 
 ### smoke:purchase
@@ -676,6 +763,12 @@ Dockerfile：
 27. 不得在没有 SKU 收入分摊口径时伪造 SKU 实际毛利。
 28. 不得用损耗模式成本覆盖历史订单真实毛利。
 29. 产品健康状态必须展示 warnings，不能隐藏数据不完整问题。
+30. CRM 同步不得影响支付成功、FIFO 扣库和 `OrderCostSnapshot`；支付后 CRM 失败只 log，不回滚主链路。
+31. 不得自动向客户发送消息，除非未来实现订阅消息授权。
+32. 不得用手机号危险合并不同微信用户。
+33. 删除常用收花人（`isActive=false`）不得删除历史订单和礼赠记录。
+34. 生日 / 纪念日提醒必须按 `Asia/Shanghai` 业务日期计算。
+35. `CustomerReminder` 是后台跟进提醒，不代表已经通知客户。
 
 ---
 
@@ -690,7 +783,9 @@ Dockerfile：
 | 完整测试体系 | 当前以 tsx 轻量测试和 smoke script 为主 |
 | 供应商付款 / 对账 / 发票 | 未实现 |
 | Excel 导入导出 | 未实现 |
-| CRM | 未实现 |
+| CRM 后台 UI / 小程序礼赠表单 UI | 未实现；后端 API 与订单沉淀已打通 |
+| CRM 自动触达（订阅消息 / 短信 / 企微） | 未实现 |
+| 会员积分 / 优惠券 / 复杂客户分群 | 未实现 |
 | SaaS 计费 | 未实现 |
 | 包装物理库存 | 未实现 |
 | `services/inbound.ts` | 遗留文件，当前未发现 import 方 |

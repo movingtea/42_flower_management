@@ -43,6 +43,66 @@ enum OrderCancelSource {
   REFUND /// 已付/制作中退款取消
 }
 
+/// CRM 客户来源
+enum CustomerSource {
+  MINI_PROGRAM
+  WECHAT
+  XIAOHONGSHU
+  DOUYIN
+  FRIEND_REFERRAL
+  OFFLINE
+  MANUAL
+  OTHER
+}
+
+/// 购买人与收花人关系
+enum RecipientRelationType {
+  SELF
+  PARTNER
+  MOTHER
+  FATHER
+  FAMILY
+  FRIEND
+  COLLEAGUE
+  CLIENT
+  TEACHER
+  OTHER
+}
+
+/// 礼赠场景类型
+enum GiftOccasionType {
+  BIRTHDAY
+  ANNIVERSARY
+  VALENTINE
+  QIXI
+  MOTHERS_DAY
+  GRADUATION
+  VISIT
+  APOLOGY
+  BUSINESS
+  OPENING
+  WEDDING
+  DAILY_SURPRISE
+  OTHER
+}
+
+/// 复购提醒类型
+enum ReminderType {
+  BIRTHDAY
+  ANNIVERSARY
+  FOLLOW_UP
+  FESTIVAL
+  CUSTOM
+}
+
+/// 复购提醒状态
+enum ReminderStatus {
+  PENDING
+  DONE
+  SNOOZED
+  CANCELLED
+}
+
 /// 首页轮播跳转类型
 enum BannerTargetType {
   PRODUCT /// 跳转商城商品详情
@@ -571,7 +631,8 @@ model User {
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
-  orders Order[]
+  orders   Order[]
+  customer Customer?
 
   @@map("users")
 }
@@ -600,10 +661,16 @@ model Order {
   cancelSource       OrderCancelSource? @map("cancel_source")
   deliveryCostActual Decimal?           @default(0) @map("delivery_cost_actual") @db.Decimal(10, 2)
   deliveryCostNote   String?            @map("delivery_cost_note") @db.Text
+  customerId         String?            @map("customer_id")
+  recipientId        String?            @map("recipient_id")
+  giftOccasionId     String?            @map("gift_occasion_id")
   createdAt          DateTime           @default(now()) @map("created_at")
   updatedAt          DateTime           @updatedAt @map("updated_at")
 
   user         User               @relation(fields: [userId], references: [id], onDelete: Restrict)
+  customer     Customer?          @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  recipient    Recipient?         @relation(fields: [recipientId], references: [id], onDelete: SetNull)
+  giftOccasion GiftOccasion?      @relation(fields: [giftOccasionId], references: [id], onDelete: SetNull)
   items        OrderItem[]
   stockLogs    StockLog[]
   costSnapshot OrderCostSnapshot?
@@ -611,6 +678,7 @@ model Order {
   @@index([status, createdAt])
   @@index([userId])
   @@index([orderNo])
+  @@index([customerId])
   @@map("orders")
 }
 
@@ -656,6 +724,149 @@ model OrderItem {
   @@index([orderId])
   @@index([skuId])
   @@map("order_items")
+}
+
+// ---------------------------------------------------------------------------
+// CRM — 小程序订单驱动的客户关系
+// ---------------------------------------------------------------------------
+
+model Customer {
+  id               String         @id @default(cuid())
+  miniProgramUserId String?       @unique @map("mini_program_user_id")
+  name             String?
+  phone            String?
+  wechatNickname   String?        @map("wechat_nickname")
+  wechatOpenid     String?        @map("wechat_openid")
+  wechatUnionid    String?        @map("wechat_unionid")
+  source           CustomerSource @default(MINI_PROGRAM)
+  note             String?        @db.Text
+  tags             String[]       @default([])
+  firstOrderAt     DateTime?      @map("first_order_at")
+  lastOrderAt      DateTime?      @map("last_order_at")
+  totalOrders      Int            @default(0) @map("total_orders")
+  totalSpent       Decimal        @default(0) @map("total_spent") @db.Decimal(12, 2)
+  averageOrderValue Decimal       @default(0) @map("average_order_value") @db.Decimal(12, 2)
+  createdAt        DateTime       @default(now()) @map("created_at")
+  updatedAt        DateTime       @updatedAt @map("updated_at")
+
+  miniProgramUser User?                      @relation(fields: [miniProgramUserId], references: [id], onDelete: SetNull)
+  recipientRelations CustomerRecipientRelation[]
+  occasions      GiftOccasion[]
+  reminders      CustomerReminder[]
+  orders         Order[]
+
+  @@index([phone])
+  @@index([wechatOpenid])
+  @@index([source])
+  @@index([lastOrderAt])
+  @@map("customers")
+}
+
+model Recipient {
+  id               String    @id @default(cuid())
+  name             String
+  phone            String?
+  address          String?   @db.Text
+  birthday         DateTime?
+  preferredColors  String?   @map("preferred_colors")
+  dislikedFlowers  String?   @map("disliked_flowers")
+  preferenceNote   String?   @map("preference_note") @db.Text
+  note             String?   @db.Text
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  customerRelations CustomerRecipientRelation[]
+  occasions         GiftOccasion[]
+  reminders         CustomerReminder[]
+  orders            Order[]
+
+  @@index([phone])
+  @@index([name])
+  @@map("recipients")
+}
+
+model CustomerRecipientRelation {
+  id            String                 @id @default(cuid())
+  customerId    String                 @map("customer_id")
+  recipientId   String                 @map("recipient_id")
+  relationType  RecipientRelationType? @map("relation_type")
+  relationLabel String?                @map("relation_label")
+  isDefault     Boolean                @default(false) @map("is_default")
+  isActive      Boolean                @default(true) @map("is_active")
+  source        CustomerSource         @default(MINI_PROGRAM)
+  lastUsedAt    DateTime?              @map("last_used_at")
+  createdAt     DateTime               @default(now()) @map("created_at")
+  updatedAt     DateTime               @updatedAt @map("updated_at")
+
+  customer  Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  recipient Recipient @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  occasions GiftOccasion[]
+
+  @@unique([customerId, recipientId])
+  @@index([customerId])
+  @@index([recipientId])
+  @@index([customerId, recipientId])
+  @@map("customer_recipient_relations")
+}
+
+model GiftOccasion {
+  id                  String           @id @default(cuid())
+  customerId          String?          @map("customer_id")
+  recipientId         String?          @map("recipient_id")
+  relationId          String?          @map("relation_id")
+  orderId             String?          @map("order_id")
+  occasionType        GiftOccasionType @map("occasion_type")
+  occasionLabel       String?          @map("occasion_label")
+  importantDate       DateTime?        @map("important_date")
+  giftPurpose         String?          @map("gift_purpose")
+  cardMessage         String?          @map("card_message") @db.Text
+  preferenceSnapshot  Json?            @map("preference_snapshot")
+  note                String?          @db.Text
+  createdAt           DateTime         @default(now()) @map("created_at")
+  updatedAt           DateTime         @updatedAt @map("updated_at")
+
+  customer  Customer?                  @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  recipient Recipient?                 @relation(fields: [recipientId], references: [id], onDelete: SetNull)
+  relation  CustomerRecipientRelation? @relation(fields: [relationId], references: [id], onDelete: SetNull)
+  orders    Order[]
+  reminders CustomerReminder[]
+
+  @@index([customerId])
+  @@index([recipientId])
+  @@index([orderId])
+  @@index([occasionType])
+  @@index([importantDate])
+  @@map("gift_occasions")
+}
+
+model CustomerReminder {
+  id           String         @id @default(cuid())
+  customerId   String         @map("customer_id")
+  recipientId  String?        @map("recipient_id")
+  occasionId   String?        @map("occasion_id")
+  orderId      String?        @map("order_id")
+  type         ReminderType
+  status       ReminderStatus @default(PENDING)
+  title        String
+  content      String?        @db.Text
+  remindAt     DateTime       @map("remind_at")
+  dueDate      DateTime?      @map("due_date")
+  completedAt  DateTime?      @map("completed_at")
+  snoozedUntil DateTime?      @map("snoozed_until")
+  note         String?        @db.Text
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+
+  customer  Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  recipient Recipient?    @relation(fields: [recipientId], references: [id], onDelete: SetNull)
+  occasion  GiftOccasion? @relation(fields: [occasionId], references: [id], onDelete: SetNull)
+
+  @@index([customerId])
+  @@index([recipientId])
+  @@index([status])
+  @@index([remindAt])
+  @@index([type])
+  @@map("customer_reminders")
 }
 
 // ---------------------------------------------------------------------------

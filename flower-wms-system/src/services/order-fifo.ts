@@ -208,5 +208,13 @@ export async function markOrderPaidWithFifo(options: MarkPaidOptions) {
       maxWait: 10000,
       timeout: 30000,
     }
-  );
+  ).then(async (order) => {
+    try {
+      const { completeCrmOnOrderPaid } = await import("@/services/crm");
+      await completeCrmOnOrderPaid(order.id);
+    } catch (err) {
+      console.error("[CRM] completeCrmOnOrderPaid failed", order.id, err);
+    }
+    return order;
+  });
 }

@@ -74,6 +74,11 @@ export const ModelName = {
   Order: 'Order',
   OrderCostSnapshot: 'OrderCostSnapshot',
   OrderItem: 'OrderItem',
+  Customer: 'Customer',
+  Recipient: 'Recipient',
+  CustomerRecipientRelation: 'CustomerRecipientRelation',
+  GiftOccasion: 'GiftOccasion',
+  CustomerReminder: 'CustomerReminder',
   AppConfig: 'AppConfig',
   FlowerWiki: 'FlowerWiki'
 } as const
@@ -428,6 +433,9 @@ export const OrderScalarFieldEnum = {
   cancelSource: 'cancelSource',
   deliveryCostActual: 'deliveryCostActual',
   deliveryCostNote: 'deliveryCostNote',
+  customerId: 'customerId',
+  recipientId: 'recipientId',
+  giftOccasionId: 'giftOccasionId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -470,6 +478,105 @@ export const OrderItemScalarFieldEnum = {
 } as const
 
 export type OrderItemScalarFieldEnum = (typeof OrderItemScalarFieldEnum)[keyof typeof OrderItemScalarFieldEnum]
+
+
+export const CustomerScalarFieldEnum = {
+  id: 'id',
+  miniProgramUserId: 'miniProgramUserId',
+  name: 'name',
+  phone: 'phone',
+  wechatNickname: 'wechatNickname',
+  wechatOpenid: 'wechatOpenid',
+  wechatUnionid: 'wechatUnionid',
+  source: 'source',
+  note: 'note',
+  tags: 'tags',
+  firstOrderAt: 'firstOrderAt',
+  lastOrderAt: 'lastOrderAt',
+  totalOrders: 'totalOrders',
+  totalSpent: 'totalSpent',
+  averageOrderValue: 'averageOrderValue',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CustomerScalarFieldEnum = (typeof CustomerScalarFieldEnum)[keyof typeof CustomerScalarFieldEnum]
+
+
+export const RecipientScalarFieldEnum = {
+  id: 'id',
+  name: 'name',
+  phone: 'phone',
+  address: 'address',
+  birthday: 'birthday',
+  preferredColors: 'preferredColors',
+  dislikedFlowers: 'dislikedFlowers',
+  preferenceNote: 'preferenceNote',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type RecipientScalarFieldEnum = (typeof RecipientScalarFieldEnum)[keyof typeof RecipientScalarFieldEnum]
+
+
+export const CustomerRecipientRelationScalarFieldEnum = {
+  id: 'id',
+  customerId: 'customerId',
+  recipientId: 'recipientId',
+  relationType: 'relationType',
+  relationLabel: 'relationLabel',
+  isDefault: 'isDefault',
+  isActive: 'isActive',
+  source: 'source',
+  lastUsedAt: 'lastUsedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CustomerRecipientRelationScalarFieldEnum = (typeof CustomerRecipientRelationScalarFieldEnum)[keyof typeof CustomerRecipientRelationScalarFieldEnum]
+
+
+export const GiftOccasionScalarFieldEnum = {
+  id: 'id',
+  customerId: 'customerId',
+  recipientId: 'recipientId',
+  relationId: 'relationId',
+  orderId: 'orderId',
+  occasionType: 'occasionType',
+  occasionLabel: 'occasionLabel',
+  importantDate: 'importantDate',
+  giftPurpose: 'giftPurpose',
+  cardMessage: 'cardMessage',
+  preferenceSnapshot: 'preferenceSnapshot',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type GiftOccasionScalarFieldEnum = (typeof GiftOccasionScalarFieldEnum)[keyof typeof GiftOccasionScalarFieldEnum]
+
+
+export const CustomerReminderScalarFieldEnum = {
+  id: 'id',
+  customerId: 'customerId',
+  recipientId: 'recipientId',
+  occasionId: 'occasionId',
+  orderId: 'orderId',
+  type: 'type',
+  status: 'status',
+  title: 'title',
+  content: 'content',
+  remindAt: 'remindAt',
+  dueDate: 'dueDate',
+  completedAt: 'completedAt',
+  snoozedUntil: 'snoozedUntil',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type CustomerReminderScalarFieldEnum = (typeof CustomerReminderScalarFieldEnum)[keyof typeof CustomerReminderScalarFieldEnum]
 
 
 export const AppConfigScalarFieldEnum = {
@@ -526,19 +633,19 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
-export const JsonNullValueInput = {
-  JsonNull: JsonNull
-} as const
-
-export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
-
-
 export const NullableJsonNullValueInput = {
   DbNull: DbNull,
   JsonNull: JsonNull
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
