@@ -59,7 +59,7 @@ function resolveCartLineInvalid(input: {
   spu: {
     isDeleted: boolean;
     isActive: boolean;
-    skus: Array<{ id: string; stock: number; specName: string }>;
+    skus: Array<{ id: string; stock: number; specName: string; isActive?: boolean }>;
   } | null;
   item: CartClientItem;
 }): { invalid: boolean; code: CartInvalidCode; reason: string | null } {
@@ -103,11 +103,19 @@ function resolveCartLineInvalid(input: {
     };
   }
 
+  if (sku.isActive === false) {
+    return {
+      invalid: true,
+      code: MINIPROGRAM_ERROR_CODES.SKU_INACTIVE,
+      reason: mapCartInvalidReason(MINIPROGRAM_ERROR_CODES.SKU_INACTIVE),
+    };
+  }
+
   if (sku.stock <= 0) {
     return {
       invalid: true,
       code: MINIPROGRAM_ERROR_CODES.INSUFFICIENT_STOCK,
-      reason: `${sku.specName} 暂时售罄`,
+      reason: `${sku.specName} 卖光啦！`,
     };
   }
 
@@ -254,6 +262,14 @@ export async function validateCartAdd(
       ok: false,
       code: MINIPROGRAM_ERROR_CODES.PRODUCT_OFF_SHELF,
       message: mapCartInvalidReason(MINIPROGRAM_ERROR_CODES.PRODUCT_OFF_SHELF)!,
+    };
+  }
+
+  if (sku.isActive === false) {
+    return {
+      ok: false,
+      code: MINIPROGRAM_ERROR_CODES.SKU_INACTIVE,
+      message: mapCartInvalidReason(MINIPROGRAM_ERROR_CODES.SKU_INACTIVE)!,
     };
   }
 

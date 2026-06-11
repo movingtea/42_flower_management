@@ -270,6 +270,7 @@ function buildValidationInput(
       specName: string;
       price: Prisma.Decimal;
       stock: number;
+      isActive?: boolean;
       recipeId: string | null;
       imageUrl: string | null;
       isMainImage: boolean;
@@ -330,7 +331,7 @@ function buildValidationInput(
       id: sku.id,
       name: sku.specName,
       price: Number(sku.price),
-      isActive: true,
+      isActive: sku.isActive !== false,
       stock: sku.stock,
       recipeId: sku.recipeId,
       bulkPreorderEnabled: sku.bulkPreorderEnabled ?? false,
@@ -1050,6 +1051,7 @@ export async function listActiveRecommendationsForMiniProgram(
           skus: item.product.skus.map((sku) => ({
             id: sku.id,
             stock: sku.stock,
+            isActive: sku.isActive !== false,
             specName: sku.specName,
             price: sku.price.toString(),
             imageUrl: sku.imageUrl,

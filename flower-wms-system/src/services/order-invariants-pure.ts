@@ -6,6 +6,7 @@ import {
 import {
   resolveDisplayStatus,
   type DisplayStatus,
+  filterActiveSkus,
 } from "@/services/miniprogram-stock-pure";
 
 /** 待支付订单自动关闭时长（毫秒） */
@@ -42,11 +43,11 @@ export function assertStockFailureDoesNotChangeShelfState(input: {
 /** stock=0 是 SOLD_OUT，不是 OFF_SHELF */
 export function assertSoldOutNotOffShelf(
   spu: { isActive: boolean; isDeleted: boolean },
-  skus: ReadonlyArray<{ stock: number }>
+  skus: ReadonlyArray<{ stock: number; isActive?: boolean }>
 ): OrderInvariantViolation | null {
   const status = resolveDisplayStatus(spu, skus);
   if (status === "SOLD_OUT") return null;
-  if (status === "OFF_SHELF" && skus.every((s) => s.stock <= 0)) {
+  if (status === "OFF_SHELF" && filterActiveSkus(skus).every((s) => s.stock <= 0)) {
     return {
       code: "SOLD_OUT_MAPPED_TO_OFF_SHELF",
       message: "售罄商品不得映射为下架",
@@ -57,7 +58,7 @@ export function assertSoldOutNotOffShelf(
 
 export function classifyDisplayStatusForInvariant(
   spu: { isActive: boolean; isDeleted: boolean },
-  skus: ReadonlyArray<{ stock: number }>
+  skus: ReadonlyArray<{ stock: number; isActive?: boolean }>
 ): DisplayStatus {
   return resolveDisplayStatus(spu, skus);
 }

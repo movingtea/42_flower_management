@@ -97,6 +97,45 @@ async function main() {
   ], { now: NOW });
   assert.equal(soldOutSlot.length, 0);
 
+  const allInactiveSlot = filterRecommendationSlotsForMiniprogram([
+    {
+      id: "slot-inactive",
+      key: `${PREFIX}_slot_inactive`,
+      name: "全停用推荐位",
+      slotType: RecommendationSlotType.HOME_MAIN,
+      sceneType: null,
+      isActive: true,
+      sortOrder: 1,
+      createdAt: NOW,
+      items: [
+        {
+          id: "item-inactive",
+          isActive: true,
+          sortOrder: 1,
+          createdAt: NOW,
+          product: {
+            id: "p-inactive",
+            name: "全停用商品",
+            isActive: true,
+            isDeleted: false,
+            skus: [
+              {
+                id: "sku-inactive",
+                stock: 10,
+                isActive: false,
+                specName: "停用款",
+                price: "199",
+                imageUrl: "https://cdn.example.com/inactive.jpg",
+                isMainImage: true,
+              },
+            ],
+          },
+        },
+      ],
+    },
+  ], { now: NOW });
+  assert.equal(allInactiveSlot.length, 0);
+
   const fallback = buildFallbackMiniProgramEntries();
   assert.ok(fallback.length >= 6, "首页场景入口 fallback 应可用");
 
@@ -143,6 +182,7 @@ async function main() {
             skus: spu.skus.map((sku) => ({
               id: sku.id,
               stock: sku.stock,
+              isActive: sku.isActive !== false,
               specName: sku.specName,
               price: sku.price.toString(),
               imageUrl: sku.imageUrl,

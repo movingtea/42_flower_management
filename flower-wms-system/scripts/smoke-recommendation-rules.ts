@@ -74,6 +74,52 @@ function main() {
   assert.equal(filled.length, 1);
   assert.equal(filled[0].items.length, 1);
 
+  const inactiveIgnored = filterRecommendationSlotsForMiniprogram([
+    {
+      id: "slot-2",
+      key: "home_secondary",
+      name: "次推",
+      slotType: "HOME_SECONDARY",
+      sceneType: null,
+      isActive: true,
+      sortOrder: 1,
+      createdAt: "2026-01-01",
+      items: [
+        {
+          id: "item-2",
+          isActive: true,
+          sortOrder: 1,
+          createdAt: "2026-01-01",
+          product: {
+            id: "p2",
+            name: "停用规格有库存",
+            isActive: true,
+            isDeleted: false,
+            skus: [
+              {
+                id: "sku-inactive",
+                stock: 20,
+                isActive: false,
+                specName: "停用款",
+                price: "199",
+                imageUrl: "https://cdn.example.com/b.jpg",
+                isMainImage: true,
+              },
+              {
+                id: "sku-active-oos",
+                stock: 0,
+                isActive: true,
+                specName: "可售但售罄",
+                price: "199",
+              },
+            ],
+          },
+        },
+      ],
+    },
+  ]);
+  assert.equal(inactiveIgnored.length, 0, "inactive SKU stock must not count");
+
   console.log("smoke-recommendation-rules passed");
 }
 

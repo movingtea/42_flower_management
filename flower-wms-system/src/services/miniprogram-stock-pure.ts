@@ -6,6 +6,11 @@ import {
 
 export const LOW_STOCK_THRESHOLD = 3;
 
+export type SkuStockInput = {
+  stock: number;
+  isActive?: boolean;
+};
+
 export type StockFlags = {
   stock: number;
   hasStock: boolean;
@@ -20,11 +25,20 @@ export type StockSummary = {
 
 export type StockStatus = "IN_STOCK" | "LOW_STOCK" | "SOLD_OUT";
 
-export type DisplayStatus = "AVAILABLE" | "SOLD_OUT" | "OFF_SHELF";
+export type DisplayStatus = "AVAILABLE" | "LOW_STOCK" | "SOLD_OUT" | "OFF_SHELF";
 
 export type CartQuantityCheck =
   | { ok: true }
   | { ok: false; code: typeof MINIPROGRAM_ERROR_CODES.INSUFFICIENT_STOCK; message: string; available: number };
+
+/** 仅保留运营可售 SKU（缺省 isActive 视为 true，兼容历史数据） */
+export function filterActiveSkus<T extends SkuStockInput>(skus: ReadonlyArray<T>): T[] {
+  return skus.filter((sku) => sku.isActive !== false);
+}
+
+export function hasActiveSku(skus: ReadonlyArray<SkuStockInput>): boolean {
+  return filterActiveSkus(skus).length > 0;
+}
 
 export function computeSkuStockFlags(stock: number): StockFlags {
   const safeStock = Math.max(0, Math.floor(stock));
@@ -35,10 +49,12 @@ export function computeSkuStockFlags(stock: number): StockFlags {
   };
 }
 
+/** 库存汇总只统计 isActive=true 的 SKU */
 export function computeStockSummary(
-  skus: ReadonlyArray<{ stock: number }>
+  skus: ReadonlyArray<SkuStockInput>
 ): StockSummary {
-  const totalStock = skus.reduce(
+  const activeSkus = filterActiveSkus(skus);
+  const totalStock = activeSkus.reduce(
     (sum, sku) => sum + Math.max(0, Math.floor(sku.stock)),
     0
   );
@@ -57,17 +73,20 @@ export function resolveStockStatus(summary: StockSummary): StockStatus {
 
 export function resolveDisplayStatus(
   spu: { isActive: boolean; isDeleted: boolean },
-  skus: ReadonlyArray<{ stock: number }>
+  skus: ReadonlyArray<SkuStockInput>
 ): DisplayStatus {
   if (spu.isDeleted || !spu.isActive) return "OFF_SHELF";
-  const summary = computeStockSummary(skus);
+  const activeSkus = filterActiveSkus(skus);
+  if (activeSkus.length === 0) return "OFF_SHELF";
+  const summary = computeStockSummary(activeSkus);
   if (!summary.hasStock) return "SOLD_OUT";
+  if (summary.lowStock) return "LOW_STOCK";
   return "AVAILABLE";
 }
 
 export function formatStockLabel(stock: number): string {
   const flags = computeSkuStockFlags(stock);
-  if (!flags.hasStock) return "暂时售罄";
+  if (!flags.hasStock) return "卖光啦！";
   if (flags.lowStock) return `仅剩 ${flags.stock} 件`;
   return `库存 ${flags.stock}`;
 }
@@ -77,7 +96,7 @@ export function formatInsufficientStockMessage(
   available: number
 ): string {
   if (available <= 0) {
-    return `${specName} 暂时售罄`;
+    return `${specName} 卖光啦！`;
   }
   return `库存不足，${specName} 当前仅剩 ${available} 件`;
 }
@@ -107,7 +126,7 @@ export function validateCartQuantity(input: {
     return {
       ok: false,
       code: MINIPROGRAM_ERROR_CODES.INSUFFICIENT_STOCK,
-      message: `${specName} 暂时售罄`,
+      message: `${specName} 卖光啦！`,
       available: 0,
     };
   }
@@ -137,11 +156,26 @@ export function assertSellableSpu(spu: {
   }
 }
 
+export function assertSellableSku(sku: {
+  isActive?: boolean;
+  specName?: string;
+}): void {
+  if (sku.isActive === false) {
+    throw new MiniprogramBusinessError(
+      MINIPROGRAM_ERROR_CODES.SKU_INACTIVE,
+      "该规格暂不可售"
+    );
+  }
+}
+
 export function assertOrderStockAvailable(input: {
   specName: string;
   stock: number;
   requestedQty: number;
+  isActive?: boolean;
 }): void {
+  assertSellableSku(input);
+
   const available = Math.max(0, Math.floor(input.stock));
   const requestedQty = Math.floor(input.requestedQty);
 

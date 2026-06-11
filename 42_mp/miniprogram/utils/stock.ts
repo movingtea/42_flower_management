@@ -33,14 +33,14 @@ export function resolveProductStockSummary(
 
 export function formatSkuStockLabel(stock: number): string {
   const safe = Math.max(0, Math.floor(Number(stock) || 0));
-  if (safe <= 0) return '暂时售罄';
+  if (safe <= 0) return '卖光啦！';
   if (safe <= LOW_STOCK_THRESHOLD) return `仅剩 ${safe} 件`;
   return `库存 ${safe}`;
 }
 
 export function formatProductStockLabel(product: WechatProductItem): string {
   const summary = resolveProductStockSummary(product);
-  if (!summary.hasStock) return '暂时售罄';
+  if (!summary.hasStock) return '卖光啦！';
   if (summary.lowStock) return `仅剩 ${summary.totalStock} 件`;
   return `库存 ${summary.totalStock}`;
 }
@@ -64,7 +64,7 @@ export function validateLocalCartQuantity(input: {
   const specName = input.specName?.trim() || '该规格';
 
   if (stock <= 0) {
-    return { ok: false, message: `${specName} 暂时售罄` };
+    return { ok: false, message: `${specName} 卖光啦！` };
   }
 
   if (input.nextQty != null) {
@@ -94,14 +94,17 @@ export function mapInvalidCartTag(
   invalidReason?: string | null,
   invalidCode?: string | null
 ): string {
+  if (invalidCode === 'SKU_INACTIVE') {
+    return '该规格暂不可售';
+  }
   if (invalidCode === 'INSUFFICIENT_STOCK') {
-    return invalidReason || '库存不足';
+    return invalidReason || '卖光啦！';
   }
   if (invalidCode === 'PRODUCT_OFF_SHELF') {
     return '商品已下架';
   }
-  if (invalidReason?.includes('售罄')) {
-    return '暂时售罄';
+  if (invalidReason?.includes('卖光') || invalidReason?.includes('售罄')) {
+    return invalidReason.includes('卖光') ? invalidReason : '卖光啦！';
   }
   if (invalidReason?.includes('库存不足')) {
     return invalidReason;

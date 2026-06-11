@@ -3,11 +3,13 @@ import {
   computeActiveSkuTotalStock,
   hasRecommendationSellableStock,
 } from "@/services/recommendation-rules-pure";
+import { filterActiveSkus, hasActiveSku } from "@/services/miniprogram-stock-pure";
 
 export type RecommendationDisplayStatus =
   | "VISIBLE"
   | "INACTIVE_ITEM"
   | "PRODUCT_OFF_SHELF"
+  | "ALL_SKUS_INACTIVE"
   | "PRODUCT_SOLD_OUT"
   | "MISSING_MAIN_IMAGE"
   | "INVALID_IMAGE"
@@ -29,6 +31,7 @@ export type RecommendationDisplayItemInput = {
     isDeleted?: boolean;
     skus: Array<{
       stock: number;
+      isActive?: boolean;
       imageUrl?: string | null;
       isMainImage?: boolean;
     }>;
@@ -47,7 +50,7 @@ function resolveCoverCandidate(
 ): string | null {
   const override = item.imageOverride?.trim();
   if (override) return override;
-  const skus = item.product.skus;
+  const skus = filterActiveSkus(item.product.skus);
   const main = skus.find((s) => s.isMainImage && s.imageUrl?.trim());
   if (main?.imageUrl) return main.imageUrl.trim();
   const first = skus.find((s) => s.imageUrl?.trim());
@@ -94,10 +97,18 @@ export function evaluateRecommendationItemDisplayStatus(
     };
   }
 
+  if (!hasActiveSku(product.skus)) {
+    return {
+      status: "ALL_SKUS_INACTIVE",
+      label: "所有规格已停用，前台不展示",
+      visibleOnMiniprogram: false,
+    };
+  }
+
   if (!hasRecommendationSellableStock(product.skus)) {
     return {
       status: "PRODUCT_SOLD_OUT",
-      label: "商品售罄，前台不展示",
+      label: "商品已售罄，前台不展示",
       visibleOnMiniprogram: false,
     };
   }

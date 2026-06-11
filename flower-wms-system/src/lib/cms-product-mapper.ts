@@ -52,6 +52,7 @@ export function productToEditorInitial(
     stock: sku.stock,
     imageUrl: sku.imageUrl ?? "",
     isMainImage: sku.isMainImage,
+    isActive: sku.isActive !== false,
     sortOrder: sku.sortOrder,
     recipeId: sku.recipeId ?? null,
     bulkPreorderEnabled: sku.bulkPreorderEnabled ?? false,

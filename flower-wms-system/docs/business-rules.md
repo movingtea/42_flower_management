@@ -1,6 +1,6 @@
 # Universe42 / 万物肆贰 — 业务规则清单
 
-> **文档版本**：Sprint 12 Round 1  
+> **文档版本**：Sprint 13（基于 Sprint 12 已合并部署）  
 > **适用范围**：flower-wms-system 后端、小程序 API、CMS/WMS 业务防线  
 > **真理源**：本文档 + `src/lib/business-errors.ts` + `src/services/*-pure.ts`  
 > **维护原则**：已确认规则必须写入本文；实现、测试与 smoke scripts 以本文为准。
@@ -23,8 +23,8 @@
 
 ## 2. 核心原则
 
-1. **售罄 ≠ 下架**：`stock=0` 为售罄（`SOLD_OUT`），`isActive=false` 为下架（`OFF_SHELF`）。
-2. **用户行为不得自动改上下架**：库存不足、下单失败、支付失败不得修改 `ProductSpu.isActive` / `ProductSku` 启用状态。
+1. **售罄 ≠ SKU 停用 ≠ SPU 下架**：`ProductSku.stock=0` 且 `ProductSku.isActive=true` 为售罄（`SOLD_OUT`）；`ProductSku.isActive=false` 为规格停用（`SKU_INACTIVE`）；`ProductSpu.isActive=false` 为商品下架（`OFF_SHELF`）。
+2. **用户行为不得自动改上下架 / 停用**：库存不足、下单失败、支付失败不得修改 `ProductSpu.isActive` 或 `ProductSku.isActive`。
 3. **错误码语义分离**：库存不足、提前预订、下架、权限不足必须使用不同错误码。
 4. **CMS 配置 ≠ 小程序展示**：推荐位/Banner 经前台安全过滤后才返回小程序。
 5. **虚拟库存 vs 物理库存**：下单锁 `ProductSku.stock`；支付后 FIFO 扣 `Batch.remainingQty`。
@@ -35,14 +35,21 @@
 
 ## 3. 关键状态定义
 
+| 字段 | 模型 | 语义 |
+|---|---|---|
+| `ProductSpu.isActive` | SPU | 商品整体运营上架状态 |
+| `ProductSku.isActive` | SKU | 规格是否运营可售（停用 ≠ 售罄） |
+| `ProductSku.stock` | SKU | 虚拟可售库存 |
+
 ### 小程序展示状态
 
 | 状态 | 条件 | 小程序行为 |
 |---|---|---|
-| `AVAILABLE` | 上架 + 有库存（stock > 3） | 可购买 |
-| `LOW_STOCK` | 上架 + 1 ≤ stock ≤ 3 | 显示「仅剩 X 件」，可购买 |
-| `SOLD_OUT` | 上架 + 全部 SKU stock = 0 | 展示商品，禁用购买，文案「卖光啦！」 |
-| `OFF_SHELF` | `isDeleted` 或 `!isActive` | **不展示** |
+| `AVAILABLE` | SPU 上架 + 至少一个 active SKU + active SKU 总库存 > 3 | 可购买 |
+| `LOW_STOCK` | SPU 上架 + active SKU 总库存 1~3 | 显示「仅剩 X 件」，可购买 |
+| `SOLD_OUT` | SPU 上架 + 存在 active SKU 但 active SKU 总 stock = 0 | 展示商品，禁用购买，文案「卖光啦！」 |
+| `OFF_SHELF` | SPU `isDeleted` / `!isActive`，或**全部 SKU inactive** | **不展示** |
+| `SKU_INACTIVE` | 单个 SKU `isActive=false` | 小程序不展示该 SKU；购物车/下单返回「该规格暂不可售」 |
 
 低库存阈值默认：**3**（`LOW_STOCK_THRESHOLD`）。
 
@@ -58,13 +65,16 @@
 
 ## 4. 商品展示规则
 
-- `stock > 3`：正常库存，可购买。
+- 库存汇总**只统计 `ProductSku.isActive=true` 的 SKU**。
+- 全部 SKU inactive：小程序商品列表/详情**不展示**该 SPU。
+- `stock > 3`（active SKU 汇总）：正常库存，可购买。
 - `1 <= stock <= 3`：低库存，显示「仅剩 X 件」。
-- `stock = 0`：售罄，继续展示，禁用购买。
+- `stock = 0` 且 SKU 仍 active：售罄，继续展示 SPU，禁用购买。
 - 售罄文案：**卖光啦！**
-- 商品下架：小程序不展示。
-- 库存不足 ≠ 下架。
-- 用户行为不得自动修改商品上下架状态。
+- SKU 停用：不展示该 SKU，**不得**显示为「卖光啦！」。
+- SPU 下架：小程序不展示。
+- 库存不足 ≠ SKU 停用 ≠ SPU 下架。
+- 用户行为不得自动修改 `ProductSpu.isActive` / `ProductSku.isActive`。
 
 实现：`src/services/miniprogram-stock-pure.ts` → `resolveDisplayStatus`。
 
@@ -72,9 +82,11 @@
 
 ## 5. 购物车规则
 
-- 加购/改数量必须服务端校验库存。
+- 加购/改数量必须服务端校验：SPU 上架 → SKU 存在 → **`ProductSku.isActive=true`** → `stock > 0`。
+- SKU inactive 返回 **`SKU_INACTIVE`**（不得返回 `INSUFFICIENT_STOCK` 或 `PRODUCT_OFF_SHELF`）。
 - 库存不足返回 `INSUFFICIENT_STOCK`，不得返回 `PRODUCT_OFF_SHELF`。
-- 下架商品返回 `PRODUCT_OFF_SHELF`。
+- SPU 下架返回 `PRODUCT_OFF_SHELF`。
+- 购物车加载：inactive SKU 标记「该规格暂不可售」；stock=0 标记「卖光啦！」；SPU 下架标记「商品已下架」。
 - 部分商品不可结算返回 `CART_ITEM_UNAVAILABLE`（购物车结算场景）。
 
 实现：`src/lib/cart.server.ts`。
@@ -86,17 +98,19 @@
 创建订单（`createWechatOrder`）顺序：
 
 1. 校验金额、配送日期、商品行。
-2. `assertSellableSpu`（下架 → `PRODUCT_OFF_SHELF`）。
-3. 合并同 SKU 数量 → `assertOrderStockAvailable`（不足 → `INSUFFICIENT_STOCK`）。
-4. `evaluateBulkPreorderRequirement`（违规 → `BULK_ORDER_REQUIRES_PREORDER`）。
-5. 原子扣减 `ProductSku.stock`（`updateMany` where `stock >= qty`）。
-6. 创建 `PENDING_PAYMENT` 订单。
-7. **成功后**才写 CRM（失败订单不写 CRM）。
+2. `assertSellableSpu`（SPU 下架 → `PRODUCT_OFF_SHELF`）。
+3. `assertSellableSku`（SKU inactive → **`SKU_INACTIVE`**，不得扣库存、不写 CRM）。
+4. 合并同 SKU 数量 → `assertOrderStockAvailable`（不足 → `INSUFFICIENT_STOCK`）。
+5. `evaluateBulkPreorderRequirement`（仅对 **active SKU** 生效；违规 → `BULK_ORDER_REQUIRES_PREORDER`）。
+6. 原子扣减 `ProductSku.stock`（`updateMany` where `isActive=true` AND `stock >= qty`）。
+7. 创建 `PENDING_PAYMENT` 订单。
+8. **成功后**才写 CRM（失败订单不写 CRM）。
 
 红线：
 
-- 库存不足不得创建订单、不得扣 stock、不得写 CRM、不得生成 `GiftOccasion` / `CustomerReminder`。
-- 不得修改商品上下架状态。
+- SKU inactive 不得创建订单、不得扣 stock、不得写 CRM、不得生成 `GiftOccasion` / `CustomerReminder`。
+- 库存不足不得创建订单、不得扣 stock、不得写 CRM。
+- 不得修改 `ProductSpu.isActive` / `ProductSku.isActive`。
 
 ---
 
@@ -111,6 +125,7 @@
 | 当天大批量 | **不允许** | 命中后最早配送日 = 今天 + minLeadDays |
 
 - 当 `quantity >= threshold` 且 `deliveryDate` 早于 `earliestDeliveryDate` → 拒绝创建订单。
+- **只对 `ProductSku.isActive=true` 的 SKU 生效**；inactive SKU 提交时先返回 `SKU_INACTIVE`，不进入提前预订判断。
 - 日期判断：**Asia/Shanghai**（`src/lib/datetime.ts`）。
 - 前端可禁用不合法日期，**服务端必须强校验**。
 
@@ -223,8 +238,9 @@
 ### 小程序
 
 - 只返回 active slot + active item + 上架商品。
-- 售罄判断：商品所有 active SKU 总库存为 0 → 不返回。
-- 至少一个 SKU `stock > 0` 可展示。
+- 售罄判断：**只统计 `ProductSku.isActive=true` 的 SKU 库存**；active SKU 总库存为 0 → 不返回。
+- 全部 SKU inactive → 不返回（CMS 配置保留，展示原因「所有规格已停用，前台不展示」）。
+- 至少一个 active SKU 且 active SKU 总库存 > 0 可展示。
 - 缺主图不返回。
 - 过滤后 items 为空 → **不返回整个 slot**。
 - **不自动补位**。
@@ -438,6 +454,7 @@ npm run smoke:recommendation-rules  # 无需 DB
 - [x] CRM 提醒 1 天过期判定
 - [x] IT_ADMIN 业务 API 阻断
 - [x] 不变量测试 + smoke scripts
+- [x] Sprint 13：`ProductSku.isActive`、SKU 停用 vs 售罄语义、CMS SKU 启用开关
 - [ ] 小程序订单倒计时 UI（Round 2）
 - [ ] 店铺配送设置 CMS UI（后续）
 - [ ] Banner 有效期 DB 字段（后续）
@@ -449,3 +466,4 @@ npm run smoke:recommendation-rules  # 无需 DB
 | 日期 | 版本 | 说明 |
 |---|---|---|
 | 2026-06-11 | Sprint 12 R1 | 初版：业务规则文档、错误码、纯函数防线、不变量测试、smoke scripts |
+| 2026-06-11 | Sprint 13 | `ProductSku.isActive`：SKU 停用 vs 售罄 vs SPU 下架语义补齐；CMS SKU 启用开关；推荐位/购物车/下单 active SKU 过滤 |

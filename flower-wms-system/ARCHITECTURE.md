@@ -532,7 +532,7 @@ Smoke 脚本：
 | `RecipeLine` | `recipe_lines` | 配方花材明细 |
 | `PackagingKit` | `packaging_kits` | 标准包装成本 |
 | `ProductSpu` | `product_spus` | 商城商品；含运营标签（`occasionTags` + Json 标签字段 + `operationNote`） |
-| `ProductSku` | `product_skus` | SKU，含 `recipeId`；可选 `bulkPreorderEnabled` / `bulkOrderThreshold` / `bulkMinLeadDays` / `bulkPreorderMessage`（大批量提前预订规则，限制配送日期，不影响上架） |
+| `ProductSku` | `product_skus` | SKU，含 `isActive`（规格运营可售，默认 true）、`recipeId`；可选 `bulkPreorderEnabled` / `bulkOrderThreshold` / `bulkMinLeadDays` / `bulkPreorderMessage`（大批量提前预订规则，限制配送日期，不影响上架） |
 | `CmsRecommendationSlot` | `cms_recommendation_slots` | 小程序推荐位配置（`slotType` / `sceneType` / `maxItems`） |
 | `CmsHomeSceneEntry` | `cms_home_scene_entries` | 小程序首页场景入口（标题 / 图标 / 排序 / 跳转方式；与推荐位商品配置分离） |
 | `CmsRecommendationItem` | `cms_recommendation_items` | 推荐位商品关联（可选 SKU、有效期、覆盖图文） |
@@ -652,22 +652,25 @@ PurchaseOrderLine.actualUnitCost
 
 | 概念 | 字段 / 展示 | 说明 |
 |---|---|---|
-| 运营上架 | `product_spus.is_active` | 仅 CMS / 后台运营可改；小程序用户行为**不得**自动修改 |
-| 虚拟可售库存 | `product_skus.stock` | 创建订单时扣减；待支付取消回补；可为 0 但商品仍可上架展示 |
-| 前台售罄 | `stockStatus=SOLD_OUT` / `displayStatus=SOLD_OUT` | `stock=0` 时展示「暂时售罄」，**不是**「已下架」 |
-| 前台下架 | `displayStatus=OFF_SHELF` | 仅当 `is_active=false` 或 `is_deleted=true` |
+| SPU 运营上架 | `product_spus.is_active` | 仅 CMS / 后台运营可改；小程序用户行为**不得**自动修改 |
+| SKU 运营可售 | `product_skus.is_active` | CMS SKU 编辑页「启用该规格」；停用 ≠ 售罄；默认 true（历史 SKU 兼容） |
+| 虚拟可售库存 | `product_skus.stock` | 创建订单时扣减；待支付取消回补；仅 active SKU 参与前台库存汇总 |
+| 前台售罄 | `stockStatus=SOLD_OUT` / `displayStatus=SOLD_OUT` | active SKU 总 `stock=0` 时展示「卖光啦！」，**不是** SKU 停用或 SPU 下架 |
+| 前台 SKU 停用 | 错误码 `SKU_INACTIVE` | 不展示该 SKU；购物车/下单提示「该规格暂不可售」 |
+| 前台 SPU 下架 | `displayStatus=OFF_SHELF` | `product_spus.is_active=false` / `is_deleted=true`，或全部 SKU inactive → 列表不展示 |
 
 小程序商品 API（`GET /api/miniprogram/products`、`GET /api/miniprogram/products/[id]`）返回：
 
-- 列表：`stockSummary`（`totalStock` / `hasStock` / `lowStock`）、`stockStatus`、`displayStatus`（兼容保留 `isOutOfStock`）、轻量 `hasBulkPreorderRule`
+- **只返回 `ProductSku.isActive=true` 的 SKU 列表**
+- 列表：`stockSummary`（仅 active SKU）、`stockStatus`、`displayStatus`（含 `LOW_STOCK`）、兼容保留 `isOutOfStock`
 - 详情 SKU：`stock` / `hasStock` / `lowStock` / `bulkPreorderRule`（`enabled` / `threshold` / `minLeadDays` / `message`）
 - **不返回** `operationNote`、成本、毛利、产品决策内部 warning
 
 购物车 / 下单库存规则：
 
-- 加入购物车：前端 + `POST /api/miniprogram/cart`（`action=validate-add`）双重校验
-- 购物车改量 / 结算前：`POST /api/miniprogram/cart` 刷新每项 `stock` 与 `invalidCode`
-- 创建订单：`createWechatOrder` 合并同 SKU 数量后校验，事务内条件 `updateMany` 扣减；失败返回 `INSUFFICIENT_STOCK`，**不创建订单、不扣库存、不写 CRM**
+- 加入购物车：`POST /api/miniprogram/cart`（`action=validate-add`）校验 SPU 上架 → SKU 存在 → **`ProductSku.isActive`** → 库存
+- 购物车改量 / 结算前：`POST /api/miniprogram/cart` 刷新每项 `stock` 与 `invalidCode`（`SKU_INACTIVE` / `INSUFFICIENT_STOCK` / `PRODUCT_OFF_SHELF` 语义分离）
+- 创建订单：`createWechatOrder` 先 `assertSellableSku`，再合并数量校验；事务内条件 `updateMany`（`isActive=true` AND `stock >= qty`）扣减；SKU inactive → **`SKU_INACTIVE`**
 - `INSUFFICIENT_STOCK` **不得**映射为 `PRODUCT_OFF_SHELF`
 
 大批量提前预订规则（`src/services/preorder-rule-pure.ts`）：
@@ -1275,6 +1278,18 @@ logging:
 | 推荐位运营提示 | `recommendation-display-pure.ts` + CMS 列表展示原因 |
 | 小程序错误码 | `42_mp/miniprogram/utils/business-error.ts` + `request.ts` |
 | 人工验收 | `docs/sprint-12-manual-checklist.md` |
+
+### Sprint 13 — SKU 可售状态语义（独立 PR，基于 Sprint 12 已合并部署）
+
+| 能力 | 实现 |
+|---|---|
+| 数据模型 | `ProductSku.isActive` 默认 `true`；migration `20260611140000_product_sku_is_active` |
+| CMS SKU 编辑 | `ProductEditor`「启用该规格」开关；停用保留数据、不清 stock、不改 Recipe |
+| 上架校验 | `validateProductPublishReadiness`：全 SKU 停用 CRITICAL；active SKU 全售罄 warning |
+| 小程序商品 API | 只返回 active SKU；全 inactive 不展示 SPU；售罄文案「卖光啦！」 |
+| 购物车 / 下单 | inactive → `SKU_INACTIVE`；stock=0 → `INSUFFICIENT_STOCK`；SPU 下架 → `PRODUCT_OFF_SHELF` |
+| 推荐位 | 库存汇总只统计 active SKU；CMS `recommendation-display-pure` 展示不可展示原因 |
+| 测试 | `test:sku-active-invariants`；smoke scripts 覆盖 inactive SKU 边界 |
 
 ### 退款库存回填
 

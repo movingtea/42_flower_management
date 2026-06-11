@@ -58,6 +58,7 @@ export type ProductSkuMinAggregateOutputType = {
   bulkOrderThreshold: number | null
   bulkMinLeadDays: number | null
   bulkPreorderMessage: string | null
+  isActive: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -78,6 +79,7 @@ export type ProductSkuMaxAggregateOutputType = {
   bulkOrderThreshold: number | null
   bulkMinLeadDays: number | null
   bulkPreorderMessage: string | null
+  isActive: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -98,6 +100,7 @@ export type ProductSkuCountAggregateOutputType = {
   bulkOrderThreshold: number
   bulkMinLeadDays: number
   bulkPreorderMessage: number
+  isActive: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -136,6 +139,7 @@ export type ProductSkuMinAggregateInputType = {
   bulkOrderThreshold?: true
   bulkMinLeadDays?: true
   bulkPreorderMessage?: true
+  isActive?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -156,6 +160,7 @@ export type ProductSkuMaxAggregateInputType = {
   bulkOrderThreshold?: true
   bulkMinLeadDays?: true
   bulkPreorderMessage?: true
+  isActive?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -176,6 +181,7 @@ export type ProductSkuCountAggregateInputType = {
   bulkOrderThreshold?: true
   bulkMinLeadDays?: true
   bulkPreorderMessage?: true
+  isActive?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -283,6 +289,7 @@ export type ProductSkuGroupByOutputType = {
   bulkOrderThreshold: number | null
   bulkMinLeadDays: number | null
   bulkPreorderMessage: string | null
+  isActive: boolean
   createdAt: Date
   updatedAt: Date
   _count: ProductSkuCountAggregateOutputType | null
@@ -326,6 +333,7 @@ export type ProductSkuWhereInput = {
   bulkOrderThreshold?: Prisma.IntNullableFilter<"ProductSku"> | number | null
   bulkMinLeadDays?: Prisma.IntNullableFilter<"ProductSku"> | number | null
   bulkPreorderMessage?: Prisma.StringNullableFilter<"ProductSku"> | string | null
+  isActive?: Prisma.BoolFilter<"ProductSku"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ProductSku"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProductSku"> | Date | string
   spu?: Prisma.XOR<Prisma.ProductSpuScalarRelationFilter, Prisma.ProductSpuWhereInput>
@@ -350,6 +358,7 @@ export type ProductSkuOrderByWithRelationInput = {
   bulkOrderThreshold?: Prisma.SortOrderInput | Prisma.SortOrder
   bulkMinLeadDays?: Prisma.SortOrderInput | Prisma.SortOrder
   bulkPreorderMessage?: Prisma.SortOrderInput | Prisma.SortOrder
+  isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   spu?: Prisma.ProductSpuOrderByWithRelationInput
@@ -377,6 +386,7 @@ export type ProductSkuWhereUniqueInput = Prisma.AtLeast<{
   bulkOrderThreshold?: Prisma.IntNullableFilter<"ProductSku"> | number | null
   bulkMinLeadDays?: Prisma.IntNullableFilter<"ProductSku"> | number | null
   bulkPreorderMessage?: Prisma.StringNullableFilter<"ProductSku"> | string | null
+  isActive?: Prisma.BoolFilter<"ProductSku"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ProductSku"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProductSku"> | Date | string
   spu?: Prisma.XOR<Prisma.ProductSpuScalarRelationFilter, Prisma.ProductSpuWhereInput>
@@ -401,6 +411,7 @@ export type ProductSkuOrderByWithAggregationInput = {
   bulkOrderThreshold?: Prisma.SortOrderInput | Prisma.SortOrder
   bulkMinLeadDays?: Prisma.SortOrderInput | Prisma.SortOrder
   bulkPreorderMessage?: Prisma.SortOrderInput | Prisma.SortOrder
+  isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.ProductSkuCountOrderByAggregateInput
@@ -429,6 +440,7 @@ export type ProductSkuScalarWhereWithAggregatesInput = {
   bulkOrderThreshold?: Prisma.IntNullableWithAggregatesFilter<"ProductSku"> | number | null
   bulkMinLeadDays?: Prisma.IntNullableWithAggregatesFilter<"ProductSku"> | number | null
   bulkPreorderMessage?: Prisma.StringNullableWithAggregatesFilter<"ProductSku"> | string | null
+  isActive?: Prisma.BoolWithAggregatesFilter<"ProductSku"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"ProductSku"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"ProductSku"> | Date | string
 }
@@ -447,6 +459,7 @@ export type ProductSkuCreateInput = {
   bulkOrderThreshold?: number | null
   bulkMinLeadDays?: number | null
   bulkPreorderMessage?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   spu: Prisma.ProductSpuCreateNestedOneWithoutSkusInput
@@ -471,6 +484,7 @@ export type ProductSkuUncheckedCreateInput = {
   bulkOrderThreshold?: number | null
   bulkMinLeadDays?: number | null
   bulkPreorderMessage?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutSkuInput
@@ -491,6 +505,7 @@ export type ProductSkuUpdateInput = {
   bulkOrderThreshold?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkMinLeadDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkPreorderMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   spu?: Prisma.ProductSpuUpdateOneRequiredWithoutSkusNestedInput
@@ -515,6 +530,7 @@ export type ProductSkuUncheckedUpdateInput = {
   bulkOrderThreshold?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkMinLeadDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkPreorderMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutSkuNestedInput
@@ -537,6 +553,7 @@ export type ProductSkuCreateManyInput = {
   bulkOrderThreshold?: number | null
   bulkMinLeadDays?: number | null
   bulkPreorderMessage?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -555,6 +572,7 @@ export type ProductSkuUpdateManyMutationInput = {
   bulkOrderThreshold?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkMinLeadDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkPreorderMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -575,6 +593,7 @@ export type ProductSkuUncheckedUpdateManyInput = {
   bulkOrderThreshold?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkMinLeadDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkPreorderMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -605,6 +624,7 @@ export type ProductSkuCountOrderByAggregateInput = {
   bulkOrderThreshold?: Prisma.SortOrder
   bulkMinLeadDays?: Prisma.SortOrder
   bulkPreorderMessage?: Prisma.SortOrder
+  isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -633,6 +653,7 @@ export type ProductSkuMaxOrderByAggregateInput = {
   bulkOrderThreshold?: Prisma.SortOrder
   bulkMinLeadDays?: Prisma.SortOrder
   bulkPreorderMessage?: Prisma.SortOrder
+  isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -653,6 +674,7 @@ export type ProductSkuMinOrderByAggregateInput = {
   bulkOrderThreshold?: Prisma.SortOrder
   bulkMinLeadDays?: Prisma.SortOrder
   bulkPreorderMessage?: Prisma.SortOrder
+  isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -811,6 +833,7 @@ export type ProductSkuCreateWithoutSpuInput = {
   bulkOrderThreshold?: number | null
   bulkMinLeadDays?: number | null
   bulkPreorderMessage?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   recipe?: Prisma.RecipeCreateNestedOneWithoutSkusInput
@@ -833,6 +856,7 @@ export type ProductSkuUncheckedCreateWithoutSpuInput = {
   bulkOrderThreshold?: number | null
   bulkMinLeadDays?: number | null
   bulkPreorderMessage?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutSkuInput
@@ -884,6 +908,7 @@ export type ProductSkuScalarWhereInput = {
   bulkOrderThreshold?: Prisma.IntNullableFilter<"ProductSku"> | number | null
   bulkMinLeadDays?: Prisma.IntNullableFilter<"ProductSku"> | number | null
   bulkPreorderMessage?: Prisma.StringNullableFilter<"ProductSku"> | string | null
+  isActive?: Prisma.BoolFilter<"ProductSku"> | boolean
   createdAt?: Prisma.DateTimeFilter<"ProductSku"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"ProductSku"> | Date | string
 }
@@ -902,6 +927,7 @@ export type ProductSkuCreateWithoutRecommendationItemsInput = {
   bulkOrderThreshold?: number | null
   bulkMinLeadDays?: number | null
   bulkPreorderMessage?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   spu: Prisma.ProductSpuCreateNestedOneWithoutSkusInput
@@ -925,6 +951,7 @@ export type ProductSkuUncheckedCreateWithoutRecommendationItemsInput = {
   bulkOrderThreshold?: number | null
   bulkMinLeadDays?: number | null
   bulkPreorderMessage?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutSkuInput
@@ -960,6 +987,7 @@ export type ProductSkuUpdateWithoutRecommendationItemsInput = {
   bulkOrderThreshold?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkMinLeadDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkPreorderMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   spu?: Prisma.ProductSpuUpdateOneRequiredWithoutSkusNestedInput
@@ -983,6 +1011,7 @@ export type ProductSkuUncheckedUpdateWithoutRecommendationItemsInput = {
   bulkOrderThreshold?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkMinLeadDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkPreorderMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutSkuNestedInput
@@ -1002,6 +1031,7 @@ export type ProductSkuCreateWithoutRecipeInput = {
   bulkOrderThreshold?: number | null
   bulkMinLeadDays?: number | null
   bulkPreorderMessage?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   spu: Prisma.ProductSpuCreateNestedOneWithoutSkusInput
@@ -1024,6 +1054,7 @@ export type ProductSkuUncheckedCreateWithoutRecipeInput = {
   bulkOrderThreshold?: number | null
   bulkMinLeadDays?: number | null
   bulkPreorderMessage?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   orderItems?: Prisma.OrderItemUncheckedCreateNestedManyWithoutSkuInput
@@ -1070,6 +1101,7 @@ export type ProductSkuCreateWithoutOrderItemsInput = {
   bulkOrderThreshold?: number | null
   bulkMinLeadDays?: number | null
   bulkPreorderMessage?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   spu: Prisma.ProductSpuCreateNestedOneWithoutSkusInput
@@ -1093,6 +1125,7 @@ export type ProductSkuUncheckedCreateWithoutOrderItemsInput = {
   bulkOrderThreshold?: number | null
   bulkMinLeadDays?: number | null
   bulkPreorderMessage?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   recommendationItems?: Prisma.CmsRecommendationItemUncheckedCreateNestedManyWithoutSkuInput
@@ -1128,6 +1161,7 @@ export type ProductSkuUpdateWithoutOrderItemsInput = {
   bulkOrderThreshold?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkMinLeadDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkPreorderMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   spu?: Prisma.ProductSpuUpdateOneRequiredWithoutSkusNestedInput
@@ -1151,6 +1185,7 @@ export type ProductSkuUncheckedUpdateWithoutOrderItemsInput = {
   bulkOrderThreshold?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkMinLeadDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkPreorderMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   recommendationItems?: Prisma.CmsRecommendationItemUncheckedUpdateManyWithoutSkuNestedInput
@@ -1171,6 +1206,7 @@ export type ProductSkuCreateManySpuInput = {
   bulkOrderThreshold?: number | null
   bulkMinLeadDays?: number | null
   bulkPreorderMessage?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1189,6 +1225,7 @@ export type ProductSkuUpdateWithoutSpuInput = {
   bulkOrderThreshold?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkMinLeadDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkPreorderMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   recipe?: Prisma.RecipeUpdateOneWithoutSkusNestedInput
@@ -1211,6 +1248,7 @@ export type ProductSkuUncheckedUpdateWithoutSpuInput = {
   bulkOrderThreshold?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkMinLeadDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkPreorderMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutSkuNestedInput
@@ -1232,6 +1270,7 @@ export type ProductSkuUncheckedUpdateManyWithoutSpuInput = {
   bulkOrderThreshold?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkMinLeadDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkPreorderMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1251,6 +1290,7 @@ export type ProductSkuCreateManyRecipeInput = {
   bulkOrderThreshold?: number | null
   bulkMinLeadDays?: number | null
   bulkPreorderMessage?: string | null
+  isActive?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -1269,6 +1309,7 @@ export type ProductSkuUpdateWithoutRecipeInput = {
   bulkOrderThreshold?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkMinLeadDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkPreorderMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   spu?: Prisma.ProductSpuUpdateOneRequiredWithoutSkusNestedInput
@@ -1291,6 +1332,7 @@ export type ProductSkuUncheckedUpdateWithoutRecipeInput = {
   bulkOrderThreshold?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkMinLeadDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkPreorderMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   orderItems?: Prisma.OrderItemUncheckedUpdateManyWithoutSkuNestedInput
@@ -1312,6 +1354,7 @@ export type ProductSkuUncheckedUpdateManyWithoutRecipeInput = {
   bulkOrderThreshold?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkMinLeadDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
   bulkPreorderMessage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -1372,6 +1415,7 @@ export type ProductSkuSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   bulkOrderThreshold?: boolean
   bulkMinLeadDays?: boolean
   bulkPreorderMessage?: boolean
+  isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
@@ -1397,6 +1441,7 @@ export type ProductSkuSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   bulkOrderThreshold?: boolean
   bulkMinLeadDays?: boolean
   bulkPreorderMessage?: boolean
+  isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
@@ -1419,6 +1464,7 @@ export type ProductSkuSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   bulkOrderThreshold?: boolean
   bulkMinLeadDays?: boolean
   bulkPreorderMessage?: boolean
+  isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
@@ -1441,11 +1487,12 @@ export type ProductSkuSelectScalar = {
   bulkOrderThreshold?: boolean
   bulkMinLeadDays?: boolean
   bulkPreorderMessage?: boolean
+  isActive?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type ProductSkuOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "spuId" | "skuCode" | "specName" | "price" | "stock" | "recipeId" | "description" | "imageUrl" | "isMainImage" | "sortOrder" | "bulkPreorderEnabled" | "bulkOrderThreshold" | "bulkMinLeadDays" | "bulkPreorderMessage" | "createdAt" | "updatedAt", ExtArgs["result"]["productSku"]>
+export type ProductSkuOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "spuId" | "skuCode" | "specName" | "price" | "stock" | "recipeId" | "description" | "imageUrl" | "isMainImage" | "sortOrder" | "bulkPreorderEnabled" | "bulkOrderThreshold" | "bulkMinLeadDays" | "bulkPreorderMessage" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["productSku"]>
 export type ProductSkuInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   spu?: boolean | Prisma.ProductSpuDefaultArgs<ExtArgs>
   recipe?: boolean | Prisma.ProductSku$recipeArgs<ExtArgs>
@@ -1498,6 +1545,10 @@ export type $ProductSkuPayload<ExtArgs extends runtime.Types.Extensions.Internal
      * 小程序提示文案（可选）
      */
     bulkPreorderMessage: string | null
+    /**
+     * 规格是否运营可售（停用 ≠ 售罄；停用规格不在小程序展示）
+     */
+    isActive: boolean
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["productSku"]>
@@ -1942,6 +1993,7 @@ export interface ProductSkuFieldRefs {
   readonly bulkOrderThreshold: Prisma.FieldRef<"ProductSku", 'Int'>
   readonly bulkMinLeadDays: Prisma.FieldRef<"ProductSku", 'Int'>
   readonly bulkPreorderMessage: Prisma.FieldRef<"ProductSku", 'String'>
+  readonly isActive: Prisma.FieldRef<"ProductSku", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"ProductSku", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"ProductSku", 'DateTime'>
 }

@@ -1,6 +1,7 @@
 import { buildWechatOperationTags } from "@/lib/cms-product-tags";
 import { categoryIdsFromProduct } from "@/lib/product-categories";
 import {
+  filterActiveSkus,
   formatMinPriceLabel,
   isSpuOutOfStock,
   resolveSpuCardImageUrl,
@@ -137,13 +138,14 @@ function resolveBannerImagesFromSkus(
 export function mapSpuToWechatListItem(
   spu: ProductSpuWithRelations
 ): WechatProductListItem {
+  const activeSkuRecords = filterActiveSkus(spu.skus);
   const mainImageUrl = resolveSpuCardImageUrl(spu.skus);
   const spuFallback = {
     description: trimOrNull(spu.description),
     mainImageUrl,
   };
 
-  const skus: WechatProductSkuItem[] = spu.skus.map((s) => {
+  const skus: WechatProductSkuItem[] = activeSkuRecords.map((s) => {
     const presentation = resolveWechatSkuPresentation(s, spuFallback);
     const stockFlags = computeSkuStockFlags(s.stock);
     return {
@@ -160,7 +162,7 @@ export function mapSpuToWechatListItem(
       bulkPreorderRule: mapSkuBulkPreorderRule(s),
     };
   });
-  const stockSummary = computeStockSummary(skus);
+  const stockSummary = computeStockSummary(activeSkuRecords);
   const hasBulkPreorderRule = skus.some((s) => s.bulkPreorderRule.enabled);
 
   const minPrice = resolveSpuMinPrice(spu.skus);
@@ -190,10 +192,10 @@ export function mapSpuToWechatListItem(
     priceSuffix,
     skuCount: skus.length,
     hasBulkPreorderRule,
-    isOutOfStock: isSpuOutOfStock(spu.skus),
+    isOutOfStock: isSpuOutOfStock(activeSkuRecords),
     stockSummary,
     stockStatus: resolveStockStatus(stockSummary),
-    displayStatus: resolveDisplayStatus(spu, skus),
+    displayStatus: resolveDisplayStatus(spu, activeSkuRecords),
     shippingFee: Number(spu.shippingFee ?? 0),
     allowPreOrder: spu.allowPreOrder,
     productionTime: spu.productionTime,

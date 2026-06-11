@@ -86,6 +86,40 @@ async function main() {
   });
   assert.equal(crmCount, 0, "订单创建失败不得写 CRM");
 
+  await prisma.productSku.update({
+    where: { id: sku.id },
+    data: { isActive: false },
+  });
+
+  let inactiveFailed = false;
+  try {
+    await createWechatOrder(user.id, {
+      receiverName: "测试",
+      receiverPhone: "13800001111",
+      deliveryAddress: "上海市测试路 1 号",
+      deliveryDate: "2026-06-15 14:00",
+      totalAmount: 199,
+      deliveryFee: 15,
+      payAmount: 214,
+      items: [{ skuId: sku.id, quantity: 1 }],
+    });
+  } catch (err) {
+    inactiveFailed = true;
+    assert.ok(isMiniprogramBusinessError(err));
+    assert.equal(err.code, MINIPROGRAM_ERROR_CODES.SKU_INACTIVE);
+  }
+  assert.equal(inactiveFailed, true, "inactive SKU 应返回 SKU_INACTIVE");
+
+  const stockAfterInactiveAttempt = (
+    await prisma.productSku.findUniqueOrThrow({ where: { id: sku.id } })
+  ).stock;
+  assert.equal(stockAfterInactiveAttempt, beforeStock, "inactive SKU 下单不得扣 stock");
+
+  await prisma.productSku.update({
+    where: { id: sku.id },
+    data: { isActive: true },
+  });
+
   const cancelOrder = await createWechatOrder(user.id, {
     receiverName: "测试",
     receiverPhone: "13800001111",

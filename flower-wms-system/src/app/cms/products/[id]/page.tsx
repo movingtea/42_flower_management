@@ -34,6 +34,7 @@ const EMPTY: ProductEditorInitial = {
       bulkOrderThreshold: "",
       bulkMinLeadDays: "",
       bulkPreorderMessage: "",
+      isActive: true,
     },
   ],
   displaySku: "",
