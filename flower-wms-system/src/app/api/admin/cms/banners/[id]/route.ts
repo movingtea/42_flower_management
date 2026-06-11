@@ -1,12 +1,13 @@
 import { AuditModule } from "@/generated/prisma/enums";
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { jsonAdminBusinessError, ADMIN_ERROR_CODES } from "@/lib/business-errors";
 import { isResponse, requirePermission } from "@/lib/api-auth";
 import { safeLogAuditFromStaff } from "@/lib/audit-helpers";
 import { parseBannerTargetType } from "@/lib/banner";
 import {
   cmsBannerToApiPayload,
-  deactivateCmsBanner,
   getCmsBannerById,
+  softDeleteCmsBanner,
   updateCmsBanner,
 } from "@/services/cms-banners";
 
@@ -124,9 +125,16 @@ export async function DELETE(request: Request, context: RouteContext) {
 
     const { id } = await context.params;
     const before = await getCmsBannerById(id);
-    if (!before) return jsonError("轮播图不存在", 404);
+    if (!before) {
+      return jsonAdminBusinessError(
+        ADMIN_ERROR_CODES.ENTITY_NOT_FOUND,
+        "轮播图不存在",
+        404
+      );
+    }
 
-    const banner = await deactivateCmsBanner(id);
+    const banner = await softDeleteCmsBanner(id);
+    const alreadyDeleted = before.isDeleted;
 
     safeLogAuditFromStaff(
       staff,
@@ -135,14 +143,25 @@ export async function DELETE(request: Request, context: RouteContext) {
         action: "BANNER_DELETE",
         entityType: "Banner",
         entityId: banner.id,
-        summary: `删除首页轮播图`,
-        beforeSnapshot: { isActive: before.isActive },
-        afterSnapshot: { isActive: banner.isActive },
+        summary: alreadyDeleted
+          ? `重复删除首页轮播图（已软删除）`
+          : `删除首页轮播图`,
+        beforeSnapshot: {
+          isActive: before.isActive,
+          isDeleted: before.isDeleted,
+        },
+        afterSnapshot: {
+          isActive: banner.isActive,
+          isDeleted: banner.isDeleted,
+        },
       },
       request
     );
 
-    return jsonSuccess({ banner: cmsBannerToApiPayload(banner) });
+    return jsonSuccess({
+      banner: cmsBannerToApiPayload(banner),
+      alreadyDeleted,
+    });
   } catch (err) {
     const message = err instanceof Error ? err.message : "删除轮播失败";
     return jsonError(message, 500);

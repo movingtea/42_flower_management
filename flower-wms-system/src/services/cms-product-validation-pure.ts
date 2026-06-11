@@ -290,9 +290,34 @@ export function validateProductPublishReadiness(
     addIssue(blockingIssues, {
       code: "NO_ENABLED_SKU",
       severity: "BLOCKER",
-      message: "至少需要一个启用的 SKU",
+      message: "该商品下所有规格均已停用，小程序不会展示该商品。",
     });
     score -= 20;
+  }
+
+  for (const sku of skus) {
+    if (sku.isActive === false && (sku.stock ?? 0) > 0) {
+      addIssue(warnings, {
+        code: "SKU_INACTIVE_WITH_STOCK",
+        severity: "WARNING",
+        message: `规格「${sku.name}」已停用，即使有库存也不会在小程序售卖。`,
+        field: "isActive",
+      });
+      score -= 3;
+    }
+  }
+
+  const activeStockTotal = enabledSkus.reduce(
+    (sum, s) => sum + Math.max(0, s.stock ?? 0),
+    0
+  );
+  if (hasEnabledSku && activeStockTotal === 0) {
+    addIssue(warnings, {
+      code: "ALL_ACTIVE_SKU_SOLD_OUT",
+      severity: "WARNING",
+      message: "该商品当前所有可售规格库存为 0，小程序将显示为卖光啦。",
+    });
+    score -= 5;
   }
 
   const pricedSkus = enabledSkus.filter((s) => parsePrice(s.price) > 0);

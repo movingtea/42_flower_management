@@ -1,11 +1,12 @@
 import { jsonError } from "@/lib/api";
+import { MINIPROGRAM_ERROR_CODES } from "@/lib/miniprogram-business-error";
 import { activeSpuWhere } from "@/lib/product-query";
-import { productSpuInclude } from "@/lib/product-spu";
+import { hasActiveSku, productSpuInclude } from "@/lib/product-spu";
 import {
   mapSpuToWechatListItem,
   resolveBannerImagesFromSkus,
 } from "@/lib/wechat-product-mapper";
-import { jsonWechatSuccess } from "@/lib/wechat-api";
+import { jsonWechatError, jsonWechatSuccess } from "@/lib/wechat-api";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -28,10 +29,30 @@ export async function GET(
     });
 
     if (!spu) {
-      return jsonError("商品不存在或已下架", 404);
+      return jsonWechatError(
+        "商品不存在或已下架",
+        404,
+        MINIPROGRAM_ERROR_CODES.PRODUCT_OFF_SHELF
+      );
+    }
+
+    if (!hasActiveSku(spu.skus)) {
+      return jsonWechatError(
+        "该商品暂不可售",
+        404,
+        MINIPROGRAM_ERROR_CODES.SKU_INACTIVE
+      );
     }
 
     const product = mapSpuToWechatListItem(spu);
+    if (!product.skus.length) {
+      return jsonWechatError(
+        "该商品暂不可售",
+        404,
+        MINIPROGRAM_ERROR_CODES.SKU_INACTIVE
+      );
+    }
+
     const bannerImages = resolveBannerImagesFromSkus(product.skus);
 
     return jsonWechatSuccess({

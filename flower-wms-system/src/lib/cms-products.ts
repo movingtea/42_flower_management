@@ -51,6 +51,7 @@ export type CmsProductSkuInput = {
   stock: number;
   imageUrl: string | null;
   isMainImage: boolean;
+  isActive?: boolean;
   sortOrder?: number;
   recipeId?: string | null;
   bulkPreorderEnabled?: boolean;
@@ -174,6 +175,7 @@ function parseSkuRows(raw: unknown): CmsProductSkuInput[] {
       stock,
       imageUrl,
       isMainImage: Boolean(r.isMainImage),
+      isActive: r.isActive === false ? false : true,
       sortOrder: Number.isFinite(Number(r.sortOrder))
         ? Math.round(Number(r.sortOrder))
         : i * 10,

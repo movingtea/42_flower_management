@@ -3,6 +3,8 @@ import { buildWechatOperationTags } from "@/lib/cms-product-tags";
 import { activeSpuWhere } from "@/lib/product-query";
 import {
   formatMinPriceLabel,
+  filterActiveSkus,
+  hasActiveSku,
   isSpuOutOfStock,
   productSpuInclude,
   resolveSpuMaxPrice,
@@ -48,9 +50,10 @@ function extractRawTagFields(spu: ProductSpuWithRelations) {
 }
 
 function pickDefaultSkuId(spu: ProductSpuWithRelations): string | null {
-  if (!spu.skus.length) return null;
-  const main = spu.skus.find((s) => s.isMainImage);
-  return (main ?? spu.skus[0]).id;
+  const activeSkus = filterActiveSkus(spu.skus);
+  if (!activeSkus.length) return null;
+  const main = activeSkus.find((s) => s.isMainImage);
+  return (main ?? activeSkus[0]).id;
 }
 
 function pickCategoryName(spu: ProductSpuWithRelations): string | null {
@@ -132,12 +135,13 @@ function buildSpuWhere(query: NormalizedListQuery): Prisma.ProductSpuWhereInput 
 }
 
 function mapCandidate(spu: ProductSpuWithRelations): InternalCandidate | null {
-  if (!spu.skus.length) {
+  if (!spu.skus.length || !hasActiveSku(spu.skus)) {
     return null;
   }
 
-  const minPriceNum = resolveSpuMinPrice(spu.skus);
-  const maxPriceNum = resolveSpuMaxPrice(spu.skus);
+  const activeSkus = filterActiveSkus(spu.skus);
+  const minPriceNum = resolveSpuMinPrice(activeSkus);
+  const maxPriceNum = resolveSpuMaxPrice(activeSkus);
   if (!Number.isFinite(minPriceNum) || minPriceNum <= 0) {
     return null;
   }
@@ -171,7 +175,7 @@ function mapCandidate(spu: ProductSpuWithRelations): InternalCandidate | null {
     defaultSkuId: pickDefaultSkuId(spu),
     coverImage: base.imageUrl,
     subtitle: displayTags.sellingPoints[0] ?? null,
-    isOutOfStock: isSpuOutOfStock(spu.skus),
+    isOutOfStock: isSpuOutOfStock(activeSkus),
   };
 }
 

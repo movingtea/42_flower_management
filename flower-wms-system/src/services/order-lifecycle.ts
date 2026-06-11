@@ -12,6 +12,7 @@ import {
 } from "@/services/order-fifo";
 import {
   assertOrderStockAvailable,
+  assertSellableSku,
   assertSellableSpu,
   formatInsufficientStockMessage,
   mergeOrderLineQuantities,
@@ -142,6 +143,7 @@ async function atomicDecrementSkuStock(
   const result = await tx.productSku.updateMany({
     where: {
       id: skuId,
+      isActive: true,
       stock: { gte: quantity },
       spu: {
         isDeleted: false,
@@ -154,8 +156,14 @@ async function atomicDecrementSkuStock(
   if (result.count !== 1) {
     const current = await tx.productSku.findUnique({
       where: { id: skuId },
-      select: { stock: true, specName: true },
+      select: { stock: true, specName: true, isActive: true },
     });
+    if (current?.isActive === false) {
+      throw new MiniprogramBusinessError(
+        MINIPROGRAM_ERROR_CODES.SKU_INACTIVE,
+        "该规格暂不可售"
+      );
+    }
     const available = current?.stock ?? 0;
     throw new MiniprogramBusinessError(
       MINIPROGRAM_ERROR_CODES.INSUFFICIENT_STOCK,
@@ -229,6 +237,7 @@ export async function createWechatOrder(
           );
         }
         assertSellableSpu(spu);
+        assertSellableSku(sku);
         if (!Number.isInteger(line.quantity) || line.quantity <= 0) {
           throw new Error("商品数量无效");
         }
@@ -242,6 +251,7 @@ export async function createWechatOrder(
           specName: sku.specName,
           stock: sku.stock,
           requestedQty,
+          isActive: sku.isActive,
         });
       }
 

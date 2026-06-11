@@ -45,6 +45,7 @@ function emptySkuRow(sortOrder = 0): ProductSkuEditorRow {
     stock: 0,
     imageUrl: "",
     isMainImage: sortOrder === 0,
+    isActive: true,
     sortOrder,
     recipeId: null,
     bulkPreorderEnabled: false,
@@ -52,6 +53,12 @@ function emptySkuRow(sortOrder = 0): ProductSkuEditorRow {
     bulkMinLeadDays: "",
     bulkPreorderMessage: "",
   };
+}
+
+function renderSkuStatusBadge(row: ProductSkuEditorRow): string | null {
+  if (row.isActive === false) return "已停用";
+  if (row.stock <= 0) return "卖光啦！";
+  return null;
 }
 
 function formatBulkPreorderPreview(row: ProductSkuEditorRow): string | null {
@@ -672,6 +679,8 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
                     <th className="px-3 py-2 font-medium">库存</th>
                     <th className="px-3 py-2 font-medium">款式图</th>
                     <th className="px-3 py-2 font-medium">主图</th>
+                    <th className="px-3 py-2 font-medium">状态</th>
+                    <th className="px-3 py-2 font-medium">启用</th>
                     <th className="px-3 py-2 font-medium">操作</th>
                   </tr>
                 </thead>
@@ -771,6 +780,43 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
                           />
                           <span className="text-xs text-zinc-600">主图</span>
                         </label>
+                      </td>
+                      <td className="px-3 py-3">
+                        {(() => {
+                          const badge = renderSkuStatusBadge(row);
+                          if (!badge) {
+                            return (
+                              <span className="text-xs text-emerald-700">
+                                可售
+                              </span>
+                            );
+                          }
+                          return (
+                            <span
+                              className={`text-xs font-medium ${
+                                row.isActive === false
+                                  ? "text-zinc-500"
+                                  : "text-amber-700"
+                              }`}
+                            >
+                              {badge}
+                            </span>
+                          );
+                        })()}
+                      </td>
+                      <td className="px-3 py-3">
+                        <div className="space-y-1">
+                          <Switch
+                            label="启用该规格"
+                            checked={row.isActive !== false}
+                            onChange={(checked) =>
+                              updateSkuRow(index, { isActive: checked })
+                            }
+                          />
+                          <p className="max-w-40 text-xs text-zinc-500">
+                            关闭后，该规格不会在小程序展示，也不能被加入购物车或下单。
+                          </p>
+                        </div>
                       </td>
                       <td className="px-3 py-3">
                         <button

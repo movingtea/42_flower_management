@@ -3150,6 +3150,7 @@ export const ProductSkuScalarFieldEnum = {
   bulkOrderThreshold: 'bulkOrderThreshold',
   bulkMinLeadDays: 'bulkMinLeadDays',
   bulkPreorderMessage: 'bulkPreorderMessage',
+  isActive: 'isActive',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

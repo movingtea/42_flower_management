@@ -6,6 +6,7 @@ export type ProductSkuEditorRow = {
   stock: number;
   imageUrl: string;
   isMainImage: boolean;
+  isActive: boolean;
   sortOrder?: number;
   recipeId: string | null;
   bulkPreorderEnabled: boolean;

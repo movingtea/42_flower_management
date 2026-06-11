@@ -1,8 +1,13 @@
 import { isLocalhostUrl, toPublicImageUrl } from "@/lib/image-url";
+import {
+  filterActiveSkus,
+  hasActiveSku,
+} from "@/services/miniprogram-stock-pure";
 
 export type RecommendationSkuInput = {
   id: string;
   stock: number;
+  isActive?: boolean;
   specName: string;
   price: string | number;
   imageUrl?: string | null;
@@ -92,18 +97,18 @@ function isWithinSchedule(
   return true;
 }
 
-/** 商品所有 SKU 总可售库存（ProductSku 无独立启用字段时，全部 SKU 计入） */
+/** 推荐位库存判断：只统计 isActive=true 的 SKU */
 export function computeActiveSkuTotalStock(
-  skus: ReadonlyArray<{ stock: number }>
+  skus: ReadonlyArray<{ stock: number; isActive?: boolean }>
 ): number {
-  return skus.reduce(
+  return filterActiveSkus(skus).reduce(
     (sum, sku) => sum + Math.max(0, Math.floor(sku.stock)),
     0
   );
 }
 
 export function hasRecommendationSellableStock(
-  skus: ReadonlyArray<{ stock: number }>
+  skus: ReadonlyArray<{ stock: number; isActive?: boolean }>
 ): boolean {
   return computeActiveSkuTotalStock(skus) > 0;
 }
@@ -111,13 +116,13 @@ export function hasRecommendationSellableStock(
 function resolveCoverImage(
   item: RecommendationItemInput,
   sku: RecommendationSkuInput,
-  allSkus: RecommendationSkuInput[]
+  activeSkus: RecommendationSkuInput[]
 ): string | null {
   const candidates = [
     item.imageOverride,
     sku.imageUrl,
-    allSkus.find((s) => s.isMainImage && s.imageUrl)?.imageUrl,
-    allSkus[0]?.imageUrl,
+    activeSkus.find((s) => s.isMainImage && s.imageUrl)?.imageUrl,
+    activeSkus[0]?.imageUrl,
   ];
 
   for (const raw of candidates) {
@@ -150,14 +155,15 @@ function pickSku(
   product: RecommendationProductInput,
   skuId?: string | null
 ): RecommendationSkuInput | null {
-  if (!product.skus.length) return null;
+  const activeSkus = filterActiveSkus(product.skus);
+  if (!activeSkus.length) return null;
   if (skuId) {
-    const matched = product.skus.find((s) => s.id === skuId);
+    const matched = activeSkus.find((s) => s.id === skuId);
     if (matched) return matched;
   }
   return (
-    product.skus.find((s) => s.isMainImage) ??
-    product.skus[0] ??
+    activeSkus.find((s) => s.isMainImage) ??
+    activeSkus[0] ??
     null
   );
 }
@@ -230,12 +236,14 @@ export function filterRecommendationSlotsForMiniprogram(
 
       const product = item.product;
       if (!product || product.isDeleted || !product.isActive) continue;
+      if (!hasActiveSku(product.skus)) continue;
       if (!hasRecommendationSellableStock(product.skus)) continue;
 
+      const activeSkus = filterActiveSkus(product.skus);
       const sku = pickSku(product, item.skuId);
       if (!sku) continue;
 
-      const coverImage = resolveCoverImage(item, sku, product.skus);
+      const coverImage = resolveCoverImage(item, sku, activeSkus);
       if (!coverImage) continue;
 
       const opTags = buildTags(product);

@@ -80,7 +80,7 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 ### CMS
 
 - `ProductSpu`：商城商品 SPU。
-- `ProductSku`：SKU 款式、价格、虚拟可售库存、可选 `recipeId`。
+- `ProductSku`：SKU 款式、价格、虚拟可售库存、`isActive`（规格运营可售，默认 true）、可选 `recipeId`。
 - 商品分类：`ProductCategory` + `ProductCategoryRelation`。
 - Banner：`Banner`。
 - 营销配置：`AppConfig`。
@@ -361,7 +361,17 @@ docker compose --profile cleanup run --rm docker-cleanup
 
 ## 11. 测试 / Smoke Scripts
 
-**业务规则源文件**：`docs/business-rules.md`（Sprint 12 起为规则真理源）。
+**业务规则源文件**：`docs/business-rules.md`（Sprint 12 起为规则真理源；Sprint 13 补齐 `ProductSku.isActive` 语义）。
+
+迁移（Sprint 13）：
+
+```bash
+cd flower-wms-system
+npx prisma migrate deploy   # 或 migrate dev
+npx prisma generate
+```
+
+新增 migration：`20260611140000_product_sku_is_active`（`product_skus.is_active BOOLEAN NOT NULL DEFAULT true`）。
 
 ### 业务不变量测试
 
@@ -370,6 +380,20 @@ docker compose --profile cleanup run --rm docker-cleanup
 ```bash
 npm run test:all
 ```
+
+Sprint 13 专项测试：
+
+```bash
+npm run test:sku-active-invariants
+npm run test:miniprogram-stock
+npm run test:recommendation-rules
+npm run test:recommendation-display
+npm run test:cms-validation
+npm run test:banner-rules
+npm run test:cms-banners
+```
+
+CMS 首页轮播删除为**软删除**（`isDeleted=true`），删除后 CMS 默认列表与小程序 `home-banners` 均不再展示；历史记录保留。
 
 Sprint 12 专项测试：
 

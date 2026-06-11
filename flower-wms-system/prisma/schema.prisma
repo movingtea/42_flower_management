@@ -415,6 +415,8 @@ model ProductSku {
   bulkMinLeadDays     Int?    @map("bulk_min_lead_days")
   /// 小程序提示文案（可选）
   bulkPreorderMessage String? @map("bulk_preorder_message") @db.Text
+  /// 规格是否运营可售（停用 ≠ 售罄；停用规格不在小程序展示）
+  isActive    Boolean  @default(true) @map("is_active")
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -425,6 +427,7 @@ model ProductSku {
 
   @@index([spuId])
   @@index([spuId, isMainImage])
+  @@index([spuId, isActive])
   @@index([recipeId])
   @@map("product_skus")
 }

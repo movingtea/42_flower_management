@@ -9,6 +9,11 @@ import { prisma } from "../src/lib/prisma";
 import { filterHomeBannersForMiniprogram } from "../src/services/banner-rules-pure";
 import { filterRecommendationSlotsForMiniprogram } from "../src/services/recommendation-rules-pure";
 import { buildFallbackMiniProgramEntries } from "../src/services/cms-home-scene-entries-pure";
+import {
+  listCmsBanners,
+  softDeleteCmsBanner,
+} from "../src/services/cms-banners";
+import { resolveWechatBanners } from "../src/lib/banner.server";
 
 const PREFIX = "SMOKE_TEST_CMS_HOME";
 const NOW = new Date("2026-06-10T10:00:00.000Z");
@@ -97,6 +102,45 @@ async function main() {
   ], { now: NOW });
   assert.equal(soldOutSlot.length, 0);
 
+  const allInactiveSlot = filterRecommendationSlotsForMiniprogram([
+    {
+      id: "slot-inactive",
+      key: `${PREFIX}_slot_inactive`,
+      name: "全停用推荐位",
+      slotType: RecommendationSlotType.HOME_MAIN,
+      sceneType: null,
+      isActive: true,
+      sortOrder: 1,
+      createdAt: NOW,
+      items: [
+        {
+          id: "item-inactive",
+          isActive: true,
+          sortOrder: 1,
+          createdAt: NOW,
+          product: {
+            id: "p-inactive",
+            name: "全停用商品",
+            isActive: true,
+            isDeleted: false,
+            skus: [
+              {
+                id: "sku-inactive",
+                stock: 10,
+                isActive: false,
+                specName: "停用款",
+                price: "199",
+                imageUrl: "https://cdn.example.com/inactive.jpg",
+                isMainImage: true,
+              },
+            ],
+          },
+        },
+      ],
+    },
+  ], { now: NOW });
+  assert.equal(allInactiveSlot.length, 0);
+
   const fallback = buildFallbackMiniProgramEntries();
   assert.ok(fallback.length >= 6, "首页场景入口 fallback 应可用");
 
@@ -143,6 +187,7 @@ async function main() {
             skus: spu.skus.map((sku) => ({
               id: sku.id,
               stock: sku.stock,
+              isActive: sku.isActive !== false,
               specName: sku.specName,
               price: sku.price.toString(),
               imageUrl: sku.imageUrl,
@@ -154,6 +199,69 @@ async function main() {
     },
   ], { now: NOW });
   assert.equal(withStock.length, 1);
+
+  const smokeBanner = await prisma.banner.create({
+    data: {
+      imageUrl: "https://cdn.example.com/smoke-banner-delete.jpg",
+      sortOrder: 99999,
+      targetType: "NONE",
+      isActive: true,
+      isDeleted: false,
+    },
+  });
+
+  const cmsBefore = await listCmsBanners({ includeInactive: true });
+  assert.ok(
+    cmsBefore.banners.some((b) => b.id === smokeBanner.id),
+    "CMS 默认列表应包含未删除 Banner"
+  );
+
+  const wechatBefore = resolveWechatBanners([
+    {
+      id: smokeBanner.id,
+      imageUrl: smokeBanner.imageUrl,
+      sortOrder: smokeBanner.sortOrder,
+      targetType: smokeBanner.targetType,
+      targetParam: smokeBanner.targetParam,
+      productId: smokeBanner.productId,
+      isActive: true,
+      isDeleted: false,
+    },
+  ], new Map(), NOW);
+  assert.equal(wechatBefore.length, 1, "软删除前小程序应可展示");
+
+  await softDeleteCmsBanner(smokeBanner.id);
+  await softDeleteCmsBanner(smokeBanner.id);
+
+  const rowAfter = await prisma.banner.findUniqueOrThrow({
+    where: { id: smokeBanner.id },
+  });
+  assert.equal(rowAfter.isDeleted, true);
+  assert.equal(rowAfter.isActive, false);
+
+  const cmsAfter = await listCmsBanners({ includeInactive: true });
+  assert.ok(
+    !cmsAfter.banners.some((b) => b.id === smokeBanner.id),
+    "软删除后 CMS 默认列表不应展示"
+  );
+
+  const wechatAfter = resolveWechatBanners(
+    [
+      {
+        id: smokeBanner.id,
+        imageUrl: smokeBanner.imageUrl,
+        sortOrder: smokeBanner.sortOrder,
+        targetType: smokeBanner.targetType,
+        targetParam: smokeBanner.targetParam,
+        productId: smokeBanner.productId,
+        isActive: rowAfter.isActive,
+        isDeleted: rowAfter.isDeleted,
+      },
+    ],
+    new Map(),
+    NOW
+  );
+  assert.equal(wechatAfter.length, 0, "软删除后小程序不应返回");
 
   console.log("smoke-cms-home-content passed");
 }

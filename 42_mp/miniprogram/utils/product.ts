@@ -56,7 +56,7 @@ export interface WechatProductRaw {
   isOutOfStock?: boolean;
   stockSummary?: StockSummary;
   stockStatus?: 'IN_STOCK' | 'LOW_STOCK' | 'SOLD_OUT';
-  displayStatus?: 'AVAILABLE' | 'SOLD_OUT' | 'OFF_SHELF';
+  displayStatus?: 'AVAILABLE' | 'LOW_STOCK' | 'SOLD_OUT' | 'OFF_SHELF';
   skus?: WechatProductSku[];
   occasionTags?: WechatProductTagDisplay[];
   colorTags?: WechatProductTagDisplay[];
@@ -79,7 +79,7 @@ export interface WechatProductItem {
   isOutOfStock?: boolean;
   stockSummary?: StockSummary;
   stockStatus?: 'IN_STOCK' | 'LOW_STOCK' | 'SOLD_OUT';
-  displayStatus?: 'AVAILABLE' | 'SOLD_OUT' | 'OFF_SHELF';
+  displayStatus?: 'AVAILABLE' | 'LOW_STOCK' | 'SOLD_OUT' | 'OFF_SHELF';
   stockLabel?: string;
   skus: WechatProductSku[];
   occasionTags: WechatProductTagDisplay[];
