@@ -1219,6 +1219,87 @@ logging:
 
 ---
 
+## 14.1 Sprint 12 — 业务规则防线（Round 1）
+
+### 业务规则源文件
+
+- **`docs/business-rules.md`**：已确认业务规则清单（展示状态、下单、提前预订、配送、取消/退款、推荐位、Banner、CRM、权限、错误码、不变量）。
+- 实现与测试以该文档为准；变更规则须同步更新文档与纯函数测试。
+
+### 统一错误码
+
+| 模块 | 文件 |
+|---|---|
+| 小程序 + 后台汇总 | `src/lib/business-errors.ts` |
+| 小程序错误码常量 | `src/lib/miniprogram-business-error.ts` |
+| 小程序错误响应 | `src/lib/wechat-api.ts` → `jsonWechatError`（`ok`/`code`/`message`） |
+| 后台权限拒绝 | `src/lib/api-auth.ts` → `PERMISSION_DENIED` |
+
+错误码红线：库存不足 → `INSUFFICIENT_STOCK`；提前预订 → `BULK_ORDER_REQUIRES_PREORDER`；下架 → `PRODUCT_OFF_SHELF`；权限 → `PERMISSION_DENIED`。
+
+### 小程序展示状态
+
+| 状态 | 含义 |
+|---|---|
+| `AVAILABLE` | 上架且有库存（stock > 3） |
+| `LOW_STOCK` | 上架且 1 ≤ stock ≤ 3 |
+| `SOLD_OUT` | 上架且售罄（stock = 0） |
+| `OFF_SHELF` | 下架或软删 |
+
+售罄 ≠ 下架；用户行为不得自动下架商品。实现：`src/services/miniprogram-stock-pure.ts`。
+
+### 纯函数业务规则
+
+| 文件 | 职责 |
+|---|---|
+| `src/services/preorder-rule-pure.ts` | 大批量提前预订（阈值默认 3，minLeadDays 默认 1） |
+| `src/services/delivery-settings-pure.ts` | 店铺配送时段 / 截单 17:00 / 当天配送 |
+| `src/services/recommendation-rules-pure.ts` | 推荐位小程序安全过滤（售罄隐藏、不补位） |
+| `src/services/banner-rules-pure.ts` | Banner 小程序过滤（软删、有效期、localhost） |
+| `src/services/order-invariants-pure.ts` | 订单/库存不变量断言与待支付超时常量 |
+
+### 待支付订单
+
+- **15 分钟**未支付自动关闭：`closeExpiredPendingOrders`（`PENDING_PAYMENT_TIMEOUT_MS`）。
+- 主动取消 / 超时关闭：回补 `ProductSku.stock`；不扣 Batch、不生成 SALE_OUT / OrderCostSnapshot。
+- 小程序订单页倒计时：Round 2。
+
+### 退款库存回填
+
+- 已支付退款**默认不回填**物理库存；`refundPaidOrder({ rollbackStock })` 由后台用户选择。
+- 历史 `OrderCostSnapshot` 保留；销售报表默认排除已退款订单。
+
+### 推荐位 / Banner
+
+- 推荐位：售罄不返回；过滤后 slot 为空则不返回；CMS 配置不自动删除售罄 item。
+- Banner：软删除（`isActive=false`）；inactive / 过期不返回小程序；允许无跳转。
+
+### CRM 提醒
+
+- 暂不直接触达客户；系统内提醒 **1 天**未处理视为过期（`isSystemReminderExpired`）。
+
+### 权限角色矩阵
+
+- `STORE_ADMIN`：全店业务 + 店员管理。
+- `WAREHOUSE_MANAGER`：库存/采购；默认不碰 CMS 营销 / CRM。
+- `FLORIST`：订单履约 / 配方；默认不碰采购 / CRM / 报表。
+- `IT_ADMIN`：技术维护；**不得访问业务数据 API**。
+
+### 测试与 Smoke
+
+```bash
+npm run test:all                    # 全量纯函数测试
+npm run test:order-invariants
+npm run test:recommendation-rules
+npm run smoke:stock-boundary        # 需 DATABASE_URL
+npm run smoke:miniprogram-order-flow
+npm run smoke:permission-matrix     # 无需 DB
+```
+
+Smoke 测试数据前缀 `SMOKE_TEST_*`；详见 `docs/business-rules.md` §22。
+
+---
+
 ## 15. CMS 商品运营增强
 
 CMS 是小程序商品与营销内容的**运营配置中心**，与 WMS 配方/成本边界分离：

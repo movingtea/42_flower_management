@@ -1,6 +1,7 @@
 import { Role } from "@/generated/prisma/enums";
 import { auth } from "@/auth";
 import { jsonError } from "@/lib/api";
+import { permissionDeniedResponse } from "@/lib/business-errors";
 import {
   canAccessBusinessData,
   hasPermission,
@@ -40,11 +41,11 @@ export async function requirePermission(
   if (staff instanceof Response) return staff;
 
   if (!canAccessBusinessData(staff.role) && permission !== "staff:manage") {
-    return jsonError("IT 运维账号无权访问业务数据", 403);
+    return permissionDeniedResponse("IT 运维账号无权访问业务数据");
   }
 
   if (!hasPermission(staff.role, permission)) {
-    return jsonError("当前角色无权执行此操作", 403);
+    return permissionDeniedResponse();
   }
 
   return staff;

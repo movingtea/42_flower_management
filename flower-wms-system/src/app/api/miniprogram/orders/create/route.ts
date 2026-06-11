@@ -2,6 +2,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { jsonError } from "@/lib/api";
 import {
   isMiniprogramBusinessError,
+  MINIPROGRAM_ERROR_CODES,
   type MiniprogramErrorCode,
 } from "@/lib/miniprogram-business-error";
 import { requireUserFromRequest } from "@/lib/wechat-auth-request";
@@ -96,7 +97,11 @@ function mapErrorStatus(
     return { message: err.message, status: 400, code: err.code };
   }
   if (isStockSoldOutError(err)) {
-    return { message: STOCK_SOLD_OUT_MESSAGE, status: 400 };
+    return {
+      message: STOCK_SOLD_OUT_MESSAGE,
+      status: 400,
+      code: MINIPROGRAM_ERROR_CODES.INSUFFICIENT_STOCK,
+    };
   }
   if (err instanceof Error) {
     const msg = err.message;

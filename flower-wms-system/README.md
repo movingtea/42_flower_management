@@ -361,24 +361,67 @@ docker compose --profile cleanup run --rm docker-cleanup
 
 ## 11. 测试 / Smoke Scripts
 
-当前没有统一 `npm test`。已有轻量 tsx 测试：
+**业务规则源文件**：`docs/business-rules.md`（Sprint 12 起为规则真理源）。
+
+### 业务不变量测试
+
+全量纯函数测试：
+
+```bash
+npm run test:all
+```
+
+Sprint 12 专项测试：
+
+```bash
+npm run test:preorder-rule
+npm run test:delivery-settings
+npm run test:recommendation-rules
+npm run test:banner-rules
+npm run test:order-invariants
+npm run test:stock-invariants
+npm run test:permission-invariants
+npm run test:crm-invariants
+npm run test:image-url-invariants
+```
+
+已有轻量 tsx 测试（节选）：
 
 ```bash
 npm run test:cost
 npm run test:reports
 npm run test:purchase
 npm run test:margin
+npm run test:miniprogram-stock
+npm run test:crm
 ```
 
-采购入库手动 smoke：
+### Smoke Scripts
+
+无需数据库：
 
 ```bash
+npm run smoke:permission-matrix
+npm run smoke:image-url
+npm run smoke:recommendation-rules
+```
+
+需要 `DATABASE_URL` 且已 migrate：
+
+```bash
+npm run smoke:stock-boundary
+npm run smoke:preorder-rule
+npm run smoke:cms-home-content
+npm run smoke:crm-order-sync
+npm run smoke:miniprogram-order-flow
 DATABASE_URL="postgresql://..." npm run smoke:purchase
 ```
 
-该脚本会创建/复用测试供应商、FlowerWiki 和操作员，创建采购单，执行 receive，断言 Batch、StockLog、Material 库存和成本字段一致。
+Smoke 脚本会创建带 `SMOKE_TEST_*` 前缀的测试数据；**勿在生产环境裸跑**。可按前缀手动清理测试 `ProductSpu` / `User` / `Order`。
 
-其他脚本：
+采购 smoke 会创建/复用测试供应商、FlowerWiki 和操作员，创建采购单并 receive，断言 Batch、StockLog、Material 一致。
+
+其他工具脚本：
 
 ```bash
 npx tsx scripts/sync-physical-to-virtual-stock.ts
@@ -412,4 +455,5 @@ npm run seed:test-products
 - Redis / MQ。
 - 供应商分析大报表、采购价趋势图。
 - Excel 导入导出。
-- CRM / SaaS 计费。
+- SaaS 计费。
+- CRM 自动触达（订阅消息 / 短信）；后台 CRM 基础能力已实现。

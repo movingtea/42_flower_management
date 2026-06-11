@@ -21,11 +21,17 @@ import {
   formatBulkPreorderServerMessage,
   resolveSkuPreorderRule,
 } from "@/services/preorder-rule-pure";
+import {
+  isPendingPaymentExpired,
+  PENDING_PAYMENT_TIMEOUT_MS,
+} from "@/services/order-invariants-pure";
 
 export const STOCK_SOLD_OUT_MESSAGE = "手慢了，花材库存已被抢光！";
 
 export const FREE_SHIPPING_THRESHOLD = 99;
 export const DEFAULT_DELIVERY_FEE = 15;
+
+export { PENDING_PAYMENT_TIMEOUT_MS };
 
 export type CreateOrderLineInput = {
   skuId: string;
@@ -307,6 +313,32 @@ export async function confirmWechatOrderReceipt(userId: string, orderId: string)
   }
 
   return prisma.order.findUniqueOrThrow({ where: { id: orderId } });
+}
+
+/** 批量关闭超时待支付订单（15 分钟），回补 ProductSku.stock */
+export async function closeExpiredPendingOrders(now: Date = new Date()) {
+  const pending = await prisma.order.findMany({
+    where: { status: OrderStatus.PENDING_PAYMENT },
+    select: { id: true, createdAt: true },
+    orderBy: { createdAt: "asc" },
+    take: 200,
+  });
+
+  const expiredIds = pending
+    .filter((order) => isPendingPaymentExpired(order.createdAt, now))
+    .map((order) => order.id);
+
+  let closed = 0;
+  for (const orderId of expiredIds) {
+    try {
+      await closePendingOrder(orderId);
+      closed += 1;
+    } catch (err) {
+      console.error("[order] closeExpiredPendingOrders failed", orderId, err);
+    }
+  }
+
+  return { scanned: pending.length, closed, orderIds: expiredIds };
 }
 
 /** 关闭待支付订单并归还虚拟 SKU 库存（无 SALE_OUT，不涉及物理回库） */

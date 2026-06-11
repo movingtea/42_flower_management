@@ -303,3 +303,16 @@ export function shouldCreateReminder(input: {
 export function getDueDateMonthDay(dueDate: Date): string {
   return formatDateInAppTimezoneIso(dueDate).slice(5);
 }
+
+/** 系统内提醒超过 1 天未处理视为过期 */
+export const SYSTEM_REMINDER_EXPIRY_MS = 24 * 60 * 60 * 1000;
+
+export function isSystemReminderExpired(
+  reminder: { createdAt: Date; status?: string },
+  now: Date = new Date()
+): boolean {
+  if (reminder.status === "COMPLETED" || reminder.status === "DISMISSED") {
+    return false;
+  }
+  return now.getTime() - reminder.createdAt.getTime() > SYSTEM_REMINDER_EXPIRY_MS;
+}
