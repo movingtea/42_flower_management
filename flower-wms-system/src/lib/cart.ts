@@ -1,4 +1,4 @@
-import { isSpuOutOfStock } from "@/lib/product-spu";
+import type { MiniprogramErrorCode } from "@/lib/miniprogram-business-error";
 
 export type CartClientItem = {
   productId: string;
@@ -21,12 +21,18 @@ export type CartProductSnapshot = {
   stock: number;
 };
 
+export type CartInvalidCode =
+  | MiniprogramErrorCode
+  | "SELECT_SPEC"
+  | null;
+
 export type CartLineResponse = {
   productId: string;
   skuId: string | null;
   quantity: number;
   isInvalid: boolean;
   invalidReason: string | null;
+  invalidCode: CartInvalidCode;
   product: CartProductSnapshot | null;
 };
 

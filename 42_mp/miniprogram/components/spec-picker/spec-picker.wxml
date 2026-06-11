@@ -12,6 +12,7 @@
       <view class="spec-header-info">
         <text class="spec-header-name">{{product.name}}</text>
         <text class="spec-header-price">¥{{product.price}}{{product.priceSuffix}}</text>
+        <text class="spec-header-stock">{{selectedSkuStockLabel}}</text>
       </view>
       <view class="spec-close-btn flex-center" catchtap="onClose">×</view>
     </view>
@@ -36,7 +37,7 @@
               wx:if="{{item.stock <= 0}}"
               class="spec-sku-soldout flex-center"
             >
-              <text>缺货</text>
+              <text>售罄</text>
             </view>
             <view
               class="spec-zoom-btn flex-center"

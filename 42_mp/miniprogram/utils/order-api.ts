@@ -106,6 +106,7 @@ export function createOrder(payload: CreateOrderPayload) {
   return request<CreateOrderResult>({
     url: '/orders/create',
     method: 'POST',
+    quiet: true,
     data: payload as WechatMiniprogram.IAnyObject,
   });
 }

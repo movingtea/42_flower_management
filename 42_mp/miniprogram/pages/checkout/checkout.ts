@@ -25,6 +25,8 @@ import {
   occasionLabelByKey,
 } from '../../utils/crm-options';
 import { getDeliveryHints, FLOWER_ADJUSTMENT_NOTE } from '../../utils/gift-copy';
+import { request } from '../../utils/request';
+import { mapInvalidCartTag } from '../../utils/stock';
 
 interface CheckoutDisplayItem {
   lineKey: string;
@@ -569,6 +571,43 @@ Page({
     });
   },
 
+  async validateCheckoutStock(): Promise<string | null> {
+    const items = this.data.checkoutSourceItems;
+    if (!items.length) return '暂无待结算商品，请返回购物车勾选';
+
+    try {
+      const res = await request<{
+        list: Array<{
+          isInvalid: boolean;
+          invalidReason?: string | null;
+          invalidCode?: string | null;
+        }>;
+      }>({
+        url: '/cart',
+        method: 'POST',
+        quiet: true,
+        data: {
+          items: items.map((row) => ({
+            productId: row.id,
+            skuId: row.skuId,
+            quantity: row.quantity,
+          })),
+        },
+      });
+
+      const invalidLine = (res?.list ?? []).find((line) => line.isInvalid);
+      if (invalidLine) {
+        return mapInvalidCartTag(
+          invalidLine.invalidReason,
+          invalidLine.invalidCode
+        );
+      }
+      return null;
+    } catch {
+      return '库存校验失败，请稍后重试';
+    }
+  },
+
   onSubmitOrder() {
     if (this.data.submitting) return;
 
@@ -587,35 +626,53 @@ Page({
       return;
     }
 
-    const payload = this.buildCreatePayload();
-
     this.setData({ submitting: true });
-    wx.showLoading({ title: '正在创建订单...', mask: true });
+    wx.showLoading({ title: '正在校验库存...', mask: true });
 
-    createOrder(payload)
-      .then((data) => {
-        wx.hideLoading();
-        if (!data?.orderId) {
-          wx.showToast({ title: '创建订单失败', icon: 'none' });
+    void this.validateCheckoutStock()
+      .then((stockError) => {
+        if (stockError) {
+          wx.hideLoading();
+          this.setData({ submitting: false });
+          wx.showModal({
+            title: '无法下单',
+            content: stockError,
+            showCancel: false,
+          });
           return;
         }
-        this.showMockPayModal(data.orderId);
+
+        const payload = this.buildCreatePayload();
+        wx.showLoading({ title: '正在创建订单...', mask: true });
+        return createOrder(payload)
+          .then((data) => {
+            wx.hideLoading();
+            if (!data?.orderId) {
+              wx.showToast({ title: '创建订单失败', icon: 'none' });
+              return;
+            }
+            this.showMockPayModal(data.orderId);
+          })
+          .catch((err) => {
+            wx.hideLoading();
+            console.error('创建订单失败', err);
+            const errBody = err as { error?: string; code?: string };
+            const errMsg = errBody?.error || '请稍后重试';
+            wx.showModal({
+              title:
+                errBody?.code === 'INSUFFICIENT_STOCK'
+                  ? '库存不足'
+                  : '下单失败',
+              content: errMsg,
+              showCancel: false,
+            });
+          })
+          .finally(() => {
+            this.setData({ submitting: false });
+          });
       })
-      .catch((err) => {
+      .catch(() => {
         wx.hideLoading();
-        console.error('创建订单失败', err);
-        const errMsg =
-          (err as { error?: string })?.error ||
-          (typeof err === 'object' && err && 'message' in err
-            ? String((err as { message?: string }).message)
-            : '');
-        wx.showModal({
-          title: '下单失败',
-          content: errMsg || '请稍后重试',
-          showCancel: false,
-        });
-      })
-      .finally(() => {
         this.setData({ submitting: false });
       });
   },

@@ -14,17 +14,21 @@ import {
   type CartListItem,
 } from '../../utils/cart';
 import { request } from '../../utils/request';
+import { mapInvalidCartTag, validateLocalCartQuantity } from '../../utils/stock';
 
 interface CartSyncLine {
   productId: string;
+  skuId?: string | null;
   quantity: number;
   isInvalid: boolean;
   invalidReason?: string | null;
+  invalidCode?: string | null;
   product?: {
     name: string;
     sellPrice: string;
     imageUrl: string | null;
     shippingFee?: number;
+    stock?: number;
   } | null;
 }
 
@@ -95,7 +99,16 @@ Page({
     })
       .then((res) => {
         const lines = res?.list ?? [];
-        const invalidByKey: Record<string, boolean> = {};
+        const metaByKey: Record<
+          string,
+          {
+            isInvalid?: boolean;
+            invalidReason?: string | null;
+            invalidCode?: string | null;
+            availableStock?: number;
+            quantity?: number;
+          }
+        > = {};
         const lineMap = new Map(
           lines.map((line) => [
             cartLineKey({
@@ -109,12 +122,41 @@ Page({
         const mergedStored = stored.map((row) => {
           const key = cartLineKey(row);
           const line = lineMap.get(key);
-          if (line?.isInvalid) {
-            invalidByKey[key] = true;
+          const availableStock = line?.product?.stock;
+          let nextQuantity = row.quantity;
+          let isInvalid = !!line?.isInvalid;
+          let invalidReason = line?.invalidReason ?? null;
+          let invalidCode = line?.invalidCode ?? null;
+
+          if (!line) {
+            isInvalid = true;
+            invalidCode = 'PRODUCT_NOT_FOUND';
+            invalidReason = '商品已失效';
+          } else if (
+            availableStock != null &&
+            availableStock > 0 &&
+            nextQuantity > availableStock
+          ) {
+            nextQuantity = availableStock;
+            isInvalid = false;
+            wx.showToast({
+              title: `库存不足，已调整为 ${availableStock} 件`,
+              icon: 'none',
+            });
           }
+
+          metaByKey[key] = {
+            isInvalid,
+            invalidReason,
+            invalidCode,
+            availableStock,
+            quantity: nextQuantity,
+          };
+
           if (line?.product) {
             return {
               ...row,
+              quantity: nextQuantity,
               name: line.product.name || row.name,
               price: line.product.sellPrice ?? row.price,
               imageUrl: toRelativeImagePath(
@@ -123,22 +165,19 @@ Page({
               shippingFee: line.product.shippingFee ?? row.shippingFee,
             };
           }
-          if (!line) {
-            invalidByKey[key] = true;
-          }
-          return row;
+          return { ...row, quantity: nextQuantity };
         });
 
         writeCartToStorage(mergedStored);
 
-        const cartList = storageToCartList(mergedStored, prevMap, invalidByKey).map(
-          (item) => {
-            const line = lineMap.get(cartLineKey(item));
-            return {
-              ...item,
-              invalidReason: line?.invalidReason ?? item.invalidReason,
-            };
-          }
+        const cartList = storageToCartList(mergedStored, prevMap, metaByKey).map(
+          (item) => ({
+            ...item,
+            invalidReason: mapInvalidCartTag(
+              item.invalidReason,
+              item.invalidCode
+            ),
+          })
         );
 
         this.applyCartList(cartList, { syncBadge: true });
@@ -198,7 +237,13 @@ Page({
 
     const cartList = [...this.getCartListSafe()];
     if (cartList[index].isInvalid) {
-      wx.showToast({ title: '该商品已下架', icon: 'none' });
+      wx.showToast({
+        title: mapInvalidCartTag(
+          cartList[index].invalidReason,
+          cartList[index].invalidCode
+        ),
+        icon: 'none',
+      });
       return;
     }
     cartList[index] = {
@@ -238,12 +283,29 @@ Page({
     const lineKey = e.currentTarget.dataset.lineKey as string;
     const index = this.findItemIndex(lineKey);
     if (index < 0) return;
-    if (this.getCartListSafe()[index].isInvalid) return;
 
     const cartList = [...this.getCartListSafe()];
+    const item = cartList[index];
+    if (item.isInvalid) return;
+
+    const stock = item.availableStock;
+    const nextQty = item.quantity + 1;
+    if (stock != null) {
+      const check = validateLocalCartQuantity({
+        stock,
+        existingQty: 0,
+        nextQty,
+        specName: item.specName,
+      });
+      if (!check.ok) {
+        wx.showToast({ title: check.message, icon: 'none' });
+        return;
+      }
+    }
+
     cartList[index] = {
-      ...cartList[index],
-      quantity: cartList[index].quantity + 1,
+      ...item,
+      quantity: nextQty,
     };
     this.persistCartList(cartList);
   },
@@ -287,7 +349,7 @@ Page({
       (item) => item.selected && item.isInvalid
     );
     if (hasInvalidSelected) {
-      wx.showToast({ title: '已下架商品无法结算', icon: 'none' });
+      wx.showToast({ title: '存在不可结算商品，请处理后再试', icon: 'none' });
       return;
     }
 

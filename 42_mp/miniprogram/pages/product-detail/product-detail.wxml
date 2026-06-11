@@ -31,7 +31,7 @@
         <text class="detail-name">{{product.name}}</text>
         <text wx:if="{{product.subtitle}}" class="detail-subtitle text-muted">{{product.subtitle}}</text>
         <text class="detail-price">{{priceLabel}}</text>
-        <text wx:if="{{product.isOutOfStock}}" class="detail-stock-tag">今日售罄</text>
+        <text class="detail-stock-tag {{canPurchase ? '' : 'detail-stock-tag--sold-out'}}">{{selectedSkuStockLabel}}</text>
       </view>
 
       <!-- 礼赠表达 -->
@@ -132,8 +132,8 @@
         <text class="footer-icon-label">购物车</text>
       </view>
       <view class="footer-actions">
-        <view class="footer-btn footer-btn--cart flex-center" bindtap="onOpenSpecPicker" data-mode="cart">加入购物车</view>
-        <view class="footer-btn footer-btn--buy flex-center" bindtap="onOpenSpecPicker" data-mode="buy">立即预订</view>
+        <view class="footer-btn footer-btn--cart flex-center {{canPurchase ? '' : 'footer-btn--disabled'}}" bindtap="onOpenSpecPicker" data-mode="cart">加入购物车</view>
+        <view class="footer-btn footer-btn--buy flex-center {{canPurchase ? '' : 'footer-btn--disabled'}}" bindtap="onOpenSpecPicker" data-mode="buy">立即预订</view>
       </view>
     </view>
   </block>

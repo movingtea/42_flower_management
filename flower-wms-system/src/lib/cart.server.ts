@@ -1,11 +1,20 @@
 import {
+  MINIPROGRAM_ERROR_CODES,
+  MiniprogramBusinessError,
+} from "@/lib/miniprogram-business-error";
+import {
   cartInvalidReason,
   isCartSpuInvalid,
   type CartClientItem,
+  type CartInvalidCode,
   type CartLineResponse,
 } from "@/lib/cart";
 import { isSpuOutOfStock, productSpuInclude } from "@/lib/product-spu";
 import { prisma } from "@/lib/prisma";
+import {
+  mapCartInvalidReason,
+  validateCartQuantity,
+} from "@/services/miniprogram-stock-pure";
 
 export function parseCartClientItems(raw: unknown): CartClientItem[] {
   if (!Array.isArray(raw)) {
@@ -45,7 +54,77 @@ export function parseCartClientItems(raw: unknown): CartClientItem[] {
   return items;
 }
 
-/** 根据客户端购物车条目查询 SPU/SKU 并计算 isInvalid */
+function resolveCartLineInvalid(input: {
+  spu: {
+    isDeleted: boolean;
+    isActive: boolean;
+    skus: Array<{ id: string; stock: number; specName: string }>;
+  } | null;
+  item: CartClientItem;
+}): { invalid: boolean; code: CartInvalidCode; reason: string | null } {
+  const { spu, item } = input;
+
+  if (!spu) {
+    return {
+      invalid: true,
+      code: MINIPROGRAM_ERROR_CODES.PRODUCT_NOT_FOUND,
+      reason: mapCartInvalidReason(MINIPROGRAM_ERROR_CODES.PRODUCT_NOT_FOUND),
+    };
+  }
+
+  if (isCartSpuInvalid(spu)) {
+    return {
+      invalid: true,
+      code: MINIPROGRAM_ERROR_CODES.PRODUCT_OFF_SHELF,
+      reason: cartInvalidReason(spu),
+    };
+  }
+
+  const sku = item.skuId
+    ? spu.skus.find((s) => s.id === item.skuId)
+    : spu.skus.length === 1
+      ? spu.skus[0]
+      : undefined;
+
+  if (spu.skus.length > 1 && !sku) {
+    return {
+      invalid: true,
+      code: "SELECT_SPEC",
+      reason: mapCartInvalidReason("SELECT_SPEC"),
+    };
+  }
+
+  if (!sku) {
+    return {
+      invalid: true,
+      code: MINIPROGRAM_ERROR_CODES.SKU_NOT_FOUND,
+      reason: mapCartInvalidReason(MINIPROGRAM_ERROR_CODES.SKU_NOT_FOUND),
+    };
+  }
+
+  if (sku.stock <= 0) {
+    return {
+      invalid: true,
+      code: MINIPROGRAM_ERROR_CODES.INSUFFICIENT_STOCK,
+      reason: `${sku.specName} 暂时售罄`,
+    };
+  }
+
+  if (sku.stock < item.quantity) {
+    return {
+      invalid: true,
+      code: MINIPROGRAM_ERROR_CODES.INSUFFICIENT_STOCK,
+      reason: mapCartInvalidReason(
+        MINIPROGRAM_ERROR_CODES.INSUFFICIENT_STOCK,
+        `库存不足，当前仅剩 ${sku.stock} 件`
+      ),
+    };
+  }
+
+  return { invalid: false, code: null, reason: null };
+}
+
+/** 根据客户端购物车条目查询 SPU/SKU 并计算库存 / 上架状态 */
 export async function buildCartLines(
   clientItems: CartClientItem[]
 ): Promise<CartLineResponse[]> {
@@ -63,69 +142,138 @@ export async function buildCartLines(
   const spuMap = new Map(spus.map((s) => [s.id, s]));
 
   return clientItems.map((item) => {
-    const spu = spuMap.get(item.productId);
+    const spu = spuMap.get(item.productId) ?? null;
+    const { invalid, code, reason } = resolveCartLineInvalid({ spu, item });
 
-    if (!spu) {
-      return {
-        productId: item.productId,
-        skuId: item.skuId ?? null,
-        quantity: item.quantity,
-        isInvalid: true,
-        invalidReason: "已下架",
-        product: null,
-      };
-    }
-
-    const sku = item.skuId
-      ? spu.skus.find((s) => s.id === item.skuId)
-      : spu.skus.length === 1
-        ? spu.skus[0]
-        : undefined;
-
-    let invalid = isCartSpuInvalid(spu);
-    let invalidReasonText: string | null = invalid
-      ? cartInvalidReason(spu)
-      : null;
-
-    if (!invalid && spu.skus.length > 1 && !sku) {
-      invalid = true;
-      invalidReasonText = "请选择款式";
-    }
-
-    if (!invalid && sku && sku.stock < item.quantity) {
-      invalid = true;
-      invalidReasonText = "库存不足";
-    }
-
-    if (!invalid && isSpuOutOfStock(spu.skus)) {
-      invalid = true;
-      invalidReasonText = "已下架";
-    }
+    const sku = spu
+      ? item.skuId
+        ? spu.skus.find((s) => s.id === item.skuId)
+        : spu.skus.length === 1
+          ? spu.skus[0]
+          : undefined
+      : undefined;
 
     const displayName = sku
-      ? `${spu.name}（${sku.specName}）`
-      : spu.name;
+      ? `${spu!.name}（${sku.specName}）`
+      : (spu?.name ?? item.productId);
 
     return {
       productId: item.productId,
       skuId: sku?.id ?? null,
       quantity: item.quantity,
       isInvalid: invalid,
-      invalidReason: invalidReasonText,
-      product: {
-        spuId: spu.id,
-        skuId: sku?.id ?? null,
-        name: displayName,
-        specName: sku?.specName ?? null,
-        skuCode: sku?.skuCode ?? null,
-        sellPrice: sku ? sku.price.toString() : "0",
-        imageUrl: sku?.imageUrl ?? null,
-        shippingFee: Number(spu.shippingFee ?? 0),
-        isDeleted: spu.isDeleted,
-        isActive: spu.isActive,
-        isOutOfStock: sku ? sku.stock <= 0 : isSpuOutOfStock(spu.skus),
-        stock: sku?.stock ?? 0,
-      },
+      invalidReason: reason,
+      invalidCode: code,
+      product: spu
+        ? {
+            spuId: spu.id,
+            skuId: sku?.id ?? null,
+            name: displayName,
+            specName: sku?.specName ?? null,
+            skuCode: sku?.skuCode ?? null,
+            sellPrice: sku ? sku.price.toString() : "0",
+            imageUrl: sku?.imageUrl ?? null,
+            shippingFee: Number(spu.shippingFee ?? 0),
+            isDeleted: spu.isDeleted,
+            isActive: spu.isActive,
+            isOutOfStock: sku ? sku.stock <= 0 : isSpuOutOfStock(spu.skus),
+            stock: sku?.stock ?? 0,
+          }
+        : null,
     };
   });
+}
+
+export type ValidateCartAddInput = {
+  spuId: string;
+  skuId: string;
+  quantity: number;
+  existingItems?: CartClientItem[];
+};
+
+export type ValidateCartAddResult = {
+  ok: boolean;
+  code?: CartInvalidCode;
+  message?: string;
+  availableStock?: number;
+};
+
+/** 加入购物车前服务端校验库存与上架状态 */
+export async function validateCartAdd(
+  input: ValidateCartAddInput
+): Promise<ValidateCartAddResult> {
+  const quantity = Math.floor(Number(input.quantity));
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    throw new Error("quantity 须为正整数");
+  }
+
+  const sku = await prisma.productSku.findUnique({
+    where: { id: input.skuId.trim() },
+    include: {
+      spu: {
+        select: {
+          id: true,
+          name: true,
+          isActive: true,
+          isDeleted: true,
+        },
+      },
+    },
+  });
+
+  if (!sku || sku.spuId !== input.spuId.trim()) {
+    return {
+      ok: false,
+      code: MINIPROGRAM_ERROR_CODES.SKU_NOT_FOUND,
+      message: mapCartInvalidReason(MINIPROGRAM_ERROR_CODES.SKU_NOT_FOUND)!,
+    };
+  }
+
+  if (!sku.spu || sku.spu.isDeleted) {
+    return {
+      ok: false,
+      code: MINIPROGRAM_ERROR_CODES.PRODUCT_NOT_FOUND,
+      message: mapCartInvalidReason(MINIPROGRAM_ERROR_CODES.PRODUCT_NOT_FOUND)!,
+    };
+  }
+
+  if (!sku.spu.isActive) {
+    return {
+      ok: false,
+      code: MINIPROGRAM_ERROR_CODES.PRODUCT_OFF_SHELF,
+      message: mapCartInvalidReason(MINIPROGRAM_ERROR_CODES.PRODUCT_OFF_SHELF)!,
+    };
+  }
+
+  const existingItems = input.existingItems ?? [];
+  const existingQty = existingItems
+    .filter((row) => row.skuId === sku.id)
+    .reduce((sum, row) => sum + row.quantity, 0);
+
+  const check = validateCartQuantity({
+    stock: sku.stock,
+    existingQty,
+    addQty: quantity,
+    specName: sku.specName,
+  });
+
+  if (!check.ok) {
+    return {
+      ok: false,
+      code: check.code,
+      message: check.message,
+      availableStock: check.available,
+    };
+  }
+
+  return { ok: true, availableStock: sku.stock };
+}
+
+export function throwIfCartAddInvalid(result: ValidateCartAddResult): void {
+  if (result.ok) return;
+  const code =
+    result.code && result.code !== "SELECT_SPEC"
+      ? result.code
+      : MINIPROGRAM_ERROR_CODES.INSUFFICIENT_STOCK;
+  throw new MiniprogramBusinessError(code, result.message ?? "库存不足");
 }

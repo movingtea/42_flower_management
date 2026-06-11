@@ -1,6 +1,7 @@
 import { baseUrl } from '../../config/index';
 import type { WechatProductItem } from '../../utils/product';
 import { isSkuSelectable } from '../../utils/product';
+import { formatSkuStockLabel } from '../../utils/stock';
 
 Component({
   properties: {
@@ -20,6 +21,7 @@ Component({
 
   data: {
     selectedSkuId: '',
+    selectedSkuStockLabel: '',
     isPreviewShow: false,
     previewImageUrl: '',
     previewSpecName: '',
@@ -37,7 +39,10 @@ Component({
       if (!product?.skus?.length) return;
       const firstAvailable =
         product.skus.find((s) => isSkuSelectable(s)) ?? product.skus[0];
-      this.setData({ selectedSkuId: firstAvailable.id });
+      this.setData({
+        selectedSkuId: firstAvailable.id,
+        selectedSkuStockLabel: formatSkuStockLabel(firstAvailable.stock),
+      });
     },
   },
 
@@ -83,10 +88,13 @@ Component({
         (s) => s.id === id
       );
       if (!sku || !isSkuSelectable(sku)) {
-        wx.showToast({ title: '该款式暂时缺货', icon: 'none' });
+        wx.showToast({ title: '该规格暂时售罄', icon: 'none' });
         return;
       }
-      this.setData({ selectedSkuId: id });
+      this.setData({
+        selectedSkuId: id,
+        selectedSkuStockLabel: formatSkuStockLabel(sku.stock),
+      });
     },
 
     onPreviewSkuImage(e: WechatMiniprogram.TouchEvent) {

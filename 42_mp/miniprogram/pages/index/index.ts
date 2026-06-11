@@ -363,7 +363,7 @@ Page({
     }
 
     if (product.isOutOfStock) {
-      wx.showToast({ title: '今日售罄，可预约明日', icon: 'none' });
+      wx.showToast({ title: '该商品暂时售罄', icon: 'none' });
       return;
     }
 
@@ -381,7 +381,7 @@ Page({
       return;
     }
 
-    addPayloadToCart({
+    void addPayloadToCart({
       spuId: product.id,
       skuId: sku.id,
       skuCode: sku.skuCode,
@@ -390,8 +390,10 @@ Page({
       price: sku.price,
       imageUrl: sku.imageUrl || product.imageUrl,
       shippingFee: product.shippingFee,
+      stock: sku.stock,
+    }).then((ok) => {
+      if (ok) wx.showToast({ title: '已加入购物车', icon: 'success' });
     });
-    wx.showToast({ title: '已加入购物车', icon: 'success' });
   },
 
   onSpecPickerClose() {
@@ -409,7 +411,9 @@ Page({
       imageUrl: string;
       shippingFee: number;
     };
-    addPayloadToCart({
+    const product = this.data.specPickerProduct;
+    const sku = product?.skus.find((s) => s.id === detail.skuId);
+    void addPayloadToCart({
       spuId: detail.spuId,
       skuId: detail.skuId,
       skuCode: detail.skuCode,
@@ -418,19 +422,16 @@ Page({
       price: detail.price,
       imageUrl: detail.imageUrl,
       shippingFee: detail.shippingFee,
+      stock: sku?.stock ?? 0,
+    }).then((ok) => {
+      if (ok) wx.showToast({ title: '已加入购物车', icon: 'success' });
     });
     this.setData({ specPickerVisible: false, specPickerProduct: null });
-    wx.showToast({ title: '已加入购物车', icon: 'success' });
   },
 
   onProductTap(e: WechatMiniprogram.TouchEvent) {
     const id = e.currentTarget.dataset.id as string;
-    const outOfStock = e.currentTarget.dataset.outOfStock;
     if (!id) return;
-    if (outOfStock) {
-      wx.showToast({ title: '今日售罄，可预约明日', icon: 'none' });
-      return;
-    }
     this.navigateToProductDetail(id);
   },
 

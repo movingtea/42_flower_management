@@ -121,7 +121,7 @@
             <view class="product-image-wrap">
               <image class="product-image" src="{{baseUrl}}{{item.imageUrl}}" mode="aspectFill" lazy-load="{{true}}" />
               <view wx:if="{{item.isOutOfStock}}" class="out-of-stock-mask flex-center">
-                <text class="out-of-stock-text">今日售罄</text>
+                <text class="out-of-stock-text">暂时售罄</text>
               </view>
             </view>
             <view class="product-info">
@@ -130,7 +130,10 @@
               <product-tag-badges tags="{{item.cardOccasionLabels}}" />
               <product-tag-badges wx:if="{{item.cardStyleColorLabels.length}}" tags="{{item.cardStyleColorLabels}}" />
               <view class="product-info-bottom">
-                <text class="price-text">¥{{item.price}}{{item.priceSuffix}}</text>
+                <view class="product-price-stock">
+                  <text class="price-text">¥{{item.price}}{{item.priceSuffix}}</text>
+                  <text class="stock-text {{item.isOutOfStock ? 'stock-text--sold-out' : ''}}">{{item.stockLabel}}</text>
+                </view>
                 <view class="cart-add-btn flex-center" catchtap="onAddCart" data-product="{{item}}">
                   <text class="cart-add-icon">+</text>
                 </view>
