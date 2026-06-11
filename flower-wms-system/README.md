@@ -389,7 +389,11 @@ npm run test:miniprogram-stock
 npm run test:recommendation-rules
 npm run test:recommendation-display
 npm run test:cms-validation
+npm run test:banner-rules
+npm run test:cms-banners
 ```
+
+CMS 首页轮播删除为**软删除**（`isDeleted=true`），删除后 CMS 默认列表与小程序 `home-banners` 均不再展示；历史记录保留。
 
 Sprint 12 专项测试：
 

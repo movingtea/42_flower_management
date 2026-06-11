@@ -23,7 +23,10 @@ export type CmsBannerRow = BannerRow & {
 };
 
 export type ListCmsBannersParams = {
+  /** 是否包含已停用（isActive=false）但未删除的 Banner；默认 true */
   includeInactive?: boolean;
+  /** 是否包含已软删除 Banner；默认 false，CMS 默认列表不展示 */
+  includeDeleted?: boolean;
 };
 
 export type CreateCmsBannerInput = {
@@ -133,11 +136,13 @@ export async function listCmsBanners(
 ): Promise<{ banners: CmsBannerRow[]; total: number }> {
   await migrateBannersFromAppConfigIfEmpty();
 
+  const includeInactive = params.includeInactive !== false;
+  const includeDeleted = params.includeDeleted === true;
+
   const rows = await prisma.banner.findMany({
     where: {
-      ...(params.includeInactive === false
-        ? { isDeleted: false, isActive: true }
-        : {}),
+      ...(includeDeleted ? {} : { isDeleted: false }),
+      ...(includeInactive ? {} : { isActive: true }),
     },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
     include: bannerInclude(),
@@ -246,10 +251,14 @@ export async function updateCmsBanner(
   return toBannerRow(row);
 }
 
-/** 软删除：停用轮播图，小程序不再展示 */
-export async function deactivateCmsBanner(id: string): Promise<CmsBannerRow> {
+/** 软删除：标记 isDeleted=true 且 isActive=false，小程序不再展示；记录保留 */
+export async function softDeleteCmsBanner(id: string): Promise<CmsBannerRow> {
   const existing = await getCmsBannerById(id);
   if (!existing) throw new Error("轮播图不存在");
+
+  if (existing.isDeleted) {
+    return existing;
+  }
 
   const row = await prisma.banner.update({
     where: { id },
@@ -259,6 +268,9 @@ export async function deactivateCmsBanner(id: string): Promise<CmsBannerRow> {
 
   return toBannerRow(row);
 }
+
+/** @deprecated 使用 softDeleteCmsBanner */
+export const deactivateCmsBanner = softDeleteCmsBanner;
 
 export async function reorderCmsBanners(
   items: Array<{ id: string; sortOrder: number }>

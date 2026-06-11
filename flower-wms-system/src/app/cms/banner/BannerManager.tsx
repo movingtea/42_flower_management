@@ -128,6 +128,7 @@ export function BannerManager() {
   const [linkTarget, setLinkTarget] = useState<CmsLinkTarget>(emptyLinkTarget);
   const [uploading, setUploading] = useState(false);
   const [legacyWarning, setLegacyWarning] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const showToast = (message: string) => {
     setToast(message);
@@ -284,25 +285,35 @@ export function BannerManager() {
   }
 
   async function handleDelete(row: BannerRow) {
+    if (deletingId) return;
     if (
       !window.confirm(
-        "确定要删除这个轮播图吗？删除后小程序首页将不再展示。"
+        "确定要删除这个首页轮播图吗？删除后小程序首页将不再展示，但历史记录会保留。"
       )
     ) {
       return;
     }
+
+    setDeletingId(row.id);
     try {
       const res = await fetch(`/api/admin/cms/banners/${row.id}`, {
         method: "DELETE",
       });
-      const json = (await res.json()) as { success?: boolean; error?: string };
+      const json = (await res.json()) as {
+        success?: boolean;
+        error?: string;
+        message?: string;
+      };
       if (!res.ok || !json.success) {
-        throw new Error(json.error ?? "删除失败");
+        throw new Error(json.error ?? json.message ?? "删除失败");
       }
+      setBanners((prev) => prev.filter((b) => b.id !== row.id));
       showToast("已删除");
       await loadBanners();
     } catch (e) {
       showToast(e instanceof Error ? e.message : "删除失败");
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -460,9 +471,10 @@ export function BannerManager() {
                       <Button
                         type="button"
                         variant="secondary"
+                        disabled={deletingId === item.id}
                         onClick={() => void handleDelete(item)}
                       >
-                        删除
+                        {deletingId === item.id ? "删除中…" : "删除"}
                       </Button>
                     </div>
                   </td>

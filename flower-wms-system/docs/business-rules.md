@@ -210,14 +210,19 @@
 
 ### CMS
 
-- 删除采用**软删除**（`isActive=false`，保留历史）。
-- 支持有效期（纯函数层 `startsAt`/`endsAt` 已预留；DB 字段待后续迁移）。
+- **删除 = 软删除**：`isDeleted=true` 且 `isActive=false`；**不物理删除**数据库记录，**不删除图片文件**。
+- 删除后 CMS **默认列表不展示**（`listCmsBanners` 默认过滤 `isDeleted=false`）。
+- **停用 ≠ 删除**：
+  - 停用（`isActive=false`，`isDeleted=false`）：临时隐藏，CMS 仍可见，可恢复启用。
+  - 删除（`isDeleted=true`）：默认管理列表隐藏，历史记录保留。
+- API：`DELETE /api/admin/cms/banners/[id]`，需 `cms:write`；重复删除幂等。
+- 支持有效期（`startsAt` / `endsAt`）。
 - 允许无跳转（`targetType=NONE`）。
 
 ### 小程序
 
-- 只返回 active Banner。
-- 软删除 / 停用 / 过期不返回。
+- 只返回 `isActive=true` 且 `isDeleted=false` 且在有效期内的 Banner。
+- 停用 / 软删除 / 过期 / 未开始 均不返回。
 - 按 `sortOrder` 排序，`createdAt`/`id` 兜底。
 - 图片 URL 不得含 localhost。
 - 不返回后台备注与内部字段。
@@ -467,3 +472,4 @@ npm run smoke:recommendation-rules  # 无需 DB
 |---|---|---|
 | 2026-06-11 | Sprint 12 R1 | 初版：业务规则文档、错误码、纯函数防线、不变量测试、smoke scripts |
 | 2026-06-11 | Sprint 13 | `ProductSku.isActive`：SKU 停用 vs 售罄 vs SPU 下架语义补齐；CMS SKU 启用开关；推荐位/购物车/下单 active SKU 过滤 |
+| 2026-06-11 | Sprint 13 fix | CMS Banner 删除修复：`listCmsBanners` 默认过滤 `isDeleted`；软删除幂等；删除按钮 loading/确认文案 |

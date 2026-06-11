@@ -40,6 +40,7 @@
     "test:order-expiry-lifecycle": "tsx src/services/order-expiry-lifecycle.test.ts",
     "test:recommendation-display": "tsx src/services/recommendation-display-pure.test.ts",
     "test:banner-validity": "tsx src/services/banner-validity.test.ts",
+    "test:cms-banners": "tsx src/services/cms-banners.test.ts",
     "test:sku-active-invariants": "tsx src/services/sku-active-invariants.test.ts",
     "test:all": "npm run test:cost && npm run test:reports && npm run test:purchase && npm run test:loss && npm run test:margin && npm run test:purchase-analytics && npm run test:product-decision && npm run test:datetime && npm run test:crm && npm run test:cms-validation && npm run test:miniprogram-products && npm run test:miniprogram-stock && npm run test:preorder-rule && npm run test:cms-home-scene-entries && npm run test:image-url && npm run test:setup-checklist && npm run test:data-quality && npm run test:system-health && npm run test:trial-run-check && npm run test:wms-nav && npm run test:cms-pickers && npm run test:delivery-settings && npm run test:recommendation-rules && npm run test:banner-rules && npm run test:order-invariants && npm run test:stock-invariants && npm run test:permission-invariants && npm run test:crm-invariants && npm run test:image-url-invariants && npm run test:order-fifo && npm run test:order-create-delivery && npm run test:recommendation-display && npm run test:banner-validity && npm run test:sku-active-invariants",
     "smoke:trial-run": "tsx scripts/smoke-trial-run.ts",

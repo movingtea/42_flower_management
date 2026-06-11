@@ -317,7 +317,7 @@ CMS 面向花店运营用户，主界面不要求理解 `productId` / `skuId` / 
 - Banner 跳转配置优先使用 `CmsLinkTargetSelector`（目标类型 + 目标对象），不要求运营手填内部 ID。
 - Banner 图片字段写库前须 `normalizeStoredImagePath`，不得持久化 localhost。
 - 小程序 `home-banners` 不得返回后台内部字段；图片 URL 输出前 `toPublicImageUrl`。
-- 删除 Banner 采用软删除（`isActive=false`），以免误删运营数据。
+- 删除 Banner 采用软删除（`isDeleted=true` + `isActive=false`），不物理删除记录；CMS 默认列表过滤已删除项。
 
 ---
 
@@ -367,8 +367,8 @@ CMS 面向花店运营用户，主界面不要求理解 `productId` / `skuId` / 
 | `GET /api/admin/cms/products/search` | 商品选择器轻量搜索 |
 | `GET /api/admin/cms/products/[id]/skus` | 商品 SKU 选择器列表 |
 | `GET /api/admin/wms/recipes/search` | 配方选择器轻量搜索 |
-| `GET/POST /api/admin/cms/banners` | 首页轮播列表（`?includeInactive=true` 含停用）/ 创建 |
-| `GET/PATCH/DELETE /api/admin/cms/banners/[id]` | 轮播详情 / 更新 / 软删除（`isActive=false`） |
+| `GET/POST /api/admin/cms/banners` | 首页轮播列表（`?includeInactive=true` 含停用但未删除）/ 创建 |
+| `GET/PATCH/DELETE /api/admin/cms/banners/[id]` | 轮播详情 / 更新 / 软删除（`isDeleted=true` + `isActive=false`；需 `cms:write`；写 AuditLog） |
 | `POST /api/admin/cms/banners/reorder` | 批量更新 `sortOrder` |
 | `GET/PUT /api/admin/banners` | **已废弃**，请用 `/api/admin/cms/banners` |
 | `GET/POST /api/admin/cms/recommendation-slots` | 推荐位列表 / 创建（`?lite=true` 返回轻量列表） |
@@ -1290,6 +1290,16 @@ logging:
 | 购物车 / 下单 | inactive → `SKU_INACTIVE`；stock=0 → `INSUFFICIENT_STOCK`；SPU 下架 → `PRODUCT_OFF_SHELF` |
 | 推荐位 | 库存汇总只统计 active SKU；CMS `recommendation-display-pure` 展示不可展示原因 |
 | 测试 | `test:sku-active-invariants`；smoke scripts 覆盖 inactive SKU 边界 |
+
+### Sprint 13 追加修复 — CMS Banner 删除
+
+| 问题 | 修复 |
+|---|---|
+| 删除后 Banner 仍出现在 CMS 列表 | `listCmsBanners` 默认 `isDeleted=false`；`includeInactive` 仅控制停用项 |
+| 删除按钮体验 | `BannerManager` 二次确认文案、loading、乐观移除、错误 toast |
+| 重复删除 | `softDeleteCmsBanner` 幂等；DELETE API 返回 `alreadyDeleted` |
+| 小程序 | `loadActiveBanners` / `filterHomeBannersForMiniprogram` 已过滤 `isDeleted`（无需改动） |
+| 测试 | `smoke:cms-home-content` 覆盖创建→软删除→列表/小程序过滤 |
 
 ### 退款库存回填
 

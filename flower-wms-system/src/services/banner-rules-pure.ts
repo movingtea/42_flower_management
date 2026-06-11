@@ -15,7 +15,7 @@ export type BannerInput = {
   sortOrder: number;
   createdAt?: string | Date;
   isActive: boolean;
-  /** 软删除：当前实现以 isActive=false 表示 */
+  /** 软删除：当前实现以 isDeleted=true 且 isActive=false 表示 */
   isDeleted?: boolean;
   startsAt?: Date | string | null;
   endsAt?: Date | string | null;
