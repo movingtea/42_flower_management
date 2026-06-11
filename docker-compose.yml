@@ -14,6 +14,11 @@ services:
       - flower-prod-network
     depends_on:
       - flower-web
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # 主 Web 应用（镜像由 CI push 至阿里云 ACR，服务器 docker compose pull）
   flower-web:
@@ -32,6 +37,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # 大仓供应链异步 Worker（反向库存健康度投影计算）
   flower-cron-worker:
@@ -49,6 +59,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   # 🐘 PostgreSQL 物理容器
   db:
@@ -66,6 +81,27 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 可选：部署后磁盘清理（非默认 profile，需手动启用）
+  # 安全提示：挂载 Docker socket 有安全风险，优先使用宿主机 scripts/deploy-cleanup.sh
+  docker-cleanup:
+    image: docker:cli
+    profiles:
+      - cleanup
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: >
+      sh -c "
+        docker container prune -f &&
+        docker image prune -f &&
+        docker network prune -f &&
+        docker builder prune -f --filter until=24h
+      "
 
 networks:
   flower-prod-network:
