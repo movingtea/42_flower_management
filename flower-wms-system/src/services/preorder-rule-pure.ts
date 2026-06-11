@@ -5,7 +5,7 @@ import {
   parseAppDateString,
 } from "@/lib/datetime";
 
-export const DEFAULT_BULK_ORDER_THRESHOLD = 5;
+export const DEFAULT_BULK_ORDER_THRESHOLD = 3;
 export const DEFAULT_BULK_MIN_LEAD_DAYS = 1;
 
 export type PreorderRuleFields = {

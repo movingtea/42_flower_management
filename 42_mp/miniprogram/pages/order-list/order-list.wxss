@@ -134,6 +134,40 @@
   color: #c45c5c;
 }
 
+.order-countdown {
+  margin-bottom: 12rpx;
+  font-size: 26rpx;
+  color: #c9a227;
+}
+
+.order-expired-text {
+  color: #999999;
+}
+
+.order-actions {
+  display: flex;
+  gap: 16rpx;
+  margin-top: 16rpx;
+}
+
+.order-pay-btn,
+.order-cancel-btn,
+.order-confirm-btn {
+  flex: 1;
+  font-size: 28rpx;
+}
+
+.order-pay-btn {
+  background: #dca597;
+  color: #ffffff;
+}
+
+.order-cancel-btn {
+  background: #ffffff;
+  color: #666666;
+  border: 1rpx solid #dddddd;
+}
+
 .order-confirm-btn {
   margin-top: 16rpx;
   background: #8fa89b;

@@ -19,8 +19,11 @@ import {
 import { prisma } from "@/lib/prisma";
 import {
   normalizeStoredImagePathRequired,
-  toPublicImageUrl,
 } from "@/lib/image-url";
+import {
+  filterHomeBannersForMiniprogram,
+  type BannerProductPayload,
+} from "@/services/banner-rules-pure";
 
 export type BannerRow = {
   id: string;
@@ -30,6 +33,9 @@ export type BannerRow = {
   targetParam: string | null;
   productId: string | null;
   isActive: boolean;
+  isDeleted?: boolean;
+  startsAt?: Date | null;
+  endsAt?: Date | null;
   spu?: {
     id: string;
     name: string;
@@ -69,7 +75,7 @@ export async function loadActiveBanners(): Promise<BannerRow[]> {
   await migrateBannersFromAppConfigIfEmpty();
 
   return prisma.banner.findMany({
-    where: { isActive: true },
+    where: { isActive: true, isDeleted: false },
     orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
     include: {
       spu: {
@@ -104,33 +110,39 @@ type ProductPick = {
   images: string[];
 };
 
-/** 小程序轮播 payload：软删除商品自动降级为 NONE */
+/** 小程序轮播 payload：经 banner-rules-pure 过滤与规范化 */
 export function resolveWechatBanners(
   rows: BannerRow[],
-  productMap: Map<string, ProductPick>
+  productMap: Map<string, ProductPick>,
+  now: Date = new Date()
 ): WechatBannerPayload[] {
-  const out: WechatBannerPayload[] = [];
-
-  for (const row of rows) {
-    let targetType = parseBannerTargetType(row.targetType);
-    let targetParam = row.targetParam?.trim() || null;
-    let productId = row.productId;
-
-    let productPayload: WechatBannerPayload["product"] = null;
-
-    if (targetType === "PRODUCT" && productId) {
-      const p = productMap.get(productId);
-      const productInvalid =
-        !p ||
-        row.spu?.isDeleted === true ||
-        row.spu?.isActive !== true;
-
-      if (productInvalid) {
-        targetType = "NONE";
-        targetParam = null;
-        productId = null;
-      } else {
-        productPayload = {
+  return filterHomeBannersForMiniprogram(
+    rows.map((row) => ({
+      id: row.id,
+      imageUrl: row.imageUrl,
+      sortOrder: row.sortOrder,
+      isActive: row.isActive,
+      isDeleted: row.isDeleted ?? false,
+      startsAt: row.startsAt,
+      endsAt: row.endsAt,
+      targetType: parseBannerTargetType(row.targetType),
+      targetParam: row.targetParam,
+      productId: row.productId,
+    })),
+    {
+      now,
+      resolveProduct: (banner) => {
+        if (!banner.productId) return null;
+        const p = productMap.get(banner.productId);
+        if (!p) return null;
+        const row = rows.find((r) => r.id === banner.id);
+        if (
+          row?.spu?.isDeleted === true ||
+          row?.spu?.isActive !== true
+        ) {
+          return null;
+        }
+        const payload: BannerProductPayload = {
           id: p.id,
           name: p.name,
           sku: p.sku,
@@ -138,21 +150,10 @@ export function resolveWechatBanners(
           imageUrl: p.images[0] ?? null,
           images: p.images,
         };
-      }
+        return payload;
+      },
     }
-
-    out.push({
-      id: row.id,
-      imageUrl: toPublicImageUrl(row.imageUrl) ?? row.imageUrl,
-      sort: row.sortOrder,
-      targetType,
-      targetParam,
-      productId,
-      product: productPayload,
-    });
-  }
-
-  return out;
+  ) as WechatBannerPayload[];
 }
 
 export async function loadWechatHomeBanners(): Promise<WechatBannerPayload[]> {

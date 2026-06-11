@@ -42,6 +42,9 @@ export type BannerMinAggregateOutputType = {
   targetParam: string | null
   productId: string | null
   isActive: boolean | null
+  isDeleted: boolean | null
+  startsAt: Date | null
+  endsAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -54,6 +57,9 @@ export type BannerMaxAggregateOutputType = {
   targetParam: string | null
   productId: string | null
   isActive: boolean | null
+  isDeleted: boolean | null
+  startsAt: Date | null
+  endsAt: Date | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -66,6 +72,9 @@ export type BannerCountAggregateOutputType = {
   targetParam: number
   productId: number
   isActive: number
+  isDeleted: number
+  startsAt: number
+  endsAt: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -88,6 +97,9 @@ export type BannerMinAggregateInputType = {
   targetParam?: true
   productId?: true
   isActive?: true
+  isDeleted?: true
+  startsAt?: true
+  endsAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -100,6 +112,9 @@ export type BannerMaxAggregateInputType = {
   targetParam?: true
   productId?: true
   isActive?: true
+  isDeleted?: true
+  startsAt?: true
+  endsAt?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -112,6 +127,9 @@ export type BannerCountAggregateInputType = {
   targetParam?: true
   productId?: true
   isActive?: true
+  isDeleted?: true
+  startsAt?: true
+  endsAt?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -211,6 +229,9 @@ export type BannerGroupByOutputType = {
   targetParam: string | null
   productId: string | null
   isActive: boolean
+  isDeleted: boolean
+  startsAt: Date | null
+  endsAt: Date | null
   createdAt: Date
   updatedAt: Date
   _count: BannerCountAggregateOutputType | null
@@ -246,6 +267,9 @@ export type BannerWhereInput = {
   targetParam?: Prisma.StringNullableFilter<"Banner"> | string | null
   productId?: Prisma.StringNullableFilter<"Banner"> | string | null
   isActive?: Prisma.BoolFilter<"Banner"> | boolean
+  isDeleted?: Prisma.BoolFilter<"Banner"> | boolean
+  startsAt?: Prisma.DateTimeNullableFilter<"Banner"> | Date | string | null
+  endsAt?: Prisma.DateTimeNullableFilter<"Banner"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Banner"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Banner"> | Date | string
   spu?: Prisma.XOR<Prisma.ProductSpuNullableScalarRelationFilter, Prisma.ProductSpuWhereInput> | null
@@ -259,6 +283,9 @@ export type BannerOrderByWithRelationInput = {
   targetParam?: Prisma.SortOrderInput | Prisma.SortOrder
   productId?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
+  startsAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  endsAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   spu?: Prisma.ProductSpuOrderByWithRelationInput
@@ -275,6 +302,9 @@ export type BannerWhereUniqueInput = Prisma.AtLeast<{
   targetParam?: Prisma.StringNullableFilter<"Banner"> | string | null
   productId?: Prisma.StringNullableFilter<"Banner"> | string | null
   isActive?: Prisma.BoolFilter<"Banner"> | boolean
+  isDeleted?: Prisma.BoolFilter<"Banner"> | boolean
+  startsAt?: Prisma.DateTimeNullableFilter<"Banner"> | Date | string | null
+  endsAt?: Prisma.DateTimeNullableFilter<"Banner"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Banner"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Banner"> | Date | string
   spu?: Prisma.XOR<Prisma.ProductSpuNullableScalarRelationFilter, Prisma.ProductSpuWhereInput> | null
@@ -288,6 +318,9 @@ export type BannerOrderByWithAggregationInput = {
   targetParam?: Prisma.SortOrderInput | Prisma.SortOrder
   productId?: Prisma.SortOrderInput | Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
+  startsAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  endsAt?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.BannerCountOrderByAggregateInput
@@ -308,6 +341,9 @@ export type BannerScalarWhereWithAggregatesInput = {
   targetParam?: Prisma.StringNullableWithAggregatesFilter<"Banner"> | string | null
   productId?: Prisma.StringNullableWithAggregatesFilter<"Banner"> | string | null
   isActive?: Prisma.BoolWithAggregatesFilter<"Banner"> | boolean
+  isDeleted?: Prisma.BoolWithAggregatesFilter<"Banner"> | boolean
+  startsAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Banner"> | Date | string | null
+  endsAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Banner"> | Date | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Banner"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Banner"> | Date | string
 }
@@ -319,6 +355,9 @@ export type BannerCreateInput = {
   targetType?: $Enums.BannerTargetType
   targetParam?: string | null
   isActive?: boolean
+  isDeleted?: boolean
+  startsAt?: Date | string | null
+  endsAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   spu?: Prisma.ProductSpuCreateNestedOneWithoutBannersInput
@@ -332,6 +371,9 @@ export type BannerUncheckedCreateInput = {
   targetParam?: string | null
   productId?: string | null
   isActive?: boolean
+  isDeleted?: boolean
+  startsAt?: Date | string | null
+  endsAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -343,6 +385,9 @@ export type BannerUpdateInput = {
   targetType?: Prisma.EnumBannerTargetTypeFieldUpdateOperationsInput | $Enums.BannerTargetType
   targetParam?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   spu?: Prisma.ProductSpuUpdateOneWithoutBannersNestedInput
@@ -356,6 +401,9 @@ export type BannerUncheckedUpdateInput = {
   targetParam?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -368,6 +416,9 @@ export type BannerCreateManyInput = {
   targetParam?: string | null
   productId?: string | null
   isActive?: boolean
+  isDeleted?: boolean
+  startsAt?: Date | string | null
+  endsAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -379,6 +430,9 @@ export type BannerUpdateManyMutationInput = {
   targetType?: Prisma.EnumBannerTargetTypeFieldUpdateOperationsInput | $Enums.BannerTargetType
   targetParam?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -391,6 +445,9 @@ export type BannerUncheckedUpdateManyInput = {
   targetParam?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   productId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -413,6 +470,9 @@ export type BannerCountOrderByAggregateInput = {
   targetParam?: Prisma.SortOrder
   productId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
+  startsAt?: Prisma.SortOrder
+  endsAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -429,6 +489,9 @@ export type BannerMaxOrderByAggregateInput = {
   targetParam?: Prisma.SortOrder
   productId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
+  startsAt?: Prisma.SortOrder
+  endsAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -441,6 +504,9 @@ export type BannerMinOrderByAggregateInput = {
   targetParam?: Prisma.SortOrder
   productId?: Prisma.SortOrder
   isActive?: Prisma.SortOrder
+  isDeleted?: Prisma.SortOrder
+  startsAt?: Prisma.SortOrder
+  endsAt?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -502,6 +568,9 @@ export type BannerCreateWithoutSpuInput = {
   targetType?: $Enums.BannerTargetType
   targetParam?: string | null
   isActive?: boolean
+  isDeleted?: boolean
+  startsAt?: Date | string | null
+  endsAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -513,6 +582,9 @@ export type BannerUncheckedCreateWithoutSpuInput = {
   targetType?: $Enums.BannerTargetType
   targetParam?: string | null
   isActive?: boolean
+  isDeleted?: boolean
+  startsAt?: Date | string | null
+  endsAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -554,6 +626,9 @@ export type BannerScalarWhereInput = {
   targetParam?: Prisma.StringNullableFilter<"Banner"> | string | null
   productId?: Prisma.StringNullableFilter<"Banner"> | string | null
   isActive?: Prisma.BoolFilter<"Banner"> | boolean
+  isDeleted?: Prisma.BoolFilter<"Banner"> | boolean
+  startsAt?: Prisma.DateTimeNullableFilter<"Banner"> | Date | string | null
+  endsAt?: Prisma.DateTimeNullableFilter<"Banner"> | Date | string | null
   createdAt?: Prisma.DateTimeFilter<"Banner"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Banner"> | Date | string
 }
@@ -565,6 +640,9 @@ export type BannerCreateManySpuInput = {
   targetType?: $Enums.BannerTargetType
   targetParam?: string | null
   isActive?: boolean
+  isDeleted?: boolean
+  startsAt?: Date | string | null
+  endsAt?: Date | string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -576,6 +654,9 @@ export type BannerUpdateWithoutSpuInput = {
   targetType?: Prisma.EnumBannerTargetTypeFieldUpdateOperationsInput | $Enums.BannerTargetType
   targetParam?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -587,6 +668,9 @@ export type BannerUncheckedUpdateWithoutSpuInput = {
   targetType?: Prisma.EnumBannerTargetTypeFieldUpdateOperationsInput | $Enums.BannerTargetType
   targetParam?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -598,6 +682,9 @@ export type BannerUncheckedUpdateManyWithoutSpuInput = {
   targetType?: Prisma.EnumBannerTargetTypeFieldUpdateOperationsInput | $Enums.BannerTargetType
   targetParam?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isDeleted?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  startsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  endsAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -612,6 +699,9 @@ export type BannerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   targetParam?: boolean
   productId?: boolean
   isActive?: boolean
+  isDeleted?: boolean
+  startsAt?: boolean
+  endsAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   spu?: boolean | Prisma.Banner$spuArgs<ExtArgs>
@@ -625,6 +715,9 @@ export type BannerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   targetParam?: boolean
   productId?: boolean
   isActive?: boolean
+  isDeleted?: boolean
+  startsAt?: boolean
+  endsAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   spu?: boolean | Prisma.Banner$spuArgs<ExtArgs>
@@ -638,6 +731,9 @@ export type BannerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   targetParam?: boolean
   productId?: boolean
   isActive?: boolean
+  isDeleted?: boolean
+  startsAt?: boolean
+  endsAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   spu?: boolean | Prisma.Banner$spuArgs<ExtArgs>
@@ -651,11 +747,14 @@ export type BannerSelectScalar = {
   targetParam?: boolean
   productId?: boolean
   isActive?: boolean
+  isDeleted?: boolean
+  startsAt?: boolean
+  endsAt?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type BannerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "imageUrl" | "sortOrder" | "targetType" | "targetParam" | "productId" | "isActive" | "createdAt" | "updatedAt", ExtArgs["result"]["banner"]>
+export type BannerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "imageUrl" | "sortOrder" | "targetType" | "targetParam" | "productId" | "isActive" | "isDeleted" | "startsAt" | "endsAt" | "createdAt" | "updatedAt", ExtArgs["result"]["banner"]>
 export type BannerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   spu?: boolean | Prisma.Banner$spuArgs<ExtArgs>
 }
@@ -679,6 +778,9 @@ export type $BannerPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     targetParam: string | null
     productId: string | null
     isActive: boolean
+    isDeleted: boolean
+    startsAt: Date | null
+    endsAt: Date | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["banner"]>
@@ -1112,6 +1214,9 @@ export interface BannerFieldRefs {
   readonly targetParam: Prisma.FieldRef<"Banner", 'String'>
   readonly productId: Prisma.FieldRef<"Banner", 'String'>
   readonly isActive: Prisma.FieldRef<"Banner", 'Boolean'>
+  readonly isDeleted: Prisma.FieldRef<"Banner", 'Boolean'>
+  readonly startsAt: Prisma.FieldRef<"Banner", 'DateTime'>
+  readonly endsAt: Prisma.FieldRef<"Banner", 'DateTime'>
   readonly createdAt: Prisma.FieldRef<"Banner", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Banner", 'DateTime'>
 }

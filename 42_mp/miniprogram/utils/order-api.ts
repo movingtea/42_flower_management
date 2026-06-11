@@ -99,6 +99,7 @@ export type OrderListItem = {
   deliveryInfo?: string | null;
   paidAt?: string;
   createdAt: string;
+  expiresAt?: string | null;
   items: OrderListItemLine[];
 };
 
@@ -130,6 +131,18 @@ export function confirmOrderReceipt(orderId: string) {
   return request<{ orderId: string; orderNo: string; status: string }>({
     url: '/orders/confirm-receipt',
     method: 'POST',
+    data: { orderId },
+  });
+}
+
+export function cancelPendingOrder(orderId: string) {
+  return request<{
+    message: string;
+    order: { id: string; status: string; statusLabel: string };
+  }>({
+    url: '/orders/cancel',
+    method: 'POST',
+    quiet: true,
     data: { orderId },
   });
 }

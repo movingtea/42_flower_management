@@ -12,8 +12,12 @@ import {
 } from "@/lib/banner.server";
 import { normalizeStoredImagePathRequired } from "@/lib/image-url";
 import { prisma } from "@/lib/prisma";
+import { resolveBannerCmsStatus as resolveBannerCmsStatusPure } from "@/services/banner-rules-pure";
 
 export type CmsBannerRow = BannerRow & {
+  isDeleted: boolean;
+  startsAt: Date | null;
+  endsAt: Date | null;
   createdAt: Date;
   updatedAt: Date;
 };
@@ -29,9 +33,35 @@ export type CreateCmsBannerInput = {
   targetParam?: string | null;
   productId?: string | null;
   isActive?: boolean;
+  startsAt?: Date | string | null;
+  endsAt?: Date | string | null;
 };
 
 export type UpdateCmsBannerInput = Partial<CreateCmsBannerInput>;
+
+function parseOptionalDate(value: Date | string | null | undefined): Date | null {
+  if (value == null || value === "") return null;
+  const d = value instanceof Date ? value : new Date(value);
+  return Number.isNaN(d.getTime()) ? null : d;
+}
+
+export function resolveBannerCmsStatus(
+  row: Pick<
+    CmsBannerRow,
+    "isActive" | "isDeleted" | "startsAt" | "endsAt"
+  >,
+  now: Date = new Date()
+): string {
+  return resolveBannerCmsStatusPure(
+    {
+      isActive: row.isActive,
+      isDeleted: row.isDeleted,
+      startsAt: row.startsAt,
+      endsAt: row.endsAt,
+    },
+    now
+  );
+}
 
 function bannerInclude() {
   return {
@@ -57,6 +87,9 @@ function toBannerRow(
     targetParam: row.targetParam,
     productId: row.productId,
     isActive: row.isActive,
+    isDeleted: row.isDeleted,
+    startsAt: row.startsAt,
+    endsAt: row.endsAt,
     createdAt: row.createdAt,
     updatedAt: row.updatedAt,
     spu: row.spu,
@@ -64,9 +97,17 @@ function toBannerRow(
 }
 
 function buildBannerData(
-  input: CreateCmsBannerInput
+  input: CreateCmsBannerInput & {
+    startsAt?: Date | string | null;
+    endsAt?: Date | string | null;
+  }
 ): Prisma.BannerUncheckedCreateInput {
   const targetType = parseBannerTargetType(input.targetType);
+  const startsAt = parseOptionalDate(input.startsAt);
+  const endsAt = parseOptionalDate(input.endsAt);
+  if (startsAt && endsAt && startsAt.getTime() > endsAt.getTime()) {
+    throw new Error("开始时间不能晚于结束时间");
+  }
   return {
     imageUrl: normalizeStoredImagePathRequired(input.imageUrl),
     sortOrder: Number.isFinite(input.sortOrder)
@@ -77,6 +118,8 @@ function buildBannerData(
     productId:
       targetType === "PRODUCT" ? input.productId?.trim() || null : null,
     isActive: input.isActive !== false,
+    startsAt,
+    endsAt,
   };
 }
 
@@ -91,7 +134,11 @@ export async function listCmsBanners(
   await migrateBannersFromAppConfigIfEmpty();
 
   const rows = await prisma.banner.findMany({
-    where: params.includeInactive === false ? { isActive: true } : undefined,
+    where: {
+      ...(params.includeInactive === false
+        ? { isDeleted: false, isActive: true }
+        : {}),
+    },
     orderBy: [{ sortOrder: "asc" }, { createdAt: "desc" }],
     include: bannerInclude(),
   });
@@ -125,7 +172,11 @@ export async function createCmsBanner(
   validateInput(draft);
 
   const row = await prisma.banner.create({
-    data: buildBannerData(input),
+    data: buildBannerData({
+      ...input,
+      startsAt: input.startsAt,
+      endsAt: input.endsAt,
+    }),
     include: bannerInclude(),
   });
 
@@ -151,9 +202,44 @@ export async function updateCmsBanner(
 
   validateInput(merged);
 
+  const patchData: Prisma.BannerUncheckedUpdateInput = {
+    imageUrl: normalizeStoredImagePathRequired(merged.imageUrl),
+    sortOrder: Math.round(merged.sortOrder),
+    targetType: merged.targetType as BannerTargetType,
+    targetParam: merged.targetParam?.trim() || null,
+    productId:
+      merged.targetType === "PRODUCT"
+        ? merged.productId?.trim() || null
+        : null,
+    isActive: merged.isActive !== false,
+  };
+
+  if (input.startsAt !== undefined) {
+    patchData.startsAt = parseOptionalDate(input.startsAt);
+  }
+  if (input.endsAt !== undefined) {
+    patchData.endsAt = parseOptionalDate(input.endsAt);
+  }
+
+  const nextStartsAt =
+    input.startsAt !== undefined
+      ? parseOptionalDate(input.startsAt)
+      : existing.startsAt;
+  const nextEndsAt =
+    input.endsAt !== undefined
+      ? parseOptionalDate(input.endsAt)
+      : existing.endsAt;
+  if (
+    nextStartsAt &&
+    nextEndsAt &&
+    nextStartsAt.getTime() > nextEndsAt.getTime()
+  ) {
+    throw new Error("开始时间不能晚于结束时间");
+  }
+
   const row = await prisma.banner.update({
     where: { id },
-    data: buildBannerData(merged),
+    data: patchData,
     include: bannerInclude(),
   });
 
@@ -167,7 +253,7 @@ export async function deactivateCmsBanner(id: string): Promise<CmsBannerRow> {
 
   const row = await prisma.banner.update({
     where: { id },
-    data: { isActive: false },
+    data: { isActive: false, isDeleted: true },
     include: bannerInclude(),
   });
 
@@ -195,6 +281,10 @@ export async function reorderCmsBanners(
 export function cmsBannerToApiPayload(row: CmsBannerRow) {
   return {
     ...bannerRowToWriteItem(row),
+    isDeleted: row.isDeleted,
+    startsAt: row.startsAt?.toISOString() ?? null,
+    endsAt: row.endsAt?.toISOString() ?? null,
+    displayStatus: resolveBannerCmsStatus(row),
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };

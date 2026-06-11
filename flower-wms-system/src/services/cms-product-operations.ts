@@ -18,10 +18,7 @@ import {
   productSpuInclude,
 } from "@/lib/product-spu";
 import { prisma } from "@/lib/prisma";
-import {
-  normalizeStoredImagePath,
-  toPublicImageUrl,
-} from "@/lib/image-url";
+import { normalizeStoredImagePath } from "@/lib/image-url";
 import {
   evaluateProductHealth,
   PRODUCT_HEALTH_STATUS_LABELS,
@@ -38,6 +35,7 @@ import {
   type PublishReadinessResult,
   type ValidateProductPublishInput,
 } from "@/services/cms-product-validation-pure";
+import { filterRecommendationSlotsForMiniprogram } from "@/services/recommendation-rules-pure";
 
 const DEFAULT_PAGE_SIZE = 20;
 
@@ -759,7 +757,16 @@ export async function getRecommendationSlotDetail(id: string) {
               id: true,
               name: true,
               isActive: true,
+              isDeleted: true,
               occasionTags: true,
+              skus: {
+                select: {
+                  id: true,
+                  stock: true,
+                  imageUrl: true,
+                  isMainImage: true,
+                },
+              },
             },
           },
           sku: {
@@ -999,19 +1006,6 @@ export async function listActiveRecommendationsForMiniProgram(
     orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
     include: {
       items: {
-        where: {
-          isActive: true,
-          OR: [{ startAt: null }, { startAt: { lte: now } }],
-          AND: [
-            { OR: [{ endAt: null }, { endAt: { gte: now } }] },
-            {
-              product: {
-                isActive: true,
-                isDeleted: false,
-              },
-            },
-          ],
-        },
         orderBy: [{ sortOrder: "asc" }, { createdAt: "asc" }],
         take: limit,
         include: {
@@ -1024,57 +1018,73 @@ export async function listActiveRecommendationsForMiniProgram(
     },
   });
 
-  const result: MiniprogramRecommendationSlot[] = [];
-
-  for (const slot of slots) {
-    const items: MiniprogramRecommendationItem[] = [];
-
-    for (const item of slot.items) {
-      const product = item.product;
-      if (!product.isActive) continue;
-
-      const sku = item.skuId
-        ? product.skus.find((s) => s.id === item.skuId)
-        : product.skus.find((s) => s.isMainImage) ?? product.skus[0];
-
-      if (!sku) continue;
-
-      const price = sku.price.toString();
-      const rawCover =
-        item.imageOverride?.trim() ||
-        sku.imageUrl?.trim() ||
-        resolveSpuCardImageUrl(product.skus);
-      const coverImage = toPublicImageUrl(rawCover) ?? "";
-
-      const opTags = buildWechatOperationTags(product);
-
-      items.push({
-        productId: product.id,
-        skuId: item.skuId ?? sku.id,
-        productName: item.titleOverride?.trim() || product.name,
-        skuName: sku.specName,
-        price,
-        coverImage,
-        subtitle: item.subtitleOverride?.trim() || product.description,
-        occasionTags: opTags.occasionTags,
-        colorTags: opTags.colorTags,
-        styleTags: opTags.styleTags,
-        sellingPoints: opTags.sellingPoints,
-      });
+  const filtered = filterRecommendationSlotsForMiniprogram(
+    slots.map((slot) => ({
+      id: slot.id,
+      key: slot.key,
+      name: slot.name,
+      slotType: slot.slotType,
+      sceneType: slot.sceneType,
+      isActive: slot.isActive,
+      sortOrder: slot.sortOrder,
+      createdAt: slot.createdAt,
+      items: slot.items.map((item) => ({
+        id: item.id,
+        isActive: item.isActive,
+        sortOrder: item.sortOrder,
+        createdAt: item.createdAt,
+        startAt: item.startAt,
+        endAt: item.endAt,
+        titleOverride: item.titleOverride,
+        subtitleOverride: item.subtitleOverride,
+        imageOverride: item.imageOverride,
+        skuId: item.skuId,
+        note: item.note,
+        product: {
+          id: item.product.id,
+          name: item.product.name,
+          isActive: item.product.isActive,
+          isDeleted: item.product.isDeleted,
+          description: item.product.description,
+          operationNote: item.product.operationNote,
+          skus: item.product.skus.map((sku) => ({
+            id: sku.id,
+            stock: sku.stock,
+            specName: sku.specName,
+            price: sku.price.toString(),
+            imageUrl: sku.imageUrl,
+            isMainImage: sku.isMainImage,
+          })),
+        },
+      })),
+    })),
+    {
+      now,
+      buildOperationTags: (product) => buildWechatOperationTags(product as never),
     }
+  );
 
-    if (items.length > 0 || params.slotKey) {
-      result.push({
-        key: slot.key,
-        name: slot.name,
-        slotType: slot.slotType,
-        sceneType: slot.sceneType,
-        items,
-      });
-    }
-  }
-
-  return { slots: result };
+  return {
+    slots: filtered.map((slot) => ({
+      key: slot.key,
+      name: slot.name,
+      slotType: slot.slotType as RecommendationSlotType,
+      sceneType: slot.sceneType as GiftOccasionType | null,
+      items: slot.items.map((item) => ({
+        productId: item.productId,
+        skuId: item.skuId,
+        productName: item.productName,
+        skuName: item.skuName,
+        price: item.price,
+        coverImage: item.coverImage,
+        subtitle: item.subtitle,
+        occasionTags: item.occasionTags as ReturnType<typeof toTagDisplayList>,
+        colorTags: item.colorTags as ReturnType<typeof toTagDisplayList>,
+        styleTags: item.styleTags as ReturnType<typeof toTagDisplayList>,
+        sellingPoints: item.sellingPoints,
+      })),
+    })),
+  };
 }
 
 export function parseOperationTagsFromBody(raw: Record<string, unknown>): {

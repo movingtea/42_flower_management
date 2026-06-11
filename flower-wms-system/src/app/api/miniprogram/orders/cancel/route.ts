@@ -1,10 +1,16 @@
 import { Prisma } from "@/generated/prisma/client";
 import { AuditModule } from "@/generated/prisma/enums";
-import { jsonError } from "@/lib/api";
 import { safeLogAudit } from "@/lib/audit-helpers";
+import {
+  MINIPROGRAM_ERROR_CODES,
+  MiniprogramBusinessError,
+  isMiniprogramBusinessError,
+} from "@/lib/miniprogram-business-error";
 import { requireUserFromRequest } from "@/lib/wechat-auth-request";
-import { jsonWechatSuccess } from "@/lib/wechat-api";
+import { jsonWechatError, jsonWechatSuccess } from "@/lib/wechat-api";
+import { prisma } from "@/lib/prisma";
 import { closePendingOrder, ORDER_STATUS_LABEL } from "@/services/order-lifecycle";
+import { OrderStatus } from "@/generated/prisma/enums";
 
 export const dynamic = "force-dynamic";
 
@@ -23,27 +29,47 @@ function parseBody(raw: unknown): { orderId: string } {
   return { orderId };
 }
 
-function mapErrorStatus(err: unknown): { message: string; status: number } {
+function mapErrorStatus(err: unknown): {
+  message: string;
+  status: number;
+  code?: string;
+} {
+  if (isMiniprogramBusinessError(err)) {
+    return { message: err.message, status: 400, code: err.code };
+  }
   if (err instanceof Error) {
     const msg = err.message;
-    if (
-      msg.includes("不存在") ||
-      msg.includes("待支付") ||
-      msg.includes("不能为空") ||
-      msg.includes("未登录")
-    ) {
+    if (msg.includes("未登录")) {
       return {
         message: msg,
-        status: msg.includes("未登录") ? 401 : 400,
+        status: 401,
+        code: MINIPROGRAM_ERROR_CODES.AUTH_REQUIRED,
+      };
+    }
+    if (msg.includes("不存在")) {
+      return {
+        message: "订单不存在",
+        status: 404,
+        code: MINIPROGRAM_ERROR_CODES.ORDER_NOT_FOUND,
+      };
+    }
+    if (msg.includes("待支付")) {
+      return {
+        message: "当前订单状态无法操作",
+        status: 400,
+        code: MINIPROGRAM_ERROR_CODES.ORDER_INVALID_STATE,
       };
     }
   }
 
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     if (err.code === "P2025") {
-      return { message: "订单不存在", status: 404 };
+      return {
+        message: "订单不存在",
+        status: 404,
+        code: MINIPROGRAM_ERROR_CODES.ORDER_NOT_FOUND,
+      };
     }
-    return { message: `数据库错误 (${err.code})`, status: 500 };
   }
 
   if (err instanceof Error) {
@@ -62,10 +88,30 @@ export async function POST(request: Request) {
     try {
       raw = await request.json();
     } catch {
-      return jsonError("无法解析请求体", 400);
+      return jsonWechatError("无法解析请求体", 400);
     }
 
     const { orderId } = parseBody(raw);
+
+    const existing = await prisma.order.findFirst({
+      where: { id: orderId, userId: user.id },
+      select: { id: true, status: true },
+    });
+
+    if (!existing) {
+      throw new MiniprogramBusinessError(
+        MINIPROGRAM_ERROR_CODES.ORDER_NOT_FOUND,
+        "订单不存在"
+      );
+    }
+
+    if (existing.status !== OrderStatus.PENDING_PAYMENT) {
+      throw new MiniprogramBusinessError(
+        MINIPROGRAM_ERROR_CODES.ORDER_INVALID_STATE,
+        "当前订单状态无法操作"
+      );
+    }
+
     const order = await closePendingOrder(orderId, user.id);
 
     safeLogAudit({
@@ -90,7 +136,14 @@ export async function POST(request: Request) {
       },
     });
   } catch (err) {
-    const { message, status } = mapErrorStatus(err);
-    return jsonError(message, status);
+    const { message, status, code } = mapErrorStatus(err);
+    if (code) {
+      return jsonWechatError(
+        message,
+        status,
+        code as (typeof MINIPROGRAM_ERROR_CODES)[keyof typeof MINIPROGRAM_ERROR_CODES]
+      );
+    }
+    return jsonWechatError(message, status);
   }
 }

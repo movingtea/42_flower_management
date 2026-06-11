@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { Loader2, X } from "lucide-react";
 import { FloralRole } from "@/generated/prisma/enums";
 import { FLORAL_ROLE_LABEL } from "@/lib/wiki-constants";
+import { ORDER_TOTAL_QUANTITY_HINT_THRESHOLD } from "@/lib/store-delivery-settings";
 import type { OrderFulfillmentDetail } from "@/services/order-fulfillment-detail";
 import type {
   LossAdjustedCostPreview,
@@ -277,6 +278,13 @@ export function OrderDetailModal({ orderId, onClose }: Props) {
                   </p>
                 </div>
               </section>
+
+              {detail.items.reduce((sum, line) => sum + line.quantity, 0) >=
+              ORDER_TOTAL_QUANTITY_HINT_THRESHOLD ? (
+                <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+                  该订单数量较多，请确认备花、制作和配送能力。
+                </p>
+              ) : null}
 
               <section>
                 <h4 className="mb-2 text-xs font-semibold tracking-wide text-zinc-500 uppercase">
