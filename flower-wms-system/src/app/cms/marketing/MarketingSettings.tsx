@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
+import { DeliverySettingsPanel } from "@/app/cms/marketing/DeliverySettingsPanel";
 import { HomeSceneEntriesManager } from "@/app/cms/marketing/HomeSceneEntriesManager";
 import { formatNullableDateTime } from "@/lib/datetime";
 import { ProductPicker } from "@/components/cms/pickers/ProductPicker";
@@ -24,7 +25,7 @@ type Props = {
   popupUpdatedAt: string | null;
 };
 
-type MarketingTab = "notice" | "home-scenes";
+type MarketingTab = "notice" | "home-scenes" | "delivery";
 
 export function MarketingSettings({
   initialNotice,
@@ -158,7 +159,7 @@ export function MarketingSettings({
       <header className="mb-8">
         <h2 className="text-2xl font-semibold text-rose-900">营销配置</h2>
         <p className="mt-1 text-sm text-zinc-500">
-          全局公告栏、首页活动弹窗与小程序首页场景入口
+          全局公告栏、首页活动弹窗、店铺配送设置与小程序首页场景入口
         </p>
       </header>
 
@@ -185,10 +186,23 @@ export function MarketingSettings({
         >
           首页场景入口
         </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab("delivery")}
+          className={`border-b-2 px-4 py-2 text-sm font-medium transition ${
+            activeTab === "delivery"
+              ? "border-rose-600 text-rose-900"
+              : "border-transparent text-zinc-500 hover:text-zinc-800"
+          }`}
+        >
+          配送设置
+        </button>
       </div>
 
       {activeTab === "home-scenes" ? (
         <HomeSceneEntriesManager />
+      ) : activeTab === "delivery" ? (
+        <DeliverySettingsPanel onSaved={() => router.refresh()} />
       ) : (
       <div className="grid gap-8 lg:grid-cols-2">
         <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">

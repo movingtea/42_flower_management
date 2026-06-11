@@ -8,6 +8,7 @@ import { MINIPROGRAM_ERROR_CODES } from "../src/lib/miniprogram-business-error";
 import { prisma } from "../src/lib/prisma";
 import { createWechatOrder } from "../src/services/order-lifecycle";
 import { isMiniprogramBusinessError } from "../src/lib/miniprogram-business-error";
+import { evaluateDeliveryAvailability } from "../src/services/delivery-settings-pure";
 import { getTodayAppDateString, addAppCalendarDays, parseAppDateString, appDateStringFromParts } from "../src/lib/datetime";
 
 const PREFIX = "SMOKE_TEST_PREORDER";
@@ -83,6 +84,19 @@ async function main() {
     items: [{ skuId: sku.id, quantity: 3 }],
   });
   assert.ok(order.id);
+
+  const deliveryCheck = evaluateDeliveryAvailability({
+    deliveryDate: `${tomorrow} 14:00`,
+    now,
+    settings: {
+      sameDayCutoffTime: "17:00",
+      deliveryTimeRange: { start: "10:00", end: "20:00" },
+      sameDayEnabled: true,
+      preorderEnabled: true,
+      disabledDates: [],
+    },
+  });
+  assert.equal(deliveryCheck.allowed, true, "配送设置与提前预订规则应可同时满足");
 
   console.log("smoke-preorder-rule passed", { orderId: order.id });
 }

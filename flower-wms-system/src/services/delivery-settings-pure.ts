@@ -57,13 +57,24 @@ function extractDatePart(deliveryDate: string): string | null {
   return parseAppDateString(match[1]) ? match[1] : null;
 }
 
+const DELIVERY_TIME_BUCKET_MAP: Record<string, string> = {
+  上午: "10:00",
+  下午: "14:00",
+  傍晚: "18:00",
+  晚上: "20:00",
+};
+
 function extractTimePart(
   deliveryDate: string,
   explicitTime?: string | null
 ): string | null {
   if (explicitTime?.trim()) return explicitTime.trim();
   const match = /(\d{1,2}:\d{2})/.exec(deliveryDate);
-  return match?.[1] ?? null;
+  if (match) return match[1];
+  for (const [bucket, time] of Object.entries(DELIVERY_TIME_BUCKET_MAP)) {
+    if (deliveryDate.includes(bucket)) return time;
+  }
+  return null;
 }
 
 function compareAppDates(a: string, b: string): number {

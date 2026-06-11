@@ -33,6 +33,9 @@ export type BannerRow = {
   targetParam: string | null;
   productId: string | null;
   isActive: boolean;
+  isDeleted?: boolean;
+  startsAt?: Date | null;
+  endsAt?: Date | null;
   spu?: {
     id: string;
     name: string;
@@ -72,7 +75,7 @@ export async function loadActiveBanners(): Promise<BannerRow[]> {
   await migrateBannersFromAppConfigIfEmpty();
 
   return prisma.banner.findMany({
-    where: { isActive: true },
+    where: { isActive: true, isDeleted: false },
     orderBy: [{ sortOrder: "asc" }, { id: "asc" }],
     include: {
       spu: {
@@ -119,7 +122,9 @@ export function resolveWechatBanners(
       imageUrl: row.imageUrl,
       sortOrder: row.sortOrder,
       isActive: row.isActive,
-      isDeleted: !row.isActive,
+      isDeleted: row.isDeleted ?? false,
+      startsAt: row.startsAt,
+      endsAt: row.endsAt,
       targetType: parseBannerTargetType(row.targetType),
       targetParam: row.targetParam,
       productId: row.productId,

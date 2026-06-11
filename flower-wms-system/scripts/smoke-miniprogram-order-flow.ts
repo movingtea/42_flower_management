@@ -8,8 +8,10 @@ import { OrderStatus } from "../src/generated/prisma/enums";
 import { prisma } from "../src/lib/prisma";
 import {
   closePendingOrder,
+  computeOrderPaymentExpiresAt,
   createWechatOrder,
 } from "../src/services/order-lifecycle";
+import { PENDING_PAYMENT_TIMEOUT_MS } from "../src/services/order-invariants-pure";
 
 const PREFIX = "SMOKE_TEST_ORDER_FLOW";
 
@@ -52,6 +54,13 @@ async function main() {
     items: [{ skuId: sku.id, quantity: 2 }],
   });
   assert.equal(order.status, OrderStatus.PENDING_PAYMENT);
+
+  const expiresAt = computeOrderPaymentExpiresAt(order.createdAt);
+  assert.equal(
+    expiresAt.getTime() - order.createdAt.getTime(),
+    PENDING_PAYMENT_TIMEOUT_MS,
+    "待支付订单 expiresAt 应为 createdAt + 15 分钟"
+  );
 
   const afterCreate = await prisma.productSku.findUniqueOrThrow({
     where: { id: sku.id },

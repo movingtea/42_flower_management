@@ -136,3 +136,18 @@ export function filterHomeBannersForMiniprogram(
 
   return out;
 }
+
+/** CMS 列表展示状态 */
+export function resolveBannerCmsStatus(
+  row: Pick<BannerInput, "isActive" | "isDeleted" | "startsAt" | "endsAt">,
+  now: Date = new Date()
+): string {
+  if (row.isDeleted) return "已删除";
+  if (!row.isActive) return "已停用";
+  const startMs = toTime(row.startsAt);
+  const endMs = toTime(row.endsAt);
+  const nowMs = now.getTime();
+  if (startMs != null && nowMs < startMs) return "未开始";
+  if (endMs != null && nowMs > endMs) return "已过期";
+  return "展示中";
+}

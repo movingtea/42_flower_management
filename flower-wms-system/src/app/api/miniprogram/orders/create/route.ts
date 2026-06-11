@@ -8,6 +8,7 @@ import {
 import { requireUserFromRequest } from "@/lib/wechat-auth-request";
 import { jsonWechatError, jsonWechatSuccess } from "@/lib/wechat-api";
 import {
+  computeOrderPaymentExpiresAt,
   createWechatOrder,
   isStockSoldOutError,
   STOCK_SOLD_OUT_MESSAGE,
@@ -113,12 +114,13 @@ function mapErrorStatus(
       msg.includes("不一致") ||
       msg.includes("不能为空") ||
       msg.includes("无效") ||
-      msg.includes("请填写")
+      msg.includes("请填写") ||
+      msg.includes("配送")
     ) {
       return { message: msg, status: 400 };
     }
     if (msg.includes("未登录")) {
-      return { message: msg, status: 401 };
+      return { message: msg, status: 401, code: MINIPROGRAM_ERROR_CODES.AUTH_REQUIRED };
     }
   }
 
@@ -193,6 +195,7 @@ export async function POST(request: Request) {
         orderNo: order.orderNo,
         status: order.status,
         payAmount: order.payAmount,
+        expiresAt: computeOrderPaymentExpiresAt(order.createdAt).toISOString(),
       },
       201
     );

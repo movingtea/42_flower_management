@@ -333,6 +333,9 @@ export const BannerScalarFieldEnum = {
   targetParam: 'targetParam',
   productId: 'productId',
   isActive: 'isActive',
+  isDeleted: 'isDeleted',
+  startsAt: 'startsAt',
+  endsAt: 'endsAt',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

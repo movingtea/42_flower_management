@@ -757,7 +757,16 @@ export async function getRecommendationSlotDetail(id: string) {
               id: true,
               name: true,
               isActive: true,
+              isDeleted: true,
               occasionTags: true,
+              skus: {
+                select: {
+                  id: true,
+                  stock: true,
+                  imageUrl: true,
+                  isMainImage: true,
+                },
+              },
             },
           },
           sku: {

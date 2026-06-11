@@ -25,6 +25,14 @@ import {
   occasionLabelByKey,
 } from '../../utils/crm-options';
 import { getDeliveryHints, FLOWER_ADJUSTMENT_NOTE } from '../../utils/gift-copy';
+import { resolveApiErrorMessage } from '../../utils/business-error';
+import {
+  computeMinDeliveryDate,
+  filterDeliveryTimeBuckets,
+  isDeliveryDateAllowed,
+  shouldShowLargeOrderHint,
+} from '../../utils/delivery-constraints';
+import { fetchDeliverySettings, type DeliverySettingsResponse } from '../../utils/delivery-settings-api';
 import { request } from '../../utils/request';
 import { mapInvalidCartTag } from '../../utils/stock';
 import {
@@ -140,18 +148,44 @@ Page({
     baseUrl,
     freeShippingThreshold: FREE_SHIPPING_THRESHOLD,
     defaultDeliveryFee: DEFAULT_DELIVERY_FEE,
+    deliverySettings: null as DeliverySettingsResponse | null,
+    largeOrderHint: '',
   },
 
   onLoad() {
     this.loadCheckoutProducts();
+    void this.loadDeliverySettings();
     void this.prefillDefaultAddress();
     void this.loadSavedRecipients();
   },
 
   onShow() {
     this.loadCheckoutProducts();
+    void this.loadDeliverySettings();
     void this.prefillDefaultAddress();
     void this.loadSavedRecipients();
+  },
+
+  async loadDeliverySettings() {
+    try {
+      const settings = await fetchDeliverySettings();
+      const timeBuckets = filterDeliveryTimeBuckets(settings);
+      const patch: Record<string, unknown> = {
+        deliverySettings: settings,
+        timeBuckets,
+      };
+      if (
+        this.data.deliveryTimeBucket &&
+        !timeBuckets.includes(this.data.deliveryTimeBucket)
+      ) {
+        patch.deliveryTimeBucketIndex = 0;
+        patch.deliveryTimeBucket = timeBuckets[0] ?? TIME_BUCKETS[0];
+      }
+      this.setData(patch);
+      this.applyBulkPreorderConstraints();
+    } catch {
+      /* 使用默认时段 */
+    }
   },
 
   async prefillDefaultAddress() {
@@ -428,25 +462,44 @@ Page({
     const list = items ?? this.data.checkoutItems;
     const lines = toBulkPreorderLines(list);
     const earliest = computeOrderEarliestDeliveryDate(lines);
-    const minDeliveryDate = earliest ?? todayString();
-    const patch: Record<string, string> = {
+    const minDeliveryDate = computeMinDeliveryDate({
+      settings: this.data.deliverySettings,
+      bulkEarliestDate: earliest,
+    });
+    const totalQty = list.reduce((sum, row) => sum + row.quantity, 0);
+    const patch: Record<string, string | boolean> = {
       minDeliveryDate,
       bulkPreorderNotice: earliest
         ? '这份花礼数量较多，我们需要提前为你备花和制作，暂不支持当天送达。'
         : '',
+      largeOrderHint: shouldShowLargeOrderHint(totalQty)
+        ? '这份订单数量较多，花店可能会与你确认制作和配送安排。'
+        : '',
     };
 
     if (this.data.deliveryDate) {
-      const check = evaluateCheckoutBulkPreorder({
+      const bulkCheck = evaluateCheckoutBulkPreorder({
         items: lines,
         deliveryDate: this.data.deliveryDate,
       });
-      if (!check.allowed && earliest) {
+      const storeAllowed = isDeliveryDateAllowed({
+        date: this.data.deliveryDate,
+        settings: this.data.deliverySettings,
+        bulkEarliestDate: earliest,
+      });
+      if (!bulkCheck.allowed && earliest) {
         patch.deliveryDate = earliest;
         patch.bulkPreorderNotice =
-          '当前订单数量较多，需要提前预订，已为你更新可选配送日期。';
+          '当前订单需要提前预订，请重新选择配送日期。';
         patch.deliveryHints = getDeliveryHints(
           earliest,
+          this.data.deliveryTimeBucket
+        );
+      } else if (!storeAllowed) {
+        patch.deliveryDate = minDeliveryDate;
+        patch.bulkPreorderNotice = '';
+        patch.deliveryHints = getDeliveryHints(
+          minDeliveryDate,
           this.data.deliveryTimeBucket
         );
       }
@@ -526,13 +579,35 @@ Page({
 
   onDeliveryDateChange(e: WechatMiniprogram.PickerChange) {
     const deliveryDate = e.detail.value as string;
+    const lines = toBulkPreorderLines(this.data.checkoutItems);
+    const earliest = computeOrderEarliestDeliveryDate(lines);
+
+    if (
+      !isDeliveryDateAllowed({
+        date: deliveryDate,
+        settings: this.data.deliverySettings,
+        bulkEarliestDate: earliest,
+      })
+    ) {
+      wx.showToast({ title: '该日期暂不可选', icon: 'none' });
+      const minDate = computeMinDeliveryDate({
+        settings: this.data.deliverySettings,
+        bulkEarliestDate: earliest,
+      });
+      this.setData({
+        deliveryDate: minDate,
+        deliveryHints: getDeliveryHints(minDate, this.data.deliveryTimeBucket),
+      });
+      return;
+    }
+
     const check = evaluateCheckoutBulkPreorder({
-      items: toBulkPreorderLines(this.data.checkoutItems),
+      items: lines,
       deliveryDate,
     });
     if (!check.allowed) {
       wx.showToast({
-        title: '当前数量需提前预订，不能选择该日期',
+        title: '当前订单需要提前预订，请重新选择配送日期。',
         icon: 'none',
       });
       if (check.earliestDeliveryDate) {
@@ -543,7 +618,7 @@ Page({
             this.data.deliveryTimeBucket
           ),
           bulkPreorderNotice:
-            '这份花礼数量较多，我们需要提前为你备花和制作，暂不支持当天送达。',
+            '当前订单需要提前预订，请重新选择配送日期。',
         });
       }
       return;
@@ -791,18 +866,29 @@ Page({
           .catch((err) => {
             wx.hideLoading();
             console.error('创建订单失败', err);
-            const errBody = err as { error?: string; code?: string };
-            const errMsg = errBody?.error || '请稍后重试';
-            if (errBody?.code === 'BULK_ORDER_REQUIRES_PREORDER') {
+            const errBody = err as {
+              error?: string;
+              code?: string;
+              message?: string;
+            };
+            const errMsg = resolveApiErrorMessage(errBody);
+            const code = errBody?.code;
+            if (
+              code === 'BULK_ORDER_REQUIRES_PREORDER' ||
+              code === 'INVALID_DELIVERY_DATE'
+            ) {
               this.applyBulkPreorderConstraints();
             }
             wx.showModal({
               title:
-                errBody?.code === 'INSUFFICIENT_STOCK'
+                code === 'INSUFFICIENT_STOCK'
                   ? '库存不足'
-                  : errBody?.code === 'BULK_ORDER_REQUIRES_PREORDER'
+                  : code === 'BULK_ORDER_REQUIRES_PREORDER'
                     ? '需要提前预订'
-                    : '下单失败',
+                    : code === 'INVALID_DELIVERY_DATE' ||
+                        code === 'DELIVERY_SLOT_UNAVAILABLE'
+                      ? '配送时间不可用'
+                      : '下单失败',
               content: errMsg,
               showCancel: false,
             });

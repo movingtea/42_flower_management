@@ -1,5 +1,6 @@
 import { apiMiniprogramBaseUrl } from '../config/index';
 import { getToken } from './auth';
+import { resolveApiErrorMessage, type ApiErrorBody } from './business-error';
 
 const BASE_URL = apiMiniprogramBaseUrl;
 
@@ -9,8 +10,10 @@ type WxRequestData = string | WechatMiniprogram.IAnyObject | ArrayBuffer;
 
 export interface ApiResponse<T> {
   success: boolean;
+  ok?: boolean;
   data?: T;
   error?: string;
+  message?: string;
   code?: string;
 }
 
@@ -44,17 +47,18 @@ export const request = <T = unknown>(options: RequestOptions): Promise<T> => {
       },
       success: (res) => {
         if (res.statusCode < 200 || res.statusCode >= 300) {
-          const body = (res.data as ApiResponse<unknown> | undefined) ?? {
+          const body = (res.data as ApiErrorBody | undefined) ?? {
             success: false,
             error: `服务异常: ${res.statusCode}`,
           };
+          const message = resolveApiErrorMessage(body);
           if (!quiet) {
             wx.showToast({
-              title: body.error || `服务异常: ${res.statusCode}`,
+              title: message,
               icon: 'none',
             });
           }
-          reject(body);
+          reject({ ...body, message, error: message });
           return;
         }
 
@@ -65,13 +69,14 @@ export const request = <T = unknown>(options: RequestOptions): Promise<T> => {
 
         const body = res.data as ApiResponse<T>;
         if (!body?.success) {
+          const message = resolveApiErrorMessage(body);
           if (!quiet) {
             wx.showToast({
-              title: body?.error || '请求失败',
+              title: message,
               icon: 'none',
             });
           }
-          reject(body);
+          reject({ ...body, message, error: message });
           return;
         }
 

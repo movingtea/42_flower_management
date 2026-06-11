@@ -2,9 +2,11 @@ import { jsonError } from "@/lib/api";
 import { requireUserFromRequest } from "@/lib/wechat-auth-request";
 import { jsonWechatSuccess } from "@/lib/wechat-api";
 import {
+  computeOrderPaymentExpiresAt,
   listWechatOrdersForUser,
   ORDER_STATUS_LABEL,
 } from "@/services/order-lifecycle";
+import { OrderStatus } from "@/generated/prisma/enums";
 
 export const dynamic = "force-dynamic";
 
@@ -31,6 +33,10 @@ export async function GET(request: Request) {
         deliveryInfo: o.deliveryInfo,
         paidAt: o.paidAt,
         createdAt: o.createdAt,
+        expiresAt:
+          o.status === OrderStatus.PENDING_PAYMENT
+            ? computeOrderPaymentExpiresAt(o.createdAt).toISOString()
+            : null,
         items: o.items.map((line) => ({
           id: line.id,
           skuId: line.skuId,

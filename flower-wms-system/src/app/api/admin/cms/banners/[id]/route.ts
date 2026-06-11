@@ -64,6 +64,18 @@ export async function PATCH(request: Request, context: RouteContext) {
           : undefined,
       isActive:
         body.isActive !== undefined ? Boolean(body.isActive) : undefined,
+      startsAt:
+        body.startsAt !== undefined
+          ? body.startsAt
+            ? String(body.startsAt)
+            : null
+          : undefined,
+      endsAt:
+        body.endsAt !== undefined
+          ? body.endsAt
+            ? String(body.endsAt)
+            : null
+          : undefined,
     });
 
     const action =

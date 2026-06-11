@@ -383,7 +383,38 @@ npm run test:stock-invariants
 npm run test:permission-invariants
 npm run test:crm-invariants
 npm run test:image-url-invariants
+npm run test:order-create-delivery
+npm run test:order-expiry-lifecycle   # 需 DATABASE_URL
+npm run test:recommendation-display
+npm run test:banner-validity
 ```
+
+### 店铺配送设置（Sprint 12 Round 2）
+
+- 存储：`AppConfig` key `STORE_DELIVERY_SETTINGS`（见 `src/lib/store-delivery-settings.ts`）
+- CMS 配置：后台 **营销配置** → **配送设置** Tab（`/cms/marketing`）
+- 小程序读取：`GET /api/miniprogram/delivery-settings`
+- 下单强校验：`createWechatOrder` → `assertDeliveryAvailabilityForOrder`
+
+### 待支付订单自动关闭（cron worker）
+
+`flower-cron-worker` 运行 `scripts/cron-inventory-daemon.ts`，除库存投影外每 60 秒执行 `closeExpiredPendingOrders()`：
+
+- 条件：`PENDING_PAYMENT` 且 `createdAt` 超过 15 分钟
+- 动作：状态 → `CANCELLED`，回补 `ProductSku.stock`
+- 不扣 Batch、不生成 `SALE_OUT` / `OrderCostSnapshot`
+
+本地调试：
+
+```bash
+npx tsx scripts/cron-inventory-daemon.ts
+```
+
+### 人工验收 Checklist
+
+Sprint 12 Round 2 上线前请逐项勾选：
+
+`docs/sprint-12-manual-checklist.md`
 
 已有轻量 tsx 测试（节选）：
 

@@ -60,6 +60,9 @@
       <view wx:if="{{bulkPreorderNotice}}" class="delivery-hints delivery-hints--preorder">
         <text class="delivery-hint-line">{{bulkPreorderNotice}}</text>
       </view>
+      <view wx:if="{{largeOrderHint}}" class="delivery-hints delivery-hints--preorder">
+        <text class="delivery-hint-line">{{largeOrderHint}}</text>
+      </view>
     </view>
 
     <!-- 第二层：送礼信息（建议填写） -->

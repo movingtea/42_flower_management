@@ -1260,9 +1260,21 @@ logging:
 
 ### 待支付订单
 
-- **15 分钟**未支付自动关闭：`closeExpiredPendingOrders`（`PENDING_PAYMENT_TIMEOUT_MS`）。
+- **15 分钟**未支付自动关闭：`closeExpiredPendingOrders`（`PENDING_PAYMENT_TIMEOUT_MS`），由 `scripts/cron-inventory-daemon.ts` 每 60 秒执行。
 - 主动取消 / 超时关闭：回补 `ProductSku.stock`；不扣 Batch、不生成 SALE_OUT / OrderCostSnapshot。
-- 小程序订单页倒计时：Round 2。
+- 小程序订单列表返回 `expiresAt`；前端展示 MM:SS 倒计时，超时后刷新并以服务端状态为准。
+- 用户取消：`POST /api/miniprogram/orders/cancel`（仅本人 `PENDING_PAYMENT`）。
+
+### Sprint 12 Round 2 集成（与 Round 1 同一 PR）
+
+| 能力 | 实现 |
+|---|---|
+| 配送校验接入下单 | `createWechatOrder` → `assertDeliveryAvailabilityForOrder` |
+| 店铺配送配置 | `AppConfig` key `STORE_DELIVERY_SETTINGS`；CMS `/cms/marketing` → 配送设置 |
+| Banner 有效期 | `Banner.startsAt` / `endsAt` / `isDeleted`；CMS `BannerManager` |
+| 推荐位运营提示 | `recommendation-display-pure.ts` + CMS 列表展示原因 |
+| 小程序错误码 | `42_mp/miniprogram/utils/business-error.ts` + `request.ts` |
+| 人工验收 | `docs/sprint-12-manual-checklist.md` |
 
 ### 退款库存回填
 
@@ -1272,7 +1284,7 @@ logging:
 ### 推荐位 / Banner
 
 - 推荐位：售罄不返回；过滤后 slot 为空则不返回；CMS 配置不自动删除售罄 item。
-- Banner：软删除（`isActive=false`）；inactive / 过期不返回小程序；允许无跳转。
+- Banner：软删除（`isDeleted=true` + `isActive=false`）；inactive / 未开始 / 过期不返回小程序；允许无跳转。
 
 ### CRM 提醒
 

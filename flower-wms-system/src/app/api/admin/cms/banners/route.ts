@@ -46,6 +46,18 @@ export async function POST(request: Request) {
         typeof body.targetParam === "string" ? body.targetParam : null,
       productId: typeof body.productId === "string" ? body.productId : null,
       isActive: body.isActive !== false,
+      startsAt:
+        body.startsAt !== undefined
+          ? body.startsAt
+            ? String(body.startsAt)
+            : null
+          : undefined,
+      endsAt:
+        body.endsAt !== undefined
+          ? body.endsAt
+            ? String(body.endsAt)
+            : null
+          : undefined,
     });
 
     safeLogAuditFromStaff(

@@ -19,6 +19,7 @@ import {
   CMS_OCCASION_TAG_OPTIONS,
   getCmsProductTagLabel,
 } from "@/lib/cms-product-tags";
+import { evaluateRecommendationItemDisplayStatus } from "@/services/recommendation-display-pure";
 
 const SLOT_TYPE_LABELS: Record<string, string> = {
   HOME_MAIN: "首页主推",
@@ -65,7 +66,14 @@ type SlotDetailItem = {
       id: string;
       name: string;
       isActive: boolean;
+      isDeleted?: boolean;
       occasionTags: string[];
+      skus?: Array<{
+        id: string;
+        stock: number;
+        imageUrl?: string | null;
+        isMainImage?: boolean;
+      }>;
     };
     sku: { id: string; specName: string; price: unknown } | null;
 };
@@ -481,7 +489,42 @@ export function RecommendationSlotsManager() {
                   <p className="text-sm text-zinc-500">该推荐位暂无商品。</p>
                 ) : (
                   <div className="space-y-3">
-                    {detail.items.map((item) => (
+                    {(() => {
+                      const evaluations = detail.items.map((item) =>
+                        evaluateRecommendationItemDisplayStatus({
+                          isActive: item.isActive,
+                          startAt: item.startAt,
+                          endAt: item.endAt,
+                          imageOverride: item.imageOverride,
+                          product: {
+                            isActive: item.product.isActive,
+                            isDeleted: item.product.isDeleted,
+                            skus: item.product.skus ?? [],
+                          },
+                        })
+                      );
+                      const visibleCount = evaluations.filter(
+                        (e) => e.visibleOnMiniprogram
+                      ).length;
+                      return visibleCount === 0 ? (
+                        <p className="rounded-lg border border-amber-100 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+                          该推荐位当前没有可在小程序展示的商品。
+                        </p>
+                      ) : null;
+                    })()}
+                    {detail.items.map((item) => {
+                      const display = evaluateRecommendationItemDisplayStatus({
+                        isActive: item.isActive,
+                        startAt: item.startAt,
+                        endAt: item.endAt,
+                        imageOverride: item.imageOverride,
+                        product: {
+                          isActive: item.product.isActive,
+                          isDeleted: item.product.isDeleted,
+                          skus: item.product.skus ?? [],
+                        },
+                      });
+                      return (
                       <div
                         key={item.id}
                         className="rounded-lg border border-zinc-100 p-3 text-sm"
@@ -497,13 +540,22 @@ export function RecommendationSlotsManager() {
                               </p>
                             ) : null}
                             <div className="mt-1 flex flex-wrap gap-1">
+                              <Badge
+                                variant={
+                                  display.visibleOnMiniprogram
+                                    ? "success"
+                                    : "warning"
+                                }
+                              >
+                                {display.label}
+                              </Badge>
                               {item.product.isActive ? (
                                 <Badge variant="success">已上架</Badge>
                               ) : (
                                 <Badge variant="warning">未上架</Badge>
                               )}
                               {!item.isActive ? (
-                                <Badge variant="default">已停用</Badge>
+                                <Badge variant="default">推荐项已停用</Badge>
                               ) : null}
                             </div>
                             {item.startAt || item.endAt ? (
@@ -536,7 +588,8 @@ export function RecommendationSlotsManager() {
                           </div>
                         </div>
                       </div>
-                    ))}
+                    );
+                    })}
                   </div>
                 )}
               </div>

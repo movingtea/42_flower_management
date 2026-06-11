@@ -7,7 +7,10 @@ import "dotenv/config";
 import assert from "node:assert/strict";
 import { MINIPROGRAM_ERROR_CODES } from "../src/lib/miniprogram-business-error";
 import { prisma } from "../src/lib/prisma";
-import { createWechatOrder } from "../src/services/order-lifecycle";
+import {
+  closePendingOrder,
+  createWechatOrder,
+} from "../src/services/order-lifecycle";
 import { isMiniprogramBusinessError } from "../src/lib/miniprogram-business-error";
 
 const PREFIX = "SMOKE_TEST_STOCK";
@@ -82,6 +85,27 @@ async function main() {
     where: { miniProgramUserId: user.id },
   });
   assert.equal(crmCount, 0, "订单创建失败不得写 CRM");
+
+  const cancelOrder = await createWechatOrder(user.id, {
+    receiverName: "测试",
+    receiverPhone: "13800001111",
+    deliveryAddress: "上海市测试路 1 号",
+    deliveryDate: "2026-12-25 14:00",
+    totalAmount: 199,
+    deliveryFee: 15,
+    payAmount: 214,
+    items: [{ skuId: sku.id, quantity: 1 }],
+  });
+  const stockAfterCreate = (
+    await prisma.productSku.findUniqueOrThrow({ where: { id: sku.id } })
+  ).stock;
+  assert.equal(stockAfterCreate, beforeStock - 1);
+
+  await closePendingOrder(cancelOrder.id, user.id);
+  const stockAfterCancel = (
+    await prisma.productSku.findUniqueOrThrow({ where: { id: sku.id } })
+  ).stock;
+  assert.equal(stockAfterCancel, beforeStock, "主动取消应回补 stock");
 
   console.log("smoke-stock-boundary passed", { skuId: sku.id, userId: user.id });
 }

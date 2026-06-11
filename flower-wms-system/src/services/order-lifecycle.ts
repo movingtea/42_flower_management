@@ -21,10 +21,16 @@ import {
   formatBulkPreorderServerMessage,
   resolveSkuPreorderRule,
 } from "@/services/preorder-rule-pure";
+import { evaluateDeliveryAvailability } from "@/services/delivery-settings-pure";
 import {
   isPendingPaymentExpired,
   PENDING_PAYMENT_TIMEOUT_MS,
 } from "@/services/order-invariants-pure";
+import { getStoreDeliverySettings } from "@/services/store-delivery-settings";
+import {
+  resolveDeliveryTimeForValidation,
+  toDeliverySettingsInput,
+} from "@/lib/store-delivery-settings";
 
 export const STOCK_SOLD_OUT_MESSAGE = "手慢了，花材库存已被抢光！";
 
@@ -60,6 +66,36 @@ export function generateWechatOrderNo(): string {
 
 export function calcDeliveryFee(productTotal: number): number {
   return productTotal >= FREE_SHIPPING_THRESHOLD ? 0 : DEFAULT_DELIVERY_FEE;
+}
+
+/** 待支付订单支付截止时间 */
+export function computeOrderPaymentExpiresAt(createdAt: Date): Date {
+  return new Date(createdAt.getTime() + PENDING_PAYMENT_TIMEOUT_MS);
+}
+
+/** 创建订单前校验配送日期 / 时段（Asia/Shanghai） */
+export async function assertDeliveryAvailabilityForOrder(
+  deliveryDate: string,
+  now: Date = new Date()
+): Promise<void> {
+  const storeSettings = await getStoreDeliverySettings();
+  const result = evaluateDeliveryAvailability({
+    deliveryDate,
+    deliveryTime: resolveDeliveryTimeForValidation(deliveryDate),
+    now,
+    settings: toDeliverySettingsInput(storeSettings),
+  });
+
+  if (!result.allowed) {
+    const code =
+      result.code === MINIPROGRAM_ERROR_CODES.DELIVERY_SLOT_UNAVAILABLE
+        ? MINIPROGRAM_ERROR_CODES.DELIVERY_SLOT_UNAVAILABLE
+        : MINIPROGRAM_ERROR_CODES.INVALID_DELIVERY_DATE;
+    throw new MiniprogramBusinessError(
+      code,
+      result.message ?? "请选择有效配送日期"
+    );
+  }
 }
 
 function roundMoney(n: number): number {
@@ -152,6 +188,8 @@ export async function createWechatOrder(
   if (!payload.items.length) {
     throw new Error("结算商品不能为空");
   }
+
+  await assertDeliveryAvailabilityForOrder(payload.deliveryDate);
 
   return prisma.$transaction(
     async (tx) => {
@@ -319,26 +357,67 @@ export async function confirmWechatOrderReceipt(userId: string, orderId: string)
 export async function closeExpiredPendingOrders(now: Date = new Date()) {
   const pending = await prisma.order.findMany({
     where: { status: OrderStatus.PENDING_PAYMENT },
-    select: { id: true, createdAt: true },
+    select: { id: true, orderNo: true, createdAt: true },
     orderBy: { createdAt: "asc" },
     take: 200,
   });
 
-  const expiredIds = pending
-    .filter((order) => isPendingPaymentExpired(order.createdAt, now))
-    .map((order) => order.id);
+  const expired = pending.filter((order) =>
+    isPendingPaymentExpired(order.createdAt, now)
+  );
 
   let closed = 0;
-  for (const orderId of expiredIds) {
+  const orderIds: string[] = [];
+
+  for (const order of expired) {
     try {
-      await closePendingOrder(orderId);
+      await closeExpiredPendingOrder(order.id);
       closed += 1;
+      orderIds.push(order.id);
+      console.log(
+        `[order-expiry] closed pending order ${order.orderNo} (${order.id})`
+      );
     } catch (err) {
-      console.error("[order] closeExpiredPendingOrders failed", orderId, err);
+      console.error(
+        "[order-expiry] closeExpiredPendingOrders failed",
+        order.id,
+        err
+      );
     }
   }
 
-  return { scanned: pending.length, closed, orderIds: expiredIds };
+  return { scanned: pending.length, closed, orderIds };
+}
+
+/** 系统自动关闭单个超时待支付订单（幂等：仅 PENDING_PAYMENT 可关闭） */
+export async function closeExpiredPendingOrder(orderId: string) {
+  return prisma.$transaction(
+    async (tx) => {
+      const updated = await tx.order.updateMany({
+        where: {
+          id: orderId,
+          status: OrderStatus.PENDING_PAYMENT,
+        },
+        data: {
+          status: OrderStatus.CANCELLED,
+          cancelSource: OrderCancelSource.ADMIN,
+        },
+      });
+
+      if (updated.count !== 1) {
+        throw new Error("仅待支付订单可关闭");
+      }
+
+      await restoreOrderSkuStock(tx, orderId);
+
+      return tx.order.findUniqueOrThrow({ where: { id: orderId } });
+    },
+    {
+      isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      maxWait: 10000,
+      timeout: 30000,
+    }
+  );
 }
 
 /** 关闭待支付订单并归还虚拟 SKU 库存（无 SALE_OUT，不涉及物理回库） */

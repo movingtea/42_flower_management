@@ -21,19 +21,50 @@ type BannerRow = BannerWriteItem & {
   id: string;
   createdAt?: string;
   updatedAt?: string;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  displayStatus?: string;
+  isDeleted?: boolean;
 };
 
 type BannerForm = {
   imageUrl: string;
   sortOrder: number;
   isActive: boolean;
+  startsAt: string;
+  endsAt: string;
 };
 
 const EMPTY_FORM: BannerForm = {
   imageUrl: "",
   sortOrder: 100,
   isActive: true,
+  startsAt: "",
+  endsAt: "",
 };
+
+function toDatetimeLocalValue(iso?: string | null): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return "";
+  const pad = (n: number) => `${n}`.padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function displayStatusVariant(status?: string) {
+  switch (status) {
+    case "展示中":
+      return "success" as const;
+    case "未开始":
+      return "warning" as const;
+    case "已过期":
+    case "已停用":
+    case "已删除":
+      return "default" as const;
+    default:
+      return "default" as const;
+  }
+}
 
 const emptyLinkTarget = (): CmsLinkTarget => ({ targetType: "NONE" });
 
@@ -42,6 +73,8 @@ function formFromRow(row: BannerRow): BannerForm {
     imageUrl: row.imageUrl,
     sortOrder: row.sortOrder,
     isActive: row.isActive !== false,
+    startsAt: toDatetimeLocalValue(row.startsAt),
+    endsAt: toDatetimeLocalValue(row.endsAt),
   };
 }
 
@@ -190,10 +223,21 @@ export function BannerManager() {
     }
 
     const jumpFields = linkTargetToBannerFields(linkTarget);
+    if (form.startsAt && form.endsAt) {
+      const start = new Date(form.startsAt);
+      const end = new Date(form.endsAt);
+      if (start.getTime() > end.getTime()) {
+        showToast("开始时间不能晚于结束时间");
+        return;
+      }
+    }
+
     const payload = {
       imageUrl: form.imageUrl.trim(),
       sortOrder: form.sortOrder,
       isActive: form.isActive,
+      startsAt: form.startsAt ? new Date(form.startsAt).toISOString() : null,
+      endsAt: form.endsAt ? new Date(form.endsAt).toISOString() : null,
       ...jumpFields,
     };
 
@@ -340,7 +384,8 @@ export function BannerManager() {
                 <th className="px-4 py-3 font-medium text-zinc-600">
                   跳转目标
                 </th>
-                <th className="px-4 py-3 font-medium text-zinc-600">状态</th>
+                <th className="px-4 py-3 font-medium text-zinc-600">展示状态</th>
+                <th className="px-4 py-3 font-medium text-zinc-600">有效期</th>
                 <th className="px-4 py-3 font-medium text-zinc-600">
                   更新时间
                 </th>
@@ -380,9 +425,18 @@ export function BannerManager() {
                   </td>
                   <td className="px-4 py-3">{renderJumpSummary(item)}</td>
                   <td className="px-4 py-3">
-                    <Badge variant={item.isActive !== false ? "success" : "default"}>
-                      {item.isActive !== false ? "启用" : "停用"}
+                    <Badge variant={displayStatusVariant(item.displayStatus)}>
+                      {item.displayStatus ?? (item.isActive !== false ? "展示中" : "已停用")}
                     </Badge>
+                  </td>
+                  <td className="px-4 py-3 text-xs text-zinc-500">
+                    <p>
+                      {item.startsAt
+                        ? formatUpdatedAt(item.startsAt)
+                        : "立即"}
+                      {" ~ "}
+                      {item.endsAt ? formatUpdatedAt(item.endsAt) : "不限"}
+                    </p>
                   </td>
                   <td className="px-4 py-3 text-zinc-500">
                     {formatUpdatedAt(item.updatedAt)}
@@ -509,6 +563,28 @@ export function BannerManager() {
                   }
                 />
               </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <Input
+                  label="展示开始（可选）"
+                  type="datetime-local"
+                  value={form.startsAt}
+                  onChange={(e) =>
+                    setForm((d) => ({ ...d, startsAt: e.target.value }))
+                  }
+                />
+                <Input
+                  label="展示结束（可选）"
+                  type="datetime-local"
+                  value={form.endsAt}
+                  onChange={(e) =>
+                    setForm((d) => ({ ...d, endsAt: e.target.value }))
+                  }
+                />
+              </div>
+              <p className="-mt-2 text-xs text-zinc-500">
+                留空表示立即可展示 / 不过期；无跳转 Banner 可正常保存。
+              </p>
 
               <CmsLinkTargetSelector
                 value={linkTarget}

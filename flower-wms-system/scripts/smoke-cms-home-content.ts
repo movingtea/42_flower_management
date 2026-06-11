@@ -40,6 +40,14 @@ async function main() {
         targetType: "NONE",
       },
       {
+        id: "not-started",
+        imageUrl: "https://cdn.example.com/future.jpg",
+        sortOrder: 3,
+        isActive: true,
+        startsAt: new Date("2026-07-01T00:00:00.000Z"),
+        targetType: "NONE",
+      },
+      {
         id: "active",
         imageUrl: "https://cdn.example.com/active.jpg",
         sortOrder: 4,
