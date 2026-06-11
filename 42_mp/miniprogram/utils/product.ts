@@ -1,12 +1,25 @@
 import { toRelativeImagePath, toRelativeImagePathList } from './image';
+import {
+  computeStockSummaryFromSkus,
+  formatProductStockLabel,
+  resolveProductStockSummary,
+} from './stock';
 
 /** 小程序端 SPU 列表项（与 GET /api/miniprogram/products 对齐） */
+export interface StockSummary {
+  totalStock: number;
+  hasStock: boolean;
+  lowStock: boolean;
+}
+
 export interface WechatProductSku {
   id: string;
   skuCode: string;
   specName: string;
   price: string;
   stock: number;
+  hasStock?: boolean;
+  lowStock?: boolean;
   /** 展现用富文本（API 已做 SPU Fallback） */
   description?: string | null;
   imageUrl: string | null;
@@ -33,6 +46,9 @@ export interface WechatProductRaw {
   imageUrl?: string;
   images?: string[];
   isOutOfStock?: boolean;
+  stockSummary?: StockSummary;
+  stockStatus?: 'IN_STOCK' | 'LOW_STOCK' | 'SOLD_OUT';
+  displayStatus?: 'AVAILABLE' | 'SOLD_OUT' | 'OFF_SHELF';
   skus?: WechatProductSku[];
   occasionTags?: WechatProductTagDisplay[];
   colorTags?: WechatProductTagDisplay[];
@@ -52,6 +68,10 @@ export interface WechatProductItem {
   shippingFee: number;
   imageUrl: string;
   isOutOfStock?: boolean;
+  stockSummary?: StockSummary;
+  stockStatus?: 'IN_STOCK' | 'LOW_STOCK' | 'SOLD_OUT';
+  displayStatus?: 'AVAILABLE' | 'SOLD_OUT' | 'OFF_SHELF';
+  stockLabel?: string;
   skus: WechatProductSku[];
   occasionTags: WechatProductTagDisplay[];
   colorTags: WechatProductTagDisplay[];
@@ -119,8 +139,16 @@ export function normalizeWechatProduct(item: WechatProductRaw): WechatProductIte
     ...styleTags.slice(0, 1),
   ].map((t) => t.label || t.key);
   const cardSellingPoint = sellingPoints[0] ?? '';
-
-  return {
+  const stockSummary = item.stockSummary ?? computeStockSummaryFromSkus(skus);
+  const normalizedSkus = skus.map((sku) => ({
+    ...sku,
+    stock: Math.max(0, Math.floor(Number(sku.stock) || 0)),
+    hasStock: sku.hasStock ?? sku.stock > 0,
+    lowStock:
+      sku.lowStock ??
+      (sku.stock > 0 && sku.stock <= 3),
+  }));
+  const productBase: WechatProductItem = {
     id: item.id,
     name: item.name,
     subtitle: item.subtitle,
@@ -128,8 +156,11 @@ export function normalizeWechatProduct(item: WechatProductRaw): WechatProductIte
     priceSuffix,
     shippingFee: Math.max(0, Number(item.shippingFee) || 0),
     imageUrl,
-    isOutOfStock: item.isOutOfStock,
-    skus,
+    isOutOfStock: item.isOutOfStock ?? !stockSummary.hasStock,
+    stockSummary,
+    stockStatus: item.stockStatus,
+    displayStatus: item.displayStatus,
+    skus: normalizedSkus,
     occasionTags,
     colorTags,
     styleTags,
@@ -141,6 +172,12 @@ export function normalizeWechatProduct(item: WechatProductRaw): WechatProductIte
     cardStyleColorLabels,
     cardSellingPoint,
   };
+
+  return {
+    ...productBase,
+    stockLabel: formatProductStockLabel(productBase),
+    isOutOfStock: !resolveProductStockSummary(productBase).hasStock,
+  };
 }
 
 export function pickDefaultSku(product: WechatProductItem): WechatProductSku | null {
@@ -151,7 +188,7 @@ export function pickDefaultSku(product: WechatProductItem): WechatProductSku | n
 }
 
 export function isSkuSelectable(sku: WechatProductSku): boolean {
-  return sku.stock > 0;
+  return (sku.hasStock ?? sku.stock > 0) && sku.stock > 0;
 }
 
 /** 详情页价格：同款同价 ¥128；多价 ¥128 - ¥399 */

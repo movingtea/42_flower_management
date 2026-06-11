@@ -20,9 +20,12 @@ export interface CartListItem extends CartItem {
   /** 列表行唯一键（SPU + SKU） */
   lineKey: string;
   selected: boolean;
-  /** 商品已软删除或未上架时为 true */
+  /** 商品已软删除、未上架或库存不足时为 true */
   isInvalid?: boolean;
   invalidReason?: string | null;
+  invalidCode?: string | null;
+  /** 服务端返回的当前 SKU 可售库存 */
+  availableStock?: number;
 }
 
 export const CART_STORAGE_KEY = 'cart';
@@ -123,16 +126,33 @@ export function selectedToCheckoutProducts(list: CartListItem[]): CartItem[] {
 export function storageToCartList(
   cart: CartItem[],
   prevSelected?: Record<string, boolean>,
-  invalidByKey?: Record<string, boolean>
+  metaByKey?: Record<
+    string,
+    {
+      isInvalid?: boolean;
+      invalidReason?: string | null;
+      invalidCode?: string | null;
+      availableStock?: number;
+      quantity?: number;
+    }
+  >
 ): CartListItem[] {
   return cart.map((item) => {
     const key = cartLineKey(item);
-    const isInvalid = invalidByKey?.[key] === true;
+    const meta = metaByKey?.[key];
+    const isInvalid = meta?.isInvalid === true;
+    const quantity =
+      meta?.quantity != null
+        ? Math.max(1, Math.floor(meta.quantity))
+        : item.quantity;
     return {
       ...item,
+      quantity,
       lineKey: key,
       isInvalid,
-      invalidReason: isInvalid ? '已下架' : null,
+      invalidReason: meta?.invalidReason ?? (isInvalid ? '商品不可结算' : null),
+      invalidCode: meta?.invalidCode ?? null,
+      availableStock: meta?.availableStock,
       selected: isInvalid ? false : (prevSelected?.[key] ?? true),
     };
   });

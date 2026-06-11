@@ -355,6 +355,23 @@
   gap: 8rpx;
 }
 
+.product-price-stock {
+  display: flex;
+  flex-direction: column;
+  gap: 4rpx;
+  flex: 1;
+  min-width: 0;
+}
+
+.stock-text {
+  font-size: 20rpx;
+  color: #8fa89b;
+}
+
+.stock-text--sold-out {
+  color: #b07a7a;
+}
+
 .price-text {
   font-size: 28rpx;
   color: var(--accent-color);

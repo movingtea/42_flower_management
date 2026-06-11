@@ -1,10 +1,21 @@
 import { Prisma } from "@/generated/prisma/client";
 import { OrderCancelSource, OrderStatus } from "@/generated/prisma/enums";
+import {
+  MINIPROGRAM_ERROR_CODES,
+  MiniprogramBusinessError,
+  isMiniprogramBusinessError,
+} from "@/lib/miniprogram-business-error";
 import { prisma } from "@/lib/prisma";
 import {
   markOrderPaidWithFifo,
   restorePhysicalStockFromSaleOutInTx,
 } from "@/services/order-fifo";
+import {
+  assertOrderStockAvailable,
+  assertSellableSpu,
+  formatInsufficientStockMessage,
+  mergeOrderLineQuantities,
+} from "@/services/miniprogram-stock-pure";
 
 export const STOCK_SOLD_OUT_MESSAGE = "手慢了，花材库存已被抢光！";
 
@@ -45,6 +56,12 @@ function roundMoney(n: number): number {
 }
 
 export function isStockSoldOutError(err: unknown): boolean {
+  if (
+    isMiniprogramBusinessError(err) &&
+    err.code === MINIPROGRAM_ERROR_CODES.INSUFFICIENT_STOCK
+  ) {
+    return true;
+  }
   return err instanceof Error && err.message === STOCK_SOLD_OUT_MESSAGE;
 }
 
@@ -72,18 +89,34 @@ export async function restoreOrderSkuStock(
 async function atomicDecrementSkuStock(
   tx: Prisma.TransactionClient,
   skuId: string,
-  quantity: number
+  quantity: number,
+  specName: string
 ) {
   const result = await tx.productSku.updateMany({
     where: {
       id: skuId,
       stock: { gte: quantity },
+      spu: {
+        isDeleted: false,
+        isActive: true,
+      },
     },
     data: { stock: { decrement: quantity } },
   });
 
   if (result.count !== 1) {
-    throw new Error(STOCK_SOLD_OUT_MESSAGE);
+    const current = await tx.productSku.findUnique({
+      where: { id: skuId },
+      select: { stock: true, specName: true },
+    });
+    const available = current?.stock ?? 0;
+    throw new MiniprogramBusinessError(
+      MINIPROGRAM_ERROR_CODES.INSUFFICIENT_STOCK,
+      formatInsufficientStockMessage(
+        current?.specName ?? specName,
+        available
+      )
+    );
   }
 }
 
@@ -127,21 +160,40 @@ export async function createWechatOrder(
       });
       const skuMap = new Map(skus.map((s) => [s.id, s]));
 
+      const mergedQty = mergeOrderLineQuantities(payload.items);
+
       let linesTotal = 0;
 
       for (const line of payload.items) {
         const sku = skuMap.get(line.skuId);
         if (!sku) {
-          throw new Error(`商品款式不存在: ${line.skuId}`);
+          throw new MiniprogramBusinessError(
+            MINIPROGRAM_ERROR_CODES.SKU_NOT_FOUND,
+            `商品款式不存在: ${line.skuId}`
+          );
         }
         const spu = sku.spu;
-        if (!spu || spu.isDeleted || !spu.isActive) {
-          throw new Error(`商品已下架: ${sku.specName}`);
+        if (!spu) {
+          throw new MiniprogramBusinessError(
+            MINIPROGRAM_ERROR_CODES.PRODUCT_NOT_FOUND,
+            "商品不存在"
+          );
         }
+        assertSellableSpu(spu);
         if (!Number.isInteger(line.quantity) || line.quantity <= 0) {
           throw new Error("商品数量无效");
         }
         linesTotal += Number(sku.price) * line.quantity;
+      }
+
+      for (const [skuId, requestedQty] of mergedQty) {
+        const sku = skuMap.get(skuId);
+        if (!sku) continue;
+        assertOrderStockAvailable({
+          specName: sku.specName,
+          stock: sku.stock,
+          requestedQty,
+        });
       }
 
       linesTotal = roundMoney(linesTotal);
@@ -151,8 +203,9 @@ export async function createWechatOrder(
         );
       }
 
-      for (const line of payload.items) {
-        await atomicDecrementSkuStock(tx, line.skuId, line.quantity);
+      for (const [skuId, requestedQty] of mergedQty) {
+        const sku = skuMap.get(skuId)!;
+        await atomicDecrementSkuStock(tx, skuId, requestedQty, sku.specName);
       }
 
       const order = await tx.order.create({

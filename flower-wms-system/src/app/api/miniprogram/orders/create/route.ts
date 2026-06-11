@@ -1,7 +1,11 @@
 import { Prisma } from "@/generated/prisma/client";
 import { jsonError } from "@/lib/api";
+import {
+  isMiniprogramBusinessError,
+  type MiniprogramErrorCode,
+} from "@/lib/miniprogram-business-error";
 import { requireUserFromRequest } from "@/lib/wechat-auth-request";
-import { jsonWechatSuccess } from "@/lib/wechat-api";
+import { jsonWechatError, jsonWechatSuccess } from "@/lib/wechat-api";
 import {
   createWechatOrder,
   isStockSoldOutError,
@@ -85,7 +89,12 @@ function parseCreateBody(raw: unknown): CreateWechatOrderPayload {
   };
 }
 
-function mapErrorStatus(err: unknown): { message: string; status: number } {
+function mapErrorStatus(
+  err: unknown
+): { message: string; status: number; code?: string } {
+  if (isMiniprogramBusinessError(err)) {
+    return { message: err.message, status: 400, code: err.code };
+  }
   if (isStockSoldOutError(err)) {
     return { message: STOCK_SOLD_OUT_MESSAGE, status: 400 };
   }
@@ -183,7 +192,10 @@ export async function POST(request: Request) {
       201
     );
   } catch (err) {
-    const { message, status } = mapErrorStatus(err);
+    const { message, status, code } = mapErrorStatus(err);
+    if (code) {
+      return jsonWechatError(message, status, code as MiniprogramErrorCode);
+    }
     return jsonError(message, status);
   }
 }

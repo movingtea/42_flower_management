@@ -16,7 +16,6 @@ import {
 } from "@/lib/wechat-product-mapper";
 import {
   buildPriceRangeText,
-  hasSellableSku,
   matchProductFilters,
   normalizeJsonTags,
   normalizeTagQueryFromSearchParams,
@@ -79,6 +78,9 @@ function toPublicListItem(item: InternalCandidate) {
     imageUrl: item.imageUrl,
     skuCount: item.skuCount,
     isOutOfStock: item.isOutOfStock,
+    stockSummary: item.stockSummary,
+    stockStatus: item.stockStatus,
+    displayStatus: item.displayStatus,
     shippingFee: item.shippingFee,
     allowPreOrder: item.allowPreOrder,
     productionTime: item.productionTime,
@@ -129,7 +131,7 @@ function buildSpuWhere(query: NormalizedListQuery): Prisma.ProductSpuWhereInput 
 }
 
 function mapCandidate(spu: ProductSpuWithRelations): InternalCandidate | null {
-  if (!hasSellableSku(spu.skus, spu.allowPreOrder)) {
+  if (!spu.skus.length) {
     return null;
   }
 

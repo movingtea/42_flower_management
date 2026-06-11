@@ -7,6 +7,15 @@ import {
   resolveSpuMinPrice,
   type ProductSpuWithRelations,
 } from "@/lib/product-spu";
+import {
+  computeSkuStockFlags,
+  computeStockSummary,
+  resolveDisplayStatus,
+  resolveStockStatus,
+  type DisplayStatus,
+  type StockStatus,
+  type StockSummary,
+} from "@/services/miniprogram-stock-pure";
 
 export type WechatProductSkuItem = {
   id: string;
@@ -14,6 +23,8 @@ export type WechatProductSkuItem = {
   specName: string;
   price: string;
   stock: number;
+  hasStock: boolean;
+  lowStock: boolean;
   /** 展现用图文（已做 SPU Fallback，SKU 有值时不被覆盖） */
   description: string | null;
   imageUrl: string | null;
@@ -35,6 +46,9 @@ export type WechatProductListItem = {
   priceSuffix: string;
   skuCount: number;
   isOutOfStock: boolean;
+  stockSummary: StockSummary;
+  stockStatus: StockStatus;
+  displayStatus: DisplayStatus;
   shippingFee: number;
   allowPreOrder: boolean;
   productionTime: number;
@@ -101,17 +115,21 @@ export function mapSpuToWechatListItem(
 
   const skus: WechatProductSkuItem[] = spu.skus.map((s) => {
     const presentation = resolveWechatSkuPresentation(s, spuFallback);
+    const stockFlags = computeSkuStockFlags(s.stock);
     return {
       id: s.id,
       skuCode: s.skuCode,
       specName: s.specName,
       price: s.price.toString(),
-      stock: s.stock,
+      stock: stockFlags.stock,
+      hasStock: stockFlags.hasStock,
+      lowStock: stockFlags.lowStock,
       description: presentation.description,
       imageUrl: presentation.imageUrl,
       isMainImage: s.isMainImage,
     };
   });
+  const stockSummary = computeStockSummary(skus);
 
   const minPrice = resolveSpuMinPrice(spu.skus);
   const { displayPrice, priceSuffix } = formatMinPriceLabel(
@@ -140,6 +158,9 @@ export function mapSpuToWechatListItem(
     priceSuffix,
     skuCount: skus.length,
     isOutOfStock: isSpuOutOfStock(spu.skus),
+    stockSummary,
+    stockStatus: resolveStockStatus(stockSummary),
+    displayStatus: resolveDisplayStatus(spu, skus),
     shippingFee: Number(spu.shippingFee ?? 0),
     allowPreOrder: spu.allowPreOrder,
     productionTime: spu.productionTime,

@@ -148,6 +148,7 @@ flower-wms-system/
 | `src/services/cms-product-validation-pure.ts` | 商品上架校验纯函数（不访问 DB） |
 | `src/services/cms-product-operations.ts` | 商品运营画像、上架校验、推荐位 CRUD、小程序推荐位查询 |
 | `src/services/miniprogram-product-filter-pure.ts` | 小程序商品 tag / 价格 / 排序 / 分页纯函数 |
+| `src/services/miniprogram-stock-pure.ts` | 小程序库存校验纯函数：库存摘要、加购/下单数量校验、展示状态（售罄 vs 下架） |
 | `src/services/miniprogram-products.ts` | 小程序商品列表 Prisma 查询 + service 层 tag 过滤后分页 |
 | `src/services/setup-checklist-pure.ts` | 试运营准备检查纯函数：根据统计结果生成 checklist 状态 |
 | `src/services/setup-checklist.ts` | 试运营准备检查：Prisma 聚合 FlowerWiki / 供应商 / 配方 / CMS 商品 / 推荐位 / 场景入口等 |
@@ -644,8 +645,30 @@ PurchaseOrderLine.actualUnitCost
 
 | 库存 | 表/字段 | 时点 |
 |---|---|---|
-| 虚拟可售库存 | `product_skus.stock` | 创建订单时扣减 |
+| 虚拟可售库存 | `product_skus.stock` | 创建订单时**原子扣减**（`updateMany` + `stock >= qty`） |
 | 物理批次库存 | `batches.remaining_qty` | 支付成功后 FIFO 扣减 |
+
+商品运营状态与库存状态**严格分离**：
+
+| 概念 | 字段 / 展示 | 说明 |
+|---|---|---|
+| 运营上架 | `product_spus.is_active` | 仅 CMS / 后台运营可改；小程序用户行为**不得**自动修改 |
+| 虚拟可售库存 | `product_skus.stock` | 创建订单时扣减；待支付取消回补；可为 0 但商品仍可上架展示 |
+| 前台售罄 | `stockStatus=SOLD_OUT` / `displayStatus=SOLD_OUT` | `stock=0` 时展示「暂时售罄」，**不是**「已下架」 |
+| 前台下架 | `displayStatus=OFF_SHELF` | 仅当 `is_active=false` 或 `is_deleted=true` |
+
+小程序商品 API（`GET /api/miniprogram/products`、`GET /api/miniprogram/products/[id]`）返回：
+
+- 列表：`stockSummary`（`totalStock` / `hasStock` / `lowStock`）、`stockStatus`、`displayStatus`（兼容保留 `isOutOfStock`）
+- 详情 SKU：`stock` / `hasStock` / `lowStock`
+- **不返回** `operationNote`、成本、毛利、产品决策内部 warning
+
+购物车 / 下单库存规则：
+
+- 加入购物车：前端 + `POST /api/miniprogram/cart`（`action=validate-add`）双重校验
+- 购物车改量 / 结算前：`POST /api/miniprogram/cart` 刷新每项 `stock` 与 `invalidCode`
+- 创建订单：`createWechatOrder` 合并同 SKU 数量后校验，事务内条件 `updateMany` 扣减；失败返回 `INSUFFICIENT_STOCK`，**不创建订单、不扣库存、不写 CRM**
+- `INSUFFICIENT_STOCK` **不得**映射为 `PRODUCT_OFF_SHELF`
 
 支付链路：
 
@@ -1175,6 +1198,11 @@ logging:
 73. 新增后台 API 必须使用 `requirePermission`；API 权限不得弱于对应页面。
 74. 不得为导航展示而放宽 `requirePermission` 或绕过 `canAccessBusinessData`。
 75. 系统健康若含业务统计，不得仅凭技术角色访问；当前 MVP 统一 `business:read`。
+76. 小程序用户加入购物车、创建订单、支付失败、库存不足**不得**自动将 `ProductSpu` / `ProductSku` 改为下架（`is_active=false`）。
+77. 库存不足**不得**修改 CMS 运营上架字段；`stock=0` 只展示售罄，不展示「已下架」。
+78. `ProductSku.stock` 扣减必须使用条件 `updateMany`（`stock >= qty`），**不得**扣成负数。
+79. 服务端库存校验不得只依赖前端；同 SKU 多订单行必须先合并数量再校验与扣减。
+80. 库存不足不得创建订单、不得写 CRM、不得生成 `GiftOccasion` / `CustomerReminder`。
 
 ---
 
