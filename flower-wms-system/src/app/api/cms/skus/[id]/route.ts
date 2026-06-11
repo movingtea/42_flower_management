@@ -32,7 +32,7 @@ function mapError(err: unknown): { message: string; status: number } {
 }
 
 /**
- * PATCH：运营人员仅可修改 SKU 营销图文（description / imageUrl）。
+ * PATCH：运营人员仅可修改 SKU 白名单字段（营销图文、大批量提前预订规则）。
  * 需 cms:write（STORE_OPERATOR / STORE_ADMIN）。
  */
 export async function PATCH(

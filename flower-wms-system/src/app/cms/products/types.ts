@@ -8,6 +8,10 @@ export type ProductSkuEditorRow = {
   isMainImage: boolean;
   sortOrder?: number;
   recipeId: string | null;
+  bulkPreorderEnabled: boolean;
+  bulkOrderThreshold?: string;
+  bulkMinLeadDays?: string;
+  bulkPreorderMessage?: string;
 };
 
 export type ProductEditorInitial = {

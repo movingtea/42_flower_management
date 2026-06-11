@@ -13,6 +13,7 @@ export interface CartItem {
   quantity: number;
   /** 单件商品运费，0 表示免运费 */
   shippingFee?: number;
+  bulkPreorderRule?: import('./preorder-rule').BulkPreorderRule | null;
 }
 
 /** 页面展示用：在 CartItem 上扩展勾选状态（不写入本地缓存） */
@@ -26,6 +27,8 @@ export interface CartListItem extends CartItem {
   invalidCode?: string | null;
   /** 服务端返回的当前 SKU 可售库存 */
   availableStock?: number;
+  bulkPreorderHint?: string | null;
+  bulkPreorderActiveHint?: string | null;
 }
 
 export const CART_STORAGE_KEY = 'cart';
@@ -105,17 +108,31 @@ export function findCartLineIndex(cart: CartItem[], spuId: string, skuId?: strin
 }
 
 export function cartItemsToStorage(list: CartListItem[]): CartItem[] {
-  return list.map(({ id, skuId, sku, specName, name, price, imageUrl, quantity, shippingFee }) => ({
-    id,
-    skuId,
-    sku,
-    specName,
-    name,
-    price,
-    imageUrl,
-    quantity,
-    shippingFee: Math.max(0, Number(shippingFee) || 0),
-  }));
+  return list.map(
+    ({
+      id,
+      skuId,
+      sku,
+      specName,
+      name,
+      price,
+      imageUrl,
+      quantity,
+      shippingFee,
+      bulkPreorderRule,
+    }) => ({
+      id,
+      skuId,
+      sku,
+      specName,
+      name,
+      price,
+      imageUrl,
+      quantity,
+      shippingFee: Math.max(0, Number(shippingFee) || 0),
+      bulkPreorderRule: bulkPreorderRule ?? null,
+    })
+  );
 }
 
 /** 勾选商品写入结算缓存（不含 selected 字段） */
@@ -134,6 +151,9 @@ export function storageToCartList(
       invalidCode?: string | null;
       availableStock?: number;
       quantity?: number;
+      bulkPreorderRule?: import('./preorder-rule').BulkPreorderRule | null;
+      bulkPreorderHint?: string | null;
+      bulkPreorderActiveHint?: string | null;
     }
   >
 ): CartListItem[] {
@@ -148,11 +168,14 @@ export function storageToCartList(
     return {
       ...item,
       quantity,
+      bulkPreorderRule: meta?.bulkPreorderRule ?? item.bulkPreorderRule ?? null,
       lineKey: key,
       isInvalid,
       invalidReason: meta?.invalidReason ?? (isInvalid ? '商品不可结算' : null),
       invalidCode: meta?.invalidCode ?? null,
       availableStock: meta?.availableStock,
+      bulkPreorderHint: meta?.bulkPreorderHint ?? null,
+      bulkPreorderActiveHint: meta?.bulkPreorderActiveHint ?? null,
       selected: isInvalid ? false : (prevSelected?.[key] ?? true),
     };
   });

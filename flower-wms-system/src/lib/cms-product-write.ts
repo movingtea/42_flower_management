@@ -37,6 +37,10 @@ export async function buildSkuCreateRows(
       isMainImage: row.isMainImage,
       sortOrder: row.sortOrder ?? i * 10,
       recipeId: row.recipeId ?? null,
+      bulkPreorderEnabled: row.bulkPreorderEnabled ?? false,
+      bulkOrderThreshold: row.bulkOrderThreshold ?? null,
+      bulkMinLeadDays: row.bulkMinLeadDays ?? null,
+      bulkPreorderMessage: row.bulkPreorderMessage ?? null,
     });
   }
 
@@ -72,6 +76,10 @@ export async function syncProductSkus(
       isMainImage: row.isMainImage,
       sortOrder: row.sortOrder ?? i * 10,
       recipeId: row.recipeId ?? null,
+      bulkPreorderEnabled: row.bulkPreorderEnabled ?? false,
+      bulkOrderThreshold: row.bulkOrderThreshold ?? null,
+      bulkMinLeadDays: row.bulkMinLeadDays ?? null,
+      bulkPreorderMessage: row.bulkPreorderMessage ?? null,
     };
 
     if (row.id && existingIds.has(row.id)) {

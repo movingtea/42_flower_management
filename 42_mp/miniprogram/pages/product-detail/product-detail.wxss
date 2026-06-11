@@ -193,6 +193,43 @@
   background: #f9efef;
 }
 
+.detail-preorder-hint {
+  margin-top: 12rpx;
+  padding: 12rpx 16rpx;
+  border-radius: 8rpx;
+  background: #fff8eb;
+  font-size: 24rpx;
+  color: #8a6d3b;
+  line-height: 1.5;
+}
+
+.detail-preorder-hint--active {
+  background: #fff1e6;
+  color: #b45309;
+  font-weight: 500;
+}
+
+.detail-quantity-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  margin-top: 20rpx;
+}
+
+.detail-quantity-label {
+  font-size: 28rpx;
+  color: #333;
+}
+
+.detail-quantity-input {
+  width: 120rpx;
+  padding: 8rpx 16rpx;
+  border: 1rpx solid #e5e5e5;
+  border-radius: 8rpx;
+  text-align: center;
+  font-size: 28rpx;
+}
+
 .recommend-section {
   margin-top: 16rpx;
   padding: 28rpx 0 12rpx;

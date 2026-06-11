@@ -6,6 +6,13 @@ export type CartClientItem = {
   quantity: number;
 };
 
+export type CartBulkPreorderRule = {
+  enabled: boolean;
+  threshold: number | null;
+  minLeadDays: number | null;
+  message: string | null;
+};
+
 export type CartProductSnapshot = {
   spuId: string;
   skuId: string | null;
@@ -19,6 +26,7 @@ export type CartProductSnapshot = {
   isActive: boolean;
   isOutOfStock: boolean;
   stock: number;
+  bulkPreorderRule?: CartBulkPreorderRule | null;
 };
 
 export type CartInvalidCode =

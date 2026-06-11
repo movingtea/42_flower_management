@@ -407,6 +407,14 @@ model ProductSku {
   imageUrl    String?  @map("image_url")
   isMainImage Boolean  @default(false) @map("is_main_image")
   sortOrder   Int      @default(0) @map("sort_order")
+  /// 是否启用大批量提前预订规则
+  bulkPreorderEnabled Boolean @default(false) @map("bulk_preorder_enabled")
+  /// 命中大批量规则的购买数量阈值（单 SKU）
+  bulkOrderThreshold  Int?    @map("bulk_order_threshold")
+  /// 命中规则后最早配送日 = 今天 + minLeadDays（Asia/Shanghai 自然日）
+  bulkMinLeadDays     Int?    @map("bulk_min_lead_days")
+  /// 小程序提示文案（可选）
+  bulkPreorderMessage String? @map("bulk_preorder_message") @db.Text
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 

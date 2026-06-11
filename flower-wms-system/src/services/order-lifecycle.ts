@@ -16,6 +16,11 @@ import {
   formatInsufficientStockMessage,
   mergeOrderLineQuantities,
 } from "@/services/miniprogram-stock-pure";
+import {
+  evaluateBulkPreorderRequirement,
+  formatBulkPreorderServerMessage,
+  resolveSkuPreorderRule,
+} from "@/services/preorder-rule-pure";
 
 export const STOCK_SOLD_OUT_MESSAGE = "手慢了，花材库存已被抢光！";
 
@@ -194,6 +199,36 @@ export async function createWechatOrder(
           stock: sku.stock,
           requestedQty,
         });
+      }
+
+      const preorderItems = [...mergedQty.entries()].map(([skuId, quantity]) => {
+        const sku = skuMap.get(skuId)!;
+        const spu = sku.spu!;
+        return {
+          skuId,
+          productName: spu.name,
+          skuName: sku.specName,
+          quantity,
+          preorderRule: resolveSkuPreorderRule({ skuRule: sku }),
+        };
+      });
+
+      const preorderCheck = evaluateBulkPreorderRequirement({
+        items: preorderItems,
+        deliveryDate: payload.deliveryDate,
+      });
+
+      if (!preorderCheck.allowed) {
+        const earliest =
+          preorderCheck.earliestDeliveryDate ??
+          preorderCheck.violations[0]?.earliestDeliveryDate ??
+          "";
+        throw new MiniprogramBusinessError(
+          MINIPROGRAM_ERROR_CODES.BULK_ORDER_REQUIRES_PREORDER,
+          earliest
+            ? formatBulkPreorderServerMessage(earliest)
+            : "当前订单数量较多，需要提前预订，请重新选择配送日期。"
+        );
       }
 
       linesTotal = roundMoney(linesTotal);

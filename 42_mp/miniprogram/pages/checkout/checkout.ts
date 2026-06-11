@@ -27,6 +27,13 @@ import {
 import { getDeliveryHints, FLOWER_ADJUSTMENT_NOTE } from '../../utils/gift-copy';
 import { request } from '../../utils/request';
 import { mapInvalidCartTag } from '../../utils/stock';
+import {
+  computeOrderEarliestDeliveryDate,
+  evaluateCheckoutBulkPreorder,
+  getTodayShanghaiDateString,
+  type BulkPreorderLineInput,
+  type BulkPreorderRule,
+} from '../../utils/preorder-rule';
 
 interface CheckoutDisplayItem {
   lineKey: string;
@@ -39,15 +46,13 @@ interface CheckoutDisplayItem {
   quantity: number;
   lineSubtotal: string;
   imageUrl: string;
+  bulkPreorderRule?: BulkPreorderRule | null;
 }
 
 const TIME_BUCKETS = ['上午', '下午', '傍晚', '晚上'];
 
 function todayString(): string {
-  const d = new Date();
-  const m = `${d.getMonth() + 1}`.padStart(2, '0');
-  const day = `${d.getDate()}`.padStart(2, '0');
-  return `${d.getFullYear()}-${m}-${day}`;
+  return getTodayShanghaiDateString();
 }
 
 function formatMoney(n: number): string {
@@ -71,8 +76,21 @@ function cartRowsToDisplay(items: CartItem[]): CheckoutDisplayItem[] {
       quantity: qty,
       lineSubtotal: formatMoney(price * qty),
       imageUrl: toRelativeImagePath(row.imageUrl),
+      bulkPreorderRule: row.bulkPreorderRule ?? null,
     };
   });
+}
+
+function toBulkPreorderLines(
+  items: CheckoutDisplayItem[]
+): BulkPreorderLineInput[] {
+  return items.map((row) => ({
+    skuId: row.skuId,
+    productName: row.name,
+    skuName: row.specName,
+    quantity: row.quantity,
+    bulkPreorderRule: row.bulkPreorderRule,
+  }));
 }
 
 Page({
@@ -84,6 +102,7 @@ Page({
     buyerPhone: '',
     deliveryDate: '',
     minDeliveryDate: todayString(),
+    bulkPreorderNotice: '',
     timeBuckets: TIME_BUCKETS,
     deliveryTimeBucketIndex: 0,
     deliveryTimeBucket: TIME_BUCKETS[0],
@@ -336,6 +355,7 @@ Page({
         emptyCheckout: true,
       });
       this.recalcAmounts([]);
+      this.applyBulkPreorderConstraints([]);
       return;
     }
 
@@ -347,13 +367,92 @@ Page({
         typeof (row as CartItem).name === 'string'
     );
 
-    const checkoutItems = cartRowsToDisplay(rows);
+    void this.refreshCheckoutRules(rows);
+  },
+
+  async refreshCheckoutRules(rows: CartItem[]) {
+    let mergedRows = rows;
+    try {
+      const res = await request<{
+        list: Array<{
+          productId: string;
+          skuId?: string | null;
+          product?: {
+            bulkPreorderRule?: BulkPreorderRule | null;
+          } | null;
+        }>;
+      }>({
+        url: '/cart',
+        method: 'POST',
+        quiet: true,
+        data: {
+          items: rows.map((row) => ({
+            productId: row.id,
+            skuId: row.skuId,
+            quantity: row.quantity,
+          })),
+        },
+      });
+
+      const ruleByKey = new Map(
+        (res?.list ?? []).map((line) => [
+          line.skuId ? `${line.productId}:${line.skuId}` : line.productId,
+          line.product?.bulkPreorderRule ?? null,
+        ])
+      );
+
+      mergedRows = rows.map((row) => ({
+        ...row,
+        bulkPreorderRule:
+          ruleByKey.get(
+            row.skuId ? `${row.id}:${row.skuId}` : row.id
+          ) ??
+          row.bulkPreorderRule ??
+          null,
+      }));
+    } catch {
+      /* 使用本地缓存规则 */
+    }
+
+    const checkoutItems = cartRowsToDisplay(mergedRows);
     this.setData({
       checkoutItems,
-      checkoutSourceItems: rows,
+      checkoutSourceItems: mergedRows,
       emptyCheckout: checkoutItems.length === 0,
     });
     this.recalcAmounts(checkoutItems);
+    this.applyBulkPreorderConstraints(checkoutItems);
+  },
+
+  applyBulkPreorderConstraints(items?: CheckoutDisplayItem[]) {
+    const list = items ?? this.data.checkoutItems;
+    const lines = toBulkPreorderLines(list);
+    const earliest = computeOrderEarliestDeliveryDate(lines);
+    const minDeliveryDate = earliest ?? todayString();
+    const patch: Record<string, string> = {
+      minDeliveryDate,
+      bulkPreorderNotice: earliest
+        ? '这份花礼数量较多，我们需要提前为你备花和制作，暂不支持当天送达。'
+        : '',
+    };
+
+    if (this.data.deliveryDate) {
+      const check = evaluateCheckoutBulkPreorder({
+        items: lines,
+        deliveryDate: this.data.deliveryDate,
+      });
+      if (!check.allowed && earliest) {
+        patch.deliveryDate = earliest;
+        patch.bulkPreorderNotice =
+          '当前订单数量较多，需要提前预订，已为你更新可选配送日期。';
+        patch.deliveryHints = getDeliveryHints(
+          earliest,
+          this.data.deliveryTimeBucket
+        );
+      }
+    }
+
+    this.setData(patch);
   },
 
   recalcAmounts(items?: CheckoutDisplayItem[]) {
@@ -396,6 +495,17 @@ Page({
     if (!this.data.deliveryDate) return '请选择配送日期';
     if (!this.data.deliveryTimeBucket) return '请选择配送时段';
 
+    const preorderCheck = evaluateCheckoutBulkPreorder({
+      items: toBulkPreorderLines(checkoutItems),
+      deliveryDate: this.buildDeliveryDateLabel(),
+    });
+    if (!preorderCheck.allowed) {
+      return (
+        preorderCheck.violations[0]?.message ||
+        '当前订单数量较多，需要提前预订，请重新选择配送日期。'
+      );
+    }
+
     for (const item of checkoutItems) {
       if (!item.skuId) {
         return '商品规格信息缺失，请返回重新选购';
@@ -416,9 +526,34 @@ Page({
 
   onDeliveryDateChange(e: WechatMiniprogram.PickerChange) {
     const deliveryDate = e.detail.value as string;
+    const check = evaluateCheckoutBulkPreorder({
+      items: toBulkPreorderLines(this.data.checkoutItems),
+      deliveryDate,
+    });
+    if (!check.allowed) {
+      wx.showToast({
+        title: '当前数量需提前预订，不能选择该日期',
+        icon: 'none',
+      });
+      if (check.earliestDeliveryDate) {
+        this.setData({
+          deliveryDate: check.earliestDeliveryDate,
+          deliveryHints: getDeliveryHints(
+            check.earliestDeliveryDate,
+            this.data.deliveryTimeBucket
+          ),
+          bulkPreorderNotice:
+            '这份花礼数量较多，我们需要提前为你备花和制作，暂不支持当天送达。',
+        });
+      }
+      return;
+    }
     this.setData({
       deliveryDate,
       deliveryHints: getDeliveryHints(deliveryDate, this.data.deliveryTimeBucket),
+      bulkPreorderNotice: check.earliestDeliveryDate
+        ? '这份花礼数量较多，我们需要提前为你备花和制作，暂不支持当天送达。'
+        : '',
     });
   },
 
@@ -658,11 +793,16 @@ Page({
             console.error('创建订单失败', err);
             const errBody = err as { error?: string; code?: string };
             const errMsg = errBody?.error || '请稍后重试';
+            if (errBody?.code === 'BULK_ORDER_REQUIRES_PREORDER') {
+              this.applyBulkPreorderConstraints();
+            }
             wx.showModal({
               title:
                 errBody?.code === 'INSUFFICIENT_STOCK'
                   ? '库存不足'
-                  : '下单失败',
+                  : errBody?.code === 'BULK_ORDER_REQUIRES_PREORDER'
+                    ? '需要提前预订'
+                    : '下单失败',
               content: errMsg,
               showCancel: false,
             });

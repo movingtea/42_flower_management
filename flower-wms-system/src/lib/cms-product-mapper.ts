@@ -54,6 +54,12 @@ export function productToEditorInitial(
     isMainImage: sku.isMainImage,
     sortOrder: sku.sortOrder,
     recipeId: sku.recipeId ?? null,
+    bulkPreorderEnabled: sku.bulkPreorderEnabled ?? false,
+    bulkOrderThreshold:
+      sku.bulkOrderThreshold != null ? String(sku.bulkOrderThreshold) : "",
+    bulkMinLeadDays:
+      sku.bulkMinLeadDays != null ? String(sku.bulkMinLeadDays) : "",
+    bulkPreorderMessage: sku.bulkPreorderMessage ?? "",
   }));
 
   const cardImage = resolveSpuCardImageUrl(spu.skus);

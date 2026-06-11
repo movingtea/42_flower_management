@@ -57,6 +57,9 @@
       <view wx:if="{{deliveryHints.length}}" class="delivery-hints">
         <text wx:for="{{deliveryHints}}" wx:key="*this" class="delivery-hint-line">{{item}}</text>
       </view>
+      <view wx:if="{{bulkPreorderNotice}}" class="delivery-hints delivery-hints--preorder">
+        <text class="delivery-hint-line">{{bulkPreorderNotice}}</text>
+      </view>
     </view>
 
     <!-- 第二层：送礼信息（建议填写） -->

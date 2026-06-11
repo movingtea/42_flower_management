@@ -275,6 +275,9 @@ function buildValidationInput(
       recipeId: string | null;
       imageUrl: string | null;
       isMainImage: boolean;
+      bulkPreorderEnabled?: boolean;
+      bulkOrderThreshold?: number | null;
+      bulkMinLeadDays?: number | null;
     }>;
   },
   skuDecisions: Array<{
@@ -332,6 +335,9 @@ function buildValidationInput(
       isActive: true,
       stock: sku.stock,
       recipeId: sku.recipeId,
+      bulkPreorderEnabled: sku.bulkPreorderEnabled ?? false,
+      bulkOrderThreshold: sku.bulkOrderThreshold ?? null,
+      bulkMinLeadDays: sku.bulkMinLeadDays ?? null,
       marginEstimate: {
         standardGrossMargin: decision.standardGrossMargin,
         conservativeGrossMargin: decision.conservativeGrossMargin,

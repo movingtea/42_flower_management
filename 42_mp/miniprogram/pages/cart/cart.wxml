@@ -37,6 +37,8 @@
             <text wx:if="{{item.isInvalid}}" class="cart-invalid-tag">{{item.invalidReason || '不可结算'}}</text>
           </view>
           <text class="cart-row-price">¥{{item.price}}</text>
+          <text wx:if="{{item.bulkPreorderHint}}" class="cart-preorder-hint">{{item.bulkPreorderHint}}</text>
+          <text wx:if="{{item.bulkPreorderActiveHint}}" class="cart-preorder-hint cart-preorder-hint--active">{{item.bulkPreorderActiveHint}}</text>
 
           <view class="cart-row-actions">
             <view class="stepper">

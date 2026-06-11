@@ -57,6 +57,9 @@ export type ValidateProductPublishInput = {
     isActive?: boolean;
     stock?: number;
     recipeId?: string | null;
+    bulkPreorderEnabled?: boolean;
+    bulkOrderThreshold?: number | null;
+    bulkMinLeadDays?: number | null;
     marginEstimate?: SkuMarginEstimateInput | null;
     productDecision?: SkuProductDecisionInput | null;
   }>;
@@ -357,6 +360,49 @@ export function validateProductPublishReadiness(
       addIssue(warnings, issue);
       score -= 8;
     }
+  }
+
+  for (const sku of enabledSkus) {
+    if (!sku.bulkPreorderEnabled) continue;
+    const thresholdOk =
+      sku.bulkOrderThreshold != null && sku.bulkOrderThreshold >= 1;
+    const leadDaysOk =
+      sku.bulkMinLeadDays != null && sku.bulkMinLeadDays >= 1;
+    if (!thresholdOk || !leadDaysOk) {
+      addIssue(warnings, {
+        code: "BULK_PREORDER_INCOMPLETE",
+        severity: "WARNING",
+        message: `SKU「${sku.name}」启用了大批量提前预订，但阈值或提前天数未配置完整。`,
+        field: "bulkPreorder",
+      });
+      score -= 5;
+    }
+  }
+
+  const positioningTags = product.positioningTags ?? [];
+  const needsPreorderSuggestionTags = [
+    "HIGH_TICKET",
+    "IMAGE_PRODUCT",
+    "FESTIVAL_LIMITED",
+  ];
+  const hasPreorderSuggestionTag = positioningTags.some((tag) =>
+    needsPreorderSuggestionTags.includes(tag)
+  );
+  const anySkuHasBulkRule = enabledSkus.some(
+    (sku) =>
+      sku.bulkPreorderEnabled &&
+      sku.bulkOrderThreshold != null &&
+      sku.bulkOrderThreshold >= 1 &&
+      sku.bulkMinLeadDays != null &&
+      sku.bulkMinLeadDays >= 1
+  );
+  if (hasPreorderSuggestionTag && !anySkuHasBulkRule) {
+    addIssue(suggestions, {
+      code: "SUGGEST_BULK_PREORDER",
+      severity: "INFO",
+      message: "该商品可能需要提前备花，建议配置提前预订规则。",
+      field: "bulkPreorder",
+    });
   }
 
   // --- 毛利与产品决策 ---

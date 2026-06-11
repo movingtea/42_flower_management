@@ -53,7 +53,57 @@ export type CmsProductSkuInput = {
   isMainImage: boolean;
   sortOrder?: number;
   recipeId?: string | null;
+  bulkPreorderEnabled?: boolean;
+  bulkOrderThreshold?: number | null;
+  bulkMinLeadDays?: number | null;
+  bulkPreorderMessage?: string | null;
 };
+
+function parseOptionalPositiveInt(
+  raw: unknown,
+  fieldLabel: string
+): number | null {
+  if (raw === null || raw === undefined || raw === "") return null;
+  const n = Number(raw);
+  if (!Number.isInteger(n) || n < 1) {
+    throw new Error(`${fieldLabel} 须为大于等于 1 的整数`);
+  }
+  return n;
+}
+
+function parseBulkPreorderSkuFields(
+  r: Record<string, unknown>
+): Pick<
+  CmsProductSkuInput,
+  | "bulkPreorderEnabled"
+  | "bulkOrderThreshold"
+  | "bulkMinLeadDays"
+  | "bulkPreorderMessage"
+> {
+  const bulkPreorderEnabled = Boolean(r.bulkPreorderEnabled);
+  const bulkOrderThreshold = parseOptionalPositiveInt(
+    r.bulkOrderThreshold,
+    "大批量阈值"
+  );
+  const bulkMinLeadDays = parseOptionalPositiveInt(
+    r.bulkMinLeadDays,
+    "最小提前天数"
+  );
+  const bulkPreorderMessage =
+    typeof r.bulkPreorderMessage === "string"
+      ? r.bulkPreorderMessage.trim() || null
+      : r.bulkPreorderMessage === null
+        ? null
+        : undefined;
+
+  return {
+    bulkPreorderEnabled,
+    bulkOrderThreshold,
+    bulkMinLeadDays,
+    bulkPreorderMessage:
+      bulkPreorderMessage === undefined ? null : bulkPreorderMessage,
+  };
+}
 
 export type CmsProductBody = {
   name: string;
@@ -128,6 +178,7 @@ function parseSkuRows(raw: unknown): CmsProductSkuInput[] {
         ? Math.round(Number(r.sortOrder))
         : i * 10,
       recipeId,
+      ...parseBulkPreorderSkuFields(r),
     });
   }
 

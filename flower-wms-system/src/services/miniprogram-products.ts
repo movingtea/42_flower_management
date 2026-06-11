@@ -85,6 +85,7 @@ function toPublicListItem(item: InternalCandidate) {
     allowPreOrder: item.allowPreOrder,
     productionTime: item.productionTime,
     defaultSkuId: item.defaultSkuId,
+    hasBulkPreorderRule: item.hasBulkPreorderRule,
     skus: item.skus,
     occasionTags: item.occasionTags,
     colorTags: item.colorTags,

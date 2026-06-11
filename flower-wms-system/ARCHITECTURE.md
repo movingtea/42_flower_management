@@ -532,7 +532,7 @@ Smoke 脚本：
 | `RecipeLine` | `recipe_lines` | 配方花材明细 |
 | `PackagingKit` | `packaging_kits` | 标准包装成本 |
 | `ProductSpu` | `product_spus` | 商城商品；含运营标签（`occasionTags` + Json 标签字段 + `operationNote`） |
-| `ProductSku` | `product_skus` | SKU，含 `recipeId` |
+| `ProductSku` | `product_skus` | SKU，含 `recipeId`；可选 `bulkPreorderEnabled` / `bulkOrderThreshold` / `bulkMinLeadDays` / `bulkPreorderMessage`（大批量提前预订规则，限制配送日期，不影响上架） |
 | `CmsRecommendationSlot` | `cms_recommendation_slots` | 小程序推荐位配置（`slotType` / `sceneType` / `maxItems`） |
 | `CmsHomeSceneEntry` | `cms_home_scene_entries` | 小程序首页场景入口（标题 / 图标 / 排序 / 跳转方式；与推荐位商品配置分离） |
 | `CmsRecommendationItem` | `cms_recommendation_items` | 推荐位商品关联（可选 SKU、有效期、覆盖图文） |
@@ -659,8 +659,8 @@ PurchaseOrderLine.actualUnitCost
 
 小程序商品 API（`GET /api/miniprogram/products`、`GET /api/miniprogram/products/[id]`）返回：
 
-- 列表：`stockSummary`（`totalStock` / `hasStock` / `lowStock`）、`stockStatus`、`displayStatus`（兼容保留 `isOutOfStock`）
-- 详情 SKU：`stock` / `hasStock` / `lowStock`
+- 列表：`stockSummary`（`totalStock` / `hasStock` / `lowStock`）、`stockStatus`、`displayStatus`（兼容保留 `isOutOfStock`）、轻量 `hasBulkPreorderRule`
+- 详情 SKU：`stock` / `hasStock` / `lowStock` / `bulkPreorderRule`（`enabled` / `threshold` / `minLeadDays` / `message`）
 - **不返回** `operationNote`、成本、毛利、产品决策内部 warning
 
 购物车 / 下单库存规则：
@@ -669,6 +669,15 @@ PurchaseOrderLine.actualUnitCost
 - 购物车改量 / 结算前：`POST /api/miniprogram/cart` 刷新每项 `stock` 与 `invalidCode`
 - 创建订单：`createWechatOrder` 合并同 SKU 数量后校验，事务内条件 `updateMany` 扣减；失败返回 `INSUFFICIENT_STOCK`，**不创建订单、不扣库存、不写 CRM**
 - `INSUFFICIENT_STOCK` **不得**映射为 `PRODUCT_OFF_SHELF`
+
+大批量提前预订规则（`src/services/preorder-rule-pure.ts`）：
+
+- CMS 商品编辑页每个 SKU 可配置「履约与预订规则」：`bulkPreorderEnabled` / `bulkOrderThreshold` / `bulkMinLeadDays` / `bulkPreorderMessage`
+- 规则优先级：SKU 级有效配置 > SPU 级（预留）> 全局默认（预留）；未启用时不限制当天送达
+- 命中规则（`quantity >= threshold`）时，最早配送日 = 今日（Asia/Shanghai）+ `minLeadDays` 自然日
+- 小程序下单页根据订单项计算 `minDeliveryDate`，禁用更早日期；前端限制仅为体验，服务端必须强校验
+- 创建订单：`createWechatOrder` 在库存校验通过后、扣减库存前执行提前预订校验；违规返回 `BULK_ORDER_REQUIRES_PREORDER`（HTTP 400），**不创建订单、不扣 `ProductSku.stock`、不写 CRM、不生成 `GiftOccasion` / `CustomerReminder`、不修改上下架状态**
+- 提前预订违规与库存不足是两件不同的事，错误码不得混淆
 
 支付链路：
 
@@ -1203,6 +1212,10 @@ logging:
 78. `ProductSku.stock` 扣减必须使用条件 `updateMany`（`stock >= qty`），**不得**扣成负数。
 79. 服务端库存校验不得只依赖前端；同 SKU 多订单行必须先合并数量再校验与扣减。
 80. 库存不足不得创建订单、不得写 CRM、不得生成 `GiftOccasion` / `CustomerReminder`。
+81. 大批量提前预订限制**不得**修改 `ProductSpu` / `ProductSku` 上架状态（`is_active`）。
+82. 提前预订限制**不得**与库存不足混淆；`BULK_ORDER_REQUIRES_PREORDER` ≠ `INSUFFICIENT_STOCK`。
+83. 配送日期判断必须使用 `Asia/Shanghai` 业务自然日（`src/lib/datetime.ts`），**不得**用 `toISOString().slice(0,10)` 或服务器本地时区替代。
+84. 命中提前预订规则时不得创建订单、不得扣 `ProductSku.stock`、不得写 CRM。
 
 ---
 
@@ -1219,6 +1232,8 @@ CMS 是小程序商品与营销内容的**运营配置中心**，与 WMS 配方/
 推荐位（`CmsRecommendationSlot` / `CmsRecommendationItem`）为**人工配置**，添加商品时 service 返回经营 warnings，但不自动拒绝、移除或改商品状态。上架校验（`validateProductPublishReadiness`）为纯函数，`canPublish` / `canPromote` 仅作运营参考。
 
 运营标签定义见 `src/lib/cms-product-tags.ts`；`occasionTags` 沿用 `String[]`（Sprint 8），其余标签存 `Json` 数组。
+
+CMS 商品 / SKU 可配置「履约与预订规则」（`ProductEditor` SKU 高级设置）：当顾客购买数量达到阈值时需提前预订，用于限制小程序配送日期，**不用于**限制商品上架。上架校验（`validateProductPublishReadiness`）对规则配置不完整给出 warning，不阻止保存草稿。
 
 CMS UI 组件（Sprint 9 Round 2 + 易用性增强）：
 
