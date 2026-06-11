@@ -293,6 +293,8 @@ Docker 文件位于仓库根目录：
 
 - `Dockerfile`
 - `docker-compose.yml`
+- `docker-compose.example.yml`
+- `scripts/deploy-cleanup.sh` — 部署后安全磁盘清理（宿主机执行）
 
 compose 服务：
 
@@ -302,12 +304,60 @@ compose 服务：
 | `flower-web` | Next.js standalone Web 应用 |
 | `flower-cron-worker` | 库存投影 cron worker，运行 `scripts/cron-inventory-daemon.ts` |
 | `db` | PostgreSQL |
+| `docker-cleanup` | 可选清理服务，仅在 `--profile cleanup` 时启用（不推荐默认使用） |
 
-容器启动：
+### 推荐部署流程
+
+生产服务器磁盘通常较小（例如 20GB），频繁部署会积累 build cache、dangling images、停止的容器与容器 json 日志。推荐在 `docker compose up -d` 成功且 healthcheck 通过后执行清理：
+
+```bash
+# 在 compose 与 .env 所在目录（如 /root/flower-platform/）
+docker compose pull
+docker compose build    # 若本地构建镜像
+docker compose up -d
+./scripts/deploy-cleanup.sh
+```
+
+`deploy-cleanup.sh` 行为：
+
+- 等待 `flower-web`（Dockerfile healthcheck `/login`）与 `db`（`pg_isready`）变为 healthy，默认最多 120 秒。
+- healthcheck 未通过时**不执行 prune**，退出码 1。
+- healthcheck 通过后执行安全 prune：停止的容器、dangling images、未使用网络、24 小时前的 build cache。
+- **不删除** Docker volumes（含 `postgres_data`）、**不删除** `public/uploads`、**不影响**正在运行的容器。
+- **不执行** `docker system prune -a --volumes` 或 `docker volume prune`。
+- 输出清理前后的 `df -h` 与 `docker system df`。
+- 清理命令失败不会停止已启动的服务。
+
+更激进但仍不删 volume：`./scripts/deploy-cleanup.sh --aggressive`（清理 72 小时前未使用的镜像与 build cache）。
+
+若磁盘仍不足，需人工排查：
+
+```bash
+docker system df
+docker logs flower-web-prod --tail 100
+du -sh /var/lib/docker/*
+du -sh public/uploads
+docker volume ls
+```
+
+### 容器日志轮转
+
+`flower-web`、`flower-cron-worker`、`flower-nginx`、`db` 已配置 json-file 日志轮转（单文件最大 10MB，保留 3 个），避免容器日志无限增长。
+
+### 容器启动与数据
 
 - `flower-wms-system/docker-entrypoint.sh` 会在 `DATABASE_URL` 存在且 `SKIP_DB_MIGRATE != true` 时执行 `npx prisma migrate deploy`。
 - Dockerfile healthcheck 请求 `/login`。
-- 当前 compose 未为 `public/uploads` 配置持久化卷；上传仍是本地文件系统方案。
+- 当前 compose 未为 `public/uploads` 配置持久化卷；上传仍是本地文件系统方案，**不得**被部署清理脚本删除。
+- PostgreSQL 数据保存在 named volume `postgres_data`，清理脚本不会 prune volumes。
+
+### 可选 compose cleanup profile（不推荐默认）
+
+```bash
+docker compose --profile cleanup run --rm docker-cleanup
+```
+
+该服务挂载 `/var/run/docker.sock`，存在安全风险；**优先使用宿主机 `scripts/deploy-cleanup.sh`**。默认 `docker compose up -d` 不会启动 `docker-cleanup`。
 
 ## 11. 测试 / Smoke Scripts
 

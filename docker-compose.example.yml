@@ -4,7 +4,10 @@
 #   cp docker-compose.example.yml docker-compose.yml
 #   cp .env.production.example .env
 #   # 编辑 .env 填入真实密钥后：
+#   docker compose pull
+#   docker compose build   # 若本地构建
 #   docker compose up -d
+#   ./scripts/deploy-cleanup.sh
 
 services:
   flower-nginx:
@@ -21,6 +24,11 @@ services:
       - flower-prod-network
     depends_on:
       - flower-web
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   flower-web:
     image: crpi-bp5b6vut8l4d7ebv.cn-hangzhou.personal.cr.aliyuncs.com/universe42/flower-platform-app:latest
@@ -38,6 +46,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   flower-cron-worker:
     image: crpi-bp5b6vut8l4d7ebv.cn-hangzhou.personal.cr.aliyuncs.com/universe42/flower-platform-app:latest
@@ -54,6 +67,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   db:
     image: postgres:alpine
@@ -70,6 +88,27 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # 可选：部署后磁盘清理（非默认 profile，需手动启用）
+  # 安全提示：挂载 Docker socket 有安全风险，优先使用宿主机 scripts/deploy-cleanup.sh
+  docker-cleanup:
+    image: docker:cli
+    profiles:
+      - cleanup
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: >
+      sh -c "
+        docker container prune -f &&
+        docker image prune -f &&
+        docker network prune -f &&
+        docker builder prune -f --filter until=24h
+      "
 
 networks:
   flower-prod-network:

@@ -944,6 +944,7 @@ Docker 文件位于仓库根目录：
 - `Dockerfile`
 - `docker-compose.yml`
 - `docker-compose.example.yml`
+- `scripts/deploy-cleanup.sh` — 宿主机部署后安全磁盘清理
 
 compose 服务：
 
@@ -952,7 +953,8 @@ compose 服务：
 | `flower-nginx` | Nginx 网关 |
 | `flower-web` | Next.js Web 应用 |
 | `flower-cron-worker` | 库存投影 cron worker |
-| `db` | PostgreSQL |
+| `db` | PostgreSQL（named volume `postgres_data`） |
+| `docker-cleanup` | 可选；`profiles: [cleanup]`，默认 `up -d` 不启动 |
 
 `flower-wms-system/docker-entrypoint.sh`：
 
@@ -963,9 +965,78 @@ Dockerfile：
 
 - builder 阶段执行 `npx prisma generate` 和 `npm run build`。
 - runner 阶段使用 Next standalone。
-- healthcheck 请求 `/login`。
+- healthcheck 请求 `/login`（compose 未覆盖，由镜像 HEALTHCHECK 生效）。
 
-当前 compose 没有为 `public/uploads` 配置持久化卷；上传文件持久性需要部署层额外处理。
+当前 compose 没有为 `public/uploads` 配置持久化卷；上传文件持久性需要部署层额外处理。**`public/uploads` 不得被部署清理删除。**
+
+### 12.0 部署后磁盘清理（小磁盘服务器）
+
+生产 ECS 磁盘通常仅 20GB 左右，频繁 `pull` / `build` / `up` 会积累：
+
+- Docker build cache
+- dangling / 旧镜像层
+- 已停止容器与未使用网络
+- 容器 json-file 日志
+
+**推荐流程**（在 compose 目录执行）：
+
+```bash
+docker compose pull
+docker compose build
+docker compose up -d
+./scripts/deploy-cleanup.sh
+```
+
+`scripts/deploy-cleanup.sh`（宿主机运行，**不在**应用 entrypoint 内执行 prune）：
+
+| 阶段 | 行为 |
+|---|---|
+| 等待 healthcheck | `flower-web`（镜像 `/login` healthcheck）、`db`（`pg_isready`）；默认超时 120s |
+| healthcheck 失败 | 不 prune，`exit 1` |
+| healthcheck 成功 | 安全 prune（见下表） |
+| 输出 | 清理前后 `df -h`、`docker system df` |
+
+默认安全 prune（**不删 volumes**）：
+
+| 命令 | 作用 |
+|---|---|
+| `docker container prune -f` | 删除已停止容器 |
+| `docker image prune -f` | 删除 dangling images |
+| `docker network prune -f` | 删除未使用网络 |
+| `docker builder prune -f --filter until=24h` | 删除 24h 前 build cache |
+
+**禁止默认执行**：
+
+- `docker volume prune`
+- `docker system prune -a --volumes`
+- 删除 `postgres_data` / `next-cache` volume
+- 删除 `public/uploads`
+
+`--aggressive` 模式：可 `image prune -a` 与 `builder prune -a`（`until=72h`），仍禁止 volume prune。
+
+清理失败**不会**停止已运行的 `flower-web` / `db` / `flower-nginx` / `flower-cron-worker`。
+
+可选 compose profile（需显式启用，挂载 docker.sock，有安全风险）：
+
+```bash
+docker compose --profile cleanup run --rm docker-cleanup
+```
+
+优先使用宿主机 `scripts/deploy-cleanup.sh`，勿将 docker.sock 挂入业务容器。
+
+### 12.0.1 容器日志轮转
+
+核心服务 `flower-web`、`flower-cron-worker`、`flower-nginx`、`db` 配置：
+
+```yaml
+logging:
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+```
+
+限制单容器 json 日志总量，避免 `/var/lib/docker/containers/*/*.log` 无限增长。
 
 ### 12.1 图片路径规范
 
