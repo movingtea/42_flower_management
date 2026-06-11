@@ -28,6 +28,12 @@ import {
   formatSkuStockLabel,
   isSoldOutProduct,
 } from '../../utils/stock';
+import {
+  formatDefaultBulkPreorderHint,
+  formatSkuBulkPreorderHint,
+  isBulkQuantityHit,
+  type BulkPreorderRule,
+} from '../../utils/preorder-rule';
 
 interface DetailPayload {
   product: WechatProductRaw;
@@ -63,6 +69,10 @@ Page({
     specPickerVisible: false,
     specPickerMode: 'cart' as 'cart' | 'buy',
     selectedSkuStockLabel: '',
+    selectedSkuId: '',
+    selectedQuantity: 1,
+    bulkPreorderHint: '',
+    bulkPreorderActiveHint: '',
     canPurchase: true,
     baseUrl,
     occasionSummary: '',
@@ -133,9 +143,13 @@ Page({
         ? canPurchaseSku(defaultSkuForStock)
         : !isSoldOutProduct(product);
 
+      this.updateSkuPreorderHints(defaultSkuForStock, 1);
+
       this.setData({
         loading: false,
         product,
+        selectedSkuId: defaultSkuForStock?.id ?? '',
+        selectedQuantity: 1,
         selectedSkuStockLabel: defaultSkuForStock
           ? formatSkuStockLabel(defaultSkuForStock.stock)
           : formatSkuStockLabel(0),
@@ -171,6 +185,33 @@ Page({
     this.setData({ bannerCurrent: e.detail.current });
   },
 
+  updateSkuPreorderHints(
+    sku: { bulkPreorderRule?: BulkPreorderRule } | null | undefined,
+    quantity: number
+  ) {
+    const rule = sku?.bulkPreorderRule;
+    if (!rule?.enabled || rule.threshold == null || rule.minLeadDays == null) {
+      this.setData({ bulkPreorderHint: '', bulkPreorderActiveHint: '' });
+      return;
+    }
+    const bulkPreorderHint =
+      formatSkuBulkPreorderHint(rule) ||
+      formatDefaultBulkPreorderHint(rule.threshold, rule.minLeadDays);
+    const bulkPreorderActiveHint = isBulkQuantityHit(rule, quantity)
+      ? '当前数量需要提前预订，不能选择当天送达。'
+      : '';
+    this.setData({ bulkPreorderHint, bulkPreorderActiveHint });
+  },
+
+  onQuantityChange(e: WechatMiniprogram.Input) {
+    const quantity = Math.max(1, Math.floor(Number(e.detail.value) || 1));
+    const sku =
+      this.data.product?.skus.find((s) => s.id === this.data.selectedSkuId) ??
+      pickDefaultSku(this.data.product!);
+    this.setData({ selectedQuantity: quantity });
+    this.updateSkuPreorderHints(sku, quantity);
+  },
+
   onOpenSpecPicker(e?: WechatMiniprogram.TouchEvent) {
     const mode =
       (e?.currentTarget?.dataset?.mode as 'cart' | 'buy' | undefined) ?? 'cart';
@@ -199,7 +240,8 @@ Page({
           sku.specName,
           sku.price,
           sku.imageUrl ?? product.imageUrl,
-          sku.stock
+          sku.stock,
+          sku.bulkPreorderRule
         );
       } else {
         void this.addSkuToCart(
@@ -208,7 +250,8 @@ Page({
           sku.specName,
           sku.price,
           sku.imageUrl ?? product.imageUrl,
-          sku.stock
+          sku.stock,
+          sku.bulkPreorderRule
         );
       }
       return;
@@ -239,9 +282,11 @@ Page({
     }
 
     this.setData({
+      selectedSkuId: detail.skuId,
       selectedSkuStockLabel: formatSkuStockLabel(sku.stock),
       canPurchase: true,
     });
+    this.updateSkuPreorderHints(sku, this.data.selectedQuantity);
 
     if (mode === 'buy') {
       void this.buySku(
@@ -250,7 +295,8 @@ Page({
         detail.specName,
         detail.price,
         detail.imageUrl,
-        sku.stock
+        sku.stock,
+        sku.bulkPreorderRule
       );
       return;
     }
@@ -261,7 +307,8 @@ Page({
       detail.specName,
       detail.price,
       detail.imageUrl,
-      sku.stock
+      sku.stock,
+      sku.bulkPreorderRule
     );
   },
 
@@ -271,7 +318,8 @@ Page({
     specName: string,
     price: string,
     imageUrl: string,
-    stock: number
+    stock: number,
+    bulkPreorderRule?: BulkPreorderRule | null
   ) {
     const { product } = this.data;
     if (!product) return;
@@ -286,6 +334,8 @@ Page({
       imageUrl: imageUrl || product.imageUrl,
       shippingFee: product.shippingFee,
       stock,
+      quantity: this.data.selectedQuantity,
+      bulkPreorderRule: bulkPreorderRule ?? null,
     });
   },
 
@@ -295,7 +345,8 @@ Page({
     specName: string,
     price: string,
     imageUrl: string,
-    stock: number
+    stock: number,
+    bulkPreorderRule?: BulkPreorderRule | null
   ) {
     const { product } = this.data;
     if (!product) return;
@@ -310,6 +361,8 @@ Page({
       imageUrl: imageUrl || product.imageUrl,
       shippingFee: product.shippingFee,
       stock,
+      quantity: this.data.selectedQuantity,
+      bulkPreorderRule: bulkPreorderRule ?? null,
     }).then((ok) => {
       if (ok) wx.showToast({ title: '已加入购物车', icon: 'success' });
     });

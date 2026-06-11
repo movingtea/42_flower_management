@@ -15,6 +15,12 @@ import {
 } from '../../utils/cart';
 import { request } from '../../utils/request';
 import { mapInvalidCartTag, validateLocalCartQuantity } from '../../utils/stock';
+import {
+  formatDefaultBulkPreorderHint,
+  formatSkuBulkPreorderHint,
+  isBulkQuantityHit,
+  type BulkPreorderRule,
+} from '../../utils/preorder-rule';
 
 interface CartSyncLine {
   productId: string;
@@ -29,7 +35,24 @@ interface CartSyncLine {
     imageUrl: string | null;
     shippingFee?: number;
     stock?: number;
+    bulkPreorderRule?: BulkPreorderRule | null;
   } | null;
+}
+
+function buildCartPreorderHints(
+  rule: BulkPreorderRule | null | undefined,
+  quantity: number
+): { bulkPreorderHint: string | null; bulkPreorderActiveHint: string | null } {
+  if (!rule?.enabled || rule.threshold == null || rule.minLeadDays == null) {
+    return { bulkPreorderHint: null, bulkPreorderActiveHint: null };
+  }
+  const bulkPreorderHint =
+    formatSkuBulkPreorderHint(rule) ||
+    formatDefaultBulkPreorderHint(rule.threshold, rule.minLeadDays);
+  const bulkPreorderActiveHint = isBulkQuantityHit(rule, quantity)
+    ? '当前数量需提前预订。'
+    : null;
+  return { bulkPreorderHint, bulkPreorderActiveHint };
 }
 
 Page({
@@ -107,6 +130,9 @@ Page({
             invalidCode?: string | null;
             availableStock?: number;
             quantity?: number;
+            bulkPreorderRule?: BulkPreorderRule | null;
+            bulkPreorderHint?: string | null;
+            bulkPreorderActiveHint?: string | null;
           }
         > = {};
         const lineMap = new Map(
@@ -145,12 +171,21 @@ Page({
             });
           }
 
+          const bulkPreorderRule =
+            line?.product?.bulkPreorderRule ?? row.bulkPreorderRule ?? null;
+          const preorderHints = buildCartPreorderHints(
+            bulkPreorderRule,
+            nextQuantity
+          );
+
           metaByKey[key] = {
             isInvalid,
             invalidReason,
             invalidCode,
             availableStock,
             quantity: nextQuantity,
+            bulkPreorderRule,
+            ...preorderHints,
           };
 
           if (line?.product) {
@@ -163,6 +198,7 @@ Page({
                 line.product.imageUrl || row.imageUrl
               ),
               shippingFee: line.product.shippingFee ?? row.shippingFee,
+              bulkPreorderRule,
             };
           }
           return { ...row, quantity: nextQuantity };
@@ -215,8 +251,17 @@ Page({
     }
   },
 
+  withPreorderHints(cartList: CartListItem[]): CartListItem[] {
+    return cartList.map((item) => {
+      const hints = buildCartPreorderHints(item.bulkPreorderRule, item.quantity);
+      return { ...item, ...hints };
+    });
+  },
+
   persistCartList(cartList: CartListItem[]) {
-    const safeList = Array.isArray(cartList) ? cartList : [];
+    const safeList = this.withPreorderHints(
+      Array.isArray(cartList) ? cartList : []
+    );
     writeCartToStorage(cartItemsToStorage(safeList));
     this.applyCartList(safeList);
   },

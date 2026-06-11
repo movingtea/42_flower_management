@@ -9,6 +9,7 @@ import {
 import { request } from './request';
 import { validateLocalCartQuantity } from './stock';
 import { toRelativeImagePath } from './image';
+import type { BulkPreorderRule } from './preorder-rule';
 
 export type AddCartPayload = {
   spuId: string;
@@ -21,6 +22,7 @@ export type AddCartPayload = {
   shippingFee: number;
   stock: number;
   quantity?: number;
+  bulkPreorderRule?: BulkPreorderRule | null;
 };
 
 type ValidateAddResponse = {
@@ -99,6 +101,7 @@ export async function addPayloadToCart(payload: AddCartPayload): Promise<boolean
       imageUrl: toRelativeImagePath(payload.imageUrl),
       quantity,
       shippingFee: payload.shippingFee,
+      bulkPreorderRule: payload.bulkPreorderRule ?? null,
     });
   }
 
@@ -141,6 +144,7 @@ export async function buyNow(payload: AddCartPayload): Promise<boolean> {
     imageUrl: toRelativeImagePath(payload.imageUrl),
     quantity,
     shippingFee: payload.shippingFee,
+    bulkPreorderRule: payload.bulkPreorderRule ?? null,
   };
 
   wx.setStorageSync(CHECKOUT_PRODUCTS_KEY, [item]);

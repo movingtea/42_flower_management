@@ -116,6 +116,19 @@
   color: #8fa89b;
 }
 
+.cart-preorder-hint {
+  display: block;
+  margin-top: 8rpx;
+  font-size: 22rpx;
+  color: #8a6d3b;
+  line-height: 1.4;
+}
+
+.cart-preorder-hint--active {
+  color: #b45309;
+  font-weight: 500;
+}
+
 .cart-row-actions {
   display: flex;
   align-items: center;

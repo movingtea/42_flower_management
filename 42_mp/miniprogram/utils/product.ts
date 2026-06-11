@@ -12,6 +12,13 @@ export interface StockSummary {
   lowStock: boolean;
 }
 
+export interface BulkPreorderRule {
+  enabled: boolean;
+  threshold: number | null;
+  minLeadDays: number | null;
+  message: string | null;
+}
+
 export interface WechatProductSku {
   id: string;
   skuCode: string;
@@ -24,6 +31,7 @@ export interface WechatProductSku {
   description?: string | null;
   imageUrl: string | null;
   isMainImage: boolean;
+  bulkPreorderRule?: BulkPreorderRule;
 }
 
 export interface WechatProductTagDisplay {
@@ -57,6 +65,7 @@ export interface WechatProductRaw {
   budgetTags?: WechatProductTagDisplay[];
   positioningTags?: WechatProductTagDisplay[];
   sellingPoints?: string[];
+  hasBulkPreorderRule?: boolean;
 }
 
 export interface WechatProductItem {

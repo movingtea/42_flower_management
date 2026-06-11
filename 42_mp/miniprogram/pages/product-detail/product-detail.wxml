@@ -32,6 +32,21 @@
         <text wx:if="{{product.subtitle}}" class="detail-subtitle text-muted">{{product.subtitle}}</text>
         <text class="detail-price">{{priceLabel}}</text>
         <text class="detail-stock-tag {{canPurchase ? '' : 'detail-stock-tag--sold-out'}}">{{selectedSkuStockLabel}}</text>
+        <view wx:if="{{bulkPreorderHint}}" class="detail-preorder-hint">
+          <text>{{bulkPreorderHint}}</text>
+        </view>
+        <view wx:if="{{bulkPreorderActiveHint}}" class="detail-preorder-hint detail-preorder-hint--active">
+          <text>{{bulkPreorderActiveHint}}</text>
+        </view>
+        <view class="detail-quantity-row">
+          <text class="detail-quantity-label">数量</text>
+          <input
+            class="detail-quantity-input"
+            type="number"
+            value="{{selectedQuantity}}"
+            bindinput="onQuantityChange"
+          />
+        </view>
       </view>
 
       <!-- 礼赠表达 -->

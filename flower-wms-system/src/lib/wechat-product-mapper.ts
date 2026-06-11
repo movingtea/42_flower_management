@@ -16,6 +16,17 @@ import {
   type StockStatus,
   type StockSummary,
 } from "@/services/miniprogram-stock-pure";
+import {
+  resolveSkuPreorderRule,
+  type ResolvedPreorderRule,
+} from "@/services/preorder-rule-pure";
+
+export type WechatBulkPreorderRule = {
+  enabled: boolean;
+  threshold: number | null;
+  minLeadDays: number | null;
+  message: string | null;
+};
 
 export type WechatProductSkuItem = {
   id: string;
@@ -29,7 +40,25 @@ export type WechatProductSkuItem = {
   description: string | null;
   imageUrl: string | null;
   isMainImage: boolean;
+  bulkPreorderRule: WechatBulkPreorderRule;
 };
+
+function mapSkuBulkPreorderRule(sku: {
+  bulkPreorderEnabled?: boolean;
+  bulkOrderThreshold?: number | null;
+  bulkMinLeadDays?: number | null;
+  bulkPreorderMessage?: string | null;
+}): WechatBulkPreorderRule {
+  const resolved: ResolvedPreorderRule = resolveSkuPreorderRule({
+    skuRule: sku,
+  });
+  return {
+    enabled: resolved.enabled,
+    threshold: resolved.threshold,
+    minLeadDays: resolved.minLeadDays,
+    message: resolved.message,
+  };
+}
 
 export type WechatProductListItem = {
   id: string;
@@ -45,6 +74,7 @@ export type WechatProductListItem = {
   sellPrice: string;
   priceSuffix: string;
   skuCount: number;
+  hasBulkPreorderRule: boolean;
   isOutOfStock: boolean;
   stockSummary: StockSummary;
   stockStatus: StockStatus;
@@ -127,9 +157,11 @@ export function mapSpuToWechatListItem(
       description: presentation.description,
       imageUrl: presentation.imageUrl,
       isMainImage: s.isMainImage,
+      bulkPreorderRule: mapSkuBulkPreorderRule(s),
     };
   });
   const stockSummary = computeStockSummary(skus);
+  const hasBulkPreorderRule = skus.some((s) => s.bulkPreorderRule.enabled);
 
   const minPrice = resolveSpuMinPrice(spu.skus);
   const { displayPrice, priceSuffix } = formatMinPriceLabel(
@@ -157,6 +189,7 @@ export function mapSpuToWechatListItem(
     sellPrice: displayPrice,
     priceSuffix,
     skuCount: skus.length,
+    hasBulkPreorderRule,
     isOutOfStock: isSpuOutOfStock(spu.skus),
     stockSummary,
     stockStatus: resolveStockStatus(stockSummary),

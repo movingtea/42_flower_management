@@ -257,6 +257,10 @@ export const ProductSkuScalarFieldEnum = {
   imageUrl: 'imageUrl',
   isMainImage: 'isMainImage',
   sortOrder: 'sortOrder',
+  bulkPreorderEnabled: 'bulkPreorderEnabled',
+  bulkOrderThreshold: 'bulkOrderThreshold',
+  bulkMinLeadDays: 'bulkMinLeadDays',
+  bulkPreorderMessage: 'bulkPreorderMessage',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

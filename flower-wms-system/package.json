@@ -19,6 +19,7 @@
     "test:cms-validation": "tsx src/services/cms-product-validation-pure.test.ts",
     "test:miniprogram-products": "tsx src/services/miniprogram-product-filter-pure.test.ts",
     "test:miniprogram-stock": "tsx src/services/miniprogram-stock-pure.test.ts",
+    "test:preorder-rule": "tsx src/services/preorder-rule-pure.test.ts",
     "test:cms-home-scene-entries": "tsx src/services/cms-home-scene-entries-pure.test.ts",
     "test:image-url": "tsx src/lib/image-url.test.ts",
     "test:setup-checklist": "tsx src/services/setup-checklist-pure.test.ts",

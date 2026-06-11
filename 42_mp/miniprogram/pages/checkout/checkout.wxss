@@ -454,6 +454,14 @@
   line-height: 1.6;
 }
 
+.delivery-hints--preorder {
+  background: rgba(180, 83, 9, 0.08);
+}
+
+.delivery-hints--preorder .delivery-hint-line {
+  color: #8a6d3b;
+}
+
 .recipient-picker-row {
   margin-bottom: 12rpx;
 }

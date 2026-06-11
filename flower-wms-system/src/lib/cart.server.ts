@@ -15,6 +15,7 @@ import {
   mapCartInvalidReason,
   validateCartQuantity,
 } from "@/services/miniprogram-stock-pure";
+import { resolveSkuPreorderRule } from "@/services/preorder-rule-pure";
 
 export function parseCartClientItems(raw: unknown): CartClientItem[] {
   if (!Array.isArray(raw)) {
@@ -178,6 +179,17 @@ export async function buildCartLines(
             isActive: spu.isActive,
             isOutOfStock: sku ? sku.stock <= 0 : isSpuOutOfStock(spu.skus),
             stock: sku?.stock ?? 0,
+            bulkPreorderRule: sku
+              ? (() => {
+                  const resolved = resolveSkuPreorderRule({ skuRule: sku });
+                  return {
+                    enabled: resolved.enabled,
+                    threshold: resolved.threshold,
+                    minLeadDays: resolved.minLeadDays,
+                    message: resolved.message,
+                  };
+                })()
+              : null,
           }
         : null,
     };

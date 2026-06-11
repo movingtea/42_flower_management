@@ -47,7 +47,32 @@ function emptySkuRow(sortOrder = 0): ProductSkuEditorRow {
     isMainImage: sortOrder === 0,
     sortOrder,
     recipeId: null,
+    bulkPreorderEnabled: false,
+    bulkOrderThreshold: "",
+    bulkMinLeadDays: "",
+    bulkPreorderMessage: "",
   };
+}
+
+function formatBulkPreorderPreview(row: ProductSkuEditorRow): string | null {
+  if (!row.bulkPreorderEnabled) return null;
+  const threshold = Number(row.bulkOrderThreshold ?? "");
+  const minLeadDays = Number(row.bulkMinLeadDays ?? "");
+  if (
+    !Number.isInteger(threshold) ||
+    threshold < 1 ||
+    !Number.isInteger(minLeadDays) ||
+    minLeadDays < 1
+  ) {
+    return "请填写有效的大批量阈值与最小提前天数。";
+  }
+  const dayLabel =
+    minLeadDays === 1
+      ? "明天"
+      : minLeadDays === 2
+        ? "后天"
+        : `${minLeadDays} 天后`;
+  return `购买 ${threshold} 件及以上时，最早可选择${dayLabel}配送。`;
 }
 
 export function ProductEditor({ productId, isNew, initial }: ProductEditorProps) {
@@ -234,6 +259,24 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
         showToast(`第 ${i + 1} 行库存须为非负整数`, "error");
         return;
       }
+      if (row.bulkPreorderEnabled) {
+        const threshold = Number(row.bulkOrderThreshold);
+        const minLeadDays = Number(row.bulkMinLeadDays);
+        if (!Number.isInteger(threshold) || threshold < 1) {
+          showToast(
+            `第 ${i + 1} 行已启用大批量提前预订，请填写有效阈值（≥1）`,
+            "error"
+          );
+          return;
+        }
+        if (!Number.isInteger(minLeadDays) || minLeadDays < 1) {
+          showToast(
+            `第 ${i + 1} 行已启用大批量提前预订，请填写有效提前天数（≥1）`,
+            "error"
+          );
+          return;
+        }
+      }
     }
 
     const payload = {
@@ -262,6 +305,14 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
         isMainImage: row.isMainImage,
         sortOrder: row.sortOrder ?? index * 10,
         recipeId: row.recipeId,
+        bulkPreorderEnabled: row.bulkPreorderEnabled,
+        bulkOrderThreshold: row.bulkOrderThreshold?.trim()
+          ? Number(row.bulkOrderThreshold)
+          : null,
+        bulkMinLeadDays: row.bulkMinLeadDays?.trim()
+          ? Number(row.bulkMinLeadDays)
+          : null,
+        bulkPreorderMessage: row.bulkPreorderMessage?.trim() || null,
       })),
     };
 
@@ -734,6 +785,90 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
                   ))}
                 </tbody>
               </table>
+            </div>
+
+            <div className="mt-6 space-y-3">
+              <h4 className="text-sm font-semibold text-zinc-900">
+                履约与预订规则（SKU 高级设置）
+              </h4>
+              <p className="text-xs text-zinc-500">
+                当顾客购买数量较多时，限制最早配送日期，不影响商品上架与库存校验。
+              </p>
+              {skus.map((row, index) => (
+                <details
+                  key={row.id ?? `preorder-${index}`}
+                  className="rounded-lg border border-zinc-200 bg-zinc-50/60 p-4"
+                >
+                  <summary className="cursor-pointer text-sm font-medium text-zinc-800">
+                    {row.specName.trim() || `款式 ${index + 1}`}
+                    {row.bulkPreorderEnabled ? (
+                      <span className="ml-2 text-xs font-normal text-amber-700">
+                        已启用大批量提前预订
+                      </span>
+                    ) : null}
+                  </summary>
+                  <div className="mt-4 space-y-4">
+                    <Switch
+                      label="启用大批量提前预订"
+                      checked={row.bulkPreorderEnabled}
+                      onChange={(checked) =>
+                        updateSkuRow(index, { bulkPreorderEnabled: checked })
+                      }
+                    />
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <Input
+                        label="大批量阈值"
+                        type="number"
+                        min={1}
+                        step={1}
+                        value={row.bulkOrderThreshold}
+                        onChange={(e) =>
+                          updateSkuRow(index, {
+                            bulkOrderThreshold: e.target.value,
+                          })
+                        }
+                        placeholder="如：3"
+                      />
+                      <Input
+                        label="最小提前天数"
+                        type="number"
+                        min={1}
+                        step={1}
+                        value={row.bulkMinLeadDays}
+                        onChange={(e) =>
+                          updateSkuRow(index, {
+                            bulkMinLeadDays: e.target.value,
+                          })
+                        }
+                        placeholder="如：1 表示不能当天送达"
+                      />
+                    </div>
+                    <p className="text-xs text-zinc-500">
+                      大批量阈值：当顾客购买该 SKU 达到此数量时，需要提前预订。
+                      最小提前天数：命中规则后，最早可选择几天后的配送日期。
+                    </p>
+                    <label className="block text-sm font-medium text-zinc-800">
+                      提示文案（可选）
+                      <textarea
+                        className="mt-1 w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm"
+                        rows={2}
+                        value={row.bulkPreorderMessage}
+                        onChange={(e) =>
+                          updateSkuRow(index, {
+                            bulkPreorderMessage: e.target.value,
+                          })
+                        }
+                        placeholder="这款花礼数量较多时需要提前备花，建议至少提前 {minLeadDays} 天预订。"
+                      />
+                    </label>
+                    {formatBulkPreorderPreview(row) ? (
+                      <p className="rounded-md bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                        预览：{formatBulkPreorderPreview(row)}
+                      </p>
+                    ) : null}
+                  </div>
+                </details>
+              ))}
             </div>
           </section>
 
