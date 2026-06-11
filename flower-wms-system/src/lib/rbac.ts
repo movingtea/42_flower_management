@@ -99,6 +99,7 @@ export const BUSINESS_API_PREFIXES = [
   "/api/admin/stocktake",
   "/api/admin/products",
   "/api/admin/banners",
+  "/api/admin/cms",
   "/api/admin/product-categories",
   "/api/admin/categories",
   "/api/admin/setup",

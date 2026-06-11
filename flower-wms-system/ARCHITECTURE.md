@@ -264,7 +264,7 @@ Dashboard 试运营状态卡片：`src/components/wms/TrialOperationStatusCard.t
 | `/cms/products` | 商品列表，展示 SKU 毛利预估与产品决策健康状态 / 关键标签 |
 | `/cms/products/[id]` | 商品编辑，SKU 绑定 Recipe，展示毛利预估、产品决策建议与 warning |
 | `/cms/product-categories` | 商城商品分类树 |
-| `/cms/banner` | 首页轮播 |
+| `/cms/banner` | 首页轮播（新增、编辑、启用/停用、删除、排序） |
 | `/cms/marketing` | 营销配置（公告 / 弹窗 + **首页场景入口** Tab） |
 | `/cms/recommendations` | 推荐位配置（首页与场景推荐） |
 | `/cms/carousel` | redirect 到 `/cms/banner` |
@@ -312,6 +312,11 @@ CMS 面向花店运营用户，主界面不要求理解 `productId` / `skuId` / 
 - 自定义 key 必须校验格式（小写字母、数字、下划线、短横线）与唯一性；冲突提示：「该 key 已被使用，请更换。」
 - 小程序跳转配置优先使用目标类型 + 目标对象，不鼓励直接写路径；自定义链接须显式 warning。
 - 旧 Banner `linkUrl` / `targetParam`、旧推荐位 key 必须兼容，不能因历史数据导致 CMS 崩溃。
+- Banner 属于首页轮播运营配置，不得与推荐位商品配置混淆。
+- Banner 跳转配置优先使用 `CmsLinkTargetSelector`（目标类型 + 目标对象），不要求运营手填内部 ID。
+- Banner 图片字段写库前须 `normalizeStoredImagePath`，不得持久化 localhost。
+- 小程序 `home-banners` 不得返回后台内部字段；图片 URL 输出前 `toPublicImageUrl`。
+- 删除 Banner 采用软删除（`isActive=false`），以免误删运营数据。
 
 ---
 
@@ -361,6 +366,10 @@ CMS 面向花店运营用户，主界面不要求理解 `productId` / `skuId` / 
 | `GET /api/admin/cms/products/search` | 商品选择器轻量搜索 |
 | `GET /api/admin/cms/products/[id]/skus` | 商品 SKU 选择器列表 |
 | `GET /api/admin/wms/recipes/search` | 配方选择器轻量搜索 |
+| `GET/POST /api/admin/cms/banners` | 首页轮播列表（`?includeInactive=true` 含停用）/ 创建 |
+| `GET/PATCH/DELETE /api/admin/cms/banners/[id]` | 轮播详情 / 更新 / 软删除（`isActive=false`） |
+| `POST /api/admin/cms/banners/reorder` | 批量更新 `sortOrder` |
+| `GET/PUT /api/admin/banners` | **已废弃**，请用 `/api/admin/cms/banners` |
 | `GET/POST /api/admin/cms/recommendation-slots` | 推荐位列表 / 创建（`?lite=true` 返回轻量列表） |
 | `GET/PATCH/DELETE /api/admin/cms/recommendation-slots/[id]` | 推荐位详情 / 更新 / 停用 |
 | `POST /api/admin/cms/recommendation-slots/[id]/items` | 添加推荐商品（返回 warnings + publishReadiness） |
@@ -446,7 +455,7 @@ Smoke 脚本：
 | GET | `/api/miniprogram/recommendations` | CMS 推荐位（`slotKey` / `sceneType` / `limit`） |
 | GET | `/api/miniprogram/home-scene-entries` | 首页场景入口（CMS + fallback） |
 | GET | `/api/miniprogram/homepage` | 首页聚合（Banner + 公告 + 弹窗 + 分类） |
-| GET | `/api/miniprogram/home-banners` | 首页轮播 |
+| GET | `/api/miniprogram/home-banners` | 首页轮播（仅 `isActive=true`；按 `sortOrder` 升序；图片 `toPublicImageUrl`） |
 | GET/POST | `/api/miniprogram/cart` | 购物车校验 |
 | GET | `/api/miniprogram/orders` | 订单列表 |
 | POST | `/api/miniprogram/orders/create` | 创建订单 |
@@ -465,6 +474,15 @@ Smoke 脚本：
 | POST | `/api/wechat/auth/login` | 小程序登录（code2Session + JWT） |
 | POST | `/api/wechat/login` | 重定向至 `auth/login`（deprecated） |
 | POST | `/api/wechat/orders/callback` | 微信支付回调占位（未来正式支付） |
+
+**CMS 首页轮播 Admin API**（需 `cms:read` / `cms:write`）：
+
+| 方法 | 路径 | 说明 |
+|---|---|---|
+| GET | `/api/admin/cms/banners` | 列表（`includeInactive` 默认 true） |
+| POST | `/api/admin/cms/banners` | 创建 |
+| GET/PATCH/DELETE | `/api/admin/cms/banners/[id]` | 详情 / 更新 / 软删除 |
+| POST | `/api/admin/cms/banners/reorder` | 批量排序 |
 
 **CMS 首页场景入口 Admin API**（需 `cms:read` / `cms:write`）：
 

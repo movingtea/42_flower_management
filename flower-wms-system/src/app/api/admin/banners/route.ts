@@ -1,14 +1,16 @@
 import { jsonError, jsonSuccess } from "@/lib/api";
-import {
-  bannerRowToWriteItem,
-  loadActiveBanners,
-  syncBannersFromWriteItems,
-} from "@/lib/banner.server";
+import { isResponse, requirePermission } from "@/lib/api-auth";
+import { bannerRowToWriteItem } from "@/lib/banner.server";
 import {
   parseBannerTargetType,
   validateBannerWriteItems,
   type BannerWriteItem,
 } from "@/lib/banner";
+import {
+  cmsBannerToApiPayload,
+  listCmsBanners,
+  syncCmsBannersBulk,
+} from "@/services/cms-banners";
 
 export const dynamic = "force-dynamic";
 
@@ -40,13 +42,16 @@ function parseWriteItems(raw: unknown): BannerWriteItem[] {
   });
 }
 
-/** GET：CMS 轮播列表 */
+/** @deprecated 请使用 GET /api/admin/cms/banners */
 export async function GET() {
   try {
-    const rows = await loadActiveBanners();
+    const staff = await requirePermission("cms:read");
+    if (isResponse(staff)) return staff;
+
+    const result = await listCmsBanners({ includeInactive: false });
     return jsonSuccess({
-      banners: rows.map(bannerRowToWriteItem),
-      total: rows.length,
+      banners: result.banners.map((row) => bannerRowToWriteItem(row)),
+      total: result.total,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : "轮播加载失败";
@@ -54,9 +59,12 @@ export async function GET() {
   }
 }
 
-/** PUT：批量保存轮播（全量同步） */
+/** @deprecated 请使用 POST/PATCH /api/admin/cms/banners */
 export async function PUT(request: Request) {
   try {
+    const staff = await requirePermission("cms:write");
+    if (isResponse(staff)) return staff;
+
     const body = (await request.json()) as { banners?: unknown };
     const items = parseWriteItems(body.banners ?? []);
     const validationError = validateBannerWriteItems(items);
@@ -64,11 +72,11 @@ export async function PUT(request: Request) {
       return jsonError(validationError, 400);
     }
 
-    const rows = await syncBannersFromWriteItems(items);
+    const rows = await syncCmsBannersBulk(items);
 
     return jsonSuccess({
       message: "轮播已保存",
-      banners: rows.map(bannerRowToWriteItem),
+      banners: rows.map(cmsBannerToApiPayload),
       total: rows.length,
     });
   } catch (err) {

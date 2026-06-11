@@ -164,6 +164,33 @@ export function linkTargetToBannerFields(
   }
 }
 
+/** 旧 Banner 跳转数据无法映射到选择器时给出提示 */
+export function getBannerLinkTargetLegacyWarning(
+  item: BannerWriteItem
+): string | null {
+  const targetType = item.targetType;
+  if (targetType === "NONE" || targetType === "PRODUCT" || targetType === "COUPON") {
+    return null;
+  }
+
+  const param = item.targetParam?.trim() ?? "";
+  if (!param) {
+    return "当前跳转目标为历史数据，建议重新选择。";
+  }
+
+  const parsed = bannerToLinkTarget(item);
+  if (
+    targetType === "ACTIVITY" &&
+    parsed.targetType === "CUSTOM_URL" &&
+    !param.startsWith("/pages/") &&
+    !param.startsWith("http")
+  ) {
+    return "当前跳转目标为历史数据，建议重新选择。";
+  }
+
+  return null;
+}
+
 export function validateCmsLinkTarget(target: CmsLinkTarget): string | null {
   switch (target.targetType) {
     case "PRODUCT":

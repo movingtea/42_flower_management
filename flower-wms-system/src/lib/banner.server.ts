@@ -17,7 +17,10 @@ import {
   resolveSpuMinPrice,
 } from "@/lib/product-spu";
 import { prisma } from "@/lib/prisma";
-import { normalizeStoredImagePathRequired } from "@/lib/image-url";
+import {
+  normalizeStoredImagePathRequired,
+  toPublicImageUrl,
+} from "@/lib/image-url";
 
 export type BannerRow = {
   id: string;
@@ -140,7 +143,7 @@ export function resolveWechatBanners(
 
     out.push({
       id: row.id,
-      imageUrl: row.imageUrl,
+      imageUrl: toPublicImageUrl(row.imageUrl) ?? row.imageUrl,
       sort: row.sortOrder,
       targetType,
       targetParam,
