@@ -2,8 +2,17 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  serverExternalPackages: ["@prisma/client", "bcryptjs"],
+  serverExternalPackages: ["@prisma/client", "bcryptjs", "ali-oss"],
   allowedDevOrigins: ["192.168.31.200", "localhost:3000"],
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "oss.universe42.studio",
+        pathname: "/**",
+      },
+    ],
+  },
   async redirects() {
     return [
       { source: "/admin/dashboard", destination: "/wms/dashboard", permanent: true },

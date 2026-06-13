@@ -8,17 +8,44 @@ import { GiftOccasionType, RecommendationSlotType } from "../src/generated/prism
 import { prisma } from "../src/lib/prisma";
 import { filterHomeBannersForMiniprogram } from "../src/services/banner-rules-pure";
 import { filterRecommendationSlotsForMiniprogram } from "../src/services/recommendation-rules-pure";
+import { toPublicImageUrl } from "../src/lib/image-url";
+import { resolveWechatBanners } from "../src/lib/banner.server";
 import { buildFallbackMiniProgramEntries } from "../src/services/cms-home-scene-entries-pure";
 import {
   listCmsBanners,
   softDeleteCmsBanner,
 } from "../src/services/cms-banners";
-import { resolveWechatBanners } from "../src/lib/banner.server";
+
+process.env.ENABLE_LEGACY_UPLOADS = "false";
+process.env.ALIYUN_OSS_PUBLIC_BASE_URL =
+  process.env.ALIYUN_OSS_PUBLIC_BASE_URL || "https://oss.universe42.studio";
+process.env.ALIYUN_OSS_OBJECT_PREFIX =
+  process.env.ALIYUN_OSS_OBJECT_PREFIX || "universe42";
+
+const OSS_BANNER_KEY = "universe42/banners/2026/06/smoke.webp";
+
+function testOssBannerPublicUrl() {
+  const url = toPublicImageUrl(OSS_BANNER_KEY);
+  assert.ok(url?.includes("oss.universe42.studio"));
+  const banners = filterHomeBannersForMiniprogram([
+    {
+      id: "oss-banner",
+      imageUrl: OSS_BANNER_KEY,
+      sortOrder: 1,
+      isActive: true,
+      targetType: "NONE",
+    },
+  ]);
+  assert.equal(banners.length, 1);
+  assert.ok(banners[0].imageUrl.includes("oss.universe42.studio"));
+}
 
 const PREFIX = "SMOKE_TEST_CMS_HOME";
 const NOW = new Date("2026-06-10T10:00:00.000Z");
 
 async function main() {
+  testOssBannerPublicUrl();
+
   const banners = filterHomeBannersForMiniprogram(
     [
       {

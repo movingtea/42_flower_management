@@ -1,23 +1,52 @@
 /**
- * 图片 URL 存储与 API 输出规范化。
- * - 本地上传：数据库保存 /uploads/xxx 相对路径
- * - 外部 CDN：https 绝对 URL 原样保存
- * - 禁止将 localhost / 127.0.0.1 等开发 origin 持久化
+ * 图片 URL 存储与 API 输出规范化（Sprint 14：OSS objectKey + public URL）。
+ * 底层实现见 src/lib/storage/image-url.ts。
  */
 
-const LOCAL_DEV_HOST_PATTERN = /localhost|127\.0\.0\.1/i;
+import {
+  getPublicImageUrl as getPublicImageUrlCore,
+  isAbsoluteUrl as isAbsoluteUrlCore,
+  isInvalidLocalImageUrl as isInvalidLocalImageUrlCore,
+  isLegacyUploadPath,
+  isLocalhostUrl as isLocalhostUrlCore,
+  isOssObjectKey,
+  isPublicOssUrl,
+  needsImageReupload,
+  normalizeImageValue,
+  normalizeImageValueList,
+  normalizeImageValueRequired,
+  getPublicImageUrlList as getPublicImageUrlListCore,
+  type ImageUrlEnv,
+} from "@/lib/storage/image-url";
+import { getStorageConfig } from "@/lib/storage/config";
+import { storageConfigToImageUrlEnv } from "@/lib/storage/storage";
+
+export {
+  isOssObjectKey,
+  isPublicOssUrl,
+  isLegacyUploadPath,
+  needsImageReupload,
+};
+
+function imageEnv(): ImageUrlEnv {
+  return storageConfigToImageUrlEnv(getStorageConfig());
+}
 
 /** 是否 http(s) 绝对 URL */
 export function isAbsoluteUrl(value: string): boolean {
-  return /^https?:\/\//i.test(value.trim());
+  return isAbsoluteUrlCore(value);
 }
 
 /** 是否包含 localhost / 127.0.0.1 */
 export function isLocalhostUrl(value: string): boolean {
-  return LOCAL_DEV_HOST_PATTERN.test(value.trim());
+  return isLocalhostUrlCore(value);
 }
 
-/** 从 localhost / 127.0.0.1 绝对 URL 提取 pathname，其余原样返回 */
+export function isInvalidLocalImageUrl(value: string): boolean {
+  return isInvalidLocalImageUrlCore(value, imageEnv());
+}
+
+/** 从 localhost / 127.0.0.1 绝对 URL 提取 pathname（legacy；新上传不应再使用） */
 export function stripLocalDevOrigin(value: string): string {
   const trimmed = value.trim();
   if (!trimmed) return trimmed;
@@ -41,92 +70,48 @@ export function stripLocalDevOrigin(value: string): string {
 
 /**
  * 写入数据库前规范化图片路径。
- * - localhost 绝对 URL → /uploads/...
- * - 相对路径补前导 /
- * - 外部 https CDN 保持不变
+ * Sprint 14：保存 OSS objectKey；拒绝 localhost / legacy /uploads（默认）。
  */
 export function normalizeStoredImagePath(
   value: string | null | undefined
 ): string | null {
-  if (value == null) return null;
-
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-
-  if (isAbsoluteUrl(trimmed)) {
-    if (isLocalhostUrl(trimmed)) {
-      return stripLocalDevOrigin(trimmed);
-    }
-    return trimmed;
-  }
-
-  return trimmed.startsWith("/") ? trimmed : `/${trimmed}`;
+  return normalizeImageValue(value, imageEnv());
 }
 
 /** 非空字符串字段（如 Banner.imageUrl）写入前规范化，空值返回 "" */
 export function normalizeStoredImagePathRequired(
   value: string | null | undefined
 ): string {
-  return normalizeStoredImagePath(value) ?? "";
+  return normalizeImageValueRequired(value, imageEnv());
 }
 
 export type ToPublicImageUrlOptions = {
-  /** 非 localhost 的 public base；仅当需要输出绝对 URL 时使用 */
+  /** @deprecated 使用 ALIYUN_OSS_PUBLIC_BASE_URL */
   publicBaseUrl?: string | null;
 };
 
-function resolvePublicBaseUrl(explicit?: string | null): string | null {
-  const candidate =
-    explicit?.trim() ||
-    process.env.NEXT_PUBLIC_ASSET_BASE_URL?.trim() ||
-    process.env.NEXT_PUBLIC_API_URL?.trim()?.replace(/\/api(\/wechat)?$/i, "") ||
-    null;
-
-  if (!candidate) return null;
-
-  const base = candidate.replace(/\/+$/, "");
-  if (isLocalhostUrl(base)) return null;
-  return base;
-}
-
 /**
- * API 返回或前端展示前规范化。
- * 默认返回相对路径（供小程序端 resolveImageUrl 拼接 baseUrl）；
- * 外部 https 保持不变；localhost 绝对 URL 转为相对路径。
+ * API 返回或前端展示前：objectKey → https://oss.universe42.studio/...
  */
 export function toPublicImageUrl(
   value: string | null | undefined,
-  options?: ToPublicImageUrlOptions
+  _options?: ToPublicImageUrlOptions
 ): string | null {
-  if (value == null) return null;
-
-  const trimmed = value.trim();
-  if (!trimmed) return null;
-
-  const normalized = stripLocalDevOrigin(trimmed);
-
-  if (isAbsoluteUrl(normalized)) {
-    return normalized;
+  const env = imageEnv();
+  if (_options?.publicBaseUrl?.trim()) {
+    return getPublicImageUrlCore(value, {
+      ...env,
+      publicBaseUrl: _options.publicBaseUrl.trim(),
+    });
   }
-
-  const relative = normalized.startsWith("/") ? normalized : `/${normalized}`;
-  const base = resolvePublicBaseUrl(options?.publicBaseUrl);
-
-  if (base) {
-    return `${base}${relative}`;
-  }
-
-  return relative;
+  return getPublicImageUrlCore(value, env);
 }
 
 /** 批量规范化字符串数组（如 images[]） */
 export function normalizeStoredImagePathList(
   values: string[] | null | undefined
 ): string[] {
-  if (!values?.length) return [];
-  return values
-    .map((v) => normalizeStoredImagePath(v))
-    .filter((v): v is string => Boolean(v));
+  return normalizeImageValueList(values, imageEnv());
 }
 
 export function toPublicImageUrlList(

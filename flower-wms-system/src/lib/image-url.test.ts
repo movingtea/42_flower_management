@@ -1,109 +1,96 @@
 /**
- * 运行：npm run test:image-url
+ * Run: npm run test:image-url
  */
 import assert from "node:assert/strict";
 import {
-  isAbsoluteUrl,
+  isInvalidLocalImageUrl,
   isLocalhostUrl,
   normalizeStoredImagePath,
-  stripLocalDevOrigin,
+  normalizeStoredImagePathRequired,
   toPublicImageUrl,
 } from "@/lib/image-url";
 
-function testIsAbsoluteUrl() {
-  assert.equal(isAbsoluteUrl("https://cdn.example.com/a.jpg"), true);
-  assert.equal(isAbsoluteUrl("http://localhost:3000/uploads/a.jpg"), true);
-  assert.equal(isAbsoluteUrl("/uploads/a.jpg"), false);
-  assert.equal(isAbsoluteUrl("uploads/a.jpg"), false);
+process.env.ENABLE_LEGACY_UPLOADS = "false";
+process.env.BLOCK_LOCALHOST_IMAGE_URL = "true";
+process.env.NORMALIZE_LOCALHOST_UPLOADS = "false";
+process.env.ALIYUN_OSS_PUBLIC_BASE_URL = "https://oss.universe42.studio";
+process.env.ALIYUN_OSS_OBJECT_PREFIX = "universe42";
+
+const OBJECT_KEY =
+  "universe42/products/spu/2026/06/550e8400-e29b-41d4-a716-446655440000.webp";
+
+function testNormalizeObjectKey() {
+  assert.equal(normalizeStoredImagePath(OBJECT_KEY), OBJECT_KEY);
+  assert.equal(normalizeStoredImagePathRequired(OBJECT_KEY), OBJECT_KEY);
 }
 
-function testIsLocalhostUrl() {
-  assert.equal(isLocalhostUrl("http://localhost:3000/uploads/a.jpg"), true);
-  assert.equal(isLocalhostUrl("http://127.0.0.1:3000/uploads/a.jpg"), true);
-  assert.equal(isLocalhostUrl("https://cdn.example.com/a.jpg"), false);
-}
-
-function testNormalizeStoredImagePath() {
-  assert.equal(normalizeStoredImagePath("/uploads/a.jpg"), "/uploads/a.jpg");
+function testRejectLocalhost() {
   assert.equal(
     normalizeStoredImagePath("http://localhost:3000/uploads/a.jpg"),
-    "/uploads/a.jpg"
+    null
   );
   assert.equal(
     normalizeStoredImagePath("http://127.0.0.1:3000/uploads/a.jpg"),
-    "/uploads/a.jpg"
+    null
   );
-  assert.equal(
-    normalizeStoredImagePath("https://cdn.example.com/a.jpg"),
-    "https://cdn.example.com/a.jpg"
-  );
+  assert.equal(isInvalidLocalImageUrl("http://localhost:3000/uploads/a.jpg"), true);
+}
+
+function testRejectLegacyUploads() {
+  assert.equal(normalizeStoredImagePath("/uploads/a.jpg"), null);
+  assert.equal(normalizeStoredImagePath("uploads/a.jpg"), null);
+}
+
+function testExternalHttpsUnchanged() {
+  const url = "https://cdn.example.com/a.jpg";
+  assert.equal(normalizeStoredImagePath(url), url);
+}
+
+function testEmptyValues() {
   assert.equal(normalizeStoredImagePath(null), null);
   assert.equal(normalizeStoredImagePath(""), null);
   assert.equal(normalizeStoredImagePath("  "), null);
-  assert.equal(normalizeStoredImagePath("uploads/a.jpg"), "/uploads/a.jpg");
 }
 
-function testStripLocalDevOrigin() {
+function testToPublicImageUrlObjectKey() {
+  const publicUrl = toPublicImageUrl(OBJECT_KEY);
+  assert.ok(publicUrl);
   assert.equal(
-    stripLocalDevOrigin("http://localhost:3000/uploads/a.jpg"),
-    "/uploads/a.jpg"
+    publicUrl,
+    `https://oss.universe42.studio/${OBJECT_KEY}`
   );
-  assert.equal(
-    stripLocalDevOrigin("https://cdn.example.com/a.jpg"),
-    "https://cdn.example.com/a.jpg"
-  );
+  assert.equal(isLocalhostUrl(publicUrl!), false);
 }
 
-function testToPublicImageUrl() {
-  const prevAsset = process.env.NEXT_PUBLIC_ASSET_BASE_URL;
-  const prevApi = process.env.NEXT_PUBLIC_API_URL;
-  delete process.env.NEXT_PUBLIC_ASSET_BASE_URL;
-  delete process.env.NEXT_PUBLIC_API_URL;
-
-  try {
-    assert.equal(toPublicImageUrl("/uploads/a.jpg"), "/uploads/a.jpg");
-    assert.equal(
-      toPublicImageUrl("http://localhost:3000/uploads/a.jpg"),
-      "/uploads/a.jpg"
-    );
-    assert.equal(
-      toPublicImageUrl("https://cdn.example.com/a.jpg"),
-      "https://cdn.example.com/a.jpg"
-    );
-    assert.equal(toPublicImageUrl(null), null);
-    assert.equal(toPublicImageUrl(""), null);
-
-    process.env.NEXT_PUBLIC_ASSET_BASE_URL = "https://cdn.prod.example.com";
-    assert.equal(
-      toPublicImageUrl("/uploads/a.jpg"),
-      "https://cdn.prod.example.com/uploads/a.jpg"
-    );
-    assert.equal(
-      toPublicImageUrl("https://cdn.example.com/a.jpg"),
-      "https://cdn.example.com/a.jpg"
-    );
-  } finally {
-    if (prevAsset === undefined) delete process.env.NEXT_PUBLIC_ASSET_BASE_URL;
-    else process.env.NEXT_PUBLIC_ASSET_BASE_URL = prevAsset;
-    if (prevApi === undefined) delete process.env.NEXT_PUBLIC_API_URL;
-    else process.env.NEXT_PUBLIC_API_URL = prevApi;
-  }
-}
-
-function testToPublicImageUrlNoDoubleAbsolute() {
-  const input = "https://cdn.example.com/a.jpg";
+function testToPublicImageUrlAlreadyPublic() {
+  const input = `https://oss.universe42.studio/${OBJECT_KEY}`;
   assert.equal(toPublicImageUrl(input), input);
   assert.equal(toPublicImageUrl(input)?.startsWith("https://https://"), false);
 }
 
+function testLegacyPathReturnsNull() {
+  assert.equal(toPublicImageUrl("/uploads/a.jpg"), null);
+  assert.equal(toPublicImageUrl("http://localhost:3000/uploads/a.jpg"), null);
+}
+
+function testExtractObjectKeyFromPublicUrl() {
+  const stored = normalizeStoredImagePath(
+    `https://oss.universe42.studio/${OBJECT_KEY}`
+  );
+  assert.equal(stored, OBJECT_KEY);
+}
+
 function run() {
-  testIsAbsoluteUrl();
-  testIsLocalhostUrl();
-  testNormalizeStoredImagePath();
-  testStripLocalDevOrigin();
-  testToPublicImageUrl();
-  testToPublicImageUrlNoDoubleAbsolute();
-  console.log("image-url.test.ts: all passed");
+  testNormalizeObjectKey();
+  testRejectLocalhost();
+  testRejectLegacyUploads();
+  testExternalHttpsUnchanged();
+  testEmptyValues();
+  testToPublicImageUrlObjectKey();
+  testToPublicImageUrlAlreadyPublic();
+  testLegacyPathReturnsNull();
+  testExtractObjectKeyFromPublicUrl();
+  console.log("image-url.test.ts: all tests passed");
 }
 
 run();

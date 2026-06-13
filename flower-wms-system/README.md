@@ -285,6 +285,43 @@ npm run db:seed
 | `INVENTORY_SYNC_INTERVAL_MS` | cron worker 读取，当前不在 `.env.example` 中列出 |
 | `SKIP_DB_MIGRATE` | Docker entrypoint 支持，设为 `true` 可跳过 migrate deploy |
 
+### 9.1 阿里云 OSS（Sprint 14）
+
+图片上传已切换至阿里云 OSS。完整变量见 `.env.example` 中 `STORAGE_DRIVER` / `ALIYUN_OSS_*` / `UPLOAD_*` / `IMAGE_*` 段。
+
+| 变量 | 说明 |
+|---|---|
+| `STORAGE_DRIVER` | 固定 `oss` |
+| `ENABLE_OSS_UPLOAD` | `true` 启用 OSS 上传 |
+| `ENABLE_LEGACY_UPLOADS` | 生产设为 `false`；`/uploads` 不再作为有效图片来源 |
+| `ALIYUN_OSS_UPLOAD_ENDPOINT` | **服务端上传** Endpoint；生产 ECS 同地域用内网 `...-internal.aliyuncs.com`；本地开发用外网 |
+| `ALIYUN_OSS_PUBLIC_BASE_URL` | **公网展示**域名，当前 `https://oss.universe42.studio` |
+| `ALIYUN_OSS_OBJECT_PREFIX` | objectKey 前缀，当前 `universe42` |
+| `UPLOAD_MAX_SIZE_MB` | 单张上限，默认 3MB |
+| `NEXT_PUBLIC_OSS_PUBLIC_BASE_URL` | CMS 客户端预览用，与 public base 一致 |
+
+**数据库存储 objectKey**（如 `universe42/products/sku/2026/06/xxx.webp`），API 返回时再转为 public URL。
+
+**连通性测试：**
+
+```bash
+cd flower-wms-system
+npm run test:oss
+```
+
+**上传限制：** JPG / PNG / WebP；禁止 SVG；默认 ≤3MB。
+
+**微信小程序：** 在微信公众平台配置 `https://oss.universe42.studio` 为合法 **downloadFile** 域名。
+
+**排查图片无法显示：**
+
+1. 确认 `.env` 中 OSS AccessKey 与 Bucket 正确（勿提交 Git）。
+2. 运行 `npm run test:oss` 验证上传与公网 HEAD。
+3. 数据库字段应为 objectKey，不应含 `localhost` 或 `/uploads`；无效旧图需在 CMS 重新上传。
+4. 小程序侧确认 downloadFile 域名白名单。
+
+不要保存 localhost 图片 URL；不要提交真实 AccessKey。
+
 不要提交真实密钥。
 
 ## 10. Docker / 部署
@@ -348,7 +385,7 @@ docker volume ls
 
 - `flower-wms-system/docker-entrypoint.sh` 会在 `DATABASE_URL` 存在且 `SKIP_DB_MIGRATE != true` 时执行 `npx prisma migrate deploy`。
 - Dockerfile healthcheck 请求 `/login`。
-- 当前 compose 未为 `public/uploads` 配置持久化卷；上传仍是本地文件系统方案，**不得**被部署清理脚本删除。
+- 当前 compose 未为 `public/uploads` 配置持久化卷；**Sprint 14 起新上传走 OSS**，legacy 本地目录仅当 `ENABLE_LEGACY_UPLOADS=true` 时使用。
 - PostgreSQL 数据保存在 named volume `postgres_data`，清理脚本不会 prune volumes。
 
 ### 可选 compose cleanup profile（不推荐默认）
@@ -506,7 +543,7 @@ npm run seed:test-products
 - 多租户 SaaS。
 - 正式微信支付 SDK；当前是 mock 支付和 callback 占位。
 - 第三方配送调度。
-- 对象存储；当前上传为本地 `public/uploads`。
+- 对象存储：**Sprint 14 已实现**（阿里云 OSS）；生产不再依赖 `public/uploads`。
 - Redis / MQ。
 - 供应商分析大报表、采购价趋势图。
 - Excel 导入导出。

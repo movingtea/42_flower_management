@@ -1,50 +1,68 @@
 /**
- * 图片 URL smoke（纯函数 + 可选 DB）
+ * 图片 URL smoke（Sprint 14 OSS objectKey）
  * Run: npm run smoke:image-url
  */
 import "dotenv/config";
 import assert from "node:assert/strict";
-import { isLocalhostUrl, normalizeStoredImagePath, toPublicImageUrl } from "../src/lib/image-url";
+import {
+  isInvalidLocalImageUrl,
+  isLocalhostUrl,
+  normalizeStoredImagePath,
+  toPublicImageUrl,
+} from "../src/lib/image-url";
 import { filterHomeBannersForMiniprogram } from "../src/services/banner-rules-pure";
 import { filterRecommendationSlotsForMiniprogram } from "../src/services/recommendation-rules-pure";
 
-function testPureImageRules() {
-  assert.equal(
-    normalizeStoredImagePath("http://localhost:3000/uploads/a.jpg"),
-    "/uploads/a.jpg"
-  );
-  const https = "https://cdn.example.com/a.jpg";
-  assert.equal(normalizeStoredImagePath(https), https);
+process.env.ENABLE_LEGACY_UPLOADS = "false";
+process.env.BLOCK_LOCALHOST_IMAGE_URL = "true";
+process.env.ALIYUN_OSS_PUBLIC_BASE_URL =
+  process.env.ALIYUN_OSS_PUBLIC_BASE_URL || "https://oss.universe42.studio";
+process.env.ALIYUN_OSS_OBJECT_PREFIX =
+  process.env.ALIYUN_OSS_OBJECT_PREFIX || "universe42";
 
-  const publicPath = toPublicImageUrl("/uploads/a.jpg");
-  assert.ok(publicPath);
-  assert.equal(isLocalhostUrl(publicPath!), false);
+const OBJECT_KEY =
+  "universe42/products/sku/2026/06/550e8400-e29b-41d4-a716-446655440000.webp";
+
+function testObjectKeyPublicUrl() {
+  const url = toPublicImageUrl(OBJECT_KEY);
+  assert.ok(url);
+  assert.ok(url!.includes("oss.universe42.studio"));
+  assert.equal(isLocalhostUrl(url!), false);
 }
 
-function testBannerNoLocalhost() {
+function testLegacyAndLocalhostInvalid() {
+  assert.equal(
+    normalizeStoredImagePath("http://localhost:3000/uploads/a.jpg"),
+    null
+  );
+  assert.equal(normalizeStoredImagePath("/uploads/a.jpg"), null);
+  assert.equal(toPublicImageUrl("/uploads/a.jpg"), null);
+  assert.equal(isInvalidLocalImageUrl("http://localhost:3000/uploads/a.jpg"), true);
+}
+
+function testBannerOssImage() {
   const banners = filterHomeBannersForMiniprogram([
     {
       id: "b1",
-      imageUrl: "http://localhost:3000/uploads/banner.jpg",
+      imageUrl: OBJECT_KEY,
       sortOrder: 1,
       isActive: true,
       targetType: "NONE",
     },
     {
       id: "b2",
-      imageUrl: "https://cdn.example.com/banner.jpg",
+      imageUrl: "http://localhost:3000/uploads/banner.jpg",
       sortOrder: 2,
       isActive: true,
       targetType: "NONE",
     },
   ]);
-  assert.equal(banners.length, 2);
-  for (const banner of banners) {
-    assert.equal(isLocalhostUrl(banner.imageUrl), false);
-  }
+  assert.equal(banners.length, 1);
+  assert.equal(banners[0].id, "b1");
+  assert.ok(banners[0].imageUrl.includes("oss.universe42.studio"));
 }
 
-function testRecommendationNoLocalhost() {
+function testRecommendationOssCover() {
   const slots = filterRecommendationSlotsForMiniprogram([
     {
       id: "slot-1",
@@ -72,8 +90,9 @@ function testRecommendationNoLocalhost() {
                 stock: 3,
                 specName: "标准款",
                 price: "199",
-                imageUrl: "http://localhost:3000/uploads/p.jpg",
+                imageUrl: OBJECT_KEY,
                 isMainImage: true,
+                isActive: true,
               },
             ],
           },
@@ -83,14 +102,15 @@ function testRecommendationNoLocalhost() {
   ]);
   assert.equal(slots.length, 1);
   const cover = slots[0].items[0].coverImage;
-  assert.equal(isLocalhostUrl(cover), false);
-  assert.ok(cover.includes("/uploads/"));
+  assert.ok(cover?.includes("oss.universe42.studio"));
+  assert.equal(isLocalhostUrl(cover!), false);
 }
 
 async function main() {
-  testPureImageRules();
-  testBannerNoLocalhost();
-  testRecommendationNoLocalhost();
+  testObjectKeyPublicUrl();
+  testLegacyAndLocalhostInvalid();
+  testBannerOssImage();
+  testRecommendationOssCover();
   console.log("smoke-image-url passed");
 }
 

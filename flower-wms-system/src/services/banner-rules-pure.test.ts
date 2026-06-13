@@ -4,7 +4,12 @@
 import assert from "node:assert/strict";
 import { filterHomeBannersForMiniprogram } from "./banner-rules-pure";
 
+process.env.ENABLE_LEGACY_UPLOADS = "false";
+process.env.ALIYUN_OSS_PUBLIC_BASE_URL = "https://oss.universe42.studio";
+process.env.ALIYUN_OSS_OBJECT_PREFIX = "universe42";
+
 const NOW = new Date("2026-06-10T10:00:00.000Z");
+const OSS_KEY = "universe42/banners/2026/06/test.webp";
 
 function testActiveBannerReturns() {
   const result = filterHomeBannersForMiniprogram([
@@ -75,7 +80,7 @@ function testEndsAtPastHidden() {
   assert.equal(result.length, 0);
 }
 
-function testLocalhostNormalizedNotReturned() {
+function testLocalhostBannerFiltered() {
   const result = filterHomeBannersForMiniprogram([
     {
       id: "b1",
@@ -85,16 +90,29 @@ function testLocalhostNormalizedNotReturned() {
       targetType: "NONE",
     },
   ], { now: NOW });
+  assert.equal(result.length, 0);
+}
+
+function testOssObjectKeyBanner() {
+  const result = filterHomeBannersForMiniprogram([
+    {
+      id: "b1",
+      imageUrl: OSS_KEY,
+      sortOrder: 1,
+      isActive: true,
+      targetType: "NONE",
+    },
+  ], { now: NOW });
   assert.equal(result.length, 1);
+  assert.ok(result[0].imageUrl.includes("oss.universe42.studio"));
   assert.ok(!result[0].imageUrl.includes("localhost"));
-  assert.ok(result[0].imageUrl.includes("/uploads/"));
 }
 
 function testNoJumpAllowed() {
   const result = filterHomeBannersForMiniprogram([
     {
       id: "b1",
-      imageUrl: "/uploads/banner.jpg",
+      imageUrl: "https://cdn.example.com/banner.jpg",
       sortOrder: 1,
       isActive: true,
       targetType: "NONE",
@@ -150,7 +168,8 @@ function run() {
   testSoftDeletedHidden();
   testStartsAtFutureHidden();
   testEndsAtPastHidden();
-  testLocalhostNormalizedNotReturned();
+  testLocalhostBannerFiltered();
+  testOssObjectKeyBanner();
   testNoJumpAllowed();
   testStableSort();
   testSensitiveFieldsNotReturned();

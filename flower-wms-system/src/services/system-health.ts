@@ -1,5 +1,4 @@
-import { access, constants } from "fs/promises";
-import path from "path";
+import { getStorageConfig, isOssStorageConfigured } from "@/lib/storage/config";
 import { prisma } from "@/lib/prisma";
 import { gatherSetupChecklistStats } from "@/services/setup-checklist";
 import {
@@ -50,42 +49,67 @@ export async function getSystemHealth(): Promise<SystemHealthResult> {
     });
   }
 
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  try {
-    await access(uploadDir, constants.F_OK);
-    try {
-      await access(uploadDir, constants.W_OK);
-      checks.push({
-        key: "uploads",
-        title: "上传目录",
-        status: "OK",
-        message: "public/uploads 存在且可写。",
-        metadata: { path: uploadDir },
-      });
-    } catch {
-      checks.push({
-        key: "uploads",
-        title: "上传目录",
-        status: "WARNING",
-        message: "public/uploads 存在但不可写，上传可能失败。",
-        metadata: { path: uploadDir },
-      });
-    }
-  } catch {
+  const storageConfig = getStorageConfig();
+  if (storageConfig.enableOssUpload && storageConfig.driver === "oss") {
+    const configured = isOssStorageConfigured(storageConfig);
     checks.push({
-      key: "uploads",
-      title: "上传目录",
+      key: "oss_storage",
+      title: "对象存储 OSS",
+      status: configured ? "OK" : "ERROR",
+      message: configured
+        ? "阿里云 OSS 配置完整（上传走内网 Endpoint，展示走自定义域名）。"
+        : "OSS 未完整配置，请检查 ALIYUN_OSS_* 与 AccessKey。",
+      metadata: {
+        bucket: storageConfig.bucket,
+        uploadEndpointConfigured: Boolean(storageConfig.uploadEndpoint),
+        publicBaseUrl: storageConfig.publicBaseUrl,
+        legacyUploads: storageConfig.enableLegacyUploads,
+      },
+    });
+  } else {
+    checks.push({
+      key: "oss_storage",
+      title: "对象存储 OSS",
       status: "WARNING",
-      message: "public/uploads 不存在，请在部署层创建或执行首次上传。",
-      metadata: { path: uploadDir },
+      message: "未启用 OSS 上传（ENABLE_OSS_UPLOAD=false 或 STORAGE_DRIVER≠oss）。",
     });
   }
 
-  const envChecks = [
-    { key: "DATABASE_URL", label: "DATABASE_URL" },
-    { key: "AUTH_SECRET", label: "AUTH_SECRET / NEXTAUTH_SECRET" },
-    { key: "NEXTAUTH_SECRET", label: "NEXTAUTH_SECRET" },
-  ];
+  const { access, constants } = await import("fs/promises");
+  const path = await import("path");
+  const uploadDir = path.join(process.cwd(), "public", "uploads");
+  if (storageConfig.enableLegacyUploads) {
+    try {
+      await access(uploadDir, constants.F_OK);
+      try {
+        await access(uploadDir, constants.W_OK);
+        checks.push({
+          key: "uploads",
+          title: "本地上传目录（legacy）",
+          status: "OK",
+          message: "public/uploads 存在且可写（legacy 模式）。",
+          metadata: { path: uploadDir },
+        });
+      } catch {
+        checks.push({
+          key: "uploads",
+          title: "本地上传目录（legacy）",
+          status: "WARNING",
+          message: "public/uploads 存在但不可写。",
+          metadata: { path: uploadDir },
+        });
+      }
+    } catch {
+      checks.push({
+        key: "uploads",
+        title: "本地上传目录（legacy）",
+        status: "WARNING",
+        message: "public/uploads 不存在。",
+        metadata: { path: uploadDir },
+      });
+    }
+  }
+
   const authOk =
     envExists("AUTH_SECRET") || envExists("NEXTAUTH_SECRET");
   checks.push({
@@ -104,6 +128,8 @@ export async function getSystemHealth(): Promise<SystemHealthResult> {
       NEXTAUTH_SECRET: envExists("NEXTAUTH_SECRET"),
       NEXT_PUBLIC_ASSET_BASE_URL: envExists("NEXT_PUBLIC_ASSET_BASE_URL"),
       NEXT_PUBLIC_API_URL: envExists("NEXT_PUBLIC_API_URL"),
+      ALIYUN_OSS_PUBLIC_BASE_URL: envExists("ALIYUN_OSS_PUBLIC_BASE_URL"),
+      ALIYUN_OSS_ACCESS_KEY_ID: envExists("ALIYUN_OSS_ACCESS_KEY_ID"),
     },
   });
 

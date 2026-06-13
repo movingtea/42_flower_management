@@ -22,6 +22,12 @@ import { ProductMiniProgramPreview } from "@/components/cms/ProductMiniProgramPr
 import { ProductPublishReadinessPanel } from "@/components/cms/ProductPublishReadinessPanel";
 import { ProductDecisionPanel } from "@/components/product-decision/ProductDecisionPanel";
 import { formatPercent } from "@/lib/format-money";
+import {
+  CMS_IMAGE_REUPLOAD_HINT,
+  isClientImageInvalid,
+  resolveClientImagePreview,
+  uploadCmsImage,
+} from "@/lib/cms-image-upload";
 import type {
   MarginEstimateSlice,
   ProductMarginEstimate,
@@ -151,27 +157,16 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
   }, [loadMarginEstimate]);
 
   async function handleSkuImageUpload(file: File, index: number) {
+    if (uploadingIndex !== null) return;
     setUploadingIndex(index);
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-      const json = (await res.json()) as {
-        success: boolean;
-        error?: string;
-        data?: { url?: string; path?: string };
-      };
-      const url = json.data?.url ?? json.data?.path;
-      if (!res.ok || !json.success || !url) {
-        showToast(json.error ?? "上传失败，请稍后重试", "error");
-        return;
-      }
+      const { objectKey } = await uploadCmsImage(file, "product-sku");
       setSkus((prev) =>
-        prev.map((row, i) => (i === index ? { ...row, imageUrl: url } : row))
+        prev.map((row, i) => (i === index ? { ...row, imageUrl: objectKey } : row))
       );
       showToast("图片上传成功", "success");
-    } catch {
-      showToast("网络异常，请检查连接后重试", "error");
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "上传失败，请稍后重试", "error");
     } finally {
       setUploadingIndex(null);
     }
@@ -742,15 +737,23 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
                       <td className="px-3 py-3">
                         <div className="flex items-center gap-2">
                           {row.imageUrl ? (
+                            isClientImageInvalid(row.imageUrl) ? (
+                              <span className="text-xs text-amber-700">
+                                {CMS_IMAGE_REUPLOAD_HINT}
+                              </span>
+                            ) : resolveClientImagePreview(row.imageUrl) ? (
                             <div className="relative h-14 w-14 overflow-hidden rounded-lg border">
                               <Image
-                                src={row.imageUrl}
+                                src={resolveClientImagePreview(row.imageUrl)!}
                                 alt="款式图"
                                 fill
                                 className="object-cover"
                                 unoptimized
                               />
                             </div>
+                            ) : (
+                              <span className="text-xs text-zinc-400">未上传</span>
+                            )
                           ) : (
                             <span className="text-xs text-zinc-400">未上传</span>
                           )}
