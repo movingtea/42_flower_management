@@ -27,6 +27,15 @@
 - [ ] 小程序 API 返回 OSS public URL（非 localhost）
 - [ ] 微信开发者工具可加载图片
 
+## CMS SKU 状态文案（与消费者端区分）
+
+- [ ] CMS 新建 SKU、库存为 0，显示「未保存」，**不显示「卖光啦！」**
+- [ ] CMS 已保存 SKU、库存改为 0，显示「库存为 0」，**不显示「卖光啦！」**
+- [ ] 库存为 0 时可看到提示「小程序前台将显示售罄」
+- [ ] CMS 停用 SKU 显示「已停用」
+- [ ] 小程序前台 stock=0 且 active 的商品仍显示「卖光啦！」
+- [ ] 推荐位仍不展示售罄商品
+
 ## 自动化
 
 ```bash
@@ -34,5 +43,7 @@ npm run test:number-input
 npm run test:client-image-preview
 npm run test:image-url
 npm run smoke:cms-product-preview
+npm run test:sku-display
+npm run test:miniprogram-stock
 npm run build
 ```

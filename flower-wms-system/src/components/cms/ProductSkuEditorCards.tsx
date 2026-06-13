@@ -8,8 +8,7 @@ import { Button } from "@/components/ui/button";
 import { DecimalStringInput, NumberInput } from "@/components/ui/NumberInput";
 import { Switch } from "@/components/ui/Switch";
 import {
-  getSkuDisplayStatus,
-  getSkuStatusBadgeLabel,
+  getCmsSkuEditorBadge,
   skuStatusBadgeClassName,
 } from "@/lib/cms/sku-display";
 import { formatPercent } from "@/lib/format-money";
@@ -241,11 +240,11 @@ export function ProductSkuEditorCards({
       <div className="space-y-4">
         {skus.map((row, index) => {
           const rowKey = row.id ?? `new-${index}`;
-          const displayStatus = getSkuDisplayStatus({
+          const cmsBadge = getCmsSkuEditorBadge({
+            id: row.id,
             isActive: row.isActive,
-            stock: row.stock ?? 0,
+            stock: row.stock,
           });
-          const badgeLabel = getSkuStatusBadgeLabel(displayStatus);
           const estimate = findSkuEstimate(row, marginEstimate);
           const lossExpanded = Boolean(expandedLoss[rowKey]);
           const canExpandLoss = Boolean(estimate && estimate.recipeId === row.recipeId);
@@ -270,11 +269,18 @@ export function ProductSkuEditorCards({
                   ) : null}
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
-                  <span
-                    className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${skuStatusBadgeClassName(displayStatus)}`}
-                  >
-                    {badgeLabel ?? "可售"}
-                  </span>
+                  <div className="space-y-0.5">
+                    <span
+                      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${skuStatusBadgeClassName(cmsBadge.status)}`}
+                    >
+                      {cmsBadge.label}
+                    </span>
+                    {cmsBadge.hint ? (
+                      <p className="max-w-[12rem] text-[11px] text-zinc-500">
+                        {cmsBadge.hint}
+                      </p>
+                    ) : null}
+                  </div>
                   <Switch
                     label="启用"
                     checked={row.isActive !== false}

@@ -9,6 +9,7 @@ import {
   computeSkuStockFlags,
   computeStockSummary,
   formatInsufficientStockMessage,
+  formatStockLabel,
   mergeOrderLineQuantities,
   resolveDisplayStatus,
   validateCartQuantity,
@@ -85,6 +86,11 @@ function testLowStockThreshold() {
   assert.equal(computeSkuStockFlags(0).hasStock, false);
 }
 
+function testMiniprogramStockZeroLabel() {
+  assert.equal(formatStockLabel(0), "卖光啦！");
+  assert.equal(formatInsufficientStockMessage("百合", 0), "百合 卖光啦！");
+}
+
 function testStockSummary() {
   const summary = computeStockSummary([
     { stock: 2 },
@@ -119,6 +125,7 @@ function run() {
   testMergeOrderLines();
   testStockZeroDoesNotChangeActiveFlag();
   testLowStockThreshold();
+  testMiniprogramStockZeroLabel();
   testStockSummary();
   testAssertSellableSpu();
   testFormatInsufficientStockMessage();
