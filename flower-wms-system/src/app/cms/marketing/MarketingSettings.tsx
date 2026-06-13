@@ -5,6 +5,12 @@ import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { DeliverySettingsPanel } from "@/app/cms/marketing/DeliverySettingsPanel";
 import { HomeSceneEntriesManager } from "@/app/cms/marketing/HomeSceneEntriesManager";
+import {
+  CMS_IMAGE_REUPLOAD_HINT,
+  isClientImageInvalid,
+  resolveClientImagePreview,
+  uploadCmsImage,
+} from "@/lib/cms-image-upload";
 import { formatNullableDateTime } from "@/lib/datetime";
 import { ProductPicker } from "@/components/cms/pickers/ProductPicker";
 import { Button } from "@/components/ui/button";
@@ -118,24 +124,14 @@ export function MarketingSettings({
   }
 
   async function handleUpload(file: File) {
+    if (uploading) return;
     setUploading(true);
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-      const json = (await res.json()) as {
-        success: boolean;
-        error?: string;
-        data?: { url?: string };
-      };
-      if (!res.ok || !json.success || !json.data?.url) {
-        showToast(json.error ?? "上传失败", "error");
-        return;
-      }
-      setPopup((p) => ({ ...p, imageUrl: json.data!.url! }));
+      const { objectKey } = await uploadCmsImage(file, "cms");
+      setPopup((p) => ({ ...p, imageUrl: objectKey }));
       showToast("海报上传成功", "success");
-    } catch {
-      showToast("上传失败，请重试", "error");
+    } catch (e) {
+      showToast(e instanceof Error ? e.message : "上传失败", "error");
     } finally {
       setUploading(false);
     }
@@ -276,7 +272,7 @@ export function MarketingSettings({
               <input
                 ref={fileRef}
                 type="file"
-                accept="image/jpeg,image/png,image/webp,image/gif"
+                accept="image/jpeg,image/png,image/webp"
                 className="hidden"
                 onChange={(e) => {
                   const file = e.target.files?.[0];
@@ -286,15 +282,21 @@ export function MarketingSettings({
               />
               {popup.imageUrl ? (
                 <div>
+                  {isClientImageInvalid(popup.imageUrl) ? (
+                    <p className="mb-2 text-sm text-amber-700">
+                      {CMS_IMAGE_REUPLOAD_HINT}
+                    </p>
+                  ) : resolveClientImagePreview(popup.imageUrl) ? (
                   <div className="relative mb-2 h-44 w-full overflow-hidden rounded-xl border border-rose-100">
                     <Image
-                      src={popup.imageUrl}
+                      src={resolveClientImagePreview(popup.imageUrl)!}
                       alt="弹窗海报"
                       fill
                       className="object-cover"
                       unoptimized
                     />
                   </div>
+                  ) : null}
                   <Button
                     type="button"
                     variant="secondary"

@@ -69,7 +69,7 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 | 多租户 SaaS | 未实现；无 `tenantId` 或租户隔离模型 |
 | 正式微信支付 | 未实现；`mock-pay` 可用，`callback` 是占位链路 |
 | 聚合配送 / 第三方配送 | 未实现 |
-| 对象存储 | 未实现；上传写本地 `public/uploads` |
+| 对象存储 | **Sprint 14 已实现**：阿里云 OSS（`universe42`）；上传走 `ALIYUN_OSS_UPLOAD_ENDPOINT`，展示走 `https://oss.universe42.studio` |
 | Redis / MQ | 未实现；`package.json` 无相关依赖 |
 | 包装物理库存扣减 | 未实现；`PackagingKit` 只代表标准包装成本 |
 | 供应商付款 / 对账 / 发票 | 未实现 |
@@ -1073,25 +1073,49 @@ logging:
 
 限制单容器 json 日志总量，避免 `/var/lib/docker/containers/*/*.log` 无限增长。
 
-### 12.1 图片路径规范
+### 12.1 图片存储与 URL 规范（Sprint 14：阿里云 OSS）
 
-本地上传图片（`public/uploads`）与外部 CDN 图片的存储、API 返回、小程序展示须统一：
+生产环境图片已切换至阿里云 OSS，不再写入 `public/uploads`。
 
 | 环节 | 规范 |
 |---|---|
-| 数据库存储 | 本地上传保存相对路径 `/uploads/xxx.jpg`；**不得**保存 `http://localhost:3000/uploads/...` 或 request origin |
-| 外部图片 | 真正的 OSS / CDN `https://...` 可保存完整绝对 URL |
-| 上传 API | `POST /api/admin/upload`、`POST /api/miniprogram/upload` 返回 `path` / `url` 均为相对路径 |
-| CMS 写入 | 商品 SKU `imageUrl`、Banner、推荐位 `imageOverride`、营销弹窗等在写库前经 `normalizeStoredImagePath` |
-| 小程序 API | `/api/miniprogram/*` 经 `imageUrlFormatter` → `toPublicImageUrl`：剥离 localhost，本地路径保持相对，**不得**默认拼接 localhost |
-| 小程序前端 | `42_mp/miniprogram/utils/image.ts` 的 `toRelativeImagePath` / `resolveImageUrl` 统一处理；WXML 用 `{{baseUrl}}{{path}}` 时 API 须返回相对路径 |
+| 数据库存储 | **OSS objectKey**（如 `universe42/products/sku/2026/06/{uuid}.webp`）；**不得**存 localhost、`/uploads`、完整 OSS public URL |
+| 服务端上传 | `ALIYUN_OSS_UPLOAD_ENDPOINT`（生产同地域 ECS 用内网 Endpoint） |
+| 公网展示 | `ALIYUN_OSS_PUBLIC_BASE_URL`（当前 `https://oss.universe42.studio`） |
+| 上传 API | `POST /api/admin/uploads/image`（推荐，需 `cms:write` + `module`）；兼容 `POST /api/admin/upload` |
+| 上传校验 | JPG / PNG / WebP；默认 ≤3MB；禁止 SVG |
+| CMS 写入 | 商品 SKU `imageUrl`、Banner、营销弹窗等经 `normalizeStoredImagePath` → objectKey |
+| 小程序 API | `/api/miniprogram/*` 经 `imageUrlFormatter` → `toPublicImageUrl` → 完整 HTTPS OSS URL |
+| Legacy | `ENABLE_LEGACY_UPLOADS=false` 时 `/uploads` 与 localhost 视为无效，CMS 提示重新上传 |
 
-核心工具：`src/lib/image-url.ts`（`isAbsoluteUrl`、`isLocalhostUrl`、`normalizeStoredImagePath`、`stripLocalDevOrigin`、`toPublicImageUrl`）。
+**Storage Service 路径：**
 
-数据巡检与清理（可选）：
+- `src/lib/storage/config.ts` — 环境变量
+- `src/lib/storage/upload-validation.ts` — 类型 / 大小校验
+- `src/lib/storage/object-key.ts` — objectKey 白名单与生成
+- `src/lib/storage/oss.ts` — OSS SDK 封装
+- `src/lib/storage/storage.ts` — `uploadImageToStorage` / `deleteObjectFromStorage`
+- `src/lib/storage/image-url.ts` — `getPublicImageUrl` / `normalizeImageValue` 纯函数
+- `src/lib/image-url.ts` — 对外 re-export（兼容旧 import）
+
+**objectKey 目录：**
+
+| module | 路径前缀 |
+|---|---|
+| product-spu | `universe42/products/spu/YYYY/MM/` |
+| product-sku | `universe42/products/sku/YYYY/MM/` |
+| banner | `universe42/banners/YYYY/MM/` |
+| recommendation | `universe42/recommendations/YYYY/MM/` |
+| home-scene | `universe42/home-scenes/YYYY/MM/` |
+| cms | `universe42/cms/YYYY/MM/` |
+| test | `universe42/test/YYYY/MM/` |
+
+**连通性测试：** `npm run test:oss`（`scripts/test-oss-upload.ts`）
+
+数据巡检（legacy localhost，可选）：
 
 - `npx tsx scripts/check-image-url-data.ts` — 只读扫描含 localhost 的图片字段
-- `npx tsx scripts/fix-localhost-image-urls.ts` — 默认 dry-run；`--write` 写库修正
+- `npx tsx scripts/fix-localhost-image-urls.ts` — 默认 dry-run（Sprint 14 起新数据应重新上传 OSS，非自动迁移）
 
 ---
 
@@ -1112,6 +1136,10 @@ logging:
 | `npm run test:crm` | CRM 纯函数测试 |
 | `npm run test:cms-validation` | CMS 商品上架校验纯函数测试 |
 | `npm run test:image-url` | 图片 URL 规范化工具测试 |
+| `npm run test:storage` | OSS storage / objectKey 纯函数测试 |
+| `npm run test:upload-validation` | 上传类型与大小校验测试 |
+| `npm run test:oss` | OSS 连通性上传测试（需 AccessKey） |
+| `npm run smoke:oss-upload` | OSS smoke（纯函数 + 可选 live 上传） |
 | `npm run db:seed` | Prisma seed |
 | `npm run smoke:purchase` | 采购入库 DB smoke |
 | `npm run smoke:crm` | CRM 订单沉淀 DB smoke |
@@ -1301,6 +1329,20 @@ logging:
 | 小程序 | `loadActiveBanners` / `filterHomeBannersForMiniprogram` 已过滤 `isDeleted`（无需改动） |
 | 测试 | `smoke:cms-home-content` 覆盖创建→软删除→列表/小程序过滤 |
 
+### Sprint 14 — OSS 对象存储与上传链路生产化
+
+| 能力 | 实现 |
+|---|---|
+| OSS SDK | `ali-oss`；Bucket `universe42`；自定义域名 `https://oss.universe42.studio` |
+| Storage Service | `src/lib/storage/*`：`uploadImageToStorage`、`getPublicImageUrl`、`buildObjectKey` |
+| 上传 API | `POST /api/admin/uploads/image`（`module` 白名单 + `cms:write`）；兼容 `/api/admin/upload` |
+| 数据库存储 | objectKey（`universe42/{module}/YYYY/MM/{uuid}.ext`）；禁止 localhost / `/uploads` / 完整 OSS URL |
+| CMS | 商品 SKU、Banner、营销弹窗、富文本图片走 OSS；无效 legacy 提示重新上传 |
+| 小程序 API | `imageUrlFormatter` → `toPublicImageUrl` 返回 HTTPS OSS URL |
+| Legacy | `ENABLE_LEGACY_UPLOADS=false`；无 `/uploads` 迁移脚本 |
+| 校验 | JPG/PNG/WebP；≤3MB；禁 SVG |
+| 测试 / 脚本 | `test:storage`、`test:upload-validation`、`test:oss`、`smoke:oss-upload`、`smoke:image-url` |
+
 ### 退款库存回填
 
 - 已支付退款**默认不回填**物理库存；`refundPaidOrder({ rollbackStock })` 由后台用户选择。
@@ -1378,7 +1420,7 @@ CMS UI 组件（Sprint 9 Round 2 + 易用性增强）：
 |---|---|
 | 多租户 SaaS | 未实现 |
 | 正式微信支付 | 未实现，当前为 mock / callback 占位 |
-| 对象存储 | 未实现，当前本地 uploads |
+| 对象存储 | Sprint 14：阿里云 OSS（`universe42` / `oss.universe42.studio`） |
 | Redis / MQ | 未实现 |
 | 完整测试体系 | 当前以 tsx 轻量测试和 smoke script 为主 |
 | 供应商付款 / 对账 / 发票 | 未实现 |

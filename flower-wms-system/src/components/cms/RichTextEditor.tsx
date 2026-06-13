@@ -13,27 +13,11 @@ type Props = {
   minHeight?: number;
 };
 
+import { uploadCmsImage } from "@/lib/cms-image-upload";
+
 async function uploadImageFile(file: File): Promise<string> {
-  const fd = new FormData();
-  fd.append("file", file);
-
-  const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-  const json = (await res.json()) as {
-    success: boolean;
-    error?: string;
-    data?: { url?: string; path?: string };
-  };
-
-  if (!res.ok || !json.success) {
-    throw new Error(json.error ?? "图片上传失败");
-  }
-
-  const url = json.data?.url ?? json.data?.path;
-  if (!url) {
-    throw new Error("上传成功但未返回图片地址");
-  }
-
-  return url;
+  const { previewUrl } = await uploadCmsImage(file, "cms");
+  return previewUrl;
 }
 
 export function RichTextEditor({
@@ -51,8 +35,8 @@ export function RichTextEditor({
       placeholder,
       MENU_CONF: {
         uploadImage: {
-          maxFileSize: 10 * 1024 * 1024,
-          allowedFileTypes: ["image/*"],
+          maxFileSize: 3 * 1024 * 1024,
+          allowedFileTypes: ["image/jpeg", "image/png", "image/webp"],
           async customUpload(
             file: File,
             insertFn: (url: string, alt: string, href: string) => void

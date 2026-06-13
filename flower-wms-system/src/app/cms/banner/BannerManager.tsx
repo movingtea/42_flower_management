@@ -7,6 +7,12 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/Switch";
+import {
+  CMS_IMAGE_REUPLOAD_HINT,
+  isClientImageInvalid,
+  resolveClientImagePreview,
+  uploadCmsImage,
+} from "@/lib/cms-image-upload";
 import type { BannerWriteItem } from "@/lib/banner";
 import {
   bannerToLinkTarget,
@@ -191,20 +197,11 @@ export function BannerManager() {
   }
 
   async function handleUpload(file: File) {
+    if (uploading) return;
     setUploading(true);
     try {
-      const fd = new FormData();
-      fd.append("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: fd });
-      const json = (await res.json()) as {
-        success: boolean;
-        error?: string;
-        data?: { url?: string };
-      };
-      if (!res.ok || !json.success || !json.data?.url) {
-        throw new Error(json.error ?? "上传失败");
-      }
-      setForm((f) => ({ ...f, imageUrl: json.data!.url! }));
+      const { objectKey } = await uploadCmsImage(file, "banner");
+      setForm((f) => ({ ...f, imageUrl: objectKey }));
     } catch (e) {
       showToast(e instanceof Error ? e.message : "上传失败");
     } finally {
@@ -215,6 +212,10 @@ export function BannerManager() {
   async function handleSave() {
     if (!form.imageUrl.trim()) {
       showToast("请上传轮播海报");
+      return;
+    }
+    if (isClientImageInvalid(form.imageUrl)) {
+      showToast(CMS_IMAGE_REUPLOAD_HINT);
       return;
     }
     const linkError = validateCmsLinkTarget(linkTarget);
@@ -409,13 +410,23 @@ export function BannerManager() {
                   <td className="px-4 py-3">
                     <div className="relative h-16 w-28 overflow-hidden rounded-lg border border-rose-100 bg-zinc-50">
                       {item.imageUrl ? (
+                        isClientImageInvalid(item.imageUrl) ? (
+                          <span className="flex h-full items-center justify-center px-1 text-center text-xs text-amber-700">
+                            {CMS_IMAGE_REUPLOAD_HINT}
+                          </span>
+                        ) : resolveClientImagePreview(item.imageUrl) ? (
                         <Image
-                          src={item.imageUrl}
+                          src={resolveClientImagePreview(item.imageUrl)!}
                           alt="轮播海报"
                           fill
                           className="object-cover"
                           unoptimized
                         />
+                        ) : (
+                          <span className="flex h-full items-center justify-center text-xs text-zinc-400">
+                            无图
+                          </span>
+                        )
                       ) : (
                         <span className="flex h-full items-center justify-center text-xs text-zinc-400">
                           无图
@@ -523,15 +534,21 @@ export function BannerManager() {
                 />
                 {form.imageUrl ? (
                   <div>
+                    {isClientImageInvalid(form.imageUrl) ? (
+                      <p className="mb-2 text-sm text-amber-700">
+                        {CMS_IMAGE_REUPLOAD_HINT}
+                      </p>
+                    ) : resolveClientImagePreview(form.imageUrl) ? (
                     <div className="relative mb-2 h-36 w-full overflow-hidden rounded-xl border border-rose-100">
                       <Image
-                        src={form.imageUrl}
+                        src={resolveClientImagePreview(form.imageUrl)!}
                         alt="预览"
                         fill
                         className="object-cover"
                         unoptimized
                       />
                     </div>
+                    ) : null}
                     <Button
                       type="button"
                       variant="secondary"
