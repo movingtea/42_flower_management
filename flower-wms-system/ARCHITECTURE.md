@@ -185,7 +185,7 @@ flower-wms-system/
 | `/wms/reports` | 经营报表中心（Tab：经营总览、销售趋势、商品毛利、库存预警、损耗模型影响、采购复盘、产品决策） |
 | `/wms/setup` | 试运营准备向导：setup checklist、next actions、trial-run 链路检查 |
 | `/wms/data-quality` | 数据质量中心：按 severity / domain 筛选问题列表 |
-| `/wms/system-health` | 系统健康检查：数据库、uploads、环境变量、cron 等 |
+| `/wms/system-health` | 系统健康检查：磁盘空间、数据库、OSS、环境变量、cron 等 |
 | `/wms/audit-logs` | 操作日志查询与 snapshot 详情 |
 | `/wms/crm` | 客户 CRM 总览：指标卡、今日 / 未来 7 天提醒、最近客户 |
 | `/wms/crm/customers` | CRM 客户列表 |
@@ -1020,6 +1020,8 @@ docker compose pull
 docker compose build
 docker compose up -d
 ./scripts/deploy-cleanup.sh
+# 或独立: ./scripts/safe-docker-prune.sh
+# 只读检查: ./scripts/check-disk-space.sh && ./scripts/check-docker-usage.sh
 ```
 
 `scripts/deploy-cleanup.sh`（宿主机运行，**不在**应用 entrypoint 内执行 prune）：
@@ -1140,6 +1142,11 @@ logging:
 | `npm run test:upload-validation` | 上传类型与大小校验测试 |
 | `npm run test:oss` | OSS 连通性上传测试（需 AccessKey） |
 | `npm run smoke:oss-upload` | OSS smoke（纯函数 + 可选 live 上传） |
+| `npm run ops:disk` | 宿主机磁盘只读检查（`scripts/check-disk-space.sh`） |
+| `npm run ops:docker-usage` | Docker 占用只读检查 |
+| `npm run ops:prune` | 安全 Docker prune（不清理 volumes；需人工执行） |
+| `npm run smoke:ops` | `ops:disk` + `ops:docker-usage`（不 prune） |
+| `npm run test:disk-status` | 磁盘状态纯函数测试 |
 | `npm run db:seed` | Prisma seed |
 | `npm run smoke:purchase` | 采购入库 DB smoke |
 | `npm run smoke:crm` | CRM 订单沉淀 DB smoke |
@@ -1342,6 +1349,29 @@ logging:
 | Legacy | `ENABLE_LEGACY_UPLOADS=false`；无 `/uploads` 迁移脚本 |
 | 校验 | JPG/PNG/WebP；≤3MB；禁 SVG |
 | 测试 / 脚本 | `test:storage`、`test:upload-validation`、`test:oss`、`smoke:oss-upload`、`smoke:image-url` |
+
+### Sprint 15 — 服务器磁盘与 Docker 运维稳定性
+
+| 能力 | 实现 |
+|---|---|
+| Docker 日志轮转 | `docker-compose.example.yml`：`flower-web` / `flower-cron-worker` / `flower-nginx` / `db` — json-file `max-size: 10m` / `max-file: 3` |
+| 磁盘检查 | `scripts/check-disk-space.sh` → `npm run ops:disk` |
+| Docker 占用 | `scripts/check-docker-usage.sh` → `npm run ops:docker-usage` |
+| 安全 prune | `scripts/safe-docker-prune.sh` → `npm run ops:prune`（`DRY_RUN=true` 预览） |
+| 部署后清理 | `scripts/deploy-cleanup.sh`；CI deploy 成功后自动尝试执行 |
+| system-health | `src/lib/system-health/disk-status.ts` + `disk-space.ts`；`/wms/system-health` 展示磁盘项 |
+| DB 错误提示 | `EAI_AGAIN` / `getaddrinfo` 时提示排查磁盘，勿误判 OSS |
+| 入口日志 | `docker-entrypoint.sh` 启动时输出容器内 `df -h /` |
+| Smoke | `npm run smoke:ops`（只读，不 prune） |
+| 测试 | `npm run test:disk-status` |
+
+**运维红线（Sprint 15）：**
+
+- 不自动执行 `docker volume prune`
+- 不删除 `postgres_data` / PostgreSQL 数据
+- 不执行 `docker system prune -a --volumes`
+- 不在 system-health UI 提供一键清理
+- 磁盘满可导致 Prisma `getaddrinfo EAI_AGAIN db`、502、容器 unhealthy — 优先 `ops:disk`
 
 ### 退款库存回填
 

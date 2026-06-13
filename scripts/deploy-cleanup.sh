@@ -22,6 +22,9 @@
 #   ./scripts/deploy-cleanup.sh              # safe mode (default)
 #   ./scripts/deploy-cleanup.sh --aggressive # more aggressive, still no volumes
 #   ./scripts/deploy-cleanup.sh --timeout 180
+#
+# 独立安全清理（不等待 healthcheck）: ./scripts/safe-docker-prune.sh
+#   DRY_RUN=true ./scripts/safe-docker-prune.sh
 #   ./scripts/deploy-cleanup.sh --compose-file /path/to/docker-compose.yml
 #
 set -uo pipefail
@@ -248,6 +251,15 @@ main() {
   fi
 
   print_disk_state "Disk usage AFTER cleanup"
+
+  local use_pct
+  use_pct="$(df -P / 2>/dev/null | awk 'NR==2 { gsub(/%/,"",$5); print $5 }')"
+  if [[ -n "${use_pct}" ]] && [[ "${use_pct}" =~ ^[0-9]+$ ]] && [[ "${use_pct}" -ge 90 ]]; then
+    warn "清理后根分区仍 >= 90% (${use_pct}%) — 请人工扩容或排查 /var/lib/docker"
+    warn "可运行: ./scripts/check-disk-space.sh 或 ./scripts/safe-docker-prune.sh"
+    warn "禁止: docker volume prune / docker system prune -a --volumes"
+  fi
+
   log ""
   log "[done] Post-deploy cleanup finished."
   exit 0

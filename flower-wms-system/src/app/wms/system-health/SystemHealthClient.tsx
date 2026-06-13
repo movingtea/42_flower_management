@@ -49,7 +49,7 @@ export function SystemHealthClient() {
         <div>
           <h2 className="text-2xl font-semibold text-zinc-900">系统健康检查</h2>
           <p className="mt-2 max-w-3xl text-sm text-zinc-500">
-            检查数据库、上传目录、关键环境变量和核心服务状态。不会展示密钥明文。
+            检查数据库、磁盘空间、OSS、环境变量和核心服务状态。不会展示密钥明文。
           </p>
         </div>
         <button

@@ -1,6 +1,11 @@
 #!/bin/sh
 set -e
 
+if command -v df >/dev/null 2>&1; then
+  echo "[entrypoint] disk usage (container root):"
+  df -h / 2>/dev/null | tail -n 1 || true
+fi
+
 if [ "${SKIP_DB_MIGRATE:-}" != "true" ] && [ -n "${DATABASE_URL:-}" ]; then
   echo "[entrypoint] prisma migrate deploy..."
   npx prisma migrate deploy
