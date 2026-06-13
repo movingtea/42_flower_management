@@ -481,6 +481,21 @@ docker compose --profile cleanup run --rm docker-cleanup
 
 该服务挂载 `/var/run/docker.sock`，存在安全风险；**优先使用宿主机 `scripts/deploy-cleanup.sh`**。默认 `docker compose up -d` 不会启动 `docker-cleanup`。
 
+### 10.6 后台 UI 规范（Sprint 16）
+
+Sprint 16 聚焦 CMS / WMS 后台布局体验，**不改业务规则与数据库 schema**。详见 [`docs/ui-guidelines.md`](docs/ui-guidelines.md) 与 [`docs/sprint-16-ui-checklist.md`](docs/sprint-16-ui-checklist.md)。
+
+| 区域 | 变更 |
+|---|---|
+| 商品编辑 SKU | 宽表 → 卡片；毛利摘要默认可见，损耗模拟默认折叠 |
+| 订单履约看板 | 归档列 compact card + 最近 20 条限制 |
+| 宽表格 | sticky 主识别列 + sticky 操作列（`src/components/admin/sticky-table.tsx`） |
+
+```bash
+npm run test:sku-display
+npm run test:kanban-archive
+```
+
 ## 11. 测试 / Smoke Scripts
 
 **业务规则源文件**：`docs/business-rules.md`（Sprint 12 起为规则真理源；Sprint 13 补齐 `ProductSku.isActive` 语义）。

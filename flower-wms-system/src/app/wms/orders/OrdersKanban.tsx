@@ -3,11 +3,16 @@
 import { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { OrderKanbanCard } from "@/app/wms/orders/OrderKanbanCard";
+import { OrderKanbanCompactCard } from "@/app/wms/orders/OrderKanbanCompactCard";
 import {
   columnIndex,
   KANBAN_COLUMNS,
 } from "@/app/wms/orders/kanban-config";
 import type { DragPayload, KanbanOrder } from "@/app/wms/orders/types";
+import {
+  KANBAN_ARCHIVE_DISPLAY_LIMIT,
+  sliceArchiveColumnOrders,
+} from "@/lib/orders/kanban-archive-display";
 
 type Props = {
   initialOrders: KanbanOrder[];
@@ -225,6 +230,10 @@ export function OrdersKanban({ initialOrders }: Props) {
       <div className="flex gap-3 overflow-x-auto pb-4">
         {KANBAN_COLUMNS.map((column) => {
           const columnOrders = ordersInColumn(orders, column.id);
+          const archiveSlice = column.isArchive
+            ? sliceArchiveColumnOrders(columnOrders)
+            : null;
+          const visibleOrders = archiveSlice?.visible ?? columnOrders;
           const isDropTarget = dropHighlight === column.id;
 
           return (
@@ -251,53 +260,67 @@ export function OrdersKanban({ initialOrders }: Props) {
                 </span>
               </header>
 
-              <div className="flex max-h-[calc(100vh-11rem)] min-h-[12rem] flex-1 flex-col gap-3 overflow-y-auto p-2">
-                {columnOrders.length === 0 ? (
+              <div className="flex max-h-[calc(100vh-11rem)] min-h-[12rem] flex-1 flex-col gap-2 overflow-y-auto p-2">
+                {visibleOrders.length === 0 ? (
                   <p className="py-8 text-center text-xs text-zinc-400">
                     暂无订单
                   </p>
                 ) : (
-                  columnOrders.map((order) => (
-                    <OrderKanbanCard
-                      key={order.id}
-                      order={order}
-                      column={column}
-                      loading={loadingId === order.id}
-                      onDragStart={(o, colId) =>
-                        setDragPayload({ orderId: o.id, fromColumnId: colId })
-                      }
-                      onCloseOrder={(o) =>
-                        void runAction(o.id, async () => {
-                          await postJson<unknown>(
-                            `/api/admin/orders/${o.id}/cancel-or-close`
-                          );
-                          const prev = orders.find((x) => x.id === o.id)!;
-                          upsertOrder({
-                            ...prev,
-                            status: "CANCELLED",
-                            cancelSource: "ADMIN",
-                            refundAmount: null,
-                            statusLabel: "已取消",
-                          });
-                        })
-                      }
-                      onStartProduction={(o) =>
-                        void runAction(o.id, () =>
-                          syncOrderFromPatch(o.id, "PRODUCTION")
-                        )
-                      }
-                      onShip={(o) => setShipModal({ order: o, deliveryInfo: "" })}
-                      onRefund={(o) =>
-                        setRefundModal({ order: o, rollbackStock: true })
-                      }
-                      onMarkCompleted={(o) =>
-                        void runAction(o.id, () =>
-                          syncOrderFromPatch(o.id, "COMPLETED")
-                        )
-                      }
-                    />
-                  ))
+                  visibleOrders.map((order) =>
+                    column.isArchive ? (
+                      <OrderKanbanCompactCard key={order.id} order={order} />
+                    ) : (
+                      <OrderKanbanCard
+                        key={order.id}
+                        order={order}
+                        column={column}
+                        loading={loadingId === order.id}
+                        onDragStart={(o, colId) =>
+                          setDragPayload({ orderId: o.id, fromColumnId: colId })
+                        }
+                        onCloseOrder={(o) =>
+                          void runAction(o.id, async () => {
+                            await postJson<unknown>(
+                              `/api/admin/orders/${o.id}/cancel-or-close`
+                            );
+                            const prev = orders.find((x) => x.id === o.id)!;
+                            upsertOrder({
+                              ...prev,
+                              status: "CANCELLED",
+                              cancelSource: "ADMIN",
+                              refundAmount: null,
+                              statusLabel: "已取消",
+                            });
+                          })
+                        }
+                        onStartProduction={(o) =>
+                          void runAction(o.id, () =>
+                            syncOrderFromPatch(o.id, "PRODUCTION")
+                          )
+                        }
+                        onShip={(o) =>
+                          setShipModal({ order: o, deliveryInfo: "" })
+                        }
+                        onRefund={(o) =>
+                          setRefundModal({ order: o, rollbackStock: true })
+                        }
+                        onMarkCompleted={(o) =>
+                          void runAction(o.id, () =>
+                            syncOrderFromPatch(o.id, "COMPLETED")
+                          )
+                        }
+                      />
+                    )
+                  )
                 )}
+                {archiveSlice && archiveSlice.hiddenCount > 0 ? (
+                  <div className="border-t border-zinc-200/80 px-1 pt-2 text-center text-xs text-zinc-500">
+                    <p>仅显示最近 {KANBAN_ARCHIVE_DISPLAY_LIMIT} 单</p>
+                    <p className="mt-0.5 text-zinc-400">
+                      更多历史订单请在经营报表中查看
+                    </p>
+                  </div>
+                ) : null}
               </div>
             </section>
           );

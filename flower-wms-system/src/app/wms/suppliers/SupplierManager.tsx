@@ -11,6 +11,15 @@ import {
   type Supplier,
   type SupplierType,
 } from "@/app/wms/purchase-orders/types";
+import {
+  STICKY_LEFT_CELL,
+  STICKY_LEFT_HEAD,
+  STICKY_RIGHT_CELL,
+  STICKY_RIGHT_HEAD,
+  STICKY_SCROLL_CELL,
+  STICKY_SCROLL_HEAD,
+  StickyTableScroll,
+} from "@/components/admin/sticky-table";
 
 type FormState = {
   name: string;
@@ -284,83 +293,90 @@ export function SupplierManager() {
             )}
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[980px] text-left text-sm">
-              <thead className="border-b bg-zinc-50">
+          <StickyTableScroll minWidth="980px">
+            <colgroup>
+              <col className="w-48" />
+              <col />
+              <col />
+              <col />
+              <col />
+              <col />
+              <col />
+              <col />
+              <col className="w-28" />
+            </colgroup>
+            <thead className="border-b bg-zinc-50">
+              <tr>
+                <th className={STICKY_LEFT_HEAD}>供应商名称</th>
+                <th className={STICKY_SCROLL_HEAD}>类型</th>
+                <th className={STICKY_SCROLL_HEAD}>联系人</th>
+                <th className={STICKY_SCROLL_HEAD}>电话</th>
+                <th className={STICKY_SCROLL_HEAD}>微信</th>
+                <th className={STICKY_SCROLL_HEAD}>地址</th>
+                <th className={STICKY_SCROLL_HEAD}>状态</th>
+                <th className={STICKY_SCROLL_HEAD}>更新时间</th>
+                <th className={STICKY_RIGHT_HEAD}>操作</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {loading ? (
                 <tr>
-                  <th className="px-4 py-3 font-medium text-zinc-600">供应商名称</th>
-                  <th className="px-4 py-3 font-medium text-zinc-600">类型</th>
-                  <th className="px-4 py-3 font-medium text-zinc-600">联系人</th>
-                  <th className="px-4 py-3 font-medium text-zinc-600">电话</th>
-                  <th className="px-4 py-3 font-medium text-zinc-600">微信</th>
-                  <th className="px-4 py-3 font-medium text-zinc-600">地址</th>
-                  <th className="px-4 py-3 font-medium text-zinc-600">状态</th>
-                  <th className="px-4 py-3 font-medium text-zinc-600">更新时间</th>
-                  <th className="px-4 py-3 font-medium text-zinc-600">操作</th>
+                  <td colSpan={9} className="px-4 py-12 text-center text-zinc-500">
+                    正在加载供应商…
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y">
-                {loading ? (
-                  <tr>
-                    <td colSpan={9} className="px-4 py-12 text-center text-zinc-500">
-                      正在加载供应商…
+              ) : items.length === 0 ? (
+                <tr>
+                  <td colSpan={9} className="px-4 py-12 text-center text-zinc-500">
+                    暂无供应商，请先创建供应商。
+                  </td>
+                </tr>
+              ) : (
+                items.map((row) => (
+                  <tr key={row.id} className="group hover:bg-zinc-50/80">
+                    <td className={STICKY_LEFT_CELL}>{row.name}</td>
+                    <td className={STICKY_SCROLL_CELL}>
+                      {supplierTypeLabels[row.supplierType]}
                     </td>
-                  </tr>
-                ) : items.length === 0 ? (
-                  <tr>
-                    <td colSpan={9} className="px-4 py-12 text-center text-zinc-500">
-                      暂无供应商，请先创建供应商。
+                    <td className={STICKY_SCROLL_CELL}>{row.contactName || "—"}</td>
+                    <td className={STICKY_SCROLL_CELL}>{row.phone || "—"}</td>
+                    <td className={STICKY_SCROLL_CELL}>{row.wechat || "—"}</td>
+                    <td className={`max-w-56 ${STICKY_SCROLL_CELL}`}>
+                      <span className="line-clamp-2">{row.address || "—"}</span>
                     </td>
-                  </tr>
-                ) : (
-                  items.map((row) => (
-                    <tr key={row.id} className="hover:bg-zinc-50/80">
-                      <td className="px-4 py-3 font-medium text-zinc-900">
-                        {row.name}
-                      </td>
-                      <td className="px-4 py-3">
-                        {supplierTypeLabels[row.supplierType]}
-                      </td>
-                      <td className="px-4 py-3">{row.contactName || "—"}</td>
-                      <td className="px-4 py-3">{row.phone || "—"}</td>
-                      <td className="px-4 py-3">{row.wechat || "—"}</td>
-                      <td className="max-w-56 px-4 py-3 text-zinc-600">
-                        <span className="line-clamp-2">{row.address || "—"}</span>
-                      </td>
-                      <td className="px-4 py-3">
-                        {row.isActive ? (
-                          <Badge variant="success">已启用</Badge>
-                        ) : (
-                          <Badge variant="default">已停用</Badge>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-zinc-500">
-                        {formatDateTime(row.updatedAt)}
-                      </td>
-                      <td className="px-4 py-3">
+                    <td className={STICKY_SCROLL_CELL}>
+                      {row.isActive ? (
+                        <Badge variant="success">已启用</Badge>
+                      ) : (
+                        <Badge variant="default">已停用</Badge>
+                      )}
+                    </td>
+                    <td className={`text-xs text-zinc-500 ${STICKY_SCROLL_CELL}`}>
+                      {formatDateTime(row.updatedAt)}
+                    </td>
+                    <td className={STICKY_RIGHT_CELL}>
+                      <button
+                        type="button"
+                        onClick={() => startEdit(row)}
+                        className="mr-3 text-rose-600 hover:underline"
+                      >
+                        编辑
+                      </button>
+                      {row.isActive && (
                         <button
                           type="button"
-                          onClick={() => startEdit(row)}
-                          className="mr-3 text-rose-600 hover:underline"
+                          onClick={() => handleDeactivate(row)}
+                          className="text-zinc-500 hover:text-red-600"
                         >
-                          编辑
+                          停用
                         </button>
-                        {row.isActive && (
-                          <button
-                            type="button"
-                            onClick={() => handleDeactivate(row)}
-                            className="text-zinc-500 hover:text-red-600"
-                          >
-                            停用
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                      )}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </StickyTableScroll>
         </section>
 
         <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm xl:col-span-2">

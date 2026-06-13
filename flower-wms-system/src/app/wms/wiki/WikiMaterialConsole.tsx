@@ -125,17 +125,12 @@ function toPayload(
 
 const WIKI_TABLE_COL_COUNT = 7 + WIKI_CARE_ROW_SPECS.length + 1;
 
-const STICKY_NAME_HEAD =
-  "sticky left-0 z-30 border-r border-zinc-200 bg-zinc-50 px-3 py-3 font-medium shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)]";
-
-const STICKY_NAME_CELL =
-  "sticky left-0 z-20 overflow-hidden border-r border-zinc-200 bg-white px-3 py-3 shadow-[4px_0_8px_-4px_rgba(0,0,0,0.08)] group-hover:bg-zinc-50";
-
-const STICKY_ACTION_HEAD =
-  "sticky right-0 z-40 border-l border-zinc-200 bg-zinc-50 px-3 py-3 font-medium text-left shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)]";
-
-const STICKY_ACTION_CELL =
-  "sticky right-0 z-30 border-l border-zinc-200 bg-white px-3 py-3 text-right shadow-[-4px_0_8px_-4px_rgba(0,0,0,0.08)] group-hover:bg-zinc-50";
+import {
+  STICKY_LEFT_CELL as STICKY_NAME_CELL,
+  STICKY_LEFT_HEAD as STICKY_NAME_HEAD,
+  STICKY_RIGHT_CELL as STICKY_ACTION_CELL,
+  STICKY_RIGHT_HEAD as STICKY_ACTION_HEAD,
+} from "@/components/admin/sticky-table";
 
 /** 固定列宽 + 换行，防止文字溢出到相邻列（宽度由 colgroup 控制） */
 const WIKI_WRAP_CELL =

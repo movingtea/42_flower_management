@@ -1373,6 +1373,21 @@ logging:
 - 不在 system-health UI 提供一键清理
 - 磁盘满可导致 Prisma `getaddrinfo EAI_AGAIN db`、502、容器 unhealthy — 优先 `ops:disk`
 
+### Sprint 16 — CMS 关键页面布局与操作体验
+
+| 能力 | 实现 |
+|---|---|
+| SKU 卡片化 | `ProductSkuEditorCards` 替代商品编辑页 SKU 宽表；`src/lib/cms/sku-display.ts` |
+| 毛利摘要 + 折叠 | 默认展示原始成本 / 原始毛利率 / 标准损耗后毛利率；「查看损耗模拟」展开 warning / 建议售价 / 损耗表 |
+| 看板 compact card | `OrderKanbanCompactCard`；归档列仅订单号 / 金额 / 日期 / 状态；点击打开 `OrderDetailModal` |
+| 归档数量限制 | `sliceArchiveColumnOrders` 默认 20 条；`KANBAN_ARCHIVE_DISPLAY_LIMIT` |
+| 宽表 sticky | `src/components/admin/sticky-table.tsx`；左冻结主列 + 右冻结操作列 |
+| 首批页面 | 供应商、物料母表、商品列表、采购单、包装方案、Banner、推荐位 |
+| UI 规范 | `docs/ui-guidelines.md`；验收清单 `docs/sprint-16-ui-checklist.md` |
+| 测试 | `npm run test:sku-display`、`npm run test:kanban-archive` |
+
+**UI 原则（Sprint 16）：** 高频信息可见、低频信息折叠、关键操作可见；不改 SKU isActive / 订单状态机 / 库存 / OSS 等业务逻辑。
+
 ### 退款库存回填
 
 - 已支付退款**默认不回填**物理库存；`refundPaidOrder({ rollbackStock })` 由后台用户选择。

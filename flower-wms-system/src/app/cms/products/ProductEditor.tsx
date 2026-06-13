@@ -1,10 +1,9 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { RecipeSelect } from "@/components/cms/RecipeSelect";
+import { ProductSkuEditorCards } from "@/components/cms/ProductSkuEditorCards";
 import { ProductCategoryTreeSelect } from "@/components/cms/ProductCategoryTreeSelect";
 import { RichTextEditorLazy } from "@/components/cms/RichTextEditorLazy";
 import { Button } from "@/components/ui/button";
@@ -21,18 +20,8 @@ import {
 import { ProductMiniProgramPreview } from "@/components/cms/ProductMiniProgramPreview";
 import { ProductPublishReadinessPanel } from "@/components/cms/ProductPublishReadinessPanel";
 import { ProductDecisionPanel } from "@/components/product-decision/ProductDecisionPanel";
-import { formatPercent } from "@/lib/format-money";
-import {
-  CMS_IMAGE_REUPLOAD_HINT,
-  isClientImageInvalid,
-  resolveClientImagePreview,
-  uploadCmsImage,
-} from "@/lib/cms-image-upload";
-import type {
-  MarginEstimateSlice,
-  ProductMarginEstimate,
-  SkuMarginEstimate,
-} from "@/services/product-margin";
+import { uploadCmsImage } from "@/lib/cms-image-upload";
+import type { ProductMarginEstimate } from "@/services/product-margin";
 
 const SHIPPING_FEE_PATTERN = /^[0-9]+(\.[0-9]{1,2})?$/;
 const SHIPPING_FEE_ERROR_MSG =
@@ -59,12 +48,6 @@ function emptySkuRow(sortOrder = 0): ProductSkuEditorRow {
     bulkMinLeadDays: "",
     bulkPreorderMessage: "",
   };
-}
-
-function renderSkuStatusBadge(row: ProductSkuEditorRow): string | null {
-  if (row.isActive === false) return "已停用";
-  if (row.stock <= 0) return "卖光啦！";
-  return null;
 }
 
 function formatBulkPreorderPreview(row: ProductSkuEditorRow): string | null {
@@ -355,159 +338,6 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
     }
   }
 
-  function findSkuEstimate(row: ProductSkuEditorRow): SkuMarginEstimate | null {
-    if (!row.id) return null;
-    return (
-      marginEstimate?.skus.find((estimate) => estimate.skuId === row.id) ?? null
-    );
-  }
-
-  function renderLossSimulationTable(estimate: SkuMarginEstimate) {
-    const rows: Array<{
-      key: string;
-      label: string;
-      slice: MarginEstimateSlice;
-      hint: string;
-    }> = [
-      {
-        key: "optimistic",
-        label: "乐观",
-        slice: estimate.lossModelEstimates.optimistic,
-        hint: "按花材乐观可用率估算",
-      },
-      {
-        key: "standard",
-        label: "标准",
-        slice: estimate.lossModelEstimates.standard,
-        hint: "按花材默认可用率估算",
-      },
-      {
-        key: "conservative",
-        label: "保守",
-        slice: estimate.lossModelEstimates.conservative,
-        hint: "用于判断产品抗不抗损耗",
-      },
-    ];
-
-    return (
-      <details className="mt-2 rounded-lg border border-sky-100 bg-sky-50/40 p-2">
-        <summary className="cursor-pointer text-xs font-medium text-sky-900">
-          查看损耗模拟
-        </summary>
-        <p className="mt-2 text-[11px] text-sky-800">
-          原始预估：不计入损耗模型；标准模式：按花材默认可用率估算。
-        </p>
-        <table className="mt-2 w-full text-left text-[11px]">
-          <thead>
-            <tr className="text-sky-900">
-              <th className="py-1 pr-2 font-medium">模式</th>
-              <th className="py-1 pr-2 text-right font-medium">估算成本</th>
-              <th className="py-1 pr-2 text-right font-medium">毛利</th>
-              <th className="py-1 text-right font-medium">毛利率</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr className="border-t border-sky-100 text-zinc-700">
-              <td className="py-1 pr-2">原始</td>
-              <td className="py-1 pr-2 text-right">
-                ¥{estimate.rawEstimate.totalCost}
-              </td>
-              <td className="py-1 pr-2 text-right">
-                ¥{estimate.rawEstimate.estimatedGrossProfit}
-              </td>
-              <td className="py-1 text-right">
-                {formatPercent(estimate.rawEstimate.estimatedGrossMargin)}
-              </td>
-            </tr>
-            {rows.map((row) => (
-              <tr key={row.key} className="border-t border-sky-100 text-zinc-700">
-                <td className="py-1 pr-2" title={row.hint}>
-                  {row.label}
-                </td>
-                <td className="py-1 pr-2 text-right">¥{row.slice.totalCost}</td>
-                <td className="py-1 pr-2 text-right">
-                  ¥{row.slice.estimatedGrossProfit}
-                </td>
-                <td className="py-1 text-right">
-                  {formatPercent(row.slice.estimatedGrossMargin)}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </details>
-    );
-  }
-
-  function renderSkuMargin(row: ProductSkuEditorRow) {
-    if (!row.id) {
-      return <span className="text-xs text-zinc-400">保存后计算</span>;
-    }
-    if (marginLoading) {
-      return <span className="text-xs text-zinc-400">计算中…</span>;
-    }
-    const estimate = findSkuEstimate(row);
-    if (!estimate) {
-      return <span className="text-xs text-zinc-400">暂无预估</span>;
-    }
-    if (estimate.recipeId !== row.recipeId) {
-      return (
-        <span className="text-xs text-amber-700">配方已修改，保存后刷新预估</span>
-      );
-    }
-
-    const price = Number(row.price);
-    const totalCost = Number(estimate.rawEstimate.totalCost);
-    const profit = Number(estimate.rawEstimate.estimatedGrossProfit);
-    const margin = Number(estimate.rawEstimate.estimatedGrossMargin);
-    const warningText = estimate.warnings.join("；");
-
-    return (
-      <div className="min-w-48 space-y-1 text-xs">
-        <div className="flex flex-wrap items-center gap-1.5">
-          <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-zinc-700">
-            原始成本 ¥{estimate.rawEstimate.totalCost}
-          </span>
-          <span
-            className={`rounded-full px-2 py-0.5 font-medium ${
-              margin < 0.45
-                ? "bg-amber-100 text-amber-800"
-                : margin > 0.7
-                  ? "bg-violet-100 text-violet-800"
-                  : "bg-emerald-100 text-emerald-800"
-            }`}
-          >
-            原始毛利率 {formatPercent(margin)}
-          </span>
-        </div>
-        <p className="text-zinc-600">
-          花材 ¥{estimate.rawEstimate.materialCost} · 包装 ¥
-          {estimate.rawEstimate.packagingCost} · 毛利 ¥{profit}
-        </p>
-        <p className="text-zinc-500">
-          标准损耗后毛利率{" "}
-          {formatPercent(
-            estimate.lossModelEstimates.standard.estimatedGrossMargin
-          )}
-        </p>
-        <p className="text-zinc-500">
-          建议售价：
-          {estimate.suggestedPrices
-            .map((row) => `${(Number(row.targetMargin) * 100).toFixed(0)}% ¥${row.price}`)
-            .join(" / ")}
-        </p>
-        {warningText ? (
-          <p className="text-amber-700" title={warningText}>
-            ⚠ {warningText}
-          </p>
-        ) : (
-          <p className="text-emerald-700">{estimate.rawEstimate.marginLevel}</p>
-        )}
-        {renderLossSimulationTable(estimate)}
-      </div>
-    );
-  }
-
   const sidebarMeta = (
     <>
       <section className="space-y-3 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
@@ -632,211 +462,40 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
             </section>
           ) : null}
 
-          <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
-            <div className="mb-4 flex items-center justify-between">
-              <div>
-                <h3 className="text-sm font-semibold text-zinc-900">
-                  款式列表（SKU / 主图）
-                </h3>
-                <p className="mt-1 text-xs text-zinc-500">
-                  指定一个「商品卡片主图」用于小程序列表封面
-                </p>
-                {marginError ? (
-                  <p className="mt-1 text-xs text-amber-700">{marginError}</p>
-                ) : null}
-              </div>
-              <Button type="button" variant="secondary" onClick={addSkuRow}>
-                + 添加款式
-              </Button>
-            </div>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/jpeg,image/png,image/webp,image/gif"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              const index = Number(fileRef.current?.dataset.index ?? -1);
+              if (file && index >= 0) void handleSkuImageUpload(file, index);
+              e.target.value = "";
+            }}
+          />
 
-            <input
-              ref={fileRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif"
-              className="hidden"
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                const index = Number(fileRef.current?.dataset.index ?? -1);
-                if (file && index >= 0) void handleSkuImageUpload(file, index);
-                e.target.value = "";
-              }}
-            />
+          <ProductSkuEditorCards
+            skus={skus}
+            marginEstimate={marginEstimate}
+            marginLoading={marginLoading}
+            marginError={marginError}
+            uploadingIndex={uploadingIndex}
+            submitting={submitting}
+            onAddRow={addSkuRow}
+            onUpdateRow={updateSkuRow}
+            onRemoveRow={removeSkuRow}
+            onSetMainImage={setMainImage}
+            onPickImage={(index) => {
+              if (fileRef.current) {
+                fileRef.current.dataset.index = String(index);
+                fileRef.current.click();
+              }
+            }}
+          />
 
-            <div className="overflow-x-auto">
-              <table className="w-full min-w-[880px] text-left text-sm">
-                <thead className="border-b bg-zinc-50 text-zinc-600">
-                  <tr>
-                    <th className="px-3 py-2 font-medium">款式品名</th>
-                    <th className="px-3 py-2 font-medium">大仓配方</th>
-                    <th className="px-3 py-2 font-medium">价格</th>
-                    <th className="px-3 py-2 font-medium">毛利预估</th>
-                    <th className="px-3 py-2 font-medium">库存</th>
-                    <th className="px-3 py-2 font-medium">款式图</th>
-                    <th className="px-3 py-2 font-medium">主图</th>
-                    <th className="px-3 py-2 font-medium">状态</th>
-                    <th className="px-3 py-2 font-medium">启用</th>
-                    <th className="px-3 py-2 font-medium">操作</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y">
-                  {skus.map((row, index) => (
-                    <tr key={row.id ?? `new-${index}`} className="align-top">
-                      <td className="px-3 py-3">
-                        <input
-                          className="w-full rounded-lg border border-zinc-200 px-2 py-1.5"
-                          value={row.specName}
-                          onChange={(e) =>
-                            updateSkuRow(index, { specName: e.target.value })
-                          }
-                          placeholder="如：标准款"
-                        />
-                        {row.skuCode ? (
-                          <p className="mt-1 text-xs text-zinc-400">
-                            编码：{row.skuCode}
-                          </p>
-                        ) : null}
-                      </td>
-                      <td className="px-3 py-3">
-                        <RecipeSelect
-                          value={row.recipeId}
-                          onChange={(recipeId) =>
-                            updateSkuRow(index, { recipeId })
-                          }
-                          disabled={submitting}
-                          compact
-                        />
-                      </td>
-                      <td className="px-3 py-3">
-                        <input
-                          type="number"
-                          min={0}
-                          step={0.01}
-                          className="w-24 rounded-lg border border-zinc-200 px-2 py-1.5"
-                          value={row.price}
-                          onChange={(e) =>
-                            updateSkuRow(index, { price: e.target.value })
-                          }
-                        />
-                      </td>
-                      <td className="px-3 py-3">{renderSkuMargin(row)}</td>
-                      <td className="px-3 py-3">
-                        <input
-                          type="number"
-                          min={0}
-                          step={1}
-                          className="w-20 rounded-lg border border-zinc-200 px-2 py-1.5"
-                          value={row.stock}
-                          onChange={(e) =>
-                            updateSkuRow(index, {
-                              stock: Number(e.target.value),
-                            })
-                          }
-                        />
-                      </td>
-                      <td className="px-3 py-3">
-                        <div className="flex items-center gap-2">
-                          {row.imageUrl ? (
-                            isClientImageInvalid(row.imageUrl) ? (
-                              <span className="text-xs text-amber-700">
-                                {CMS_IMAGE_REUPLOAD_HINT}
-                              </span>
-                            ) : resolveClientImagePreview(row.imageUrl) ? (
-                            <div className="relative h-14 w-14 overflow-hidden rounded-lg border">
-                              <Image
-                                src={resolveClientImagePreview(row.imageUrl)!}
-                                alt="款式图"
-                                fill
-                                className="object-cover"
-                                unoptimized
-                              />
-                            </div>
-                            ) : (
-                              <span className="text-xs text-zinc-400">未上传</span>
-                            )
-                          ) : (
-                            <span className="text-xs text-zinc-400">未上传</span>
-                          )}
-                          <Button
-                            type="button"
-                            variant="secondary"
-                            disabled={uploadingIndex === index}
-                            onClick={() => {
-                              if (fileRef.current) {
-                                fileRef.current.dataset.index = String(index);
-                                fileRef.current.click();
-                              }
-                            }}
-                          >
-                            {uploadingIndex === index ? "上传中…" : "上传"}
-                          </Button>
-                        </div>
-                      </td>
-                      <td className="px-3 py-3">
-                        <label className="inline-flex cursor-pointer items-center gap-2">
-                          <input
-                            type="radio"
-                            name="mainImageSku"
-                            checked={row.isMainImage}
-                            onChange={() => setMainImage(index)}
-                            className="accent-rose-600"
-                          />
-                          <span className="text-xs text-zinc-600">主图</span>
-                        </label>
-                      </td>
-                      <td className="px-3 py-3">
-                        {(() => {
-                          const badge = renderSkuStatusBadge(row);
-                          if (!badge) {
-                            return (
-                              <span className="text-xs text-emerald-700">
-                                可售
-                              </span>
-                            );
-                          }
-                          return (
-                            <span
-                              className={`text-xs font-medium ${
-                                row.isActive === false
-                                  ? "text-zinc-500"
-                                  : "text-amber-700"
-                              }`}
-                            >
-                              {badge}
-                            </span>
-                          );
-                        })()}
-                      </td>
-                      <td className="px-3 py-3">
-                        <div className="space-y-1">
-                          <Switch
-                            label="启用该规格"
-                            checked={row.isActive !== false}
-                            onChange={(checked) =>
-                              updateSkuRow(index, { isActive: checked })
-                            }
-                          />
-                          <p className="max-w-40 text-xs text-zinc-500">
-                            关闭后，该规格不会在小程序展示，也不能被加入购物车或下单。
-                          </p>
-                        </div>
-                      </td>
-                      <td className="px-3 py-3">
-                        <button
-                          type="button"
-                          onClick={() => removeSkuRow(index)}
-                          className="text-sm text-red-600 hover:text-red-800"
-                        >
-                          删除
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="mt-6 space-y-3">
+          <section className="mt-6 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+            <div className="space-y-3">
               <h4 className="text-sm font-semibold text-zinc-900">
                 履约与预订规则（SKU 高级设置）
               </h4>
