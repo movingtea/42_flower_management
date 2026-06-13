@@ -496,6 +496,17 @@ npm run test:sku-display
 npm run test:kanban-archive
 ```
 
+### 10.7 后台表单与图片预览（Sprint 17）
+
+- 数字输入：使用 `NumberInput` / `DecimalStringInput`，勿在 `onChange` 中 `Number('') → 0`。
+- 图片：DB 存 objectKey；CMS 预览用 `NEXT_PUBLIC_OSS_PUBLIC_BASE_URL`；详见 [`docs/ui-guidelines.md`](docs/ui-guidelines.md)。
+
+```bash
+npm run test:number-input
+npm run test:client-image-preview
+npm run smoke:cms-product-preview
+```
+
 ## 11. 测试 / Smoke Scripts
 
 **业务规则源文件**：`docs/business-rules.md`（Sprint 12 起为规则真理源；Sprint 13 补齐 `ProductSku.isActive` 语义）。

@@ -1,8 +1,3 @@
-import {
-  CMS_IMAGE_REUPLOAD_HINT,
-  isClientImageInvalid,
-  resolveClientImagePreview,
-} from "@/lib/client-image-preview";
 import type { UploadModule } from "@/lib/storage/object-key";
 
 export type CmsImageUploadResult = {
@@ -10,7 +5,13 @@ export type CmsImageUploadResult = {
   previewUrl: string;
 };
 
-export { CMS_IMAGE_REUPLOAD_HINT, isClientImageInvalid, resolveClientImagePreview };
+export {
+  CMS_IMAGE_INVALID_LOAD_HINT,
+  CMS_IMAGE_REUPLOAD_HINT,
+  getClientPreviewImageUrl,
+  isClientImageInvalid,
+  resolveClientImagePreview,
+} from "@/lib/client-image-preview";
 
 type UploadApiResponse = {
   success: boolean;

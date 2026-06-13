@@ -38,8 +38,7 @@ export function QuantityStepper({
   function commitDraft(raw: string) {
     const trimmed = raw.trim();
     if (trimmed === "" || trimmed === "-" || trimmed === ".") {
-      onChange(min);
-      setDraft(String(min));
+      setDraft(String(value));
       return;
     }
     const parsed = Number(trimmed);

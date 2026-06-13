@@ -1388,6 +1388,20 @@ logging:
 
 **UI 原则（Sprint 16）：** 高频信息可见、低频信息折叠、关键操作可见；不改 SKU isActive / 订单状态机 / 库存 / OSS 等业务逻辑。
 
+### Sprint 17 — 后台表单与图片预览体验
+
+| 能力 | 实现 |
+|---|---|
+| 数字输入 UX | `NumberInput` / `DecimalStringInput` / `IntegerStringInput`；输入阶段允许空字符串，blur / submit 校验 |
+| 覆盖范围 | SKU 库存 / 价格、Banner / 推荐位 / 场景入口 sortOrder、配送 dailyOrderLimit、大批量预订阈值等 |
+| 客户端图片预览 | `getClientPreviewImageUrl`（`client-image-preview.ts`）；`CmsImagePreview` 统一占位与 onError |
+| 小程序卡片预览 | `ProductMiniProgramPreview` 将 objectKey 转为 OSS public URL，不再直接用作 `img src` |
+| 存储规则不变 | DB 仍存 objectKey；`normalizeStoredImagePath` 写入；API / 预览层 `toPublicImageUrl` |
+| 无效图片 | localhost / `/uploads` → 提示「图片需要重新上传」；加载失败 → 「图片加载失败，请重新上传」 |
+| 测试 / smoke | `test:number-input`、`test:client-image-preview`、`smoke:cms-product-preview` |
+
+**前端预览 env：** `NEXT_PUBLIC_OSS_PUBLIC_BASE_URL` + `NEXT_PUBLIC_OSS_OBJECT_PREFIX`（不含 AccessKey）。
+
 ### 退款库存回填
 
 - 已支付退款**默认不回填**物理库存；`refundPaidOrder({ rollbackStock })` 由后台用户选择。

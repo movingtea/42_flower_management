@@ -1,11 +1,15 @@
 "use client";
 
-import Image from "next/image";
 import {
   getCmsProductTagLabel,
   toTagDisplayList,
 } from "@/lib/cms-product-tags";
 import type { ProductOperationTagsValue } from "@/components/cms/ProductOperationTagsEditor";
+import { CmsImagePreview } from "@/components/cms/CmsImagePreview";
+import {
+  getClientPreviewImageUrl,
+  isClientImageInvalid,
+} from "@/lib/client-image-preview";
 
 type SkuPreview = {
   specName: string;
@@ -26,6 +30,22 @@ function stripHtml(html: string): string {
   return html.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
 }
 
+function pickCoverSku(skus: SkuPreview[]): SkuPreview | undefined {
+  const withImage = (s: SkuPreview) => {
+    const url = s.imageUrl?.trim();
+    if (!url) return false;
+    if (isClientImageInvalid(url)) return false;
+    return Boolean(getClientPreviewImageUrl(url));
+  };
+
+  return (
+    skus.find((s) => s.isMainImage && withImage(s)) ??
+    skus.find(withImage) ??
+    skus.find((s) => s.isMainImage) ??
+    skus[0]
+  );
+}
+
 export function ProductMiniProgramPreview({
   name,
   description,
@@ -33,12 +53,11 @@ export function ProductMiniProgramPreview({
   tags,
   skus,
 }: Props) {
-  const mainSku =
-    skus.find((s) => s.isMainImage && s.imageUrl) ??
-    skus.find((s) => s.imageUrl) ??
-    skus[0];
+  const mainSku = pickCoverSku(skus);
+  const storedCover = mainSku?.imageUrl?.trim() ?? "";
+  const coverPreview = getClientPreviewImageUrl(storedCover);
+  const coverInvalid = storedCover ? isClientImageInvalid(storedCover) : false;
 
-  const cover = mainSku?.imageUrl?.trim() ?? "";
   const prices = skus
     .map((s) => Number(s.price))
     .filter((n) => Number.isFinite(n) && n > 0);
@@ -66,12 +85,16 @@ export function ProductMiniProgramPreview({
   const story = stripHtml(maintenanceGuide || description);
   const hints: string[] = [];
   if (name.length > 18) hints.push("商品名较长，可能影响小程序列表展示。");
-  if (
-    tags.occasionTags.length + tags.positioningTags.length > 4
-  ) {
+  if (tags.occasionTags.length + tags.positioningTags.length > 4) {
     hints.push("标签较多，前台建议只展示前 2–3 个。");
   }
-  if (!cover) hints.push("缺少主图，小程序将显示占位。");
+  if (!coverPreview) {
+    hints.push(
+      coverInvalid
+        ? "主图无效（localhost / 旧 uploads），小程序需重新上传。"
+        : "缺少主图，小程序将显示占位。"
+    );
+  }
 
   return (
     <div className="space-y-4">
@@ -81,14 +104,8 @@ export function ProductMiniProgramPreview({
         </p>
         <div className="mx-auto max-w-xs overflow-hidden rounded-2xl border border-zinc-100 bg-white shadow-sm">
           <div className="relative aspect-[4/5] bg-zinc-100">
-            {cover ? (
-              <Image
-                src={cover}
-                alt={name}
-                fill
-                className="object-cover"
-                unoptimized
-              />
+            {storedCover ? (
+              <CmsImagePreview stored={storedCover} alt={name} fill />
             ) : (
               <div className="flex h-full items-center justify-center text-sm text-zinc-400">
                 暂无主图

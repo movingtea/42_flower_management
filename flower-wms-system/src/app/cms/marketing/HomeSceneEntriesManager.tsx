@@ -7,6 +7,7 @@ import type { RecommendationSlotPickerItem } from "@/components/cms/pickers/type
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/NumberInput";
 import { Switch } from "@/components/ui/Switch";
 import {
   CMS_HOME_SCENE_ICON_KEYS,
@@ -485,20 +486,19 @@ export function HomeSceneEntriesManager() {
                 </p>
               </label>
 
-              <label className="block space-y-1 text-sm">
-                <span className="font-medium text-zinc-700">排序</span>
-                <Input
-                  type="number"
-                  value={String(form.sortOrder)}
-                  onChange={(e) =>
-                    setForm((prev) => ({
-                      ...prev,
-                      sortOrder: Number(e.target.value) || 0,
-                    }))
+              <NumberInput
+                label="排序"
+                integerOnly
+                min={0}
+                allowEmpty
+                value={form.sortOrder}
+                onChange={(sortOrder) => {
+                  if (sortOrder != null) {
+                    setForm((prev) => ({ ...prev, sortOrder }));
                   }
-                />
-                <p className="text-xs text-zinc-500">数值越小越靠前</p>
-              </label>
+                }}
+              />
+              <p className="text-xs text-zinc-500">数值越小越靠前</p>
 
               <div className="flex items-center justify-between rounded-lg border border-zinc-200 px-3 py-2">
                 <span className="text-sm font-medium text-zinc-700">启用</span>

@@ -8,6 +8,7 @@ import { ProductCategoryTreeSelect } from "@/components/cms/ProductCategoryTreeS
 import { RichTextEditorLazy } from "@/components/cms/RichTextEditorLazy";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { IntegerStringInput } from "@/components/ui/NumberInput";
 import { Switch } from "@/components/ui/Switch";
 import type {
   ProductEditorProps,
@@ -240,7 +241,7 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
         showToast(`第 ${i + 1} 行价格无效`, "error");
         return;
       }
-      if (!Number.isInteger(row.stock) || row.stock < 0) {
+      if (row.stock == null || !Number.isInteger(row.stock) || row.stock < 0) {
         showToast(`第 ${i + 1} 行库存须为非负整数`, "error");
         return;
       }
@@ -285,7 +286,7 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
         skuCode: row.skuCode,
         specName: row.specName.trim(),
         price: Number(row.price),
-        stock: row.stock,
+        stock: row.stock ?? 0,
         imageUrl: row.imageUrl.trim() || null,
         isMainImage: row.isMainImage,
         sortOrder: row.sortOrder ?? index * 10,
@@ -524,29 +525,19 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
                       }
                     />
                     <div className="grid gap-4 sm:grid-cols-2">
-                      <Input
+                      <IntegerStringInput
                         label="大批量阈值"
-                        type="number"
-                        min={1}
-                        step={1}
-                        value={row.bulkOrderThreshold}
-                        onChange={(e) =>
-                          updateSkuRow(index, {
-                            bulkOrderThreshold: e.target.value,
-                          })
+                        value={row.bulkOrderThreshold ?? ""}
+                        onChange={(bulkOrderThreshold) =>
+                          updateSkuRow(index, { bulkOrderThreshold })
                         }
                         placeholder="如：3"
                       />
-                      <Input
+                      <IntegerStringInput
                         label="最小提前天数"
-                        type="number"
-                        min={1}
-                        step={1}
-                        value={row.bulkMinLeadDays}
-                        onChange={(e) =>
-                          updateSkuRow(index, {
-                            bulkMinLeadDays: e.target.value,
-                          })
+                        value={row.bulkMinLeadDays ?? ""}
+                        onChange={(bulkMinLeadDays) =>
+                          updateSkuRow(index, { bulkMinLeadDays })
                         }
                         placeholder="如：1 表示不能当天送达"
                       />

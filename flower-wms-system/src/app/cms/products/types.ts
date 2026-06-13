@@ -3,7 +3,7 @@ export type ProductSkuEditorRow = {
   skuCode?: string;
   specName: string;
   price: string;
-  stock: number;
+  stock: number | null;
   imageUrl: string;
   isMainImage: boolean;
   isActive: boolean;

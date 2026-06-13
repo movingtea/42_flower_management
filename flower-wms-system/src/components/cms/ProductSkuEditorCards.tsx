@@ -1,16 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { useState } from "react";
 import type { ProductSkuEditorRow } from "@/app/cms/products/types";
 import { RecipeSelect } from "@/components/cms/RecipeSelect";
+import { CmsImagePreview } from "@/components/cms/CmsImagePreview";
 import { Button } from "@/components/ui/button";
+import { DecimalStringInput, NumberInput } from "@/components/ui/NumberInput";
 import { Switch } from "@/components/ui/Switch";
-import {
-  CMS_IMAGE_REUPLOAD_HINT,
-  isClientImageInvalid,
-  resolveClientImagePreview,
-} from "@/lib/cms-image-upload";
 import {
   getSkuDisplayStatus,
   getSkuStatusBadgeLabel,
@@ -245,7 +241,10 @@ export function ProductSkuEditorCards({
       <div className="space-y-4">
         {skus.map((row, index) => {
           const rowKey = row.id ?? `new-${index}`;
-          const displayStatus = getSkuDisplayStatus(row);
+          const displayStatus = getSkuDisplayStatus({
+            isActive: row.isActive,
+            stock: row.stock ?? 0,
+          });
           const badgeLabel = getSkuStatusBadgeLabel(displayStatus);
           const estimate = findSkuEstimate(row, marginEstimate);
           const lossExpanded = Boolean(expandedLoss[rowKey]);
@@ -299,25 +298,12 @@ export function ProductSkuEditorCards({
                 <div className="space-y-2">
                   <p className="text-xs font-medium text-zinc-600">款式图</p>
                   <div className="relative mx-auto h-28 w-28 overflow-hidden rounded-lg border border-zinc-200 bg-white lg:mx-0">
-                    {row.imageUrl &&
-                    !isClientImageInvalid(row.imageUrl) &&
-                    resolveClientImagePreview(row.imageUrl) ? (
-                      <Image
-                        src={resolveClientImagePreview(row.imageUrl)!}
-                        alt="款式图"
-                        fill
-                        className="object-cover"
-                        unoptimized
-                      />
-                    ) : row.imageUrl && isClientImageInvalid(row.imageUrl) ? (
-                      <span className="flex h-full items-center justify-center p-2 text-center text-[10px] text-amber-700">
-                        {CMS_IMAGE_REUPLOAD_HINT}
-                      </span>
-                    ) : (
-                      <span className="flex h-full items-center justify-center text-xs text-zinc-400">
-                        未上传
-                      </span>
-                    )}
+                    <CmsImagePreview
+                      stored={row.imageUrl}
+                      alt="款式图"
+                      fill
+                      compact
+                    />
                   </div>
                   <Button
                     type="button"
@@ -342,33 +328,21 @@ export function ProductSkuEditorCards({
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-zinc-600">
-                      价格（元）
-                    </label>
-                    <input
-                      type="number"
-                      min={0}
-                      step={0.01}
-                      className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+                    <DecimalStringInput
+                      label="价格（元）"
                       value={row.price}
-                      onChange={(e) =>
-                        onUpdateRow(index, { price: e.target.value })
-                      }
+                      onChange={(price) => onUpdateRow(index, { price })}
+                      placeholder="0.00"
                     />
                   </div>
                   <div>
-                    <label className="mb-1 block text-xs font-medium text-zinc-600">
-                      库存
-                    </label>
-                    <input
-                      type="number"
+                    <NumberInput
+                      label="库存"
+                      integerOnly
                       min={0}
-                      step={1}
-                      className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm"
+                      allowEmpty
                       value={row.stock}
-                      onChange={(e) =>
-                        onUpdateRow(index, { stock: Number(e.target.value) })
-                      }
+                      onChange={(stock) => onUpdateRow(index, { stock })}
                     />
                   </div>
                   <div className="flex items-end">

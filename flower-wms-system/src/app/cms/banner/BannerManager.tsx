@@ -6,6 +6,7 @@ import { CmsLinkTargetSelector } from "@/components/cms/pickers/CmsLinkTargetSel
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/NumberInput";
 import { Switch } from "@/components/ui/Switch";
 import {
   CMS_IMAGE_REUPLOAD_HINT,
@@ -449,13 +450,18 @@ export function BannerManager() {
                     </div>
                   </td>
                   <td className={STICKY_SCROLL_CELL}>
-                    <input
-                      type="number"
-                      className="w-20 rounded-lg border border-zinc-200 px-2 py-1"
+                    <NumberInput
+                      integerOnly
+                      min={0}
+                      allowEmpty
+                      commitOnBlur
                       value={item.sortOrder}
-                      onChange={(e) =>
-                        void handleSortChange(item, Number(e.target.value))
-                      }
+                      onChange={(sortOrder) => {
+                        if (sortOrder != null) {
+                          void handleSortChange(item, sortOrder);
+                        }
+                      }}
+                      inputClassName="w-20 px-2 py-1 text-sm"
                     />
                     <p className="mt-0.5 text-xs text-zinc-400">越小越靠前</p>
                   </td>
@@ -584,16 +590,17 @@ export function BannerManager() {
                 )}
               </div>
 
-              <Input
+              <NumberInput
                 label="排序权重"
-                type="number"
-                value={String(form.sortOrder)}
-                onChange={(e) =>
-                  setForm((d) => ({
-                    ...d,
-                    sortOrder: Number(e.target.value) || 0,
-                  }))
-                }
+                integerOnly
+                min={0}
+                allowEmpty
+                value={form.sortOrder}
+                onChange={(sortOrder) => {
+                  if (sortOrder != null) {
+                    setForm((d) => ({ ...d, sortOrder }));
+                  }
+                }}
               />
               <p className="-mt-2 text-xs text-zinc-500">数值越小越靠前</p>
 

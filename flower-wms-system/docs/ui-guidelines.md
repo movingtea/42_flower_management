@@ -49,3 +49,34 @@
 - SKU 卡片使用响应式 grid，小屏单列堆叠。
 - 宽表允许横向滚动；sticky 列在小屏仍保持可见。
 - 看板列宽使用 `min(100%, 17.5rem)`，紧凑卡片保持可点区域。
+
+## 数字输入（Sprint 17 起）
+
+组件：`src/components/ui/NumberInput.tsx`
+
+- **NumberInput**：受控 `number | null`；内部 `draft` 字符串；输入阶段允许空值。
+- **DecimalStringInput / IntegerStringInput**：表单字段存 `string`（如 price、bulkOrderThreshold）。
+- **禁止** `onChange={(e) => setValue(Number(e.target.value))}` — 空字符串会变成 `0`。
+- 整数 / 库存 / 排序：`integerOnly` + `min={0}`；金额：`DecimalStringInput` 或 `allowDecimal`。
+- 可选字段：`allowEmpty` + 保存时 `value ?? null`；必填字段 submit 时校验。
+- 表格内联保存：`commitOnBlur` 仅在 blur 时通知父组件。
+
+## 图片字段存储与展示（Sprint 17 起）
+
+| 层 | 规则 |
+|----|------|
+| 数据库 | 存 OSS **objectKey**（如 `universe42/products/sku/...webp`） |
+| CMS 客户端预览 | `getClientPreviewImageUrl(stored)` → `https://oss.universe42.studio/...` |
+| 服务端 API | `toPublicImageUrl` / `imageUrlFormatter` |
+| 无效 | `localhost`、`/uploads`（`ENABLE_LEGACY_UPLOADS=false`）→ 提示重新上传 |
+
+- 组件：`CmsImagePreview` 统一占位、onError fallback。
+- 前端 env：`NEXT_PUBLIC_OSS_PUBLIC_BASE_URL`（**不要**暴露 AccessKey）。
+- 保存：`normalizeStoredImagePath` 将 public URL 还原为 objectKey；拒绝 localhost。
+
+### CMS 预览异常排查
+
+1. 确认 `.env` 中 `NEXT_PUBLIC_OSS_PUBLIC_BASE_URL=https://oss.universe42.studio`。
+2. 数据库字段应为 objectKey，不是完整 URL。
+3. 若仍显示「图片需要重新上传」，字段可能是旧 `/uploads` 或 localhost 路径。
+4. 小程序卡片预览见 `ProductMiniProgramPreview` + `CmsImagePreview`。

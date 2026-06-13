@@ -10,6 +10,7 @@ import { RecommendationWarnings } from "@/components/cms/RecommendationWarnings"
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/NumberInput";
 import {
   generateRecommendationSlotKey,
   validateCmsKey,
@@ -111,8 +112,8 @@ export function RecommendationSlotsManager() {
     slotType: "HOME_MAIN",
     sceneType: "",
     isActive: true,
-    sortOrder: 0,
-    maxItems: 10,
+    sortOrder: 0 as number | null,
+    maxItems: 10 as number | null,
   });
   const [addOpen, setAddOpen] = useState(false);
   const [addForm, setAddForm] = useState({
@@ -121,7 +122,7 @@ export function RecommendationSlotsManager() {
     titleOverride: "",
     subtitleOverride: "",
     imageOverride: "",
-    sortOrder: 0,
+    sortOrder: 0 as number | null,
     isActive: true,
     startAt: "",
     endAt: "",
@@ -236,7 +237,7 @@ export function RecommendationSlotsManager() {
       showToast("该 key 已被使用，请更换。");
       return;
     }
-    if (form.maxItems <= 0) {
+    if (form.maxItems == null || form.maxItems <= 0) {
       showToast("最大商品数须大于 0");
       return;
     }
@@ -248,8 +249,8 @@ export function RecommendationSlotsManager() {
       slotType: form.slotType,
       sceneType: form.sceneType.trim() || null,
       isActive: form.isActive,
-      sortOrder: Number(form.sortOrder) || 0,
-      maxItems: Number(form.maxItems) || 10,
+      sortOrder: form.sortOrder ?? 0,
+      maxItems: form.maxItems,
     };
 
     const url =
@@ -658,8 +659,30 @@ export function RecommendationSlotsManager() {
               </select>
             </label>
             <div className="grid grid-cols-2 gap-3">
-              <Input label="排序" type="number" value={String(form.sortOrder)} onChange={(e) => setForm({ ...form, sortOrder: Number(e.target.value) })} />
-              <Input label="最大商品数" type="number" value={String(form.maxItems)} onChange={(e) => setForm({ ...form, maxItems: Number(e.target.value) })} />
+              <NumberInput
+                label="排序"
+                integerOnly
+                min={0}
+                allowEmpty
+                value={form.sortOrder}
+                onChange={(sortOrder) => {
+                  if (sortOrder != null) {
+                    setForm({ ...form, sortOrder });
+                  }
+                }}
+              />
+              <NumberInput
+                label="最大商品数"
+                integerOnly
+                min={1}
+                allowEmpty
+                value={form.maxItems}
+                onChange={(maxItems) => {
+                  if (maxItems != null) {
+                    setForm({ ...form, maxItems });
+                  }
+                }}
+              />
             </div>
             <label className="flex items-center gap-2 text-sm">
               <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
@@ -692,7 +715,18 @@ export function RecommendationSlotsManager() {
             <Input label="覆盖标题" value={addForm.titleOverride} onChange={(e) => setAddForm({ ...addForm, titleOverride: e.target.value })} />
             <Input label="覆盖副标题" value={addForm.subtitleOverride} onChange={(e) => setAddForm({ ...addForm, subtitleOverride: e.target.value })} />
             <Input label="覆盖图片 URL" value={addForm.imageOverride} onChange={(e) => setAddForm({ ...addForm, imageOverride: e.target.value })} />
-            <Input label="排序" type="number" value={String(addForm.sortOrder)} onChange={(e) => setAddForm({ ...addForm, sortOrder: Number(e.target.value) })} />
+            <NumberInput
+              label="排序"
+              integerOnly
+              min={0}
+              allowEmpty
+              value={addForm.sortOrder}
+              onChange={(sortOrder) => {
+                if (sortOrder != null) {
+                  setAddForm({ ...addForm, sortOrder });
+                }
+              }}
+            />
             <div className="grid grid-cols-2 gap-3">
               <Input label="生效开始" type="datetime-local" value={addForm.startAt} onChange={(e) => setAddForm({ ...addForm, startAt: e.target.value })} />
               <Input label="生效结束" type="datetime-local" value={addForm.endAt} onChange={(e) => setAddForm({ ...addForm, endAt: e.target.value })} />

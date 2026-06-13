@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { NumberInput } from "@/components/ui/NumberInput";
 import { Switch } from "@/components/ui/Switch";
 import type { StoreDeliverySettings } from "@/lib/store-delivery-settings";
 
@@ -196,19 +197,15 @@ export function DeliverySettingsPanel({ onSaved }: Props) {
             />
           </label>
 
-          <Input
+          <NumberInput
             label="每日可承接订单数量上限（可选）"
-            type="number"
-            value={
-              form.dailyOrderLimit != null ? String(form.dailyOrderLimit) : ""
+            integerOnly
+            min={1}
+            allowEmpty
+            value={form.dailyOrderLimit}
+            onChange={(dailyOrderLimit) =>
+              setForm((f) => ({ ...f, dailyOrderLimit }))
             }
-            onChange={(e) => {
-              const raw = e.target.value.trim();
-              setForm((f) => ({
-                ...f,
-                dailyOrderLimit: raw ? Number(raw) : null,
-              }));
-            }}
             placeholder="留空表示不限制"
           />
           <p className="-mt-3 text-xs text-amber-700">
