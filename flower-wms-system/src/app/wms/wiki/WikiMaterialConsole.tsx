@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useDeferredEffect } from "@/lib/defer-effect";
 import { WikiCareTable } from "@/components/wiki/WikiCareTable";
-import { WikiMaterialDetailModal } from "@/components/wiki/WikiMaterialDetailModal";
+import { WikiMaterialDetailDrawer } from "@/components/wiki/WikiMaterialDetailModal";
+import { AdminDrawer } from "@/components/admin/AdminDrawer";
+import { DrawerFooterActions } from "@/components/admin/DrawerFooterActions";
 import { WikiTableTruncatedText } from "@/components/wiki/WikiTableTruncatedText";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -131,6 +133,7 @@ import {
   STICKY_LEFT_HEAD as STICKY_NAME_HEAD,
   STICKY_RIGHT_CELL as STICKY_ACTION_CELL,
   STICKY_RIGHT_HEAD as STICKY_ACTION_HEAD,
+  STICKY_TABLE_ROW,
 } from "@/components/admin/sticky-table";
 
 /** 固定列宽 + 换行，防止文字溢出到相邻列（宽度由 colgroup 控制） */
@@ -574,7 +577,7 @@ export function WikiMaterialConsole() {
               items.map((item) => (
                 <tr
                   key={item.id}
-                  className="group border-t border-zinc-100 bg-white hover:bg-zinc-50"
+                  className={`${STICKY_TABLE_ROW} border-t border-zinc-100`}
                 >
                   <td className={`${STICKY_NAME_CELL} align-top`}>
                     <button
@@ -673,25 +676,36 @@ export function WikiMaterialConsole() {
         </div>
       )}
 
-      {viewItem && (
-        <WikiMaterialDetailModal
+      {viewItem ? (
+        <WikiMaterialDetailDrawer
           item={viewItem}
-          onClose={closeView}
+          open={Boolean(viewItem)}
+          onOpenChange={(open) => {
+            if (!open) closeView();
+          }}
           onEdit={() => openEditFromView(viewItem)}
         />
-      )}
+      ) : null}
 
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="flex max-h-[min(90vh,760px)] w-full max-w-2xl flex-col rounded-2xl bg-white shadow-xl">
-            <div className="border-b border-zinc-100 px-6 py-4">
-              <h2 className="text-lg font-semibold text-zinc-900">
-                {editingId ? "编辑物料" : "新增物料"}
-              </h2>
-            </div>
-
-            <div className="flex-1 overflow-y-auto px-6 py-4">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <AdminDrawer
+        open={modalOpen}
+        onOpenChange={(open) => {
+          if (!open) closeModal();
+        }}
+        title={editingId ? "编辑物料" : "新增物料"}
+        size="lg"
+        closeOnOverlayClick={false}
+        bodyClassName="space-y-3"
+        footer={
+          <DrawerFooterActions
+            onCancel={closeModal}
+            onConfirm={() => void handleSubmit()}
+            confirmLoading={saving}
+            confirmDisabled={aiLoading}
+          />
+        }
+      >
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                 <div className="sm:col-span-2">
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-end">
                     <div className="min-w-0 flex-1">
@@ -929,23 +943,7 @@ export function WikiMaterialConsole() {
                   )}
                 </div>
               </div>
-            </div>
-
-            <div className="flex justify-end gap-2 border-t border-zinc-100 px-6 py-4">
-              <Button type="button" variant="secondary" onClick={closeModal}>
-                取消
-              </Button>
-              <Button
-                type="button"
-                disabled={saving || aiLoading}
-                onClick={() => void handleSubmit()}
-              >
-                {saving ? "保存中…" : "保存"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      )}
+      </AdminDrawer>
 
       {toast && (
         <div

@@ -18,6 +18,10 @@ import {
   type StockSummary,
 } from "@/services/miniprogram-stock-pure";
 import {
+  formatMiniprogramSpecLabel,
+  shouldShowMiniprogramSpecSelector,
+} from "@/lib/cms/single-spec-product";
+import {
   resolveSkuPreorderRule,
   type ResolvedPreorderRule,
 } from "@/services/preorder-rule-pure";
@@ -33,6 +37,8 @@ export type WechatProductSkuItem = {
   id: string;
   skuCode: string;
   specName: string;
+  /** 小程序 UI 展示用；单 SKU 商品为空字符串 */
+  displaySpecName: string;
   price: string;
   stock: number;
   hasStock: boolean;
@@ -75,6 +81,8 @@ export type WechatProductListItem = {
   sellPrice: string;
   priceSuffix: string;
   skuCount: number;
+  /** 是否展示款式选择器（仅多 SKU） */
+  showSpecSelector: boolean;
   hasBulkPreorderRule: boolean;
   isOutOfStock: boolean;
   stockSummary: StockSummary;
@@ -152,6 +160,10 @@ export function mapSpuToWechatListItem(
       id: s.id,
       skuCode: s.skuCode,
       specName: s.specName,
+      displaySpecName: formatMiniprogramSpecLabel(
+        s.specName,
+        activeSkuRecords.length
+      ),
       price: s.price.toString(),
       stock: stockFlags.stock,
       hasStock: stockFlags.hasStock,
@@ -191,6 +203,7 @@ export function mapSpuToWechatListItem(
     sellPrice: displayPrice,
     priceSuffix,
     skuCount: skus.length,
+    showSpecSelector: shouldShowMiniprogramSpecSelector(skus.length),
     hasBulkPreorderRule,
     isOutOfStock: isSpuOutOfStock(activeSkuRecords),
     stockSummary,

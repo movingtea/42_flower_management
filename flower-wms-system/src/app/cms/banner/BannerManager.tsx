@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useCallback, useRef, useState } from "react";
 import { CmsLinkTargetSelector } from "@/components/cms/pickers/CmsLinkTargetSelector";
+import { AdminDrawer } from "@/components/admin/AdminDrawer";
+import { DrawerFooterActions } from "@/components/admin/DrawerFooterActions";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +33,8 @@ import {
   STICKY_RIGHT_HEAD,
   STICKY_SCROLL_CELL,
   STICKY_SCROLL_HEAD,
+  STICKY_ACTIONS,
+  STICKY_TABLE_ROW,
   StickyTableScroll,
 } from "@/components/admin/sticky-table";
 
@@ -220,7 +224,7 @@ export function BannerManager() {
 
   async function handleSave() {
     if (!form.imageUrl.trim()) {
-      showToast("请上传轮播海报");
+      showToast("请上传轮播图");
       return;
     }
     if (isClientImageInvalid(form.imageUrl)) {
@@ -359,7 +363,7 @@ export function BannerManager() {
         <div>
           <h2 className="text-2xl font-semibold text-rose-900">首页轮播图</h2>
           <p className="mt-1 text-sm text-zinc-500">
-            配置小程序首页顶部轮播海报与点击跳转；停用后前台不再展示。
+            配置小程序首页顶部轮播图与点击跳转；停用后前台不再展示。
           </p>
         </div>
         <Button type="button" onClick={openCreate}>
@@ -409,18 +413,18 @@ export function BannerManager() {
             </colgroup>
             <thead className="border-b bg-zinc-50">
               <tr>
-                <th className={STICKY_LEFT_HEAD}>海报</th>
+                <th className={STICKY_LEFT_HEAD}>轮播图</th>
                 <th className={STICKY_SCROLL_HEAD}>排序</th>
                 <th className={STICKY_SCROLL_HEAD}>跳转目标</th>
                 <th className={STICKY_SCROLL_HEAD}>展示状态</th>
                 <th className={STICKY_SCROLL_HEAD}>有效期</th>
                 <th className={STICKY_SCROLL_HEAD}>更新时间</th>
-                <th className={`${STICKY_RIGHT_HEAD} min-w-[8rem] w-32`}>操作</th>
+                <th className={STICKY_RIGHT_HEAD}>操作</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {banners.map((item) => (
-                <tr key={item.id} className="group hover:bg-zinc-50/50">
+                <tr key={item.id} className={STICKY_TABLE_ROW}>
                   <td className={STICKY_LEFT_CELL}>
                     <div className="relative h-16 w-28 overflow-hidden rounded-lg border border-rose-100 bg-zinc-50">
                       {item.imageUrl ? (
@@ -431,7 +435,7 @@ export function BannerManager() {
                         ) : resolveClientImagePreview(item.imageUrl) ? (
                         <Image
                           src={resolveClientImagePreview(item.imageUrl)!}
-                          alt="轮播海报"
+                          alt="轮播图"
                           fill
                           className="object-cover"
                           unoptimized
@@ -482,8 +486,8 @@ export function BannerManager() {
                   <td className={`text-zinc-500 ${STICKY_SCROLL_CELL}`}>
                     {formatUpdatedAt(item.updatedAt)}
                   </td>
-                  <td className={`${STICKY_RIGHT_CELL} min-w-[8rem] w-32`}>
-                    <div className="flex flex-wrap justify-end gap-2">
+                  <td className={STICKY_RIGHT_CELL}>
+                    <div className={STICKY_ACTIONS}>
                       <Button
                         type="button"
                         variant="secondary"
@@ -515,30 +519,34 @@ export function BannerManager() {
         </div>
       )}
 
-      {modalOpen ? (
-        <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
-          role="dialog"
-          aria-modal="true"
-        >
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-2xl bg-white p-6 shadow-xl">
-            <h3 className="text-lg font-semibold text-rose-900">
-              {editingId ? "编辑轮播图" : "新增轮播图"}
-            </h3>
-            <p className="mt-1 text-sm text-zinc-500">
-              配置海报与点击后的跳转行为
-            </p>
+      <AdminDrawer
+        open={modalOpen}
+        onOpenChange={(open) => {
+          if (!open) closeModal();
+        }}
+        title={editingId ? "编辑轮播图" : "新增轮播图"}
+        description="配置轮播图与点击后的跳转行为"
+        size="md"
+        closeOnOverlayClick={false}
+        bodyClassName="space-y-3"
+        footer={
+          <DrawerFooterActions
+            onCancel={closeModal}
+            onConfirm={() => void handleSave()}
+            confirmLoading={uploading || saving}
+          />
+        }
+      >
+        {legacyWarning ? (
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+            {legacyWarning}
+          </p>
+        ) : null}
 
-            {legacyWarning ? (
-              <p className="mt-3 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
-                {legacyWarning}
-              </p>
-            ) : null}
-
-            <div className="mt-6 space-y-4">
+        <div className="space-y-3">
               <div>
                 <span className="mb-2 block text-sm font-medium text-zinc-700">
-                  轮播海报 *
+                  轮播图 *
                 </span>
                 <input
                   ref={fileRef}
@@ -558,7 +566,7 @@ export function BannerManager() {
                         {CMS_IMAGE_REUPLOAD_HINT}
                       </p>
                     ) : resolveClientImagePreview(form.imageUrl) ? (
-                    <div className="relative mb-2 h-36 w-full overflow-hidden rounded-xl border border-rose-100">
+                    <div className="relative mb-2 h-28 w-full overflow-hidden rounded-xl border border-rose-100">
                       <Image
                         src={resolveClientImagePreview(form.imageUrl)!}
                         alt="预览"
@@ -582,9 +590,9 @@ export function BannerManager() {
                     type="button"
                     disabled={uploading}
                     onClick={() => fileRef.current?.click()}
-                    className="flex h-32 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-rose-200 bg-rose-50/30 text-sm text-rose-700 hover:border-rose-300"
+                    className="flex h-24 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-rose-200 bg-rose-50/30 text-sm text-rose-700 hover:border-rose-300"
                   >
-                    {uploading ? "上传中…" : "点击上传海报（JPG / PNG / WebP）"}
+                    {uploading ? "上传中…" : "点击上传轮播图（JPG / PNG / WebP）"}
                   </button>
                 )}
               </div>
@@ -640,23 +648,8 @@ export function BannerManager() {
                 onChange={setLinkTarget}
                 showCoupon
               />
-            </div>
-
-            <div className="mt-6 flex justify-end gap-2">
-              <Button type="button" variant="secondary" onClick={closeModal}>
-                取消
-              </Button>
-              <Button
-                type="button"
-                onClick={() => void handleSave()}
-                disabled={uploading || saving}
-              >
-                {saving ? "保存中…" : "保存"}
-              </Button>
-            </div>
-          </div>
         </div>
-      ) : null}
+      </AdminDrawer>
 
       {toast ? (
         <div className="fixed bottom-6 right-6 z-50 rounded-lg bg-zinc-900 px-4 py-2 text-sm text-white shadow-lg">

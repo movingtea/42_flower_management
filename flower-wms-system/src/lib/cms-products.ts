@@ -9,6 +9,7 @@ import {
   cmsCategoryIdSet,
   parseProductCategoryPayload,
 } from "@/lib/cms-product-categories";
+import { resolveSkuSpecNameForSave } from "@/lib/cms/single-spec-product";
 
 const SHIPPING_FEE_PATTERN = /^[0-9]+(\.[0-9]{1,2})?$/;
 
@@ -129,7 +130,7 @@ export type CmsProductBody = {
 
 function parseSkuRows(raw: unknown): CmsProductSkuInput[] {
   if (!Array.isArray(raw) || raw.length === 0) {
-    throw new Error("请至少添加一个商品款式");
+    throw new Error("请至少添加一个商品规格");
   }
 
   const rows: CmsProductSkuInput[] = [];
@@ -137,13 +138,11 @@ function parseSkuRows(raw: unknown): CmsProductSkuInput[] {
   for (let i = 0; i < raw.length; i++) {
     const row = raw[i];
     if (!row || typeof row !== "object") {
-      throw new Error(`款式第 ${i + 1} 行格式无效`);
+      throw new Error(`规格第 ${i + 1} 行格式无效`);
     }
     const r = row as Record<string, unknown>;
-    const specName = typeof r.specName === "string" ? r.specName.trim() : "";
-    if (!specName) {
-      throw new Error(`款式第 ${i + 1} 行须填写款式品名`);
-    }
+    const specNameRaw = typeof r.specName === "string" ? r.specName : "";
+    const specName = resolveSkuSpecNameForSave(specNameRaw, raw.length, i);
 
     const price = Number(r.price);
     if (!Number.isFinite(price) || price < 0) {

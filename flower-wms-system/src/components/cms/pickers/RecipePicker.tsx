@@ -1,7 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { deferEffectTask, useDeferredEffect } from "@/lib/defer-effect";
+import { RecipePickerDrawer } from "@/components/cms/pickers/RecipePickerDrawer";
+import { Button } from "@/components/ui/button";
 import type { RecipePickerItem } from "@/components/cms/pickers/types";
 
 type Props = {
@@ -19,9 +21,7 @@ export function RecipePicker({
   compact,
   label = "选择配方",
 }: Props) {
-  const rootRef = useRef<HTMLDivElement>(null);
-  const [query, setQuery] = useState("");
-  const [open, setOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [items, setItems] = useState<RecipePickerItem[]>([]);
   const [selected, setSelected] = useState<RecipePickerItem | null>(null);
@@ -110,20 +110,6 @@ export function RecipePicker({
     };
   }, [value, selected?.id]);
 
-  useEffect(() => {
-    if (!open) return;
-    const timer = window.setTimeout(() => void fetchItems(query), 280);
-    return () => window.clearTimeout(timer);
-  }, [open, query, fetchItems]);
-
-  useEffect(() => {
-    function onDocClick(e: MouseEvent) {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener("mousedown", onDocClick);
-    return () => document.removeEventListener("mousedown", onDocClick);
-  }, []);
-
   useDeferredEffect(() => {
     if (!compact) return;
     void fetchItems("");
@@ -153,8 +139,8 @@ export function RecipePicker({
   }
 
   return (
-    <div ref={rootRef} className={compact ? "" : "space-y-2"}>
-      {!compact && label ? (
+    <div className="space-y-2">
+      {label ? (
         <span className="block text-sm font-medium text-zinc-800">{label}</span>
       ) : null}
 
@@ -169,78 +155,61 @@ export function RecipePicker({
             {selected.estimatedCost ? ` · 成本 ¥${selected.estimatedCost}` : ""}
           </p>
           {!disabled ? (
-            <button
-              type="button"
-              className="mt-1 text-xs text-zinc-500 hover:text-red-600"
-              onClick={() => {
-                onChange(null);
-                setSelected(null);
-              }}
-            >
-              清除绑定
-            </button>
+            <div className="mt-2 flex flex-wrap gap-2">
+              <Button
+                type="button"
+                variant="secondary"
+                className="h-7 px-2 text-xs"
+                onClick={() => setDrawerOpen(true)}
+              >
+                更换配方
+              </Button>
+              <button
+                type="button"
+                className="text-xs text-zinc-500 hover:text-red-600"
+                onClick={() => {
+                  onChange(null);
+                  setSelected(null);
+                }}
+              >
+                清除绑定
+              </button>
+            </div>
           ) : null}
         </div>
       ) : missing && value ? (
         <p className="text-sm text-amber-700">关联对象不存在或已删除</p>
+      ) : !disabled ? (
+        <Button
+          type="button"
+          variant="secondary"
+          onClick={() => setDrawerOpen(true)}
+        >
+          选择配方
+        </Button>
       ) : null}
 
       {!disabled ? (
-        <div className="relative">
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => {
-              setQuery(e.target.value);
-              setOpen(true);
-            }}
-            onFocus={() => {
-              setOpen(true);
-              void fetchItems(query);
-            }}
-            placeholder="搜索配方名称、BOM 编号…"
-            className="w-full rounded-lg border border-zinc-200 px-3 py-2 text-sm outline-none focus:border-rose-400"
-          />
-          {open ? (
-            <div className="absolute z-40 mt-1 max-h-56 w-full overflow-y-auto rounded-lg border border-zinc-200 bg-white shadow-lg">
-              {loading ? (
-                <p className="px-3 py-2 text-sm text-zinc-500">搜索中…</p>
-              ) : items.length === 0 ? (
-                <p className="px-3 py-2 text-sm text-zinc-500">暂无匹配配方</p>
-              ) : (
-                items.map((item) => (
-                  <button
-                    key={item.id}
-                    type="button"
-                    className="block w-full border-b border-zinc-50 px-3 py-2 text-left hover:bg-rose-50/50"
-                    onClick={() => {
-                      setSelected(item);
-                      onChange(item.id);
-                      setOpen(false);
-                      setQuery("");
-                    }}
-                  >
-                    <p className="text-sm font-medium">{item.name}</p>
-                    <p className="text-xs text-zinc-500">
-                      {item.bomNo}
-                      {item.packagingKitName
-                        ? ` · ${item.packagingKitName}`
-                        : ""}
-                      {item.estimatedCost ? ` · ¥${item.estimatedCost}` : ""}
-                    </p>
-                  </button>
-                ))
-              )}
-            </div>
-          ) : null}
-        </div>
+        <RecipePickerDrawer
+          open={drawerOpen}
+          onOpenChange={setDrawerOpen}
+          value={value}
+          onChange={(recipeId) => {
+            onChange(recipeId);
+            if (recipeId) {
+              void fetchItems("").then(() => {
+                /* selected sync via value effect */
+              });
+            } else {
+              setSelected(null);
+            }
+          }}
+        />
       ) : null}
 
-      {!compact ? (
-        <p className="text-xs text-zinc-500">
-          配方在 WMS「标准配方研发中心」维护，单号由系统自动分配
-        </p>
-      ) : null}
+      <p className="text-xs text-zinc-500">
+        配方在 WMS「标准配方研发中心」维护，单号由系统自动分配
+      </p>
     </div>
   );
 }

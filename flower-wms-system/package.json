@@ -47,6 +47,7 @@
     "test:cms-banners": "tsx src/services/cms-banners.test.ts",
     "test:sku-active-invariants": "tsx src/services/sku-active-invariants.test.ts",
     "test:sku-display": "tsx src/lib/cms/sku-display.test.ts",
+    "test:single-spec-product": "tsx src/lib/cms/single-spec-product.test.ts",
     "test:kanban-archive": "tsx src/lib/orders/kanban-archive-display.test.ts",
     "test:number-input": "tsx src/lib/number-input-utils.test.ts",
     "test:client-image-preview": "tsx src/lib/client-image-preview.test.ts",

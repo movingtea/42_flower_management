@@ -52,3 +52,19 @@ npm run build
 
 - `npm run lint` 已无 error；NumberInput / 图片预览相关文件未新增 lint 问题。
 - 详见 README §10.8。
+
+## 单规格商品（默认 SKU）
+
+- [ ] 新建商品页默认出现「单规格」卡片，可直接填价格/库存/图片
+- [ ] 不点「添加款式」也可保存，数据库有 1 条 SKU（`spec_name=单规格`）
+- [ ] 单规格商品可上架；库存 0 可上架，小程序显示「卖光啦！」
+- [ ] CMS stock=0 显示「库存为 0」，不显示「卖光啦！」
+- [ ] 单规格小程序详情不弹出款式选择器，下单仍传 skuId
+- [ ] 添加第二个 SKU 后 CMS 显示款式品名输入；小程序弹出款式选择器
+- [ ] 不能删除最后一个 SKU；已上架不能停用最后一个启用 SKU
+
+```bash
+npm run test:single-spec-product
+npm run test:sku-display
+npm run test:miniprogram-stock
+```

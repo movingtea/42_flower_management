@@ -129,7 +129,7 @@ export function MarketingSettings({
     try {
       const { objectKey } = await uploadCmsImage(file, "cms");
       setPopup((p) => ({ ...p, imageUrl: objectKey }));
-      showToast("海报上传成功", "success");
+      showToast("活动图片上传成功", "success");
     } catch (e) {
       showToast(e instanceof Error ? e.message : "上传失败", "error");
     } finally {
@@ -267,7 +267,7 @@ export function MarketingSettings({
 
             <div>
               <span className="mb-2 block text-sm font-medium text-zinc-700">
-                活动海报
+                活动图片
               </span>
               <input
                 ref={fileRef}
@@ -290,7 +290,7 @@ export function MarketingSettings({
                   <div className="relative mb-2 h-44 w-full overflow-hidden rounded-xl border border-rose-100">
                     <Image
                       src={resolveClientImagePreview(popup.imageUrl)!}
-                      alt="弹窗海报"
+                      alt="弹窗图片"
                       fill
                       className="object-cover"
                       unoptimized
@@ -303,7 +303,7 @@ export function MarketingSettings({
                     disabled={uploading || savingPopup}
                     onClick={() => fileRef.current?.click()}
                   >
-                    {uploading ? "上传中…" : "更换海报"}
+                    {uploading ? "上传中…" : "更换图片"}
                   </Button>
                 </div>
               ) : (
@@ -313,7 +313,7 @@ export function MarketingSettings({
                   onClick={() => fileRef.current?.click()}
                   className="flex h-36 w-full flex-col items-center justify-center rounded-xl border-2 border-dashed border-rose-200 bg-rose-50/30 text-sm text-rose-700 hover:border-rose-300"
                 >
-                  {uploading ? "上传中…" : "点击上传活动海报"}
+                  {uploading ? "上传中…" : "点击上传活动图片"}
                 </button>
               )}
             </div>

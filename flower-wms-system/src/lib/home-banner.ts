@@ -57,7 +57,7 @@ export function validateHomeBannerItems(items: HomeBannerItem[]): string | null 
   if (items.length === 0) return null;
 
   for (const item of items) {
-    if (!item.imageUrl) return "每条轮播须上传海报图";
+    if (!item.imageUrl) return "每条轮播须上传轮播图";
     if (!item.productId) return "每条轮播须选择跳转商品";
     if (!Number.isFinite(item.sort)) return "排序号须为数字";
   }

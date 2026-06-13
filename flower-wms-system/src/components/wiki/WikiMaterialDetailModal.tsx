@@ -2,14 +2,16 @@
 
 import type { ReactNode } from "react";
 import { WikiCareTable } from "@/components/wiki/WikiCareTable";
-import { Button } from "@/components/ui/button";
+import { AdminDrawer } from "@/components/admin/AdminDrawer";
+import { DrawerFooterActions } from "@/components/admin/DrawerFooterActions";
 import { formatNullableDateTime } from "@/lib/datetime";
 import type { WikiListItem } from "@/lib/wiki-constants";
 import { normalizeCareTable, validateCareTableForSave } from "@/lib/wiki-care";
 
 type Props = {
   item: WikiListItem;
-  onClose: () => void;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
   onEdit?: () => void;
 };
 
@@ -32,109 +34,120 @@ function DetailField({
   );
 }
 
-export function WikiMaterialDetailModal({ item, onClose, onEdit }: Props) {
+export function WikiMaterialDetailDrawer({
+  item,
+  open,
+  onOpenChange,
+  onEdit,
+}: Props) {
   const careTable =
     item.careTable?.length && validateCareTableForSave(item.careTable)
       ? normalizeCareTable(item.careTable)
       : null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div
-        className="flex max-h-[min(90vh,760px)] w-full max-w-2xl flex-col rounded-2xl bg-white shadow-xl"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="wiki-detail-title"
-      >
-        <div className="border-b border-zinc-100 px-6 py-4">
-          <p className="text-xs font-medium text-rose-600">物料详情</p>
-          <h2
-            id="wiki-detail-title"
-            className="mt-1 text-xl font-semibold text-zinc-900"
-          >
-            {item.chineseName}
-          </h2>
-          {item.englishName && (
-            <p className="mt-1 text-sm italic text-zinc-500">{item.englishName}</p>
-          )}
-        </div>
+    <AdminDrawer
+      open={open}
+      onOpenChange={onOpenChange}
+      title={item.chineseName}
+      description={item.englishName || "物料详情"}
+      size="lg"
+      closeOnOverlayClick
+      bodyClassName="space-y-4"
+      footer={
+        <DrawerFooterActions
+          onCancel={() => onOpenChange(false)}
+          cancelLabel="关闭"
+          hideConfirm={!onEdit}
+          confirmLabel="编辑"
+          onConfirm={onEdit}
+        />
+      }
+    >
+      <dl className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <DetailField
+          label="拉丁学名 / 英文名"
+          value={item.englishName || "—"}
+          className="sm:col-span-2"
+        />
+        <DetailField
+          label="花语"
+          value={item.flowerLanguage?.trim() || "—"}
+          className="sm:col-span-2"
+        />
+        <DetailField
+          label="供货周期"
+          value={item.supplySeason ?? item.availability ?? "—"}
+        />
+        <DetailField
+          label="默认保质期"
+          value={
+            item.defaultShelfLifeDays != null
+              ? `${item.defaultShelfLifeDays} 天`
+              : "—"
+          }
+        />
+        <DetailField
+          label="标准成本"
+          value={
+            item.standardUnitCost
+              ? `¥${Number(item.standardUnitCost).toFixed(2)} / ${
+                  item.costUnit || "支"
+                }`
+              : "未设置"
+          }
+        />
+        <DetailField
+          label="成本更新时间"
+          value={
+            item.costUpdatedAt
+              ? formatNullableDateTime(item.costUpdatedAt)
+              : "—"
+          }
+        />
+        <DetailField
+          label="成本备注"
+          value={item.costNote?.trim() || "—"}
+          className="sm:col-span-2"
+        />
+      </dl>
 
-        <div className="flex-1 overflow-y-auto px-6 py-5">
-          <dl className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-            <DetailField
-              label="拉丁学名 / 英文名"
-              value={item.englishName || "—"}
-              className="sm:col-span-2"
-            />
-            <DetailField
-              label="花语"
-              value={item.flowerLanguage?.trim() || "—"}
-              className="sm:col-span-2"
-            />
-            <DetailField
-              label="供货周期"
-              value={item.supplySeason ?? item.availability ?? "—"}
-            />
-            <DetailField
-              label="默认保质期"
-              value={
-                item.defaultShelfLifeDays != null
-                  ? `${item.defaultShelfLifeDays} 天`
-                  : "—"
-              }
-            />
-            <DetailField
-              label="标准成本"
-              value={
-                item.standardUnitCost
-                  ? `¥${Number(item.standardUnitCost).toFixed(2)} / ${
-                      item.costUnit || "支"
-                    }`
-                  : "未设置"
-              }
-            />
-            <DetailField
-              label="成本更新时间"
-              value={
-                item.costUpdatedAt
-                  ? formatNullableDateTime(item.costUpdatedAt)
-                  : "—"
-              }
-            />
-            <DetailField
-              label="成本备注"
-              value={item.costNote?.trim() || "—"}
-              className="sm:col-span-2"
-            />
-          </dl>
+      <p className="rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+        标准成本用于产品定价预估；订单实际成本仍以入库批次成本为准。
+      </p>
 
-          <p className="mt-4 rounded-lg border border-emerald-100 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
-            标准成本用于产品定价预估；订单实际成本仍以入库批次成本为准。
-          </p>
-
-          <div className="mt-6 space-y-3">
-            <h3 className="text-sm font-medium text-zinc-700">养护指南</h3>
-            {careTable ? (
-              <WikiCareTable rows={careTable} />
-            ) : (
-              <pre className="whitespace-pre-wrap rounded-xl border border-zinc-200 bg-zinc-50/80 px-4 py-3 text-sm leading-relaxed text-zinc-700">
-                {item.maintenance?.trim() || "暂无养护说明"}
-              </pre>
-            )}
-          </div>
-        </div>
-
-        <div className="flex justify-end gap-2 border-t border-zinc-100 px-6 py-4">
-          <Button type="button" variant="secondary" onClick={onClose}>
-            关闭
-          </Button>
-          {onEdit && (
-            <Button type="button" onClick={onEdit}>
-              编辑
-            </Button>
-          )}
-        </div>
+      <div className="space-y-2">
+        <h3 className="text-sm font-semibold text-zinc-700">养护指南</h3>
+        {careTable ? (
+          <WikiCareTable rows={careTable} />
+        ) : (
+          <pre className="whitespace-pre-wrap rounded-lg border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm leading-relaxed text-zinc-700">
+            {item.maintenance?.trim() || "暂无养护说明"}
+          </pre>
+        )}
       </div>
-    </div>
+    </AdminDrawer>
+  );
+}
+
+/** @deprecated 使用 WikiMaterialDetailDrawer */
+export function WikiMaterialDetailModal({
+  item,
+  onClose,
+  onEdit,
+}: {
+  item: WikiListItem;
+  onClose: () => void;
+  onEdit?: () => void;
+}) {
+  return (
+    <WikiMaterialDetailDrawer
+      item={item}
+      open
+      onOpenChange={(next) => {
+        if (!next) onClose();
+      }}
+      onEdit={onEdit}
+    />
   );
 }

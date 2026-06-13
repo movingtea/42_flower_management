@@ -4,6 +4,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
+import { AdminDrawer } from "@/components/admin/AdminDrawer";
+import { DrawerFooterActions } from "@/components/admin/DrawerFooterActions";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/Switch";
 import { formatDateTimeInAppTimezone } from "@/lib/datetime";
@@ -15,6 +17,8 @@ import {
   STICKY_RIGHT_HEAD,
   STICKY_SCROLL_CELL,
   STICKY_SCROLL_HEAD,
+  STICKY_ACTIONS,
+  STICKY_TABLE_ROW,
   StickyTableScroll,
 } from "@/components/admin/sticky-table";
 
@@ -46,6 +50,7 @@ export function PackagingKitManager({ initialList }: Props) {
   const [form, setForm] = useState<FormState>(EMPTY_FORM);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
@@ -59,6 +64,13 @@ export function PackagingKitManager({ initialList }: Props) {
   function resetForm() {
     setForm(EMPTY_FORM);
     setEditingId(null);
+    setDrawerOpen(false);
+  }
+
+  function openCreate() {
+    setForm(EMPTY_FORM);
+    setEditingId(null);
+    setDrawerOpen(true);
   }
 
   function startEdit(row: PackagingKitRow) {
@@ -69,6 +81,7 @@ export function PackagingKitManager({ initialList }: Props) {
       standardCost: row.standardCost,
       isActive: row.isActive,
     });
+    setDrawerOpen(true);
   }
 
   async function reloadList() {
@@ -167,15 +180,19 @@ export function PackagingKitManager({ initialList }: Props) {
         </div>
       )}
 
-      <header className="mb-8">
-        <h2 className="text-2xl font-semibold text-zinc-900">包装方案管理</h2>
-        <p className="mt-1 text-sm text-zinc-500">
-          维护订单毛利核算使用的标准包装成本；本阶段不扣减包装耗材库存。
-        </p>
+      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-semibold text-zinc-900">包装方案管理</h2>
+          <p className="mt-1 text-sm text-zinc-500">
+            维护订单毛利核算使用的标准包装成本；本阶段不扣减包装耗材库存。
+          </p>
+        </div>
+        <Button type="button" onClick={openCreate}>
+          新建包装方案
+        </Button>
       </header>
 
-      <div className="grid gap-8 lg:grid-cols-5">
-        <section className="rounded-xl border border-zinc-200 bg-white shadow-sm lg:col-span-3">
+      <section className="rounded-xl border border-zinc-200 bg-white shadow-sm">
           <StickyTableScroll minWidth="720px">
             <colgroup>
               <col className="w-44" />
@@ -207,7 +224,7 @@ export function PackagingKitManager({ initialList }: Props) {
                 </tr>
               ) : (
                 list.map((row) => (
-                  <tr key={row.id} className="group hover:bg-zinc-50/80">
+                  <tr key={row.id} className={STICKY_TABLE_ROW}>
                     <td className={STICKY_LEFT_CELL}>{row.name}</td>
                     <td className={`font-semibold text-rose-800 ${STICKY_SCROLL_CELL}`}>
                       ¥{row.standardCost}
@@ -226,10 +243,11 @@ export function PackagingKitManager({ initialList }: Props) {
                       {formatTime(row.updatedAt)}
                     </td>
                     <td className={STICKY_RIGHT_CELL}>
+                      <div className={STICKY_ACTIONS}>
                         <button
                           type="button"
                           onClick={() => startEdit(row)}
-                          className="mr-3 text-rose-600 hover:underline"
+                          className="text-rose-600 hover:underline"
                         >
                           编辑
                         </button>
@@ -242,23 +260,32 @@ export function PackagingKitManager({ initialList }: Props) {
                             停用
                           </button>
                         )}
-                      </td>
+                      </div>
+                    </td>
                     </tr>
                   ))
                 )}
               </tbody>
           </StickyTableScroll>
-        </section>
+      </section>
 
-        <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm lg:col-span-2">
-          <h3 className="font-semibold text-zinc-900">
-            {editingId ? "编辑包装方案" : "新建包装方案"}
-          </h3>
-          <p className="mt-1 text-xs text-zinc-500">
-            标准成本会乘以订单商品数量计入包装成本。
-          </p>
-
-          <div className="mt-5 space-y-4">
+      <AdminDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        title={editingId ? "编辑包装方案" : "新建包装方案"}
+        description="标准成本会乘以订单商品数量计入包装成本"
+        size="md"
+        closeOnOverlayClick={false}
+        bodyClassName="space-y-3"
+        footer={
+          <DrawerFooterActions
+            onCancel={resetForm}
+            onConfirm={() => void handleSubmit()}
+            confirmLoading={saving}
+            confirmLabel={editingId ? "保存修改" : "创建方案"}
+          />
+        }
+      >
             <Input
               label="方案名称"
               value={form.name}
@@ -277,7 +304,7 @@ export function PackagingKitManager({ initialList }: Props) {
             <label className="block text-sm">
               <span className="mb-1 block font-medium text-zinc-700">描述</span>
               <textarea
-                rows={3}
+                rows={2}
                 value={form.description}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, description: e.target.value }))
@@ -285,7 +312,7 @@ export function PackagingKitManager({ initialList }: Props) {
                 className="w-full rounded-lg border border-zinc-200 px-3 py-2"
               />
             </label>
-            <div className="rounded-lg border border-zinc-200 px-4 py-3">
+            <div className="rounded-lg border border-zinc-200 px-3 py-2">
               <Switch
                 label="启用状态"
                 checked={form.isActive}
@@ -294,19 +321,7 @@ export function PackagingKitManager({ initialList }: Props) {
                 }
               />
             </div>
-            <div className="flex gap-2">
-              <Button type="button" onClick={handleSubmit} disabled={saving}>
-                {saving ? "保存中…" : editingId ? "保存修改" : "创建方案"}
-              </Button>
-              {editingId && (
-                <Button type="button" variant="ghost" onClick={resetForm}>
-                  取消
-                </Button>
-              )}
-            </div>
-          </div>
-        </section>
-      </div>
+      </AdminDrawer>
     </div>
   );
 }

@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useCallback, useState } from "react";
 import { useDeferredEffect } from "@/lib/defer-effect";
 import { ActionEmptyState } from "@/components/admin/ActionEmptyState";
+import { AdminDrawer } from "@/components/admin/AdminDrawer";
+import { DrawerFooterActions } from "@/components/admin/DrawerFooterActions";
 import { AutoKeyField } from "@/components/cms/pickers/AutoKeyField";
 import { ProductPicker } from "@/components/cms/pickers/ProductPicker";
 import { SkuPicker } from "@/components/cms/pickers/SkuPicker";
@@ -29,6 +31,7 @@ import {
   STICKY_RIGHT_HEAD,
   STICKY_SCROLL_CELL,
   STICKY_SCROLL_HEAD,
+  STICKY_ACTIONS,
   StickyTableScroll,
 } from "@/components/admin/sticky-table";
 
@@ -395,18 +398,18 @@ export function RecommendationSlotsManager() {
                   <th className={STICKY_LEFT_HEAD}>名称</th>
                   <th className={STICKY_SCROLL_HEAD}>类型</th>
                   <th className={STICKY_SCROLL_HEAD}>商品数</th>
-                  <th className={`${STICKY_RIGHT_HEAD} min-w-[8rem] w-36`}>操作</th>
+                  <th className={STICKY_RIGHT_HEAD}>操作</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
-                {slots.map((slot) => (
+                {slots.map((slot) => {
+                  const isSelected = selectedId === slot.id;
+                  return (
                   <tr
                     key={slot.id}
-                    className={`group ${
-                      selectedId === slot.id ? "bg-rose-50/60" : "hover:bg-zinc-50/50"
-                    }`}
+                    className={`group ${isSelected ? "bg-rose-50" : "bg-white hover:bg-zinc-50"}`}
                   >
-                    <td className={STICKY_LEFT_CELL}>
+                    <td className={`${STICKY_LEFT_CELL} ${isSelected ? "!bg-rose-50" : ""}`}>
                       <button
                         type="button"
                         className="text-left font-medium text-zinc-900 hover:text-rose-700"
@@ -427,8 +430,8 @@ export function RecommendationSlotsManager() {
                       ) : null}
                     </td>
                     <td className={STICKY_SCROLL_CELL}>{slot._count?.items ?? 0}</td>
-                    <td className={`${STICKY_RIGHT_CELL} min-w-[8rem] w-36`}>
-                      <div className="flex flex-wrap justify-end gap-2">
+                    <td className={`${STICKY_RIGHT_CELL} ${isSelected ? "!bg-rose-50" : ""}`}>
+                      <div className={STICKY_ACTIONS}>
                         <button
                           type="button"
                           className="text-rose-600 hover:underline"
@@ -453,7 +456,8 @@ export function RecommendationSlotsManager() {
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </StickyTableScroll>
           </div>
@@ -613,9 +617,20 @@ export function RecommendationSlotsManager() {
         </div>
       )}
 
-      {editorOpen ? (
-        <Modal title={editorMode === "create" ? "新建推荐位" : "编辑推荐位"} onClose={() => setEditorOpen(false)}>
-          <div className="space-y-4">
+      <AdminDrawer
+        open={editorOpen}
+        onOpenChange={setEditorOpen}
+        title={editorMode === "create" ? "新建推荐位" : "编辑推荐位"}
+        size="md"
+        closeOnOverlayClick={false}
+        bodyClassName="space-y-3"
+        footer={
+          <DrawerFooterActions
+            onCancel={() => setEditorOpen(false)}
+            onConfirm={() => void saveSlot()}
+          />
+        }
+      >
             <Input label="推荐位名称" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
             {editorMode === "create" ? (
               <AutoKeyField
@@ -687,17 +702,25 @@ export function RecommendationSlotsManager() {
               <input type="checkbox" checked={form.isActive} onChange={(e) => setForm({ ...form, isActive: e.target.checked })} />
               启用
             </label>
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="secondary" onClick={() => setEditorOpen(false)}>取消</Button>
-              <Button type="button" onClick={() => void saveSlot()}>保存</Button>
-            </div>
-          </div>
-        </Modal>
-      ) : null}
+      </AdminDrawer>
 
-      {addOpen && selectedId ? (
-        <Modal title="添加推荐商品" onClose={() => setAddOpen(false)}>
-          <div className="space-y-4">
+      <AdminDrawer
+        open={Boolean(addOpen && selectedId)}
+        onOpenChange={(open) => {
+          if (!open) setAddOpen(false);
+        }}
+        title="添加推荐商品"
+        size="md"
+        closeOnOverlayClick={false}
+        bodyClassName="space-y-3"
+        footer={
+          <DrawerFooterActions
+            onCancel={() => setAddOpen(false)}
+            onConfirm={() => void addItem()}
+            confirmLabel="添加"
+          />
+        }
+      >
             <ProductPicker
               value={addForm.productId || null}
               onChange={(productId) =>
@@ -730,35 +753,7 @@ export function RecommendationSlotsManager() {
               <Input label="生效开始" type="datetime-local" value={addForm.startAt} onChange={(e) => setAddForm({ ...addForm, startAt: e.target.value })} />
               <Input label="生效结束" type="datetime-local" value={addForm.endAt} onChange={(e) => setAddForm({ ...addForm, endAt: e.target.value })} />
             </div>
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="secondary" onClick={() => setAddOpen(false)}>取消</Button>
-              <Button type="button" onClick={() => void addItem()}>添加</Button>
-            </div>
-          </div>
-        </Modal>
-      ) : null}
-    </div>
-  );
-}
-
-function Modal({
-  title,
-  children,
-  onClose,
-}: {
-  title: string;
-  children: React.ReactNode;
-  onClose: () => void;
-}) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
-        <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-semibold">{title}</h3>
-          <button type="button" onClick={onClose} className="text-zinc-500">×</button>
-        </div>
-        {children}
-      </div>
+      </AdminDrawer>
     </div>
   );
 }

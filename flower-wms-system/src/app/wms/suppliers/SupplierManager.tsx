@@ -3,6 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
+import { AdminDrawer } from "@/components/admin/AdminDrawer";
+import { DrawerFooterActions } from "@/components/admin/DrawerFooterActions";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/Switch";
 import {
@@ -18,6 +20,8 @@ import {
   STICKY_RIGHT_HEAD,
   STICKY_SCROLL_CELL,
   STICKY_SCROLL_HEAD,
+  STICKY_ACTIONS,
+  STICKY_TABLE_ROW,
   StickyTableScroll,
 } from "@/components/admin/sticky-table";
 
@@ -82,6 +86,7 @@ export function SupplierManager() {
   const [q, setQ] = useState("");
   const [supplierType, setSupplierType] = useState("");
   const [isActive, setIsActive] = useState("");
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const [toast, setToast] = useState<{
     message: string;
     type: "success" | "error";
@@ -133,6 +138,13 @@ export function SupplierManager() {
   function resetForm() {
     setForm(EMPTY_FORM);
     setEditingId(null);
+    setDrawerOpen(false);
+  }
+
+  function openCreate() {
+    setForm(EMPTY_FORM);
+    setEditingId(null);
+    setDrawerOpen(true);
   }
 
   function startEdit(row: Supplier) {
@@ -147,6 +159,7 @@ export function SupplierManager() {
       note: row.note ?? "",
       isActive: row.isActive,
     });
+    setDrawerOpen(true);
   }
 
   async function handleSubmit() {
@@ -239,13 +252,12 @@ export function SupplierManager() {
             维护花材采购来源、联系人和启用状态；停用供应商不会影响历史采购单。
           </p>
         </div>
-        <Button type="button" onClick={resetForm}>
+        <Button type="button" onClick={openCreate}>
           新增供应商
         </Button>
       </header>
 
-      <div className="grid gap-8 xl:grid-cols-5">
-        <section className="rounded-xl border border-zinc-200 bg-white shadow-sm xl:col-span-3">
+      <section className="rounded-xl border border-zinc-200 bg-white shadow-sm">
           <div className="border-b border-zinc-100 p-4">
             <div className="grid gap-3 md:grid-cols-4">
               <Input
@@ -333,7 +345,7 @@ export function SupplierManager() {
                 </tr>
               ) : (
                 items.map((row) => (
-                  <tr key={row.id} className="group hover:bg-zinc-50/80">
+                  <tr key={row.id} className={STICKY_TABLE_ROW}>
                     <td className={STICKY_LEFT_CELL}>{row.name}</td>
                     <td className={STICKY_SCROLL_CELL}>
                       {supplierTypeLabels[row.supplierType]}
@@ -355,39 +367,49 @@ export function SupplierManager() {
                       {formatDateTime(row.updatedAt)}
                     </td>
                     <td className={STICKY_RIGHT_CELL}>
-                      <button
-                        type="button"
-                        onClick={() => startEdit(row)}
-                        className="mr-3 text-rose-600 hover:underline"
-                      >
-                        编辑
-                      </button>
-                      {row.isActive && (
+                      <div className={STICKY_ACTIONS}>
                         <button
                           type="button"
-                          onClick={() => handleDeactivate(row)}
-                          className="text-zinc-500 hover:text-red-600"
+                          onClick={() => startEdit(row)}
+                          className="text-rose-600 hover:underline"
                         >
-                          停用
+                          编辑
                         </button>
-                      )}
+                        {row.isActive && (
+                          <button
+                            type="button"
+                            onClick={() => handleDeactivate(row)}
+                            className="text-zinc-500 hover:text-red-600"
+                          >
+                            停用
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))
               )}
             </tbody>
           </StickyTableScroll>
-        </section>
+      </section>
 
-        <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm xl:col-span-2">
-          <h3 className="font-semibold text-zinc-900">
-            {editingId ? "编辑供应商" : "新增供应商"}
-          </h3>
-          <p className="mt-1 text-xs text-zinc-500">
-            新建采购单时默认只选择已启用供应商。
-          </p>
-
-          <div className="mt-5 space-y-4">
+      <AdminDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        title={editingId ? "编辑供应商" : "新增供应商"}
+        description="新建采购单时默认只选择已启用供应商"
+        size="md"
+        closeOnOverlayClick={false}
+        bodyClassName="space-y-3"
+        footer={
+          <DrawerFooterActions
+            onCancel={resetForm}
+            onConfirm={() => void handleSubmit()}
+            confirmLoading={saving}
+            confirmLabel={editingId ? "保存修改" : "创建供应商"}
+          />
+        }
+      >
             <Input
               label="供应商名称"
               value={form.name}
@@ -406,7 +428,7 @@ export function SupplierManager() {
                 </option>
               ))}
             </SelectField>
-            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
+            <div className="grid gap-3 sm:grid-cols-2">
               <Input
                 label="联系人"
                 value={form.contactName}
@@ -443,7 +465,7 @@ export function SupplierManager() {
             <label className="block text-sm">
               <span className="mb-1 block font-medium text-zinc-700">备注</span>
               <textarea
-                rows={3}
+                rows={2}
                 value={form.note}
                 onChange={(e) =>
                   setForm((f) => ({ ...f, note: e.target.value }))
@@ -451,7 +473,7 @@ export function SupplierManager() {
                 className="w-full rounded-lg border border-zinc-200 px-3 py-2 outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-400"
               />
             </label>
-            <div className="rounded-lg border border-zinc-200 px-4 py-3">
+            <div className="rounded-lg border border-zinc-200 px-3 py-2">
               <Switch
                 label="启用状态"
                 checked={form.isActive}
@@ -460,19 +482,7 @@ export function SupplierManager() {
                 }
               />
             </div>
-            <div className="flex gap-2">
-              <Button type="button" onClick={handleSubmit} disabled={saving}>
-                {saving ? "保存中…" : editingId ? "保存修改" : "创建供应商"}
-              </Button>
-              {editingId && (
-                <Button type="button" variant="ghost" onClick={resetForm}>
-                  取消
-                </Button>
-              )}
-            </div>
-          </div>
-        </section>
-      </div>
+      </AdminDrawer>
     </div>
   );
 }

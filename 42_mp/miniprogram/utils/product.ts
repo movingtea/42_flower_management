@@ -22,7 +22,7 @@ export interface BulkPreorderRule {
 export interface WechatProductSku {
   id: string;
   skuCode: string;
-  specName: string;
+  displaySpecName?: string;
   price: string;
   stock: number;
   hasStock?: boolean;
@@ -82,6 +82,8 @@ export interface WechatProductItem {
   displayStatus?: 'AVAILABLE' | 'LOW_STOCK' | 'SOLD_OUT' | 'OFF_SHELF';
   stockLabel?: string;
   skus: WechatProductSku[];
+  /** 是否展示款式选择器（仅多 SKU；单规格商品为 false） */
+  showSpecSelector?: boolean;
   occasionTags: WechatProductTagDisplay[];
   colorTags: WechatProductTagDisplay[];
   styleTags: WechatProductTagDisplay[];
@@ -151,6 +153,9 @@ export function normalizeWechatProduct(item: WechatProductRaw): WechatProductIte
   const stockSummary = item.stockSummary ?? computeStockSummaryFromSkus(skus);
   const normalizedSkus = skus.map((sku) => ({
     ...sku,
+    displaySpecName:
+      sku.displaySpecName ??
+      (skus.length > 1 ? sku.specName : ''),
     stock: Math.max(0, Math.floor(Number(sku.stock) || 0)),
     hasStock: sku.hasStock ?? sku.stock > 0,
     lowStock:
@@ -169,6 +174,8 @@ export function normalizeWechatProduct(item: WechatProductRaw): WechatProductIte
     stockSummary,
     stockStatus: item.stockStatus,
     displayStatus: item.displayStatus,
+    showSpecSelector:
+      item.showSpecSelector ?? normalizedSkus.length > 1,
     skus: normalizedSkus,
     occasionTags,
     colorTags,

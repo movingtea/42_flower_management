@@ -10,6 +10,7 @@ import {
   getClientPreviewImageUrl,
   isClientImageInvalid,
 } from "@/lib/client-image-preview";
+import { isSingleSpecProduct } from "@/lib/cms/single-spec-product";
 
 type SkuPreview = {
   specName: string;
@@ -169,12 +170,16 @@ export function ProductMiniProgramPreview({
             </dd>
           </div>
           <div>
-            <dt className="text-zinc-500">SKU 价格</dt>
+            <dt className="text-zinc-500">
+              {isSingleSpecProduct(skus.length) ? "售价" : "SKU 价格"}
+            </dt>
             <dd className="text-zinc-800">
               {skus.length
-                ? skus
-                    .map((s) => `${s.specName} ¥${s.price}`)
-                    .join(" · ")
+                ? isSingleSpecProduct(skus.length)
+                  ? priceLabel
+                  : skus
+                      .map((s) => `${s.specName} ¥${s.price}`)
+                      .join(" · ")
                 : "—"}
             </dd>
           </div>

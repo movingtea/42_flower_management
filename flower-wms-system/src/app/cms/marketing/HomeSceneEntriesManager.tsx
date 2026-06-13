@@ -3,6 +3,8 @@
 import {useCallback, useState} from "react";
 import { useDeferredEffect } from "@/lib/defer-effect";
 import { ActionEmptyState } from "@/components/admin/ActionEmptyState";
+import { AdminDrawer } from "@/components/admin/AdminDrawer";
+import { DrawerFooterActions } from "@/components/admin/DrawerFooterActions";
 import { RecommendationSlotPicker } from "@/components/cms/pickers/RecommendationSlotPicker";
 import type { RecommendationSlotPickerItem } from "@/components/cms/pickers/types";
 import { Badge } from "@/components/ui/Badge";
@@ -419,13 +421,23 @@ export function HomeSceneEntriesManager() {
         </div>
       )}
 
-      {formOpen ? (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl bg-white p-6 shadow-xl">
-            <h3 className="text-lg font-semibold text-zinc-900">
-              {editingId ? "编辑场景入口" : "新建场景入口"}
-            </h3>
-            <div className="mt-4 space-y-4">
+      <AdminDrawer
+        open={formOpen}
+        onOpenChange={(open) => {
+          if (!open) closeForm();
+        }}
+        title={editingId ? "编辑场景入口" : "新建场景入口"}
+        size="md"
+        closeOnOverlayClick={false}
+        bodyClassName="space-y-3"
+        footer={
+          <DrawerFooterActions
+            onCancel={closeForm}
+            onConfirm={() => void handleSave()}
+            confirmLoading={saving}
+          />
+        }
+      >
               <label className="block space-y-1 text-sm">
                 <span className="font-medium text-zinc-700">标题 *</span>
                 <Input
@@ -570,23 +582,7 @@ export function HomeSceneEntriesManager() {
                   className="w-full rounded-lg border border-zinc-200 px-3 py-2"
                 />
               </label>
-            </div>
-
-            <div className="mt-6 flex justify-end gap-2">
-              <Button type="button" variant="secondary" onClick={closeForm}>
-                取消
-              </Button>
-              <Button
-                type="button"
-                disabled={saving}
-                onClick={() => void handleSave()}
-              >
-                {saving ? "保存中…" : "保存"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      ) : null}
+      </AdminDrawer>
 
       {toast ? (
         <div className="fixed bottom-6 right-6 z-50 rounded-lg bg-zinc-900 px-4 py-2 text-sm text-white shadow-lg">

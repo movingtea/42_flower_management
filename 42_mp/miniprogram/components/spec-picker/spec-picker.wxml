@@ -47,7 +47,7 @@
               <text class="spec-zoom-icon">⌕</text>
             </view>
           </view>
-          <text class="spec-sku-name text-ellipsis">{{item.specName}}</text>
+          <text class="spec-sku-name text-ellipsis">{{item.displaySpecName || item.specName}}</text>
           <text class="spec-sku-price">¥{{item.price}}</text>
         </view>
       </view>

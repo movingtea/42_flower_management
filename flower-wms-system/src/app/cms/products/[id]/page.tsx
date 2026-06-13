@@ -10,6 +10,8 @@ import { loadAllProductCategoriesFlat } from "@/lib/product-category.server";
 import { activeSpuWhere } from "@/lib/product-query";
 import { prisma } from "@/lib/prisma";
 
+import { createDefaultSkuDraftRow } from "@/lib/cms/single-spec-product";
+
 export const dynamic = "force-dynamic";
 
 const EMPTY: ProductEditorInitial = {
@@ -21,22 +23,7 @@ const EMPTY: ProductEditorInitial = {
   isActive: true,
   needsShipping: false,
   shippingFee: "",
-  skus: [
-    {
-      specName: "标准款",
-      price: "",
-      stock: 0,
-      imageUrl: "",
-      isMainImage: true,
-      sortOrder: 0,
-      recipeId: null,
-      bulkPreorderEnabled: false,
-      bulkOrderThreshold: "",
-      bulkMinLeadDays: "",
-      bulkPreorderMessage: "",
-      isActive: true,
-    },
-  ],
+  skus: [createDefaultSkuDraftRow(0)],
   displaySku: "",
   displayImageUrl: "",
   displayMinPrice: "0.00",

@@ -76,7 +76,14 @@
 - 库存不足 ≠ SKU 停用 ≠ SPU 下架。
 - 用户行为不得自动修改 `ProductSpu.isActive` / `ProductSku.isActive`。
 
-实现：`src/services/miniprogram-stock-pure.ts` → `resolveDisplayStatus`。
+### 单规格商品（默认 SKU）
+
+- **SPU 不能独立售卖**；每个 SPU 底层**至少一个** `ProductSku`（存库字段 `spec_name`，默认 `"单规格"`）。
+- **单规格商品**：仅 1 个 active SKU 时，CMS 展示「价格与库存」，无需手动「添加款式」；小程序**不展示**款式选择器，但下单仍传 `skuId`。
+- **多规格商品**：≥2 个 SKU 时，CMS 需填写各款式品名；小程序展示款式选择器。
+- 小程序 API 返回 `showSpecSelector`（`activeSkuCount > 1`）；单 SKU 时 `displaySpecName` 为空，不展示「单规格」等后台默认名。
+- 不允许删除最后一个 SKU；已上架商品不允许停用最后一个启用 SKU（须先下架 SPU）。
+- 实现：`src/lib/cms/single-spec-product.ts`、`ProductSkuEditorCards`、`wechat-product-mapper.ts`；库存展示状态见 `src/services/miniprogram-stock-pure.ts` → `resolveDisplayStatus`。
 
 ---
 

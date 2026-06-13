@@ -17,6 +17,17 @@ import type { CmsProductCategoryItem } from "@/lib/cms-product-categories";
 import { formatPercent } from "@/lib/format-money";
 import { formatNullable } from "@/lib/format-display";
 import type { PublishReadinessStatus } from "@/services/cms-product-validation-pure";
+import {
+  STICKY_ACTIONS,
+  STICKY_LEFT_CELL,
+  STICKY_LEFT_HEAD,
+  STICKY_RIGHT_CELL,
+  STICKY_RIGHT_HEAD,
+  STICKY_SCROLL_CELL,
+  STICKY_SCROLL_HEAD,
+  STICKY_TABLE_ROW,
+  StickyTableScroll,
+} from "@/components/admin/sticky-table";
 
 type SummaryItem = {
   id: string;
@@ -251,17 +262,17 @@ export function CmsProductsOperationsList({ categoryConfig }: Props) {
         />
       ) : (
         <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
-          <table className="w-full text-left text-sm">
+          <StickyTableScroll minWidth="1200px">
             <thead className="border-b bg-zinc-50">
               <tr>
-                <th className="px-4 py-3 font-medium text-zinc-600">品名</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">运营标签</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">上架校验</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">产品决策</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">推荐位</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">价格</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">状态</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">操作</th>
+                <th className={STICKY_LEFT_HEAD}>品名</th>
+                <th className={STICKY_SCROLL_HEAD}>运营标签</th>
+                <th className={STICKY_SCROLL_HEAD}>上架校验</th>
+                <th className={STICKY_SCROLL_HEAD}>产品决策</th>
+                <th className={STICKY_SCROLL_HEAD}>推荐位</th>
+                <th className={STICKY_SCROLL_HEAD}>价格</th>
+                <th className={STICKY_SCROLL_HEAD}>状态</th>
+                <th className={STICKY_RIGHT_HEAD}>操作</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -283,11 +294,11 @@ export function CmsProductsOperationsList({ categoryConfig }: Props) {
                   ).slice(0, 1);
 
                   return (
-                    <tr key={item.id} className="hover:bg-zinc-50/50">
-                      <td className="px-4 py-3">
+                    <tr key={item.id} className={STICKY_TABLE_ROW}>
+                      <td className={STICKY_LEFT_CELL}>
                         <p className="font-medium">{item.name}</p>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className={STICKY_SCROLL_CELL}>
                         <div className="space-y-2">
                           <ProductOccasionTagsBadge
                             tags={item.tags.occasionTags}
@@ -312,14 +323,14 @@ export function CmsProductsOperationsList({ categoryConfig }: Props) {
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className={STICKY_SCROLL_CELL}>
                         <ProductOperationSummaryBadge
                           status={item.publishReadiness.overallStatus}
                           score={item.publishReadiness.score}
                           canPromote={item.publishReadiness.canPromote}
                         />
                       </td>
-                      <td className="px-4 py-3">
+                      <td className={STICKY_SCROLL_CELL}>
                         {item.productDecisionSummary.healthStatus ? (
                           <div className="space-y-1">
                             <ProductDecisionHealthBadge
@@ -340,23 +351,23 @@ export function CmsProductsOperationsList({ categoryConfig }: Props) {
                           <span className="text-xs text-zinc-400">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-3">
+                      <td className={STICKY_SCROLL_CELL}>
                         {item.hasRecommendationSlot ? (
                           <Badge variant="info">已配置</Badge>
                         ) : (
                           <span className="text-xs text-zinc-400">—</span>
                         )}
                       </td>
-                      <td className="px-4 py-3">¥{item.minPrice}</td>
-                      <td className="px-4 py-3">
+                      <td className={STICKY_SCROLL_CELL}>¥{item.minPrice}</td>
+                      <td className={STICKY_SCROLL_CELL}>
                         {item.isActive ? (
                           <Badge variant="success">上架</Badge>
                         ) : (
                           <Badge variant="default">未上架</Badge>
                         )}
                       </td>
-                      <td className="px-4 py-3">
-                        <div className="flex flex-wrap gap-3">
+                      <td className={STICKY_RIGHT_CELL}>
+                        <div className={STICKY_ACTIONS}>
                           <Link
                             href={`/cms/products/${item.id}`}
                             className="text-rose-600 hover:underline"
@@ -378,7 +389,7 @@ export function CmsProductsOperationsList({ categoryConfig }: Props) {
                 })
               )}
             </tbody>
-          </table>
+          </StickyTableScroll>
         </div>
       )}
 

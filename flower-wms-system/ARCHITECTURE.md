@@ -285,6 +285,7 @@ CMS 商品编辑边界：
 - **首页场景入口**（`/cms/marketing` 首页场景入口 Tab、`/api/admin/cms/home-scene-entries`）决定小程序首页展示哪些送花场景卡片；与推荐位商品配置不得混为一谈。
 - 商品列表（`/cms/products`）通过 `operation-summaries` API 展示运营标签、上架校验状态、产品决策摘要、推荐位状态，并支持场景 / 定位 / 校验状态筛选。
 - 商品编辑页含「商品运营标签」「上架校验」「小程序展示预览」区块。
+- **单规格商品**：新建页默认 1 个 SKU 草稿（`specName=单规格`）；仅 1 SKU 时 CMS 显示「价格与库存」；≥2 SKU 时显示款式列表。小程序 `showSpecSelector=false` 时不展示款式选择器，下单仍用 `skuId`。
 
 ### CMS 易用性增强（运营配置无需手填内部 ID）
 
@@ -1401,6 +1402,19 @@ logging:
 | 测试 / smoke | `test:number-input`、`test:client-image-preview`、`smoke:cms-product-preview` |
 
 **前端预览 env：** `NEXT_PUBLIC_OSS_PUBLIC_BASE_URL` + `NEXT_PUBLIC_OSS_OBJECT_PREFIX`（不含 AccessKey）。
+
+### Sprint 19 — 后台弹窗统一改造为右侧 Drawer
+
+| 能力 | 实现 |
+|---|---|
+| 统一组件 | `src/components/admin/AdminDrawer.tsx`；Footer `DrawerFooterActions` |
+| mask | `bg-slate-950/30 backdrop-blur-[1px]`；打开时禁止 body 滚动 |
+| P0 迁移 | 供应商、物料、Banner、推荐位、CRM 客户详情、订单详情、采购单详情、SKU 损耗模拟、配方选择 |
+| P1 迁移 | 包装方案、首页场景入口、商品决策详情 Drawer 重构 |
+| 例外 | 删除 / 发货 / 退款等简单居中确认弹窗保留 |
+| UI 规范 | `docs/ui-guidelines.md` §后台 Drawer；验收 `docs/sprint-19-drawer-migration-checklist.md` |
+
+**原则：** Header / Body / Footer 三段式；Footer action 固定底部；表单紧凑一屏优先；不改业务逻辑 / API / schema。
 
 ### 退款库存回填
 

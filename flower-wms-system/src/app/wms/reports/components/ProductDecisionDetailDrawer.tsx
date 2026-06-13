@@ -3,6 +3,8 @@
 import Link from "next/link";
 import { ProductDecisionHealthBadge } from "@/components/product-decision/ProductDecisionBadge";
 import { ProductDecisionTags } from "@/components/product-decision/ProductDecisionTags";
+import { AdminDrawer } from "@/components/admin/AdminDrawer";
+import { DrawerFooterActions } from "@/components/admin/DrawerFooterActions";
 import { formatNullable, formatNumber, formatSignedPercent } from "@/lib/format-display";
 import { formatCurrency, formatPercent } from "@/lib/format-money";
 import {
@@ -73,32 +75,43 @@ export function ProductDecisionDetailDrawer({
   );
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/40">
-      <div className="flex h-full w-full max-w-3xl flex-col bg-white shadow-2xl">
-        <div className="flex items-start justify-between border-b border-zinc-200 px-6 py-4">
-          <div>
-            <p className="text-xs text-zinc-500">{item.productName}</p>
-            <h3 className="text-lg font-semibold text-zinc-900">{item.skuName}</h3>
-            <div className="mt-2 flex flex-wrap items-center gap-2">
-              <ProductDecisionHealthBadge
-                status={item.health.status}
-                statusLabel={item.health.statusLabel}
-              />
-              <span className="text-xs text-zinc-500">
-                {item.isActive ? "已上架" : "未上架"}
-              </span>
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg border border-zinc-200 px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-50"
-          >
-            关闭
-          </button>
+    <AdminDrawer
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+      title={item.skuName}
+      description={`${item.productName} · ${item.health.statusLabel}`}
+      size="full"
+      closeOnOverlayClick
+      bodyClassName="space-y-4"
+      footer={
+        <DrawerFooterActions
+          onCancel={onClose}
+          cancelLabel="关闭"
+          hideConfirm
+          dangerAction={
+            <Link
+              href={`/cms/products/${item.productId}`}
+              className="text-sm text-rose-600 hover:underline"
+            >
+              前往商品编辑 →
+            </Link>
+          }
+        />
+      }
+    >
+        <div className="flex flex-wrap items-center gap-2">
+          <ProductDecisionHealthBadge
+            status={item.health.status}
+            statusLabel={item.health.statusLabel}
+          />
+          <span className="text-xs text-zinc-500">
+            {item.isActive ? "已上架" : "未上架"}
+          </span>
         </div>
 
-        <div className="flex-1 space-y-6 overflow-y-auto px-6 py-6">
+        <div className="space-y-4">
           <Section title="基本信息">
             <div className="grid gap-3 text-sm sm:grid-cols-2">
               <p>分类：{item.categoryName || "—"}</p>
@@ -290,16 +303,6 @@ export function ProductDecisionDetailDrawer({
             </div>
           </Section>
         </div>
-
-        <div className="border-t border-zinc-200 px-6 py-4">
-          <Link
-            href={`/cms/products/${item.productId}`}
-            className="text-sm text-rose-600 hover:underline"
-          >
-            前往商品编辑 →
-          </Link>
-        </div>
-      </div>
-    </div>
+    </AdminDrawer>
   );
 }

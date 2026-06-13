@@ -13,6 +13,8 @@ import {
   STICKY_RIGHT_HEAD,
   STICKY_SCROLL_CELL,
   STICKY_SCROLL_HEAD,
+  STICKY_ACTIONS,
+  STICKY_TABLE_ROW,
   StickyTableScroll,
 } from "@/components/admin/sticky-table";
 import { PurchaseOrderDetailModal } from "@/app/wms/purchase-orders/PurchaseOrderDetailModal";
@@ -435,7 +437,7 @@ export function PurchaseOrderConsole() {
               <th className={STICKY_SCROLL_HEAD}>总金额</th>
               <th className={STICKY_SCROLL_HEAD}>明细数</th>
               <th className={STICKY_SCROLL_HEAD}>到货时间</th>
-              <th className={`${STICKY_RIGHT_HEAD} min-w-[9rem] w-36`}>操作</th>
+              <th className={STICKY_RIGHT_HEAD}>操作</th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -463,7 +465,7 @@ export function PurchaseOrderConsole() {
               items.map((item) => {
                 const actionable = isEditablePurchaseStatus(item.status);
                 return (
-                  <tr key={item.id} className="group hover:bg-zinc-50/80">
+                  <tr key={item.id} className={STICKY_TABLE_ROW}>
                     <td className={STICKY_LEFT_CELL}>{item.purchaseNo}</td>
                     <td className={STICKY_SCROLL_CELL}>{item.supplier.name}</td>
                     <td className={STICKY_SCROLL_CELL}>
@@ -493,11 +495,12 @@ export function PurchaseOrderConsole() {
                     <td className={`text-xs text-zinc-500 ${STICKY_SCROLL_CELL}`}>
                       {formatDateTime(item.receivedAt)}
                     </td>
-                    <td className={`${STICKY_RIGHT_CELL} min-w-[9rem] w-36`}>
+                    <td className={`${STICKY_RIGHT_CELL} min-w-[11rem] w-44`}>
+                      <div className={STICKY_ACTIONS}>
                         <button
                           type="button"
                           onClick={() => openDetail(item.id)}
-                          className="mr-3 text-rose-600 hover:underline"
+                          className="text-rose-600 hover:underline"
                           disabled={actionBusy}
                         >
                           查看
@@ -506,7 +509,7 @@ export function PurchaseOrderConsole() {
                           type="button"
                           onClick={() => startEdit(item.id)}
                           disabled={!actionable || actionBusy}
-                          className="mr-3 text-zinc-600 hover:text-rose-600 disabled:text-zinc-300"
+                          className="text-zinc-600 hover:text-rose-600 disabled:text-zinc-300"
                         >
                           编辑
                         </button>
@@ -514,7 +517,7 @@ export function PurchaseOrderConsole() {
                           type="button"
                           onClick={() => handleCancelOrder(item)}
                           disabled={!actionable || actionBusy}
-                          className="mr-3 text-zinc-500 hover:text-red-600 disabled:text-zinc-300"
+                          className="text-zinc-500 hover:text-red-600 disabled:text-zinc-300"
                         >
                           取消
                         </button>
@@ -526,7 +529,8 @@ export function PurchaseOrderConsole() {
                         >
                           入库
                         </button>
-                      </td>
+                      </div>
+                    </td>
                     </tr>
                   );
                 })

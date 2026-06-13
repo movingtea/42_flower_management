@@ -514,6 +514,22 @@ npm run smoke:cms-product-preview
 - React 19：`react-hooks/set-state-in-effect` 通过 `src/lib/defer-effect.ts`（`useDeferredEffect` / `deferEffectTask`）延迟 effect 内 setState，不改变请求时机与业务逻辑。
 - `QuantityStepper`：聚焦时用 draft、失焦后同步 prop，移除 effect 同步。
 
+### 10.9 单规格商品（默认 SKU）
+
+- 新建商品默认 1 个 SKU 草稿（`createDefaultSkuDraftRow()`），CMS 区块「价格与库存」，无需手动添加款式。
+- 多款式：点击「添加款式」；小程序 `showSpecSelector` 仅多 SKU 为 true。
+- 测试：`npm run test:single-spec-product`
+
+### 10.10 UI 抛光（Sprint 18 补充）
+
+- SKU 卡片启用区固定布局；宽表 sticky 不透明背景 + 操作列横向按钮。
+- 验收：`docs/sprint-18-ui-polish-checklist.md`
+
+### 10.11 Drawer 交互（Sprint 19）
+
+- 新增 / 编辑 / 详情统一右侧 `AdminDrawer`；mask 半透明遮盖；Footer 固定保存 / 取消。
+- 验收：`docs/sprint-19-drawer-migration-checklist.md`
+
 ## 11. 测试 / Smoke Scripts
 
 **业务规则源文件**：`docs/business-rules.md`（Sprint 12 起为规则真理源；Sprint 13 补齐 `ProductSku.isActive` 语义）。

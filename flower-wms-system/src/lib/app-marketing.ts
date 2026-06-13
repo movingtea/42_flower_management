@@ -70,7 +70,7 @@ export function validateGlobalNotice(config: GlobalNoticeConfig): string | null 
 
 export function validateHomePopup(config: HomePopupConfig): string | null {
   if (config.enabled && !config.imageUrl) {
-    return "开启弹窗时请上传活动海报";
+    return "开启弹窗时请上传活动图片";
   }
   return null;
 }

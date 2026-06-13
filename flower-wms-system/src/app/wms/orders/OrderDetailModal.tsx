@@ -1,7 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { Loader2, X } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import { AdminDrawer } from "@/components/admin/AdminDrawer";
+import { DrawerFooterActions } from "@/components/admin/DrawerFooterActions";
 import { FloralRole } from "@/generated/prisma/enums";
 import { FLORAL_ROLE_LABEL } from "@/lib/wiki-constants";
 import { ORDER_TOTAL_QUANTITY_HINT_THRESHOLD } from "@/lib/store-delivery-settings";
@@ -163,53 +165,31 @@ export function OrderDetailModal({ orderId, onClose }: Props) {
     }
   }
 
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 backdrop-blur-xs"
-      role="presentation"
-      onClick={onClose}
-    >
-      <div
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="order-detail-title"
-        className="flex max-h-[min(92vh,44rem)] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl ring-1 ring-black/5"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <header className="flex shrink-0 items-start justify-between gap-3 border-b border-zinc-100 px-5 py-4">
-          <div className="min-w-0 flex-1">
-            {detail ? (
-              <>
-                <p className="text-xs font-medium text-rose-600">
-                  {detail.statusLabel}
-                </p>
-                <h3
-                  id="order-detail-title"
-                  className="mt-1 break-all text-sm font-bold text-zinc-900 md:text-base"
-                >
-                  {detail.orderNo}
-                </h3>
-              </>
-            ) : (
-              <h3
-                id="order-detail-title"
-                className="break-all text-sm font-bold text-zinc-900 md:text-base"
-              >
-                订单详情
-              </h3>
-            )}
-          </div>
-          <button
-            type="button"
-            aria-label="关闭详情"
-            onClick={onClose}
-            className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-zinc-400 transition-colors hover:bg-zinc-100 hover:text-zinc-700"
-          >
-            <X className="size-4" strokeWidth={2.25} aria-hidden />
-          </button>
-        </header>
+  const drawerTitle = detail?.orderNo ?? "订单详情";
+  const drawerDescription = detail
+    ? `${detail.statusLabel} · 实付 ¥${detail.payAmount}`
+    : undefined;
 
-        <div className="flex-1 overflow-y-auto px-5 py-4">
+  return (
+    <AdminDrawer
+      open
+      onOpenChange={(open) => {
+        if (!open) onClose();
+      }}
+      title={drawerTitle}
+      description={drawerDescription}
+      size="xl"
+      closeOnOverlayClick
+      loading={loading}
+      bodyClassName="space-y-4"
+      footer={
+        <DrawerFooterActions
+          onCancel={onClose}
+          cancelLabel="关闭"
+          hideConfirm
+        />
+      }
+    >
           {loading ? (
             <div className="flex items-center justify-center gap-2 py-16 text-sm text-zinc-500">
               <Loader2 className="size-4 animate-spin" aria-hidden />
@@ -220,7 +200,7 @@ export function OrderDetailModal({ orderId, onClose }: Props) {
               {error}
             </p>
           ) : detail ? (
-            <div className="space-y-5">
+            <div className="space-y-4">
               <div className="flex flex-wrap items-center justify-between gap-2 rounded-xl border border-rose-100 bg-rose-50/60 px-4 py-3">
                 <div>
                   <p className="text-xs font-medium text-zinc-500">履约状态</p>
@@ -649,8 +629,6 @@ export function OrderDetailModal({ orderId, onClose }: Props) {
               </section>
             </div>
           ) : null}
-        </div>
-      </div>
-    </div>
+    </AdminDrawer>
   );
 }

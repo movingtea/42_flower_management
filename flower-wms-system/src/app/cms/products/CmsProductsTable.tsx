@@ -19,6 +19,8 @@ import {
   STICKY_RIGHT_HEAD,
   STICKY_SCROLL_CELL,
   STICKY_SCROLL_HEAD,
+  STICKY_ACTIONS,
+  STICKY_TABLE_ROW,
   StickyTableScroll,
 } from "@/components/admin/sticky-table";
 
@@ -194,7 +196,7 @@ export function CmsProductsTable({ rows, categoryConfig }: Props) {
               </tr>
             ) : (
               list.map((p) => (
-                <tr key={p.id} className="group hover:bg-zinc-50/50">
+                <tr key={p.id} className={STICKY_TABLE_ROW}>
                   <td className={STICKY_LEFT_CELL}>
                     <p className="font-medium">{p.name}</p>
                     <p className="text-xs text-zinc-500">{p.sku}</p>
@@ -272,7 +274,7 @@ export function CmsProductsTable({ rows, categoryConfig }: Props) {
                     )}
                   </td>
                   <td className={STICKY_RIGHT_CELL}>
-                    <div className="flex flex-wrap items-center justify-end gap-3">
+                    <div className={STICKY_ACTIONS}>
                       <Link
                         href={`/cms/products/${p.id}`}
                         className="text-rose-600 hover:underline"

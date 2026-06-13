@@ -23,6 +23,11 @@ import { ProductMiniProgramPreview } from "@/components/cms/ProductMiniProgramPr
 import { ProductPublishReadinessPanel } from "@/components/cms/ProductPublishReadinessPanel";
 import { ProductDecisionPanel } from "@/components/product-decision/ProductDecisionPanel";
 import { uploadCmsImage } from "@/lib/cms-image-upload";
+import {
+  countEnabledSkus,
+  createDefaultSkuDraftRow,
+  resolveSkuSpecNameForSave,
+} from "@/lib/cms/single-spec-product";
 import type { ProductMarginEstimate } from "@/services/product-margin";
 
 const SHIPPING_FEE_PATTERN = /^[0-9]+(\.[0-9]{1,2})?$/;
@@ -36,20 +41,7 @@ type ProductMarginApiResponse = {
 };
 
 function emptySkuRow(sortOrder = 0): ProductSkuEditorRow {
-  return {
-    specName: "",
-    price: "",
-    stock: 0,
-    imageUrl: "",
-    isMainImage: sortOrder === 0,
-    isActive: true,
-    sortOrder,
-    recipeId: null,
-    bulkPreorderEnabled: false,
-    bulkOrderThreshold: "",
-    bulkMinLeadDays: "",
-    bulkPreorderMessage: "",
-  };
+  return createDefaultSkuDraftRow(sortOrder);
 }
 
 function formatBulkPreorderPreview(row: ProductSkuEditorRow): string | null {
@@ -158,13 +150,20 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
   function addSkuRow() {
     setSkus((prev) => {
       const maxSort = prev.reduce((m, r) => Math.max(m, r.sortOrder ?? 0), 0);
-      return [...prev, emptySkuRow(maxSort + 10)];
+      return [
+        ...prev,
+        {
+          ...createDefaultSkuDraftRow(maxSort + 10),
+          specName: "",
+          isMainImage: false,
+        },
+      ];
     });
   }
 
   function removeSkuRow(index: number) {
     if (skus.length <= 1) {
-      showToast("至少保留一个款式", "error");
+      showToast("请至少保留一个规格", "error");
       return;
     }
     setSkus((prev) => {
@@ -180,6 +179,15 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
     index: number,
     patch: Partial<ProductSkuEditorRow>
   ) {
+    if (
+      patch.isActive === false &&
+      isPublished &&
+      countEnabledSkus(skus) <= 1 &&
+      skus[index]?.isActive !== false
+    ) {
+      showToast("已上架商品请至少保留一个启用规格，或先下架商品", "error");
+      return;
+    }
     setSkus((prev) =>
       prev.map((row, i) => (i === index ? { ...row, ...patch } : row))
     );
@@ -229,10 +237,20 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
     }
     if (!validateShippingFeeInput()) return;
 
+    if (isPublished && countEnabledSkus(skus) === 0) {
+      showToast("请至少保留一个启用规格，或先下架商品", "error");
+      return;
+    }
+
     for (let i = 0; i < skus.length; i++) {
       const row = skus[i];
-      if (!row.specName.trim()) {
-        showToast(`请填写第 ${i + 1} 行的款式品名`, "error");
+      try {
+        resolveSkuSpecNameForSave(row.specName, skus.length, i);
+      } catch (e) {
+        showToast(
+          e instanceof Error ? e.message : `请填写第 ${i + 1} 行的款式品名`,
+          "error"
+        );
         return;
       }
       const price = Number(row.price);
@@ -283,11 +301,12 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
       skus: skus.map((row, index) => ({
         id: row.id,
         skuCode: row.skuCode,
-        specName: row.specName.trim(),
+        specName: resolveSkuSpecNameForSave(row.specName, skus.length, index),
         price: Number(row.price),
         stock: row.stock ?? 0,
         imageUrl: row.imageUrl.trim() || null,
         isMainImage: row.isMainImage,
+        isActive: row.isActive !== false,
         sortOrder: row.sortOrder ?? index * 10,
         recipeId: row.recipeId,
         bulkPreorderEnabled: row.bulkPreorderEnabled,
@@ -402,7 +421,7 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
             {isNew ? "新增商品" : "编辑商品"}
           </h2>
           <p className="mt-1 text-sm text-zinc-500">
-            SPU 公用信息 + 多款式 SKU 管理
+            填写商品信息与价格库存；单规格商品无需手动添加款式
           </p>
         </div>
         <Link href="/cms/products" className="text-sm text-rose-600 hover:underline">

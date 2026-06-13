@@ -11,12 +11,10 @@ import {
   getCmsSkuEditorBadge,
   skuStatusBadgeClassName,
 } from "@/lib/cms/sku-display";
+import { isSingleSpecProduct } from "@/lib/cms/single-spec-product";
 import { formatPercent } from "@/lib/format-money";
-import type {
-  MarginEstimateSlice,
-  ProductMarginEstimate,
-  SkuMarginEstimate,
-} from "@/services/product-margin";
+import { SkuLossSimulationDrawer } from "@/components/cms/SkuLossSimulationDrawer";
+import type { ProductMarginEstimate, SkuMarginEstimate } from "@/services/product-margin";
 
 type Props = {
   skus: ProductSkuEditorRow[];
@@ -102,99 +100,47 @@ function SkuMarginSummary({
   );
 }
 
-function SkuLossSimulationPanel({ estimate }: { estimate: SkuMarginEstimate }) {
-  const rows: Array<{
-    key: string;
-    label: string;
-    slice: MarginEstimateSlice;
-    hint: string;
-  }> = [
-    {
-      key: "optimistic",
-      label: "乐观",
-      slice: estimate.lossModelEstimates.optimistic,
-      hint: "按花材乐观可用率估算",
-    },
-    {
-      key: "standard",
-      label: "标准",
-      slice: estimate.lossModelEstimates.standard,
-      hint: "按花材默认可用率估算",
-    },
-    {
-      key: "conservative",
-      label: "保守",
-      slice: estimate.lossModelEstimates.conservative,
-      hint: "用于判断产品抗不抗损耗",
-    },
-  ];
+function getSkuStatusAreaHint(
+  row: ProductSkuEditorRow,
+  cmsBadge: ReturnType<typeof getCmsSkuEditorBadge>
+): string | null {
+  if (row.isActive === false) {
+    return "该规格已停用，即使有库存也不会在小程序售卖";
+  }
+  if (cmsBadge.status === "sold_out" && row.id) {
+    return "小程序前台将显示售罄";
+  }
+  return null;
+}
 
-  const warningText = estimate.warnings.join("；");
+function SkuStatusControl({
+  row,
+  cmsBadge,
+  onToggleActive,
+}: {
+  row: ProductSkuEditorRow;
+  cmsBadge: ReturnType<typeof getCmsSkuEditorBadge>;
+  onToggleActive: (checked: boolean) => void;
+}) {
+  const hint = getSkuStatusAreaHint(row, cmsBadge);
 
   return (
-    <div className="mt-3 space-y-3 rounded-lg border border-sky-100 bg-sky-50/50 p-3 text-xs">
-      <p className="text-sky-900">
-        花材 ¥{estimate.rawEstimate.materialCost} · 包装 ¥
-        {estimate.rawEstimate.packagingCost} · 毛利 ¥
-        {estimate.rawEstimate.estimatedGrossProfit}
+    <div className="flex min-w-[240px] shrink-0 flex-col items-end gap-1">
+      <div className="flex items-center justify-end gap-3">
+        <span
+          className={`inline-flex min-w-[4.5rem] justify-center rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${skuStatusBadgeClassName(cmsBadge.status)}`}
+        >
+          {cmsBadge.label}
+        </span>
+        <Switch
+          label="启用"
+          checked={row.isActive !== false}
+          onChange={onToggleActive}
+        />
+      </div>
+      <p className="min-h-[2.5rem] max-w-[15rem] text-right text-[11px] leading-snug text-zinc-500">
+        {hint ?? "\u00A0"}
       </p>
-      <p className="text-zinc-600">
-        建议售价：
-        {estimate.suggestedPrices.length > 0
-          ? estimate.suggestedPrices
-              .map(
-                (item) =>
-                  `${(Number(item.targetMargin) * 100).toFixed(0)}% ¥${item.price}`
-              )
-              .join(" / ")
-          : "—"}
-      </p>
-      {warningText ? (
-        <p className="text-amber-800">⚠ {warningText}</p>
-      ) : (
-        <p className="text-emerald-700">{estimate.rawEstimate.marginLevel}</p>
-      )}
-      <p className="text-[11px] text-sky-800">
-        原始预估：不计入损耗模型；标准模式：按花材默认可用率估算。
-      </p>
-      <table className="w-full text-left text-[11px]">
-        <thead>
-          <tr className="text-sky-900">
-            <th className="py-1 pr-2 font-medium">模式</th>
-            <th className="py-1 pr-2 text-right font-medium">估算成本</th>
-            <th className="py-1 pr-2 text-right font-medium">毛利</th>
-            <th className="py-1 text-right font-medium">毛利率</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr className="border-t border-sky-100 text-zinc-700">
-            <td className="py-1 pr-2">原始</td>
-            <td className="py-1 pr-2 text-right">
-              ¥{estimate.rawEstimate.totalCost}
-            </td>
-            <td className="py-1 pr-2 text-right">
-              ¥{estimate.rawEstimate.estimatedGrossProfit}
-            </td>
-            <td className="py-1 text-right">
-              {formatPercent(estimate.rawEstimate.estimatedGrossMargin)}
-            </td>
-          </tr>
-          {rows.map((item) => (
-            <tr key={item.key} className="border-t border-sky-100 text-zinc-700">
-              <td className="py-1 pr-2" title={item.hint}>
-                {item.label}
-              </td>
-              <td className="py-1 pr-2 text-right">¥{item.slice.totalCost}</td>
-              <td className="py-1 pr-2 text-right">
-                ¥{item.slice.estimatedGrossProfit}
-              </td>
-              <td className="py-1 text-right">
-                {formatPercent(item.slice.estimatedGrossMargin)}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
     </div>
   );
 }
@@ -212,21 +158,26 @@ export function ProductSkuEditorCards({
   onSetMainImage,
   onPickImage,
 }: Props) {
-  const [expandedLoss, setExpandedLoss] = useState<Record<string, boolean>>({});
+  const [lossDrawerIndex, setLossDrawerIndex] = useState<number | null>(null);
+  const singleSpec = isSingleSpecProduct(skus.length);
 
-  function toggleLoss(key: string) {
-    setExpandedLoss((prev) => ({ ...prev, [key]: !prev[key] }));
-  }
+  const lossDrawerRow =
+    lossDrawerIndex != null ? skus[lossDrawerIndex] : null;
+  const lossDrawerEstimate = lossDrawerRow
+    ? findSkuEstimate(lossDrawerRow, marginEstimate)
+    : null;
 
   return (
     <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h3 className="text-sm font-semibold text-zinc-900">
-            款式列表（SKU / 主图）
+            {singleSpec ? "价格与库存" : "款式列表（SKU / 主图）"}
           </h3>
           <p className="mt-1 text-xs text-zinc-500">
-            指定一个「商品卡片主图」用于小程序列表封面
+            {singleSpec
+              ? "单规格商品可直接填写售价与库存；如需多个款式，请点击「添加款式」"
+              : "指定一个「商品卡片主图」用于小程序列表封面"}
           </p>
           {marginError ? (
             <p className="mt-1 text-xs text-amber-700">{marginError}</p>
@@ -246,67 +197,77 @@ export function ProductSkuEditorCards({
             stock: row.stock,
           });
           const estimate = findSkuEstimate(row, marginEstimate);
-          const lossExpanded = Boolean(expandedLoss[rowKey]);
           const canExpandLoss = Boolean(estimate && estimate.recipeId === row.recipeId);
+          const cardTitle = singleSpec
+            ? "单规格"
+            : `款式 ${index + 1}`;
 
           return (
             <article
               key={rowKey}
               className="rounded-xl border border-zinc-200 bg-zinc-50/30 p-4 shadow-sm"
             >
-              <header className="flex flex-wrap items-start justify-between gap-3 border-b border-zinc-100 pb-3">
+              <header className="flex items-start justify-between gap-3 border-b border-zinc-100 pb-3">
                 <div className="min-w-0 flex-1 space-y-2">
-                  <input
-                    className="w-full max-w-md rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium"
-                    value={row.specName}
-                    onChange={(e) =>
-                      onUpdateRow(index, { specName: e.target.value })
-                    }
-                    placeholder="款式品名，如：标准款"
-                  />
+                  {singleSpec ? (
+                    <div>
+                      <p className="text-sm font-semibold text-zinc-900">
+                        {cardTitle}
+                      </p>
+                      <p className="text-xs text-zinc-500">
+                        默认规格 · 小程序不展示款式选择
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <p className="text-xs font-medium text-zinc-500">
+                        {cardTitle}
+                      </p>
+                      <input
+                        className="w-full max-w-md rounded-lg border border-zinc-200 bg-white px-3 py-2 text-sm font-medium"
+                        value={row.specName}
+                        onChange={(e) =>
+                          onUpdateRow(index, { specName: e.target.value })
+                        }
+                        placeholder="款式品名，如：大号 / 标准款"
+                      />
+                    </>
+                  )}
                   {row.skuCode ? (
                     <p className="text-xs text-zinc-400">编码：{row.skuCode}</p>
                   ) : null}
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <div className="space-y-0.5">
-                    <span
-                      className={`inline-flex rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${skuStatusBadgeClassName(cmsBadge.status)}`}
-                    >
-                      {cmsBadge.label}
-                    </span>
-                    {cmsBadge.hint ? (
-                      <p className="max-w-[12rem] text-[11px] text-zinc-500">
-                        {cmsBadge.hint}
-                      </p>
-                    ) : null}
-                  </div>
-                  <Switch
-                    label="启用"
-                    checked={row.isActive !== false}
-                    onChange={(checked) =>
+                <div className="flex shrink-0 items-start gap-2">
+                  <SkuStatusControl
+                    row={row}
+                    cmsBadge={cmsBadge}
+                    onToggleActive={(checked) =>
                       onUpdateRow(index, { isActive: checked })
                     }
                   />
-                  <Button
-                    type="button"
-                    variant="secondary"
-                    className="text-red-600 hover:text-red-800"
-                    disabled={skus.length <= 1}
-                    onClick={() => onRemoveRow(index)}
-                  >
-                    删除
-                  </Button>
+                  {!singleSpec ? (
+                    <Button
+                      type="button"
+                      variant="secondary"
+                      className="mt-0.5 text-red-600 hover:text-red-800"
+                      disabled={skus.length <= 1}
+                      onClick={() => onRemoveRow(index)}
+                    >
+                      删除
+                    </Button>
+                  ) : null}
                 </div>
               </header>
 
               <div className="mt-4 grid gap-4 lg:grid-cols-[9rem_minmax(0,1fr)_minmax(0,14rem)]">
                 <div className="space-y-2">
-                  <p className="text-xs font-medium text-zinc-600">款式图</p>
+                  <p className="text-xs font-medium text-zinc-600">
+                    {singleSpec ? "商品图" : "款式图"}
+                  </p>
                   <div className="relative mx-auto h-28 w-28 overflow-hidden rounded-lg border border-zinc-200 bg-white lg:mx-0">
                     <CmsImagePreview
                       stored={row.imageUrl}
-                      alt="款式图"
+                      alt={singleSpec ? "商品图" : "款式图"}
                       fill
                       compact
                     />
@@ -377,18 +338,14 @@ export function ProductSkuEditorCards({
                 </div>
               </div>
 
-              <p className="mt-3 text-xs text-zinc-500">
-                关闭后，该规格不会在小程序展示，也不能被加入购物车或下单。
-              </p>
-
               <footer className="mt-3 flex flex-wrap items-center gap-2 border-t border-zinc-100 pt-3">
                 {canExpandLoss ? (
                   <Button
                     type="button"
                     variant="secondary"
-                    onClick={() => toggleLoss(rowKey)}
+                    onClick={() => setLossDrawerIndex(index)}
                   >
-                    {lossExpanded ? "收起损耗模拟" : "查看损耗模拟"}
+                    查看损耗模拟
                   </Button>
                 ) : null}
                 {!row.isMainImage ? (
@@ -406,13 +363,32 @@ export function ProductSkuEditorCards({
                 )}
               </footer>
 
-              {lossExpanded && estimate ? (
-                <SkuLossSimulationPanel estimate={estimate} />
-              ) : null}
             </article>
           );
         })}
       </div>
+
+      {lossDrawerRow && lossDrawerEstimate ? (
+        <SkuLossSimulationDrawer
+          open={lossDrawerIndex != null}
+          onOpenChange={(open) => {
+            if (!open) setLossDrawerIndex(null);
+          }}
+          skuLabel={
+            singleSpec
+              ? "单规格"
+              : lossDrawerRow.specName || `款式 ${(lossDrawerIndex ?? 0) + 1}`
+          }
+          price={lossDrawerRow.price}
+          stock={lossDrawerRow.stock}
+          estimate={lossDrawerEstimate}
+          onApplySuggestedPrice={(price) => {
+            if (lossDrawerIndex != null) {
+              onUpdateRow(lossDrawerIndex, { price });
+            }
+          }}
+        />
+      ) : null}
     </section>
   );
 }

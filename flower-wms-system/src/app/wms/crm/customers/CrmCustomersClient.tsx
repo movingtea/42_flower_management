@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { ActionEmptyState } from "@/components/admin/ActionEmptyState";
 import { CustomerTable } from "@/app/wms/crm/components/CustomerTable";
+import { CustomerDetailDrawer } from "@/app/wms/crm/components/CustomerDetailDrawer";
 import { getCustomerSourceLabel } from "@/lib/crm-tags";
 import { CustomerSource } from "@/generated/prisma/enums";
 
@@ -38,6 +39,7 @@ export function CrmCustomersClient() {
   const [data, setData] = useState<ApiData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [detailCustomerId, setDetailCustomerId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -148,8 +150,18 @@ export function CrmCustomersClient() {
               primaryActionHref="/wms/orders"
             />
           ) : (
-            <CustomerTable rows={data?.customers ?? []} />
+            <CustomerTable
+              rows={data?.customers ?? []}
+              onViewDetail={setDetailCustomerId}
+            />
           )}
+          <CustomerDetailDrawer
+            customerId={detailCustomerId}
+            open={detailCustomerId != null}
+            onOpenChange={(open) => {
+              if (!open) setDetailCustomerId(null);
+            }}
+          />
           {data && data.pagination.totalPages > 1 && (
             <div className="flex items-center justify-between text-sm text-zinc-600">
               <span>
