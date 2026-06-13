@@ -22,6 +22,15 @@ import {
   validateCmsLinkTarget,
   type CmsLinkTarget,
 } from "@/lib/cms-link-target";
+import {
+  STICKY_LEFT_CELL,
+  STICKY_LEFT_HEAD,
+  STICKY_RIGHT_CELL,
+  STICKY_RIGHT_HEAD,
+  STICKY_SCROLL_CELL,
+  STICKY_SCROLL_HEAD,
+  StickyTableScroll,
+} from "@/components/admin/sticky-table";
 
 type BannerRow = BannerWriteItem & {
   id: string;
@@ -388,26 +397,31 @@ export function BannerManager() {
         </div>
       ) : (
         <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
-          <table className="w-full text-left text-sm">
+          <StickyTableScroll minWidth="900px">
+            <colgroup>
+              <col className="w-36" />
+              <col />
+              <col />
+              <col />
+              <col />
+              <col />
+              <col className="w-32" />
+            </colgroup>
             <thead className="border-b bg-zinc-50">
               <tr>
-                <th className="px-4 py-3 font-medium text-zinc-600">海报</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">排序</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">
-                  跳转目标
-                </th>
-                <th className="px-4 py-3 font-medium text-zinc-600">展示状态</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">有效期</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">
-                  更新时间
-                </th>
-                <th className="px-4 py-3 font-medium text-zinc-600">操作</th>
+                <th className={STICKY_LEFT_HEAD}>海报</th>
+                <th className={STICKY_SCROLL_HEAD}>排序</th>
+                <th className={STICKY_SCROLL_HEAD}>跳转目标</th>
+                <th className={STICKY_SCROLL_HEAD}>展示状态</th>
+                <th className={STICKY_SCROLL_HEAD}>有效期</th>
+                <th className={STICKY_SCROLL_HEAD}>更新时间</th>
+                <th className={`${STICKY_RIGHT_HEAD} min-w-[8rem] w-32`}>操作</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {banners.map((item) => (
-                <tr key={item.id} className="hover:bg-zinc-50/50">
-                  <td className="px-4 py-3">
+                <tr key={item.id} className="group hover:bg-zinc-50/50">
+                  <td className={STICKY_LEFT_CELL}>
                     <div className="relative h-16 w-28 overflow-hidden rounded-lg border border-rose-100 bg-zinc-50">
                       {item.imageUrl ? (
                         isClientImageInvalid(item.imageUrl) ? (
@@ -434,7 +448,7 @@ export function BannerManager() {
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className={STICKY_SCROLL_CELL}>
                     <input
                       type="number"
                       className="w-20 rounded-lg border border-zinc-200 px-2 py-1"
@@ -445,13 +459,13 @@ export function BannerManager() {
                     />
                     <p className="mt-0.5 text-xs text-zinc-400">越小越靠前</p>
                   </td>
-                  <td className="px-4 py-3">{renderJumpSummary(item)}</td>
-                  <td className="px-4 py-3">
+                  <td className={STICKY_SCROLL_CELL}>{renderJumpSummary(item)}</td>
+                  <td className={STICKY_SCROLL_CELL}>
                     <Badge variant={displayStatusVariant(item.displayStatus)}>
                       {item.displayStatus ?? (item.isActive !== false ? "展示中" : "已停用")}
                     </Badge>
                   </td>
-                  <td className="px-4 py-3 text-xs text-zinc-500">
+                  <td className={`text-xs text-zinc-500 ${STICKY_SCROLL_CELL}`}>
                     <p>
                       {item.startsAt
                         ? formatUpdatedAt(item.startsAt)
@@ -460,11 +474,11 @@ export function BannerManager() {
                       {item.endsAt ? formatUpdatedAt(item.endsAt) : "不限"}
                     </p>
                   </td>
-                  <td className="px-4 py-3 text-zinc-500">
+                  <td className={`text-zinc-500 ${STICKY_SCROLL_CELL}`}>
                     {formatUpdatedAt(item.updatedAt)}
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap gap-2">
+                  <td className={`${STICKY_RIGHT_CELL} min-w-[8rem] w-32`}>
+                    <div className="flex flex-wrap justify-end gap-2">
                       <Button
                         type="button"
                         variant="secondary"
@@ -492,7 +506,7 @@ export function BannerManager() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </StickyTableScroll>
         </div>
       )}
 

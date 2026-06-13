@@ -6,6 +6,15 @@ import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { formatCurrency } from "@/lib/format-money";
+import {
+  STICKY_LEFT_CELL,
+  STICKY_LEFT_HEAD,
+  STICKY_RIGHT_CELL,
+  STICKY_RIGHT_HEAD,
+  STICKY_SCROLL_CELL,
+  STICKY_SCROLL_HEAD,
+  StickyTableScroll,
+} from "@/components/admin/sticky-table";
 import { PurchaseOrderDetailModal } from "@/app/wms/purchase-orders/PurchaseOrderDetailModal";
 import { PurchaseOrderEditor } from "@/app/wms/purchase-orders/PurchaseOrderEditor";
 import {
@@ -398,80 +407,93 @@ export function PurchaseOrderConsole() {
           </div>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[1180px] text-left text-sm">
-            <thead className="border-b bg-zinc-50">
+        <StickyTableScroll minWidth="1180px">
+          <colgroup>
+            <col className="w-40" />
+            <col />
+            <col />
+            <col />
+            <col />
+            <col />
+            <col />
+            <col />
+            <col />
+            <col />
+            <col />
+            <col className="w-36" />
+          </colgroup>
+          <thead className="border-b bg-zinc-50">
+            <tr>
+              <th className={STICKY_LEFT_HEAD}>采购单号</th>
+              <th className={STICKY_SCROLL_HEAD}>供应商</th>
+              <th className={STICKY_SCROLL_HEAD}>采购日期</th>
+              <th className={STICKY_SCROLL_HEAD}>状态</th>
+              <th className={STICKY_SCROLL_HEAD}>商品金额</th>
+              <th className={STICKY_SCROLL_HEAD}>运费</th>
+              <th className={STICKY_SCROLL_HEAD}>包装费</th>
+              <th className={STICKY_SCROLL_HEAD}>其他费用</th>
+              <th className={STICKY_SCROLL_HEAD}>总金额</th>
+              <th className={STICKY_SCROLL_HEAD}>明细数</th>
+              <th className={STICKY_SCROLL_HEAD}>到货时间</th>
+              <th className={`${STICKY_RIGHT_HEAD} min-w-[9rem] w-36`}>操作</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y">
+            {loading ? (
               <tr>
-                <th className="px-4 py-3 font-medium text-zinc-600">采购单号</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">供应商</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">采购日期</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">状态</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">商品金额</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">运费</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">包装费</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">其他费用</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">总金额</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">明细数</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">到货时间</th>
-                <th className="px-4 py-3 font-medium text-zinc-600">操作</th>
+                <td colSpan={12} className="px-4 py-12 text-center text-zinc-500">
+                  正在加载采购单…
+                </td>
               </tr>
-            </thead>
-            <tbody className="divide-y">
-              {loading ? (
-                <tr>
-                  <td colSpan={12} className="px-4 py-12 text-center text-zinc-500">
-                    正在加载采购单…
-                  </td>
-                </tr>
-              ) : items.length === 0 ? (
-                <tr>
-                  <td colSpan={12} className="p-0">
-                    <ActionEmptyState
-                      title="还没有采购单"
-                      description="试运营前建议先录入供应商，并创建第一张采购单。"
-                      primaryActionLabel="创建供应商"
-                      primaryActionHref="/wms/suppliers"
-                      secondaryActionLabel="新建采购单"
-                      secondaryActionHref="/wms/purchase-orders"
-                      className="border-0 shadow-none"
-                    />
-                  </td>
-                </tr>
-              ) : (
-                items.map((item) => {
-                  const actionable = isEditablePurchaseStatus(item.status);
-                  return (
-                    <tr key={item.id} className="hover:bg-zinc-50/80">
-                      <td className="px-4 py-3 font-medium text-zinc-900">
-                        {item.purchaseNo}
-                      </td>
-                      <td className="px-4 py-3">{item.supplier.name}</td>
-                      <td className="px-4 py-3">{formatDate(item.purchaseDate)}</td>
-                      <td className="px-4 py-3">
-                        <Badge variant={statusVariant(item.status)}>
-                          {purchaseStatusLabels[item.status]}
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-3">
-                        {formatCurrency(item.goodsAmount)}
-                      </td>
-                      <td className="px-4 py-3">
-                        {formatCurrency(item.shippingFee ?? 0)}
-                      </td>
-                      <td className="px-4 py-3">
-                        {formatCurrency(item.packagingFee ?? 0)}
-                      </td>
-                      <td className="px-4 py-3">
-                        {formatCurrency(item.otherFee ?? 0)}
-                      </td>
-                      <td className="px-4 py-3 font-semibold text-rose-700">
-                        {formatCurrency(item.totalAmount)}
-                      </td>
-                      <td className="px-4 py-3">{item.lineCount}</td>
-                      <td className="px-4 py-3 text-xs text-zinc-500">
-                        {formatDateTime(item.receivedAt)}
-                      </td>
-                      <td className="px-4 py-3">
+            ) : items.length === 0 ? (
+              <tr>
+                <td colSpan={12} className="p-0">
+                  <ActionEmptyState
+                    title="还没有采购单"
+                    description="试运营前建议先录入供应商，并创建第一张采购单。"
+                    primaryActionLabel="创建供应商"
+                    primaryActionHref="/wms/suppliers"
+                    secondaryActionLabel="新建采购单"
+                    secondaryActionHref="/wms/purchase-orders"
+                    className="border-0 shadow-none"
+                  />
+                </td>
+              </tr>
+            ) : (
+              items.map((item) => {
+                const actionable = isEditablePurchaseStatus(item.status);
+                return (
+                  <tr key={item.id} className="group hover:bg-zinc-50/80">
+                    <td className={STICKY_LEFT_CELL}>{item.purchaseNo}</td>
+                    <td className={STICKY_SCROLL_CELL}>{item.supplier.name}</td>
+                    <td className={STICKY_SCROLL_CELL}>
+                      {formatDate(item.purchaseDate)}
+                    </td>
+                    <td className={STICKY_SCROLL_CELL}>
+                      <Badge variant={statusVariant(item.status)}>
+                        {purchaseStatusLabels[item.status]}
+                      </Badge>
+                    </td>
+                    <td className={STICKY_SCROLL_CELL}>
+                      {formatCurrency(item.goodsAmount)}
+                    </td>
+                    <td className={STICKY_SCROLL_CELL}>
+                      {formatCurrency(item.shippingFee ?? 0)}
+                    </td>
+                    <td className={STICKY_SCROLL_CELL}>
+                      {formatCurrency(item.packagingFee ?? 0)}
+                    </td>
+                    <td className={STICKY_SCROLL_CELL}>
+                      {formatCurrency(item.otherFee ?? 0)}
+                    </td>
+                    <td className={`font-semibold text-rose-700 ${STICKY_SCROLL_CELL}`}>
+                      {formatCurrency(item.totalAmount)}
+                    </td>
+                    <td className={STICKY_SCROLL_CELL}>{item.lineCount}</td>
+                    <td className={`text-xs text-zinc-500 ${STICKY_SCROLL_CELL}`}>
+                      {formatDateTime(item.receivedAt)}
+                    </td>
+                    <td className={`${STICKY_RIGHT_CELL} min-w-[9rem] w-36`}>
                         <button
                           type="button"
                           onClick={() => openDetail(item.id)}
@@ -510,8 +532,7 @@ export function PurchaseOrderConsole() {
                 })
               )}
             </tbody>
-          </table>
-        </div>
+          </StickyTableScroll>
       </section>
 
       {detail && (

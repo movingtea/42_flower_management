@@ -8,6 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/Switch";
 import { formatDateTimeInAppTimezone } from "@/lib/datetime";
 import type { PackagingKitRow } from "@/lib/packaging-kit";
+import {
+  STICKY_LEFT_CELL,
+  STICKY_LEFT_HEAD,
+  STICKY_RIGHT_CELL,
+  STICKY_RIGHT_HEAD,
+  STICKY_SCROLL_CELL,
+  STICKY_SCROLL_HEAD,
+  StickyTableScroll,
+} from "@/components/admin/sticky-table";
 
 type Props = {
   initialList: PackagingKitRow[];
@@ -167,53 +176,56 @@ export function PackagingKitManager({ initialList }: Props) {
 
       <div className="grid gap-8 lg:grid-cols-5">
         <section className="rounded-xl border border-zinc-200 bg-white shadow-sm lg:col-span-3">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="border-b bg-zinc-50">
+          <StickyTableScroll minWidth="720px">
+            <colgroup>
+              <col className="w-44" />
+              <col />
+              <col />
+              <col />
+              <col />
+              <col className="w-28" />
+            </colgroup>
+            <thead className="border-b bg-zinc-50">
+              <tr>
+                <th className={STICKY_LEFT_HEAD}>名称</th>
+                <th className={STICKY_SCROLL_HEAD}>标准成本</th>
+                <th className={STICKY_SCROLL_HEAD}>描述</th>
+                <th className={STICKY_SCROLL_HEAD}>状态</th>
+                <th className={STICKY_SCROLL_HEAD}>更新时间</th>
+                <th className={STICKY_RIGHT_HEAD}>操作</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y">
+              {list.length === 0 ? (
                 <tr>
-                  <th className="px-4 py-3 font-medium text-zinc-600">名称</th>
-                  <th className="px-4 py-3 font-medium text-zinc-600">
-                    标准成本
-                  </th>
-                  <th className="px-4 py-3 font-medium text-zinc-600">描述</th>
-                  <th className="px-4 py-3 font-medium text-zinc-600">状态</th>
-                  <th className="px-4 py-3 font-medium text-zinc-600">
-                    更新时间
-                  </th>
-                  <th className="px-4 py-3 font-medium text-zinc-600">操作</th>
+                  <td
+                    colSpan={6}
+                    className="px-4 py-12 text-center text-zinc-500"
+                  >
+                    暂无包装方案
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y">
-                {list.length === 0 ? (
-                  <tr>
-                    <td
-                      colSpan={6}
-                      className="px-4 py-12 text-center text-zinc-500"
-                    >
-                      暂无包装方案
+              ) : (
+                list.map((row) => (
+                  <tr key={row.id} className="group hover:bg-zinc-50/80">
+                    <td className={STICKY_LEFT_CELL}>{row.name}</td>
+                    <td className={`font-semibold text-rose-800 ${STICKY_SCROLL_CELL}`}>
+                      ¥{row.standardCost}
                     </td>
-                  </tr>
-                ) : (
-                  list.map((row) => (
-                    <tr key={row.id} className="hover:bg-zinc-50/80">
-                      <td className="px-4 py-3 font-medium">{row.name}</td>
-                      <td className="px-4 py-3 font-semibold text-rose-800">
-                        ¥{row.standardCost}
-                      </td>
-                      <td className="max-w-56 px-4 py-3 text-zinc-600">
-                        {row.description || "—"}
-                      </td>
-                      <td className="px-4 py-3">
-                        {row.isActive ? (
-                          <Badge variant="success">已启用</Badge>
-                        ) : (
-                          <Badge variant="default">已停用</Badge>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-zinc-500">
-                        {formatTime(row.updatedAt)}
-                      </td>
-                      <td className="px-4 py-3">
+                    <td className={`max-w-56 ${STICKY_SCROLL_CELL}`}>
+                      {row.description || "—"}
+                    </td>
+                    <td className={STICKY_SCROLL_CELL}>
+                      {row.isActive ? (
+                        <Badge variant="success">已启用</Badge>
+                      ) : (
+                        <Badge variant="default">已停用</Badge>
+                      )}
+                    </td>
+                    <td className={`text-xs text-zinc-500 ${STICKY_SCROLL_CELL}`}>
+                      {formatTime(row.updatedAt)}
+                    </td>
+                    <td className={STICKY_RIGHT_CELL}>
                         <button
                           type="button"
                           onClick={() => startEdit(row)}
@@ -235,8 +247,7 @@ export function PackagingKitManager({ initialList }: Props) {
                   ))
                 )}
               </tbody>
-            </table>
-          </div>
+          </StickyTableScroll>
         </section>
 
         <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm lg:col-span-2">

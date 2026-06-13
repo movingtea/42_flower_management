@@ -20,6 +20,15 @@ import {
   getCmsProductTagLabel,
 } from "@/lib/cms-product-tags";
 import { evaluateRecommendationItemDisplayStatus } from "@/services/recommendation-display-pure";
+import {
+  STICKY_LEFT_CELL,
+  STICKY_LEFT_HEAD,
+  STICKY_RIGHT_CELL,
+  STICKY_RIGHT_HEAD,
+  STICKY_SCROLL_CELL,
+  STICKY_SCROLL_HEAD,
+  StickyTableScroll,
+} from "@/components/admin/sticky-table";
 
 const SLOT_TYPE_LABELS: Record<string, string> = {
   HOME_MAIN: "首页主推",
@@ -374,24 +383,30 @@ export function RecommendationSlotsManager() {
       ) : (
         <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.2fr)]">
           <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
-            <table className="w-full text-left text-sm">
+            <StickyTableScroll minWidth="560px">
+              <colgroup>
+                <col className="w-48" />
+                <col />
+                <col />
+                <col className="w-36" />
+              </colgroup>
               <thead className="border-b bg-zinc-50">
                 <tr>
-                  <th className="px-4 py-3 font-medium text-zinc-600">名称</th>
-                  <th className="px-4 py-3 font-medium text-zinc-600">类型</th>
-                  <th className="px-4 py-3 font-medium text-zinc-600">商品数</th>
-                  <th className="px-4 py-3 font-medium text-zinc-600">操作</th>
+                  <th className={STICKY_LEFT_HEAD}>名称</th>
+                  <th className={STICKY_SCROLL_HEAD}>类型</th>
+                  <th className={STICKY_SCROLL_HEAD}>商品数</th>
+                  <th className={`${STICKY_RIGHT_HEAD} min-w-[8rem] w-36`}>操作</th>
                 </tr>
               </thead>
               <tbody className="divide-y">
                 {slots.map((slot) => (
                   <tr
                     key={slot.id}
-                    className={
+                    className={`group ${
                       selectedId === slot.id ? "bg-rose-50/60" : "hover:bg-zinc-50/50"
-                    }
+                    }`}
                   >
-                    <td className="px-4 py-3">
+                    <td className={STICKY_LEFT_CELL}>
                       <button
                         type="button"
                         className="text-left font-medium text-zinc-900 hover:text-rose-700"
@@ -403,7 +418,7 @@ export function RecommendationSlotsManager() {
                         {slot.key}
                       </p>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className={STICKY_SCROLL_CELL}>
                       <p>{SLOT_TYPE_LABELS[slot.slotType] ?? slot.slotType}</p>
                       {slot.sceneType ? (
                         <p className="text-xs text-zinc-500">
@@ -411,9 +426,9 @@ export function RecommendationSlotsManager() {
                         </p>
                       ) : null}
                     </td>
-                    <td className="px-4 py-3">{slot._count?.items ?? 0}</td>
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-2">
+                    <td className={STICKY_SCROLL_CELL}>{slot._count?.items ?? 0}</td>
+                    <td className={`${STICKY_RIGHT_CELL} min-w-[8rem] w-36`}>
+                      <div className="flex flex-wrap justify-end gap-2">
                         <button
                           type="button"
                           className="text-rose-600 hover:underline"
@@ -440,7 +455,7 @@ export function RecommendationSlotsManager() {
                   </tr>
                 ))}
               </tbody>
-            </table>
+            </StickyTableScroll>
           </div>
 
           <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">

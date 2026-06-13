@@ -12,6 +12,15 @@ import type { CmsProductCategoryItem } from "@/lib/cms-product-categories";
 import { formatNullable } from "@/lib/format-display";
 import { formatPercent } from "@/lib/format-money";
 import type { ProductDecisionTagLike } from "@/lib/product-decision-tags";
+import {
+  STICKY_LEFT_CELL,
+  STICKY_LEFT_HEAD,
+  STICKY_RIGHT_CELL,
+  STICKY_RIGHT_HEAD,
+  STICKY_SCROLL_CELL,
+  STICKY_SCROLL_HEAD,
+  StickyTableScroll,
+} from "@/components/admin/sticky-table";
 
 export type CmsProductListRow = {
   id: string;
@@ -145,18 +154,29 @@ export function CmsProductsTable({ rows, categoryConfig }: Props) {
       ) : null}
 
       <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
-        <table className="w-full text-left text-sm">
+        <StickyTableScroll minWidth="1100px">
+          <colgroup>
+            <col className="w-52" />
+            <col />
+            <col />
+            <col />
+            <col />
+            <col />
+            <col />
+            <col />
+            <col className="w-28" />
+          </colgroup>
           <thead className="border-b bg-zinc-50">
             <tr>
-              <th className="px-4 py-3 font-medium text-zinc-600">品名</th>
-              <th className="px-4 py-3 font-medium text-zinc-600">分类</th>
-              <th className="px-4 py-3 font-medium text-zinc-600">礼赠场景</th>
-              <th className="px-4 py-3 font-medium text-zinc-600">零售价</th>
-              <th className="px-4 py-3 font-medium text-zinc-600">毛利预估</th>
-              <th className="px-4 py-3 font-medium text-zinc-600">产品决策</th>
-              <th className="px-4 py-3 font-medium text-zinc-600">可售数量</th>
-              <th className="px-4 py-3 font-medium text-zinc-600">上架状态</th>
-              <th className="px-4 py-3 font-medium text-zinc-600">操作</th>
+              <th className={STICKY_LEFT_HEAD}>品名</th>
+              <th className={STICKY_SCROLL_HEAD}>分类</th>
+              <th className={STICKY_SCROLL_HEAD}>礼赠场景</th>
+              <th className={STICKY_SCROLL_HEAD}>零售价</th>
+              <th className={STICKY_SCROLL_HEAD}>毛利预估</th>
+              <th className={STICKY_SCROLL_HEAD}>产品决策</th>
+              <th className={STICKY_SCROLL_HEAD}>可售数量</th>
+              <th className={STICKY_SCROLL_HEAD}>上架状态</th>
+              <th className={STICKY_RIGHT_HEAD}>操作</th>
             </tr>
           </thead>
           <tbody className="divide-y">
@@ -174,12 +194,12 @@ export function CmsProductsTable({ rows, categoryConfig }: Props) {
               </tr>
             ) : (
               list.map((p) => (
-                <tr key={p.id} className="hover:bg-zinc-50/50">
-                  <td className="px-4 py-3">
+                <tr key={p.id} className="group hover:bg-zinc-50/50">
+                  <td className={STICKY_LEFT_CELL}>
                     <p className="font-medium">{p.name}</p>
                     <p className="text-xs text-zinc-500">{p.sku}</p>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className={STICKY_SCROLL_CELL}>
                     <div className="flex flex-wrap gap-1">
                       {p.categoryIds.length === 0 ? (
                         <span className="text-zinc-400">无分类</span>
@@ -198,11 +218,11 @@ export function CmsProductsTable({ rows, categoryConfig }: Props) {
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className={STICKY_SCROLL_CELL}>
                     <ProductOccasionTagsBadge tags={p.occasionTags} />
                   </td>
-                  <td className="px-4 py-3">{p.priceLabel}</td>
-                  <td className="px-4 py-3">
+                  <td className={STICKY_SCROLL_CELL}>{p.priceLabel}</td>
+                  <td className={STICKY_SCROLL_CELL}>
                     <span
                       className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                         p.marginStatus === "ok"
@@ -215,7 +235,7 @@ export function CmsProductsTable({ rows, categoryConfig }: Props) {
                       {p.marginLabel}
                     </span>
                   </td>
-                  <td className="px-4 py-3">
+                  <td className={STICKY_SCROLL_CELL}>
                     {p.decisionHealthStatus ? (
                       <div className="space-y-2">
                         <ProductDecisionHealthBadge
@@ -243,16 +263,16 @@ export function CmsProductsTable({ rows, categoryConfig }: Props) {
                       </Link>
                     )}
                   </td>
-                  <td className="px-4 py-3">{p.quantity}</td>
-                  <td className="px-4 py-3">
+                  <td className={STICKY_SCROLL_CELL}>{p.quantity}</td>
+                  <td className={STICKY_SCROLL_CELL}>
                     {p.status === "PUBLISHED" ? (
                       <Badge variant="success">上架</Badge>
                     ) : (
                       <Badge variant="default">{p.status}</Badge>
                     )}
                   </td>
-                  <td className="px-4 py-3">
-                    <div className="flex flex-wrap items-center gap-3">
+                  <td className={STICKY_RIGHT_CELL}>
+                    <div className="flex flex-wrap items-center justify-end gap-3">
                       <Link
                         href={`/cms/products/${p.id}`}
                         className="text-rose-600 hover:underline"
@@ -273,7 +293,7 @@ export function CmsProductsTable({ rows, categoryConfig }: Props) {
               ))
             )}
           </tbody>
-        </table>
+        </StickyTableScroll>
       </div>
     </div>
   );
