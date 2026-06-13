@@ -107,7 +107,21 @@ jobs:
           docker compose logs --tail=30 flower-web
           docker compose logs --tail=15 flower-cron-worker || true
 
-          docker image prune -f
+          echo "[deploy] post-deploy disk snapshot..."
+          df -h / || true
+          docker system df || true
+
+          if [[ -x ./scripts/deploy-cleanup.sh ]]; then
+            echo "[deploy] running deploy-cleanup.sh (safe prune, no volumes)..."
+            ./scripts/deploy-cleanup.sh --timeout 180 || echo "[deploy] WARNING: deploy-cleanup failed or skipped (see logs)"
+          else
+            echo "[deploy] deploy-cleanup.sh not found; running minimal safe prune..."
+            docker container prune -f || true
+            docker image prune -f || true
+            docker network prune -f || true
+            docker builder prune -f || true
+          fi
+
           echo "[deploy] done."
           REMOTE
 

@@ -1,3 +1,4 @@
+import { buildDiskHealthCheckItem } from "@/lib/system-health/disk-space";
 import { getStorageConfig, isOssStorageConfigured } from "@/lib/storage/config";
 import { prisma } from "@/lib/prisma";
 import { gatherSetupChecklistStats } from "@/services/setup-checklist";
@@ -30,6 +31,17 @@ export async function getSystemHealth(): Promise<SystemHealthResult> {
   const checks: HealthCheckItem[] = [];
 
   try {
+    checks.push(await buildDiskHealthCheckItem());
+  } catch {
+    checks.push({
+      key: "disk_space",
+      title: "磁盘空间",
+      status: "UNKNOWN",
+      message: "磁盘检查异常；宿主机请运行 npm run ops:disk",
+    });
+  }
+
+  try {
     await prisma.$queryRaw`SELECT 1`;
     const staffCount = await prisma.staffUser.count();
     checks.push({
@@ -40,12 +52,17 @@ export async function getSystemHealth(): Promise<SystemHealthResult> {
       metadata: { staffUsers: staffCount },
     });
   } catch (err) {
+    const raw =
+      err instanceof Error ? err.message : "数据库连接失败";
+    const dnsOrDiskHint =
+      /EAI_AGAIN|getaddrinfo|ECONNREFUSED|timeout/i.test(raw)
+        ? " 若伴随 CMS 502 或容器 unhealthy，优先排查宿主机磁盘（npm run ops:disk），勿误判为 OSS 问题。"
+        : "";
     checks.push({
       key: "database",
       title: "数据库连接",
       status: "ERROR",
-      message:
-        err instanceof Error ? err.message : "数据库连接失败",
+      message: raw + dnsOrDiskHint,
     });
   }
 

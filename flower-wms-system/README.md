@@ -367,6 +367,91 @@ docker compose up -d
 
 更激进但仍不删 volume：`./scripts/deploy-cleanup.sh --aggressive`（清理 72 小时前未使用的镜像与 build cache）。
 
+CI/CD（`.github/workflows/deploy.yml`）在远程部署成功后会尝试执行 `./scripts/deploy-cleanup.sh`；失败仅 WARNING，不阻断已成功的 deploy（healthcheck 失败时 deploy-cleanup 会跳过 prune）。
+
+### 10.5 服务器磁盘空间与 Docker 运维（Sprint 15）
+
+Sprint 14 验证中曾出现：**CMS 图片上传成功但保存 502**、Prisma `getaddrinfo EAI_AGAIN db` — 根因是**宿主机磁盘满**，不是 OSS。磁盘不足还会导致容器 unhealthy、cron-worker 重启、PostgreSQL 异常。
+
+#### 常见现象
+
+| 现象 | 可能根因 |
+|---|---|
+| CMS 保存 502 | 磁盘满 → Node/Prisma/DB 不稳定 |
+| `getaddrinfo EAI_AGAIN db` | Docker DNS/网络或 db 容器异常，常伴随磁盘满 |
+| 容器 unhealthy | 健康检查超时、日志或 overlay 写满 |
+| cron-worker 反复重启 | 同主机资源耗尽 |
+| 上传成功保存失败 | 上传走 OSS 已成功，写库阶段 DB 不可用 |
+
+#### 排查命令（宿主机）
+
+```bash
+df -h
+docker system df
+docker ps -a
+docker logs flower-web-prod --tail 100
+du -sh /var/lib/docker
+```
+
+#### 项目运维命令（在 `flower-wms-system/` 目录）
+
+```bash
+npm run ops:disk           # 只读：df、Docker 占用、目录 du（>=90% exit 2）
+npm run ops:docker-usage   # 只读：镜像/容器/volume/build cache 摘要
+npm run smoke:ops          # 上述两项串联，不执行清理
+npm run ops:prune          # 安全清理（需人工执行；不清理 volumes）
+```
+
+或直接运行仓库根目录脚本：
+
+```bash
+./scripts/check-disk-space.sh
+./scripts/check-docker-usage.sh
+DRY_RUN=true ./scripts/safe-docker-prune.sh   # 预览
+./scripts/safe-docker-prune.sh                # 执行清理
+./scripts/deploy-cleanup.sh                   # 部署后（等 healthcheck）
+```
+
+#### 安全清理说明
+
+**可以清理：**
+
+- 已停止容器（`docker container prune -f`）
+- dangling images（`docker image prune -f`）
+- 未使用网络（`docker network prune -f`）
+- build cache（`docker builder prune -f`）
+
+**禁止清理：**
+
+- `docker volume prune` / `docker system prune -a --volumes`
+- `postgres_data` 等 PostgreSQL 数据 volume
+- `rm -rf /var/lib/docker`、业务 uploads 目录
+
+#### 日志轮转
+
+`docker-compose.example.yml` 中 `flower-web`、`flower-cron-worker`、`flower-nginx`、`db` 均已配置：
+
+```yaml
+logging:
+  driver: "json-file"
+  options:
+    max-size: "10m"
+    max-file: "3"
+```
+
+#### PostgreSQL volume
+
+数据在 compose volume `postgres_data`（`/var/lib/docker/volumes/...`），**任何自动清理脚本均不得 prune volumes**。
+
+#### 何时扩容磁盘
+
+- 根分区持续 ≥80%（WARNING）
+- 执行 `ops:prune` / `deploy-cleanup` 后仍 ≥80%
+- `/var/lib/docker` 占用持续增长
+- 数据库数据量明显增长
+
+WMS **系统健康**（`/wms/system-health`）会展示容器内磁盘视图；宿主机请以 `ops:disk` 为准。
+
 若磁盘仍不足，需人工排查：
 
 ```bash
