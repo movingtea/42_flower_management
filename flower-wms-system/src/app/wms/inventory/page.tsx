@@ -19,8 +19,8 @@ function isExpiringSoon(expiresAt: Date | null, now: number): boolean {
 }
 
 export default async function InventoryPage() {
-  const now = Date.now();
   const updatedAt = new Date();
+  const now = updatedAt.getTime();
 
   const materials = await listPhysicalInventoryMaterials();
 

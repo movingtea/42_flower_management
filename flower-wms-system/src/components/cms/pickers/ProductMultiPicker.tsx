@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { deferEffectTask } from "@/lib/defer-effect";
 import type { ProductPickerItem } from "@/components/cms/pickers/types";
 
 type Props = {
@@ -42,49 +43,59 @@ export function ProductMultiPicker({
   }, []);
 
   useEffect(() => {
-    if (value.length === 0) {
-      setChips([]);
-      return;
-    }
-    void (async () => {
-      const resolved: ProductPickerItem[] = [];
-      for (const id of value) {
-        if (chips.some((c) => c.id === id)) {
-          const hit = chips.find((c) => c.id === id);
-          if (hit) resolved.push(hit);
-          continue;
-        }
-        try {
-          const res = await fetch(
-            `/api/admin/cms/products/search?keyword=${encodeURIComponent(id)}&limit=50`
-          );
-          const json = (await res.json()) as {
-            data?: { items?: ProductPickerItem[] };
-          };
-          const hit = json.data?.items?.find((i) => i.id === id);
-          if (hit) resolved.push(hit);
-          else {
-            resolved.push({
-              id,
-              name: "关联对象不存在或已删除",
-              categoryName: null,
-              status: "inactive",
-              coverImage: "",
-              priceRange: "—",
-              skuCount: 0,
-              readinessStatus: "INCOMPLETE",
-              productDecisionSummary: {
-                healthStatus: "UNKNOWN",
-                healthStatusLabel: "未知",
-              },
-            });
-          }
-        } catch {
-          /* skip */
-        }
+    let cancelled = false;
+
+    deferEffectTask(() => {
+      if (cancelled) return;
+      if (value.length === 0) {
+        setChips([]);
+        return;
       }
-      setChips(resolved);
-    })();
+
+      void (async () => {
+        const resolved: ProductPickerItem[] = [];
+        for (const id of value) {
+          if (chips.some((c) => c.id === id)) {
+            const hit = chips.find((c) => c.id === id);
+            if (hit) resolved.push(hit);
+            continue;
+          }
+          try {
+            const res = await fetch(
+              `/api/admin/cms/products/search?keyword=${encodeURIComponent(id)}&limit=50`
+            );
+            const json = (await res.json()) as {
+              data?: { items?: ProductPickerItem[] };
+            };
+            const hit = json.data?.items?.find((i) => i.id === id);
+            if (hit) resolved.push(hit);
+            else {
+              resolved.push({
+                id,
+                name: "关联对象不存在或已删除",
+                categoryName: null,
+                status: "inactive",
+                coverImage: "",
+                priceRange: "—",
+                skuCount: 0,
+                readinessStatus: "INCOMPLETE",
+                productDecisionSummary: {
+                  healthStatus: "UNKNOWN",
+                  healthStatusLabel: "未知",
+                },
+              });
+            }
+          } catch {
+            /* skip */
+          }
+        }
+        if (!cancelled) setChips(resolved);
+      })();
+    });
+
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps -- chips resolved from value
   }, [value]);
 

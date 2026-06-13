@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import {useCallback, useState} from "react";
+import { useDeferredEffect } from "@/lib/defer-effect";
 import { ProductDecisionHealthBadge } from "@/components/product-decision/ProductDecisionBadge";
 import { ProductDecisionTags } from "@/components/product-decision/ProductDecisionTags";
 import { formatNullable, formatNumber } from "@/lib/format-display";
@@ -52,9 +53,7 @@ export function ProductDecisionPanel({
     }
   }, [productId]);
 
-  useEffect(() => {
-    void loadDecisions();
-  }, [loadDecisions]);
+  useDeferredEffect(() => loadDecisions(), [loadDecisions]);
 
   if (loading) {
     return <p className="text-sm text-zinc-500">正在加载产品决策建议…</p>;

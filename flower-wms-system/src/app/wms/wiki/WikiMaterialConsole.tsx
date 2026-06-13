@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { useDeferredEffect } from "@/lib/defer-effect";
 import { WikiCareTable } from "@/components/wiki/WikiCareTable";
 import { WikiMaterialDetailModal } from "@/components/wiki/WikiMaterialDetailModal";
 import { WikiTableTruncatedText } from "@/components/wiki/WikiTableTruncatedText";
@@ -245,13 +246,11 @@ export function WikiMaterialConsole() {
     return () => window.clearTimeout(timer);
   }, [search]);
 
-  useEffect(() => {
+  useDeferredEffect(() => {
     setPage(1);
   }, [debouncedQ]);
 
-  useEffect(() => {
-    void loadList();
-  }, [loadList]);
+  useDeferredEffect(() => loadList(), [loadList]);
 
   function openView(item: WikiListItem) {
     setViewItem(item);

@@ -1,7 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { ProductOperationSummaryBadge } from "@/components/cms/ProductOperationSummaryBadge";
+import { useDeferredEffect } from "@/lib/defer-effect";
 import type {
   PublishReadinessResult,
   PublishReadinessStatus,
@@ -51,9 +52,7 @@ export function ProductPublishReadinessPanel({ productId, refreshKey = 0 }: Prop
     }
   }, [productId]);
 
-  useEffect(() => {
-    void load();
-  }, [load, refreshKey]);
+  useDeferredEffect(() => load(), [load, refreshKey]);
 
   if (productId === "new") {
     return (

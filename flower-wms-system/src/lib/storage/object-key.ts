@@ -28,20 +28,20 @@ export function parseUploadModule(value: unknown): UploadModule {
   if (typeof value !== "string" || !value.trim()) {
     throw new StorageError("INVALID_MODULE", "缺少上传模块参数 module");
   }
-  const module = value.trim() as UploadModule;
-  if (!UPLOAD_MODULES.includes(module)) {
+  const uploadModule = value.trim() as UploadModule;
+  if (!UPLOAD_MODULES.includes(uploadModule)) {
     throw new StorageError("INVALID_MODULE", "无效的上传模块");
   }
-  return module;
+  return uploadModule;
 }
 
 export function buildObjectKey(
-  module: UploadModule,
+  uploadModule: UploadModule,
   extension: string,
   options?: { objectPrefix?: string; now?: Date }
 ): string {
   const objectPrefix = (options?.objectPrefix ?? "universe42").replace(/\/+$/, "");
-  const pathSegment = MODULE_PATH_MAP[module];
+  const pathSegment = MODULE_PATH_MAP[uploadModule];
   if (!pathSegment) {
     throw new StorageError("INVALID_MODULE", "无效的上传模块");
   }

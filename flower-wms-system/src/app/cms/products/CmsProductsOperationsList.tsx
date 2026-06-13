@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import {useCallback, useState} from "react";
+import { useDeferredEffect } from "@/lib/defer-effect";
 import { ActionEmptyState } from "@/components/admin/ActionEmptyState";
 import { ProductOccasionTagsBadge } from "@/components/cms/ProductOccasionTagsBadge";
 import { ProductOperationSummaryBadge } from "@/components/cms/ProductOperationSummaryBadge";
@@ -122,9 +123,7 @@ export function CmsProductsOperationsList({ categoryConfig }: Props) {
     page,
   ]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useDeferredEffect(() => load(), [load]);
 
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
 

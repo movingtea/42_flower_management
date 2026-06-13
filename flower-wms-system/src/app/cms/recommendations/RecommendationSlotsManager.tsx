@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useDeferredEffect } from "@/lib/defer-effect";
 import { ActionEmptyState } from "@/components/admin/ActionEmptyState";
 import { AutoKeyField } from "@/components/cms/pickers/AutoKeyField";
 import { ProductPicker } from "@/components/cms/pickers/ProductPicker";
@@ -169,13 +170,11 @@ export function RecommendationSlotsManager() {
     }
   }, []);
 
-  useEffect(() => {
-    void loadSlots();
-  }, [loadSlots]);
+  useDeferredEffect(() => loadSlots(), [loadSlots]);
 
-  useEffect(() => {
-    if (selectedId) void loadDetail(selectedId);
-    else setDetail(null);
+  useDeferredEffect(() => {
+    if (selectedId) return loadDetail(selectedId);
+    setDetail(null);
   }, [selectedId, loadDetail]);
 
   function openCreate() {

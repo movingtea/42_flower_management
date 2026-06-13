@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { deferEffectTask } from "@/lib/defer-effect";
 import type { ProductCategoryTreeNode } from "@/lib/product-category";
 
 type TreeDataNode = {
@@ -47,33 +48,37 @@ export function ProductCategoryTreeSelect({ value, onChange }: Props) {
 
   useEffect(() => {
     let cancelled = false;
-    setLoading(true);
-    setError(null);
 
-    fetch("/api/admin/product-categories")
-      .then(async (res) => {
-        const json = (await res.json()) as {
-          success: boolean;
-          error?: string;
-          data?: { tree?: ProductCategoryTreeNode[] };
-        };
-        if (!res.ok || !json.success) {
-          throw new Error(json.error ?? "分类加载失败");
-        }
-        if (!cancelled) {
-          setTree(json.data?.tree ?? []);
-          const rootIds = (json.data?.tree ?? []).map((n) => n.id);
-          setExpanded(new Set(rootIds));
-        }
-      })
-      .catch((e) => {
-        if (!cancelled) {
-          setError(e instanceof Error ? e.message : "分类加载失败");
-        }
-      })
-      .finally(() => {
-        if (!cancelled) setLoading(false);
-      });
+    deferEffectTask(() => {
+      if (cancelled) return;
+      setLoading(true);
+      setError(null);
+
+      fetch("/api/admin/product-categories")
+        .then(async (res) => {
+          const json = (await res.json()) as {
+            success: boolean;
+            error?: string;
+            data?: { tree?: ProductCategoryTreeNode[] };
+          };
+          if (!res.ok || !json.success) {
+            throw new Error(json.error ?? "分类加载失败");
+          }
+          if (!cancelled) {
+            setTree(json.data?.tree ?? []);
+            const rootIds = (json.data?.tree ?? []).map((n) => n.id);
+            setExpanded(new Set(rootIds));
+          }
+        })
+        .catch((e) => {
+          if (!cancelled) {
+            setError(e instanceof Error ? e.message : "分类加载失败");
+          }
+        })
+        .finally(() => {
+          if (!cancelled) setLoading(false);
+        });
+    });
 
     return () => {
       cancelled = true;

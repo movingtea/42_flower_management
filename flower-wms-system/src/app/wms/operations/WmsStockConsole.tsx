@@ -7,6 +7,7 @@ import { QuantityStepper } from "@/components/shared/QuantityStepper";
 import { FlowerMaterialSelect } from "@/components/ui/FlowerMaterialSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { deferEffectTask, useDeferredEffect } from "@/lib/defer-effect";
 import type { WikiListItem } from "@/lib/wiki-constants";
 import type {
   BatchPipelineRow,
@@ -88,51 +89,55 @@ export function WmsStockConsole({
     window.setTimeout(() => setToast(null), 3200);
   }
 
-  useEffect(() => {
+  useDeferredEffect(() => {
     setPipeline(initialPipeline);
   }, [initialPipeline]);
 
   useEffect(() => {
-    if (!lossWikiId) {
-      setWikiBatches([]);
+    let cancelled = false;
+
+    deferEffectTask(() => {
+      if (cancelled) return;
+      if (!lossWikiId) {
+        setWikiBatches([]);
+        setLossBatchId("");
+        setLossQty(1);
+        return;
+      }
+
+      setBatchesLoading(true);
       setLossBatchId("");
       setLossQty(1);
-      return;
-    }
 
-    let cancelled = false;
-    setBatchesLoading(true);
-    void (async () => {
-      try {
-        const res = await fetch(
-          `/api/admin/wms/stock-batches?flowerWikiId=${encodeURIComponent(lossWikiId)}`
-        );
-        const json = (await res.json()) as {
-          success?: boolean;
-          data?: { items?: WikiBatchOption[] };
-        };
-        if (cancelled) return;
-        if (res.ok && json.success && json.data?.items) {
-          setWikiBatches(json.data.items);
-        } else {
-          setWikiBatches([]);
+      void (async () => {
+        try {
+          const res = await fetch(
+            `/api/admin/wms/stock-batches?flowerWikiId=${encodeURIComponent(lossWikiId)}`
+          );
+          const json = (await res.json()) as {
+            success?: boolean;
+            data?: { items?: WikiBatchOption[] };
+          };
+          if (cancelled) return;
+          if (res.ok && json.success && json.data?.items) {
+            setWikiBatches(json.data.items);
+          } else {
+            setWikiBatches([]);
+          }
+        } catch {
+          if (!cancelled) setWikiBatches([]);
+        } finally {
+          if (!cancelled) setBatchesLoading(false);
         }
-      } catch {
-        if (!cancelled) setWikiBatches([]);
-      } finally {
-        if (!cancelled) setBatchesLoading(false);
-      }
-    })();
-
-    setLossBatchId("");
-    setLossQty(1);
+      })();
+    });
 
     return () => {
       cancelled = true;
     };
   }, [lossWikiId]);
 
-  useEffect(() => {
+  useDeferredEffect(() => {
     if (lossMaxQty <= 0) return;
     setLossQty((prev) => Math.min(Math.max(1, prev), lossMaxQty));
   }, [lossMaxQty, lossBatchId]);

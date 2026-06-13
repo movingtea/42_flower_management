@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { deferEffectTask } from "@/lib/defer-effect";
 import type { ProductSkuPickerItem } from "@/components/cms/pickers/types";
 
 type Props = {
@@ -23,38 +24,42 @@ export function SkuPicker({
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!productId) {
-      setItems([]);
-      return;
-    }
-
     let cancelled = false;
-    setLoading(true);
-    setError("");
 
-    void (async () => {
-      try {
-        const res = await fetch(`/api/admin/cms/products/${productId}/skus`);
-        const json = (await res.json()) as {
-          success?: boolean;
-          error?: string;
-          data?: { items?: ProductSkuPickerItem[] };
-        };
-        if (!res.ok || !json.success) {
-          throw new Error(json.error ?? "SKU 加载失败");
-        }
-        if (!cancelled) {
-          setItems(json.data?.items ?? []);
-        }
-      } catch (e) {
-        if (!cancelled) {
-          setError(e instanceof Error ? e.message : "SKU 加载失败");
-          setItems([]);
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
+    deferEffectTask(() => {
+      if (cancelled) return;
+      if (!productId) {
+        setItems([]);
+        return;
       }
-    })();
+
+      setLoading(true);
+      setError("");
+
+      void (async () => {
+        try {
+          const res = await fetch(`/api/admin/cms/products/${productId}/skus`);
+          const json = (await res.json()) as {
+            success?: boolean;
+            error?: string;
+            data?: { items?: ProductSkuPickerItem[] };
+          };
+          if (!res.ok || !json.success) {
+            throw new Error(json.error ?? "SKU 加载失败");
+          }
+          if (!cancelled) {
+            setItems(json.data?.items ?? []);
+          }
+        } catch (e) {
+          if (!cancelled) {
+            setError(e instanceof Error ? e.message : "SKU 加载失败");
+            setItems([]);
+          }
+        } finally {
+          if (!cancelled) setLoading(false);
+        }
+      })();
+    });
 
     return () => {
       cancelled = true;

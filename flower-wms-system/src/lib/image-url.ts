@@ -15,7 +15,6 @@ import {
   normalizeImageValue,
   normalizeImageValueList,
   normalizeImageValueRequired,
-  getPublicImageUrlList as getPublicImageUrlListCore,
   type ImageUrlEnv,
 } from "@/lib/storage/image-url";
 import { getStorageConfig } from "@/lib/storage/config";

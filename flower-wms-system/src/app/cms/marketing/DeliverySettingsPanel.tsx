@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useDeferredEffect } from "@/lib/defer-effect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NumberInput } from "@/components/ui/NumberInput";
@@ -57,9 +58,7 @@ export function DeliverySettingsPanel({ onSaved }: Props) {
     }
   }, []);
 
-  useEffect(() => {
-    void loadSettings();
-  }, [loadSettings]);
+  useDeferredEffect(() => loadSettings(), [loadSettings]);
 
   async function handleSave() {
     const disabledDates = disabledDatesText

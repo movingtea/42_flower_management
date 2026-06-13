@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {useCallback, useState} from "react";
+import { useDeferredEffect } from "@/lib/defer-effect";
 import { ActionEmptyState } from "@/components/admin/ActionEmptyState";
 import { MetricCard } from "@/components/admin/MetricCard";
 import { PageError, PageLoading } from "@/components/admin/PageState";
@@ -69,9 +70,7 @@ export function DataQualityClient() {
     }
   }, [severity, domain, page]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useDeferredEffect(() => load(), [load]);
 
   return (
     <div className="space-y-6">

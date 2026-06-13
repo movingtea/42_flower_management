@@ -173,7 +173,6 @@ export function getPublicImageUrl(
     const relative = trimmed.startsWith("/")
       ? trimmed
       : `/${trimmed.replace(/^uploads\//i, "/uploads/")}`;
-    const base = env.publicBaseUrl.replace(/\/+$/, "");
     if (env.enableLegacyUploads && process.env.NEXT_PUBLIC_ASSET_BASE_URL?.trim()) {
       const assetBase = process.env.NEXT_PUBLIC_ASSET_BASE_URL.replace(/\/+$/, "");
       if (!isLocalhostUrl(assetBase)) {

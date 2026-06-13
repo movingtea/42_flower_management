@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {useCallback, useRef, useState} from "react";
+import { useDeferredEffect } from "@/lib/defer-effect";
 import { ProductSkuEditorCards } from "@/components/cms/ProductSkuEditorCards";
 import { ProductCategoryTreeSelect } from "@/components/cms/ProductCategoryTreeSelect";
 import { RichTextEditorLazy } from "@/components/cms/RichTextEditorLazy";
@@ -136,9 +137,7 @@ export function ProductEditor({ productId, isNew, initial }: ProductEditorProps)
     }
   }, [isNew, productId]);
 
-  useEffect(() => {
-    void loadMarginEstimate();
-  }, [loadMarginEstimate]);
+  useDeferredEffect(() => loadMarginEstimate(), [loadMarginEstimate]);
 
   async function handleSkuImageUpload(file: File, index: number) {
     if (uploadingIndex !== null) return;

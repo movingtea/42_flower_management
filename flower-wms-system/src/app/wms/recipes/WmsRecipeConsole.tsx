@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
+import { useDeferredEffect } from "@/lib/defer-effect";
 import { ActionEmptyState } from "@/components/admin/ActionEmptyState";
 import { FlowerMaterialSelect } from "@/components/ui/FlowerMaterialSelect";
 import { QuantityStepper } from "@/components/shared/QuantityStepper";
@@ -249,7 +250,7 @@ export function WmsRecipeConsole() {
     [applyDuplicateFlags]
   );
 
-  useEffect(() => {
+  useDeferredEffect(() => {
     void loadList();
     void loadPackagingKits();
   }, [loadList, loadPackagingKits]);

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useId, useRef, useState } from "react";
+import { deferEffectTask } from "@/lib/defer-effect";
 import type { WikiListItem } from "@/lib/wiki-constants";
 
 export type FlowerMaterialSelectProps = {
@@ -51,26 +52,37 @@ export function FlowerMaterialSelect({
   }, []);
 
   useEffect(() => {
-    if (!value) {
-      setSelected(null);
-      return;
-    }
-    if (selected?.id === value) return;
-    void (async () => {
-      try {
-        const res = await fetch(`/api/admin/wiki/${value}`);
-        const json = (await res.json()) as {
-          success?: boolean;
-          data?: { item?: WikiListItem };
-        };
-        if (res.ok && json.success && json.data?.item) {
-          setSelected(json.data.item);
-          setQuery(json.data.item.chineseName);
-        }
-      } catch {
-        /* ignore */
+    let cancelled = false;
+
+    deferEffectTask(() => {
+      if (cancelled) return;
+      if (!value) {
+        setSelected(null);
+        return;
       }
-    })();
+      if (selected?.id === value) return;
+
+      void (async () => {
+        try {
+          const res = await fetch(`/api/admin/wiki/${value}`);
+          const json = (await res.json()) as {
+            success?: boolean;
+            data?: { item?: WikiListItem };
+          };
+          if (cancelled) return;
+          if (res.ok && json.success && json.data?.item) {
+            setSelected(json.data.item);
+            setQuery(json.data.item.chineseName);
+          }
+        } catch {
+          /* ignore */
+        }
+      })();
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [value, selected?.id]);
 
   useEffect(() => {

@@ -507,6 +507,13 @@ npm run test:client-image-preview
 npm run smoke:cms-product-preview
 ```
 
+### 10.8 Lint 清理（Sprint 18）
+
+- `npm run lint`：**0 error**（2026-06-10）；剩余 warning 为历史未使用 import/变量（API routes、product-margin 等），不影响 build。
+- OSS：`module` 变量重命名为 `uploadModule`，避免 `@next/next/no-assign-module-variable`。
+- React 19：`react-hooks/set-state-in-effect` 通过 `src/lib/defer-effect.ts`（`useDeferredEffect` / `deferEffectTask`）延迟 effect 内 setState，不改变请求时机与业务逻辑。
+- `QuantityStepper`：聚焦时用 draft、失焦后同步 prop，移除 effect 同步。
+
 ## 11. 测试 / Smoke Scripts
 
 **业务规则源文件**：`docs/business-rules.md`（Sprint 12 起为规则真理源；Sprint 13 补齐 `ProductSku.isActive` 语义）。

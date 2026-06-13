@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import {useCallback, useState} from "react";
+import { useDeferredEffect } from "@/lib/defer-effect";
 import { MetricCard } from "@/components/admin/MetricCard";
 import { PageError, PageLoading } from "@/components/admin/PageState";
 import { StatusBadge } from "@/components/admin/StatusBadge";
@@ -67,9 +68,7 @@ export function SetupWizardClient() {
     await Promise.all([loadChecklist(), loadTrial()]);
   }, [loadChecklist, loadTrial]);
 
-  useEffect(() => {
-    void loadAll();
-  }, [loadAll]);
+  useDeferredEffect(() => loadAll(), [loadAll]);
 
   if (loading) {
     return <PageLoading text="正在加载试运营准备清单…" />;

@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useState } from "react";
 import { Role } from "@/generated/prisma/enums";
 import { resetUserPassword } from "@/actions/staff-users";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useDeferredEffect } from "@/lib/defer-effect";
 import { ROLE_LABEL } from "@/lib/role-labels";
 
 type StaffRow = {
@@ -67,9 +68,7 @@ export function StaffUserManager({ canResetPassword }: StaffUserManagerProps) {
     }
   }, []);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useDeferredEffect(() => load(), [load]);
 
   async function handleCreate(e: React.FormEvent) {
     e.preventDefault();

@@ -43,9 +43,9 @@ export async function handleAdminImageUpload(
     }
 
     const moduleRaw = formData.get("module") ?? options?.defaultModule ?? "cms";
-    let module;
+    let uploadModule;
     try {
-      module = parseUploadModule(moduleRaw);
+      uploadModule = parseUploadModule(moduleRaw);
     } catch (err) {
       if (err instanceof StorageError) {
         return jsonError(err.message, 400);
@@ -53,7 +53,7 @@ export async function handleAdminImageUpload(
       throw err;
     }
 
-    const result = await uploadImageToStorage({ file: entry, module });
+    const result = await uploadImageToStorage({ file: entry, module: uploadModule });
 
     return jsonSuccess({
       ok: true,

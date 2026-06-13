@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { deferEffectTask, useDeferredEffect } from "@/lib/defer-effect";
 import type { RecipePickerItem } from "@/components/cms/pickers/types";
 
 type Props = {
@@ -45,56 +46,68 @@ export function RecipePicker({
   }, []);
 
   useEffect(() => {
-    if (!value) {
-      setSelected(null);
-      setMissing(false);
-      return;
-    }
-    if (selected?.id === value) return;
-    void (async () => {
-      try {
-        const res = await fetch(
-          `/api/admin/wms/recipes/search?keyword=${encodeURIComponent(value)}&limit=50`
-        );
-        const json = (await res.json()) as {
-          data?: { items?: RecipePickerItem[] };
-        };
-        const hit = json.data?.items?.find((i) => i.id === value) ?? null;
-        if (hit) {
-          setSelected(hit);
-          setMissing(false);
-        } else {
-          const res2 = await fetch(`/api/admin/wms/recipes?id=${encodeURIComponent(value)}`);
-          const json2 = (await res2.json()) as {
-            data?: {
-              recipe?: {
-                id: string;
-                name: string;
-                recipeCode: string;
-                packagingKit?: { name: string } | null;
-                standardCost?: { totalCost: string };
-              };
-            };
+    let cancelled = false;
+
+    deferEffectTask(() => {
+      if (cancelled) return;
+      if (!value) {
+        setSelected(null);
+        setMissing(false);
+        return;
+      }
+      if (selected?.id === value) return;
+
+      void (async () => {
+        try {
+          const res = await fetch(
+            `/api/admin/wms/recipes/search?keyword=${encodeURIComponent(value)}&limit=50`
+          );
+          const json = (await res.json()) as {
+            data?: { items?: RecipePickerItem[] };
           };
-          const r = json2.data?.recipe;
-          if (r) {
-            setSelected({
-              id: r.id,
-              name: r.name,
-              bomNo: r.recipeCode,
-              packagingKitName: r.packagingKit?.name ?? null,
-              estimatedCost: r.standardCost?.totalCost ?? "—",
-              ingredientSummary: "",
-            });
+          if (cancelled) return;
+          const hit = json.data?.items?.find((i) => i.id === value) ?? null;
+          if (hit) {
+            setSelected(hit);
             setMissing(false);
           } else {
-            setMissing(true);
+            const res2 = await fetch(`/api/admin/wms/recipes?id=${encodeURIComponent(value)}`);
+            const json2 = (await res2.json()) as {
+              data?: {
+                recipe?: {
+                  id: string;
+                  name: string;
+                  recipeCode: string;
+                  packagingKit?: { name: string } | null;
+                  standardCost?: { totalCost: string };
+                };
+              };
+            };
+            if (cancelled) return;
+            const r = json2.data?.recipe;
+            if (r) {
+              setSelected({
+                id: r.id,
+                name: r.name,
+                bomNo: r.recipeCode,
+                packagingKitName: r.packagingKit?.name ?? null,
+                estimatedCost: r.standardCost?.totalCost ?? "—",
+                ingredientSummary: "",
+              });
+              setMissing(false);
+            } else {
+              setMissing(true);
+            }
           }
+        } catch {
+          if (!cancelled) setMissing(true);
         }
-      } catch {
-        setMissing(true);
-      }
-    })();
+      })();
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [value, selected?.id]);
 
   useEffect(() => {
@@ -111,7 +124,7 @@ export function RecipePicker({
     return () => document.removeEventListener("mousedown", onDocClick);
   }, []);
 
-  useEffect(() => {
+  useDeferredEffect(() => {
     if (!compact) return;
     void fetchItems("");
   }, [compact, fetchItems]);

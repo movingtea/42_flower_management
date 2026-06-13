@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { deferEffectTask } from "@/lib/defer-effect";
 import { Badge } from "@/components/ui/Badge";
 import type { ProductPickerItem } from "@/components/cms/pickers/types";
 
@@ -70,33 +71,44 @@ export function ProductPicker({
   }, []);
 
   useEffect(() => {
-    if (!value) {
-      setSelected(null);
-      setMissing(false);
-      return;
-    }
-    if (selected?.id === value) return;
-    void (async () => {
-      try {
-        const res = await fetch(
-          `/api/admin/cms/products/search?keyword=${encodeURIComponent(value)}&limit=50`
-        );
-        const json = (await res.json()) as {
-          success?: boolean;
-          data?: { items?: ProductPickerItem[] };
-        };
-        const hit = json.data?.items?.find((i) => i.id === value) ?? null;
-        if (hit) {
-          setSelected(hit);
-          setMissing(false);
-        } else {
-          setSelected(null);
-          setMissing(true);
-        }
-      } catch {
-        setMissing(true);
+    let cancelled = false;
+
+    deferEffectTask(() => {
+      if (cancelled) return;
+      if (!value) {
+        setSelected(null);
+        setMissing(false);
+        return;
       }
-    })();
+      if (selected?.id === value) return;
+
+      void (async () => {
+        try {
+          const res = await fetch(
+            `/api/admin/cms/products/search?keyword=${encodeURIComponent(value)}&limit=50`
+          );
+          const json = (await res.json()) as {
+            success?: boolean;
+            data?: { items?: ProductPickerItem[] };
+          };
+          if (cancelled) return;
+          const hit = json.data?.items?.find((i) => i.id === value) ?? null;
+          if (hit) {
+            setSelected(hit);
+            setMissing(false);
+          } else {
+            setSelected(null);
+            setMissing(true);
+          }
+        } catch {
+          if (!cancelled) setMissing(true);
+        }
+      })();
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [value, selected?.id]);
 
   useEffect(() => {

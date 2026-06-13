@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useCallback, useEffect, useState } from "react";
+import {useCallback, useState} from "react";
+import { useDeferredEffect } from "@/lib/defer-effect";
 import { PageError, PageLoading } from "@/components/admin/PageState";
 import { StatusBadge } from "@/components/admin/StatusBadge";
 import { fetchAdminApi } from "@/lib/admin-api-client";
@@ -39,9 +40,7 @@ export function SystemHealthClient() {
     }
   }, []);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useDeferredEffect(() => load(), [load]);
 
   return (
     <div className="space-y-6">

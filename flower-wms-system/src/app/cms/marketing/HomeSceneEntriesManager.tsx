@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {useCallback, useState} from "react";
+import { useDeferredEffect } from "@/lib/defer-effect";
 import { ActionEmptyState } from "@/components/admin/ActionEmptyState";
 import { RecommendationSlotPicker } from "@/components/cms/pickers/RecommendationSlotPicker";
 import type { RecommendationSlotPickerItem } from "@/components/cms/pickers/types";
@@ -128,9 +129,7 @@ export function HomeSceneEntriesManager() {
     }
   }, []);
 
-  useEffect(() => {
-    void loadEntries();
-  }, [loadEntries]);
+  useDeferredEffect(() => loadEntries(), [loadEntries]);
 
   function openCreate() {
     setEditingId(null);

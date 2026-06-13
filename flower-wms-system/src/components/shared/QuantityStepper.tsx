@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 
 type Props = {
   value: number;
@@ -30,10 +30,8 @@ export function QuantityStepper({
   "aria-label": ariaLabel = "数量",
 }: Props) {
   const [draft, setDraft] = useState(String(value));
-
-  useEffect(() => {
-    setDraft(String(value));
-  }, [value]);
+  const [focused, setFocused] = useState(false);
+  const displayValue = focused ? draft : String(value);
 
   function commitDraft(raw: string) {
     const trimmed = raw.trim();
@@ -53,7 +51,13 @@ export function QuantityStepper({
   }
 
   function handleBlur() {
+    setFocused(false);
     commitDraft(draft);
+  }
+
+  function handleFocus() {
+    setDraft(String(value));
+    setFocused(true);
   }
 
   function handleInputChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -86,8 +90,9 @@ export function QuantityStepper({
         max={max}
         step={1}
         disabled={disabled}
-        value={draft}
+        value={displayValue}
         onChange={handleInputChange}
+        onFocus={handleFocus}
         onBlur={handleBlur}
         aria-label={ariaLabel}
         className="h-11 w-14 min-w-[3rem] border-0 bg-transparent text-center text-base font-semibold tabular-nums text-zinc-900 outline-none focus:ring-0 disabled:opacity-40 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-auto [&::-webkit-outer-spin-button]:appearance-auto"

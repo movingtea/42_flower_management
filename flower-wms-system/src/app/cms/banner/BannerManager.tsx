@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { CmsLinkTargetSelector } from "@/components/cms/pickers/CmsLinkTargetSelector";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import {
   resolveClientImagePreview,
   uploadCmsImage,
 } from "@/lib/cms-image-upload";
+import { useDeferredEffect } from "@/lib/defer-effect";
 import type { BannerWriteItem } from "@/lib/banner";
 import {
   bannerToLinkTarget,
@@ -177,9 +178,7 @@ export function BannerManager() {
     }
   }, []);
 
-  useEffect(() => {
-    void loadBanners();
-  }, [loadBanners]);
+  useDeferredEffect(() => loadBanners(), [loadBanners]);
 
   function openCreate() {
     const maxSort = banners.reduce((m, i) => Math.max(m, i.sortOrder), 0);

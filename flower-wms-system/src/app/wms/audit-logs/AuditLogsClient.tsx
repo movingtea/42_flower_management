@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import {useCallback, useState} from "react";
+import { useDeferredEffect } from "@/lib/defer-effect";
 import {
   AuditLogTable,
   type AuditLogRow,
@@ -71,9 +72,7 @@ export function AuditLogsClient() {
     page,
   ]);
 
-  useEffect(() => {
-    void load();
-  }, [load]);
+  useDeferredEffect(() => load(), [load]);
 
   return (
     <div className="space-y-6">

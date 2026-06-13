@@ -47,3 +47,8 @@ npm run test:sku-display
 npm run test:miniprogram-stock
 npm run build
 ```
+
+## Sprint 18 跟进
+
+- `npm run lint` 已无 error；NumberInput / 图片预览相关文件未新增 lint 问题。
+- 详见 README §10.8。

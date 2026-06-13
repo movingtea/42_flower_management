@@ -1,7 +1,7 @@
 import { jsonError } from "@/lib/api";
 import { isResponse, requirePermission } from "@/lib/api-auth";
 import { StorageError } from "@/lib/storage/errors";
-import { parseUploadModule } from "@/lib/storage/object-key";
+import { parseUploadModule, type UploadModule } from "@/lib/storage/object-key";
 import {
   auditImageUpload,
   handleAdminImageUpload,
@@ -26,10 +26,10 @@ export async function POST(request: Request) {
   if (isResponse(staff)) return staff;
 
   const clone = request.clone();
-  let module = "cms";
+  let uploadModule: UploadModule = "cms";
   try {
     const fd = await clone.formData();
-    module = parseUploadModule(fd.get("module") ?? "cms");
+    uploadModule = parseUploadModule(fd.get("module") ?? "cms");
   } catch (err) {
     if (err instanceof StorageError) {
       return jsonError(err.message, storageErrorStatus(err.code));
@@ -47,7 +47,7 @@ export async function POST(request: Request) {
       if (json.success && json.data?.objectKey) {
         auditImageUpload(staff, {
           objectKey: json.data.objectKey,
-          module,
+          module: uploadModule,
           size: json.data.size ?? 0,
         });
       }
