@@ -672,9 +672,17 @@ npm run seed:test-products
 11. CMS SKU 营销 PATCH 不得 mass assignment，只能改图文白名单字段。
 12. 当前不是多租户 SaaS：代码中没有 tenant 模型或隔离字段。
 
+### 12.1 多租户 SaaS 改造准备（Sprint 20）
+
+系统**当前仍为单租户（单店）**运行。Sprint 20 已完成多租户就绪度审计，改造路线图见：
+
+- **[`docs/multitenancy-audit.md`](docs/multitenancy-audit.md)** — Prisma 模型、unique 约束、API 边界、权限、OSS、小程序、支付、cron、部署与分阶段 Sprint 计划
+
+后续实施将按审计文档中的 Sprint A–J 渐进推进，**不破坏现有单店生产环境**。
+
 ## 13. 当前未实现 / 不应假设
 
-- 多租户 SaaS。
+- 多租户 SaaS（审计已完成，**代码尚未改造**）。
 - 正式微信支付 SDK；当前是 mock 支付和 callback 占位。
 - 第三方配送调度。
 - 对象存储：**Sprint 14 已实现**（阿里云 OSS）；生产不再依赖 `public/uploads`。
