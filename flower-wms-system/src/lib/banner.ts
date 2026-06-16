@@ -58,7 +58,7 @@ export function validateBannerWriteItem(
   index: number
 ): string | null {
   if (!item.imageUrl.trim()) {
-    return `第 ${index + 1} 条轮播须上传海报图`;
+    return `第 ${index + 1} 条轮播须上传轮播图`;
   }
   if (!Number.isFinite(item.sortOrder)) {
     return `第 ${index + 1} 条轮播排序须为数字`;
