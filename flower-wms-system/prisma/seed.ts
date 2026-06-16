@@ -1,6 +1,7 @@
 import { PrismaClient, Role } from "../src/generated/prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
+import { backfillDefaultTenantMembers, ensureDefaultTenant } from "../src/services/tenant";
 
 const connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
@@ -61,10 +62,17 @@ async function main() {
     }
   }
 
+  const tenant = await ensureDefaultTenant(prisma);
+  const backfill = await backfillDefaultTenantMembers(prisma);
+
   console.log(
     `[seed] 默认管理员已就绪：${DEFAULT_ADMIN_USERNAME} / ${DEFAULT_ADMIN_PASSWORD}（角色 IT_ADMIN）`
   );
   console.log(`[seed] 默认包装方案已就绪：${DEFAULT_PACKAGING_KITS.length} 项`);
+  console.log(`[seed] 默认租户已就绪：${tenant.slug} (${tenant.name})`);
+  console.log(
+    `[seed] TenantMember 回填：staff=${backfill.staffUsersFound} created=${backfill.membersCreated} skipped=${backfill.membersSkipped}`
+  );
 }
 
 main()

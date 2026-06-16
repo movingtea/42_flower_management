@@ -404,6 +404,8 @@ export const ModelName = {
   Batch: 'Batch',
   StockLog: 'StockLog',
   StockLossRecord: 'StockLossRecord',
+  Tenant: 'Tenant',
+  TenantMember: 'TenantMember',
   StaffUser: 'StaffUser',
   StaffAuditLog: 'StaffAuditLog',
   User: 'User',
@@ -433,7 +435,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "productCategory" | "productCategoryRelation" | "materialCategory" | "materialCategoryRelation" | "supplier" | "purchaseOrder" | "purchaseOrderLine" | "productSpu" | "productSku" | "cmsRecommendationSlot" | "cmsRecommendationItem" | "cmsHomeSceneEntry" | "banner" | "material" | "recipe" | "packagingKit" | "recipeLine" | "batch" | "stockLog" | "stockLossRecord" | "staffUser" | "staffAuditLog" | "user" | "order" | "orderCostSnapshot" | "orderItem" | "customer" | "recipient" | "customerRecipientRelation" | "giftOccasion" | "customerReminder" | "appConfig" | "auditLog" | "flowerWiki"
+    modelProps: "productCategory" | "productCategoryRelation" | "materialCategory" | "materialCategoryRelation" | "supplier" | "purchaseOrder" | "purchaseOrderLine" | "productSpu" | "productSku" | "cmsRecommendationSlot" | "cmsRecommendationItem" | "cmsHomeSceneEntry" | "banner" | "material" | "recipe" | "packagingKit" | "recipeLine" | "batch" | "stockLog" | "stockLossRecord" | "tenant" | "tenantMember" | "staffUser" | "staffAuditLog" | "user" | "order" | "orderCostSnapshot" | "orderItem" | "customer" | "recipient" | "customerRecipientRelation" | "giftOccasion" | "customerReminder" | "appConfig" | "auditLog" | "flowerWiki"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1917,6 +1919,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    Tenant: {
+      payload: Prisma.$TenantPayload<ExtArgs>
+      fields: Prisma.TenantFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TenantFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TenantFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>
+        }
+        findFirst: {
+          args: Prisma.TenantFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TenantFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>
+        }
+        findMany: {
+          args: Prisma.TenantFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>[]
+        }
+        create: {
+          args: Prisma.TenantCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>
+        }
+        createMany: {
+          args: Prisma.TenantCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TenantCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>[]
+        }
+        delete: {
+          args: Prisma.TenantDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>
+        }
+        update: {
+          args: Prisma.TenantUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>
+        }
+        deleteMany: {
+          args: Prisma.TenantDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TenantUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TenantUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>[]
+        }
+        upsert: {
+          args: Prisma.TenantUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantPayload>
+        }
+        aggregate: {
+          args: Prisma.TenantAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTenant>
+        }
+        groupBy: {
+          args: Prisma.TenantGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TenantCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantCountAggregateOutputType> | number
+        }
+      }
+    }
+    TenantMember: {
+      payload: Prisma.$TenantMemberPayload<ExtArgs>
+      fields: Prisma.TenantMemberFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.TenantMemberFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantMemberPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.TenantMemberFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantMemberPayload>
+        }
+        findFirst: {
+          args: Prisma.TenantMemberFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantMemberPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.TenantMemberFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantMemberPayload>
+        }
+        findMany: {
+          args: Prisma.TenantMemberFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantMemberPayload>[]
+        }
+        create: {
+          args: Prisma.TenantMemberCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantMemberPayload>
+        }
+        createMany: {
+          args: Prisma.TenantMemberCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.TenantMemberCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantMemberPayload>[]
+        }
+        delete: {
+          args: Prisma.TenantMemberDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantMemberPayload>
+        }
+        update: {
+          args: Prisma.TenantMemberUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantMemberPayload>
+        }
+        deleteMany: {
+          args: Prisma.TenantMemberDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.TenantMemberUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.TenantMemberUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantMemberPayload>[]
+        }
+        upsert: {
+          args: Prisma.TenantMemberUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$TenantMemberPayload>
+        }
+        aggregate: {
+          args: Prisma.TenantMemberAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateTenantMember>
+        }
+        groupBy: {
+          args: Prisma.TenantMemberGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantMemberGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.TenantMemberCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.TenantMemberCountAggregateOutputType> | number
+        }
+      }
+    }
     StaffUser: {
       payload: Prisma.$StaffUserPayload<ExtArgs>
       fields: Prisma.StaffUserFieldRefs
@@ -3339,6 +3489,35 @@ export const StockLossRecordScalarFieldEnum = {
 export type StockLossRecordScalarFieldEnum = (typeof StockLossRecordScalarFieldEnum)[keyof typeof StockLossRecordScalarFieldEnum]
 
 
+export const TenantScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  name: 'name',
+  status: 'status',
+  plan: 'plan',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
+
+
+export const TenantMemberScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  staffUserId: 'staffUserId',
+  role: 'role',
+  status: 'status',
+  isDefault: 'isDefault',
+  joinedAt: 'joinedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantMemberScalarFieldEnum = (typeof TenantMemberScalarFieldEnum)[keyof typeof TenantMemberScalarFieldEnum]
+
+
 export const StaffUserScalarFieldEnum = {
   id: 'id',
   username: 'username',
@@ -3870,6 +4049,20 @@ export type ListEnumStockLogTypeFieldRefInput<$PrismaModel> = FieldRefInputType<
 
 
 /**
+ * Reference to a field of type 'TenantStatus'
+ */
+export type EnumTenantStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TenantStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'TenantStatus[]'
+ */
+export type ListEnumTenantStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TenantStatus[]'>
+    
+
+
+/**
  * Reference to a field of type 'Role'
  */
 export type EnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Role'>
@@ -3880,6 +4073,20 @@ export type EnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel
  * Reference to a field of type 'Role[]'
  */
 export type ListEnumRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Role[]'>
+    
+
+
+/**
+ * Reference to a field of type 'TenantMemberStatus'
+ */
+export type EnumTenantMemberStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TenantMemberStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'TenantMemberStatus[]'
+ */
+export type ListEnumTenantMemberStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'TenantMemberStatus[]'>
     
 
 
@@ -4152,6 +4359,8 @@ export type GlobalOmitConfig = {
   batch?: Prisma.BatchOmit
   stockLog?: Prisma.StockLogOmit
   stockLossRecord?: Prisma.StockLossRecordOmit
+  tenant?: Prisma.TenantOmit
+  tenantMember?: Prisma.TenantMemberOmit
   staffUser?: Prisma.StaffUserOmit
   staffAuditLog?: Prisma.StaffAuditLogOmit
   user?: Prisma.UserOmit

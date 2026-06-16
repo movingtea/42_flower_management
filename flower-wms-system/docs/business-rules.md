@@ -3,7 +3,8 @@
 > **文档版本**：Sprint 13（基于 Sprint 12 已合并部署）  
 > **适用范围**：flower-wms-system 后端、小程序 API、CMS/WMS 业务防线  
 > **真理源**：本文档 + `src/lib/business-errors.ts` + `src/services/*-pure.ts`  
-> **维护原则**：已确认规则必须写入本文；实现、测试与 smoke scripts 以本文为准。
+> **维护原则**：已确认规则必须写入本文；实现、测试与 smoke scripts 以本文为准。  
+> **多租户说明（Sprint 21）**：业务规则仍按**单店**执行；`Tenant` / `TenantMember` 仅为未来 SaaS 边界地基，不改变当前权限与数据隔离语义。
 
 ---
 

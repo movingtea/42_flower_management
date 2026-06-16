@@ -2,8 +2,25 @@
 
 > **Sprint 20 — 多租户 SaaS 改造准备审计**  
 > **审计日期**：2026-06-15  
+> **Sprint 21 执行状态（2026-06-15）**：**Sprint A 已完成** — 已新增 `Tenant` / `TenantMember` 模型、默认租户 `universe42`、StaffUser 成员回填与 session 最小租户字段；**业务表仍未加 `tenantId`，行为仍为单店**。  
 > **代码基线**：`flower-wms-system/` @ `master`（单店 Universe42 / 万物肆贰）  
-> **范围**：只读审计与改造计划；**未修改** schema、业务代码、小程序、Docker、OSS 逻辑。
+> **范围**：Sprint 20 为只读审计；Sprint 21 仅租户身份地基。
+
+---
+
+## Sprint 21 执行摘要（Sprint A）
+
+| 项 | 状态 |
+|---|---|
+| `Tenant` / `TenantMember` model | ✅ 已新增 |
+| Migration `20260615120000_add_tenant_and_tenant_member` | ✅ 已生成 |
+| 默认租户 `universe42` | ✅ seed / `db:seed:tenant` |
+| StaffUser → TenantMember 回填 | ✅ `db:backfill:tenant-members` / `db:seed` |
+| 新建 StaffUser 自动加入默认租户 | ✅ 事务 `createStaffUserWithDefaultTenantMembership` |
+| Session `defaultTenantId` / `currentTenantId` / `tenantRole` | ✅ JWT + session callback |
+| 业务表 `tenantId` | ❌ 未做（Sprint B） |
+| 业务查询 tenant 过滤 | ❌ 未做（Sprint D） |
+| 权限 `requirePermission` | ✅ 不变（仍用 `StaffUser.role`） |
 
 ---
 
@@ -13,10 +30,10 @@
 
 | 维度 | 当前状态 | SaaS 就绪度 |
 |---|---|---|
-| 数据模型 | 35 个 Prisma model，0 个租户字段 | ❌ 未就绪 |
+| 数据模型 | 37 个 Prisma model（含 Tenant/TenantMember）；业务表仍 **0** 个 tenantId | ⚠️ 地基已就绪 |
 | Unique 约束 | 15+ 全局唯一字段/组合 | ❌ 需租户化 |
 | Service / API | 全部业务查询无 tenant 过滤 | ❌ 高风险 |
-| 权限 | `StaffUser.role` 全局枚举，无店铺边界 | ❌ 未就绪 |
+| 权限 | `TenantMember` 已建；**当前仍以 `StaffUser.role` 驱动** | ⚠️ 地基已就绪 |
 | 配置 | `AppConfig` 全局 key | ❌ 需租户化 |
 | OSS | `universe42/{module}/...`，无 tenant 前缀 | ⚠️ 可渐进改造 |
 | 小程序 | 单 baseUrl、单 appId、无 store 参数 | ⚠️ 方案 A 优先 |
@@ -556,12 +573,12 @@ AuditLog
 
 ## 17. Recommended Sprint Plan
 
-### Sprint A：Tenant 基础模型与默认租户
+### Sprint A：Tenant 基础模型与默认租户 ✅（Sprint 21 已完成）
 
 - **目标**：`Tenant` + `TenantMember` 表；seed 默认租户 `universe42`
-- **模块**：`prisma/schema.prisma`, `prisma/seed.ts`
+- **模块**：`prisma/schema.prisma`, `prisma/seed.ts`, `src/services/tenant.ts`, `src/auth.ts`
 - **风险**：低
-- **验收**：默认租户存在；现有 StaffUser 有 TenantMember；业务无行为变化
+- **验收**：默认租户存在；StaffUser 有 TenantMember；业务无行为变化 — **已通过**
 
 ### Sprint B：业务表 tenantId nullable + 默认数据回填
 

@@ -142,6 +142,16 @@ export type StockLog = Prisma.StockLogModel
  */
 export type StockLossRecord = Prisma.StockLossRecordModel
 /**
+ * Model Tenant
+ * 
+ */
+export type Tenant = Prisma.TenantModel
+/**
+ * Model TenantMember
+ * 
+ */
+export type TenantMember = Prisma.TenantMemberModel
+/**
  * Model StaffUser
  * 
  */

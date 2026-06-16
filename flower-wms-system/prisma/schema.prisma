@@ -174,6 +174,20 @@ enum StaffAuditAction {
   PASSWORD_RESET /// 管理员代行重置密码
 }
 
+/// SaaS 租户状态（Sprint 21）
+enum TenantStatus {
+  ACTIVE
+  SUSPENDED
+  TRIAL
+}
+
+/// 租户成员状态（Sprint 21）
+enum TenantMemberStatus {
+  ACTIVE
+  DISABLED
+  INVITED
+}
+
 /// 业务操作审计模块（AuditLog）
 enum AuditModule {
   WMS
@@ -317,31 +331,31 @@ model PurchaseOrder {
 }
 
 model PurchaseOrderLine {
-  id                String   @id @default(cuid())
-  purchaseOrderId   String   @map("purchase_order_id")
-  flowerWikiId      String   @map("flower_wiki_id")
-  purchaseName      String?  @map("purchase_name")
-  grade             String?
-  color             String?
-  spec              String?
-  purchaseQuantity  Decimal  @map("purchase_quantity") @db.Decimal(12, 2)
-  purchaseUnit      String   @map("purchase_unit")
-  stemsPerUnit      Decimal  @map("stems_per_unit") @db.Decimal(12, 2)
-  totalStems        Decimal  @map("total_stems") @db.Decimal(12, 2)
-  unitPrice         Decimal  @map("unit_price") @db.Decimal(12, 2)
-  lineAmount        Decimal  @map("line_amount") @db.Decimal(12, 2)
-  allocatedExtraFee Decimal  @default(0) @map("allocated_extra_fee") @db.Decimal(12, 2)
-  actualTotalCost        Decimal  @default(0) @map("actual_total_cost") @db.Decimal(12, 2)
-  actualUnitCost         Decimal  @default(0) @map("actual_unit_cost") @db.Decimal(12, 4)
-  usableRate             Decimal? @map("usable_rate") @db.Decimal(5, 4)
-  lossRate               Decimal? @map("loss_rate") @db.Decimal(5, 4)
-  lossAdjustedTotalCost  Decimal? @map("loss_adjusted_total_cost") @db.Decimal(12, 2)
-  lossAdjustedUnitCost   Decimal? @map("loss_adjusted_unit_cost") @db.Decimal(12, 4)
-  supplierSkuName        String?  @map("supplier_sku_name")
-  note              String?  @db.Text
-  inboundBatchId    String?  @unique @map("inbound_batch_id")
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
+  id                    String   @id @default(cuid())
+  purchaseOrderId       String   @map("purchase_order_id")
+  flowerWikiId          String   @map("flower_wiki_id")
+  purchaseName          String?  @map("purchase_name")
+  grade                 String?
+  color                 String?
+  spec                  String?
+  purchaseQuantity      Decimal  @map("purchase_quantity") @db.Decimal(12, 2)
+  purchaseUnit          String   @map("purchase_unit")
+  stemsPerUnit          Decimal  @map("stems_per_unit") @db.Decimal(12, 2)
+  totalStems            Decimal  @map("total_stems") @db.Decimal(12, 2)
+  unitPrice             Decimal  @map("unit_price") @db.Decimal(12, 2)
+  lineAmount            Decimal  @map("line_amount") @db.Decimal(12, 2)
+  allocatedExtraFee     Decimal  @default(0) @map("allocated_extra_fee") @db.Decimal(12, 2)
+  actualTotalCost       Decimal  @default(0) @map("actual_total_cost") @db.Decimal(12, 2)
+  actualUnitCost        Decimal  @default(0) @map("actual_unit_cost") @db.Decimal(12, 4)
+  usableRate            Decimal? @map("usable_rate") @db.Decimal(5, 4)
+  lossRate              Decimal? @map("loss_rate") @db.Decimal(5, 4)
+  lossAdjustedTotalCost Decimal? @map("loss_adjusted_total_cost") @db.Decimal(12, 2)
+  lossAdjustedUnitCost  Decimal? @map("loss_adjusted_unit_cost") @db.Decimal(12, 4)
+  supplierSkuName       String?  @map("supplier_sku_name")
+  note                  String?  @db.Text
+  inboundBatchId        String?  @unique @map("inbound_batch_id")
+  createdAt             DateTime @default(now()) @map("created_at")
+  updatedAt             DateTime @updatedAt @map("updated_at")
 
   purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
   flowerWiki    FlowerWiki    @relation(fields: [flowerWikiId], references: [id], onDelete: Restrict)
@@ -385,10 +399,10 @@ model ProductSpu {
   createdAt        DateTime @default(now())
   updatedAt        DateTime @updatedAt
 
-  skus                 ProductSku[]
-  categories           ProductCategoryRelation[]
-  banners              Banner[]
-  recommendationItems  CmsRecommendationItem[]
+  skus                ProductSku[]
+  categories          ProductCategoryRelation[]
+  banners             Banner[]
+  recommendationItems CmsRecommendationItem[]
 
   @@index([isActive])
   @@index([isDeleted])
@@ -396,34 +410,34 @@ model ProductSpu {
 }
 
 model ProductSku {
-  id          String   @id @default(uuid())
-  spuId       String   @map("spu_id")
-  skuCode     String   @unique @map("sku_code")
-  specName    String   @map("spec_name")
-  price       Decimal  @db.Decimal(10, 2)
-  stock       Int      @default(0)
-  recipeId    String?  @map("recipe_id")
-  description String?  @db.Text
-  imageUrl    String?  @map("image_url")
-  isMainImage Boolean  @default(false) @map("is_main_image")
-  sortOrder   Int      @default(0) @map("sort_order")
+  id                  String   @id @default(uuid())
+  spuId               String   @map("spu_id")
+  skuCode             String   @unique @map("sku_code")
+  specName            String   @map("spec_name")
+  price               Decimal  @db.Decimal(10, 2)
+  stock               Int      @default(0)
+  recipeId            String?  @map("recipe_id")
+  description         String?  @db.Text
+  imageUrl            String?  @map("image_url")
+  isMainImage         Boolean  @default(false) @map("is_main_image")
+  sortOrder           Int      @default(0) @map("sort_order")
   /// 是否启用大批量提前预订规则
-  bulkPreorderEnabled Boolean @default(false) @map("bulk_preorder_enabled")
+  bulkPreorderEnabled Boolean  @default(false) @map("bulk_preorder_enabled")
   /// 命中大批量规则的购买数量阈值（单 SKU）
-  bulkOrderThreshold  Int?    @map("bulk_order_threshold")
+  bulkOrderThreshold  Int?     @map("bulk_order_threshold")
   /// 命中规则后最早配送日 = 今天 + minLeadDays（Asia/Shanghai 自然日）
-  bulkMinLeadDays     Int?    @map("bulk_min_lead_days")
+  bulkMinLeadDays     Int?     @map("bulk_min_lead_days")
   /// 小程序提示文案（可选）
-  bulkPreorderMessage String? @map("bulk_preorder_message") @db.Text
+  bulkPreorderMessage String?  @map("bulk_preorder_message") @db.Text
   /// 规格是否运营可售（停用 ≠ 售罄；停用规格不在小程序展示）
-  isActive    Boolean  @default(true) @map("is_active")
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  isActive            Boolean  @default(true) @map("is_active")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 
-  spu                  ProductSpu              @relation(fields: [spuId], references: [id], onDelete: Cascade)
-  recipe               Recipe?                 @relation(fields: [recipeId], references: [id], onDelete: SetNull)
-  orderItems           OrderItem[]
-  recommendationItems  CmsRecommendationItem[]
+  spu                 ProductSpu              @relation(fields: [spuId], references: [id], onDelete: Cascade)
+  recipe              Recipe?                 @relation(fields: [recipeId], references: [id], onDelete: SetNull)
+  orderItems          OrderItem[]
+  recommendationItems CmsRecommendationItem[]
 
   @@index([spuId])
   @@index([spuId, isMainImage])
@@ -634,22 +648,22 @@ model RecipeLine {
 // ---------------------------------------------------------------------------
 
 model Batch {
-  id              String    @id @default(cuid())
-  materialId      String
-  batchNo         String?   @unique
-  inboundAt       DateTime  @default(now())
-  originalQty            Int
-  remainingQty           Int
-  unitCost               Decimal   @db.Decimal(12, 4)
-  lossAdjustedUnitCost   Decimal?  @map("loss_adjusted_unit_cost") @db.Decimal(12, 4)
-  usableRate             Decimal?  @map("usable_rate") @db.Decimal(5, 4)
-  lossRate               Decimal?  @map("loss_rate") @db.Decimal(5, 4)
-  expiresAt              DateTime?
-  storageLocation String?
-  supplier        String?
-  note            String?   @db.Text
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id                   String    @id @default(cuid())
+  materialId           String
+  batchNo              String?   @unique
+  inboundAt            DateTime  @default(now())
+  originalQty          Int
+  remainingQty         Int
+  unitCost             Decimal   @db.Decimal(12, 4)
+  lossAdjustedUnitCost Decimal?  @map("loss_adjusted_unit_cost") @db.Decimal(12, 4)
+  usableRate           Decimal?  @map("usable_rate") @db.Decimal(5, 4)
+  lossRate             Decimal?  @map("loss_rate") @db.Decimal(5, 4)
+  expiresAt            DateTime?
+  storageLocation      String?
+  supplier             String?
+  note                 String?   @db.Text
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
 
   material          Material           @relation(fields: [materialId], references: [id], onDelete: Restrict)
   stockLogs         StockLog[]
@@ -724,6 +738,47 @@ model StockLossRecord {
 }
 
 // ---------------------------------------------------------------------------
+// Tenant / TenantMember — SaaS 租户与后台员工归属（Sprint 21）
+// 说明：当前仅身份地基；业务表尚未加 tenantId，权限仍由 StaffUser.role 驱动
+// ---------------------------------------------------------------------------
+
+model Tenant {
+  id          String       @id @default(cuid())
+  slug        String       @unique
+  name        String
+  status      TenantStatus @default(ACTIVE)
+  plan        String?
+  description String?      @db.Text
+  createdAt   DateTime     @default(now()) @map("created_at")
+  updatedAt   DateTime     @updatedAt @map("updated_at")
+
+  members TenantMember[]
+
+  @@index([status])
+  @@map("tenants")
+}
+
+model TenantMember {
+  id          String             @id @default(cuid())
+  tenantId    String             @map("tenant_id")
+  staffUserId String             @map("staff_user_id")
+  role        Role
+  status      TenantMemberStatus @default(ACTIVE)
+  isDefault   Boolean            @default(false) @map("is_default")
+  joinedAt    DateTime           @default(now()) @map("joined_at")
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+
+  tenant    Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  staffUser StaffUser @relation(fields: [staffUserId], references: [id], onDelete: Cascade)
+
+  @@unique([tenantId, staffUserId])
+  @@index([staffUserId])
+  @@index([tenantId])
+  @@map("tenant_members")
+}
+
+// ---------------------------------------------------------------------------
 // StaffUser — 后台登录账号（Credentials + RBAC）
 // 说明：小程序顾客仍使用下方 User（openId），二者物理隔离
 // ---------------------------------------------------------------------------
@@ -738,10 +793,11 @@ model StaffUser {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
-  stockLogs        StockLog[]
-  stockLossRecords StockLossRecord[]
-  auditsAsOperator StaffAuditLog[]   @relation("StaffAuditOperator")
-  auditsAsTarget   StaffAuditLog[]   @relation("StaffAuditTarget")
+  stockLogs         StockLog[]
+  stockLossRecords  StockLossRecord[]
+  auditsAsOperator  StaffAuditLog[]   @relation("StaffAuditOperator")
+  auditsAsTarget    StaffAuditLog[]   @relation("StaffAuditTarget")
+  tenantMemberships TenantMember[]
 
   @@index([role])
   @@map("staff_users")
@@ -882,29 +938,29 @@ model OrderItem {
 // ---------------------------------------------------------------------------
 
 model Customer {
-  id               String         @id @default(cuid())
-  miniProgramUserId String?       @unique @map("mini_program_user_id")
-  name             String?
-  phone            String?
-  wechatNickname   String?        @map("wechat_nickname")
-  wechatOpenid     String?        @map("wechat_openid")
-  wechatUnionid    String?        @map("wechat_unionid")
-  source           CustomerSource @default(MINI_PROGRAM)
-  note             String?        @db.Text
-  tags             String[]       @default([])
-  firstOrderAt     DateTime?      @map("first_order_at")
-  lastOrderAt      DateTime?      @map("last_order_at")
-  totalOrders      Int            @default(0) @map("total_orders")
-  totalSpent       Decimal        @default(0) @map("total_spent") @db.Decimal(12, 2)
-  averageOrderValue Decimal       @default(0) @map("average_order_value") @db.Decimal(12, 2)
-  createdAt        DateTime       @default(now()) @map("created_at")
-  updatedAt        DateTime       @updatedAt @map("updated_at")
+  id                String         @id @default(cuid())
+  miniProgramUserId String?        @unique @map("mini_program_user_id")
+  name              String?
+  phone             String?
+  wechatNickname    String?        @map("wechat_nickname")
+  wechatOpenid      String?        @map("wechat_openid")
+  wechatUnionid     String?        @map("wechat_unionid")
+  source            CustomerSource @default(MINI_PROGRAM)
+  note              String?        @db.Text
+  tags              String[]       @default([])
+  firstOrderAt      DateTime?      @map("first_order_at")
+  lastOrderAt       DateTime?      @map("last_order_at")
+  totalOrders       Int            @default(0) @map("total_orders")
+  totalSpent        Decimal        @default(0) @map("total_spent") @db.Decimal(12, 2)
+  averageOrderValue Decimal        @default(0) @map("average_order_value") @db.Decimal(12, 2)
+  createdAt         DateTime       @default(now()) @map("created_at")
+  updatedAt         DateTime       @updatedAt @map("updated_at")
 
-  miniProgramUser User?                      @relation(fields: [miniProgramUserId], references: [id], onDelete: SetNull)
+  miniProgramUser    User?                       @relation(fields: [miniProgramUserId], references: [id], onDelete: SetNull)
   recipientRelations CustomerRecipientRelation[]
-  occasions      GiftOccasion[]
-  reminders      CustomerReminder[]
-  orders         Order[]
+  occasions          GiftOccasion[]
+  reminders          CustomerReminder[]
+  orders             Order[]
 
   @@index([phone])
   @@index([wechatOpenid])
@@ -914,17 +970,17 @@ model Customer {
 }
 
 model Recipient {
-  id               String    @id @default(cuid())
-  name             String
-  phone            String?
-  address          String?   @db.Text
-  birthday         DateTime?
-  preferredColors  String?   @map("preferred_colors")
-  dislikedFlowers  String?   @map("disliked_flowers")
-  preferenceNote   String?   @map("preference_note") @db.Text
-  note             String?   @db.Text
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
+  id              String    @id @default(cuid())
+  name            String
+  phone           String?
+  address         String?   @db.Text
+  birthday        DateTime?
+  preferredColors String?   @map("preferred_colors")
+  dislikedFlowers String?   @map("disliked_flowers")
+  preferenceNote  String?   @map("preference_note") @db.Text
+  note            String?   @db.Text
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
   customerRelations CustomerRecipientRelation[]
   occasions         GiftOccasion[]
@@ -949,8 +1005,8 @@ model CustomerRecipientRelation {
   createdAt     DateTime               @default(now()) @map("created_at")
   updatedAt     DateTime               @updatedAt @map("updated_at")
 
-  customer  Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  recipient Recipient @relation(fields: [recipientId], references: [id], onDelete: Cascade)
+  customer  Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  recipient Recipient      @relation(fields: [recipientId], references: [id], onDelete: Cascade)
   occasions GiftOccasion[]
 
   @@unique([customerId, recipientId])
@@ -961,20 +1017,20 @@ model CustomerRecipientRelation {
 }
 
 model GiftOccasion {
-  id                  String           @id @default(cuid())
-  customerId          String?          @map("customer_id")
-  recipientId         String?          @map("recipient_id")
-  relationId          String?          @map("relation_id")
-  orderId             String?          @map("order_id")
-  occasionType        GiftOccasionType @map("occasion_type")
-  occasionLabel       String?          @map("occasion_label")
-  importantDate       DateTime?        @map("important_date")
-  giftPurpose         String?          @map("gift_purpose")
-  cardMessage         String?          @map("card_message") @db.Text
-  preferenceSnapshot  Json?            @map("preference_snapshot")
-  note                String?          @db.Text
-  createdAt           DateTime         @default(now()) @map("created_at")
-  updatedAt           DateTime         @updatedAt @map("updated_at")
+  id                 String           @id @default(cuid())
+  customerId         String?          @map("customer_id")
+  recipientId        String?          @map("recipient_id")
+  relationId         String?          @map("relation_id")
+  orderId            String?          @map("order_id")
+  occasionType       GiftOccasionType @map("occasion_type")
+  occasionLabel      String?          @map("occasion_label")
+  importantDate      DateTime?        @map("important_date")
+  giftPurpose        String?          @map("gift_purpose")
+  cardMessage        String?          @map("card_message") @db.Text
+  preferenceSnapshot Json?            @map("preference_snapshot")
+  note               String?          @db.Text
+  createdAt          DateTime         @default(now()) @map("created_at")
+  updatedAt          DateTime         @updatedAt @map("updated_at")
 
   customer  Customer?                  @relation(fields: [customerId], references: [id], onDelete: SetNull)
   recipient Recipient?                 @relation(fields: [recipientId], references: [id], onDelete: SetNull)
@@ -1070,21 +1126,21 @@ model AuditLog {
 // ---------------------------------------------------------------------------
 
 model FlowerWiki {
-  id                   String     @id @default(uuid())
-  photo                String?
-  englishName          String     @unique @map("english_name")
-  chineseName          String     @map("chinese_name")
-  pinyinIndex          String     @default("") @map("pinyin_index")
-  colorTags            String[]   @default([]) @map("color_tags")
-  morphology           String?
-  supplySeason         String?    @map("supply_season")
-  floralRole           FloralRole @map("floral_role")
-  maintenance          String     @db.Text
-  flowerLanguage       String?    @map("flower_language") @db.Text
+  id                     String     @id @default(uuid())
+  photo                  String?
+  englishName            String     @unique @map("english_name")
+  chineseName            String     @map("chinese_name")
+  pinyinIndex            String     @default("") @map("pinyin_index")
+  colorTags              String[]   @default([]) @map("color_tags")
+  morphology             String?
+  supplySeason           String?    @map("supply_season")
+  floralRole             FloralRole @map("floral_role")
+  maintenance            String     @db.Text
+  flowerLanguage         String?    @map("flower_language") @db.Text
   /// 结构化养护指南表格（AI / 表格编辑）；maintenance 保留文本摘要兼容旧数据
-  maintenanceCare      Json?      @map("maintenance_care")
+  maintenanceCare        Json?      @map("maintenance_care")
   /// 默认保质期（天）；入库时用于计算 batch.expiresAt，可单次入库覆盖
-  defaultShelfLifeDays Int?       @map("default_shelf_life_days")
+  defaultShelfLifeDays   Int?       @map("default_shelf_life_days")
   /// 标准单支成本：仅用于产品定价预估；订单实际成本仍以 Batch.unitCost 为准
   standardUnitCost       Decimal?   @map("standard_unit_cost") @db.Decimal(12, 4)
   costUnit               String?    @map("cost_unit")
@@ -1101,8 +1157,8 @@ model FlowerWiki {
   lossRateNote           String?    @map("loss_rate_note") @db.Text
   lossRateUpdatedAt      DateTime?  @map("loss_rate_updated_at")
   aliasMap               Json       @default("{}") @map("alias_map")
-  createdAt            DateTime   @default(now()) @map("created_at")
-  updatedAt            DateTime   @updatedAt @map("updated_at")
+  createdAt              DateTime   @default(now()) @map("created_at")
+  updatedAt              DateTime   @updatedAt @map("updated_at")
 
   materials          Material[]
   recipeLines        RecipeLine[]

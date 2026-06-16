@@ -2,6 +2,11 @@ import { Role } from "@/generated/prisma/enums";
 
 export type StaffRole = Role;
 
+/**
+ * TenantMember.role 是未来租户级权限基础（Sprint 21）。
+ * 当前 requirePermission / hasPermission 仍以 StaffUser.role 为准，行为不变。
+ */
+
 /** IT Admin 严禁访问任何业务数据 API */
 export function canAccessBusinessData(role: StaffRole): boolean {
   return role !== Role.IT_ADMIN;

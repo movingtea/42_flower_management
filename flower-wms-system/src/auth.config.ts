@@ -17,6 +17,9 @@ export const authConfig = {
         token.id = user.id;
         token.username = user.username;
         token.role = user.role;
+        token.defaultTenantId = user.defaultTenantId ?? null;
+        token.currentTenantId = user.currentTenantId ?? null;
+        token.tenantRole = user.tenantRole ?? null;
       }
       return token;
     },
@@ -30,6 +33,14 @@ export const authConfig = {
         session.user.id = token.id;
         session.user.username = token.username;
         session.user.role = token.role as Role;
+        session.user.defaultTenantId =
+          typeof token.defaultTenantId === "string" ? token.defaultTenantId : null;
+        session.user.currentTenantId =
+          typeof token.currentTenantId === "string" ? token.currentTenantId : null;
+        session.user.tenantRole =
+          typeof token.tenantRole === "string"
+            ? (token.tenantRole as Role)
+            : null;
       }
       return session;
     },

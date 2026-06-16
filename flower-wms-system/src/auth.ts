@@ -4,6 +4,7 @@ import Credentials from "next-auth/providers/credentials";
 import { authConfig } from "@/auth.config";
 import { Role } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
+import { resolveStaffTenantContext } from "@/services/tenant";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
@@ -32,12 +33,20 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const ok = await bcrypt.compare(password, staff.passwordHash);
         if (!ok) return null;
 
+        const tenantContext = await resolveStaffTenantContext(
+          staff.id,
+          staff.role as Role
+        );
+
         return {
           id: staff.id,
           name: staff.displayName ?? staff.username,
           email: staff.username,
           username: staff.username,
           role: staff.role as Role,
+          defaultTenantId: tenantContext.defaultTenantId,
+          currentTenantId: tenantContext.currentTenantId,
+          tenantRole: tenantContext.tenantRole,
         };
       },
     }),

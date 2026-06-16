@@ -670,19 +670,37 @@ npm run seed:test-products
 9. 采购入库必须写 Batch + `StockLog: INBOUND`。
 10. 供应商停用不能影响历史采购单。
 11. CMS SKU 营销 PATCH 不得 mass assignment，只能改图文白名单字段。
-12. 当前不是多租户 SaaS：代码中没有 tenant 模型或隔离字段。
+12. 当前不是完整多租户 SaaS：已有 `Tenant` / `TenantMember` 地基，但**业务表尚无 `tenantId`，查询未隔离**。
 
-### 12.1 多租户 SaaS 改造准备（Sprint 20）
+### 12.1 多租户 SaaS 改造准备（Sprint 20 + 21）
 
-系统**当前仍为单租户（单店）**运行。Sprint 20 已完成多租户就绪度审计，改造路线图见：
+系统**业务行为仍为单店**。Sprint 20 审计与 Sprint 21 租户地基：
 
-- **[`docs/multitenancy-audit.md`](docs/multitenancy-audit.md)** — Prisma 模型、unique 约束、API 边界、权限、OSS、小程序、支付、cron、部署与分阶段 Sprint 计划
+- **[`docs/multitenancy-audit.md`](docs/multitenancy-audit.md)** — 完整审计与路线图
+- **Sprint 21**：`Tenant` / `TenantMember`、默认租户 `universe42`、StaffUser 成员归属、session 租户字段
 
-后续实施将按审计文档中的 Sprint A–J 渐进推进，**不破坏现有单店生产环境**。
+**默认租户与成员回填命令**（在 `flower-wms-system/` 下，需 `DATABASE_URL` 且已 migrate）：
+
+```bash
+npx prisma migrate deploy
+npm run db:seed              # 含默认租户 + TenantMember 回填
+# 或分步：
+npm run db:seed:tenant
+npm run db:backfill:tenant-members
+```
+
+**测试**：
+
+```bash
+npm run test:tenant-foundation    # 纯函数，无需 DB
+DATABASE_URL="..." npm run smoke:tenant-foundation
+```
+
+> 租户模型仅为 SaaS **身份地基**，不代表商品/订单/库存等业务数据已多租户隔离。
 
 ## 13. 当前未实现 / 不应假设
 
-- 多租户 SaaS（审计已完成，**代码尚未改造**）。
+- 完整多租户 SaaS 数据隔离（Sprint B/C/D 未做；业务表无 `tenantId`）。
 - 正式微信支付 SDK；当前是 mock 支付和 callback 占位。
 - 第三方配送调度。
 - 对象存储：**Sprint 14 已实现**（阿里云 OSS）；生产不再依赖 `public/uploads`。

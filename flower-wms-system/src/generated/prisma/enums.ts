@@ -200,6 +200,24 @@ export const StaffAuditAction = {
 export type StaffAuditAction = (typeof StaffAuditAction)[keyof typeof StaffAuditAction]
 
 
+export const TenantStatus = {
+  ACTIVE: 'ACTIVE',
+  SUSPENDED: 'SUSPENDED',
+  TRIAL: 'TRIAL'
+} as const
+
+export type TenantStatus = (typeof TenantStatus)[keyof typeof TenantStatus]
+
+
+export const TenantMemberStatus = {
+  ACTIVE: 'ACTIVE',
+  DISABLED: 'DISABLED',
+  INVITED: 'INVITED'
+} as const
+
+export type TenantMemberStatus = (typeof TenantMemberStatus)[keyof typeof TenantMemberStatus]
+
+
 export const AuditModule = {
   WMS: 'WMS',
   CMS: 'CMS',

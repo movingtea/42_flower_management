@@ -1509,20 +1509,29 @@ CMS UI 组件（Sprint 9 Round 2 + 易用性增强）：
 
 ## 17. Future Multi-Tenant SaaS Roadmap（摘要）
 
-> **当前仍为单店系统**；完整审计见 [`docs/multitenancy-audit.md`](docs/multitenancy-audit.md)（Sprint 20）。
+> **当前仍为单店业务行为**（无业务表 `tenantId`、无查询隔离）；完整审计见 [`docs/multitenancy-audit.md`](docs/multitenancy-audit.md)。
+
+### Sprint 21 已完成（Sprint A 地基）
+
+- 新增 Prisma 模型：`Tenant`、`TenantMember`；枚举 `TenantStatus`、`TenantMemberStatus`
+- Migration：`20260615120000_add_tenant_and_tenant_member`
+- 默认租户：`slug=universe42`，`name=Universe42 / 万物肆贰`，`status=ACTIVE`
+- 全部 `StaffUser` 通过 seed / `db:backfill:tenant-members` 归属默认租户
+- 新建 `StaffUser` 事务内自动创建 `TenantMember`（`role` 复制 `StaffUser.role`）
+- Session 预留：`defaultTenantId`、`currentTenantId`、`tenantRole`（**权限仍以 `StaffUser.role` 为准**）
 
 | 阶段 | 要点 |
 |---|---|
-| 数据 | 新增 `Tenant` / `TenantMember`；核心业务表加 `tenantId`；默认回填 universe42 |
-| 隔离 | 全部 Prisma 业务查询加 `tenantId`；unique 改为 tenant-scoped（skuCode、slot.key、AppConfig.key 等） |
-| 权限 | `StaffUser` 平台账号 + `TenantMember` 租户角色；session 存 `currentTenantId` |
-| 小程序 | **优先方案 A**：单小程序 + `storeSlug` / scene 进店；购物车 storage 按 tenant 分 key |
+| 数据 | ✅ `Tenant` / `TenantMember`；⏳ 核心业务表加 `tenantId`（Sprint B） |
+| 隔离 | 全部 Prisma 业务查询加 `tenantId`（Sprint D） |
+| 权限 | `TenantMember` 已建；session 有 `currentTenantId`；⏳ `requireTenant`（Sprint C） |
+| 小程序 | **优先方案 A**：单小程序 + `storeSlug` / scene 进店 |
 | OSS | 新上传 `tenants/{tenantId}/...`；历史 `universe42/...` 只读兼容 |
-| 支付 | 预留 `PaymentProviderConfig`；订单号建议含 tenant 前缀且平台全局唯一 |
-| Cron | `closeExpiredPendingOrders` / 库存投影按 tenant 分片；需 Redis 分布式锁（多实例） |
-| 部署 | 早期可单机 Compose；规模化 → RDS + Redis + SLB |
+| 支付 | 预留 `PaymentProviderConfig` |
+| Cron | 按 tenant 分片 + Redis 锁 |
+| 部署 | 早期单机 Compose；规模化 → RDS + Redis + SLB |
 
-**Sprint 20 红线**：本轮审计**未**改 schema、业务代码、小程序或 OSS 逻辑。
+**Sprint 21 红线**：未给业务表加 `tenantId`、未改业务查询、未改小程序/OSS/支付。
 
 ---
 

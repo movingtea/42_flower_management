@@ -210,6 +210,7 @@ export type StaffUserWhereInput = {
   stockLossRecords?: Prisma.StockLossRecordListRelationFilter
   auditsAsOperator?: Prisma.StaffAuditLogListRelationFilter
   auditsAsTarget?: Prisma.StaffAuditLogListRelationFilter
+  tenantMemberships?: Prisma.TenantMemberListRelationFilter
 }
 
 export type StaffUserOrderByWithRelationInput = {
@@ -225,6 +226,7 @@ export type StaffUserOrderByWithRelationInput = {
   stockLossRecords?: Prisma.StockLossRecordOrderByRelationAggregateInput
   auditsAsOperator?: Prisma.StaffAuditLogOrderByRelationAggregateInput
   auditsAsTarget?: Prisma.StaffAuditLogOrderByRelationAggregateInput
+  tenantMemberships?: Prisma.TenantMemberOrderByRelationAggregateInput
 }
 
 export type StaffUserWhereUniqueInput = Prisma.AtLeast<{
@@ -243,6 +245,7 @@ export type StaffUserWhereUniqueInput = Prisma.AtLeast<{
   stockLossRecords?: Prisma.StockLossRecordListRelationFilter
   auditsAsOperator?: Prisma.StaffAuditLogListRelationFilter
   auditsAsTarget?: Prisma.StaffAuditLogListRelationFilter
+  tenantMemberships?: Prisma.TenantMemberListRelationFilter
 }, "id" | "username">
 
 export type StaffUserOrderByWithAggregationInput = {
@@ -286,6 +289,7 @@ export type StaffUserCreateInput = {
   stockLossRecords?: Prisma.StockLossRecordCreateNestedManyWithoutOperatorStaffInput
   auditsAsOperator?: Prisma.StaffAuditLogCreateNestedManyWithoutOperatorInput
   auditsAsTarget?: Prisma.StaffAuditLogCreateNestedManyWithoutTargetInput
+  tenantMemberships?: Prisma.TenantMemberCreateNestedManyWithoutStaffUserInput
 }
 
 export type StaffUserUncheckedCreateInput = {
@@ -301,6 +305,7 @@ export type StaffUserUncheckedCreateInput = {
   stockLossRecords?: Prisma.StockLossRecordUncheckedCreateNestedManyWithoutOperatorStaffInput
   auditsAsOperator?: Prisma.StaffAuditLogUncheckedCreateNestedManyWithoutOperatorInput
   auditsAsTarget?: Prisma.StaffAuditLogUncheckedCreateNestedManyWithoutTargetInput
+  tenantMemberships?: Prisma.TenantMemberUncheckedCreateNestedManyWithoutStaffUserInput
 }
 
 export type StaffUserUpdateInput = {
@@ -316,6 +321,7 @@ export type StaffUserUpdateInput = {
   stockLossRecords?: Prisma.StockLossRecordUpdateManyWithoutOperatorStaffNestedInput
   auditsAsOperator?: Prisma.StaffAuditLogUpdateManyWithoutOperatorNestedInput
   auditsAsTarget?: Prisma.StaffAuditLogUpdateManyWithoutTargetNestedInput
+  tenantMemberships?: Prisma.TenantMemberUpdateManyWithoutStaffUserNestedInput
 }
 
 export type StaffUserUncheckedUpdateInput = {
@@ -331,6 +337,7 @@ export type StaffUserUncheckedUpdateInput = {
   stockLossRecords?: Prisma.StockLossRecordUncheckedUpdateManyWithoutOperatorStaffNestedInput
   auditsAsOperator?: Prisma.StaffAuditLogUncheckedUpdateManyWithoutOperatorNestedInput
   auditsAsTarget?: Prisma.StaffAuditLogUncheckedUpdateManyWithoutTargetNestedInput
+  tenantMemberships?: Prisma.TenantMemberUncheckedUpdateManyWithoutStaffUserNestedInput
 }
 
 export type StaffUserCreateManyInput = {
@@ -371,6 +378,11 @@ export type StaffUserNullableScalarRelationFilter = {
   isNot?: Prisma.StaffUserWhereInput | null
 }
 
+export type StaffUserScalarRelationFilter = {
+  is?: Prisma.StaffUserWhereInput
+  isNot?: Prisma.StaffUserWhereInput
+}
+
 export type StaffUserCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   username?: Prisma.SortOrder
@@ -402,11 +414,6 @@ export type StaffUserMinOrderByAggregateInput = {
   isActive?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
-}
-
-export type StaffUserScalarRelationFilter = {
-  is?: Prisma.StaffUserWhereInput
-  isNot?: Prisma.StaffUserWhereInput
 }
 
 export type StaffUserCreateNestedOneWithoutStockLogsInput = {
@@ -441,8 +448,18 @@ export type StaffUserUpdateOneWithoutStockLossRecordsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.StaffUserUpdateToOneWithWhereWithoutStockLossRecordsInput, Prisma.StaffUserUpdateWithoutStockLossRecordsInput>, Prisma.StaffUserUncheckedUpdateWithoutStockLossRecordsInput>
 }
 
-export type EnumRoleFieldUpdateOperationsInput = {
-  set?: $Enums.Role
+export type StaffUserCreateNestedOneWithoutTenantMembershipsInput = {
+  create?: Prisma.XOR<Prisma.StaffUserCreateWithoutTenantMembershipsInput, Prisma.StaffUserUncheckedCreateWithoutTenantMembershipsInput>
+  connectOrCreate?: Prisma.StaffUserCreateOrConnectWithoutTenantMembershipsInput
+  connect?: Prisma.StaffUserWhereUniqueInput
+}
+
+export type StaffUserUpdateOneRequiredWithoutTenantMembershipsNestedInput = {
+  create?: Prisma.XOR<Prisma.StaffUserCreateWithoutTenantMembershipsInput, Prisma.StaffUserUncheckedCreateWithoutTenantMembershipsInput>
+  connectOrCreate?: Prisma.StaffUserCreateOrConnectWithoutTenantMembershipsInput
+  upsert?: Prisma.StaffUserUpsertWithoutTenantMembershipsInput
+  connect?: Prisma.StaffUserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.StaffUserUpdateToOneWithWhereWithoutTenantMembershipsInput, Prisma.StaffUserUpdateWithoutTenantMembershipsInput>, Prisma.StaffUserUncheckedUpdateWithoutTenantMembershipsInput>
 }
 
 export type StaffUserCreateNestedOneWithoutAuditsAsOperatorInput = {
@@ -485,6 +502,7 @@ export type StaffUserCreateWithoutStockLogsInput = {
   stockLossRecords?: Prisma.StockLossRecordCreateNestedManyWithoutOperatorStaffInput
   auditsAsOperator?: Prisma.StaffAuditLogCreateNestedManyWithoutOperatorInput
   auditsAsTarget?: Prisma.StaffAuditLogCreateNestedManyWithoutTargetInput
+  tenantMemberships?: Prisma.TenantMemberCreateNestedManyWithoutStaffUserInput
 }
 
 export type StaffUserUncheckedCreateWithoutStockLogsInput = {
@@ -499,6 +517,7 @@ export type StaffUserUncheckedCreateWithoutStockLogsInput = {
   stockLossRecords?: Prisma.StockLossRecordUncheckedCreateNestedManyWithoutOperatorStaffInput
   auditsAsOperator?: Prisma.StaffAuditLogUncheckedCreateNestedManyWithoutOperatorInput
   auditsAsTarget?: Prisma.StaffAuditLogUncheckedCreateNestedManyWithoutTargetInput
+  tenantMemberships?: Prisma.TenantMemberUncheckedCreateNestedManyWithoutStaffUserInput
 }
 
 export type StaffUserCreateOrConnectWithoutStockLogsInput = {
@@ -529,6 +548,7 @@ export type StaffUserUpdateWithoutStockLogsInput = {
   stockLossRecords?: Prisma.StockLossRecordUpdateManyWithoutOperatorStaffNestedInput
   auditsAsOperator?: Prisma.StaffAuditLogUpdateManyWithoutOperatorNestedInput
   auditsAsTarget?: Prisma.StaffAuditLogUpdateManyWithoutTargetNestedInput
+  tenantMemberships?: Prisma.TenantMemberUpdateManyWithoutStaffUserNestedInput
 }
 
 export type StaffUserUncheckedUpdateWithoutStockLogsInput = {
@@ -543,6 +563,7 @@ export type StaffUserUncheckedUpdateWithoutStockLogsInput = {
   stockLossRecords?: Prisma.StockLossRecordUncheckedUpdateManyWithoutOperatorStaffNestedInput
   auditsAsOperator?: Prisma.StaffAuditLogUncheckedUpdateManyWithoutOperatorNestedInput
   auditsAsTarget?: Prisma.StaffAuditLogUncheckedUpdateManyWithoutTargetNestedInput
+  tenantMemberships?: Prisma.TenantMemberUncheckedUpdateManyWithoutStaffUserNestedInput
 }
 
 export type StaffUserCreateWithoutStockLossRecordsInput = {
@@ -557,6 +578,7 @@ export type StaffUserCreateWithoutStockLossRecordsInput = {
   stockLogs?: Prisma.StockLogCreateNestedManyWithoutOperatorStaffInput
   auditsAsOperator?: Prisma.StaffAuditLogCreateNestedManyWithoutOperatorInput
   auditsAsTarget?: Prisma.StaffAuditLogCreateNestedManyWithoutTargetInput
+  tenantMemberships?: Prisma.TenantMemberCreateNestedManyWithoutStaffUserInput
 }
 
 export type StaffUserUncheckedCreateWithoutStockLossRecordsInput = {
@@ -571,6 +593,7 @@ export type StaffUserUncheckedCreateWithoutStockLossRecordsInput = {
   stockLogs?: Prisma.StockLogUncheckedCreateNestedManyWithoutOperatorStaffInput
   auditsAsOperator?: Prisma.StaffAuditLogUncheckedCreateNestedManyWithoutOperatorInput
   auditsAsTarget?: Prisma.StaffAuditLogUncheckedCreateNestedManyWithoutTargetInput
+  tenantMemberships?: Prisma.TenantMemberUncheckedCreateNestedManyWithoutStaffUserInput
 }
 
 export type StaffUserCreateOrConnectWithoutStockLossRecordsInput = {
@@ -601,6 +624,7 @@ export type StaffUserUpdateWithoutStockLossRecordsInput = {
   stockLogs?: Prisma.StockLogUpdateManyWithoutOperatorStaffNestedInput
   auditsAsOperator?: Prisma.StaffAuditLogUpdateManyWithoutOperatorNestedInput
   auditsAsTarget?: Prisma.StaffAuditLogUpdateManyWithoutTargetNestedInput
+  tenantMemberships?: Prisma.TenantMemberUpdateManyWithoutStaffUserNestedInput
 }
 
 export type StaffUserUncheckedUpdateWithoutStockLossRecordsInput = {
@@ -613,6 +637,83 @@ export type StaffUserUncheckedUpdateWithoutStockLossRecordsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   stockLogs?: Prisma.StockLogUncheckedUpdateManyWithoutOperatorStaffNestedInput
+  auditsAsOperator?: Prisma.StaffAuditLogUncheckedUpdateManyWithoutOperatorNestedInput
+  auditsAsTarget?: Prisma.StaffAuditLogUncheckedUpdateManyWithoutTargetNestedInput
+  tenantMemberships?: Prisma.TenantMemberUncheckedUpdateManyWithoutStaffUserNestedInput
+}
+
+export type StaffUserCreateWithoutTenantMembershipsInput = {
+  id?: string
+  username: string
+  passwordHash: string
+  role: $Enums.Role
+  displayName?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  stockLogs?: Prisma.StockLogCreateNestedManyWithoutOperatorStaffInput
+  stockLossRecords?: Prisma.StockLossRecordCreateNestedManyWithoutOperatorStaffInput
+  auditsAsOperator?: Prisma.StaffAuditLogCreateNestedManyWithoutOperatorInput
+  auditsAsTarget?: Prisma.StaffAuditLogCreateNestedManyWithoutTargetInput
+}
+
+export type StaffUserUncheckedCreateWithoutTenantMembershipsInput = {
+  id?: string
+  username: string
+  passwordHash: string
+  role: $Enums.Role
+  displayName?: string | null
+  isActive?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  stockLogs?: Prisma.StockLogUncheckedCreateNestedManyWithoutOperatorStaffInput
+  stockLossRecords?: Prisma.StockLossRecordUncheckedCreateNestedManyWithoutOperatorStaffInput
+  auditsAsOperator?: Prisma.StaffAuditLogUncheckedCreateNestedManyWithoutOperatorInput
+  auditsAsTarget?: Prisma.StaffAuditLogUncheckedCreateNestedManyWithoutTargetInput
+}
+
+export type StaffUserCreateOrConnectWithoutTenantMembershipsInput = {
+  where: Prisma.StaffUserWhereUniqueInput
+  create: Prisma.XOR<Prisma.StaffUserCreateWithoutTenantMembershipsInput, Prisma.StaffUserUncheckedCreateWithoutTenantMembershipsInput>
+}
+
+export type StaffUserUpsertWithoutTenantMembershipsInput = {
+  update: Prisma.XOR<Prisma.StaffUserUpdateWithoutTenantMembershipsInput, Prisma.StaffUserUncheckedUpdateWithoutTenantMembershipsInput>
+  create: Prisma.XOR<Prisma.StaffUserCreateWithoutTenantMembershipsInput, Prisma.StaffUserUncheckedCreateWithoutTenantMembershipsInput>
+  where?: Prisma.StaffUserWhereInput
+}
+
+export type StaffUserUpdateToOneWithWhereWithoutTenantMembershipsInput = {
+  where?: Prisma.StaffUserWhereInput
+  data: Prisma.XOR<Prisma.StaffUserUpdateWithoutTenantMembershipsInput, Prisma.StaffUserUncheckedUpdateWithoutTenantMembershipsInput>
+}
+
+export type StaffUserUpdateWithoutTenantMembershipsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stockLogs?: Prisma.StockLogUpdateManyWithoutOperatorStaffNestedInput
+  stockLossRecords?: Prisma.StockLossRecordUpdateManyWithoutOperatorStaffNestedInput
+  auditsAsOperator?: Prisma.StaffAuditLogUpdateManyWithoutOperatorNestedInput
+  auditsAsTarget?: Prisma.StaffAuditLogUpdateManyWithoutTargetNestedInput
+}
+
+export type StaffUserUncheckedUpdateWithoutTenantMembershipsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  username?: Prisma.StringFieldUpdateOperationsInput | string
+  passwordHash?: Prisma.StringFieldUpdateOperationsInput | string
+  role?: Prisma.EnumRoleFieldUpdateOperationsInput | $Enums.Role
+  displayName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  stockLogs?: Prisma.StockLogUncheckedUpdateManyWithoutOperatorStaffNestedInput
+  stockLossRecords?: Prisma.StockLossRecordUncheckedUpdateManyWithoutOperatorStaffNestedInput
   auditsAsOperator?: Prisma.StaffAuditLogUncheckedUpdateManyWithoutOperatorNestedInput
   auditsAsTarget?: Prisma.StaffAuditLogUncheckedUpdateManyWithoutTargetNestedInput
 }
@@ -629,6 +730,7 @@ export type StaffUserCreateWithoutAuditsAsOperatorInput = {
   stockLogs?: Prisma.StockLogCreateNestedManyWithoutOperatorStaffInput
   stockLossRecords?: Prisma.StockLossRecordCreateNestedManyWithoutOperatorStaffInput
   auditsAsTarget?: Prisma.StaffAuditLogCreateNestedManyWithoutTargetInput
+  tenantMemberships?: Prisma.TenantMemberCreateNestedManyWithoutStaffUserInput
 }
 
 export type StaffUserUncheckedCreateWithoutAuditsAsOperatorInput = {
@@ -643,6 +745,7 @@ export type StaffUserUncheckedCreateWithoutAuditsAsOperatorInput = {
   stockLogs?: Prisma.StockLogUncheckedCreateNestedManyWithoutOperatorStaffInput
   stockLossRecords?: Prisma.StockLossRecordUncheckedCreateNestedManyWithoutOperatorStaffInput
   auditsAsTarget?: Prisma.StaffAuditLogUncheckedCreateNestedManyWithoutTargetInput
+  tenantMemberships?: Prisma.TenantMemberUncheckedCreateNestedManyWithoutStaffUserInput
 }
 
 export type StaffUserCreateOrConnectWithoutAuditsAsOperatorInput = {
@@ -662,6 +765,7 @@ export type StaffUserCreateWithoutAuditsAsTargetInput = {
   stockLogs?: Prisma.StockLogCreateNestedManyWithoutOperatorStaffInput
   stockLossRecords?: Prisma.StockLossRecordCreateNestedManyWithoutOperatorStaffInput
   auditsAsOperator?: Prisma.StaffAuditLogCreateNestedManyWithoutOperatorInput
+  tenantMemberships?: Prisma.TenantMemberCreateNestedManyWithoutStaffUserInput
 }
 
 export type StaffUserUncheckedCreateWithoutAuditsAsTargetInput = {
@@ -676,6 +780,7 @@ export type StaffUserUncheckedCreateWithoutAuditsAsTargetInput = {
   stockLogs?: Prisma.StockLogUncheckedCreateNestedManyWithoutOperatorStaffInput
   stockLossRecords?: Prisma.StockLossRecordUncheckedCreateNestedManyWithoutOperatorStaffInput
   auditsAsOperator?: Prisma.StaffAuditLogUncheckedCreateNestedManyWithoutOperatorInput
+  tenantMemberships?: Prisma.TenantMemberUncheckedCreateNestedManyWithoutStaffUserInput
 }
 
 export type StaffUserCreateOrConnectWithoutAuditsAsTargetInput = {
@@ -706,6 +811,7 @@ export type StaffUserUpdateWithoutAuditsAsOperatorInput = {
   stockLogs?: Prisma.StockLogUpdateManyWithoutOperatorStaffNestedInput
   stockLossRecords?: Prisma.StockLossRecordUpdateManyWithoutOperatorStaffNestedInput
   auditsAsTarget?: Prisma.StaffAuditLogUpdateManyWithoutTargetNestedInput
+  tenantMemberships?: Prisma.TenantMemberUpdateManyWithoutStaffUserNestedInput
 }
 
 export type StaffUserUncheckedUpdateWithoutAuditsAsOperatorInput = {
@@ -720,6 +826,7 @@ export type StaffUserUncheckedUpdateWithoutAuditsAsOperatorInput = {
   stockLogs?: Prisma.StockLogUncheckedUpdateManyWithoutOperatorStaffNestedInput
   stockLossRecords?: Prisma.StockLossRecordUncheckedUpdateManyWithoutOperatorStaffNestedInput
   auditsAsTarget?: Prisma.StaffAuditLogUncheckedUpdateManyWithoutTargetNestedInput
+  tenantMemberships?: Prisma.TenantMemberUncheckedUpdateManyWithoutStaffUserNestedInput
 }
 
 export type StaffUserUpsertWithoutAuditsAsTargetInput = {
@@ -745,6 +852,7 @@ export type StaffUserUpdateWithoutAuditsAsTargetInput = {
   stockLogs?: Prisma.StockLogUpdateManyWithoutOperatorStaffNestedInput
   stockLossRecords?: Prisma.StockLossRecordUpdateManyWithoutOperatorStaffNestedInput
   auditsAsOperator?: Prisma.StaffAuditLogUpdateManyWithoutOperatorNestedInput
+  tenantMemberships?: Prisma.TenantMemberUpdateManyWithoutStaffUserNestedInput
 }
 
 export type StaffUserUncheckedUpdateWithoutAuditsAsTargetInput = {
@@ -759,6 +867,7 @@ export type StaffUserUncheckedUpdateWithoutAuditsAsTargetInput = {
   stockLogs?: Prisma.StockLogUncheckedUpdateManyWithoutOperatorStaffNestedInput
   stockLossRecords?: Prisma.StockLossRecordUncheckedUpdateManyWithoutOperatorStaffNestedInput
   auditsAsOperator?: Prisma.StaffAuditLogUncheckedUpdateManyWithoutOperatorNestedInput
+  tenantMemberships?: Prisma.TenantMemberUncheckedUpdateManyWithoutStaffUserNestedInput
 }
 
 
@@ -771,6 +880,7 @@ export type StaffUserCountOutputType = {
   stockLossRecords: number
   auditsAsOperator: number
   auditsAsTarget: number
+  tenantMemberships: number
 }
 
 export type StaffUserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -778,6 +888,7 @@ export type StaffUserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensi
   stockLossRecords?: boolean | StaffUserCountOutputTypeCountStockLossRecordsArgs
   auditsAsOperator?: boolean | StaffUserCountOutputTypeCountAuditsAsOperatorArgs
   auditsAsTarget?: boolean | StaffUserCountOutputTypeCountAuditsAsTargetArgs
+  tenantMemberships?: boolean | StaffUserCountOutputTypeCountTenantMembershipsArgs
 }
 
 /**
@@ -818,6 +929,13 @@ export type StaffUserCountOutputTypeCountAuditsAsTargetArgs<ExtArgs extends runt
   where?: Prisma.StaffAuditLogWhereInput
 }
 
+/**
+ * StaffUserCountOutputType without action
+ */
+export type StaffUserCountOutputTypeCountTenantMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.TenantMemberWhereInput
+}
+
 
 export type StaffUserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -832,6 +950,7 @@ export type StaffUserSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   stockLossRecords?: boolean | Prisma.StaffUser$stockLossRecordsArgs<ExtArgs>
   auditsAsOperator?: boolean | Prisma.StaffUser$auditsAsOperatorArgs<ExtArgs>
   auditsAsTarget?: boolean | Prisma.StaffUser$auditsAsTargetArgs<ExtArgs>
+  tenantMemberships?: boolean | Prisma.StaffUser$tenantMembershipsArgs<ExtArgs>
   _count?: boolean | Prisma.StaffUserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["staffUser"]>
 
@@ -874,6 +993,7 @@ export type StaffUserInclude<ExtArgs extends runtime.Types.Extensions.InternalAr
   stockLossRecords?: boolean | Prisma.StaffUser$stockLossRecordsArgs<ExtArgs>
   auditsAsOperator?: boolean | Prisma.StaffUser$auditsAsOperatorArgs<ExtArgs>
   auditsAsTarget?: boolean | Prisma.StaffUser$auditsAsTargetArgs<ExtArgs>
+  tenantMemberships?: boolean | Prisma.StaffUser$tenantMembershipsArgs<ExtArgs>
   _count?: boolean | Prisma.StaffUserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type StaffUserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -886,6 +1006,7 @@ export type $StaffUserPayload<ExtArgs extends runtime.Types.Extensions.InternalA
     stockLossRecords: Prisma.$StockLossRecordPayload<ExtArgs>[]
     auditsAsOperator: Prisma.$StaffAuditLogPayload<ExtArgs>[]
     auditsAsTarget: Prisma.$StaffAuditLogPayload<ExtArgs>[]
+    tenantMemberships: Prisma.$TenantMemberPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1294,6 +1415,7 @@ export interface Prisma__StaffUserClient<T, Null = never, ExtArgs extends runtim
   stockLossRecords<T extends Prisma.StaffUser$stockLossRecordsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StaffUser$stockLossRecordsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StockLossRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditsAsOperator<T extends Prisma.StaffUser$auditsAsOperatorArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StaffUser$auditsAsOperatorArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StaffAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   auditsAsTarget<T extends Prisma.StaffUser$auditsAsTargetArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StaffUser$auditsAsTargetArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StaffAuditLogPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  tenantMemberships<T extends Prisma.StaffUser$tenantMembershipsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StaffUser$tenantMembershipsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$TenantMemberPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1817,6 +1939,30 @@ export type StaffUser$auditsAsTargetArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.StaffAuditLogScalarFieldEnum | Prisma.StaffAuditLogScalarFieldEnum[]
+}
+
+/**
+ * StaffUser.tenantMemberships
+ */
+export type StaffUser$tenantMembershipsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the TenantMember
+   */
+  select?: Prisma.TenantMemberSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the TenantMember
+   */
+  omit?: Prisma.TenantMemberOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.TenantMemberInclude<ExtArgs> | null
+  where?: Prisma.TenantMemberWhereInput
+  orderBy?: Prisma.TenantMemberOrderByWithRelationInput | Prisma.TenantMemberOrderByWithRelationInput[]
+  cursor?: Prisma.TenantMemberWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.TenantMemberScalarFieldEnum | Prisma.TenantMemberScalarFieldEnum[]
 }
 
 /**

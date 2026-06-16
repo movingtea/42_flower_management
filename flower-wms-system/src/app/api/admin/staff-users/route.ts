@@ -3,6 +3,7 @@ import { Role } from "@/generated/prisma/enums";
 import { jsonError, jsonSuccess } from "@/lib/api";
 import { isResponse, requirePermission } from "@/lib/api-auth";
 import { prisma } from "@/lib/prisma";
+import { createStaffUserWithDefaultTenantMembership } from "@/services/tenant";
 
 export const dynamic = "force-dynamic";
 
@@ -54,24 +55,26 @@ export async function POST(request: Request) {
     }
 
     const passwordHash = await bcrypt.hash(password, 12);
-    const created = await prisma.staffUser.create({
-      data: {
-        username,
-        passwordHash,
-        role,
-        displayName,
-      },
-      select: {
-        id: true,
-        username: true,
-        role: true,
-        displayName: true,
-        isActive: true,
-        createdAt: true,
-      },
+    const created = await createStaffUserWithDefaultTenantMembership({
+      username,
+      passwordHash,
+      role,
+      displayName,
     });
 
-    return jsonSuccess({ item: created }, 201);
+    return jsonSuccess(
+      {
+        item: {
+          id: created.id,
+          username: created.username,
+          role: created.role,
+          displayName: created.displayName,
+          isActive: created.isActive,
+          createdAt: created.createdAt,
+        },
+      },
+      201
+    );
   } catch (err) {
     const message = err instanceof Error ? err.message : "创建用户失败";
     if (message.includes("Unique constraint")) {

@@ -71,6 +71,8 @@ export const ModelName = {
   Batch: 'Batch',
   StockLog: 'StockLog',
   StockLossRecord: 'StockLossRecord',
+  Tenant: 'Tenant',
+  TenantMember: 'TenantMember',
   StaffUser: 'StaffUser',
   StaffAuditLog: 'StaffAuditLog',
   User: 'User',
@@ -448,6 +450,35 @@ export const StockLossRecordScalarFieldEnum = {
 } as const
 
 export type StockLossRecordScalarFieldEnum = (typeof StockLossRecordScalarFieldEnum)[keyof typeof StockLossRecordScalarFieldEnum]
+
+
+export const TenantScalarFieldEnum = {
+  id: 'id',
+  slug: 'slug',
+  name: 'name',
+  status: 'status',
+  plan: 'plan',
+  description: 'description',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantScalarFieldEnum = (typeof TenantScalarFieldEnum)[keyof typeof TenantScalarFieldEnum]
+
+
+export const TenantMemberScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  staffUserId: 'staffUserId',
+  role: 'role',
+  status: 'status',
+  isDefault: 'isDefault',
+  joinedAt: 'joinedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type TenantMemberScalarFieldEnum = (typeof TenantMemberScalarFieldEnum)[keyof typeof TenantMemberScalarFieldEnum]
 
 
 export const StaffUserScalarFieldEnum = {
