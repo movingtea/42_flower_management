@@ -1087,6 +1087,7 @@ logging:
 | 公网展示 | `ALIYUN_OSS_PUBLIC_BASE_URL`（当前 `https://oss.universe42.studio`） |
 | 上传 API | `POST /api/admin/uploads/image`（推荐，需 `cms:write` + `module`）；兼容 `POST /api/admin/upload` |
 | 上传校验 | JPG / PNG / WebP；默认 ≤3MB；禁止 SVG |
+| 反向代理 | Nginx `client_max_body_size` 推荐 **5m**（高于业务 3MB）；默认 1m 会导致 1MB+ 上传在 API 前 **413**，非 `FILE_TOO_LARGE` |
 | CMS 写入 | 商品 SKU `imageUrl`、Banner、营销弹窗等经 `normalizeStoredImagePath` → objectKey |
 | 小程序 API | `/api/miniprogram/*` 经 `imageUrlFormatter` → `toPublicImageUrl` → 完整 HTTPS OSS URL（含 `snapshotImageUrl` 等订单快照字段） |
 | Legacy | `ENABLE_LEGACY_UPLOADS=false` 时 `/uploads` 与 localhost 视为无效，CMS 提示重新上传 |

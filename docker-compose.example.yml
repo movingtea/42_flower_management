@@ -8,6 +8,9 @@
 #   docker compose build   # 若本地构建
 #   docker compose up -d
 #   ./scripts/deploy-cleanup.sh
+#
+# Nginx 上传限制：/root/flower-nginx/conf.d/ 须含 client_max_body_size 5m;
+# 见 deploy/nginx/conf.d/flower.conf.example 与 deploy/nginx/README.md
 
 services:
   flower-nginx:

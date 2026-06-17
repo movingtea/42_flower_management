@@ -40,10 +40,40 @@ async function testValidJpeg() {
   assert.equal(result.extension, "jpg");
 }
 
+async function test173MbPasses() {
+  const sizeBytes = Math.floor(1.73 * 1024 * 1024);
+  const file = new File([new Uint8Array(sizeBytes)], "banner.jpg", {
+    type: "image/jpeg",
+  });
+  const result = await validateImageUpload(file, config);
+  assert.equal(result.size, sizeBytes);
+  assert.equal(result.mimeType, "image/jpeg");
+}
+
+async function testExactly3MbPasses() {
+  const sizeBytes = 3 * 1024 * 1024;
+  const file = new File([new Uint8Array(sizeBytes)], "edge.jpg", {
+    type: "image/jpeg",
+  });
+  const result = await validateImageUpload(file, config);
+  assert.equal(result.size, sizeBytes);
+}
+
+async function testEmptyFile() {
+  const file = new File([], "empty.jpg", { type: "image/jpeg" });
+  await assert.rejects(
+    () => validateImageUpload(file, config),
+    (err: unknown) => err instanceof StorageError && err.code === "FILE_REQUIRED"
+  );
+}
+
 async function run() {
   await testSvgRejected();
   await testFileTooLarge();
   await testValidJpeg();
+  await test173MbPasses();
+  await testExactly3MbPasses();
+  await testEmptyFile();
   console.log("upload-validation.test.ts: all tests passed");
 }
 

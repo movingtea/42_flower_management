@@ -26,7 +26,8 @@ server {
     ssl_certificate     /etc/nginx/cert/fullchain.pem;
     ssl_certificate_key /etc/nginx/cert/privkey.pem;
 
-    client_max_body_size 20m;
+    # 必须大于 UPLOAD_MAX_SIZE_MB（默认 3MB）；否则 Nginx 默认 1m 会在 API 前拦截 multipart 上传
+    client_max_body_size 5m;
 
     location / {
         proxy_pass http://flower_web_upstream;

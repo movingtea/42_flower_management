@@ -5,6 +5,7 @@ import { StorageError, toSafeUploadErrorMessage } from "@/lib/storage/errors";
 import { uploadImageToStorage } from "@/lib/storage/storage";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 /** POST：小程序用户上传头像（需 Bearer Token，OSS module=cms） */
 export async function POST(request: Request) {
@@ -39,7 +40,7 @@ export async function POST(request: Request) {
           : err.code === "UPLOAD_FAILED"
             ? 502
             : 400;
-      return jsonError(err.message, status);
+      return jsonError(err.message, status, err.code);
     }
     const message = err instanceof Error ? err.message : toSafeUploadErrorMessage(err);
     const status =

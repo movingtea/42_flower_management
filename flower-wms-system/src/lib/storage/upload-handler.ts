@@ -66,7 +66,7 @@ export async function handleAdminImageUpload(
     } satisfies AdminImageUploadResponse & { path: string });
   } catch (err) {
     if (err instanceof StorageError) {
-      return jsonError(err.message, storageErrorStatus(err.code));
+      return jsonError(err.message, storageErrorStatus(err.code), err.code);
     }
     return jsonError(toSafeUploadErrorMessage(err), 500);
   }

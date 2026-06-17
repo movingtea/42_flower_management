@@ -8,6 +8,7 @@ import {
 } from "@/lib/storage/upload-handler";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 function storageErrorStatus(code: StorageError["code"]): number {
   switch (code) {
@@ -32,7 +33,7 @@ export async function POST(request: Request) {
     uploadModule = parseUploadModule(fd.get("module") ?? "cms");
   } catch (err) {
     if (err instanceof StorageError) {
-      return jsonError(err.message, storageErrorStatus(err.code));
+      return jsonError(err.message, storageErrorStatus(err.code), err.code);
     }
     throw err;
   }

@@ -297,7 +297,7 @@ npm run db:seed
 | `ALIYUN_OSS_UPLOAD_ENDPOINT` | **服务端上传** Endpoint；生产 ECS 同地域用内网 `...-internal.aliyuncs.com`；本地开发用外网 |
 | `ALIYUN_OSS_PUBLIC_BASE_URL` | **公网展示**域名，当前 `https://oss.universe42.studio` |
 | `ALIYUN_OSS_OBJECT_PREFIX` | objectKey 前缀，当前 `universe42` |
-| `UPLOAD_MAX_SIZE_MB` | 单张上限，默认 3MB |
+| `UPLOAD_MAX_SIZE_MB` | 单张上限，默认 **3MB**（API 业务校验）；Nginx `client_max_body_size` 应 **大于** 此值（推荐 **5m**） |
 | `NEXT_PUBLIC_OSS_PUBLIC_BASE_URL` | CMS 客户端预览用，与 public base 一致 |
 
 **数据库存储 objectKey**（如 `universe42/products/sku/2026/06/xxx.webp`），API 返回时再转为 public URL。
@@ -310,6 +310,15 @@ npm run test:oss
 ```
 
 **上传限制：** JPG / PNG / WebP；禁止 SVG；默认 ≤3MB。
+
+**图片上传 413 排查：**
+
+1. 若 **1MB 以上**图片返回裸 `413 Request Entity Too Large`（非 JSON），请求在到达 Next.js 前被 **Nginx** 拦截（默认 `client_max_body_size 1m`）。
+2. 生产配置见 [`deploy/nginx/conf.d/flower.conf.example`](../deploy/nginx/conf.d/flower.conf.example)：`client_max_body_size 5m;`
+3. 业务限制仍为 `UPLOAD_MAX_SIZE_MB=3`；超过 3MB 应由 API 返回 JSON `{ code: "FILE_TOO_LARGE" }`。
+4. 修改 Nginx 后 reload：`docker compose exec flower-nginx nginx -s reload`
+5. 验证：`docker compose exec flower-nginx nginx -T | grep client_max_body_size`
+6. 验收清单：[`docs/upload-size-limit-checklist.md`](docs/upload-size-limit-checklist.md)
 
 ### 小程序图片（Sprint 22）
 

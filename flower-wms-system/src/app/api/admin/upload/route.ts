@@ -5,6 +5,7 @@ import {
 } from "@/lib/storage/upload-handler";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
 
 /**
  * POST /api/admin/upload
