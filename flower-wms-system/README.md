@@ -311,6 +311,18 @@ npm run test:oss
 
 **上传限制：** JPG / PNG / WebP；禁止 SVG；默认 ≤3MB。
 
+### 小程序图片（Sprint 22）
+
+- 业务远程图：API 返回完整 OSS URL；客户端 `42_mp/miniprogram/utils/image-url.ts` → `normalizeImageUrl` 兜底（objectKey / 拒绝 localhost /uploads）。
+- `<image src>` 直接使用完整 URL，**不要** `baseUrl + objectKey`。
+- 配置：`42_mp/miniprogram/config/index.ts` 中 `ossPublicBaseUrl`（`https://oss.universe42.studio`）与 API `baseUrl` 分离。
+- 本地图标：`assets/icons`、tabBar 不走 OSS。
+- 验收：[`docs/sprint-22-miniprogram-image-url-audit-checklist.md`](docs/sprint-22-miniprogram-image-url-audit-checklist.md)
+
+```bash
+npm run test:miniprogram-image-url
+```
+
 **微信小程序：** 在微信公众平台配置 `https://oss.universe42.studio` 为合法 **downloadFile** 域名。
 
 **排查图片无法显示：**
@@ -499,7 +511,7 @@ npm run test:kanban-archive
 ### 10.7 后台表单与图片预览（Sprint 17）
 
 - 数字输入：使用 `NumberInput` / `DecimalStringInput`，勿在 `onChange` 中 `Number('') → 0`。
-- 图片：DB 存 objectKey；CMS 预览用 `NEXT_PUBLIC_OSS_PUBLIC_BASE_URL`；详见 [`docs/ui-guidelines.md`](docs/ui-guidelines.md)。
+- 图片：DB 存 objectKey；CMS 预览用 `NEXT_PUBLIC_OSS_PUBLIC_BASE_URL` + `NEXT_PUBLIC_OSS_OBJECT_PREFIX`；**禁止**在 client component 将 objectKey 直接作为 `img` / `next/image` src；详见 [`docs/ui-guidelines.md`](docs/ui-guidelines.md) 与 [`docs/sprint-22-cms-image-url-audit-checklist.md`](docs/sprint-22-cms-image-url-audit-checklist.md)。
 
 ```bash
 npm run test:number-input

@@ -1,13 +1,12 @@
 // pages/profile/profile.ts — 头像昵称自愿填写
-import { apiMiniprogramBaseUrl, baseUrl } from '../../config/index';
+import { apiMiniprogramBaseUrl } from '../../config/index';
 import { getToken, setStoredUser } from '../../utils/auth';
-import { toRelativeImagePath } from '../../utils/image';
+import { normalizeImageUrl } from '../../utils/image';
 import { fetchUserProfile, patchUserProfile } from '../../utils/user-api';
 import type { WechatUserProfile } from '../../utils/user';
 
 Page({
   data: {
-    baseUrl,
     nickName: '',
     avatarUrl: '',
     avatarDisplay: '',
@@ -31,13 +30,13 @@ Page({
   },
 
   applyUser(user: WechatUserProfile) {
-    const avatarPath = user.avatarUrl
-      ? toRelativeImagePath(user.avatarUrl)
+    const avatarDisplay = user.avatarUrl
+      ? normalizeImageUrl(user.avatarUrl)
       : '';
     this.setData({
       nickName: user.nickName ?? '',
-      avatarUrl: avatarPath,
-      avatarDisplay: avatarPath ? `${baseUrl}${avatarPath}` : '',
+      avatarUrl: user.avatarUrl ?? '',
+      avatarDisplay,
     });
   },
 
@@ -65,7 +64,7 @@ Page({
         try {
           const body = JSON.parse(res.data) as {
             success?: boolean;
-            data?: { url?: string };
+            data?: { url?: string; objectKey?: string; path?: string };
             error?: string;
           };
           if (!body.success || !body.data?.url) {
@@ -76,12 +75,14 @@ Page({
             return;
           }
 
-          const avatarPath = toRelativeImagePath(body.data.url);
+          const storedKey =
+            body.data.objectKey ?? body.data.path ?? body.data.url ?? '';
+          const avatarDisplay = normalizeImageUrl(body.data.url);
           this.setData({
-            avatarUrl: avatarPath,
-            avatarDisplay: `${baseUrl}${avatarPath}`,
+            avatarUrl: storedKey,
+            avatarDisplay,
           });
-          void this.syncProfile({ avatarUrl: avatarPath });
+          void this.syncProfile({ avatarUrl: storedKey });
         } catch {
           wx.showToast({ title: '上传响应解析失败', icon: 'none' });
         }

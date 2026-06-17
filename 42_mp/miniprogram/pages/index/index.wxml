@@ -34,7 +34,7 @@
     <swiper-item wx:for="{{banners}}" wx:key="id">
       <image
         class="banner-image"
-        src="{{baseUrl}}{{item.imageUrl}}"
+        src="{{item.imageUrl}}"
         mode="aspectFill"
         bindtap="onBannerTap"
         data-target-type="{{item.targetType}}"
@@ -86,7 +86,7 @@
           bindtap="onRecommendationTap"
           data-product-id="{{item.productId}}"
         >
-          <image class="home-main-image" src="{{baseUrl}}{{item.coverImage}}" mode="aspectFill" lazy-load />
+          <image class="home-main-image" src="{{item.coverImage}}" mode="aspectFill" lazy-load />
           <view class="home-main-info">
             <text class="home-main-name text-ellipsis">{{item.productName}}</text>
             <text wx:if="{{item.cardSellingPoint}}" class="home-main-point text-ellipsis text-muted">{{item.cardSellingPoint}}</text>
@@ -114,7 +114,7 @@
             bindtap="onRecommendationTap"
             data-product-id="{{item.productId}}"
           >
-            <image class="recommend-h-image" src="{{baseUrl}}{{item.coverImage}}" mode="aspectFill" lazy-load />
+            <image class="recommend-h-image" src="{{item.coverImage}}" mode="aspectFill" lazy-load />
             <text class="recommend-h-name text-ellipsis">{{item.productName}}</text>
             <text class="price-text">¥{{item.price}}</text>
           </view>
@@ -142,7 +142,7 @@
             bindtap="onRecommendationTap"
             data-product-id="{{item.productId}}"
           >
-            <image class="recommend-h-image" src="{{baseUrl}}{{item.coverImage}}" mode="aspectFill" lazy-load />
+            <image class="recommend-h-image" src="{{item.coverImage}}" mode="aspectFill" lazy-load />
             <text class="recommend-h-name text-ellipsis">{{item.productName}}</text>
             <product-tag-badges tags="{{item.cardOccasionLabels}}" />
             <text class="price-text">¥{{item.price}}</text>
@@ -168,7 +168,7 @@
             bindtap="onRecommendationTap"
             data-product-id="{{item.productId}}"
           >
-            <image class="recommend-h-image" src="{{baseUrl}}{{item.coverImage}}" mode="aspectFill" lazy-load />
+            <image class="recommend-h-image" src="{{item.coverImage}}" mode="aspectFill" lazy-load />
             <text class="recommend-h-name text-ellipsis">{{item.productName}}</text>
             <product-tag-badges tags="{{item.cardOccasionLabels}}" />
             <text class="price-text">¥{{item.price}}</text>
@@ -226,7 +226,7 @@
         <view class="product-image-wrap">
           <image
             class="product-image"
-            src="{{baseUrl}}{{item.imageUrl}}"
+            src="{{item.imageUrl}}"
             mode="aspectFill"
             lazy-load
           />
@@ -280,7 +280,7 @@
     <image
       wx:if="{{popup.imageUrl}}"
       class="popup-image"
-      src="{{baseUrl}}{{popup.imageUrl}}"
+      src="{{popup.imageUrl}}"
       mode="aspectFill"
     />
     <view class="popup-body">

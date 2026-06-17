@@ -55,6 +55,27 @@ function testHelpers() {
   );
 }
 
+function testObjectKeyNotSiteRelativePath() {
+  const url = getClientPreviewImageUrl(OBJECT_KEY);
+  assert.equal(url?.startsWith("/"), false);
+  assert.equal(url?.includes("www.universe42.studio"), false);
+}
+
+function testObjectKeyNotWrongDomain() {
+  const url = getClientPreviewImageUrl(
+    "universe42/products/sku/test.webp"
+  );
+  assert.equal(url, "https://oss.universe42.studio/universe42/products/sku/test.webp");
+  assert.equal(url.includes("www.universe42.studio"), false);
+}
+
+function testFallbackPublicBaseWhenEnvMissing() {
+  delete process.env.NEXT_PUBLIC_OSS_PUBLIC_BASE_URL;
+  const url = getClientPreviewImageUrl("universe42/products/sku/test.webp");
+  assert.equal(url, "https://oss.universe42.studio/universe42/products/sku/test.webp");
+  process.env.NEXT_PUBLIC_OSS_PUBLIC_BASE_URL = "https://oss.universe42.studio";
+}
+
 testObjectKeyToPublicUrl();
 testPublicUrlPassthrough();
 testNoDoublePrefix();
@@ -62,5 +83,8 @@ testLocalhostInvalid();
 testLegacyUploadsInvalid();
 testEmptyNull();
 testHelpers();
+testObjectKeyNotSiteRelativePath();
+testObjectKeyNotWrongDomain();
+testFallbackPublicBaseWhenEnvMissing();
 
 console.log("client-image-preview.test.ts: all passed");

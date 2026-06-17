@@ -13,6 +13,7 @@ const IMAGE_STRING_KEYS = new Set([
   "mainImageUrl",
   "picUrl",
   "snapshotProductImage",
+  "snapshotImageUrl",
   "imageOverride",
 ]);
 

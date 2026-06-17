@@ -2,7 +2,7 @@
 import { baseUrl } from '../../config/index';
 import { isLoggedIn } from '../../utils/auth';
 import { resolveApiErrorMessage } from '../../utils/business-error';
-import { toRelativeImagePath } from '../../utils/image';
+import { normalizeImageUrl } from '../../utils/image';
 import {
   cancelPendingOrder,
   confirmOrderReceipt,
@@ -72,7 +72,7 @@ function decorateOrder(o: OrderListItem): OrderCard {
     showCancel: o.status === 'PENDING_PAYMENT' && !expired,
     items: o.items.map((line) => ({
       ...line,
-      imageUrl: toRelativeImagePath(line.snapshotImageUrl),
+      imageUrl: normalizeImageUrl(line.snapshotImageUrl),
       snapshotPrice: Number(line.snapshotPrice).toFixed(2),
     })),
   };

@@ -98,6 +98,9 @@
 | 无效 | `localhost`、`/uploads`（`ENABLE_LEGACY_UPLOADS=false`）→ 提示重新上传 |
 
 - 组件：`CmsImagePreview` 统一占位、onError fallback。
+- **禁止**在 CMS client component 中将 API 返回的 `coverImage` / `imageUrl` / `imageOverride` 等 objectKey 直接传给 `next/image` 或 `img src`（会被当作站点相对路径，拼成 `https://{当前域名}/universe42/...`）。
+- Picker / 列表缩略图 / Banner 预览：优先 `CmsImagePreview`；不便封装时用 `getClientPreviewImageUrl(stored)` 后再赋 `src`。
+- 本地 `assets/icons`、tabBar 图标不走 OSS；远程业务图使用 `normalizeImageUrl`（`42_mp/miniprogram/utils/image-url.ts`），禁止 `baseUrl + objectKey`。
 - 前端 env：`NEXT_PUBLIC_OSS_PUBLIC_BASE_URL`（**不要**暴露 AccessKey）。
 - 保存：`normalizeStoredImagePath` 将 public URL 还原为 objectKey；拒绝 localhost。
 

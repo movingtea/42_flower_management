@@ -1,14 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { DeliverySettingsPanel } from "@/app/cms/marketing/DeliverySettingsPanel";
 import { HomeSceneEntriesManager } from "@/app/cms/marketing/HomeSceneEntriesManager";
+import { CmsImagePreview } from "@/components/cms/CmsImagePreview";
 import {
-  CMS_IMAGE_REUPLOAD_HINT,
-  isClientImageInvalid,
-  resolveClientImagePreview,
   uploadCmsImage,
 } from "@/lib/cms-image-upload";
 import { formatNullableDateTime } from "@/lib/datetime";
@@ -282,21 +279,14 @@ export function MarketingSettings({
               />
               {popup.imageUrl ? (
                 <div>
-                  {isClientImageInvalid(popup.imageUrl) ? (
-                    <p className="mb-2 text-sm text-amber-700">
-                      {CMS_IMAGE_REUPLOAD_HINT}
-                    </p>
-                  ) : resolveClientImagePreview(popup.imageUrl) ? (
                   <div className="relative mb-2 h-44 w-full overflow-hidden rounded-xl border border-rose-100">
-                    <Image
-                      src={resolveClientImagePreview(popup.imageUrl)!}
+                    <CmsImagePreview
+                      stored={popup.imageUrl}
                       alt="弹窗图片"
                       fill
                       className="object-cover"
-                      unoptimized
                     />
                   </div>
-                  ) : null}
                   <Button
                     type="button"
                     variant="secondary"

@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { ChevronRight } from "lucide-react";
 import { OrderDetailModal } from "@/app/wms/orders/OrderDetailModal";
 import {

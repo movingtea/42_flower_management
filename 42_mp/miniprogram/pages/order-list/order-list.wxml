@@ -34,7 +34,7 @@
         <image
           wx:if="{{line.imageUrl}}"
           class="order-line-image"
-          src="{{baseUrl}}{{line.imageUrl}}"
+          src="{{line.imageUrl}}"
           mode="aspectFill"
         />
         <view class="order-line-body">

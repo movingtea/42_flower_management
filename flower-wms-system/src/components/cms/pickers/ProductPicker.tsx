@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { CmsImagePreview } from "@/components/cms/CmsImagePreview";
 import { deferEffectTask } from "@/lib/defer-effect";
 import { Badge } from "@/components/ui/Badge";
 import type { ProductPickerItem } from "@/components/cms/pickers/types";
@@ -135,17 +135,16 @@ export function ProductPicker({
 
       {selected ? (
         <div className="flex items-start gap-3 rounded-lg border border-zinc-200 bg-zinc-50 p-3">
-          {selected.coverImage ? (
-            <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-md border border-zinc-100">
-              <Image
-                src={selected.coverImage}
-                alt=""
-                fill
-                className="object-cover"
-                unoptimized
-              />
-            </div>
-          ) : null}
+          <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-md border border-zinc-100">
+            <CmsImagePreview
+              stored={selected.coverImage}
+              alt=""
+              fill
+              className="object-cover"
+              compact
+              emptyHint="暂无主图"
+            />
+          </div>
           <div className="min-w-0 flex-1">
             <p className="font-medium text-zinc-900">{selected.name}</p>
             <p className="text-xs text-zinc-500">
@@ -214,17 +213,16 @@ export function ProductPicker({
                       setQuery("");
                     }}
                   >
-                    {item.coverImage ? (
-                      <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded">
-                        <Image
-                          src={item.coverImage}
-                          alt=""
-                          fill
-                          className="object-cover"
-                          unoptimized
-                        />
-                      </div>
-                    ) : null}
+                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded border border-zinc-100">
+                      <CmsImagePreview
+                        stored={item.coverImage}
+                        alt=""
+                        fill
+                        className="object-cover"
+                        compact
+                        emptyHint="无图"
+                      />
+                    </div>
                     <div className="min-w-0">
                       <p className="text-sm font-medium text-zinc-900">
                         {item.name}

@@ -6,7 +6,7 @@
     <view class="spec-sheet-header">
       <image
         class="spec-header-thumb"
-        src="{{baseUrl}}{{product.imageUrl}}"
+        src="{{product.imageUrl}}"
         mode="aspectFill"
       />
       <view class="spec-header-info">
@@ -30,7 +30,7 @@
           <view class="spec-sku-image-wrap">
             <image
               class="spec-sku-image"
-              src="{{baseUrl}}{{item.imageUrl || product.imageUrl}}"
+              src="{{item.imageUrl || product.imageUrl}}"
               mode="aspectFill"
             />
             <view
@@ -78,7 +78,7 @@
   <view class="preview-image-stage" catchtap="onPreviewImageTap">
     <image
       class="preview-image"
-      src="{{baseUrl}}{{previewImageUrl}}"
+      src="{{previewImageUrl}}"
       mode="aspectFit"
       show-menu-by-longpress="{{true}}"
     />

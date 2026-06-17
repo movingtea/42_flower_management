@@ -119,7 +119,7 @@
             data-out-of-stock="{{item.isOutOfStock}}"
           >
             <view class="product-image-wrap">
-              <image class="product-image" src="{{baseUrl}}{{item.imageUrl}}" mode="aspectFill" lazy-load="{{true}}" />
+              <image class="product-image" src="{{item.imageUrl}}" mode="aspectFill" lazy-load="{{true}}" />
               <view wx:if="{{item.isOutOfStock}}" class="out-of-stock-mask flex-center">
                 <text class="out-of-stock-text">暂时售罄</text>
               </view>

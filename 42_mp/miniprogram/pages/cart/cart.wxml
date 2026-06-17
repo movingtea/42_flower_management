@@ -26,7 +26,7 @@
 
         <image
           class="cart-row-image"
-          src="{{baseUrl}}{{item.imageUrl}}"
+          src="{{item.imageUrl}}"
           mode="aspectFill"
           lazy-load
         />

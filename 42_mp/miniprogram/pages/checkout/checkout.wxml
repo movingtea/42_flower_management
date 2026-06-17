@@ -174,7 +174,7 @@
     <view class="section">
       <view class="section-title">商品清单</view>
       <view class="checkout-line" wx:for="{{checkoutItems}}" wx:for-item="item" wx:key="lineKey">
-        <image wx:if="{{item.imageUrl}}" class="checkout-line-image" src="{{baseUrl}}{{item.imageUrl}}" mode="aspectFill" lazy-load />
+        <image wx:if="{{item.imageUrl}}" class="checkout-line-image" src="{{item.imageUrl}}" mode="aspectFill" lazy-load />
         <view class="checkout-line-body">
           <text class="checkout-line-name">{{item.name}}</text>
           <text class="checkout-line-spec">{{item.specName}}</text>

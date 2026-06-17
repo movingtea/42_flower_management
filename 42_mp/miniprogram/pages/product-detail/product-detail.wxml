@@ -17,7 +17,7 @@
           bindchange="onBannerChange"
         >
           <swiper-item wx:for="{{bannerImages}}" wx:key="*this">
-            <image class="detail-banner-image" src="{{baseUrl}}{{item}}" mode="aspectFill" />
+            <image class="detail-banner-image" src="{{item}}" mode="aspectFill" />
           </swiper-item>
         </swiper>
         <view wx:else class="detail-banner detail-banner--placeholder flex-center">
@@ -113,7 +113,7 @@
               bindtap="onRecommendTap"
               data-id="{{item.id}}"
             >
-              <image class="recommend-image" src="{{baseUrl}}{{item.imageUrl}}" mode="aspectFill" lazy-load />
+              <image class="recommend-image" src="{{item.imageUrl}}" mode="aspectFill" lazy-load />
               <text class="recommend-name text-ellipsis">{{item.name}}</text>
               <text class="recommend-price">¥{{item.price}}{{item.priceSuffix}}</text>
             </view>

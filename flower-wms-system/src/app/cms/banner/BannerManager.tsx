@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useRef, useState } from "react";
+import { CmsImagePreview } from "@/components/cms/CmsImagePreview";
 import { CmsLinkTargetSelector } from "@/components/cms/pickers/CmsLinkTargetSelector";
 import { AdminDrawer } from "@/components/admin/AdminDrawer";
 import { DrawerFooterActions } from "@/components/admin/DrawerFooterActions";
@@ -13,7 +13,6 @@ import { Switch } from "@/components/ui/Switch";
 import {
   CMS_IMAGE_REUPLOAD_HINT,
   isClientImageInvalid,
-  resolveClientImagePreview,
   uploadCmsImage,
 } from "@/lib/cms-image-upload";
 import { useDeferredEffect } from "@/lib/defer-effect";
@@ -427,29 +426,13 @@ export function BannerManager() {
                 <tr key={item.id} className={STICKY_TABLE_ROW}>
                   <td className={STICKY_LEFT_CELL}>
                     <div className="relative h-16 w-28 overflow-hidden rounded-lg border border-rose-100 bg-zinc-50">
-                      {item.imageUrl ? (
-                        isClientImageInvalid(item.imageUrl) ? (
-                          <span className="flex h-full items-center justify-center px-1 text-center text-xs text-amber-700">
-                            {CMS_IMAGE_REUPLOAD_HINT}
-                          </span>
-                        ) : resolveClientImagePreview(item.imageUrl) ? (
-                        <Image
-                          src={resolveClientImagePreview(item.imageUrl)!}
-                          alt="轮播图"
-                          fill
-                          className="object-cover"
-                          unoptimized
-                        />
-                        ) : (
-                          <span className="flex h-full items-center justify-center text-xs text-zinc-400">
-                            无图
-                          </span>
-                        )
-                      ) : (
-                        <span className="flex h-full items-center justify-center text-xs text-zinc-400">
-                          无图
-                        </span>
-                      )}
+                      <CmsImagePreview
+                        stored={item.imageUrl}
+                        alt="轮播图"
+                        fill
+                        className="object-cover"
+                        compact
+                      />
                     </div>
                   </td>
                   <td className={STICKY_SCROLL_CELL}>
@@ -561,21 +544,14 @@ export function BannerManager() {
                 />
                 {form.imageUrl ? (
                   <div>
-                    {isClientImageInvalid(form.imageUrl) ? (
-                      <p className="mb-2 text-sm text-amber-700">
-                        {CMS_IMAGE_REUPLOAD_HINT}
-                      </p>
-                    ) : resolveClientImagePreview(form.imageUrl) ? (
                     <div className="relative mb-2 h-28 w-full overflow-hidden rounded-xl border border-rose-100">
-                      <Image
-                        src={resolveClientImagePreview(form.imageUrl)!}
+                      <CmsImagePreview
+                        stored={form.imageUrl}
                         alt="预览"
                         fill
                         className="object-cover"
-                        unoptimized
                       />
                     </div>
-                    ) : null}
                     <Button
                       type="button"
                       variant="secondary"

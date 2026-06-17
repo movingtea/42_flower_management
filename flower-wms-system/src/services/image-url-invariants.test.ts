@@ -8,6 +8,7 @@ import {
   normalizeStoredImagePath,
   toPublicImageUrl,
 } from "@/lib/image-url";
+import { imageUrlFormatter } from "@/utils/imageUrlFormatter";
 
 process.env.ENABLE_LEGACY_UPLOADS = "false";
 process.env.BLOCK_LOCALHOST_IMAGE_URL = "true";
@@ -50,6 +51,17 @@ function testExternalCdnReadOnly() {
   assert.equal(normalizeStoredImagePath(url), url);
 }
 
+function testSnapshotImageUrlInFormatter() {
+  const out = imageUrlFormatter({
+    items: [{ snapshotImageUrl: OBJECT_KEY }],
+  }) as { items: Array<{ snapshotImageUrl: string }> };
+  assert.ok(out.items[0].snapshotImageUrl.includes("oss.universe42.studio"));
+  assert.equal(
+    out.items[0].snapshotImageUrl,
+    `https://oss.universe42.studio/${OBJECT_KEY}`
+  );
+}
+
 function run() {
   testStoreObjectKey();
   testDoNotStoreLocalhost();
@@ -57,6 +69,7 @@ function run() {
   testPublicUrlFromObjectKey();
   testNoDoubleConcat();
   testExternalCdnReadOnly();
+  testSnapshotImageUrlInFormatter();
   assert.equal(
     isInvalidLocalImageUrl("http://localhost:3000/uploads/a.jpg"),
     true

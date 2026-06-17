@@ -1088,7 +1088,7 @@ logging:
 | 上传 API | `POST /api/admin/uploads/image`（推荐，需 `cms:write` + `module`）；兼容 `POST /api/admin/upload` |
 | 上传校验 | JPG / PNG / WebP；默认 ≤3MB；禁止 SVG |
 | CMS 写入 | 商品 SKU `imageUrl`、Banner、营销弹窗等经 `normalizeStoredImagePath` → objectKey |
-| 小程序 API | `/api/miniprogram/*` 经 `imageUrlFormatter` → `toPublicImageUrl` → 完整 HTTPS OSS URL |
+| 小程序 API | `/api/miniprogram/*` 经 `imageUrlFormatter` → `toPublicImageUrl` → 完整 HTTPS OSS URL（含 `snapshotImageUrl` 等订单快照字段） |
 | Legacy | `ENABLE_LEGACY_UPLOADS=false` 时 `/uploads` 与 localhost 视为无效，CMS 提示重新上传 |
 
 **Storage Service 路径：**
@@ -1402,6 +1402,10 @@ logging:
 | 测试 / smoke | `test:number-input`、`test:client-image-preview`、`smoke:cms-product-preview` |
 
 **前端预览 env：** `NEXT_PUBLIC_OSS_PUBLIC_BASE_URL` + `NEXT_PUBLIC_OSS_OBJECT_PREFIX`（不含 AccessKey）。
+
+**Sprint 22 补充：** CMS client component（含 `ProductPicker`、Banner 列表、`MarketingSettings` 弹窗预览等）**禁止**将 objectKey 直接作为 `next/image` / `img` 的 `src`；须经 `CmsImagePreview` 或 `getClientPreviewImageUrl`。验收见 `docs/sprint-22-cms-image-url-audit-checklist.md`。
+
+**Sprint 22 小程序补充：** `42_mp/miniprogram/utils/image-url.ts` 的 `normalizeImageUrl` 将 objectKey → `https://oss.universe42.studio/...`；`<image src>` 使用完整 URL，**禁止** `baseUrl + objectKey` 拼接。本地 `assets/icons` / tabBar 图标不走 OSS。验收见 `docs/sprint-22-miniprogram-image-url-audit-checklist.md`。
 
 ### Sprint 19 — 后台弹窗统一改造为右侧 Drawer
 
