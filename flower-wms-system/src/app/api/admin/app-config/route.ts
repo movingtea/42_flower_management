@@ -1,5 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
 import {
   GLOBAL_NOTICE_KEY,
   GLOBAL_NOTICE_NAME,
@@ -70,6 +71,9 @@ function parseValueForKey(
 /** GET ?key=... */
 export async function GET(request: Request) {
   try {
+    const staff = await requirePermission("cms:read");
+    if (isResponse(staff)) return staff;
+
     const key = new URL(request.url).searchParams.get("key")?.trim();
     if (!key) {
       return jsonError("请提供 key 查询参数", 400);
@@ -170,6 +174,9 @@ function normalizePutValue(
 /** PUT：按 key 写入或更新配置（upsert） */
 export async function PUT(request: Request) {
   try {
+    const staff = await requirePermission("cms:write");
+    if (isResponse(staff)) return staff;
+
     const body = parsePutBody(await request.json());
     const jsonValue = normalizePutValue(body.key, body.value);
     const defaultName = defaultNameForKey(body.key);

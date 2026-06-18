@@ -382,6 +382,9 @@ export function OrdersKanban({ initialOrders }: Props) {
             <p className="mt-2 text-sm text-zinc-600">
               订单 {refundModal.order.orderNo}，实付 ¥{refundModal.order.payAmount}
             </p>
+            <p className="mt-2 text-xs text-zinc-500">
+              退款取消不会自动回补物理花材批次库存。如需恢复小程序可售数量，可勾选下方选项。
+            </p>
             <label className="mt-4 flex cursor-pointer items-center gap-2 text-sm">
               <input
                 type="checkbox"
@@ -392,8 +395,11 @@ export function OrdersKanban({ initialOrders }: Props) {
                   )
                 }
               />
-              花材未损耗，退回 SKU 可售库存
+              回补虚拟 SKU 可售库存（不影响物理批次）
             </label>
+            <p className="mt-2 text-xs text-zinc-500">
+              物理花材回库将在后续功能中通过显式选择批次和数量处理。
+            </p>
             <div className="mt-6 flex justify-end gap-2">
               <Button
                 type="button"

@@ -62,6 +62,16 @@ function testSnapshotImageUrlInFormatter() {
   );
 }
 
+function testCoverImageInFormatter() {
+  const out = imageUrlFormatter({
+    list: [{ coverImage: OBJECT_KEY }],
+  }) as { list: Array<{ coverImage: string }> };
+  assert.equal(
+    out.list[0].coverImage,
+    `https://oss.universe42.studio/${OBJECT_KEY}`
+  );
+}
+
 function run() {
   testStoreObjectKey();
   testDoNotStoreLocalhost();
@@ -70,6 +80,7 @@ function run() {
   testNoDoubleConcat();
   testExternalCdnReadOnly();
   testSnapshotImageUrlInFormatter();
+  testCoverImageInFormatter();
   assert.equal(
     isInvalidLocalImageUrl("http://localhost:3000/uploads/a.jpg"),
     true

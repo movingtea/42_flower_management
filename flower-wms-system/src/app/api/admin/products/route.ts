@@ -1,5 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
 import { buildSkuCreateRows, cmsSpuCreateData } from "@/lib/cms-product-write";
 import { loadCmsProductCategories } from "@/lib/cms-product-categories.server";
 import { parseCmsProductBody } from "@/lib/cms-products";
@@ -39,6 +40,9 @@ function mapError(err: unknown): { message: string; status: number } {
 /** @deprecated 请使用 POST /api/cms/products */
 export async function POST(request: Request) {
   try {
+    const staff = await requirePermission("cms:write");
+    if (isResponse(staff)) return staff;
+
     const categoryConfig = await loadCmsProductCategories();
     const body = parseCmsProductBody(await request.json(), categoryConfig);
 

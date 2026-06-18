@@ -13,6 +13,7 @@ function parseBody(raw: unknown): { rollbackStock: boolean; refundAmount?: numbe
     return { rollbackStock: false };
   }
   const b = raw as Record<string, unknown>;
+  /** 仅控制虚拟 SKU 可售库存（ProductSku.stock），不涉及物理 Batch */
   const rollbackStock = b.rollbackStock === true;
   const refundAmount =
     b.refundAmount != null ? Number(b.refundAmount) : undefined;
@@ -52,12 +53,13 @@ export async function POST(request: Request, ctx: RouteCtx) {
         entityType: "Order",
         entityId: order.id,
         summary: body.rollbackStock
-          ? `订单 ${order.orderNo} 退款取消并回库`
-          : `订单 ${order.orderNo} 退款取消`,
+          ? `订单 ${order.orderNo} 退款取消并回补虚拟 SKU 可售库存`
+          : `订单 ${order.orderNo} 退款取消（未回补虚拟 SKU）`,
         afterSnapshot: {
           status: order.status,
           refundAmount: order.refundAmount,
           rollbackStock: body.rollbackStock,
+          physicalBatchRestored: false,
         },
       },
       request
@@ -65,8 +67,8 @@ export async function POST(request: Request, ctx: RouteCtx) {
 
     return jsonSuccess({
       message: body.rollbackStock
-        ? "已退款取消，物理批次与虚拟库存均已回库"
-        : "已退款取消，物理批次已回库（虚拟 SKU 未回滚）",
+        ? "订单已退款取消，已回补虚拟 SKU 可售库存；物理花材批次未自动回库，如需回库请在后续显式回库功能中处理"
+        : "订单已退款取消；虚拟 SKU 与物理花材批次均未自动回库",
       order: {
         id: order.id,
         orderNo: order.orderNo,

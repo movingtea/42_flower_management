@@ -1,4 +1,7 @@
-import { toPublicImageUrl } from "@/lib/image-url";
+import {
+  MINIPROGRAM_LOGIC_ICON_KEYS,
+  toMiniprogramImageUrl,
+} from "@/lib/miniprogram-image-dto";
 
 /** 需要规范化输出的字符串字段名 */
 const IMAGE_STRING_KEYS = new Set([
@@ -15,6 +18,10 @@ const IMAGE_STRING_KEYS = new Set([
   "snapshotProductImage",
   "snapshotImageUrl",
   "imageOverride",
+  "iconUrl",
+  "posterUrl",
+  "productImage",
+  "skuImage",
 ]);
 
 /** 图片 URL 字符串数组字段名 */
@@ -23,6 +30,7 @@ const IMAGE_ARRAY_KEYS = new Set([
   "imageList",
   "gallery",
   "bannerImages",
+  "detailImages",
 ]);
 
 /** @deprecated 小程序 API 不再拼接 localhost；请使用 toPublicImageUrl */
@@ -57,7 +65,7 @@ export function resolveImageUrl(
 ): string | null | undefined {
   if (value == null) return value;
   if (typeof value !== "string") return value;
-  const out = toPublicImageUrl(value);
+  const out = toMiniprogramImageUrl(value);
   if (out) return out;
   const trimmed = value.trim();
   return trimmed || null;
@@ -87,6 +95,11 @@ function walkUnknown(value: unknown): unknown {
     const out: Record<string, unknown> = {};
 
     for (const [key, val] of Object.entries(record)) {
+      if (MINIPROGRAM_LOGIC_ICON_KEYS.has(key)) {
+        out[key] = val;
+        continue;
+      }
+
       if (IMAGE_ARRAY_KEYS.has(key)) {
         out[key] = formatImageArray(val);
         continue;

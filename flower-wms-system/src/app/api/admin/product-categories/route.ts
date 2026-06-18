@@ -1,5 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
 import {
   buildProductCategoryTree,
   parseProductCategoryWriteBody,
@@ -68,6 +69,9 @@ async function assertParentValid(
 /** GET：商品分类树（按 sortOrder 排序，含 children） */
 export async function GET() {
   try {
+    const staff = await requirePermission("cms:read");
+    if (isResponse(staff)) return staff;
+
     const flat = await loadAllProductCategoriesFlat();
     const tree = buildProductCategoryTree(flat);
 
@@ -94,6 +98,9 @@ export async function GET() {
 /** POST：创建商品分类 */
 export async function POST(request: Request) {
   try {
+    const staff = await requirePermission("cms:write");
+    if (isResponse(staff)) return staff;
+
     const body = parseProductCategoryWriteBody(await request.json());
     await assertParentValid(body.parentId);
 

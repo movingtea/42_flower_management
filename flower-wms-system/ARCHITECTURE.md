@@ -23,7 +23,7 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 
 当前已实现能力：
 
-- WMS 花材母表、标准配方、包装方案、物理批次库存、手工入库、指定批次报损、销售 FIFO、退款回库。
+- WMS 花材母表、标准配方、包装方案、物理批次库存、手工入库、指定批次报损、销售 FIFO；退款默认不自动物理回库（Batch B.1）。
 - CMS 商品 SPU/SKU、商品分类、轮播、营销配置、SKU 绑定 Recipe、SKU 毛利预估展示。
 - 微信小程序用户登录、商品浏览、购物车、下单、mock 支付、订单查询。
 - 小程序订单驱动 CRM：`Customer` / `Recipient` / `GiftOccasion` / `CustomerReminder`；常用收花人 API；后台 CRM 基础 API；支付成功后客户统计与复购提醒生成。
@@ -398,6 +398,8 @@ CMS 面向花店运营用户，主界面不要求理解 `productId` / `skuId` / 
 权限：
 
 - 后台 API 使用 `src/lib/api-auth.ts` 的 `requirePermission`。
+- **所有 `/api/admin/*` 业务 API 必须在 handler 内调用 `requirePermission`；Middleware 与 Sidebar 隐藏不是权限边界。**
+- 权限矩阵审计见 [`docs/admin-api-permission-audit.md`](docs/admin-api-permission-audit.md)（Batch A）。
 - `IT_ADMIN` 不能访问业务数据（`canAccessBusinessData` + proxy 业务 API 403）。
 - `wms:read`：`STORE_ADMIN` / `WAREHOUSE_MANAGER` / `FLORIST` / `STORE_OPERATOR`（Florist 对 WMS 写 API 仅 GET）。
 - `wms:write`：`STORE_ADMIN` / `WAREHOUSE_MANAGER`。
@@ -556,7 +558,7 @@ Smoke 脚本：
 
 - 采购：创建 / 取消 / 到货入库
 - 库存：手工入库 / 指定批次报损
-- 订单：mock 支付、关闭待支付、退款回库、后台状态流转
+- 订单：mock 支付、关闭待支付、退款取消（虚拟 SKU 可选回补）、后台状态流转
 - CMS：商品创建 / 更新、推荐位创建 / 更新 / 停用、推荐项添加 / 更新 / 移除、首页场景入口创建 / 更新 / 删除
 - CRM：提醒状态更新、小程序常用收花人软删除
 
@@ -716,7 +718,7 @@ markOrderPaidWithFifo / mock-pay / admin-mark-paid
 
 - mock 支付 / 后台标记已支付 / 回调占位进入 `markOrderPaidWithFifo` 后生成或更新。
 - `deliveryCostActual` 变更后，`PATCH /api/admin/orders/[id]/delivery-cost` 会触发重算。
-- 退款后历史快照保留，报表会按退款状态排除或单独统计；库存通过 `IN_CANCEL` 原路回库。
+- 退款后历史快照保留，报表会按退款状态排除或单独统计；**不**自动写 `IN_CANCEL` 回补物理批次（Batch B.1）。虚拟 SKU 仅在 `rollbackStock=true` 时回补。
 
 订单成本不使用 `FlowerWiki.standardUnitCost`；它只使用历史 `SALE_OUT` 对应的 `Batch.unitCost`。
 
@@ -961,7 +963,7 @@ receivePurchaseOrder
 - `SALE_OUT`：销售出库。
 - `WASTAGE_OUT`：指定批次报损。
 - `ADJUSTMENT`：盘点调整。
-- `IN_CANCEL`：订单取消 / 退款回库。
+- `IN_CANCEL`：显式物理花材回库（Batch B.2+）；**不是**退款默认行为。
 
 ### 库存页面兼容性
 
@@ -1089,7 +1091,8 @@ logging:
 | 上传校验 | JPG / PNG / WebP；默认 ≤3MB；禁止 SVG |
 | 反向代理 | Nginx `client_max_body_size` 推荐 **5m**（高于业务 3MB）；默认 1m 会导致 1MB+ 上传在 API 前 **413**，非 `FILE_TOO_LARGE` |
 | CMS 写入 | 商品 SKU `imageUrl`、Banner、营销弹窗等经 `normalizeStoredImagePath` → objectKey |
-| 小程序 API | `/api/miniprogram/*` 经 `imageUrlFormatter` → `toPublicImageUrl` → 完整 HTTPS OSS URL（含 `snapshotImageUrl` 等订单快照字段） |
+| 小程序 API | `/api/miniprogram/*` 成功响应经 `jsonWechatSuccess` → `miniprogram-image-dto`（mapper 层）+ `imageUrlFormatter`（兜底）→ 完整 HTTPS OSS URL；**禁止**裸 objectKey / localhost / `/uploads` / `www.universe42.studio/universe42/...` 进入 image src 字段 |
+| 小程序客户端 | `normalizeImageUrl` 保留为防御性兜底，**不是**主转换层 |
 | Legacy | `ENABLE_LEGACY_UPLOADS=false` 时 `/uploads` 与 localhost 视为无效，CMS 提示重新上传 |
 
 **Storage Service 路径：**
@@ -1347,7 +1350,7 @@ logging:
 | 上传 API | `POST /api/admin/uploads/image`（`module` 白名单 + `cms:write`）；兼容 `/api/admin/upload` |
 | 数据库存储 | objectKey（`universe42/{module}/YYYY/MM/{uuid}.ext`）；禁止 localhost / `/uploads` / 完整 OSS URL |
 | CMS | 商品 SKU、Banner、营销弹窗、富文本图片走 OSS；无效 legacy 提示重新上传 |
-| 小程序 API | `imageUrlFormatter` → `toPublicImageUrl` 返回 HTTPS OSS URL |
+| 小程序 API | `jsonWechatSuccess` + `miniprogram-image-dto` + `imageUrlFormatter` → HTTPS OSS URL（Batch C） |
 | Legacy | `ENABLE_LEGACY_UPLOADS=false`；无 `/uploads` 迁移脚本 |
 | 校验 | JPG/PNG/WebP；≤3MB；禁 SVG |
 | 测试 / 脚本 | `test:storage`、`test:upload-validation`、`test:oss`、`smoke:oss-upload`、`smoke:image-url` |
@@ -1421,10 +1424,14 @@ logging:
 
 **原则：** Header / Body / Footer 三段式；Footer action 固定底部；表单紧凑一屏优先；不改业务逻辑 / API / schema。
 
-### 退款库存回填
+### 退款与双轨库存（Batch B.1）
 
-- 已支付退款**默认不回填**物理库存；`refundPaidOrder({ rollbackStock })` 由后台用户选择。
-- 历史 `OrderCostSnapshot` 保留；销售报表默认排除已退款订单。
+- 已支付退款：**默认不**回补物理批次、**不**写 `IN_CANCEL`；历史 `SALE_OUT` 与 `OrderCostSnapshot` 保留。
+- `rollbackStock`（API 字段）：**仅**回补虚拟 `ProductSku.stock`；与物理 `Batch` 无关。
+- `restorePhysicalStockFromSaleOutInTx` 保留为 Batch B.2 显式回库内部基础，**不得**由 `refundPaidOrder` 默认调用。
+- 待支付关闭（`closePendingOrder` / 超时）：仍只回补虚拟 SKU（无 `SALE_OUT`）。
+
+详见 `docs/batch-b1-refund-stock-fix.md`、`docs/business-rules.md` §已支付退款。
 
 ### 推荐位 / Banner
 

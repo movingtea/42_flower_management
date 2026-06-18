@@ -22,6 +22,10 @@ import {
   shouldShowMiniprogramSpecSelector,
 } from "@/lib/cms/single-spec-product";
 import {
+  toMiniprogramImageUrl,
+  toMiniprogramImageUrlOrEmpty,
+} from "@/lib/miniprogram-image-dto";
+import {
   resolveSkuPreorderRule,
   type ResolvedPreorderRule,
 } from "@/services/preorder-rule-pure";
@@ -116,7 +120,9 @@ export function resolveWechatSkuPresentation(
 
   return {
     description: ownDescription ?? spuFallback.description,
-    imageUrl: ownImage ?? (spuFallback.mainImageUrl || null),
+    imageUrl:
+      toMiniprogramImageUrl(ownImage) ??
+      toMiniprogramImageUrl(spuFallback.mainImageUrl || null),
   };
 }
 
@@ -127,7 +133,7 @@ function resolveBannerImagesFromSkus(
   const seen = new Set<string>();
 
   const push = (raw: string | null | undefined) => {
-    const u = raw?.trim();
+    const u = toMiniprogramImageUrl(raw);
     if (!u || seen.has(u)) return;
     seen.add(u);
     urls.push(u);
@@ -147,7 +153,9 @@ export function mapSpuToWechatListItem(
   spu: ProductSpuWithRelations
 ): WechatProductListItem {
   const activeSkuRecords = filterActiveSkus(spu.skus);
-  const mainImageUrl = resolveSpuCardImageUrl(spu.skus);
+  const mainImageUrl = toMiniprogramImageUrlOrEmpty(
+    resolveSpuCardImageUrl(spu.skus)
+  );
   const spuFallback = {
     description: trimOrNull(spu.description),
     mainImageUrl,
@@ -182,7 +190,8 @@ export function mapSpuToWechatListItem(
     minPrice,
     skus.length
   );
-  const imageUrl = mainImageUrl || skus[0]?.imageUrl || "";
+  const imageUrl =
+    mainImageUrl || toMiniprogramImageUrlOrEmpty(skus[0]?.imageUrl ?? null);
   const bannerImages = resolveBannerImagesFromSkus(skus);
   const operationTags = buildWechatOperationTags(spu);
 

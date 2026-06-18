@@ -14,7 +14,25 @@ export type StaffSession = {
   role: Role;
 };
 
+/** @internal Admin API HTTP smoke：覆盖 session（undefined = 走真实 auth） */
+let staffSessionTestOverride: StaffSession | null | undefined;
+
+/** @internal 仅测试脚本调用 */
+export function setStaffSessionOverrideForTests(
+  staff: StaffSession | null | undefined
+): void {
+  staffSessionTestOverride = staff;
+}
+
+/** @internal 仅测试脚本调用 */
+export function clearStaffSessionOverrideForTests(): void {
+  staffSessionTestOverride = undefined;
+}
+
 export async function getStaffSession(): Promise<StaffSession | null> {
+  if (staffSessionTestOverride !== undefined) {
+    return staffSessionTestOverride;
+  }
   const session = await auth();
   if (!session?.user?.id || !session.user.role) return null;
   return {

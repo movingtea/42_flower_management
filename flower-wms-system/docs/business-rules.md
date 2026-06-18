@@ -198,11 +198,14 @@
 
 ### 已支付退款
 
-- **不默认**自动回填物理库存。
-- 后台用户选择 `rollbackStock` 决定是否回补虚拟库存。
-- 历史 `OrderCostSnapshot` 保留；不得删除库存流水；不得重算历史采购成本。
+- **退款取消 ≠ 自动物理回库**（Batch B.1）。
+- 已支付订单退款时：订单状态 → `CANCELLED`；**不**自动增加 `Batch.remainingQty`；**不**写入 `IN_CANCEL`；历史 `SALE_OUT` 与 `OrderCostSnapshot` 保留。
+- `rollbackStock`（API 字段名保持不变）**仅**表示是否回补虚拟 SKU 可售库存（`ProductSku.stock`），与物理批次无关。
+- 物理花材回库须运营在后续 Batch B.2 显式选择批次/数量（基于 `restorePhysicalStockFromSaleOutInTx` 或新服务），不得默认全量回库。
 
-实现：`refundPaidOrder(orderId, { rollbackStock })`。
+实现：`refundPaidOrder(orderId, { rollbackStock })` — 仅当 `rollbackStock=true` 时调用 `restoreOrderSkuStock`。
+
+修复记录：`docs/batch-b1-refund-stock-fix.md`。
 
 ---
 
@@ -274,12 +277,13 @@
 
 ## 15. 图片 URL 规则
 
-- 数据库存 `/uploads/xxx.jpg` 相对路径。
-- **禁止**存 `http://localhost:3000/uploads/...`。
-- 小程序 API 经 `imageUrlFormatter` / `toPublicImageUrl` 处理，不返回 localhost。
-- HTTPS 绝对 URL 保持不变；不重复拼接。
+- 数据库存 **OSS objectKey**（如 `universe42/products/sku/xxx.webp`）；**不得**存完整 OSS public URL、localhost、`/uploads`。
+- 小程序 API（Batch C）：`/api/miniprogram/*` 成功响应经 `jsonWechatSuccess` → mapper 层 `miniprogram-image-dto` + 兜底 `imageUrlFormatter`，**image src 字段必须输出完整 HTTPS OSS URL**。
+- 客户端 `normalizeImageUrl` 仅作防御性兜底，不是主转换层。
+- **禁止**返回裸 objectKey、localhost、`/uploads`、`https://www.universe42.studio/universe42/...` 给小程序 `<image src>`。
+- `iconKey` 等逻辑 key 不得误转 OSS URL。
 
-实现：`src/lib/image-url.ts`。
+实现：`src/lib/miniprogram-image-dto.ts`、`src/lib/image-url.ts`、`src/utils/imageUrlFormatter.ts`。
 
 ---
 

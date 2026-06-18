@@ -1,5 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
 import { parseMaterialCategoryWriteBody } from "@/lib/material-category";
 import { prisma } from "@/lib/prisma";
 
@@ -24,6 +25,9 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const staff = await requirePermission("wms:write");
+    if (isResponse(staff)) return staff;
+
     const { id } = await context.params;
     const body = parseMaterialCategoryWriteBody(await request.json());
 
@@ -52,6 +56,9 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const staff = await requirePermission("wms:write");
+    if (isResponse(staff)) return staff;
+
     const { id } = await context.params;
 
     const existing = await prisma.materialCategory.findUnique({

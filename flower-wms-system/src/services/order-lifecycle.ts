@@ -8,7 +8,6 @@ import {
 import { prisma } from "@/lib/prisma";
 import {
   markOrderPaidWithFifo,
-  restorePhysicalStockFromSaleOutInTx,
 } from "@/services/order-fifo";
 import {
   assertOrderStockAvailable,
@@ -464,12 +463,26 @@ export async function closePendingOrder(orderId: string, userId?: string) {
   );
 }
 
+export type RefundPaidOrderOptions = {
+  /**
+   * 是否回补虚拟 SKU 可售库存（ProductSku.stock）。
+   * 不包含物理批次回库；物理花材回库须后续 Batch B.2 显式操作。
+   */
+  rollbackStock: boolean;
+  refundAmount?: number;
+};
+
 /**
- * 已付订单退款取消：Serializable 事务内原路回库物理批次（IN_CANCEL）+ 可选归还虚拟 SKU。
+ * 已付订单退款取消：更新订单为 CANCELLED，可选回补虚拟 SKU 库存。
+ *
+ * 默认不调用 restorePhysicalStockFromSaleOutInTx —— 退款 ≠ 花材自动回库。
+ * 历史 SALE_OUT / OrderCostSnapshot 保留；不写入 IN_CANCEL。
+ *
+ * @see restorePhysicalStockFromSaleOutInTx — Batch B.2 显式物理回库基础
  */
 export async function refundPaidOrder(
   orderId: string,
-  options: { rollbackStock: boolean; refundAmount?: number }
+  options: RefundPaidOrderOptions
 ) {
   return prisma.$transaction(
     async (tx) => {
@@ -484,8 +497,6 @@ export async function refundPaidOrder(
       }
 
       const refundAmount = options.refundAmount ?? order.payAmount;
-
-      await restorePhysicalStockFromSaleOutInTx(tx, orderId);
 
       const updated = await tx.order.updateMany({
         where: {

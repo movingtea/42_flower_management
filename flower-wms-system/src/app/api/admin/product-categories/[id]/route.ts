@@ -1,5 +1,6 @@
 import { Prisma } from "@/generated/prisma/client";
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
 import {
   collectProductCategoryDescendantIds,
   parseProductCategoryWriteBody,
@@ -55,6 +56,9 @@ export async function PUT(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const staff = await requirePermission("cms:write");
+    if (isResponse(staff)) return staff;
+
     const { id } = await context.params;
     const body = parseProductCategoryWriteBody(await request.json());
 
@@ -87,6 +91,9 @@ export async function DELETE(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const staff = await requirePermission("cms:write");
+    if (isResponse(staff)) return staff;
+
     const { id } = await context.params;
 
     const existing = await prisma.productCategory.findUnique({

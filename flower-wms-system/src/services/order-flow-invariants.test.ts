@@ -10,7 +10,7 @@ import {
   assertStockFailureDoesNotChangeShelfState,
   isPendingPaymentExpired,
   paidOrderFulfillmentInvariant,
-  paidRefundStockInvariant,
+  paidRefundStockPolicy,
   pendingCancelStockInvariant,
   PENDING_PAYMENT_TIMEOUT_MS,
 } from "./order-invariants-pure";
@@ -65,10 +65,16 @@ function testPendingCancelInvariant() {
   assert.equal(inv.createOrderCostSnapshot, false);
 }
 
-function testPaidRefundDefaultNoRollback() {
-  const inv = paidRefundStockInvariant(false);
-  assert.equal(inv.defaultRollbackStock, false);
-  assert.equal(inv.rollbackStockWhenExplicit, false);
+function testPaidRefundPolicy() {
+  const noRollback = paidRefundStockPolicy(false);
+  assert.equal(noRollback.restoreProductSkuStock, false);
+  assert.equal(noRollback.incrementBatchRemainingQty, false);
+  assert.equal(noRollback.createInCancel, false);
+
+  const withRollback = paidRefundStockPolicy(true);
+  assert.equal(withRollback.restoreProductSkuStock, true);
+  assert.equal(withRollback.incrementBatchRemainingQty, false);
+  assert.equal(withRollback.createInCancel, false);
 }
 
 function testPaidFulfillmentInvariant() {
@@ -90,7 +96,7 @@ function run() {
   testSoldOutNotOffShelf();
   testStockErrorCodeMapping();
   testPendingCancelInvariant();
-  testPaidRefundDefaultNoRollback();
+  testPaidRefundPolicy();
   testPaidFulfillmentInvariant();
   testPendingPaymentExpiry();
   console.log("order-flow-invariants.test.ts: all tests passed");

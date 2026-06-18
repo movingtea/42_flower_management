@@ -1,5 +1,6 @@
 /** @deprecated 请使用 /api/admin/wms/recipes */
 import { jsonError, jsonSuccess } from "@/lib/api";
+import { isResponse, requirePermission } from "@/lib/api-auth";
 import { getRecipeForProduct } from "@/services/recipe";
 
 export const dynamic = "force-dynamic";
@@ -9,6 +10,9 @@ export async function GET(
   ctx: { params: Promise<{ id: string }> }
 ) {
   try {
+    const staff = await requirePermission("wms:read");
+    if (isResponse(staff)) return staff;
+
     const { id } = await ctx.params;
     const recipe = await getRecipeForProduct(id);
     return jsonSuccess({
@@ -22,6 +26,9 @@ export async function GET(
 }
 
 export async function PUT() {
+  const staff = await requirePermission("wms:write");
+  if (isResponse(staff)) return staff;
+
   return jsonError(
     "商品级 BOM 写入已废弃，请使用 WMS 标准配方中心维护 recipe",
     410

@@ -102,8 +102,10 @@ export async function deductPhysicalStockForPaidOrder(
 export const IN_CANCEL_REFUND_OPERATOR = "SYSTEM_REFUND_AUTO";
 
 /**
- * 按支付时 SALE_OUT 流水原路补偿物理批次，并写入 IN_CANCEL 留痕。
+ * 按订单历史 SALE_OUT 显式补偿物理批次，并写入 IN_CANCEL 留痕。
  * 须在父级 Serializable 事务内调用。
+ *
+ * **不得**由 refundPaidOrder 默认调用。仅供 Batch B.2+ 运营显式选择批次/数量回库使用。
  */
 export async function restorePhysicalStockFromSaleOutInTx(
   tx: PrismaTypes.TransactionClient,

@@ -46,7 +46,8 @@
 
 ## API
 
-- [ ] `/api/miniprogram/*` 返回的 `imageUrl` / `coverImage` / `snapshotImageUrl` 等为完整 HTTPS OSS URL（或前端 `normalizeImageUrl` 兜底）
+- [x] `/api/miniprogram/*` 服务端 DTO 经 `miniprogram-image-dto` + `imageUrlFormatter` 输出完整 HTTPS OSS URL（Batch C）
+- [x] 客户端 `normalizeImageUrl` 保留为防御性兜底
 - [ ] 数据库存储仍为 objectKey（未写入完整 URL）
 
 ## 自动化
@@ -54,6 +55,8 @@
 ```bash
 cd flower-wms-system
 npm run test:miniprogram-image-url
+npm run test:miniprogram-image-dto
+npm run check:miniprogram-image-dto
 npm run test:image-url
 npm run test:image-url-invariants
 npm run build

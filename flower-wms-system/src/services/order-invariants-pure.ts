@@ -95,7 +95,24 @@ export function pendingCancelStockInvariant(): {
   };
 }
 
-/** 已支付退款默认不回填物理库存 */
+/** 已支付退款库存策略（Batch B.1：默认不自动物理回库） */
+export function paidRefundStockPolicy(rollbackStock: boolean): {
+  restoreProductSkuStock: boolean;
+  incrementBatchRemainingQty: false;
+  createInCancel: false;
+  preserveSaleOut: true;
+  preserveOrderCostSnapshot: true;
+} {
+  return {
+    restoreProductSkuStock: rollbackStock,
+    incrementBatchRemainingQty: false,
+    createInCancel: false,
+    preserveSaleOut: true,
+    preserveOrderCostSnapshot: true,
+  };
+}
+
+/** @deprecated 使用 paidRefundStockPolicy */
 export function paidRefundStockInvariant(rollbackStock: boolean): {
   defaultRollbackStock: false;
   rollbackStockWhenExplicit: boolean;

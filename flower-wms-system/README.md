@@ -17,7 +17,7 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 - FlowerWiki 花材母表与简拼检索。
 - Recipe / RecipeLine 标准 BOM，SKU 通过 `ProductSku.recipeId` 绑定配方。
 - Material / Batch / StockLog 物理批次库存。
-- 手工入库、指定批次报损、销售 FIFO、退款 `IN_CANCEL` 原路回库。
+- 手工入库、指定批次报损、销售 FIFO；已支付退款默认不自动物理回库（`rollbackStock` 仅回补虚拟 SKU）。
 - OrderCostSnapshot 订单真实毛利。
 - FlowerWiki 标准单支成本 + PackagingKit 标准包装成本的产品级毛利预估。
 - 经营报表中心：销售汇总、趋势、商品毛利排行、低毛利订单、成本结构、花材使用、损耗、库存预警。
@@ -234,7 +234,7 @@ PurchaseOrder RECEIVED
 
 - 下单扣 SKU 虚拟库存。
 - 支付成功后按配方展开花材需求，FIFO 扣 `Batch.remainingQty` 并写 `SALE_OUT`。
-- 退款通过历史 `SALE_OUT` 原路写 `IN_CANCEL` 回库。
+- 已支付退款默认不回补物理批次、不写 `IN_CANCEL`；`rollbackStock=true` 时仅回补虚拟 `ProductSku.stock`。
 - 报损必须指定批次，写 `WASTAGE_OUT` 和 `StockLossRecord`。
 - 手工入库和采购入库都会创建 Batch 并写 `INBOUND`。
 - cron worker 可运行 `scripts/cron-inventory-daemon.ts`，定期将物理库存木桶上限投影到 SKU 虚拟库存。
@@ -322,7 +322,7 @@ npm run test:oss
 
 ### 小程序图片（Sprint 22）
 
-- 业务远程图：API 返回完整 OSS URL；客户端 `42_mp/miniprogram/utils/image-url.ts` → `normalizeImageUrl` 兜底（objectKey / 拒绝 localhost /uploads）。
+- 业务远程图：服务端 DTO 输出完整 OSS URL（Batch C：`miniprogram-image-dto` + `imageUrlFormatter`）；客户端 `normalizeImageUrl` 仅兜底。
 - `<image src>` 直接使用完整 URL，**不要** `baseUrl + objectKey`。
 - 配置：`42_mp/miniprogram/config/index.ts` 中 `ossPublicBaseUrl`（`https://oss.universe42.studio`）与 API `baseUrl` 分离。
 - 本地图标：`assets/icons`、tabBar 不走 OSS。
@@ -330,6 +330,8 @@ npm run test:oss
 
 ```bash
 npm run test:miniprogram-image-url
+npm run test:miniprogram-image-dto
+npm run check:miniprogram-image-dto
 ```
 
 **微信小程序：** 在微信公众平台配置 `https://oss.universe42.studio` 为合法 **downloadFile** 域名。
@@ -648,10 +650,14 @@ npm run test:crm
 无需数据库：
 
 ```bash
-npm run smoke:permission-matrix
+npm run smoke:permission-matrix   # Batch A：静态 route + RBAC 角色边界 + admin API guard
+npm run check:admin-api-permissions
+npm run smoke:admin-api-http-permissions   # Batch A.2：handler 层 401/403 HTTP smoke
 npm run smoke:image-url
 npm run smoke:recommendation-rules
 ```
+
+**后台 API 权限**：所有 `/api/admin/*` 业务 handler 必须调用 `requirePermission`；UI 菜单隐藏不能替代 API 校验。`IT_ADMIN` 不得访问业务数据。详见 [`docs/admin-api-permission-audit.md`](docs/admin-api-permission-audit.md)。
 
 需要 `DATABASE_URL` 且已 migrate：
 
