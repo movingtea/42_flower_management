@@ -287,7 +287,17 @@ npm run db:seed
 
 ### 9.1 阿里云 OSS（Sprint 14）
 
-图片上传已切换至阿里云 OSS。完整变量见 `.env.example` 中 `STORAGE_DRIVER` / `ALIYUN_OSS_*` / `UPLOAD_*` / `IMAGE_*` 段。
+图片上传已切换至阿里云 OSS。本地开发见 `flower-wms-system/.env.example`；**生产**见仓库根目录 [`.env.production.example`](../.env.production.example)（与 compose 同目录放置 `.env`）。
+
+部署前静态检查：
+
+```bash
+cd flower-wms-system
+npm run check:production-env-example
+npm run check:nginx-upload-limit
+```
+
+完整发布清单：[`docs/production-deployment-checklist.md`](docs/production-deployment-checklist.md)。
 
 | 变量 | 说明 |
 |---|---|
@@ -299,8 +309,11 @@ npm run db:seed
 | `ALIYUN_OSS_OBJECT_PREFIX` | objectKey 前缀，当前 `universe42` |
 | `UPLOAD_MAX_SIZE_MB` | 单张上限，默认 **3MB**（API 业务校验）；Nginx `client_max_body_size` 应 **大于** 此值（推荐 **5m**） |
 | `NEXT_PUBLIC_OSS_PUBLIC_BASE_URL` | CMS 客户端预览用，与 public base 一致 |
+| `NEXT_PUBLIC_OSS_OBJECT_PREFIX` | objectKey 前缀识别（**非密钥**） |
 
-**数据库存储 objectKey**（如 `universe42/products/sku/2026/06/xxx.webp`），API 返回时再转为 public URL。
+**安全边界：** `ALIYUN_OSS_ACCESS_KEY_ID` / `ALIYUN_OSS_ACCESS_KEY_SECRET` 为**服务端密钥**，**禁止** `NEXT_PUBLIC_` 前缀；`ALIYUN_OSS_INTERNAL_ENDPOINT` 仅服务端使用。
+
+**数据库存储 objectKey**（如 `universe42/products/sku/2026/06/xxx.webp`），**不存**完整 public URL；CMS / 小程序展示时转换为 `https://oss.universe42.studio/...`。生产不再使用 `public/uploads` 作为图片来源。
 
 **连通性测试：**
 
@@ -354,6 +367,8 @@ Docker 文件位于仓库根目录：
 - `Dockerfile`
 - `docker-compose.yml`
 - `docker-compose.example.yml`
+- `.env.production.example` — 生产 env 模板（OSS / 上传 / Auth）
+- `deploy/nginx/conf.d/flower.conf.example` — Nginx 含 `client_max_body_size 5m`
 - `scripts/deploy-cleanup.sh` — 部署后安全磁盘清理（宿主机执行）
 
 compose 服务：

@@ -2,6 +2,17 @@
 
 > 业务层 `UPLOAD_MAX_SIZE_MB=3`；Nginx `client_max_body_size=5m`（必须高于业务限制）。
 
+## 生产 env（部署前）
+
+- [ ] 根目录 `.env` 由 [`.env.production.example`](../.env.production.example) 复制
+- [ ] `ENABLE_OSS_UPLOAD=true`
+- [ ] `ALIYUN_OSS_*` 与 `NEXT_PUBLIC_OSS_*` 已配置（AccessKey **仅**服务端变量）
+- [ ] `UPLOAD_MAX_SIZE_MB=3`
+- [ ] `npm run check:production-env-example` 通过
+- [ ] `npm run check:nginx-upload-limit` 通过
+
+完整清单见 [`production-deployment-checklist.md`](production-deployment-checklist.md)。
+
 ## Nginx / 部署
 
 - [ ] 生产 `/root/flower-nginx/conf.d/flower.conf` 含 `client_max_body_size 5m;`
@@ -30,10 +41,22 @@
 - [ ] OSS 上传仍正常（`npm run test:oss` 可选）
 - [ ] 小程序图片展示未受影响
 
+## 413 排查顺序
+
+1. Nginx `client_max_body_size` 是否为 **5m**（默认 1m 会在 API 前拦截）
+2. docker compose 实际挂载的 Nginx 配置（`/root/flower-nginx/conf.d/flower.conf`）
+3. Nginx 容器是否 `nginx -t && nginx -s reload` 或 restart
+4. `.env` 中 `UPLOAD_MAX_SIZE_MB=3`
+5. `upload-validation.ts` 业务校验（`FILE_TOO_LARGE` JSON）
+
+验证：`docker compose exec flower-nginx nginx -T | grep client_max_body_size`
+
 ## 自动化
 
 ```bash
 cd flower-wms-system
+npm run check:production-env-example
+npm run check:nginx-upload-limit
 npm run test:upload-validation
 npm run test:storage
 npm run lint

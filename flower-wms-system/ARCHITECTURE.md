@@ -1095,6 +1095,21 @@ logging:
 | 小程序客户端 | `normalizeImageUrl` 保留为防御性兜底，**不是**主转换层 |
 | Legacy | `ENABLE_LEGACY_UPLOADS=false` 时 `/uploads` 与 localhost 视为无效，CMS 提示重新上传 |
 
+**生产配置边界（Batch D.1）：**
+
+| 类型 | 变量 | 说明 |
+|---|---|---|
+| 服务端密钥 | `ALIYUN_OSS_ACCESS_KEY_ID` / `ALIYUN_OSS_ACCESS_KEY_SECRET` | 仅 Node 服务端；**禁止** `NEXT_PUBLIC_*` |
+| 服务端网络 | `ALIYUN_OSS_INTERNAL_ENDPOINT` / `ALIYUN_OSS_UPLOAD_ENDPOINT` | ECS 同地域用内网上传 |
+| 公网展示 | `ALIYUN_OSS_PUBLIC_BASE_URL` | `https://oss.universe42.studio` |
+| 客户端预览 | `NEXT_PUBLIC_OSS_PUBLIC_BASE_URL` / `NEXT_PUBLIC_OSS_OBJECT_PREFIX` | 非密钥；CMS 预览与 objectKey 前缀 |
+| 业务上传上限 | `UPLOAD_MAX_SIZE_MB=3` | API `upload-validation` 校验 |
+| 反向代理上限 | Nginx `client_max_body_size 5m` | 必须 **大于** 业务 3MB，否则 multipart 在 API 前 **413** |
+
+env 模板：根目录 `.env.production.example`；静态检查 `npm run check:production-env-example`。
+
+**D.2（后续）：** 单 `flower-web` 实例可暂保留 `docker-entrypoint.sh` 内 `prisma migrate deploy`；**多 web 实例 / 滚动发布前**必须迁移到独立 migration job。Sprint 22 生产发布流程：**backup → migrate → backfill → verify → deploy**（见 `docs/production-deployment-checklist.md`）。
+
 **Storage Service 路径：**
 
 - `src/lib/storage/config.ts` — 环境变量

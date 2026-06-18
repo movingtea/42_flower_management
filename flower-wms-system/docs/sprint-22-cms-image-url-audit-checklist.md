@@ -2,6 +2,8 @@
 
 > 目标：CMS 客户端不得将 OSS objectKey 直接作为 `next/image` / `img` 的 `src`；展示前须经 `CmsImagePreview` 或 `getClientPreviewImageUrl`。
 
+> **Sprint 22 生产发布前**：须完成 [`production-deployment-checklist.md`](production-deployment-checklist.md) 中的 env / OSS / backup → migrate → backfill → verify 检查。
+
 ## 环境
 
 - [ ] `.env` / `.env.example` 含 `NEXT_PUBLIC_OSS_PUBLIC_BASE_URL=https://oss.universe42.studio`

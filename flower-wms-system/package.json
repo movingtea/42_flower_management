@@ -76,6 +76,8 @@
     "smoke:permission-matrix": "tsx scripts/smoke-permission-matrix.ts",
     "check:admin-api-permissions": "tsx scripts/check-admin-api-permissions.ts",
     "check:miniprogram-image-dto": "tsx scripts/check-miniprogram-image-dto.ts",
+    "check:production-env-example": "tsx scripts/check-production-env-example.ts",
+    "check:nginx-upload-limit": "tsx scripts/check-nginx-upload-limit.ts",
     "smoke:admin-api-http-permissions": "tsx --require ./scripts/permission-smoke-preload.cjs scripts/smoke-admin-api-http-permissions.ts",
     "smoke:crm-order-sync": "tsx scripts/smoke-crm-order-sync.ts",
     "smoke:miniprogram-order-flow": "tsx scripts/smoke-miniprogram-order-flow.ts",

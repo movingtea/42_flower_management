@@ -32,6 +32,3 @@ docker-compose.yml
 !docker-compose.example.yml
 
 flower-wms-system/public/uploads/
-
-docs/
-docs/audit_result.md
