@@ -38,6 +38,7 @@ export type ProductSpuSumAggregateOutputType = {
 
 export type ProductSpuMinAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   name: string | null
   description: string | null
   maintenanceGuide: string | null
@@ -53,6 +54,7 @@ export type ProductSpuMinAggregateOutputType = {
 
 export type ProductSpuMaxAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   name: string | null
   description: string | null
   maintenanceGuide: string | null
@@ -68,6 +70,7 @@ export type ProductSpuMaxAggregateOutputType = {
 
 export type ProductSpuCountAggregateOutputType = {
   id: number
+  tenantId: number
   name: number
   description: number
   maintenanceGuide: number
@@ -102,6 +105,7 @@ export type ProductSpuSumAggregateInputType = {
 
 export type ProductSpuMinAggregateInputType = {
   id?: true
+  tenantId?: true
   name?: true
   description?: true
   maintenanceGuide?: true
@@ -117,6 +121,7 @@ export type ProductSpuMinAggregateInputType = {
 
 export type ProductSpuMaxAggregateInputType = {
   id?: true
+  tenantId?: true
   name?: true
   description?: true
   maintenanceGuide?: true
@@ -132,6 +137,7 @@ export type ProductSpuMaxAggregateInputType = {
 
 export type ProductSpuCountAggregateInputType = {
   id?: true
+  tenantId?: true
   name?: true
   description?: true
   maintenanceGuide?: true
@@ -241,6 +247,7 @@ export type ProductSpuGroupByArgs<ExtArgs extends runtime.Types.Extensions.Inter
 
 export type ProductSpuGroupByOutputType = {
   id: string
+  tenantId: string | null
   name: string
   description: string | null
   maintenanceGuide: string | null
@@ -286,6 +293,7 @@ export type ProductSpuWhereInput = {
   OR?: Prisma.ProductSpuWhereInput[]
   NOT?: Prisma.ProductSpuWhereInput | Prisma.ProductSpuWhereInput[]
   id?: Prisma.StringFilter<"ProductSpu"> | string
+  tenantId?: Prisma.StringNullableFilter<"ProductSpu"> | string | null
   name?: Prisma.StringFilter<"ProductSpu"> | string
   description?: Prisma.StringNullableFilter<"ProductSpu"> | string | null
   maintenanceGuide?: Prisma.StringNullableFilter<"ProductSpu"> | string | null
@@ -312,6 +320,7 @@ export type ProductSpuWhereInput = {
 
 export type ProductSpuOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   maintenanceGuide?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -341,6 +350,7 @@ export type ProductSpuWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.ProductSpuWhereInput | Prisma.ProductSpuWhereInput[]
   OR?: Prisma.ProductSpuWhereInput[]
   NOT?: Prisma.ProductSpuWhereInput | Prisma.ProductSpuWhereInput[]
+  tenantId?: Prisma.StringNullableFilter<"ProductSpu"> | string | null
   name?: Prisma.StringFilter<"ProductSpu"> | string
   description?: Prisma.StringNullableFilter<"ProductSpu"> | string | null
   maintenanceGuide?: Prisma.StringNullableFilter<"ProductSpu"> | string | null
@@ -367,6 +377,7 @@ export type ProductSpuWhereUniqueInput = Prisma.AtLeast<{
 
 export type ProductSpuOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   maintenanceGuide?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -397,6 +408,7 @@ export type ProductSpuScalarWhereWithAggregatesInput = {
   OR?: Prisma.ProductSpuScalarWhereWithAggregatesInput[]
   NOT?: Prisma.ProductSpuScalarWhereWithAggregatesInput | Prisma.ProductSpuScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"ProductSpu"> | string
+  tenantId?: Prisma.StringNullableWithAggregatesFilter<"ProductSpu"> | string | null
   name?: Prisma.StringWithAggregatesFilter<"ProductSpu"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"ProductSpu"> | string | null
   maintenanceGuide?: Prisma.StringNullableWithAggregatesFilter<"ProductSpu"> | string | null
@@ -419,6 +431,7 @@ export type ProductSpuScalarWhereWithAggregatesInput = {
 
 export type ProductSpuCreateInput = {
   id?: string
+  tenantId?: string | null
   name: string
   description?: string | null
   maintenanceGuide?: string | null
@@ -445,6 +458,7 @@ export type ProductSpuCreateInput = {
 
 export type ProductSpuUncheckedCreateInput = {
   id?: string
+  tenantId?: string | null
   name: string
   description?: string | null
   maintenanceGuide?: string | null
@@ -471,6 +485,7 @@ export type ProductSpuUncheckedCreateInput = {
 
 export type ProductSpuUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceGuide?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -497,6 +512,7 @@ export type ProductSpuUpdateInput = {
 
 export type ProductSpuUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceGuide?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -523,6 +539,7 @@ export type ProductSpuUncheckedUpdateInput = {
 
 export type ProductSpuCreateManyInput = {
   id?: string
+  tenantId?: string | null
   name: string
   description?: string | null
   maintenanceGuide?: string | null
@@ -545,6 +562,7 @@ export type ProductSpuCreateManyInput = {
 
 export type ProductSpuUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceGuide?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -567,6 +585,7 @@ export type ProductSpuUpdateManyMutationInput = {
 
 export type ProductSpuUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceGuide?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -602,6 +621,7 @@ export type StringNullableListFilter<$PrismaModel = never> = {
 
 export type ProductSpuCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   maintenanceGuide?: Prisma.SortOrder
@@ -629,6 +649,7 @@ export type ProductSpuAvgOrderByAggregateInput = {
 
 export type ProductSpuMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   maintenanceGuide?: Prisma.SortOrder
@@ -644,6 +665,7 @@ export type ProductSpuMaxOrderByAggregateInput = {
 
 export type ProductSpuMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
   maintenanceGuide?: Prisma.SortOrder
@@ -744,6 +766,7 @@ export type ProductSpuUpdateOneWithoutBannersNestedInput = {
 
 export type ProductSpuCreateWithoutCategoriesInput = {
   id?: string
+  tenantId?: string | null
   name: string
   description?: string | null
   maintenanceGuide?: string | null
@@ -769,6 +792,7 @@ export type ProductSpuCreateWithoutCategoriesInput = {
 
 export type ProductSpuUncheckedCreateWithoutCategoriesInput = {
   id?: string
+  tenantId?: string | null
   name: string
   description?: string | null
   maintenanceGuide?: string | null
@@ -810,6 +834,7 @@ export type ProductSpuUpdateToOneWithWhereWithoutCategoriesInput = {
 
 export type ProductSpuUpdateWithoutCategoriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceGuide?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -835,6 +860,7 @@ export type ProductSpuUpdateWithoutCategoriesInput = {
 
 export type ProductSpuUncheckedUpdateWithoutCategoriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceGuide?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -860,6 +886,7 @@ export type ProductSpuUncheckedUpdateWithoutCategoriesInput = {
 
 export type ProductSpuCreateWithoutSkusInput = {
   id?: string
+  tenantId?: string | null
   name: string
   description?: string | null
   maintenanceGuide?: string | null
@@ -885,6 +912,7 @@ export type ProductSpuCreateWithoutSkusInput = {
 
 export type ProductSpuUncheckedCreateWithoutSkusInput = {
   id?: string
+  tenantId?: string | null
   name: string
   description?: string | null
   maintenanceGuide?: string | null
@@ -926,6 +954,7 @@ export type ProductSpuUpdateToOneWithWhereWithoutSkusInput = {
 
 export type ProductSpuUpdateWithoutSkusInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceGuide?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -951,6 +980,7 @@ export type ProductSpuUpdateWithoutSkusInput = {
 
 export type ProductSpuUncheckedUpdateWithoutSkusInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceGuide?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -976,6 +1006,7 @@ export type ProductSpuUncheckedUpdateWithoutSkusInput = {
 
 export type ProductSpuCreateWithoutRecommendationItemsInput = {
   id?: string
+  tenantId?: string | null
   name: string
   description?: string | null
   maintenanceGuide?: string | null
@@ -1001,6 +1032,7 @@ export type ProductSpuCreateWithoutRecommendationItemsInput = {
 
 export type ProductSpuUncheckedCreateWithoutRecommendationItemsInput = {
   id?: string
+  tenantId?: string | null
   name: string
   description?: string | null
   maintenanceGuide?: string | null
@@ -1042,6 +1074,7 @@ export type ProductSpuUpdateToOneWithWhereWithoutRecommendationItemsInput = {
 
 export type ProductSpuUpdateWithoutRecommendationItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceGuide?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1067,6 +1100,7 @@ export type ProductSpuUpdateWithoutRecommendationItemsInput = {
 
 export type ProductSpuUncheckedUpdateWithoutRecommendationItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceGuide?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1092,6 +1126,7 @@ export type ProductSpuUncheckedUpdateWithoutRecommendationItemsInput = {
 
 export type ProductSpuCreateWithoutBannersInput = {
   id?: string
+  tenantId?: string | null
   name: string
   description?: string | null
   maintenanceGuide?: string | null
@@ -1117,6 +1152,7 @@ export type ProductSpuCreateWithoutBannersInput = {
 
 export type ProductSpuUncheckedCreateWithoutBannersInput = {
   id?: string
+  tenantId?: string | null
   name: string
   description?: string | null
   maintenanceGuide?: string | null
@@ -1158,6 +1194,7 @@ export type ProductSpuUpdateToOneWithWhereWithoutBannersInput = {
 
 export type ProductSpuUpdateWithoutBannersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceGuide?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1183,6 +1220,7 @@ export type ProductSpuUpdateWithoutBannersInput = {
 
 export type ProductSpuUncheckedUpdateWithoutBannersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   maintenanceGuide?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1266,6 +1304,7 @@ export type ProductSpuCountOutputTypeCountRecommendationItemsArgs<ExtArgs extend
 
 export type ProductSpuSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   name?: boolean
   description?: boolean
   maintenanceGuide?: boolean
@@ -1293,6 +1332,7 @@ export type ProductSpuSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
 
 export type ProductSpuSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   name?: boolean
   description?: boolean
   maintenanceGuide?: boolean
@@ -1315,6 +1355,7 @@ export type ProductSpuSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
 
 export type ProductSpuSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   name?: boolean
   description?: boolean
   maintenanceGuide?: boolean
@@ -1337,6 +1378,7 @@ export type ProductSpuSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
 
 export type ProductSpuSelectScalar = {
   id?: boolean
+  tenantId?: boolean
   name?: boolean
   description?: boolean
   maintenanceGuide?: boolean
@@ -1357,7 +1399,7 @@ export type ProductSpuSelectScalar = {
   updatedAt?: boolean
 }
 
-export type ProductSpuOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "name" | "description" | "maintenanceGuide" | "isActive" | "isDeleted" | "shippingFee" | "allowPreOrder" | "productionTime" | "occasionTags" | "colorTags" | "styleTags" | "relationshipTags" | "budgetTags" | "positioningTags" | "sellingPoints" | "operationNote" | "createdAt" | "updatedAt", ExtArgs["result"]["productSpu"]>
+export type ProductSpuOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "name" | "description" | "maintenanceGuide" | "isActive" | "isDeleted" | "shippingFee" | "allowPreOrder" | "productionTime" | "occasionTags" | "colorTags" | "styleTags" | "relationshipTags" | "budgetTags" | "positioningTags" | "sellingPoints" | "operationNote" | "createdAt" | "updatedAt", ExtArgs["result"]["productSpu"]>
 export type ProductSpuInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   skus?: boolean | Prisma.ProductSpu$skusArgs<ExtArgs>
   categories?: boolean | Prisma.ProductSpu$categoriesArgs<ExtArgs>
@@ -1378,6 +1420,7 @@ export type $ProductSpuPayload<ExtArgs extends runtime.Types.Extensions.Internal
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    tenantId: string | null
     name: string
     description: string | null
     maintenanceGuide: string | null
@@ -1848,6 +1891,7 @@ export interface Prisma__ProductSpuClient<T, Null = never, ExtArgs extends runti
  */
 export interface ProductSpuFieldRefs {
   readonly id: Prisma.FieldRef<"ProductSpu", 'String'>
+  readonly tenantId: Prisma.FieldRef<"ProductSpu", 'String'>
   readonly name: Prisma.FieldRef<"ProductSpu", 'String'>
   readonly description: Prisma.FieldRef<"ProductSpu", 'String'>
   readonly maintenanceGuide: Prisma.FieldRef<"ProductSpu", 'String'>

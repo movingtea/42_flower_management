@@ -153,6 +153,7 @@ export type MaterialCategoryRelationScalarFieldEnum = (typeof MaterialCategoryRe
 
 export const SupplierScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   name: 'name',
   supplierType: 'supplierType',
   contactName: 'contactName',
@@ -170,6 +171,7 @@ export type SupplierScalarFieldEnum = (typeof SupplierScalarFieldEnum)[keyof typ
 
 export const PurchaseOrderScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   purchaseNo: 'purchaseNo',
   supplierId: 'supplierId',
   purchaseDate: 'purchaseDate',
@@ -224,6 +226,7 @@ export type PurchaseOrderLineScalarFieldEnum = (typeof PurchaseOrderLineScalarFi
 
 export const ProductSpuScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   name: 'name',
   description: 'description',
   maintenanceGuide: 'maintenanceGuide',
@@ -249,6 +252,7 @@ export type ProductSpuScalarFieldEnum = (typeof ProductSpuScalarFieldEnum)[keyof
 
 export const ProductSkuScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   spuId: 'spuId',
   skuCode: 'skuCode',
   specName: 'specName',
@@ -273,6 +277,7 @@ export type ProductSkuScalarFieldEnum = (typeof ProductSkuScalarFieldEnum)[keyof
 
 export const CmsRecommendationSlotScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   key: 'key',
   name: 'name',
   description: 'description',
@@ -310,6 +315,7 @@ export type CmsRecommendationItemScalarFieldEnum = (typeof CmsRecommendationItem
 
 export const CmsHomeSceneEntryScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   title: 'title',
   subtitle: 'subtitle',
   sceneType: 'sceneType',
@@ -330,6 +336,7 @@ export type CmsHomeSceneEntryScalarFieldEnum = (typeof CmsHomeSceneEntryScalarFi
 
 export const BannerScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   imageUrl: 'imageUrl',
   sortOrder: 'sortOrder',
   targetType: 'targetType',
@@ -348,6 +355,7 @@ export type BannerScalarFieldEnum = (typeof BannerScalarFieldEnum)[keyof typeof 
 
 export const MaterialScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   materialCode: 'materialCode',
   name: 'name',
   unit: 'unit',
@@ -362,6 +370,7 @@ export type MaterialScalarFieldEnum = (typeof MaterialScalarFieldEnum)[keyof typ
 
 export const RecipeScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   recipeCode: 'recipeCode',
   name: 'name',
   description: 'description',
@@ -398,6 +407,7 @@ export type RecipeLineScalarFieldEnum = (typeof RecipeLineScalarFieldEnum)[keyof
 
 export const BatchScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   materialId: 'materialId',
   batchNo: 'batchNo',
   inboundAt: 'inboundAt',
@@ -420,6 +430,7 @@ export type BatchScalarFieldEnum = (typeof BatchScalarFieldEnum)[keyof typeof Ba
 
 export const StockLogScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   materialId: 'materialId',
   batchId: 'batchId',
   type: 'type',
@@ -523,6 +534,7 @@ export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof User
 
 export const OrderScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   orderNo: 'orderNo',
   userId: 'userId',
   totalAmount: 'totalAmount',
@@ -590,6 +602,7 @@ export type OrderItemScalarFieldEnum = (typeof OrderItemScalarFieldEnum)[keyof t
 
 export const CustomerScalarFieldEnum = {
   id: 'id',
+  tenantId: 'tenantId',
   miniProgramUserId: 'miniProgramUserId',
   name: 'name',
   phone: 'phone',

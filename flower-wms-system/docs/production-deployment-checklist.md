@@ -84,6 +84,7 @@ npm run check:nginx-upload-limit
 cd flower-wms-system
 npm run check:production-env-example
 npm run check:nginx-upload-limit
+npm run db:verify:tenant
 npm run test:upload-validation
 npm run test:image-url
 npm run test:miniprogram-image-dto
@@ -99,10 +100,12 @@ npm run build
 进入 Sprint 22 生产发布前必须：
 
 1. **备份** 生产数据库
-2. `npx prisma migrate deploy`
-3. `npm run db:seed:tenant` / `db:backfill:tenant-members`（按 Sprint 21 文档）
-4. 验证 tenant smoke
-5. 再部署应用镜像
+2. `npx prisma migrate deploy`（含 `20260617120000_add_tenant_id_nullable`）
+3. `npm run db:backfill:tenant` — 回填 `tenantId = universe42`
+4. `npm run db:verify:tenant` — 确认 NULL = 0
+5. `npm run db:seed:tenant` / `db:backfill:tenant-members`（Sprint 21 员工归属，如需要）
+6. 验证 tenant smoke
+7. 再部署应用镜像
 
 ---
 

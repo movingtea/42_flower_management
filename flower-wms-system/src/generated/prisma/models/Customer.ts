@@ -40,6 +40,7 @@ export type CustomerSumAggregateOutputType = {
 
 export type CustomerMinAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   miniProgramUserId: string | null
   name: string | null
   phone: string | null
@@ -59,6 +60,7 @@ export type CustomerMinAggregateOutputType = {
 
 export type CustomerMaxAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   miniProgramUserId: string | null
   name: string | null
   phone: string | null
@@ -78,6 +80,7 @@ export type CustomerMaxAggregateOutputType = {
 
 export type CustomerCountAggregateOutputType = {
   id: number
+  tenantId: number
   miniProgramUserId: number
   name: number
   phone: number
@@ -112,6 +115,7 @@ export type CustomerSumAggregateInputType = {
 
 export type CustomerMinAggregateInputType = {
   id?: true
+  tenantId?: true
   miniProgramUserId?: true
   name?: true
   phone?: true
@@ -131,6 +135,7 @@ export type CustomerMinAggregateInputType = {
 
 export type CustomerMaxAggregateInputType = {
   id?: true
+  tenantId?: true
   miniProgramUserId?: true
   name?: true
   phone?: true
@@ -150,6 +155,7 @@ export type CustomerMaxAggregateInputType = {
 
 export type CustomerCountAggregateInputType = {
   id?: true
+  tenantId?: true
   miniProgramUserId?: true
   name?: true
   phone?: true
@@ -257,6 +263,7 @@ export type CustomerGroupByArgs<ExtArgs extends runtime.Types.Extensions.Interna
 
 export type CustomerGroupByOutputType = {
   id: string
+  tenantId: string | null
   miniProgramUserId: string | null
   name: string | null
   phone: string | null
@@ -300,6 +307,7 @@ export type CustomerWhereInput = {
   OR?: Prisma.CustomerWhereInput[]
   NOT?: Prisma.CustomerWhereInput | Prisma.CustomerWhereInput[]
   id?: Prisma.StringFilter<"Customer"> | string
+  tenantId?: Prisma.StringNullableFilter<"Customer"> | string | null
   miniProgramUserId?: Prisma.StringNullableFilter<"Customer"> | string | null
   name?: Prisma.StringNullableFilter<"Customer"> | string | null
   phone?: Prisma.StringNullableFilter<"Customer"> | string | null
@@ -325,6 +333,7 @@ export type CustomerWhereInput = {
 
 export type CustomerOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   miniProgramUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -354,6 +363,7 @@ export type CustomerWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.CustomerWhereInput | Prisma.CustomerWhereInput[]
   OR?: Prisma.CustomerWhereInput[]
   NOT?: Prisma.CustomerWhereInput | Prisma.CustomerWhereInput[]
+  tenantId?: Prisma.StringNullableFilter<"Customer"> | string | null
   name?: Prisma.StringNullableFilter<"Customer"> | string | null
   phone?: Prisma.StringNullableFilter<"Customer"> | string | null
   wechatNickname?: Prisma.StringNullableFilter<"Customer"> | string | null
@@ -378,6 +388,7 @@ export type CustomerWhereUniqueInput = Prisma.AtLeast<{
 
 export type CustomerOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   miniProgramUserId?: Prisma.SortOrderInput | Prisma.SortOrder
   name?: Prisma.SortOrderInput | Prisma.SortOrder
   phone?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -406,6 +417,7 @@ export type CustomerScalarWhereWithAggregatesInput = {
   OR?: Prisma.CustomerScalarWhereWithAggregatesInput[]
   NOT?: Prisma.CustomerScalarWhereWithAggregatesInput | Prisma.CustomerScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Customer"> | string
+  tenantId?: Prisma.StringNullableWithAggregatesFilter<"Customer"> | string | null
   miniProgramUserId?: Prisma.StringNullableWithAggregatesFilter<"Customer"> | string | null
   name?: Prisma.StringNullableWithAggregatesFilter<"Customer"> | string | null
   phone?: Prisma.StringNullableWithAggregatesFilter<"Customer"> | string | null
@@ -426,6 +438,7 @@ export type CustomerScalarWhereWithAggregatesInput = {
 
 export type CustomerCreateInput = {
   id?: string
+  tenantId?: string | null
   name?: string | null
   phone?: string | null
   wechatNickname?: string | null
@@ -450,6 +463,7 @@ export type CustomerCreateInput = {
 
 export type CustomerUncheckedCreateInput = {
   id?: string
+  tenantId?: string | null
   miniProgramUserId?: string | null
   name?: string | null
   phone?: string | null
@@ -474,6 +488,7 @@ export type CustomerUncheckedCreateInput = {
 
 export type CustomerUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   wechatNickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -498,6 +513,7 @@ export type CustomerUpdateInput = {
 
 export type CustomerUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   miniProgramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -522,6 +538,7 @@ export type CustomerUncheckedUpdateInput = {
 
 export type CustomerCreateManyInput = {
   id?: string
+  tenantId?: string | null
   miniProgramUserId?: string | null
   name?: string | null
   phone?: string | null
@@ -542,6 +559,7 @@ export type CustomerCreateManyInput = {
 
 export type CustomerUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   wechatNickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -561,6 +579,7 @@ export type CustomerUpdateManyMutationInput = {
 
 export type CustomerUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   miniProgramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -586,6 +605,7 @@ export type CustomerNullableScalarRelationFilter = {
 
 export type CustomerCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   miniProgramUserId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   phone?: Prisma.SortOrder
@@ -612,6 +632,7 @@ export type CustomerAvgOrderByAggregateInput = {
 
 export type CustomerMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   miniProgramUserId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   phone?: Prisma.SortOrder
@@ -631,6 +652,7 @@ export type CustomerMaxOrderByAggregateInput = {
 
 export type CustomerMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   miniProgramUserId?: Prisma.SortOrder
   name?: Prisma.SortOrder
   phone?: Prisma.SortOrder
@@ -766,6 +788,7 @@ export type CustomerUpdateOneRequiredWithoutRemindersNestedInput = {
 
 export type CustomerCreateWithoutMiniProgramUserInput = {
   id?: string
+  tenantId?: string | null
   name?: string | null
   phone?: string | null
   wechatNickname?: string | null
@@ -789,6 +812,7 @@ export type CustomerCreateWithoutMiniProgramUserInput = {
 
 export type CustomerUncheckedCreateWithoutMiniProgramUserInput = {
   id?: string
+  tenantId?: string | null
   name?: string | null
   phone?: string | null
   wechatNickname?: string | null
@@ -828,6 +852,7 @@ export type CustomerUpdateToOneWithWhereWithoutMiniProgramUserInput = {
 
 export type CustomerUpdateWithoutMiniProgramUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   wechatNickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -851,6 +876,7 @@ export type CustomerUpdateWithoutMiniProgramUserInput = {
 
 export type CustomerUncheckedUpdateWithoutMiniProgramUserInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   wechatNickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -874,6 +900,7 @@ export type CustomerUncheckedUpdateWithoutMiniProgramUserInput = {
 
 export type CustomerCreateWithoutOrdersInput = {
   id?: string
+  tenantId?: string | null
   name?: string | null
   phone?: string | null
   wechatNickname?: string | null
@@ -897,6 +924,7 @@ export type CustomerCreateWithoutOrdersInput = {
 
 export type CustomerUncheckedCreateWithoutOrdersInput = {
   id?: string
+  tenantId?: string | null
   miniProgramUserId?: string | null
   name?: string | null
   phone?: string | null
@@ -936,6 +964,7 @@ export type CustomerUpdateToOneWithWhereWithoutOrdersInput = {
 
 export type CustomerUpdateWithoutOrdersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   wechatNickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -959,6 +988,7 @@ export type CustomerUpdateWithoutOrdersInput = {
 
 export type CustomerUncheckedUpdateWithoutOrdersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   miniProgramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -982,6 +1012,7 @@ export type CustomerUncheckedUpdateWithoutOrdersInput = {
 
 export type CustomerCreateWithoutRecipientRelationsInput = {
   id?: string
+  tenantId?: string | null
   name?: string | null
   phone?: string | null
   wechatNickname?: string | null
@@ -1005,6 +1036,7 @@ export type CustomerCreateWithoutRecipientRelationsInput = {
 
 export type CustomerUncheckedCreateWithoutRecipientRelationsInput = {
   id?: string
+  tenantId?: string | null
   miniProgramUserId?: string | null
   name?: string | null
   phone?: string | null
@@ -1044,6 +1076,7 @@ export type CustomerUpdateToOneWithWhereWithoutRecipientRelationsInput = {
 
 export type CustomerUpdateWithoutRecipientRelationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   wechatNickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1067,6 +1100,7 @@ export type CustomerUpdateWithoutRecipientRelationsInput = {
 
 export type CustomerUncheckedUpdateWithoutRecipientRelationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   miniProgramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1090,6 +1124,7 @@ export type CustomerUncheckedUpdateWithoutRecipientRelationsInput = {
 
 export type CustomerCreateWithoutOccasionsInput = {
   id?: string
+  tenantId?: string | null
   name?: string | null
   phone?: string | null
   wechatNickname?: string | null
@@ -1113,6 +1148,7 @@ export type CustomerCreateWithoutOccasionsInput = {
 
 export type CustomerUncheckedCreateWithoutOccasionsInput = {
   id?: string
+  tenantId?: string | null
   miniProgramUserId?: string | null
   name?: string | null
   phone?: string | null
@@ -1152,6 +1188,7 @@ export type CustomerUpdateToOneWithWhereWithoutOccasionsInput = {
 
 export type CustomerUpdateWithoutOccasionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   wechatNickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1175,6 +1212,7 @@ export type CustomerUpdateWithoutOccasionsInput = {
 
 export type CustomerUncheckedUpdateWithoutOccasionsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   miniProgramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1198,6 +1236,7 @@ export type CustomerUncheckedUpdateWithoutOccasionsInput = {
 
 export type CustomerCreateWithoutRemindersInput = {
   id?: string
+  tenantId?: string | null
   name?: string | null
   phone?: string | null
   wechatNickname?: string | null
@@ -1221,6 +1260,7 @@ export type CustomerCreateWithoutRemindersInput = {
 
 export type CustomerUncheckedCreateWithoutRemindersInput = {
   id?: string
+  tenantId?: string | null
   miniProgramUserId?: string | null
   name?: string | null
   phone?: string | null
@@ -1260,6 +1300,7 @@ export type CustomerUpdateToOneWithWhereWithoutRemindersInput = {
 
 export type CustomerUpdateWithoutRemindersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   wechatNickname?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1283,6 +1324,7 @@ export type CustomerUpdateWithoutRemindersInput = {
 
 export type CustomerUncheckedUpdateWithoutRemindersInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   miniProgramUserId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   name?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1364,6 +1406,7 @@ export type CustomerCountOutputTypeCountOrdersArgs<ExtArgs extends runtime.Types
 
 export type CustomerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   miniProgramUserId?: boolean
   name?: boolean
   phone?: boolean
@@ -1390,6 +1433,7 @@ export type CustomerSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
 
 export type CustomerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   miniProgramUserId?: boolean
   name?: boolean
   phone?: boolean
@@ -1411,6 +1455,7 @@ export type CustomerSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
 
 export type CustomerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   miniProgramUserId?: boolean
   name?: boolean
   phone?: boolean
@@ -1432,6 +1477,7 @@ export type CustomerSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
 
 export type CustomerSelectScalar = {
   id?: boolean
+  tenantId?: boolean
   miniProgramUserId?: boolean
   name?: boolean
   phone?: boolean
@@ -1450,7 +1496,7 @@ export type CustomerSelectScalar = {
   updatedAt?: boolean
 }
 
-export type CustomerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "miniProgramUserId" | "name" | "phone" | "wechatNickname" | "wechatOpenid" | "wechatUnionid" | "source" | "note" | "tags" | "firstOrderAt" | "lastOrderAt" | "totalOrders" | "totalSpent" | "averageOrderValue" | "createdAt" | "updatedAt", ExtArgs["result"]["customer"]>
+export type CustomerOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "miniProgramUserId" | "name" | "phone" | "wechatNickname" | "wechatOpenid" | "wechatUnionid" | "source" | "note" | "tags" | "firstOrderAt" | "lastOrderAt" | "totalOrders" | "totalSpent" | "averageOrderValue" | "createdAt" | "updatedAt", ExtArgs["result"]["customer"]>
 export type CustomerInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   miniProgramUser?: boolean | Prisma.Customer$miniProgramUserArgs<ExtArgs>
   recipientRelations?: boolean | Prisma.Customer$recipientRelationsArgs<ExtArgs>
@@ -1477,6 +1523,7 @@ export type $CustomerPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    tenantId: string | null
     miniProgramUserId: string | null
     name: string | null
     phone: string | null
@@ -1922,6 +1969,7 @@ export interface Prisma__CustomerClient<T, Null = never, ExtArgs extends runtime
  */
 export interface CustomerFieldRefs {
   readonly id: Prisma.FieldRef<"Customer", 'String'>
+  readonly tenantId: Prisma.FieldRef<"Customer", 'String'>
   readonly miniProgramUserId: Prisma.FieldRef<"Customer", 'String'>
   readonly name: Prisma.FieldRef<"Customer", 'String'>
   readonly phone: Prisma.FieldRef<"Customer", 'String'>

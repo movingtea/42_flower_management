@@ -38,6 +38,7 @@ export type StockLogSumAggregateOutputType = {
 
 export type StockLogMinAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   materialId: string | null
   batchId: string | null
   type: $Enums.StockLogType | null
@@ -54,6 +55,7 @@ export type StockLogMinAggregateOutputType = {
 
 export type StockLogMaxAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   materialId: string | null
   batchId: string | null
   type: $Enums.StockLogType | null
@@ -70,6 +72,7 @@ export type StockLogMaxAggregateOutputType = {
 
 export type StockLogCountAggregateOutputType = {
   id: number
+  tenantId: number
   materialId: number
   batchId: number
   type: number
@@ -98,6 +101,7 @@ export type StockLogSumAggregateInputType = {
 
 export type StockLogMinAggregateInputType = {
   id?: true
+  tenantId?: true
   materialId?: true
   batchId?: true
   type?: true
@@ -114,6 +118,7 @@ export type StockLogMinAggregateInputType = {
 
 export type StockLogMaxAggregateInputType = {
   id?: true
+  tenantId?: true
   materialId?: true
   batchId?: true
   type?: true
@@ -130,6 +135,7 @@ export type StockLogMaxAggregateInputType = {
 
 export type StockLogCountAggregateInputType = {
   id?: true
+  tenantId?: true
   materialId?: true
   batchId?: true
   type?: true
@@ -233,6 +239,7 @@ export type StockLogGroupByArgs<ExtArgs extends runtime.Types.Extensions.Interna
 
 export type StockLogGroupByOutputType = {
   id: string
+  tenantId: string | null
   materialId: string
   batchId: string
   type: $Enums.StockLogType
@@ -272,6 +279,7 @@ export type StockLogWhereInput = {
   OR?: Prisma.StockLogWhereInput[]
   NOT?: Prisma.StockLogWhereInput | Prisma.StockLogWhereInput[]
   id?: Prisma.StringFilter<"StockLog"> | string
+  tenantId?: Prisma.StringNullableFilter<"StockLog"> | string | null
   materialId?: Prisma.StringFilter<"StockLog"> | string
   batchId?: Prisma.StringFilter<"StockLog"> | string
   type?: Prisma.EnumStockLogTypeFilter<"StockLog"> | $Enums.StockLogType
@@ -294,6 +302,7 @@ export type StockLogWhereInput = {
 
 export type StockLogOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   materialId?: Prisma.SortOrder
   batchId?: Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -319,6 +328,7 @@ export type StockLogWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.StockLogWhereInput | Prisma.StockLogWhereInput[]
   OR?: Prisma.StockLogWhereInput[]
   NOT?: Prisma.StockLogWhereInput | Prisma.StockLogWhereInput[]
+  tenantId?: Prisma.StringNullableFilter<"StockLog"> | string | null
   materialId?: Prisma.StringFilter<"StockLog"> | string
   batchId?: Prisma.StringFilter<"StockLog"> | string
   type?: Prisma.EnumStockLogTypeFilter<"StockLog"> | $Enums.StockLogType
@@ -341,6 +351,7 @@ export type StockLogWhereUniqueInput = Prisma.AtLeast<{
 
 export type StockLogOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   materialId?: Prisma.SortOrder
   batchId?: Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -365,6 +376,7 @@ export type StockLogScalarWhereWithAggregatesInput = {
   OR?: Prisma.StockLogScalarWhereWithAggregatesInput[]
   NOT?: Prisma.StockLogScalarWhereWithAggregatesInput | Prisma.StockLogScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"StockLog"> | string
+  tenantId?: Prisma.StringNullableWithAggregatesFilter<"StockLog"> | string | null
   materialId?: Prisma.StringWithAggregatesFilter<"StockLog"> | string
   batchId?: Prisma.StringWithAggregatesFilter<"StockLog"> | string
   type?: Prisma.EnumStockLogTypeWithAggregatesFilter<"StockLog"> | $Enums.StockLogType
@@ -381,6 +393,7 @@ export type StockLogScalarWhereWithAggregatesInput = {
 
 export type StockLogCreateInput = {
   id?: string
+  tenantId?: string | null
   type: $Enums.StockLogType
   delta: number
   quantity: number
@@ -398,6 +411,7 @@ export type StockLogCreateInput = {
 
 export type StockLogUncheckedCreateInput = {
   id?: string
+  tenantId?: string | null
   materialId: string
   batchId: string
   type: $Enums.StockLogType
@@ -415,6 +429,7 @@ export type StockLogUncheckedCreateInput = {
 
 export type StockLogUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
   delta?: Prisma.IntFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -432,6 +447,7 @@ export type StockLogUpdateInput = {
 
 export type StockLogUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   batchId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
@@ -449,6 +465,7 @@ export type StockLogUncheckedUpdateInput = {
 
 export type StockLogCreateManyInput = {
   id?: string
+  tenantId?: string | null
   materialId: string
   batchId: string
   type: $Enums.StockLogType
@@ -465,6 +482,7 @@ export type StockLogCreateManyInput = {
 
 export type StockLogUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
   delta?: Prisma.IntFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -476,6 +494,7 @@ export type StockLogUpdateManyMutationInput = {
 
 export type StockLogUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   batchId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
@@ -502,6 +521,7 @@ export type StockLogOrderByRelationAggregateInput = {
 
 export type StockLogCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   materialId?: Prisma.SortOrder
   batchId?: Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -523,6 +543,7 @@ export type StockLogAvgOrderByAggregateInput = {
 
 export type StockLogMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   materialId?: Prisma.SortOrder
   batchId?: Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -539,6 +560,7 @@ export type StockLogMaxOrderByAggregateInput = {
 
 export type StockLogMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   materialId?: Prisma.SortOrder
   batchId?: Prisma.SortOrder
   type?: Prisma.SortOrder
@@ -793,6 +815,7 @@ export type StockLogUncheckedUpdateManyWithoutOrderItemNestedInput = {
 
 export type StockLogCreateWithoutMaterialInput = {
   id?: string
+  tenantId?: string | null
   type: $Enums.StockLogType
   delta: number
   quantity: number
@@ -809,6 +832,7 @@ export type StockLogCreateWithoutMaterialInput = {
 
 export type StockLogUncheckedCreateWithoutMaterialInput = {
   id?: string
+  tenantId?: string | null
   batchId: string
   type: $Enums.StockLogType
   delta: number
@@ -854,6 +878,7 @@ export type StockLogScalarWhereInput = {
   OR?: Prisma.StockLogScalarWhereInput[]
   NOT?: Prisma.StockLogScalarWhereInput | Prisma.StockLogScalarWhereInput[]
   id?: Prisma.StringFilter<"StockLog"> | string
+  tenantId?: Prisma.StringNullableFilter<"StockLog"> | string | null
   materialId?: Prisma.StringFilter<"StockLog"> | string
   batchId?: Prisma.StringFilter<"StockLog"> | string
   type?: Prisma.EnumStockLogTypeFilter<"StockLog"> | $Enums.StockLogType
@@ -870,6 +895,7 @@ export type StockLogScalarWhereInput = {
 
 export type StockLogCreateWithoutBatchInput = {
   id?: string
+  tenantId?: string | null
   type: $Enums.StockLogType
   delta: number
   quantity: number
@@ -886,6 +912,7 @@ export type StockLogCreateWithoutBatchInput = {
 
 export type StockLogUncheckedCreateWithoutBatchInput = {
   id?: string
+  tenantId?: string | null
   materialId: string
   type: $Enums.StockLogType
   delta: number
@@ -928,6 +955,7 @@ export type StockLogUpdateManyWithWhereWithoutBatchInput = {
 
 export type StockLogCreateWithoutStockLossRecordInput = {
   id?: string
+  tenantId?: string | null
   type: $Enums.StockLogType
   delta: number
   quantity: number
@@ -944,6 +972,7 @@ export type StockLogCreateWithoutStockLossRecordInput = {
 
 export type StockLogUncheckedCreateWithoutStockLossRecordInput = {
   id?: string
+  tenantId?: string | null
   materialId: string
   batchId: string
   type: $Enums.StockLogType
@@ -976,6 +1005,7 @@ export type StockLogUpdateToOneWithWhereWithoutStockLossRecordInput = {
 
 export type StockLogUpdateWithoutStockLossRecordInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
   delta?: Prisma.IntFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -992,6 +1022,7 @@ export type StockLogUpdateWithoutStockLossRecordInput = {
 
 export type StockLogUncheckedUpdateWithoutStockLossRecordInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   batchId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
@@ -1008,6 +1039,7 @@ export type StockLogUncheckedUpdateWithoutStockLossRecordInput = {
 
 export type StockLogCreateWithoutOperatorStaffInput = {
   id?: string
+  tenantId?: string | null
   type: $Enums.StockLogType
   delta: number
   quantity: number
@@ -1024,6 +1056,7 @@ export type StockLogCreateWithoutOperatorStaffInput = {
 
 export type StockLogUncheckedCreateWithoutOperatorStaffInput = {
   id?: string
+  tenantId?: string | null
   materialId: string
   batchId: string
   type: $Enums.StockLogType
@@ -1066,6 +1099,7 @@ export type StockLogUpdateManyWithWhereWithoutOperatorStaffInput = {
 
 export type StockLogCreateWithoutOrderInput = {
   id?: string
+  tenantId?: string | null
   type: $Enums.StockLogType
   delta: number
   quantity: number
@@ -1082,6 +1116,7 @@ export type StockLogCreateWithoutOrderInput = {
 
 export type StockLogUncheckedCreateWithoutOrderInput = {
   id?: string
+  tenantId?: string | null
   materialId: string
   batchId: string
   type: $Enums.StockLogType
@@ -1124,6 +1159,7 @@ export type StockLogUpdateManyWithWhereWithoutOrderInput = {
 
 export type StockLogCreateWithoutOrderItemInput = {
   id?: string
+  tenantId?: string | null
   type: $Enums.StockLogType
   delta: number
   quantity: number
@@ -1140,6 +1176,7 @@ export type StockLogCreateWithoutOrderItemInput = {
 
 export type StockLogUncheckedCreateWithoutOrderItemInput = {
   id?: string
+  tenantId?: string | null
   materialId: string
   batchId: string
   type: $Enums.StockLogType
@@ -1182,6 +1219,7 @@ export type StockLogUpdateManyWithWhereWithoutOrderItemInput = {
 
 export type StockLogCreateManyMaterialInput = {
   id?: string
+  tenantId?: string | null
   batchId: string
   type: $Enums.StockLogType
   delta: number
@@ -1197,6 +1235,7 @@ export type StockLogCreateManyMaterialInput = {
 
 export type StockLogUpdateWithoutMaterialInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
   delta?: Prisma.IntFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1213,6 +1252,7 @@ export type StockLogUpdateWithoutMaterialInput = {
 
 export type StockLogUncheckedUpdateWithoutMaterialInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   batchId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
   delta?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1229,6 +1269,7 @@ export type StockLogUncheckedUpdateWithoutMaterialInput = {
 
 export type StockLogUncheckedUpdateManyWithoutMaterialInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   batchId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
   delta?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1244,6 +1285,7 @@ export type StockLogUncheckedUpdateManyWithoutMaterialInput = {
 
 export type StockLogCreateManyBatchInput = {
   id?: string
+  tenantId?: string | null
   materialId: string
   type: $Enums.StockLogType
   delta: number
@@ -1259,6 +1301,7 @@ export type StockLogCreateManyBatchInput = {
 
 export type StockLogUpdateWithoutBatchInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
   delta?: Prisma.IntFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1275,6 +1318,7 @@ export type StockLogUpdateWithoutBatchInput = {
 
 export type StockLogUncheckedUpdateWithoutBatchInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
   delta?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1291,6 +1335,7 @@ export type StockLogUncheckedUpdateWithoutBatchInput = {
 
 export type StockLogUncheckedUpdateManyWithoutBatchInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
   delta?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1306,6 +1351,7 @@ export type StockLogUncheckedUpdateManyWithoutBatchInput = {
 
 export type StockLogCreateManyOperatorStaffInput = {
   id?: string
+  tenantId?: string | null
   materialId: string
   batchId: string
   type: $Enums.StockLogType
@@ -1321,6 +1367,7 @@ export type StockLogCreateManyOperatorStaffInput = {
 
 export type StockLogUpdateWithoutOperatorStaffInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
   delta?: Prisma.IntFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1337,6 +1384,7 @@ export type StockLogUpdateWithoutOperatorStaffInput = {
 
 export type StockLogUncheckedUpdateWithoutOperatorStaffInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   batchId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
@@ -1353,6 +1401,7 @@ export type StockLogUncheckedUpdateWithoutOperatorStaffInput = {
 
 export type StockLogUncheckedUpdateManyWithoutOperatorStaffInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   batchId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
@@ -1368,6 +1417,7 @@ export type StockLogUncheckedUpdateManyWithoutOperatorStaffInput = {
 
 export type StockLogCreateManyOrderInput = {
   id?: string
+  tenantId?: string | null
   materialId: string
   batchId: string
   type: $Enums.StockLogType
@@ -1383,6 +1433,7 @@ export type StockLogCreateManyOrderInput = {
 
 export type StockLogUpdateWithoutOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
   delta?: Prisma.IntFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1399,6 +1450,7 @@ export type StockLogUpdateWithoutOrderInput = {
 
 export type StockLogUncheckedUpdateWithoutOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   batchId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
@@ -1415,6 +1467,7 @@ export type StockLogUncheckedUpdateWithoutOrderInput = {
 
 export type StockLogUncheckedUpdateManyWithoutOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   batchId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
@@ -1430,6 +1483,7 @@ export type StockLogUncheckedUpdateManyWithoutOrderInput = {
 
 export type StockLogCreateManyOrderItemInput = {
   id?: string
+  tenantId?: string | null
   materialId: string
   batchId: string
   type: $Enums.StockLogType
@@ -1445,6 +1499,7 @@ export type StockLogCreateManyOrderItemInput = {
 
 export type StockLogUpdateWithoutOrderItemInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
   delta?: Prisma.IntFieldUpdateOperationsInput | number
   quantity?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1461,6 +1516,7 @@ export type StockLogUpdateWithoutOrderItemInput = {
 
 export type StockLogUncheckedUpdateWithoutOrderItemInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   batchId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
@@ -1477,6 +1533,7 @@ export type StockLogUncheckedUpdateWithoutOrderItemInput = {
 
 export type StockLogUncheckedUpdateManyWithoutOrderItemInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   batchId?: Prisma.StringFieldUpdateOperationsInput | string
   type?: Prisma.EnumStockLogTypeFieldUpdateOperationsInput | $Enums.StockLogType
@@ -1494,6 +1551,7 @@ export type StockLogUncheckedUpdateManyWithoutOrderItemInput = {
 
 export type StockLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   materialId?: boolean
   batchId?: boolean
   type?: boolean
@@ -1516,6 +1574,7 @@ export type StockLogSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
 
 export type StockLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   materialId?: boolean
   batchId?: boolean
   type?: boolean
@@ -1537,6 +1596,7 @@ export type StockLogSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
 
 export type StockLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   materialId?: boolean
   batchId?: boolean
   type?: boolean
@@ -1558,6 +1618,7 @@ export type StockLogSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
 
 export type StockLogSelectScalar = {
   id?: boolean
+  tenantId?: boolean
   materialId?: boolean
   batchId?: boolean
   type?: boolean
@@ -1572,7 +1633,7 @@ export type StockLogSelectScalar = {
   createdAt?: boolean
 }
 
-export type StockLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "materialId" | "batchId" | "type" | "delta" | "quantity" | "orderId" | "orderItemId" | "wastageReason" | "remark" | "operator" | "operatorStaffId" | "createdAt", ExtArgs["result"]["stockLog"]>
+export type StockLogOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "materialId" | "batchId" | "type" | "delta" | "quantity" | "orderId" | "orderItemId" | "wastageReason" | "remark" | "operator" | "operatorStaffId" | "createdAt", ExtArgs["result"]["stockLog"]>
 export type StockLogInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   material?: boolean | Prisma.MaterialDefaultArgs<ExtArgs>
   batch?: boolean | Prisma.BatchDefaultArgs<ExtArgs>
@@ -1608,6 +1669,7 @@ export type $StockLogPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    tenantId: string | null
     materialId: string
     batchId: string
     type: $Enums.StockLogType
@@ -2053,6 +2115,7 @@ export interface Prisma__StockLogClient<T, Null = never, ExtArgs extends runtime
  */
 export interface StockLogFieldRefs {
   readonly id: Prisma.FieldRef<"StockLog", 'String'>
+  readonly tenantId: Prisma.FieldRef<"StockLog", 'String'>
   readonly materialId: Prisma.FieldRef<"StockLog", 'String'>
   readonly batchId: Prisma.FieldRef<"StockLog", 'String'>
   readonly type: Prisma.FieldRef<"StockLog", 'StockLogType'>

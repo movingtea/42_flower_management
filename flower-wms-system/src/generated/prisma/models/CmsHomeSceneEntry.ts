@@ -36,6 +36,7 @@ export type CmsHomeSceneEntrySumAggregateOutputType = {
 
 export type CmsHomeSceneEntryMinAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   title: string | null
   subtitle: string | null
   sceneType: $Enums.GiftOccasionType | null
@@ -53,6 +54,7 @@ export type CmsHomeSceneEntryMinAggregateOutputType = {
 
 export type CmsHomeSceneEntryMaxAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   title: string | null
   subtitle: string | null
   sceneType: $Enums.GiftOccasionType | null
@@ -70,6 +72,7 @@ export type CmsHomeSceneEntryMaxAggregateOutputType = {
 
 export type CmsHomeSceneEntryCountAggregateOutputType = {
   id: number
+  tenantId: number
   title: number
   subtitle: number
   sceneType: number
@@ -97,6 +100,7 @@ export type CmsHomeSceneEntrySumAggregateInputType = {
 
 export type CmsHomeSceneEntryMinAggregateInputType = {
   id?: true
+  tenantId?: true
   title?: true
   subtitle?: true
   sceneType?: true
@@ -114,6 +118,7 @@ export type CmsHomeSceneEntryMinAggregateInputType = {
 
 export type CmsHomeSceneEntryMaxAggregateInputType = {
   id?: true
+  tenantId?: true
   title?: true
   subtitle?: true
   sceneType?: true
@@ -131,6 +136,7 @@ export type CmsHomeSceneEntryMaxAggregateInputType = {
 
 export type CmsHomeSceneEntryCountAggregateInputType = {
   id?: true
+  tenantId?: true
   title?: true
   subtitle?: true
   sceneType?: true
@@ -235,6 +241,7 @@ export type CmsHomeSceneEntryGroupByArgs<ExtArgs extends runtime.Types.Extension
 
 export type CmsHomeSceneEntryGroupByOutputType = {
   id: string
+  tenantId: string | null
   title: string
   subtitle: string | null
   sceneType: $Enums.GiftOccasionType
@@ -275,6 +282,7 @@ export type CmsHomeSceneEntryWhereInput = {
   OR?: Prisma.CmsHomeSceneEntryWhereInput[]
   NOT?: Prisma.CmsHomeSceneEntryWhereInput | Prisma.CmsHomeSceneEntryWhereInput[]
   id?: Prisma.StringFilter<"CmsHomeSceneEntry"> | string
+  tenantId?: Prisma.StringNullableFilter<"CmsHomeSceneEntry"> | string | null
   title?: Prisma.StringFilter<"CmsHomeSceneEntry"> | string
   subtitle?: Prisma.StringNullableFilter<"CmsHomeSceneEntry"> | string | null
   sceneType?: Prisma.EnumGiftOccasionTypeFilter<"CmsHomeSceneEntry"> | $Enums.GiftOccasionType
@@ -293,6 +301,7 @@ export type CmsHomeSceneEntryWhereInput = {
 
 export type CmsHomeSceneEntryOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrder
   subtitle?: Prisma.SortOrderInput | Prisma.SortOrder
   sceneType?: Prisma.SortOrder
@@ -314,6 +323,7 @@ export type CmsHomeSceneEntryWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.CmsHomeSceneEntryWhereInput | Prisma.CmsHomeSceneEntryWhereInput[]
   OR?: Prisma.CmsHomeSceneEntryWhereInput[]
   NOT?: Prisma.CmsHomeSceneEntryWhereInput | Prisma.CmsHomeSceneEntryWhereInput[]
+  tenantId?: Prisma.StringNullableFilter<"CmsHomeSceneEntry"> | string | null
   title?: Prisma.StringFilter<"CmsHomeSceneEntry"> | string
   subtitle?: Prisma.StringNullableFilter<"CmsHomeSceneEntry"> | string | null
   sceneType?: Prisma.EnumGiftOccasionTypeFilter<"CmsHomeSceneEntry"> | $Enums.GiftOccasionType
@@ -332,6 +342,7 @@ export type CmsHomeSceneEntryWhereUniqueInput = Prisma.AtLeast<{
 
 export type CmsHomeSceneEntryOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   title?: Prisma.SortOrder
   subtitle?: Prisma.SortOrderInput | Prisma.SortOrder
   sceneType?: Prisma.SortOrder
@@ -357,6 +368,7 @@ export type CmsHomeSceneEntryScalarWhereWithAggregatesInput = {
   OR?: Prisma.CmsHomeSceneEntryScalarWhereWithAggregatesInput[]
   NOT?: Prisma.CmsHomeSceneEntryScalarWhereWithAggregatesInput | Prisma.CmsHomeSceneEntryScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"CmsHomeSceneEntry"> | string
+  tenantId?: Prisma.StringNullableWithAggregatesFilter<"CmsHomeSceneEntry"> | string | null
   title?: Prisma.StringWithAggregatesFilter<"CmsHomeSceneEntry"> | string
   subtitle?: Prisma.StringNullableWithAggregatesFilter<"CmsHomeSceneEntry"> | string | null
   sceneType?: Prisma.EnumGiftOccasionTypeWithAggregatesFilter<"CmsHomeSceneEntry"> | $Enums.GiftOccasionType
@@ -374,6 +386,7 @@ export type CmsHomeSceneEntryScalarWhereWithAggregatesInput = {
 
 export type CmsHomeSceneEntryCreateInput = {
   id?: string
+  tenantId?: string | null
   title: string
   subtitle?: string | null
   sceneType: $Enums.GiftOccasionType
@@ -391,6 +404,7 @@ export type CmsHomeSceneEntryCreateInput = {
 
 export type CmsHomeSceneEntryUncheckedCreateInput = {
   id?: string
+  tenantId?: string | null
   title: string
   subtitle?: string | null
   sceneType: $Enums.GiftOccasionType
@@ -408,6 +422,7 @@ export type CmsHomeSceneEntryUncheckedCreateInput = {
 
 export type CmsHomeSceneEntryUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   subtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sceneType?: Prisma.EnumGiftOccasionTypeFieldUpdateOperationsInput | $Enums.GiftOccasionType
@@ -425,6 +440,7 @@ export type CmsHomeSceneEntryUpdateInput = {
 
 export type CmsHomeSceneEntryUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   subtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sceneType?: Prisma.EnumGiftOccasionTypeFieldUpdateOperationsInput | $Enums.GiftOccasionType
@@ -442,6 +458,7 @@ export type CmsHomeSceneEntryUncheckedUpdateInput = {
 
 export type CmsHomeSceneEntryCreateManyInput = {
   id?: string
+  tenantId?: string | null
   title: string
   subtitle?: string | null
   sceneType: $Enums.GiftOccasionType
@@ -459,6 +476,7 @@ export type CmsHomeSceneEntryCreateManyInput = {
 
 export type CmsHomeSceneEntryUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   subtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sceneType?: Prisma.EnumGiftOccasionTypeFieldUpdateOperationsInput | $Enums.GiftOccasionType
@@ -475,6 +493,7 @@ export type CmsHomeSceneEntryUpdateManyMutationInput = {
 
 export type CmsHomeSceneEntryUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   subtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sceneType?: Prisma.EnumGiftOccasionTypeFieldUpdateOperationsInput | $Enums.GiftOccasionType
@@ -502,6 +521,7 @@ export type CmsHomeSceneEntryOrderByRelationAggregateInput = {
 
 export type CmsHomeSceneEntryCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   subtitle?: Prisma.SortOrder
   sceneType?: Prisma.SortOrder
@@ -523,6 +543,7 @@ export type CmsHomeSceneEntryAvgOrderByAggregateInput = {
 
 export type CmsHomeSceneEntryMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   subtitle?: Prisma.SortOrder
   sceneType?: Prisma.SortOrder
@@ -540,6 +561,7 @@ export type CmsHomeSceneEntryMaxOrderByAggregateInput = {
 
 export type CmsHomeSceneEntryMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   title?: Prisma.SortOrder
   subtitle?: Prisma.SortOrder
   sceneType?: Prisma.SortOrder
@@ -611,6 +633,7 @@ export type EnumHomeSceneEntryTargetTypeFieldUpdateOperationsInput = {
 
 export type CmsHomeSceneEntryCreateWithoutLinkedRecommendationSlotInput = {
   id?: string
+  tenantId?: string | null
   title: string
   subtitle?: string | null
   sceneType: $Enums.GiftOccasionType
@@ -627,6 +650,7 @@ export type CmsHomeSceneEntryCreateWithoutLinkedRecommendationSlotInput = {
 
 export type CmsHomeSceneEntryUncheckedCreateWithoutLinkedRecommendationSlotInput = {
   id?: string
+  tenantId?: string | null
   title: string
   subtitle?: string | null
   sceneType: $Enums.GiftOccasionType
@@ -672,6 +696,7 @@ export type CmsHomeSceneEntryScalarWhereInput = {
   OR?: Prisma.CmsHomeSceneEntryScalarWhereInput[]
   NOT?: Prisma.CmsHomeSceneEntryScalarWhereInput | Prisma.CmsHomeSceneEntryScalarWhereInput[]
   id?: Prisma.StringFilter<"CmsHomeSceneEntry"> | string
+  tenantId?: Prisma.StringNullableFilter<"CmsHomeSceneEntry"> | string | null
   title?: Prisma.StringFilter<"CmsHomeSceneEntry"> | string
   subtitle?: Prisma.StringNullableFilter<"CmsHomeSceneEntry"> | string | null
   sceneType?: Prisma.EnumGiftOccasionTypeFilter<"CmsHomeSceneEntry"> | $Enums.GiftOccasionType
@@ -689,6 +714,7 @@ export type CmsHomeSceneEntryScalarWhereInput = {
 
 export type CmsHomeSceneEntryCreateManyLinkedRecommendationSlotInput = {
   id?: string
+  tenantId?: string | null
   title: string
   subtitle?: string | null
   sceneType: $Enums.GiftOccasionType
@@ -705,6 +731,7 @@ export type CmsHomeSceneEntryCreateManyLinkedRecommendationSlotInput = {
 
 export type CmsHomeSceneEntryUpdateWithoutLinkedRecommendationSlotInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   subtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sceneType?: Prisma.EnumGiftOccasionTypeFieldUpdateOperationsInput | $Enums.GiftOccasionType
@@ -721,6 +748,7 @@ export type CmsHomeSceneEntryUpdateWithoutLinkedRecommendationSlotInput = {
 
 export type CmsHomeSceneEntryUncheckedUpdateWithoutLinkedRecommendationSlotInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   subtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sceneType?: Prisma.EnumGiftOccasionTypeFieldUpdateOperationsInput | $Enums.GiftOccasionType
@@ -737,6 +765,7 @@ export type CmsHomeSceneEntryUncheckedUpdateWithoutLinkedRecommendationSlotInput
 
 export type CmsHomeSceneEntryUncheckedUpdateManyWithoutLinkedRecommendationSlotInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   title?: Prisma.StringFieldUpdateOperationsInput | string
   subtitle?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   sceneType?: Prisma.EnumGiftOccasionTypeFieldUpdateOperationsInput | $Enums.GiftOccasionType
@@ -755,6 +784,7 @@ export type CmsHomeSceneEntryUncheckedUpdateManyWithoutLinkedRecommendationSlotI
 
 export type CmsHomeSceneEntrySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   title?: boolean
   subtitle?: boolean
   sceneType?: boolean
@@ -773,6 +803,7 @@ export type CmsHomeSceneEntrySelect<ExtArgs extends runtime.Types.Extensions.Int
 
 export type CmsHomeSceneEntrySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   title?: boolean
   subtitle?: boolean
   sceneType?: boolean
@@ -791,6 +822,7 @@ export type CmsHomeSceneEntrySelectCreateManyAndReturn<ExtArgs extends runtime.T
 
 export type CmsHomeSceneEntrySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   title?: boolean
   subtitle?: boolean
   sceneType?: boolean
@@ -809,6 +841,7 @@ export type CmsHomeSceneEntrySelectUpdateManyAndReturn<ExtArgs extends runtime.T
 
 export type CmsHomeSceneEntrySelectScalar = {
   id?: boolean
+  tenantId?: boolean
   title?: boolean
   subtitle?: boolean
   sceneType?: boolean
@@ -824,7 +857,7 @@ export type CmsHomeSceneEntrySelectScalar = {
   updatedAt?: boolean
 }
 
-export type CmsHomeSceneEntryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "title" | "subtitle" | "sceneType" | "iconKey" | "sortOrder" | "isActive" | "targetType" | "targetValue" | "linkedRecommendationSlotId" | "linkedRecommendationSlotKey" | "note" | "createdAt" | "updatedAt", ExtArgs["result"]["cmsHomeSceneEntry"]>
+export type CmsHomeSceneEntryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "title" | "subtitle" | "sceneType" | "iconKey" | "sortOrder" | "isActive" | "targetType" | "targetValue" | "linkedRecommendationSlotId" | "linkedRecommendationSlotKey" | "note" | "createdAt" | "updatedAt", ExtArgs["result"]["cmsHomeSceneEntry"]>
 export type CmsHomeSceneEntryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   linkedRecommendationSlot?: boolean | Prisma.CmsHomeSceneEntry$linkedRecommendationSlotArgs<ExtArgs>
 }
@@ -842,6 +875,7 @@ export type $CmsHomeSceneEntryPayload<ExtArgs extends runtime.Types.Extensions.I
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    tenantId: string | null
     title: string
     subtitle: string | null
     sceneType: $Enums.GiftOccasionType
@@ -1280,6 +1314,7 @@ export interface Prisma__CmsHomeSceneEntryClient<T, Null = never, ExtArgs extend
  */
 export interface CmsHomeSceneEntryFieldRefs {
   readonly id: Prisma.FieldRef<"CmsHomeSceneEntry", 'String'>
+  readonly tenantId: Prisma.FieldRef<"CmsHomeSceneEntry", 'String'>
   readonly title: Prisma.FieldRef<"CmsHomeSceneEntry", 'String'>
   readonly subtitle: Prisma.FieldRef<"CmsHomeSceneEntry", 'String'>
   readonly sceneType: Prisma.FieldRef<"CmsHomeSceneEntry", 'GiftOccasionType'>

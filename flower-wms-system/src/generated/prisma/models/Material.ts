@@ -36,6 +36,7 @@ export type MaterialSumAggregateOutputType = {
 
 export type MaterialMinAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   materialCode: string | null
   name: string | null
   unit: string | null
@@ -47,6 +48,7 @@ export type MaterialMinAggregateOutputType = {
 
 export type MaterialMaxAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   materialCode: string | null
   name: string | null
   unit: string | null
@@ -58,6 +60,7 @@ export type MaterialMaxAggregateOutputType = {
 
 export type MaterialCountAggregateOutputType = {
   id: number
+  tenantId: number
   materialCode: number
   name: number
   unit: number
@@ -79,6 +82,7 @@ export type MaterialSumAggregateInputType = {
 
 export type MaterialMinAggregateInputType = {
   id?: true
+  tenantId?: true
   materialCode?: true
   name?: true
   unit?: true
@@ -90,6 +94,7 @@ export type MaterialMinAggregateInputType = {
 
 export type MaterialMaxAggregateInputType = {
   id?: true
+  tenantId?: true
   materialCode?: true
   name?: true
   unit?: true
@@ -101,6 +106,7 @@ export type MaterialMaxAggregateInputType = {
 
 export type MaterialCountAggregateInputType = {
   id?: true
+  tenantId?: true
   materialCode?: true
   name?: true
   unit?: true
@@ -199,6 +205,7 @@ export type MaterialGroupByArgs<ExtArgs extends runtime.Types.Extensions.Interna
 
 export type MaterialGroupByOutputType = {
   id: string
+  tenantId: string | null
   materialCode: string
   name: string
   unit: string
@@ -233,6 +240,7 @@ export type MaterialWhereInput = {
   OR?: Prisma.MaterialWhereInput[]
   NOT?: Prisma.MaterialWhereInput | Prisma.MaterialWhereInput[]
   id?: Prisma.StringFilter<"Material"> | string
+  tenantId?: Prisma.StringNullableFilter<"Material"> | string | null
   materialCode?: Prisma.StringFilter<"Material"> | string
   name?: Prisma.StringFilter<"Material"> | string
   unit?: Prisma.StringFilter<"Material"> | string
@@ -248,6 +256,7 @@ export type MaterialWhereInput = {
 
 export type MaterialOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   materialCode?: Prisma.SortOrder
   name?: Prisma.SortOrder
   unit?: Prisma.SortOrder
@@ -267,6 +276,7 @@ export type MaterialWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.MaterialWhereInput | Prisma.MaterialWhereInput[]
   OR?: Prisma.MaterialWhereInput[]
   NOT?: Prisma.MaterialWhereInput | Prisma.MaterialWhereInput[]
+  tenantId?: Prisma.StringNullableFilter<"Material"> | string | null
   name?: Prisma.StringFilter<"Material"> | string
   unit?: Prisma.StringFilter<"Material"> | string
   safetyStockThreshold?: Prisma.IntFilter<"Material"> | number
@@ -281,6 +291,7 @@ export type MaterialWhereUniqueInput = Prisma.AtLeast<{
 
 export type MaterialOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   materialCode?: Prisma.SortOrder
   name?: Prisma.SortOrder
   unit?: Prisma.SortOrder
@@ -300,6 +311,7 @@ export type MaterialScalarWhereWithAggregatesInput = {
   OR?: Prisma.MaterialScalarWhereWithAggregatesInput[]
   NOT?: Prisma.MaterialScalarWhereWithAggregatesInput | Prisma.MaterialScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Material"> | string
+  tenantId?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
   materialCode?: Prisma.StringWithAggregatesFilter<"Material"> | string
   name?: Prisma.StringWithAggregatesFilter<"Material"> | string
   unit?: Prisma.StringWithAggregatesFilter<"Material"> | string
@@ -311,6 +323,7 @@ export type MaterialScalarWhereWithAggregatesInput = {
 
 export type MaterialCreateInput = {
   id?: string
+  tenantId?: string | null
   materialCode: string
   name: string
   unit: string
@@ -325,6 +338,7 @@ export type MaterialCreateInput = {
 
 export type MaterialUncheckedCreateInput = {
   id?: string
+  tenantId?: string | null
   materialCode: string
   name: string
   unit: string
@@ -339,6 +353,7 @@ export type MaterialUncheckedCreateInput = {
 
 export type MaterialUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialCode?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
@@ -353,6 +368,7 @@ export type MaterialUpdateInput = {
 
 export type MaterialUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialCode?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
@@ -367,6 +383,7 @@ export type MaterialUncheckedUpdateInput = {
 
 export type MaterialCreateManyInput = {
   id?: string
+  tenantId?: string | null
   materialCode: string
   name: string
   unit: string
@@ -378,6 +395,7 @@ export type MaterialCreateManyInput = {
 
 export type MaterialUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialCode?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
@@ -388,6 +406,7 @@ export type MaterialUpdateManyMutationInput = {
 
 export type MaterialUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialCode?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
@@ -404,6 +423,7 @@ export type MaterialScalarRelationFilter = {
 
 export type MaterialCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   materialCode?: Prisma.SortOrder
   name?: Prisma.SortOrder
   unit?: Prisma.SortOrder
@@ -419,6 +439,7 @@ export type MaterialAvgOrderByAggregateInput = {
 
 export type MaterialMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   materialCode?: Prisma.SortOrder
   name?: Prisma.SortOrder
   unit?: Prisma.SortOrder
@@ -430,6 +451,7 @@ export type MaterialMaxOrderByAggregateInput = {
 
 export type MaterialMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   materialCode?: Prisma.SortOrder
   name?: Prisma.SortOrder
   unit?: Prisma.SortOrder
@@ -539,6 +561,7 @@ export type MaterialUncheckedUpdateManyWithoutWikiNestedInput = {
 
 export type MaterialCreateWithoutCategoryRelationsInput = {
   id?: string
+  tenantId?: string | null
   materialCode: string
   name: string
   unit: string
@@ -552,6 +575,7 @@ export type MaterialCreateWithoutCategoryRelationsInput = {
 
 export type MaterialUncheckedCreateWithoutCategoryRelationsInput = {
   id?: string
+  tenantId?: string | null
   materialCode: string
   name: string
   unit: string
@@ -581,6 +605,7 @@ export type MaterialUpdateToOneWithWhereWithoutCategoryRelationsInput = {
 
 export type MaterialUpdateWithoutCategoryRelationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialCode?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
@@ -594,6 +619,7 @@ export type MaterialUpdateWithoutCategoryRelationsInput = {
 
 export type MaterialUncheckedUpdateWithoutCategoryRelationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialCode?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
@@ -607,6 +633,7 @@ export type MaterialUncheckedUpdateWithoutCategoryRelationsInput = {
 
 export type MaterialCreateWithoutBatchesInput = {
   id?: string
+  tenantId?: string | null
   materialCode: string
   name: string
   unit: string
@@ -620,6 +647,7 @@ export type MaterialCreateWithoutBatchesInput = {
 
 export type MaterialUncheckedCreateWithoutBatchesInput = {
   id?: string
+  tenantId?: string | null
   materialCode: string
   name: string
   unit: string
@@ -649,6 +677,7 @@ export type MaterialUpdateToOneWithWhereWithoutBatchesInput = {
 
 export type MaterialUpdateWithoutBatchesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialCode?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
@@ -662,6 +691,7 @@ export type MaterialUpdateWithoutBatchesInput = {
 
 export type MaterialUncheckedUpdateWithoutBatchesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialCode?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
@@ -675,6 +705,7 @@ export type MaterialUncheckedUpdateWithoutBatchesInput = {
 
 export type MaterialCreateWithoutStockLogsInput = {
   id?: string
+  tenantId?: string | null
   materialCode: string
   name: string
   unit: string
@@ -688,6 +719,7 @@ export type MaterialCreateWithoutStockLogsInput = {
 
 export type MaterialUncheckedCreateWithoutStockLogsInput = {
   id?: string
+  tenantId?: string | null
   materialCode: string
   name: string
   unit: string
@@ -717,6 +749,7 @@ export type MaterialUpdateToOneWithWhereWithoutStockLogsInput = {
 
 export type MaterialUpdateWithoutStockLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialCode?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
@@ -730,6 +763,7 @@ export type MaterialUpdateWithoutStockLogsInput = {
 
 export type MaterialUncheckedUpdateWithoutStockLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialCode?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
@@ -743,6 +777,7 @@ export type MaterialUncheckedUpdateWithoutStockLogsInput = {
 
 export type MaterialCreateWithoutWikiInput = {
   id?: string
+  tenantId?: string | null
   materialCode: string
   name: string
   unit: string
@@ -756,6 +791,7 @@ export type MaterialCreateWithoutWikiInput = {
 
 export type MaterialUncheckedCreateWithoutWikiInput = {
   id?: string
+  tenantId?: string | null
   materialCode: string
   name: string
   unit: string
@@ -798,6 +834,7 @@ export type MaterialScalarWhereInput = {
   OR?: Prisma.MaterialScalarWhereInput[]
   NOT?: Prisma.MaterialScalarWhereInput | Prisma.MaterialScalarWhereInput[]
   id?: Prisma.StringFilter<"Material"> | string
+  tenantId?: Prisma.StringNullableFilter<"Material"> | string | null
   materialCode?: Prisma.StringFilter<"Material"> | string
   name?: Prisma.StringFilter<"Material"> | string
   unit?: Prisma.StringFilter<"Material"> | string
@@ -809,6 +846,7 @@ export type MaterialScalarWhereInput = {
 
 export type MaterialCreateManyWikiInput = {
   id?: string
+  tenantId?: string | null
   materialCode: string
   name: string
   unit: string
@@ -819,6 +857,7 @@ export type MaterialCreateManyWikiInput = {
 
 export type MaterialUpdateWithoutWikiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialCode?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
@@ -832,6 +871,7 @@ export type MaterialUpdateWithoutWikiInput = {
 
 export type MaterialUncheckedUpdateWithoutWikiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialCode?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
@@ -845,6 +885,7 @@ export type MaterialUncheckedUpdateWithoutWikiInput = {
 
 export type MaterialUncheckedUpdateManyWithoutWikiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialCode?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   unit?: Prisma.StringFieldUpdateOperationsInput | string
@@ -904,6 +945,7 @@ export type MaterialCountOutputTypeCountCategoryRelationsArgs<ExtArgs extends ru
 
 export type MaterialSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   materialCode?: boolean
   name?: boolean
   unit?: boolean
@@ -920,6 +962,7 @@ export type MaterialSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
 
 export type MaterialSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   materialCode?: boolean
   name?: boolean
   unit?: boolean
@@ -932,6 +975,7 @@ export type MaterialSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
 
 export type MaterialSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   materialCode?: boolean
   name?: boolean
   unit?: boolean
@@ -944,6 +988,7 @@ export type MaterialSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
 
 export type MaterialSelectScalar = {
   id?: boolean
+  tenantId?: boolean
   materialCode?: boolean
   name?: boolean
   unit?: boolean
@@ -953,7 +998,7 @@ export type MaterialSelectScalar = {
   updatedAt?: boolean
 }
 
-export type MaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "materialCode" | "name" | "unit" | "safetyStockThreshold" | "wikiId" | "createdAt" | "updatedAt", ExtArgs["result"]["material"]>
+export type MaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "materialCode" | "name" | "unit" | "safetyStockThreshold" | "wikiId" | "createdAt" | "updatedAt", ExtArgs["result"]["material"]>
 export type MaterialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   wiki?: boolean | Prisma.Material$wikiArgs<ExtArgs>
   batches?: boolean | Prisma.Material$batchesArgs<ExtArgs>
@@ -978,6 +1023,7 @@ export type $MaterialPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    tenantId: string | null
     materialCode: string
     name: string
     unit: string
@@ -1413,6 +1459,7 @@ export interface Prisma__MaterialClient<T, Null = never, ExtArgs extends runtime
  */
 export interface MaterialFieldRefs {
   readonly id: Prisma.FieldRef<"Material", 'String'>
+  readonly tenantId: Prisma.FieldRef<"Material", 'String'>
   readonly materialCode: Prisma.FieldRef<"Material", 'String'>
   readonly name: Prisma.FieldRef<"Material", 'String'>
   readonly unit: Prisma.FieldRef<"Material", 'String'>

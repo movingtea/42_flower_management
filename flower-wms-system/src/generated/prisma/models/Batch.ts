@@ -46,6 +46,7 @@ export type BatchSumAggregateOutputType = {
 
 export type BatchMinAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   materialId: string | null
   batchNo: string | null
   inboundAt: Date | null
@@ -65,6 +66,7 @@ export type BatchMinAggregateOutputType = {
 
 export type BatchMaxAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   materialId: string | null
   batchNo: string | null
   inboundAt: Date | null
@@ -84,6 +86,7 @@ export type BatchMaxAggregateOutputType = {
 
 export type BatchCountAggregateOutputType = {
   id: number
+  tenantId: number
   materialId: number
   batchNo: number
   inboundAt: number
@@ -123,6 +126,7 @@ export type BatchSumAggregateInputType = {
 
 export type BatchMinAggregateInputType = {
   id?: true
+  tenantId?: true
   materialId?: true
   batchNo?: true
   inboundAt?: true
@@ -142,6 +146,7 @@ export type BatchMinAggregateInputType = {
 
 export type BatchMaxAggregateInputType = {
   id?: true
+  tenantId?: true
   materialId?: true
   batchNo?: true
   inboundAt?: true
@@ -161,6 +166,7 @@ export type BatchMaxAggregateInputType = {
 
 export type BatchCountAggregateInputType = {
   id?: true
+  tenantId?: true
   materialId?: true
   batchNo?: true
   inboundAt?: true
@@ -267,6 +273,7 @@ export type BatchGroupByArgs<ExtArgs extends runtime.Types.Extensions.InternalAr
 
 export type BatchGroupByOutputType = {
   id: string
+  tenantId: string | null
   materialId: string
   batchNo: string | null
   inboundAt: Date
@@ -309,6 +316,7 @@ export type BatchWhereInput = {
   OR?: Prisma.BatchWhereInput[]
   NOT?: Prisma.BatchWhereInput | Prisma.BatchWhereInput[]
   id?: Prisma.StringFilter<"Batch"> | string
+  tenantId?: Prisma.StringNullableFilter<"Batch"> | string | null
   materialId?: Prisma.StringFilter<"Batch"> | string
   batchNo?: Prisma.StringNullableFilter<"Batch"> | string | null
   inboundAt?: Prisma.DateTimeFilter<"Batch"> | Date | string
@@ -332,6 +340,7 @@ export type BatchWhereInput = {
 
 export type BatchOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   materialId?: Prisma.SortOrder
   batchNo?: Prisma.SortOrderInput | Prisma.SortOrder
   inboundAt?: Prisma.SortOrder
@@ -359,6 +368,7 @@ export type BatchWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.BatchWhereInput | Prisma.BatchWhereInput[]
   OR?: Prisma.BatchWhereInput[]
   NOT?: Prisma.BatchWhereInput | Prisma.BatchWhereInput[]
+  tenantId?: Prisma.StringNullableFilter<"Batch"> | string | null
   materialId?: Prisma.StringFilter<"Batch"> | string
   inboundAt?: Prisma.DateTimeFilter<"Batch"> | Date | string
   originalQty?: Prisma.IntFilter<"Batch"> | number
@@ -381,6 +391,7 @@ export type BatchWhereUniqueInput = Prisma.AtLeast<{
 
 export type BatchOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   materialId?: Prisma.SortOrder
   batchNo?: Prisma.SortOrderInput | Prisma.SortOrder
   inboundAt?: Prisma.SortOrder
@@ -408,6 +419,7 @@ export type BatchScalarWhereWithAggregatesInput = {
   OR?: Prisma.BatchScalarWhereWithAggregatesInput[]
   NOT?: Prisma.BatchScalarWhereWithAggregatesInput | Prisma.BatchScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"Batch"> | string
+  tenantId?: Prisma.StringNullableWithAggregatesFilter<"Batch"> | string | null
   materialId?: Prisma.StringWithAggregatesFilter<"Batch"> | string
   batchNo?: Prisma.StringNullableWithAggregatesFilter<"Batch"> | string | null
   inboundAt?: Prisma.DateTimeWithAggregatesFilter<"Batch"> | Date | string
@@ -427,6 +439,7 @@ export type BatchScalarWhereWithAggregatesInput = {
 
 export type BatchCreateInput = {
   id?: string
+  tenantId?: string | null
   batchNo?: string | null
   inboundAt?: Date | string
   originalQty: number
@@ -449,6 +462,7 @@ export type BatchCreateInput = {
 
 export type BatchUncheckedCreateInput = {
   id?: string
+  tenantId?: string | null
   materialId: string
   batchNo?: string | null
   inboundAt?: Date | string
@@ -471,6 +485,7 @@ export type BatchUncheckedCreateInput = {
 
 export type BatchUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   batchNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
@@ -493,6 +508,7 @@ export type BatchUpdateInput = {
 
 export type BatchUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   batchNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -515,6 +531,7 @@ export type BatchUncheckedUpdateInput = {
 
 export type BatchCreateManyInput = {
   id?: string
+  tenantId?: string | null
   materialId: string
   batchNo?: string | null
   inboundAt?: Date | string
@@ -534,6 +551,7 @@ export type BatchCreateManyInput = {
 
 export type BatchUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   batchNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
@@ -552,6 +570,7 @@ export type BatchUpdateManyMutationInput = {
 
 export type BatchUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   batchNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -586,6 +605,7 @@ export type BatchOrderByRelationAggregateInput = {
 
 export type BatchCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   materialId?: Prisma.SortOrder
   batchNo?: Prisma.SortOrder
   inboundAt?: Prisma.SortOrder
@@ -614,6 +634,7 @@ export type BatchAvgOrderByAggregateInput = {
 
 export type BatchMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   materialId?: Prisma.SortOrder
   batchNo?: Prisma.SortOrder
   inboundAt?: Prisma.SortOrder
@@ -633,6 +654,7 @@ export type BatchMaxOrderByAggregateInput = {
 
 export type BatchMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   materialId?: Prisma.SortOrder
   batchNo?: Prisma.SortOrder
   inboundAt?: Prisma.SortOrder
@@ -752,6 +774,7 @@ export type BatchUpdateOneRequiredWithoutStockLossRecordsNestedInput = {
 
 export type BatchCreateWithoutPurchaseOrderLineInput = {
   id?: string
+  tenantId?: string | null
   batchNo?: string | null
   inboundAt?: Date | string
   originalQty: number
@@ -773,6 +796,7 @@ export type BatchCreateWithoutPurchaseOrderLineInput = {
 
 export type BatchUncheckedCreateWithoutPurchaseOrderLineInput = {
   id?: string
+  tenantId?: string | null
   materialId: string
   batchNo?: string | null
   inboundAt?: Date | string
@@ -810,6 +834,7 @@ export type BatchUpdateToOneWithWhereWithoutPurchaseOrderLineInput = {
 
 export type BatchUpdateWithoutPurchaseOrderLineInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   batchNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
@@ -831,6 +856,7 @@ export type BatchUpdateWithoutPurchaseOrderLineInput = {
 
 export type BatchUncheckedUpdateWithoutPurchaseOrderLineInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   batchNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -852,6 +878,7 @@ export type BatchUncheckedUpdateWithoutPurchaseOrderLineInput = {
 
 export type BatchCreateWithoutMaterialInput = {
   id?: string
+  tenantId?: string | null
   batchNo?: string | null
   inboundAt?: Date | string
   originalQty: number
@@ -873,6 +900,7 @@ export type BatchCreateWithoutMaterialInput = {
 
 export type BatchUncheckedCreateWithoutMaterialInput = {
   id?: string
+  tenantId?: string | null
   batchNo?: string | null
   inboundAt?: Date | string
   originalQty: number
@@ -923,6 +951,7 @@ export type BatchScalarWhereInput = {
   OR?: Prisma.BatchScalarWhereInput[]
   NOT?: Prisma.BatchScalarWhereInput | Prisma.BatchScalarWhereInput[]
   id?: Prisma.StringFilter<"Batch"> | string
+  tenantId?: Prisma.StringNullableFilter<"Batch"> | string | null
   materialId?: Prisma.StringFilter<"Batch"> | string
   batchNo?: Prisma.StringNullableFilter<"Batch"> | string | null
   inboundAt?: Prisma.DateTimeFilter<"Batch"> | Date | string
@@ -942,6 +971,7 @@ export type BatchScalarWhereInput = {
 
 export type BatchCreateWithoutStockLogsInput = {
   id?: string
+  tenantId?: string | null
   batchNo?: string | null
   inboundAt?: Date | string
   originalQty: number
@@ -963,6 +993,7 @@ export type BatchCreateWithoutStockLogsInput = {
 
 export type BatchUncheckedCreateWithoutStockLogsInput = {
   id?: string
+  tenantId?: string | null
   materialId: string
   batchNo?: string | null
   inboundAt?: Date | string
@@ -1000,6 +1031,7 @@ export type BatchUpdateToOneWithWhereWithoutStockLogsInput = {
 
 export type BatchUpdateWithoutStockLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   batchNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1021,6 +1053,7 @@ export type BatchUpdateWithoutStockLogsInput = {
 
 export type BatchUncheckedUpdateWithoutStockLogsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   batchNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1042,6 +1075,7 @@ export type BatchUncheckedUpdateWithoutStockLogsInput = {
 
 export type BatchCreateWithoutStockLossRecordsInput = {
   id?: string
+  tenantId?: string | null
   batchNo?: string | null
   inboundAt?: Date | string
   originalQty: number
@@ -1063,6 +1097,7 @@ export type BatchCreateWithoutStockLossRecordsInput = {
 
 export type BatchUncheckedCreateWithoutStockLossRecordsInput = {
   id?: string
+  tenantId?: string | null
   materialId: string
   batchNo?: string | null
   inboundAt?: Date | string
@@ -1100,6 +1135,7 @@ export type BatchUpdateToOneWithWhereWithoutStockLossRecordsInput = {
 
 export type BatchUpdateWithoutStockLossRecordsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   batchNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1121,6 +1157,7 @@ export type BatchUpdateWithoutStockLossRecordsInput = {
 
 export type BatchUncheckedUpdateWithoutStockLossRecordsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   materialId?: Prisma.StringFieldUpdateOperationsInput | string
   batchNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1142,6 +1179,7 @@ export type BatchUncheckedUpdateWithoutStockLossRecordsInput = {
 
 export type BatchCreateManyMaterialInput = {
   id?: string
+  tenantId?: string | null
   batchNo?: string | null
   inboundAt?: Date | string
   originalQty: number
@@ -1160,6 +1198,7 @@ export type BatchCreateManyMaterialInput = {
 
 export type BatchUpdateWithoutMaterialInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   batchNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1181,6 +1220,7 @@ export type BatchUpdateWithoutMaterialInput = {
 
 export type BatchUncheckedUpdateWithoutMaterialInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   batchNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1202,6 +1242,7 @@ export type BatchUncheckedUpdateWithoutMaterialInput = {
 
 export type BatchUncheckedUpdateManyWithoutMaterialInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   batchNo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   inboundAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   originalQty?: Prisma.IntFieldUpdateOperationsInput | number
@@ -1260,6 +1301,7 @@ export type BatchCountOutputTypeCountStockLossRecordsArgs<ExtArgs extends runtim
 
 export type BatchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   materialId?: boolean
   batchNo?: boolean
   inboundAt?: boolean
@@ -1284,6 +1326,7 @@ export type BatchSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
 
 export type BatchSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   materialId?: boolean
   batchNo?: boolean
   inboundAt?: boolean
@@ -1304,6 +1347,7 @@ export type BatchSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 
 export type BatchSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   materialId?: boolean
   batchNo?: boolean
   inboundAt?: boolean
@@ -1324,6 +1368,7 @@ export type BatchSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
 
 export type BatchSelectScalar = {
   id?: boolean
+  tenantId?: boolean
   materialId?: boolean
   batchNo?: boolean
   inboundAt?: boolean
@@ -1341,7 +1386,7 @@ export type BatchSelectScalar = {
   updatedAt?: boolean
 }
 
-export type BatchOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "materialId" | "batchNo" | "inboundAt" | "originalQty" | "remainingQty" | "unitCost" | "lossAdjustedUnitCost" | "usableRate" | "lossRate" | "expiresAt" | "storageLocation" | "supplier" | "note" | "createdAt" | "updatedAt", ExtArgs["result"]["batch"]>
+export type BatchOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "materialId" | "batchNo" | "inboundAt" | "originalQty" | "remainingQty" | "unitCost" | "lossAdjustedUnitCost" | "usableRate" | "lossRate" | "expiresAt" | "storageLocation" | "supplier" | "note" | "createdAt" | "updatedAt", ExtArgs["result"]["batch"]>
 export type BatchInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   material?: boolean | Prisma.MaterialDefaultArgs<ExtArgs>
   stockLogs?: boolean | Prisma.Batch$stockLogsArgs<ExtArgs>
@@ -1366,6 +1411,7 @@ export type $BatchPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    tenantId: string | null
     materialId: string
     batchNo: string | null
     inboundAt: Date
@@ -1809,6 +1855,7 @@ export interface Prisma__BatchClient<T, Null = never, ExtArgs extends runtime.Ty
  */
 export interface BatchFieldRefs {
   readonly id: Prisma.FieldRef<"Batch", 'String'>
+  readonly tenantId: Prisma.FieldRef<"Batch", 'String'>
   readonly materialId: Prisma.FieldRef<"Batch", 'String'>
   readonly batchNo: Prisma.FieldRef<"Batch", 'String'>
   readonly inboundAt: Prisma.FieldRef<"Batch", 'DateTime'>

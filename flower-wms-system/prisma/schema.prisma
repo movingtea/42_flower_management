@@ -283,6 +283,7 @@ model MaterialCategoryRelation {
 
 model Supplier {
   id           String       @id @default(cuid())
+  tenantId     String?      @map("tenant_id")
   name         String
   supplierType SupplierType @map("supplier_type")
   contactName  String?      @map("contact_name")
@@ -304,6 +305,7 @@ model Supplier {
 
 model PurchaseOrder {
   id                  String                       @id @default(cuid())
+  tenantId            String?                      @map("tenant_id")
   purchaseNo          String                       @unique @map("purchase_no")
   supplierId          String                       @map("supplier_id")
   purchaseDate        DateTime                     @map("purchase_date")
@@ -372,6 +374,7 @@ model PurchaseOrderLine {
 
 model ProductSpu {
   id               String   @id @default(uuid())
+  tenantId         String?  @map("tenant_id")
   name             String
   description      String?  @db.Text
   maintenanceGuide String?  @map("maintenance_guide") @db.Text
@@ -411,6 +414,7 @@ model ProductSpu {
 
 model ProductSku {
   id                  String   @id @default(uuid())
+  tenantId            String?  @map("tenant_id")
   spuId               String   @map("spu_id")
   skuCode             String   @unique @map("sku_code")
   specName            String   @map("spec_name")
@@ -452,6 +456,7 @@ model ProductSku {
 
 model CmsRecommendationSlot {
   id          String                 @id @default(cuid())
+  tenantId    String?                @map("tenant_id")
   key         String                 @unique
   name        String
   description String?                @db.Text
@@ -515,6 +520,7 @@ enum HomeSceneEntryTargetType {
 
 model CmsHomeSceneEntry {
   id                          String                   @id @default(cuid())
+  tenantId                    String?                  @map("tenant_id")
   title                       String
   subtitle                    String?
   sceneType                   GiftOccasionType         @map("scene_type")
@@ -545,6 +551,7 @@ model CmsHomeSceneEntry {
 
 model Banner {
   id          String           @id @default(uuid())
+  tenantId    String?          @map("tenant_id")
   imageUrl    String           @map("image_url")
   sortOrder   Int              @default(100) @map("sort_order")
   targetType  BannerTargetType @default(NONE) @map("target_type")
@@ -574,6 +581,7 @@ model Banner {
 
 model Material {
   id                   String   @id @default(uuid())
+  tenantId             String?  @map("tenant_id")
   materialCode         String   @unique
   name                 String
   unit                 String
@@ -597,6 +605,7 @@ model Material {
 
 model Recipe {
   id             String   @id @default(uuid())
+  tenantId       String?  @map("tenant_id")
   recipeCode     String   @unique @map("recipe_code")
   name           String
   description    String?  @db.Text
@@ -649,6 +658,7 @@ model RecipeLine {
 
 model Batch {
   id                   String    @id @default(cuid())
+  tenantId             String?   @map("tenant_id")
   materialId           String
   batchNo              String?   @unique
   inboundAt            DateTime  @default(now())
@@ -682,6 +692,7 @@ model Batch {
 
 model StockLog {
   id              String       @id @default(cuid())
+  tenantId        String?      @map("tenant_id")
   materialId      String
   batchId         String
   type            StockLogType
@@ -739,7 +750,7 @@ model StockLossRecord {
 
 // ---------------------------------------------------------------------------
 // Tenant / TenantMember — SaaS 租户与后台员工归属（Sprint 21）
-// 说明：当前仅身份地基；业务表尚未加 tenantId，权限仍由 StaffUser.role 驱动
+// 说明：Sprint 22 起业务表含 nullable tenantId（归属标签）；尚无 FK / 查询隔离
 // ---------------------------------------------------------------------------
 
 model Tenant {
@@ -850,6 +861,7 @@ model User {
 
 model Order {
   id                 String             @id @default(uuid())
+  tenantId           String?            @map("tenant_id")
   orderNo            String             @unique @map("order_no")
   userId             String             @map("user_id")
   totalAmount        Float              @map("total_amount")
@@ -939,6 +951,7 @@ model OrderItem {
 
 model Customer {
   id                String         @id @default(cuid())
+  tenantId          String?        @map("tenant_id")
   miniProgramUserId String?        @unique @map("mini_program_user_id")
   name              String?
   phone             String?

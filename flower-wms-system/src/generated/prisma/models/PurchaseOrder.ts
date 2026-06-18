@@ -46,6 +46,7 @@ export type PurchaseOrderSumAggregateOutputType = {
 
 export type PurchaseOrderMinAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   purchaseNo: string | null
   supplierId: string | null
   purchaseDate: Date | null
@@ -66,6 +67,7 @@ export type PurchaseOrderMinAggregateOutputType = {
 
 export type PurchaseOrderMaxAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   purchaseNo: string | null
   supplierId: string | null
   purchaseDate: Date | null
@@ -86,6 +88,7 @@ export type PurchaseOrderMaxAggregateOutputType = {
 
 export type PurchaseOrderCountAggregateOutputType = {
   id: number
+  tenantId: number
   purchaseNo: number
   supplierId: number
   purchaseDate: number
@@ -126,6 +129,7 @@ export type PurchaseOrderSumAggregateInputType = {
 
 export type PurchaseOrderMinAggregateInputType = {
   id?: true
+  tenantId?: true
   purchaseNo?: true
   supplierId?: true
   purchaseDate?: true
@@ -146,6 +150,7 @@ export type PurchaseOrderMinAggregateInputType = {
 
 export type PurchaseOrderMaxAggregateInputType = {
   id?: true
+  tenantId?: true
   purchaseNo?: true
   supplierId?: true
   purchaseDate?: true
@@ -166,6 +171,7 @@ export type PurchaseOrderMaxAggregateInputType = {
 
 export type PurchaseOrderCountAggregateInputType = {
   id?: true
+  tenantId?: true
   purchaseNo?: true
   supplierId?: true
   purchaseDate?: true
@@ -273,6 +279,7 @@ export type PurchaseOrderGroupByArgs<ExtArgs extends runtime.Types.Extensions.In
 
 export type PurchaseOrderGroupByOutputType = {
   id: string
+  tenantId: string | null
   purchaseNo: string
   supplierId: string
   purchaseDate: Date
@@ -316,6 +323,7 @@ export type PurchaseOrderWhereInput = {
   OR?: Prisma.PurchaseOrderWhereInput[]
   NOT?: Prisma.PurchaseOrderWhereInput | Prisma.PurchaseOrderWhereInput[]
   id?: Prisma.StringFilter<"PurchaseOrder"> | string
+  tenantId?: Prisma.StringNullableFilter<"PurchaseOrder"> | string | null
   purchaseNo?: Prisma.StringFilter<"PurchaseOrder"> | string
   supplierId?: Prisma.StringFilter<"PurchaseOrder"> | string
   purchaseDate?: Prisma.DateTimeFilter<"PurchaseOrder"> | Date | string
@@ -338,6 +346,7 @@ export type PurchaseOrderWhereInput = {
 
 export type PurchaseOrderOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   purchaseNo?: Prisma.SortOrder
   supplierId?: Prisma.SortOrder
   purchaseDate?: Prisma.SortOrder
@@ -364,6 +373,7 @@ export type PurchaseOrderWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.PurchaseOrderWhereInput | Prisma.PurchaseOrderWhereInput[]
   OR?: Prisma.PurchaseOrderWhereInput[]
   NOT?: Prisma.PurchaseOrderWhereInput | Prisma.PurchaseOrderWhereInput[]
+  tenantId?: Prisma.StringNullableFilter<"PurchaseOrder"> | string | null
   supplierId?: Prisma.StringFilter<"PurchaseOrder"> | string
   purchaseDate?: Prisma.DateTimeFilter<"PurchaseOrder"> | Date | string
   expectedArrivalDate?: Prisma.DateTimeNullableFilter<"PurchaseOrder"> | Date | string | null
@@ -385,6 +395,7 @@ export type PurchaseOrderWhereUniqueInput = Prisma.AtLeast<{
 
 export type PurchaseOrderOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   purchaseNo?: Prisma.SortOrder
   supplierId?: Prisma.SortOrder
   purchaseDate?: Prisma.SortOrder
@@ -413,6 +424,7 @@ export type PurchaseOrderScalarWhereWithAggregatesInput = {
   OR?: Prisma.PurchaseOrderScalarWhereWithAggregatesInput[]
   NOT?: Prisma.PurchaseOrderScalarWhereWithAggregatesInput | Prisma.PurchaseOrderScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"PurchaseOrder"> | string
+  tenantId?: Prisma.StringNullableWithAggregatesFilter<"PurchaseOrder"> | string | null
   purchaseNo?: Prisma.StringWithAggregatesFilter<"PurchaseOrder"> | string
   supplierId?: Prisma.StringWithAggregatesFilter<"PurchaseOrder"> | string
   purchaseDate?: Prisma.DateTimeWithAggregatesFilter<"PurchaseOrder"> | Date | string
@@ -433,6 +445,7 @@ export type PurchaseOrderScalarWhereWithAggregatesInput = {
 
 export type PurchaseOrderCreateInput = {
   id?: string
+  tenantId?: string | null
   purchaseNo: string
   purchaseDate: Date | string
   expectedArrivalDate?: Date | string | null
@@ -454,6 +467,7 @@ export type PurchaseOrderCreateInput = {
 
 export type PurchaseOrderUncheckedCreateInput = {
   id?: string
+  tenantId?: string | null
   purchaseNo: string
   supplierId: string
   purchaseDate: Date | string
@@ -475,6 +489,7 @@ export type PurchaseOrderUncheckedCreateInput = {
 
 export type PurchaseOrderUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseNo?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expectedArrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -496,6 +511,7 @@ export type PurchaseOrderUpdateInput = {
 
 export type PurchaseOrderUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseNo?: Prisma.StringFieldUpdateOperationsInput | string
   supplierId?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -517,6 +533,7 @@ export type PurchaseOrderUncheckedUpdateInput = {
 
 export type PurchaseOrderCreateManyInput = {
   id?: string
+  tenantId?: string | null
   purchaseNo: string
   supplierId: string
   purchaseDate: Date | string
@@ -537,6 +554,7 @@ export type PurchaseOrderCreateManyInput = {
 
 export type PurchaseOrderUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseNo?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expectedArrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -556,6 +574,7 @@ export type PurchaseOrderUpdateManyMutationInput = {
 
 export type PurchaseOrderUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseNo?: Prisma.StringFieldUpdateOperationsInput | string
   supplierId?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -586,6 +605,7 @@ export type PurchaseOrderOrderByRelationAggregateInput = {
 
 export type PurchaseOrderCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   purchaseNo?: Prisma.SortOrder
   supplierId?: Prisma.SortOrder
   purchaseDate?: Prisma.SortOrder
@@ -615,6 +635,7 @@ export type PurchaseOrderAvgOrderByAggregateInput = {
 
 export type PurchaseOrderMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   purchaseNo?: Prisma.SortOrder
   supplierId?: Prisma.SortOrder
   purchaseDate?: Prisma.SortOrder
@@ -635,6 +656,7 @@ export type PurchaseOrderMaxOrderByAggregateInput = {
 
 export type PurchaseOrderMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   purchaseNo?: Prisma.SortOrder
   supplierId?: Prisma.SortOrder
   purchaseDate?: Prisma.SortOrder
@@ -745,6 +767,7 @@ export type PurchaseOrderUpdateOneRequiredWithoutLinesNestedInput = {
 
 export type PurchaseOrderCreateWithoutSupplierInput = {
   id?: string
+  tenantId?: string | null
   purchaseNo: string
   purchaseDate: Date | string
   expectedArrivalDate?: Date | string | null
@@ -765,6 +788,7 @@ export type PurchaseOrderCreateWithoutSupplierInput = {
 
 export type PurchaseOrderUncheckedCreateWithoutSupplierInput = {
   id?: string
+  tenantId?: string | null
   purchaseNo: string
   purchaseDate: Date | string
   expectedArrivalDate?: Date | string | null
@@ -814,6 +838,7 @@ export type PurchaseOrderScalarWhereInput = {
   OR?: Prisma.PurchaseOrderScalarWhereInput[]
   NOT?: Prisma.PurchaseOrderScalarWhereInput | Prisma.PurchaseOrderScalarWhereInput[]
   id?: Prisma.StringFilter<"PurchaseOrder"> | string
+  tenantId?: Prisma.StringNullableFilter<"PurchaseOrder"> | string | null
   purchaseNo?: Prisma.StringFilter<"PurchaseOrder"> | string
   supplierId?: Prisma.StringFilter<"PurchaseOrder"> | string
   purchaseDate?: Prisma.DateTimeFilter<"PurchaseOrder"> | Date | string
@@ -834,6 +859,7 @@ export type PurchaseOrderScalarWhereInput = {
 
 export type PurchaseOrderCreateWithoutLinesInput = {
   id?: string
+  tenantId?: string | null
   purchaseNo: string
   purchaseDate: Date | string
   expectedArrivalDate?: Date | string | null
@@ -854,6 +880,7 @@ export type PurchaseOrderCreateWithoutLinesInput = {
 
 export type PurchaseOrderUncheckedCreateWithoutLinesInput = {
   id?: string
+  tenantId?: string | null
   purchaseNo: string
   supplierId: string
   purchaseDate: Date | string
@@ -890,6 +917,7 @@ export type PurchaseOrderUpdateToOneWithWhereWithoutLinesInput = {
 
 export type PurchaseOrderUpdateWithoutLinesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseNo?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expectedArrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -910,6 +938,7 @@ export type PurchaseOrderUpdateWithoutLinesInput = {
 
 export type PurchaseOrderUncheckedUpdateWithoutLinesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseNo?: Prisma.StringFieldUpdateOperationsInput | string
   supplierId?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -930,6 +959,7 @@ export type PurchaseOrderUncheckedUpdateWithoutLinesInput = {
 
 export type PurchaseOrderCreateManySupplierInput = {
   id?: string
+  tenantId?: string | null
   purchaseNo: string
   purchaseDate: Date | string
   expectedArrivalDate?: Date | string | null
@@ -949,6 +979,7 @@ export type PurchaseOrderCreateManySupplierInput = {
 
 export type PurchaseOrderUpdateWithoutSupplierInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseNo?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expectedArrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -969,6 +1000,7 @@ export type PurchaseOrderUpdateWithoutSupplierInput = {
 
 export type PurchaseOrderUncheckedUpdateWithoutSupplierInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseNo?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expectedArrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -989,6 +1021,7 @@ export type PurchaseOrderUncheckedUpdateWithoutSupplierInput = {
 
 export type PurchaseOrderUncheckedUpdateManyWithoutSupplierInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseNo?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseDate?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   expectedArrivalDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1039,6 +1072,7 @@ export type PurchaseOrderCountOutputTypeCountLinesArgs<ExtArgs extends runtime.T
 
 export type PurchaseOrderSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   purchaseNo?: boolean
   supplierId?: boolean
   purchaseDate?: boolean
@@ -1062,6 +1096,7 @@ export type PurchaseOrderSelect<ExtArgs extends runtime.Types.Extensions.Interna
 
 export type PurchaseOrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   purchaseNo?: boolean
   supplierId?: boolean
   purchaseDate?: boolean
@@ -1083,6 +1118,7 @@ export type PurchaseOrderSelectCreateManyAndReturn<ExtArgs extends runtime.Types
 
 export type PurchaseOrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   purchaseNo?: boolean
   supplierId?: boolean
   purchaseDate?: boolean
@@ -1104,6 +1140,7 @@ export type PurchaseOrderSelectUpdateManyAndReturn<ExtArgs extends runtime.Types
 
 export type PurchaseOrderSelectScalar = {
   id?: boolean
+  tenantId?: boolean
   purchaseNo?: boolean
   supplierId?: boolean
   purchaseDate?: boolean
@@ -1122,7 +1159,7 @@ export type PurchaseOrderSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PurchaseOrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "purchaseNo" | "supplierId" | "purchaseDate" | "expectedArrivalDate" | "receivedAt" | "status" | "goodsAmount" | "shippingFee" | "packagingFee" | "otherFee" | "totalExtraFee" | "totalAmount" | "allocationMethod" | "note" | "createdAt" | "updatedAt", ExtArgs["result"]["purchaseOrder"]>
+export type PurchaseOrderOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "purchaseNo" | "supplierId" | "purchaseDate" | "expectedArrivalDate" | "receivedAt" | "status" | "goodsAmount" | "shippingFee" | "packagingFee" | "otherFee" | "totalExtraFee" | "totalAmount" | "allocationMethod" | "note" | "createdAt" | "updatedAt", ExtArgs["result"]["purchaseOrder"]>
 export type PurchaseOrderInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   supplier?: boolean | Prisma.SupplierDefaultArgs<ExtArgs>
   lines?: boolean | Prisma.PurchaseOrder$linesArgs<ExtArgs>
@@ -1143,6 +1180,7 @@ export type $PurchaseOrderPayload<ExtArgs extends runtime.Types.Extensions.Inter
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    tenantId: string | null
     purchaseNo: string
     supplierId: string
     purchaseDate: Date
@@ -1585,6 +1623,7 @@ export interface Prisma__PurchaseOrderClient<T, Null = never, ExtArgs extends ru
  */
 export interface PurchaseOrderFieldRefs {
   readonly id: Prisma.FieldRef<"PurchaseOrder", 'String'>
+  readonly tenantId: Prisma.FieldRef<"PurchaseOrder", 'String'>
   readonly purchaseNo: Prisma.FieldRef<"PurchaseOrder", 'String'>
   readonly supplierId: Prisma.FieldRef<"PurchaseOrder", 'String'>
   readonly purchaseDate: Prisma.FieldRef<"PurchaseOrder", 'DateTime'>

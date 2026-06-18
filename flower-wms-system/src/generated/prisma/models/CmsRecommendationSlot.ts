@@ -38,6 +38,7 @@ export type CmsRecommendationSlotSumAggregateOutputType = {
 
 export type CmsRecommendationSlotMinAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   key: string | null
   name: string | null
   description: string | null
@@ -52,6 +53,7 @@ export type CmsRecommendationSlotMinAggregateOutputType = {
 
 export type CmsRecommendationSlotMaxAggregateOutputType = {
   id: string | null
+  tenantId: string | null
   key: string | null
   name: string | null
   description: string | null
@@ -66,6 +68,7 @@ export type CmsRecommendationSlotMaxAggregateOutputType = {
 
 export type CmsRecommendationSlotCountAggregateOutputType = {
   id: number
+  tenantId: number
   key: number
   name: number
   description: number
@@ -92,6 +95,7 @@ export type CmsRecommendationSlotSumAggregateInputType = {
 
 export type CmsRecommendationSlotMinAggregateInputType = {
   id?: true
+  tenantId?: true
   key?: true
   name?: true
   description?: true
@@ -106,6 +110,7 @@ export type CmsRecommendationSlotMinAggregateInputType = {
 
 export type CmsRecommendationSlotMaxAggregateInputType = {
   id?: true
+  tenantId?: true
   key?: true
   name?: true
   description?: true
@@ -120,6 +125,7 @@ export type CmsRecommendationSlotMaxAggregateInputType = {
 
 export type CmsRecommendationSlotCountAggregateInputType = {
   id?: true
+  tenantId?: true
   key?: true
   name?: true
   description?: true
@@ -221,6 +227,7 @@ export type CmsRecommendationSlotGroupByArgs<ExtArgs extends runtime.Types.Exten
 
 export type CmsRecommendationSlotGroupByOutputType = {
   id: string
+  tenantId: string | null
   key: string
   name: string
   description: string | null
@@ -258,6 +265,7 @@ export type CmsRecommendationSlotWhereInput = {
   OR?: Prisma.CmsRecommendationSlotWhereInput[]
   NOT?: Prisma.CmsRecommendationSlotWhereInput | Prisma.CmsRecommendationSlotWhereInput[]
   id?: Prisma.StringFilter<"CmsRecommendationSlot"> | string
+  tenantId?: Prisma.StringNullableFilter<"CmsRecommendationSlot"> | string | null
   key?: Prisma.StringFilter<"CmsRecommendationSlot"> | string
   name?: Prisma.StringFilter<"CmsRecommendationSlot"> | string
   description?: Prisma.StringNullableFilter<"CmsRecommendationSlot"> | string | null
@@ -274,6 +282,7 @@ export type CmsRecommendationSlotWhereInput = {
 
 export type CmsRecommendationSlotOrderByWithRelationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   key?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -294,6 +303,7 @@ export type CmsRecommendationSlotWhereUniqueInput = Prisma.AtLeast<{
   AND?: Prisma.CmsRecommendationSlotWhereInput | Prisma.CmsRecommendationSlotWhereInput[]
   OR?: Prisma.CmsRecommendationSlotWhereInput[]
   NOT?: Prisma.CmsRecommendationSlotWhereInput | Prisma.CmsRecommendationSlotWhereInput[]
+  tenantId?: Prisma.StringNullableFilter<"CmsRecommendationSlot"> | string | null
   name?: Prisma.StringFilter<"CmsRecommendationSlot"> | string
   description?: Prisma.StringNullableFilter<"CmsRecommendationSlot"> | string | null
   slotType?: Prisma.EnumRecommendationSlotTypeFilter<"CmsRecommendationSlot"> | $Enums.RecommendationSlotType
@@ -309,6 +319,7 @@ export type CmsRecommendationSlotWhereUniqueInput = Prisma.AtLeast<{
 
 export type CmsRecommendationSlotOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrderInput | Prisma.SortOrder
   key?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -331,6 +342,7 @@ export type CmsRecommendationSlotScalarWhereWithAggregatesInput = {
   OR?: Prisma.CmsRecommendationSlotScalarWhereWithAggregatesInput[]
   NOT?: Prisma.CmsRecommendationSlotScalarWhereWithAggregatesInput | Prisma.CmsRecommendationSlotScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"CmsRecommendationSlot"> | string
+  tenantId?: Prisma.StringNullableWithAggregatesFilter<"CmsRecommendationSlot"> | string | null
   key?: Prisma.StringWithAggregatesFilter<"CmsRecommendationSlot"> | string
   name?: Prisma.StringWithAggregatesFilter<"CmsRecommendationSlot"> | string
   description?: Prisma.StringNullableWithAggregatesFilter<"CmsRecommendationSlot"> | string | null
@@ -345,6 +357,7 @@ export type CmsRecommendationSlotScalarWhereWithAggregatesInput = {
 
 export type CmsRecommendationSlotCreateInput = {
   id?: string
+  tenantId?: string | null
   key: string
   name: string
   description?: string | null
@@ -361,6 +374,7 @@ export type CmsRecommendationSlotCreateInput = {
 
 export type CmsRecommendationSlotUncheckedCreateInput = {
   id?: string
+  tenantId?: string | null
   key: string
   name: string
   description?: string | null
@@ -377,6 +391,7 @@ export type CmsRecommendationSlotUncheckedCreateInput = {
 
 export type CmsRecommendationSlotUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -393,6 +408,7 @@ export type CmsRecommendationSlotUpdateInput = {
 
 export type CmsRecommendationSlotUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -409,6 +425,7 @@ export type CmsRecommendationSlotUncheckedUpdateInput = {
 
 export type CmsRecommendationSlotCreateManyInput = {
   id?: string
+  tenantId?: string | null
   key: string
   name: string
   description?: string | null
@@ -423,6 +440,7 @@ export type CmsRecommendationSlotCreateManyInput = {
 
 export type CmsRecommendationSlotUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -437,6 +455,7 @@ export type CmsRecommendationSlotUpdateManyMutationInput = {
 
 export type CmsRecommendationSlotUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -451,6 +470,7 @@ export type CmsRecommendationSlotUncheckedUpdateManyInput = {
 
 export type CmsRecommendationSlotCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   key?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
@@ -470,6 +490,7 @@ export type CmsRecommendationSlotAvgOrderByAggregateInput = {
 
 export type CmsRecommendationSlotMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   key?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
@@ -484,6 +505,7 @@ export type CmsRecommendationSlotMaxOrderByAggregateInput = {
 
 export type CmsRecommendationSlotMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
+  tenantId?: Prisma.SortOrder
   key?: Prisma.SortOrder
   name?: Prisma.SortOrder
   description?: Prisma.SortOrder
@@ -551,6 +573,7 @@ export type CmsRecommendationSlotUpdateOneWithoutHomeSceneEntriesNestedInput = {
 
 export type CmsRecommendationSlotCreateWithoutItemsInput = {
   id?: string
+  tenantId?: string | null
   key: string
   name: string
   description?: string | null
@@ -566,6 +589,7 @@ export type CmsRecommendationSlotCreateWithoutItemsInput = {
 
 export type CmsRecommendationSlotUncheckedCreateWithoutItemsInput = {
   id?: string
+  tenantId?: string | null
   key: string
   name: string
   description?: string | null
@@ -597,6 +621,7 @@ export type CmsRecommendationSlotUpdateToOneWithWhereWithoutItemsInput = {
 
 export type CmsRecommendationSlotUpdateWithoutItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -612,6 +637,7 @@ export type CmsRecommendationSlotUpdateWithoutItemsInput = {
 
 export type CmsRecommendationSlotUncheckedUpdateWithoutItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -627,6 +653,7 @@ export type CmsRecommendationSlotUncheckedUpdateWithoutItemsInput = {
 
 export type CmsRecommendationSlotCreateWithoutHomeSceneEntriesInput = {
   id?: string
+  tenantId?: string | null
   key: string
   name: string
   description?: string | null
@@ -642,6 +669,7 @@ export type CmsRecommendationSlotCreateWithoutHomeSceneEntriesInput = {
 
 export type CmsRecommendationSlotUncheckedCreateWithoutHomeSceneEntriesInput = {
   id?: string
+  tenantId?: string | null
   key: string
   name: string
   description?: string | null
@@ -673,6 +701,7 @@ export type CmsRecommendationSlotUpdateToOneWithWhereWithoutHomeSceneEntriesInpu
 
 export type CmsRecommendationSlotUpdateWithoutHomeSceneEntriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -688,6 +717,7 @@ export type CmsRecommendationSlotUpdateWithoutHomeSceneEntriesInput = {
 
 export type CmsRecommendationSlotUncheckedUpdateWithoutHomeSceneEntriesInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   key?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -743,6 +773,7 @@ export type CmsRecommendationSlotCountOutputTypeCountHomeSceneEntriesArgs<ExtArg
 
 export type CmsRecommendationSlotSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   key?: boolean
   name?: boolean
   description?: boolean
@@ -760,6 +791,7 @@ export type CmsRecommendationSlotSelect<ExtArgs extends runtime.Types.Extensions
 
 export type CmsRecommendationSlotSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   key?: boolean
   name?: boolean
   description?: boolean
@@ -774,6 +806,7 @@ export type CmsRecommendationSlotSelectCreateManyAndReturn<ExtArgs extends runti
 
 export type CmsRecommendationSlotSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
+  tenantId?: boolean
   key?: boolean
   name?: boolean
   description?: boolean
@@ -788,6 +821,7 @@ export type CmsRecommendationSlotSelectUpdateManyAndReturn<ExtArgs extends runti
 
 export type CmsRecommendationSlotSelectScalar = {
   id?: boolean
+  tenantId?: boolean
   key?: boolean
   name?: boolean
   description?: boolean
@@ -800,7 +834,7 @@ export type CmsRecommendationSlotSelectScalar = {
   updatedAt?: boolean
 }
 
-export type CmsRecommendationSlotOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "key" | "name" | "description" | "slotType" | "sceneType" | "isActive" | "sortOrder" | "maxItems" | "createdAt" | "updatedAt", ExtArgs["result"]["cmsRecommendationSlot"]>
+export type CmsRecommendationSlotOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "key" | "name" | "description" | "slotType" | "sceneType" | "isActive" | "sortOrder" | "maxItems" | "createdAt" | "updatedAt", ExtArgs["result"]["cmsRecommendationSlot"]>
 export type CmsRecommendationSlotInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   items?: boolean | Prisma.CmsRecommendationSlot$itemsArgs<ExtArgs>
   homeSceneEntries?: boolean | Prisma.CmsRecommendationSlot$homeSceneEntriesArgs<ExtArgs>
@@ -817,6 +851,7 @@ export type $CmsRecommendationSlotPayload<ExtArgs extends runtime.Types.Extensio
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
+    tenantId: string | null
     key: string
     name: string
     description: string | null
@@ -1253,6 +1288,7 @@ export interface Prisma__CmsRecommendationSlotClient<T, Null = never, ExtArgs ex
  */
 export interface CmsRecommendationSlotFieldRefs {
   readonly id: Prisma.FieldRef<"CmsRecommendationSlot", 'String'>
+  readonly tenantId: Prisma.FieldRef<"CmsRecommendationSlot", 'String'>
   readonly key: Prisma.FieldRef<"CmsRecommendationSlot", 'String'>
   readonly name: Prisma.FieldRef<"CmsRecommendationSlot", 'String'>
   readonly description: Prisma.FieldRef<"CmsRecommendationSlot", 'String'>
