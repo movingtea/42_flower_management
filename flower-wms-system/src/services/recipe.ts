@@ -1,6 +1,7 @@
 import { Prisma } from "@/generated/prisma/client";
 import { formatIngredientSummary } from "../lib/recipe-display";
 import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/tenant/tenant-write-context";
 import { decimalToString, money } from "@/services/order-cost-pure";
 import {
   calculateMaterialLinesByMode,
@@ -500,7 +501,7 @@ export async function createRecipe(raw: unknown): Promise<RecipeSummary> {
           await assertPackagingKitActive(tx, packagingKitId);
 
           const recipe = await tx.recipe.create({
-            data: { recipeCode, name, description, packagingKitId },
+            data: withTenant({ recipeCode, name, description, packagingKitId }),
             select: { id: true },
           });
           await writeRecipeLines(tx, recipe.id, ingredients);

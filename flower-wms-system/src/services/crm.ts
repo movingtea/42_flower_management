@@ -18,6 +18,7 @@ import {
   parseAppDateString,
 } from "@/lib/datetime";
 import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/tenant/tenant-write-context";
 import {
   buildCustomerDisplayName,
   buildReminderContent,
@@ -247,7 +248,7 @@ export async function upsertCustomerFromMiniProgramOrder(
     });
   } else {
     customer = await client.customer.create({
-      data: {
+      data: withTenant({
         miniProgramUserId: input.miniProgramUserId,
         name: name ?? displayName,
         phone,
@@ -257,7 +258,7 @@ export async function upsertCustomerFromMiniProgramOrder(
         source,
         firstOrderAt: input.orderCreatedAt,
         lastOrderAt: input.orderCreatedAt,
-      },
+      }),
     });
   }
 
@@ -1172,7 +1173,7 @@ export async function createMiniProgramRecipient(
   if (!customer) {
     const user = await prisma.user.findUniqueOrThrow({ where: { id: userId } });
     customer = await prisma.customer.create({
-      data: {
+      data: withTenant({
         miniProgramUserId: userId,
         wechatOpenid: user.openId,
         wechatNickname: user.nickName,
@@ -1182,7 +1183,7 @@ export async function createMiniProgramRecipient(
         }),
         phone: normalizePhone(user.defaultReceiverPhone),
         source: CustomerSource.MINI_PROGRAM,
-      },
+      }),
     });
   }
 

@@ -1,12 +1,13 @@
 import type { Prisma } from "@/generated/prisma/client";
 import type { CmsProductBody } from "@/lib/cms-products";
 import { cmsBodyToSpuData } from "@/lib/cms-product-mapper";
+import { withTenant } from "@/lib/tenant/tenant-write-context";
 import { generateUniqueSku } from "@/utils/skuGenerator";
 
 export function cmsSpuCreateData(
   body: CmsProductBody
 ): Prisma.ProductSpuUncheckedCreateInput {
-  return cmsBodyToSpuData(body);
+  return withTenant(cmsBodyToSpuData(body));
 }
 
 export function cmsSpuUpdateData(
@@ -27,22 +28,24 @@ export async function buildSkuCreateRows(
     const skuCode =
       row.skuCode?.trim() || (await generateUniqueSku("productSku", tx));
 
-    rows.push({
-      spuId,
-      skuCode,
-      specName: row.specName,
-      price: row.price,
-      stock: row.stock,
-      imageUrl: row.imageUrl,
-      isMainImage: row.isMainImage,
-      isActive: row.isActive !== false,
-      sortOrder: row.sortOrder ?? i * 10,
-      recipeId: row.recipeId ?? null,
-      bulkPreorderEnabled: row.bulkPreorderEnabled ?? false,
-      bulkOrderThreshold: row.bulkOrderThreshold ?? null,
-      bulkMinLeadDays: row.bulkMinLeadDays ?? null,
-      bulkPreorderMessage: row.bulkPreorderMessage ?? null,
-    });
+    rows.push(
+      withTenant({
+        spuId,
+        skuCode,
+        specName: row.specName,
+        price: row.price,
+        stock: row.stock,
+        imageUrl: row.imageUrl,
+        isMainImage: row.isMainImage,
+        isActive: row.isActive !== false,
+        sortOrder: row.sortOrder ?? i * 10,
+        recipeId: row.recipeId ?? null,
+        bulkPreorderEnabled: row.bulkPreorderEnabled ?? false,
+        bulkOrderThreshold: row.bulkOrderThreshold ?? null,
+        bulkMinLeadDays: row.bulkMinLeadDays ?? null,
+        bulkPreorderMessage: row.bulkPreorderMessage ?? null,
+      })
+    );
   }
 
   return rows;
@@ -93,11 +96,11 @@ export async function syncProductSkus(
       const skuCode =
         row.skuCode?.trim() || (await generateUniqueSku("productSku", tx));
       await tx.productSku.create({
-        data: {
+        data: withTenant({
           spuId,
           skuCode,
           ...data,
-        },
+        }),
       });
     }
   }

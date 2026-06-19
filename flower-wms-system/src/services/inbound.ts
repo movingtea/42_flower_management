@@ -2,6 +2,7 @@ import { Prisma } from "@/generated/prisma/client";
 import { StockLogType } from "@/generated/prisma/enums";
 import { syncMaterialCategoryLinks } from "@/lib/material-categories";
 import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/tenant/tenant-write-context";
 import { generateUniqueSku } from "@/utils/skuGenerator";
 
 export type PurchaseInboundPayload = {
@@ -49,17 +50,19 @@ export async function runPurchaseInboundTransaction(body: PurchaseInboundPayload
       materialCreated = true;
       const materialCode = await generateUniqueSku("material", tx);
       material = await tx.material.create({
-        data: {
+        data: withTenant({
           materialCode,
           name: body.name,
           unit: "支",
           safetyStockThreshold: body.safetyStockThreshold,
-        },
+        }),
       });
     } else {
       material = await tx.material.update({
         where: { id: material.id },
-        data: { safetyStockThreshold: body.safetyStockThreshold },
+        data: withTenant({
+          safetyStockThreshold: body.safetyStockThreshold,
+        }),
       });
     }
 
@@ -69,7 +72,7 @@ export async function runPurchaseInboundTransaction(body: PurchaseInboundPayload
 
     const batchNo = await generateBatchNo(tx);
     const batch = await tx.batch.create({
-      data: {
+      data: withTenant({
         materialId: material.id,
         batchNo,
         originalQty: body.receivedQty,
@@ -77,11 +80,11 @@ export async function runPurchaseInboundTransaction(body: PurchaseInboundPayload
         unitCost: body.costPrice,
         expiresAt: body.expiryDate ? new Date(body.expiryDate) : undefined,
         supplier: body.supplierName,
-      },
+      }),
     });
 
     const stockLog = await tx.stockLog.create({
-      data: {
+      data: withTenant({
         materialId: material.id,
         batchId: batch.id,
         type: StockLogType.INBOUND,
@@ -89,7 +92,7 @@ export async function runPurchaseInboundTransaction(body: PurchaseInboundPayload
         quantity: body.receivedQty,
         remark: "采购入库",
         operator: "system",
-      },
+      }),
     });
 
     return { materialCreated, material, batch, stockLog };

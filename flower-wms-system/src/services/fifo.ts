@@ -1,5 +1,6 @@
 import type { Prisma } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/tenant/tenant-write-context";
 import { assertStockMutationAuthorized } from "@/lib/stock-mutation-auth";
 import type { FifoDeduction } from "@/types";
 import { StockLogType } from "@/generated/prisma/enums";
@@ -107,7 +108,7 @@ export async function applyFifoDeductionsInTx(
     }
 
     await tx.stockLog.create({
-      data: {
+      data: withTenant({
         materialId: options.materialId,
         batchId: d.batchId,
         type: options.logType,
@@ -119,7 +120,7 @@ export async function applyFifoDeductionsInTx(
         operator: options.operatorLabel ?? options.operator,
         operatorStaffId: options.operatorStaffId,
         remark: options.remark,
-      },
+      }),
     });
   }
 

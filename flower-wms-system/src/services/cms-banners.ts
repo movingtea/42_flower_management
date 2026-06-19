@@ -12,6 +12,7 @@ import {
 } from "@/lib/banner.server";
 import { normalizeStoredImagePathRequired } from "@/lib/image-url";
 import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/tenant/tenant-write-context";
 import { resolveBannerCmsStatus as resolveBannerCmsStatusPure } from "@/services/banner-rules-pure";
 
 export type CmsBannerRow = BannerRow & {
@@ -111,7 +112,7 @@ function buildBannerData(
   if (startsAt && endsAt && startsAt.getTime() > endsAt.getTime()) {
     throw new Error("开始时间不能晚于结束时间");
   }
-  return {
+  return withTenant({
     imageUrl: normalizeStoredImagePathRequired(input.imageUrl),
     sortOrder: Number.isFinite(input.sortOrder)
       ? Math.round(input.sortOrder as number)
@@ -123,7 +124,7 @@ function buildBannerData(
     isActive: input.isActive !== false,
     startsAt,
     endsAt,
-  };
+  });
 }
 
 function validateInput(item: BannerWriteItem, index = 0): void {

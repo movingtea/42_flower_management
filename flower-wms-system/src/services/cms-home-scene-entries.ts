@@ -4,6 +4,7 @@ import {
 } from "@/generated/prisma/enums";
 import type { CmsHomeSceneEntry } from "@/generated/prisma/client";
 import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/tenant/tenant-write-context";
 import {
   buildFallbackMiniProgramEntries,
   DEFAULT_HOME_SCENE_ENTRIES,
@@ -231,7 +232,7 @@ export async function createHomeSceneEntry(
   );
 
   return prisma.cmsHomeSceneEntry.create({
-    data: {
+    data: withTenant({
       title,
       subtitle: input.subtitle?.trim() || null,
       sceneType: input.sceneType,
@@ -244,7 +245,7 @@ export async function createHomeSceneEntry(
       linkedRecommendationSlotId: linked.linkedRecommendationSlotId,
       linkedRecommendationSlotKey: linked.linkedRecommendationSlotKey,
       note: input.note?.trim() || null,
-    },
+    }),
     include: entryInclude(),
   });
 }

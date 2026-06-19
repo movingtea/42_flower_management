@@ -3,6 +3,7 @@ import { StockLogType } from "@/generated/prisma/enums";
 import type { OperatorContext } from "@/lib/operator-context";
 import { assertStockMutationOperatorMatches } from "@/lib/stock-mutation-auth";
 import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/tenant/tenant-write-context";
 import { generateBatchNo } from "@/utils/batch-no";
 import { generateUniqueSku } from "@/utils/skuGenerator";
 import {
@@ -179,12 +180,12 @@ async function resolveOrCreateMaterial(tx: Tx, flowerWikiId: string) {
   if (!material) {
     const materialCode = await generateUniqueSku("material", tx);
     material = await tx.material.create({
-      data: {
+      data: withTenant({
         materialCode,
         name: wiki.chineseName,
         unit: "支",
         wikiId: flowerWikiId,
-      },
+      }),
     });
   }
 
@@ -210,7 +211,7 @@ export async function runStockInTransaction(payload: StockInPayload) {
     const inboundRemark = `原料到货入库（${payload.bundleCount}束×${payload.stemsPerBundle}支/束）`;
 
     const batch = await tx.batch.create({
-      data: {
+      data: withTenant({
         materialId: material.id,
         batchNo,
         inboundAt: now,
@@ -219,11 +220,11 @@ export async function runStockInTransaction(payload: StockInPayload) {
         unitCost: unitCostPerStem,
         expiresAt,
         supplier: payload.supplier ?? null,
-      },
+      }),
     });
 
     await tx.stockLog.create({
-      data: {
+      data: withTenant({
         materialId: material.id,
         batchId: batch.id,
         type: StockLogType.INBOUND,
@@ -232,7 +233,7 @@ export async function runStockInTransaction(payload: StockInPayload) {
         remark: inboundRemark,
         operator: operator.operatorLabel,
         operatorStaffId: operator.operatorStaffId,
-      },
+      }),
     });
 
     return { material, batch, totalStems, shelfLifeDays, expiresAt };
@@ -281,7 +282,7 @@ export async function runStockLossTransaction(payload: StockLossPayload) {
     }
 
     const stockLog = await tx.stockLog.create({
-      data: {
+      data: withTenant({
         materialId: batch.materialId,
         batchId: batch.id,
         type: StockLogType.WASTAGE_OUT,
@@ -291,7 +292,7 @@ export async function runStockLossTransaction(payload: StockLossPayload) {
         remark: payload.reason,
         operator: operator.operatorLabel,
         operatorStaffId: operator.operatorStaffId,
-      },
+      }),
     });
 
     const lossRecord = await tx.stockLossRecord.create({

@@ -18,6 +18,7 @@ import {
   productSpuInclude,
 } from "@/lib/product-spu";
 import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/tenant/tenant-write-context";
 import { normalizeStoredImagePath } from "@/lib/image-url";
 import {
   evaluateProductHealth,
@@ -679,7 +680,7 @@ export async function createRecommendationSlot(
   }
 
   return prisma.cmsRecommendationSlot.create({
-    data: {
+    data: withTenant({
       key,
       name: input.name.trim(),
       description: input.description?.trim() || null,
@@ -688,7 +689,7 @@ export async function createRecommendationSlot(
       isActive: input.isActive ?? true,
       sortOrder: input.sortOrder ?? 0,
       maxItems: input.maxItems ?? 10,
-    },
+    }),
   });
 }
 

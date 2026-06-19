@@ -17,6 +17,7 @@ import {
   resolveSpuMinPrice,
 } from "@/lib/product-spu";
 import { prisma } from "@/lib/prisma";
+import { withTenant, withTenantMany } from "@/lib/tenant/tenant-write-context";
 import {
   normalizeStoredImagePathRequired,
 } from "@/lib/image-url";
@@ -56,15 +57,17 @@ export async function migrateBannersFromAppConfigIfEmpty(): Promise<number> {
   if (legacy.length === 0) return 0;
 
   await prisma.banner.createMany({
-    data: legacy.map((item) => ({
-      id: item.id,
-      imageUrl: item.imageUrl,
-      sortOrder: item.sort,
-      targetType: BannerTargetType.PRODUCT,
-      targetParam: null,
-      productId: item.productId,
-      isActive: true,
-    })),
+    data: withTenantMany(
+      legacy.map((item) => ({
+        id: item.id,
+        imageUrl: item.imageUrl,
+        sortOrder: item.sort,
+        targetType: BannerTargetType.PRODUCT,
+        targetParam: null,
+        productId: item.productId,
+        isActive: true,
+      }))
+    ),
     skipDuplicates: true,
   });
 
@@ -220,7 +223,7 @@ export async function syncBannersFromWriteItems(
     }
 
     for (const item of sorted) {
-      const data: Prisma.BannerUncheckedCreateInput = {
+      const data: Prisma.BannerUncheckedCreateInput = withTenant({
         imageUrl: normalizeStoredImagePathRequired(item.imageUrl),
         sortOrder: Math.round(item.sortOrder),
         targetType: parseBannerTargetType(item.targetType) as BannerTargetType,
@@ -230,7 +233,7 @@ export async function syncBannersFromWriteItems(
             ? item.productId?.trim() || null
             : null,
         isActive: item.isActive ?? true,
-      };
+      });
 
       if (item.id) {
         await tx.banner.upsert({

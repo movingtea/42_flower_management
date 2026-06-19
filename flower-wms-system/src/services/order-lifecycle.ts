@@ -6,6 +6,7 @@ import {
   isMiniprogramBusinessError,
 } from "@/lib/miniprogram-business-error";
 import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/tenant/tenant-write-context";
 import {
   markOrderPaidWithFifo,
 } from "@/services/order-fifo";
@@ -297,7 +298,7 @@ export async function createWechatOrder(
       }
 
       const order = await tx.order.create({
-        data: {
+        data: withTenant({
           orderNo,
           userId,
           totalAmount: payload.totalAmount,
@@ -309,7 +310,7 @@ export async function createWechatOrder(
           deliveryDate: payload.deliveryDate.trim(),
           greetingCard: payload.greetingCard?.trim() || null,
           status: OrderStatus.PENDING_PAYMENT,
-        },
+        }),
       });
 
       for (const line of payload.items) {

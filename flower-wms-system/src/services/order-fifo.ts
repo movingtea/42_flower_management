@@ -2,6 +2,7 @@ import { Prisma } from "@/generated/prisma/client";
 import type { Prisma as PrismaTypes } from "@/generated/prisma/client";
 import { OrderStatus, StockLogType } from "@/generated/prisma/enums";
 import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/tenant/tenant-write-context";
 import {
   applyFifoDeductionsInTx,
   PhysicalStockInsufficientError,
@@ -145,7 +146,7 @@ export async function restorePhysicalStockFromSaleOutInTx(
     });
 
     await tx.stockLog.create({
-      data: {
+      data: withTenant({
         materialId: log.materialId,
         batchId: log.batchId,
         type: StockLogType.IN_CANCEL,
@@ -154,7 +155,7 @@ export async function restorePhysicalStockFromSaleOutInTx(
         orderId,
         orderItemId: log.orderItemId,
         operator,
-      },
+      }),
     });
   }
 

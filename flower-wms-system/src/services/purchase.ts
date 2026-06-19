@@ -12,6 +12,7 @@ import {
   normalizeReportDateParam,
 } from "@/lib/datetime";
 import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/tenant/tenant-write-context";
 import { assertStockMutationOperatorMatches } from "@/lib/stock-mutation-auth";
 import { generateBatchNo } from "@/utils/batch-no";
 import { generateUniqueSku } from "@/utils/skuGenerator";
@@ -653,7 +654,7 @@ export async function createSupplier(raw: unknown) {
   if (!raw || typeof raw !== "object") throw new Error("请求体须为 JSON 对象");
   const body = raw as Record<string, unknown>;
   const supplier = await prisma.supplier.create({
-    data: {
+    data: withTenant({
       name: requiredString(body.name, "供应商名称不能为空"),
       supplierType: parseSupplierType(body.supplierType),
       contactName: optionalString(body.contactName) ?? null,
@@ -662,7 +663,7 @@ export async function createSupplier(raw: unknown) {
       address: optionalString(body.address) ?? null,
       note: optionalString(body.note) ?? null,
       isActive: parseOptionalBoolean(body.isActive) ?? true,
-    },
+    }),
   });
   return serializeSupplier(supplier);
 }
@@ -726,7 +727,7 @@ export async function createPurchaseOrder(raw: unknown) {
           await assertFlowerWikiIdsExist(tx, input.lines);
           const purchaseNo = await generatePurchaseNo(tx, input.purchaseDate);
           const purchaseOrder = await tx.purchaseOrder.create({
-            data: {
+            data: withTenant({
               purchaseNo,
               supplierId: input.supplierId,
               purchaseDate: input.purchaseDate,
@@ -740,7 +741,7 @@ export async function createPurchaseOrder(raw: unknown) {
               totalAmount: calculated.totalAmount,
               allocationMethod: calculated.allocationMethod,
               note: input.note ?? null,
-            },
+            }),
             select: { id: true },
           });
 
@@ -929,12 +930,12 @@ async function resolveOrCreateMaterial(tx: Tx, flowerWikiId: string) {
   if (!material) {
     const materialCode = await generateUniqueSku("material", tx);
     material = await tx.material.create({
-      data: {
+      data: withTenant({
         materialCode,
         name: wiki.chineseName,
         unit: "支",
         wikiId: flowerWikiId,
-      },
+      }),
     });
   }
   return material;
@@ -1066,7 +1067,7 @@ export async function receivePurchaseOrderWithTrustedOperator(
         line.flowerWiki.defaultShelfLifeDays
       );
       const batch = await tx.batch.create({
-        data: {
+        data: withTenant({
           materialId: material.id,
           batchNo,
           inboundAt: receivedAt,
@@ -1079,10 +1080,10 @@ export async function receivePurchaseOrderWithTrustedOperator(
           expiresAt,
           supplier: purchaseOrder.supplier.name,
           note: remark,
-        },
+        }),
       });
       const stockLog = await tx.stockLog.create({
-        data: {
+        data: withTenant({
           materialId: material.id,
           batchId: batch.id,
           type: StockLogType.INBOUND,
@@ -1091,7 +1092,7 @@ export async function receivePurchaseOrderWithTrustedOperator(
           remark,
           operator: operator.operatorLabel,
           operatorStaffId: operator.operatorStaffId,
-        },
+        }),
       });
       await tx.purchaseOrderLine.update({
         where: { id: line.id },

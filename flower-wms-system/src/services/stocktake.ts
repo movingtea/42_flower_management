@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { withTenant } from "@/lib/tenant/tenant-write-context";
 import { StockLogType } from "@/generated/prisma/enums";
 import type { StocktakeInput } from "@/types";
 
@@ -19,7 +20,7 @@ export async function adjustStockByStocktake(input: StocktakeInput) {
     });
 
     await tx.stockLog.create({
-      data: {
+      data: withTenant({
         materialId: batch.materialId,
         batchId: batch.id,
         type: StockLogType.ADJUSTMENT,
@@ -27,7 +28,7 @@ export async function adjustStockByStocktake(input: StocktakeInput) {
         quantity: Math.abs(delta),
         remark: input.remark,
         operator: input.operator,
-      },
+      }),
     });
 
     return { batch: updated, delta };
