@@ -7,6 +7,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getTodayAppDateString, formatDateInAppTimezoneIso } from "@/lib/datetime";
 import { formatCurrency, formatPercent } from "@/lib/format-money";
+import {
+  buildPurchaseLinePayloadLine,
+  createDefaultPurchaseLine,
+  DEFAULT_FLOWER_USABLE_RATE_PERCENT,
+  inferPurchaseLineItemTypeFromSavedLine,
+  insertNewPurchaseLineAtTop,
+  isPurchaseLineFieldRequired,
+  isPurchaseLineFieldVisible,
+  isPurchaseLineReadyForPreview,
+  purchaseLineItemTypeLabels,
+  PURCHASE_LINE_ITEM_TYPES,
+  type PurchaseLineItemType,
+  validatePurchaseLineDraft,
+} from "@/lib/purchase-line-form-pure";
 import type { WikiListItem } from "@/lib/wiki-constants";
 import {
   allocationMethodLabels,
@@ -20,6 +34,7 @@ import {
 
 type DraftLine = {
   key: string;
+  itemType: PurchaseLineItemType;
   flowerWikiId: string;
   flowerName: string;
   purchaseName: string;
@@ -31,7 +46,6 @@ type DraftLine = {
   stemsPerUnit: string;
   unitPrice: string;
   usableRate: string;
-  supplierSkuName: string;
   note: string;
 };
 
@@ -54,7 +68,7 @@ type Props = {
   showToast: (message: string, type: "success" | "error") => void;
 };
 
-const purchaseUnits = ["扎", "支", "把", "盒"];
+const purchaseUnits = ["扎", "支", "把", "盒", "件", "卷", "包", "套"];
 
 function todayInputValue() {
   return getTodayAppDateString();
@@ -66,40 +80,29 @@ function toDateInput(value: string | null | undefined) {
   return formatted === "—" ? "" : formatted;
 }
 
-function emptyLine(): DraftLine {
-  return {
-    key: `po-line-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-    flowerWikiId: "",
-    flowerName: "",
-    purchaseName: "",
-    grade: "",
-    color: "",
-    spec: "",
-    purchaseQuantity: "1",
-    purchaseUnit: "扎",
-    stemsPerUnit: "10",
-    unitPrice: "0",
-    usableRate: "",
-    supplierSkuName: "",
-    note: "",
-  };
-}
-
 function resolveWikiUsableRateInput(item: WikiListItem | null): string {
-  if (!item) return "";
+  if (!item) return DEFAULT_FLOWER_USABLE_RATE_PERCENT;
   const rate = item.standardUsableRate ?? item.defaultUsableRate;
-  if (!rate) return "";
+  if (!rate) return DEFAULT_FLOWER_USABLE_RATE_PERCENT;
   const numeric = Number(rate);
-  if (!Number.isFinite(numeric)) return "";
+  if (!Number.isFinite(numeric)) return DEFAULT_FLOWER_USABLE_RATE_PERCENT;
   return String(Math.round(numeric * 1000) / 10);
 }
 
 function lineFromOrder(line: PurchaseOrderDetail["lines"][number]): DraftLine {
+  const itemType = inferPurchaseLineItemTypeFromSavedLine({
+    flowerWikiId: line.flowerWikiId,
+    grade: line.grade,
+    color: line.color,
+    spec: line.spec,
+    usableRate: line.usableRate,
+  });
   return {
     key: line.id,
+    itemType,
     flowerWikiId: line.flowerWikiId,
     flowerName: line.flowerWiki.chineseName,
-    purchaseName: line.purchaseName ?? "",
+    purchaseName: line.purchaseName ?? line.flowerWiki.chineseName ?? "",
     grade: line.grade ?? "",
     color: line.color ?? "",
     spec: line.spec ?? "",
@@ -109,8 +112,7 @@ function lineFromOrder(line: PurchaseOrderDetail["lines"][number]): DraftLine {
     unitPrice: line.unitPrice,
     usableRate: line.usableRate
       ? String(Number(line.usableRate) * 100)
-      : "",
-    supplierSkuName: line.supplierSkuName ?? "",
+      : DEFAULT_FLOWER_USABLE_RATE_PERCENT,
     note: line.note ?? "",
   };
 }
@@ -164,20 +166,37 @@ function buildInitialForm(order?: PurchaseOrderDetail | null): FormState {
   };
 }
 
+function FieldLabel({
+  children,
+  required = false,
+}: {
+  children: React.ReactNode;
+  required?: boolean;
+}) {
+  return (
+    <span className="mb-1 block font-medium text-zinc-700">
+      {children}
+      {required ? <span className="ml-1 text-red-500">*</span> : null}
+    </span>
+  );
+}
+
 function TextareaField({
   label,
+  requiredMark = false,
   rows = 2,
   value,
   onChange,
 }: {
   label: string;
+  requiredMark?: boolean;
   rows?: number;
   value: string;
   onChange: (value: string) => void;
 }) {
   return (
     <label className="block text-sm">
-      <span className="mb-1 block font-medium text-zinc-700">{label}</span>
+      <FieldLabel required={requiredMark}>{label}</FieldLabel>
       <textarea
         rows={rows}
         value={value}
@@ -197,7 +216,9 @@ export function PurchaseOrderEditor({
 }: Props) {
   const [form, setForm] = useState<FormState>(() => buildInitialForm(order));
   const [lines, setLines] = useState<DraftLine[]>(() =>
-    order?.lines.length ? order.lines.map(lineFromOrder) : [emptyLine()]
+    order?.lines.length
+      ? [...order.lines].reverse().map(lineFromOrder)
+      : [createDefaultPurchaseLine()]
   );
   const [preview, setPreview] = useState<PurchasePreview | null>(null);
   const [previewError, setPreviewError] = useState<string | null>(null);
@@ -217,20 +238,7 @@ export function PurchaseOrderEditor({
       otherFee: form.otherFee || "0",
       allocationMethod: form.allocationMethod,
       note: form.note.trim() || null,
-      lines: lines.map((line) => ({
-        flowerWikiId: line.flowerWikiId,
-        purchaseName: line.purchaseName.trim() || null,
-        grade: line.grade.trim() || null,
-        color: line.color.trim() || null,
-        spec: line.spec.trim() || null,
-        purchaseQuantity: line.purchaseQuantity || "0",
-        purchaseUnit: line.purchaseUnit,
-        stemsPerUnit: line.stemsPerUnit || "0",
-        unitPrice: line.unitPrice || "0",
-        usableRate: line.usableRate.trim() || null,
-        supplierSkuName: line.supplierSkuName.trim() || null,
-        note: line.note.trim() || null,
-      })),
+      lines: lines.map((line) => buildPurchaseLinePayloadLine(line)),
     }),
     [form, lines]
   );
@@ -239,14 +247,7 @@ export function PurchaseOrderEditor({
     Boolean(payload.supplierId) &&
     Boolean(payload.purchaseDate) &&
     payload.lines.length > 0 &&
-    payload.lines.every(
-      (line) =>
-        line.flowerWikiId &&
-        line.purchaseUnit &&
-        Number(line.purchaseQuantity) > 0 &&
-        Number(line.stemsPerUnit) > 0 &&
-        Number(line.unitPrice) >= 0
-    );
+    lines.every((line) => isPurchaseLineReadyForPreview(line));
 
   useEffect(() => {
     const timer = window.setTimeout(() => {
@@ -294,6 +295,27 @@ export function PurchaseOrderEditor({
     );
   }
 
+  function changeItemType(key: string, itemType: PurchaseLineItemType) {
+    setLines((prev) =>
+      prev.map((line) => {
+        if (line.key !== key) return line;
+        const defaults = createDefaultPurchaseLine(itemType, line.key);
+        return {
+          ...defaults,
+          purchaseName: line.purchaseName,
+          purchaseQuantity: line.purchaseQuantity,
+          unitPrice: line.unitPrice,
+          note: line.note,
+          flowerWikiId: itemType === "FLOWER" ? line.flowerWikiId : "",
+          flowerName: itemType === "FLOWER" ? line.flowerName : "",
+          grade: itemType === "FLOWER" ? line.grade : "",
+          color: itemType === "FLOWER" ? line.color : "",
+          spec: itemType === "FLOWER" ? "" : line.spec,
+        };
+      })
+    );
+  }
+
   function selectFlower(key: string, item: WikiListItem | null) {
     updateLine(key, {
       flowerWikiId: item?.id ?? "",
@@ -308,12 +330,8 @@ export function PurchaseOrderEditor({
     if (!form.purchaseDate) return "请选择采购日期";
     if (lines.length === 0) return "请至少添加一条采购明细";
     for (const [index, line] of lines.entries()) {
-      const label = `第 ${index + 1} 行`;
-      if (!line.flowerWikiId) return `${label}请选择花材`;
-      if (!line.purchaseUnit.trim()) return `${label}采购单位不能为空`;
-      if (Number(line.purchaseQuantity) <= 0) return `${label}采购数量必须大于 0`;
-      if (Number(line.stemsPerUnit) <= 0) return `${label}折算支数必须大于 0`;
-      if (Number(line.unitPrice) < 0) return `${label}采购单价不能小于 0`;
+      const error = validatePurchaseLineDraft(line, `第 ${index + 1} 行：`);
+      if (error) return error;
     }
     for (const [label, value] of [
       ["运费", form.shippingFee],
@@ -360,6 +378,10 @@ export function PurchaseOrderEditor({
     }
   }
 
+  function addLine() {
+    setLines((prev) => insertNewPurchaseLineAtTop(prev, createDefaultPurchaseLine()));
+  }
+
   const displayPreview = preview;
 
   return (
@@ -386,7 +408,7 @@ export function PurchaseOrderEditor({
 
       <div className="mt-5 grid gap-4 lg:grid-cols-4">
         <label className="block text-sm">
-          <span className="mb-1 block font-medium text-zinc-700">供应商</span>
+          <FieldLabel required>供应商</FieldLabel>
           <select
             value={form.supplierId}
             disabled={!canEdit}
@@ -414,6 +436,7 @@ export function PurchaseOrderEditor({
         </label>
         <Input
           label="采购日期"
+          requiredMark
           type="date"
           disabled={!canEdit}
           value={form.purchaseDate}
@@ -498,7 +521,7 @@ export function PurchaseOrderEditor({
             type="button"
             variant="secondary"
             disabled={!canEdit}
-            onClick={() => setLines((prev) => [...prev, emptyLine()])}
+            onClick={addLine}
           >
             添加明细
           </Button>
@@ -506,6 +529,10 @@ export function PurchaseOrderEditor({
         <div className="space-y-4">
           {lines.map((line, index) => {
             const previewLine = displayPreview?.lines[index];
+            const show = (field: Parameters<typeof isPurchaseLineFieldVisible>[1]) =>
+              isPurchaseLineFieldVisible(line.itemType, field);
+            const required = (field: Parameters<typeof isPurchaseLineFieldRequired>[1]) =>
+              isPurchaseLineFieldRequired(line.itemType, field);
             return (
               <div
                 key={line.key}
@@ -529,115 +556,167 @@ export function PurchaseOrderEditor({
                   )}
                 </div>
                 <div className="grid gap-3 lg:grid-cols-6">
-                  <label className="block text-sm lg:col-span-2">
-                    <span className="mb-1 block font-medium text-zinc-700">花材</span>
-                    <FlowerMaterialSelect
-                      value={line.flowerWikiId || null}
+                  {show("itemType") && (
+                    <label className="block text-sm">
+                      <FieldLabel required={required("itemType")}>采购品类</FieldLabel>
+                      <select
+                        disabled={!canEdit}
+                        value={line.itemType}
+                        onChange={(e) =>
+                          changeItemType(
+                            line.key,
+                            e.target.value as PurchaseLineItemType
+                          )
+                        }
+                        className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-400 disabled:bg-zinc-50"
+                      >
+                        {PURCHASE_LINE_ITEM_TYPES.map((type) => (
+                          <option key={type} value={type}>
+                            {purchaseLineItemTypeLabels[type]}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
+                  {show("flowerSelect") && (
+                    <label className="block text-sm lg:col-span-2">
+                      <FieldLabel required={required("flowerSelect")}>花材</FieldLabel>
+                      <FlowerMaterialSelect
+                        value={line.flowerWikiId || null}
+                        disabled={!canEdit}
+                        onChange={(item) => selectFlower(line.key, item)}
+                      />
+                    </label>
+                  )}
+                  {show("purchaseName") && (
+                    <Input
+                      label="采购名称"
+                      requiredMark={required("purchaseName")}
                       disabled={!canEdit}
-                      onChange={(item) => selectFlower(line.key, item)}
-                    />
-                  </label>
-                  <Input
-                    label="采购名称"
-                    disabled={!canEdit}
-                    value={line.purchaseName}
-                    onChange={(e) =>
-                      updateLine(line.key, { purchaseName: e.target.value })
-                    }
-                  />
-                  <Input
-                    label="等级"
-                    disabled={!canEdit}
-                    value={line.grade}
-                    onChange={(e) => updateLine(line.key, { grade: e.target.value })}
-                  />
-                  <Input
-                    label="颜色"
-                    disabled={!canEdit}
-                    value={line.color}
-                    onChange={(e) => updateLine(line.key, { color: e.target.value })}
-                  />
-                  <Input
-                    label="规格"
-                    disabled={!canEdit}
-                    value={line.spec}
-                    onChange={(e) => updateLine(line.key, { spec: e.target.value })}
-                  />
-                  <Input
-                    label="采购数量"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    disabled={!canEdit}
-                    value={line.purchaseQuantity}
-                    onChange={(e) =>
-                      updateLine(line.key, { purchaseQuantity: e.target.value })
-                    }
-                  />
-                  <label className="block text-sm">
-                    <span className="mb-1 block font-medium text-zinc-700">
-                      采购单位
-                    </span>
-                    <select
-                      disabled={!canEdit}
-                      value={line.purchaseUnit}
+                      value={line.purchaseName}
                       onChange={(e) =>
-                        updateLine(line.key, { purchaseUnit: e.target.value })
+                        updateLine(line.key, { purchaseName: e.target.value })
                       }
-                      className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-400 disabled:bg-zinc-50"
-                    >
-                      {purchaseUnits.map((unit) => (
-                        <option key={unit} value={unit}>
-                          {unit}
-                        </option>
-                      ))}
-                    </select>
-                  </label>
-                  <Input
-                    label="每单位支数"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    disabled={!canEdit}
-                    value={line.stemsPerUnit}
-                    onChange={(e) =>
-                      updateLine(line.key, { stemsPerUnit: e.target.value })
-                    }
-                  />
-                  <Input
-                    label="单价"
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    disabled={!canEdit}
-                    value={line.unitPrice}
-                    onChange={(e) =>
-                      updateLine(line.key, { unitPrice: e.target.value })
-                    }
-                  />
-                  <Input
-                    label="可用率"
-                    placeholder="如 85、85% 或 0.85"
-                    disabled={!canEdit}
-                    value={line.usableRate}
-                    onChange={(e) =>
-                      updateLine(line.key, { usableRate: e.target.value })
-                    }
-                  />
-                  <Input
-                    label="供应商品名"
-                    disabled={!canEdit}
-                    value={line.supplierSkuName}
-                    onChange={(e) =>
-                      updateLine(line.key, { supplierSkuName: e.target.value })
-                    }
-                  />
-                  <Input
-                    label="行备注"
-                    disabled={!canEdit}
-                    value={line.note}
-                    onChange={(e) => updateLine(line.key, { note: e.target.value })}
-                  />
+                    />
+                  )}
+                  {show("materialName") && (
+                    <Input
+                      label="物料名称"
+                      requiredMark={required("materialName")}
+                      disabled={!canEdit}
+                      value={line.purchaseName}
+                      onChange={(e) =>
+                        updateLine(line.key, { purchaseName: e.target.value })
+                      }
+                    />
+                  )}
+                  {show("grade") && (
+                    <Input
+                      label="等级"
+                      disabled={!canEdit}
+                      value={line.grade}
+                      onChange={(e) => updateLine(line.key, { grade: e.target.value })}
+                    />
+                  )}
+                  {show("color") && (
+                    <Input
+                      label="颜色"
+                      disabled={!canEdit}
+                      value={line.color}
+                      onChange={(e) => updateLine(line.key, { color: e.target.value })}
+                    />
+                  )}
+                  {show("spec") && (
+                    <Input
+                      label="规格说明"
+                      disabled={!canEdit}
+                      value={line.spec}
+                      onChange={(e) => updateLine(line.key, { spec: e.target.value })}
+                    />
+                  )}
+                  {show("purchaseQuantity") && (
+                    <Input
+                      label="采购数量"
+                      requiredMark={required("purchaseQuantity")}
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      disabled={!canEdit}
+                      value={line.purchaseQuantity}
+                      onChange={(e) =>
+                        updateLine(line.key, { purchaseQuantity: e.target.value })
+                      }
+                    />
+                  )}
+                  {show("purchaseUnit") && (
+                    <label className="block text-sm">
+                      <FieldLabel required={required("purchaseUnit")}>
+                        采购单位
+                      </FieldLabel>
+                      <select
+                        disabled={!canEdit}
+                        value={line.purchaseUnit}
+                        onChange={(e) =>
+                          updateLine(line.key, { purchaseUnit: e.target.value })
+                        }
+                        className="w-full rounded-lg border border-zinc-200 bg-white px-3 py-2 text-zinc-900 outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-400 disabled:bg-zinc-50"
+                      >
+                        {purchaseUnits.map((unit) => (
+                          <option key={unit} value={unit}>
+                            {unit}
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                  )}
+                  {show("stemsPerUnit") && (
+                    <Input
+                      label="每单位支数"
+                      requiredMark={required("stemsPerUnit")}
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      disabled={!canEdit}
+                      value={line.stemsPerUnit}
+                      onChange={(e) =>
+                        updateLine(line.key, { stemsPerUnit: e.target.value })
+                      }
+                    />
+                  )}
+                  {show("unitPrice") && (
+                    <Input
+                      label="单价"
+                      requiredMark={required("unitPrice")}
+                      type="number"
+                      min="0"
+                      step="0.01"
+                      disabled={!canEdit}
+                      value={line.unitPrice}
+                      onChange={(e) =>
+                        updateLine(line.key, { unitPrice: e.target.value })
+                      }
+                    />
+                  )}
+                  {show("usableRate") && (
+                    <Input
+                      label="可用率"
+                      requiredMark={required("usableRate")}
+                      placeholder="如 100、100% 或 1"
+                      disabled={!canEdit}
+                      value={line.usableRate}
+                      onChange={(e) =>
+                        updateLine(line.key, { usableRate: e.target.value })
+                      }
+                    />
+                  )}
+                  {show("note") && (
+                    <Input
+                      label="行备注"
+                      disabled={!canEdit}
+                      value={line.note}
+                      onChange={(e) => updateLine(line.key, { note: e.target.value })}
+                    />
+                  )}
                 </div>
                 <div className="mt-3 grid gap-2 rounded-lg bg-white p-3 text-xs text-zinc-600 md:grid-cols-4 lg:grid-cols-8">
                   <span>总支数：{formatQuantity(previewLine?.totalStems ?? 0)}</span>
@@ -652,16 +731,25 @@ export function PurchaseOrderEditor({
                     实际单支成本：¥
                     {Number(previewLine?.actualUnitCost ?? 0).toFixed(4)}
                   </span>
-                  <span>
-                    可用率：{formatPercent(previewLine?.usableRate ?? 0.85)}
-                  </span>
-                  <span>
-                    损耗率：{formatPercent(previewLine?.lossRate ?? 0.15)}
-                  </span>
-                  <span>
-                    损耗后单支成本：¥
-                    {Number(previewLine?.lossAdjustedUnitCost ?? 0).toFixed(4)}
-                  </span>
+                  {show("usableRate") && (
+                    <>
+                      <span>
+                        可用率：
+                        {formatPercent(
+                          previewLine?.usableRate ??
+                            Number(line.usableRate || DEFAULT_FLOWER_USABLE_RATE_PERCENT) /
+                              100
+                        )}
+                      </span>
+                      <span>
+                        损耗率：{formatPercent(previewLine?.lossRate ?? 0)}
+                      </span>
+                      <span>
+                        损耗后单支成本：¥
+                        {Number(previewLine?.lossAdjustedUnitCost ?? 0).toFixed(4)}
+                      </span>
+                    </>
+                  )}
                 </div>
               </div>
             );
