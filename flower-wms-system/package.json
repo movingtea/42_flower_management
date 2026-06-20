@@ -53,6 +53,7 @@
     "test:number-input": "tsx src/lib/number-input-utils.test.ts",
     "test:material-care-normalizer": "tsx src/lib/ai/material-care-normalizer.test.ts",
     "test:purchase-line-form": "tsx src/lib/purchase-line-form-pure.test.ts",
+    "test:master-parts": "tsx src/lib/master-parts-pure.test.ts",
     "test:client-image-preview": "tsx src/lib/client-image-preview.test.ts",
     "test:miniprogram-image-url": "node ../42_mp/scripts/test-image-url.mjs",
     "test:miniprogram-image-dto": "tsx --require ./scripts/permission-smoke-preload.cjs src/lib/miniprogram-image-dto.test.ts",

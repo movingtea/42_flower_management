@@ -142,6 +142,7 @@ flower-wms-system/
 | `src/services/inventory-sync.ts` | 物理库存向 SKU 虚拟库存投影 |
 | `src/services/recipe.ts` | Recipe / RecipeLine CRUD 和 BOM 编号 |
 | `src/services/wiki.ts` | FlowerWiki CRUD 和检索 |
+| `src/services/master-parts.ts` | MasterPart 通用物料母表 CRUD（辅料 / 包装 / 工具 / 其他） |
 | `src/services/crm-pure.ts` | CRM 纯函数：手机号规范化、客户统计、提醒日期与文案 |
 | `src/services/crm.ts` | CRM Prisma 服务：订单沉淀、客户/收花人/礼赠/提醒 CRUD |
 | `src/lib/cms-product-tags.ts` | CMS 商品运营标签 key / label 常量与解析 |
@@ -177,7 +178,8 @@ flower-wms-system/
 | `/wms/operations` | 仓储日常：手工入库、报损、批次流水线 |
 | `/wms/purchase-orders` | 采购单管理：列表、详情、编辑、取消、到货入库、标准成本更新 |
 | `/wms/suppliers` | 供应商管理 |
-| `/wms/wiki` | FlowerWiki 母表 |
+| `/wms/wiki` | FlowerWiki 花材母表 |
+| `/wms/master-parts` | MasterPart 通用物料母表（辅料 / 包装 / 工具 / 其他） |
 | `/wms/recipes` | 标准配方研发中心 |
 | `/wms/packaging-kits` | 包装方案管理 |
 | `/wms/material-categories` | 原材料分类 |
@@ -526,7 +528,8 @@ Smoke 脚本：
 
 | 模型 | 表 | 说明 |
 |---|---|---|
-| `FlowerWiki` | `flower_wikis` | 花材母表；标准成本字段用于产品预估 |
+| `FlowerWiki` | `flower_wikis` | 花材母表；标准成本字段用于产品预估；仅鲜切花 / 叶材 / 需养护指南的花材 |
+| `MasterPart` | `master_parts` | 通用物料母表；辅料、包装材料、工具、其他耗材（Batch P2；尚未接入采购单保存） |
 | `Material` | `materials` | 仓储原材料，通常通过 `wikiId` 关联 FlowerWiki |
 | `Batch` | `batches` | 物理库存批次，含 `unitCost`、`remainingQty` |
 | `StockLog` | `stock_logs` | 库存流水 |

@@ -45,7 +45,9 @@ function testWarehouseManagerInventoryGroup() {
   assert.ok(titles.includes("商品与成本"));
   const labels = groups.flatMap((g) => g.items.map((i) => i.label));
   assert.ok(labels.includes("采购单"));
+  assert.ok(labels.includes("通用物料母表"));
   assert.ok(labels.includes("标准配方"));
+  assert.equal(canAccessWmsPath(Role.WAREHOUSE_MANAGER, "/wms/master-parts"), true);
 }
 
 function testActiveStates() {

@@ -389,6 +389,7 @@ export const ModelName = {
   MaterialCategory: 'MaterialCategory',
   MaterialCategoryRelation: 'MaterialCategoryRelation',
   Supplier: 'Supplier',
+  MasterPart: 'MasterPart',
   PurchaseOrder: 'PurchaseOrder',
   PurchaseOrderLine: 'PurchaseOrderLine',
   ProductSpu: 'ProductSpu',
@@ -435,7 +436,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "productCategory" | "productCategoryRelation" | "materialCategory" | "materialCategoryRelation" | "supplier" | "purchaseOrder" | "purchaseOrderLine" | "productSpu" | "productSku" | "cmsRecommendationSlot" | "cmsRecommendationItem" | "cmsHomeSceneEntry" | "banner" | "material" | "recipe" | "packagingKit" | "recipeLine" | "batch" | "stockLog" | "stockLossRecord" | "tenant" | "tenantMember" | "staffUser" | "staffAuditLog" | "user" | "order" | "orderCostSnapshot" | "orderItem" | "customer" | "recipient" | "customerRecipientRelation" | "giftOccasion" | "customerReminder" | "appConfig" | "auditLog" | "flowerWiki"
+    modelProps: "productCategory" | "productCategoryRelation" | "materialCategory" | "materialCategoryRelation" | "supplier" | "masterPart" | "purchaseOrder" | "purchaseOrderLine" | "productSpu" | "productSku" | "cmsRecommendationSlot" | "cmsRecommendationItem" | "cmsHomeSceneEntry" | "banner" | "material" | "recipe" | "packagingKit" | "recipeLine" | "batch" | "stockLog" | "stockLossRecord" | "tenant" | "tenantMember" | "staffUser" | "staffAuditLog" | "user" | "order" | "orderCostSnapshot" | "orderItem" | "customer" | "recipient" | "customerRecipientRelation" | "giftOccasion" | "customerReminder" | "appConfig" | "auditLog" | "flowerWiki"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -806,6 +807,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SupplierCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SupplierCountAggregateOutputType> | number
+        }
+      }
+    }
+    MasterPart: {
+      payload: Prisma.$MasterPartPayload<ExtArgs>
+      fields: Prisma.MasterPartFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.MasterPartFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPartPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.MasterPartFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPartPayload>
+        }
+        findFirst: {
+          args: Prisma.MasterPartFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPartPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.MasterPartFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPartPayload>
+        }
+        findMany: {
+          args: Prisma.MasterPartFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPartPayload>[]
+        }
+        create: {
+          args: Prisma.MasterPartCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPartPayload>
+        }
+        createMany: {
+          args: Prisma.MasterPartCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.MasterPartCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPartPayload>[]
+        }
+        delete: {
+          args: Prisma.MasterPartDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPartPayload>
+        }
+        update: {
+          args: Prisma.MasterPartUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPartPayload>
+        }
+        deleteMany: {
+          args: Prisma.MasterPartDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.MasterPartUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.MasterPartUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPartPayload>[]
+        }
+        upsert: {
+          args: Prisma.MasterPartUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$MasterPartPayload>
+        }
+        aggregate: {
+          args: Prisma.MasterPartAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateMasterPart>
+        }
+        groupBy: {
+          args: Prisma.MasterPartGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MasterPartGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.MasterPartCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.MasterPartCountAggregateOutputType> | number
         }
       }
     }
@@ -3206,6 +3281,26 @@ export const SupplierScalarFieldEnum = {
 export type SupplierScalarFieldEnum = (typeof SupplierScalarFieldEnum)[keyof typeof SupplierScalarFieldEnum]
 
 
+export const MasterPartScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  type: 'type',
+  name: 'name',
+  spec: 'spec',
+  defaultUnit: 'defaultUnit',
+  brand: 'brand',
+  model: 'model',
+  color: 'color',
+  isConsumable: 'isConsumable',
+  isActive: 'isActive',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MasterPartScalarFieldEnum = (typeof MasterPartScalarFieldEnum)[keyof typeof MasterPartScalarFieldEnum]
+
+
 export const PurchaseOrderScalarFieldEnum = {
   id: 'id',
   tenantId: 'tenantId',
@@ -4357,6 +4452,7 @@ export type GlobalOmitConfig = {
   materialCategory?: Prisma.MaterialCategoryOmit
   materialCategoryRelation?: Prisma.MaterialCategoryRelationOmit
   supplier?: Prisma.SupplierOmit
+  masterPart?: Prisma.MasterPartOmit
   purchaseOrder?: Prisma.PurchaseOrderOmit
   purchaseOrderLine?: Prisma.PurchaseOrderLineOmit
   productSpu?: Prisma.ProductSpuOmit

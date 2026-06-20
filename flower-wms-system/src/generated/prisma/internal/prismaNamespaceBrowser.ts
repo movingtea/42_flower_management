@@ -56,6 +56,7 @@ export const ModelName = {
   MaterialCategory: 'MaterialCategory',
   MaterialCategoryRelation: 'MaterialCategoryRelation',
   Supplier: 'Supplier',
+  MasterPart: 'MasterPart',
   PurchaseOrder: 'PurchaseOrder',
   PurchaseOrderLine: 'PurchaseOrderLine',
   ProductSpu: 'ProductSpu',
@@ -167,6 +168,26 @@ export const SupplierScalarFieldEnum = {
 } as const
 
 export type SupplierScalarFieldEnum = (typeof SupplierScalarFieldEnum)[keyof typeof SupplierScalarFieldEnum]
+
+
+export const MasterPartScalarFieldEnum = {
+  id: 'id',
+  tenantId: 'tenantId',
+  type: 'type',
+  name: 'name',
+  spec: 'spec',
+  defaultUnit: 'defaultUnit',
+  brand: 'brand',
+  model: 'model',
+  color: 'color',
+  isConsumable: 'isConsumable',
+  isActive: 'isActive',
+  note: 'note',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type MasterPartScalarFieldEnum = (typeof MasterPartScalarFieldEnum)[keyof typeof MasterPartScalarFieldEnum]
 
 
 export const PurchaseOrderScalarFieldEnum = {
