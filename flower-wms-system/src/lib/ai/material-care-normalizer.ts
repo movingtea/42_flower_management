@@ -3,8 +3,8 @@ import type { WikiCareRow } from "@/lib/wiki-care";
 const WAKE_WATER_DEEP = "需要深水醒花";
 const WAKE_WATER_NO_DEEP = "不需要深水醒花";
 
-const MAIN_WATER_DEEP = "深水养护";
-const MAIN_WATER_SHALLOW = "浅水养护";
+const DEFAULT_MAIN_WATER = "花瓶1/3至1/2";
+const DEEP_MAIN_WATER = "花瓶1/2至2/3";
 
 const PRUNE_45 = "45度斜切";
 const PRUNE_45_CROSS = "45度斜切 + 十字劈开";
@@ -65,21 +65,49 @@ export function normalizeWakeWater(value: string): string {
   return WAKE_WATER_NO_DEEP;
 }
 
-export function normalizeMainWater(value: string): string {
-  const trimmed = value.trim();
-  if (!trimmed) return MAIN_WATER_SHALLOW;
-  if (trimmed === MAIN_WATER_DEEP || trimmed === MAIN_WATER_SHALLOW) {
-    return trimmed;
+function normalizeMainWaterFractionPart(raw: string): string {
+  return raw
+    .replace(/\s+/g, "")
+    .replace(/[～~\-—－]/g, "至");
+}
+
+function extractMainWaterLevel(value: string): string | null {
+  const vaseMatch = value.match(
+    /(?:花瓶|容器)[^。；，]{0,16}?(\d+\s*\/\s*\d+(?:\s*(?:至|到|~|－|-)\s*\d+\s*\/\s*\d+)?)/i
+  );
+  if (vaseMatch?.[1]) {
+    return `花瓶${normalizeMainWaterFractionPart(vaseMatch[1])}`;
   }
 
-  const text = compactText(trimmed);
-  if (containsAny(text, [/浅水养护/, /浅水/, /低水位/, /浅养/])) {
-    return MAIN_WATER_SHALLOW;
+  const fractionMatch = value.match(
+    /(\d+\s*\/\s*\d+(?:\s*(?:至|到|~|－|-)\s*\d+\s*\/\s*\d+)?)/
+  );
+  if (fractionMatch?.[1] && /花瓶|容器|水位/.test(value)) {
+    return `花瓶${normalizeMainWaterFractionPart(fractionMatch[1])}`;
   }
-  if (containsAny(text, [/深水养护/, /深水/, /高水位/, /深养/])) {
-    return MAIN_WATER_DEEP;
+
+  return null;
+}
+
+export function normalizeMainWater(value: string): string {
+  const trimmed = value.trim();
+  if (!trimmed) return DEFAULT_MAIN_WATER;
+
+  const extracted = extractMainWaterLevel(trimmed);
+  if (extracted) return extracted;
+
+  const compact = compactText(trimmed);
+  if (/^(?:花瓶|容器)\d+\/\d+(?:至\d+\/\d+)?$/.test(compact)) {
+    return compact.replace(/^容器/, "花瓶");
   }
-  return MAIN_WATER_SHALLOW;
+
+  if (containsAny(compact, [/浅水养护/, /浅水/, /低水位/, /浅养/])) {
+    return DEFAULT_MAIN_WATER;
+  }
+  if (containsAny(compact, [/深水养护/, /深水/, /高水位/, /深养/])) {
+    return DEEP_MAIN_WATER;
+  }
+  return DEFAULT_MAIN_WATER;
 }
 
 export function normalizePruneMethod(value: string): string {

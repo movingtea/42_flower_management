@@ -18,9 +18,14 @@ function testWakeWaterLongSentence() {
   assert.equal(normalizeWakeWater("无需深水醒花处理"), "不需要深水醒花");
 }
 
-function testMainWaterShallow() {
-  assert.equal(normalizeMainWater("浅水养护即可"), "浅水养护");
-  assert.equal(normalizeMainWater("深水养护"), "深水养护");
+function testMainWaterLevel() {
+  assert.equal(normalizeMainWater("浅水养护即可"), "花瓶1/3至1/2");
+  assert.equal(normalizeMainWater("花瓶1/3至1/2"), "花瓶1/3至1/2");
+  assert.equal(normalizeMainWater("深水养护"), "花瓶1/2至2/3");
+  assert.equal(
+    normalizeMainWater("日常养护建议将花瓶水位保持在1/3至1/2之间"),
+    "花瓶1/3至1/2"
+  );
 }
 
 function testPruneMethodCross() {
@@ -111,7 +116,7 @@ function testParseFlowerAiJsonAppliesNormalizer() {
 
   const byKey = new Map(parsed.careTable.map((row) => [row.key, row.value]));
   assert.equal(byKey.get("wakeWater"), "需要深水醒花");
-  assert.equal(byKey.get("mainWater"), "浅水养护");
+  assert.equal(byKey.get("mainWater"), "花瓶1/3至1/2");
   assert.equal(byKey.get("pruneMethod"), "45度斜切 + 十字劈开");
   assert.equal(byKey.get("nutrient"), "✓");
   assert.equal(byKey.get("disinfectant"), "✓，1L水加1-2滴");
@@ -120,7 +125,7 @@ function testParseFlowerAiJsonAppliesNormalizer() {
 }
 
 testWakeWaterLongSentence();
-testMainWaterShallow();
+testMainWaterLevel();
 testPruneMethodCross();
 testNutrientSymbols();
 testDisinfectantDose();
