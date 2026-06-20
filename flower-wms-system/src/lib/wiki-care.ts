@@ -1,3 +1,5 @@
+import { normalizeAiCareTable } from "@/lib/ai/material-care-normalizer";
+
 /** 结构化养护指南行（与 DeepSeek / 前端表格一致） */
 export type WikiCareRow = {
   key: string;
@@ -135,6 +137,6 @@ export function parseFlowerAiJson(raw: string): FlowerAiCompleteResult {
     latinName,
     englishName,
     flowerLanguage,
-    careTable: normalizeCareTable(careTableRaw),
+    careTable: normalizeAiCareTable(normalizeCareTable(careTableRaw)),
   };
 }
