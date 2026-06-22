@@ -59,7 +59,9 @@ export type PurchaseOrderLineSumAggregateOutputType = {
 export type PurchaseOrderLineMinAggregateOutputType = {
   id: string | null
   purchaseOrderId: string | null
+  itemType: string | null
   flowerWikiId: string | null
+  masterPartId: string | null
   purchaseName: string | null
   grade: string | null
   color: string | null
@@ -87,7 +89,9 @@ export type PurchaseOrderLineMinAggregateOutputType = {
 export type PurchaseOrderLineMaxAggregateOutputType = {
   id: string | null
   purchaseOrderId: string | null
+  itemType: string | null
   flowerWikiId: string | null
+  masterPartId: string | null
   purchaseName: string | null
   grade: string | null
   color: string | null
@@ -115,7 +119,9 @@ export type PurchaseOrderLineMaxAggregateOutputType = {
 export type PurchaseOrderLineCountAggregateOutputType = {
   id: number
   purchaseOrderId: number
+  itemType: number
   flowerWikiId: number
+  masterPartId: number
   purchaseName: number
   grade: number
   color: number
@@ -175,7 +181,9 @@ export type PurchaseOrderLineSumAggregateInputType = {
 export type PurchaseOrderLineMinAggregateInputType = {
   id?: true
   purchaseOrderId?: true
+  itemType?: true
   flowerWikiId?: true
+  masterPartId?: true
   purchaseName?: true
   grade?: true
   color?: true
@@ -203,7 +211,9 @@ export type PurchaseOrderLineMinAggregateInputType = {
 export type PurchaseOrderLineMaxAggregateInputType = {
   id?: true
   purchaseOrderId?: true
+  itemType?: true
   flowerWikiId?: true
+  masterPartId?: true
   purchaseName?: true
   grade?: true
   color?: true
@@ -231,7 +241,9 @@ export type PurchaseOrderLineMaxAggregateInputType = {
 export type PurchaseOrderLineCountAggregateInputType = {
   id?: true
   purchaseOrderId?: true
+  itemType?: true
   flowerWikiId?: true
+  masterPartId?: true
   purchaseName?: true
   grade?: true
   color?: true
@@ -346,7 +358,9 @@ export type PurchaseOrderLineGroupByArgs<ExtArgs extends runtime.Types.Extension
 export type PurchaseOrderLineGroupByOutputType = {
   id: string
   purchaseOrderId: string
-  flowerWikiId: string
+  itemType: string
+  flowerWikiId: string | null
+  masterPartId: string | null
   purchaseName: string | null
   grade: string | null
   color: string | null
@@ -397,7 +411,9 @@ export type PurchaseOrderLineWhereInput = {
   NOT?: Prisma.PurchaseOrderLineWhereInput | Prisma.PurchaseOrderLineWhereInput[]
   id?: Prisma.StringFilter<"PurchaseOrderLine"> | string
   purchaseOrderId?: Prisma.StringFilter<"PurchaseOrderLine"> | string
-  flowerWikiId?: Prisma.StringFilter<"PurchaseOrderLine"> | string
+  itemType?: Prisma.StringFilter<"PurchaseOrderLine"> | string
+  flowerWikiId?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
+  masterPartId?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
   purchaseName?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
   grade?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
   color?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
@@ -421,14 +437,17 @@ export type PurchaseOrderLineWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"PurchaseOrderLine"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PurchaseOrderLine"> | Date | string
   purchaseOrder?: Prisma.XOR<Prisma.PurchaseOrderScalarRelationFilter, Prisma.PurchaseOrderWhereInput>
-  flowerWiki?: Prisma.XOR<Prisma.FlowerWikiScalarRelationFilter, Prisma.FlowerWikiWhereInput>
+  flowerWiki?: Prisma.XOR<Prisma.FlowerWikiNullableScalarRelationFilter, Prisma.FlowerWikiWhereInput> | null
+  masterPart?: Prisma.XOR<Prisma.MasterPartNullableScalarRelationFilter, Prisma.MasterPartWhereInput> | null
   inboundBatch?: Prisma.XOR<Prisma.BatchNullableScalarRelationFilter, Prisma.BatchWhereInput> | null
 }
 
 export type PurchaseOrderLineOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   purchaseOrderId?: Prisma.SortOrder
-  flowerWikiId?: Prisma.SortOrder
+  itemType?: Prisma.SortOrder
+  flowerWikiId?: Prisma.SortOrderInput | Prisma.SortOrder
+  masterPartId?: Prisma.SortOrderInput | Prisma.SortOrder
   purchaseName?: Prisma.SortOrderInput | Prisma.SortOrder
   grade?: Prisma.SortOrderInput | Prisma.SortOrder
   color?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -453,6 +472,7 @@ export type PurchaseOrderLineOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   purchaseOrder?: Prisma.PurchaseOrderOrderByWithRelationInput
   flowerWiki?: Prisma.FlowerWikiOrderByWithRelationInput
+  masterPart?: Prisma.MasterPartOrderByWithRelationInput
   inboundBatch?: Prisma.BatchOrderByWithRelationInput
 }
 
@@ -463,7 +483,9 @@ export type PurchaseOrderLineWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.PurchaseOrderLineWhereInput[]
   NOT?: Prisma.PurchaseOrderLineWhereInput | Prisma.PurchaseOrderLineWhereInput[]
   purchaseOrderId?: Prisma.StringFilter<"PurchaseOrderLine"> | string
-  flowerWikiId?: Prisma.StringFilter<"PurchaseOrderLine"> | string
+  itemType?: Prisma.StringFilter<"PurchaseOrderLine"> | string
+  flowerWikiId?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
+  masterPartId?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
   purchaseName?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
   grade?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
   color?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
@@ -486,14 +508,17 @@ export type PurchaseOrderLineWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"PurchaseOrderLine"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"PurchaseOrderLine"> | Date | string
   purchaseOrder?: Prisma.XOR<Prisma.PurchaseOrderScalarRelationFilter, Prisma.PurchaseOrderWhereInput>
-  flowerWiki?: Prisma.XOR<Prisma.FlowerWikiScalarRelationFilter, Prisma.FlowerWikiWhereInput>
+  flowerWiki?: Prisma.XOR<Prisma.FlowerWikiNullableScalarRelationFilter, Prisma.FlowerWikiWhereInput> | null
+  masterPart?: Prisma.XOR<Prisma.MasterPartNullableScalarRelationFilter, Prisma.MasterPartWhereInput> | null
   inboundBatch?: Prisma.XOR<Prisma.BatchNullableScalarRelationFilter, Prisma.BatchWhereInput> | null
 }, "id" | "inboundBatchId">
 
 export type PurchaseOrderLineOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   purchaseOrderId?: Prisma.SortOrder
-  flowerWikiId?: Prisma.SortOrder
+  itemType?: Prisma.SortOrder
+  flowerWikiId?: Prisma.SortOrderInput | Prisma.SortOrder
+  masterPartId?: Prisma.SortOrderInput | Prisma.SortOrder
   purchaseName?: Prisma.SortOrderInput | Prisma.SortOrder
   grade?: Prisma.SortOrderInput | Prisma.SortOrder
   color?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -529,7 +554,9 @@ export type PurchaseOrderLineScalarWhereWithAggregatesInput = {
   NOT?: Prisma.PurchaseOrderLineScalarWhereWithAggregatesInput | Prisma.PurchaseOrderLineScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"PurchaseOrderLine"> | string
   purchaseOrderId?: Prisma.StringWithAggregatesFilter<"PurchaseOrderLine"> | string
-  flowerWikiId?: Prisma.StringWithAggregatesFilter<"PurchaseOrderLine"> | string
+  itemType?: Prisma.StringWithAggregatesFilter<"PurchaseOrderLine"> | string
+  flowerWikiId?: Prisma.StringNullableWithAggregatesFilter<"PurchaseOrderLine"> | string | null
+  masterPartId?: Prisma.StringNullableWithAggregatesFilter<"PurchaseOrderLine"> | string | null
   purchaseName?: Prisma.StringNullableWithAggregatesFilter<"PurchaseOrderLine"> | string | null
   grade?: Prisma.StringNullableWithAggregatesFilter<"PurchaseOrderLine"> | string | null
   color?: Prisma.StringNullableWithAggregatesFilter<"PurchaseOrderLine"> | string | null
@@ -556,6 +583,7 @@ export type PurchaseOrderLineScalarWhereWithAggregatesInput = {
 
 export type PurchaseOrderLineCreateInput = {
   id?: string
+  itemType?: string
   purchaseName?: string | null
   grade?: string | null
   color?: string | null
@@ -578,14 +606,17 @@ export type PurchaseOrderLineCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   purchaseOrder: Prisma.PurchaseOrderCreateNestedOneWithoutLinesInput
-  flowerWiki: Prisma.FlowerWikiCreateNestedOneWithoutPurchaseOrderLinesInput
+  flowerWiki?: Prisma.FlowerWikiCreateNestedOneWithoutPurchaseOrderLinesInput
+  masterPart?: Prisma.MasterPartCreateNestedOneWithoutPurchaseOrderLinesInput
   inboundBatch?: Prisma.BatchCreateNestedOneWithoutPurchaseOrderLineInput
 }
 
 export type PurchaseOrderLineUncheckedCreateInput = {
   id?: string
   purchaseOrderId: string
-  flowerWikiId: string
+  itemType?: string
+  flowerWikiId?: string | null
+  masterPartId?: string | null
   purchaseName?: string | null
   grade?: string | null
   color?: string | null
@@ -612,6 +643,7 @@ export type PurchaseOrderLineUncheckedCreateInput = {
 
 export type PurchaseOrderLineUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  itemType?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -634,14 +666,17 @@ export type PurchaseOrderLineUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   purchaseOrder?: Prisma.PurchaseOrderUpdateOneRequiredWithoutLinesNestedInput
-  flowerWiki?: Prisma.FlowerWikiUpdateOneRequiredWithoutPurchaseOrderLinesNestedInput
+  flowerWiki?: Prisma.FlowerWikiUpdateOneWithoutPurchaseOrderLinesNestedInput
+  masterPart?: Prisma.MasterPartUpdateOneWithoutPurchaseOrderLinesNestedInput
   inboundBatch?: Prisma.BatchUpdateOneWithoutPurchaseOrderLineNestedInput
 }
 
 export type PurchaseOrderLineUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseOrderId?: Prisma.StringFieldUpdateOperationsInput | string
-  flowerWikiId?: Prisma.StringFieldUpdateOperationsInput | string
+  itemType?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerWikiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterPartId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -669,7 +704,9 @@ export type PurchaseOrderLineUncheckedUpdateInput = {
 export type PurchaseOrderLineCreateManyInput = {
   id?: string
   purchaseOrderId: string
-  flowerWikiId: string
+  itemType?: string
+  flowerWikiId?: string | null
+  masterPartId?: string | null
   purchaseName?: string | null
   grade?: string | null
   color?: string | null
@@ -696,6 +733,7 @@ export type PurchaseOrderLineCreateManyInput = {
 
 export type PurchaseOrderLineUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  itemType?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -722,7 +760,9 @@ export type PurchaseOrderLineUpdateManyMutationInput = {
 export type PurchaseOrderLineUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseOrderId?: Prisma.StringFieldUpdateOperationsInput | string
-  flowerWikiId?: Prisma.StringFieldUpdateOperationsInput | string
+  itemType?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerWikiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterPartId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -760,7 +800,9 @@ export type PurchaseOrderLineOrderByRelationAggregateInput = {
 export type PurchaseOrderLineCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   purchaseOrderId?: Prisma.SortOrder
+  itemType?: Prisma.SortOrder
   flowerWikiId?: Prisma.SortOrder
+  masterPartId?: Prisma.SortOrder
   purchaseName?: Prisma.SortOrder
   grade?: Prisma.SortOrder
   color?: Prisma.SortOrder
@@ -803,7 +845,9 @@ export type PurchaseOrderLineAvgOrderByAggregateInput = {
 export type PurchaseOrderLineMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   purchaseOrderId?: Prisma.SortOrder
+  itemType?: Prisma.SortOrder
   flowerWikiId?: Prisma.SortOrder
+  masterPartId?: Prisma.SortOrder
   purchaseName?: Prisma.SortOrder
   grade?: Prisma.SortOrder
   color?: Prisma.SortOrder
@@ -831,7 +875,9 @@ export type PurchaseOrderLineMaxOrderByAggregateInput = {
 export type PurchaseOrderLineMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   purchaseOrderId?: Prisma.SortOrder
+  itemType?: Prisma.SortOrder
   flowerWikiId?: Prisma.SortOrder
+  masterPartId?: Prisma.SortOrder
   purchaseName?: Prisma.SortOrder
   grade?: Prisma.SortOrder
   color?: Prisma.SortOrder
@@ -874,6 +920,48 @@ export type PurchaseOrderLineSumOrderByAggregateInput = {
 export type PurchaseOrderLineNullableScalarRelationFilter = {
   is?: Prisma.PurchaseOrderLineWhereInput | null
   isNot?: Prisma.PurchaseOrderLineWhereInput | null
+}
+
+export type PurchaseOrderLineCreateNestedManyWithoutMasterPartInput = {
+  create?: Prisma.XOR<Prisma.PurchaseOrderLineCreateWithoutMasterPartInput, Prisma.PurchaseOrderLineUncheckedCreateWithoutMasterPartInput> | Prisma.PurchaseOrderLineCreateWithoutMasterPartInput[] | Prisma.PurchaseOrderLineUncheckedCreateWithoutMasterPartInput[]
+  connectOrCreate?: Prisma.PurchaseOrderLineCreateOrConnectWithoutMasterPartInput | Prisma.PurchaseOrderLineCreateOrConnectWithoutMasterPartInput[]
+  createMany?: Prisma.PurchaseOrderLineCreateManyMasterPartInputEnvelope
+  connect?: Prisma.PurchaseOrderLineWhereUniqueInput | Prisma.PurchaseOrderLineWhereUniqueInput[]
+}
+
+export type PurchaseOrderLineUncheckedCreateNestedManyWithoutMasterPartInput = {
+  create?: Prisma.XOR<Prisma.PurchaseOrderLineCreateWithoutMasterPartInput, Prisma.PurchaseOrderLineUncheckedCreateWithoutMasterPartInput> | Prisma.PurchaseOrderLineCreateWithoutMasterPartInput[] | Prisma.PurchaseOrderLineUncheckedCreateWithoutMasterPartInput[]
+  connectOrCreate?: Prisma.PurchaseOrderLineCreateOrConnectWithoutMasterPartInput | Prisma.PurchaseOrderLineCreateOrConnectWithoutMasterPartInput[]
+  createMany?: Prisma.PurchaseOrderLineCreateManyMasterPartInputEnvelope
+  connect?: Prisma.PurchaseOrderLineWhereUniqueInput | Prisma.PurchaseOrderLineWhereUniqueInput[]
+}
+
+export type PurchaseOrderLineUpdateManyWithoutMasterPartNestedInput = {
+  create?: Prisma.XOR<Prisma.PurchaseOrderLineCreateWithoutMasterPartInput, Prisma.PurchaseOrderLineUncheckedCreateWithoutMasterPartInput> | Prisma.PurchaseOrderLineCreateWithoutMasterPartInput[] | Prisma.PurchaseOrderLineUncheckedCreateWithoutMasterPartInput[]
+  connectOrCreate?: Prisma.PurchaseOrderLineCreateOrConnectWithoutMasterPartInput | Prisma.PurchaseOrderLineCreateOrConnectWithoutMasterPartInput[]
+  upsert?: Prisma.PurchaseOrderLineUpsertWithWhereUniqueWithoutMasterPartInput | Prisma.PurchaseOrderLineUpsertWithWhereUniqueWithoutMasterPartInput[]
+  createMany?: Prisma.PurchaseOrderLineCreateManyMasterPartInputEnvelope
+  set?: Prisma.PurchaseOrderLineWhereUniqueInput | Prisma.PurchaseOrderLineWhereUniqueInput[]
+  disconnect?: Prisma.PurchaseOrderLineWhereUniqueInput | Prisma.PurchaseOrderLineWhereUniqueInput[]
+  delete?: Prisma.PurchaseOrderLineWhereUniqueInput | Prisma.PurchaseOrderLineWhereUniqueInput[]
+  connect?: Prisma.PurchaseOrderLineWhereUniqueInput | Prisma.PurchaseOrderLineWhereUniqueInput[]
+  update?: Prisma.PurchaseOrderLineUpdateWithWhereUniqueWithoutMasterPartInput | Prisma.PurchaseOrderLineUpdateWithWhereUniqueWithoutMasterPartInput[]
+  updateMany?: Prisma.PurchaseOrderLineUpdateManyWithWhereWithoutMasterPartInput | Prisma.PurchaseOrderLineUpdateManyWithWhereWithoutMasterPartInput[]
+  deleteMany?: Prisma.PurchaseOrderLineScalarWhereInput | Prisma.PurchaseOrderLineScalarWhereInput[]
+}
+
+export type PurchaseOrderLineUncheckedUpdateManyWithoutMasterPartNestedInput = {
+  create?: Prisma.XOR<Prisma.PurchaseOrderLineCreateWithoutMasterPartInput, Prisma.PurchaseOrderLineUncheckedCreateWithoutMasterPartInput> | Prisma.PurchaseOrderLineCreateWithoutMasterPartInput[] | Prisma.PurchaseOrderLineUncheckedCreateWithoutMasterPartInput[]
+  connectOrCreate?: Prisma.PurchaseOrderLineCreateOrConnectWithoutMasterPartInput | Prisma.PurchaseOrderLineCreateOrConnectWithoutMasterPartInput[]
+  upsert?: Prisma.PurchaseOrderLineUpsertWithWhereUniqueWithoutMasterPartInput | Prisma.PurchaseOrderLineUpsertWithWhereUniqueWithoutMasterPartInput[]
+  createMany?: Prisma.PurchaseOrderLineCreateManyMasterPartInputEnvelope
+  set?: Prisma.PurchaseOrderLineWhereUniqueInput | Prisma.PurchaseOrderLineWhereUniqueInput[]
+  disconnect?: Prisma.PurchaseOrderLineWhereUniqueInput | Prisma.PurchaseOrderLineWhereUniqueInput[]
+  delete?: Prisma.PurchaseOrderLineWhereUniqueInput | Prisma.PurchaseOrderLineWhereUniqueInput[]
+  connect?: Prisma.PurchaseOrderLineWhereUniqueInput | Prisma.PurchaseOrderLineWhereUniqueInput[]
+  update?: Prisma.PurchaseOrderLineUpdateWithWhereUniqueWithoutMasterPartInput | Prisma.PurchaseOrderLineUpdateWithWhereUniqueWithoutMasterPartInput[]
+  updateMany?: Prisma.PurchaseOrderLineUpdateManyWithWhereWithoutMasterPartInput | Prisma.PurchaseOrderLineUpdateManyWithWhereWithoutMasterPartInput[]
+  deleteMany?: Prisma.PurchaseOrderLineScalarWhereInput | Prisma.PurchaseOrderLineScalarWhereInput[]
 }
 
 export type PurchaseOrderLineCreateNestedManyWithoutPurchaseOrderInput = {
@@ -1000,8 +1088,9 @@ export type PurchaseOrderLineUncheckedUpdateManyWithoutFlowerWikiNestedInput = {
   deleteMany?: Prisma.PurchaseOrderLineScalarWhereInput | Prisma.PurchaseOrderLineScalarWhereInput[]
 }
 
-export type PurchaseOrderLineCreateWithoutPurchaseOrderInput = {
+export type PurchaseOrderLineCreateWithoutMasterPartInput = {
   id?: string
+  itemType?: string
   purchaseName?: string | null
   grade?: string | null
   color?: string | null
@@ -1023,13 +1112,133 @@ export type PurchaseOrderLineCreateWithoutPurchaseOrderInput = {
   note?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
-  flowerWiki: Prisma.FlowerWikiCreateNestedOneWithoutPurchaseOrderLinesInput
+  purchaseOrder: Prisma.PurchaseOrderCreateNestedOneWithoutLinesInput
+  flowerWiki?: Prisma.FlowerWikiCreateNestedOneWithoutPurchaseOrderLinesInput
+  inboundBatch?: Prisma.BatchCreateNestedOneWithoutPurchaseOrderLineInput
+}
+
+export type PurchaseOrderLineUncheckedCreateWithoutMasterPartInput = {
+  id?: string
+  purchaseOrderId: string
+  itemType?: string
+  flowerWikiId?: string | null
+  purchaseName?: string | null
+  grade?: string | null
+  color?: string | null
+  spec?: string | null
+  purchaseQuantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  purchaseUnit: string
+  stemsPerUnit: runtime.Decimal | runtime.DecimalJsLike | number | string
+  totalStems: runtime.Decimal | runtime.DecimalJsLike | number | string
+  unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lineAmount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  allocatedExtraFee?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierSkuName?: string | null
+  note?: string | null
+  inboundBatchId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type PurchaseOrderLineCreateOrConnectWithoutMasterPartInput = {
+  where: Prisma.PurchaseOrderLineWhereUniqueInput
+  create: Prisma.XOR<Prisma.PurchaseOrderLineCreateWithoutMasterPartInput, Prisma.PurchaseOrderLineUncheckedCreateWithoutMasterPartInput>
+}
+
+export type PurchaseOrderLineCreateManyMasterPartInputEnvelope = {
+  data: Prisma.PurchaseOrderLineCreateManyMasterPartInput | Prisma.PurchaseOrderLineCreateManyMasterPartInput[]
+  skipDuplicates?: boolean
+}
+
+export type PurchaseOrderLineUpsertWithWhereUniqueWithoutMasterPartInput = {
+  where: Prisma.PurchaseOrderLineWhereUniqueInput
+  update: Prisma.XOR<Prisma.PurchaseOrderLineUpdateWithoutMasterPartInput, Prisma.PurchaseOrderLineUncheckedUpdateWithoutMasterPartInput>
+  create: Prisma.XOR<Prisma.PurchaseOrderLineCreateWithoutMasterPartInput, Prisma.PurchaseOrderLineUncheckedCreateWithoutMasterPartInput>
+}
+
+export type PurchaseOrderLineUpdateWithWhereUniqueWithoutMasterPartInput = {
+  where: Prisma.PurchaseOrderLineWhereUniqueInput
+  data: Prisma.XOR<Prisma.PurchaseOrderLineUpdateWithoutMasterPartInput, Prisma.PurchaseOrderLineUncheckedUpdateWithoutMasterPartInput>
+}
+
+export type PurchaseOrderLineUpdateManyWithWhereWithoutMasterPartInput = {
+  where: Prisma.PurchaseOrderLineScalarWhereInput
+  data: Prisma.XOR<Prisma.PurchaseOrderLineUpdateManyMutationInput, Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMasterPartInput>
+}
+
+export type PurchaseOrderLineScalarWhereInput = {
+  AND?: Prisma.PurchaseOrderLineScalarWhereInput | Prisma.PurchaseOrderLineScalarWhereInput[]
+  OR?: Prisma.PurchaseOrderLineScalarWhereInput[]
+  NOT?: Prisma.PurchaseOrderLineScalarWhereInput | Prisma.PurchaseOrderLineScalarWhereInput[]
+  id?: Prisma.StringFilter<"PurchaseOrderLine"> | string
+  purchaseOrderId?: Prisma.StringFilter<"PurchaseOrderLine"> | string
+  itemType?: Prisma.StringFilter<"PurchaseOrderLine"> | string
+  flowerWikiId?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
+  masterPartId?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
+  purchaseName?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
+  grade?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
+  color?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
+  spec?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
+  purchaseQuantity?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  purchaseUnit?: Prisma.StringFilter<"PurchaseOrderLine"> | string
+  stemsPerUnit?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  totalStems?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  unitPrice?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lineAmount?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  allocatedExtraFee?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualTotalCost?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualUnitCost?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierSkuName?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
+  note?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
+  inboundBatchId?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
+  createdAt?: Prisma.DateTimeFilter<"PurchaseOrderLine"> | Date | string
+  updatedAt?: Prisma.DateTimeFilter<"PurchaseOrderLine"> | Date | string
+}
+
+export type PurchaseOrderLineCreateWithoutPurchaseOrderInput = {
+  id?: string
+  itemType?: string
+  purchaseName?: string | null
+  grade?: string | null
+  color?: string | null
+  spec?: string | null
+  purchaseQuantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  purchaseUnit: string
+  stemsPerUnit: runtime.Decimal | runtime.DecimalJsLike | number | string
+  totalStems: runtime.Decimal | runtime.DecimalJsLike | number | string
+  unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lineAmount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  allocatedExtraFee?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierSkuName?: string | null
+  note?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  flowerWiki?: Prisma.FlowerWikiCreateNestedOneWithoutPurchaseOrderLinesInput
+  masterPart?: Prisma.MasterPartCreateNestedOneWithoutPurchaseOrderLinesInput
   inboundBatch?: Prisma.BatchCreateNestedOneWithoutPurchaseOrderLineInput
 }
 
 export type PurchaseOrderLineUncheckedCreateWithoutPurchaseOrderInput = {
   id?: string
-  flowerWikiId: string
+  itemType?: string
+  flowerWikiId?: string | null
+  masterPartId?: string | null
   purchaseName?: string | null
   grade?: string | null
   color?: string | null
@@ -1080,39 +1289,9 @@ export type PurchaseOrderLineUpdateManyWithWhereWithoutPurchaseOrderInput = {
   data: Prisma.XOR<Prisma.PurchaseOrderLineUpdateManyMutationInput, Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutPurchaseOrderInput>
 }
 
-export type PurchaseOrderLineScalarWhereInput = {
-  AND?: Prisma.PurchaseOrderLineScalarWhereInput | Prisma.PurchaseOrderLineScalarWhereInput[]
-  OR?: Prisma.PurchaseOrderLineScalarWhereInput[]
-  NOT?: Prisma.PurchaseOrderLineScalarWhereInput | Prisma.PurchaseOrderLineScalarWhereInput[]
-  id?: Prisma.StringFilter<"PurchaseOrderLine"> | string
-  purchaseOrderId?: Prisma.StringFilter<"PurchaseOrderLine"> | string
-  flowerWikiId?: Prisma.StringFilter<"PurchaseOrderLine"> | string
-  purchaseName?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
-  grade?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
-  color?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
-  spec?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
-  purchaseQuantity?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  purchaseUnit?: Prisma.StringFilter<"PurchaseOrderLine"> | string
-  stemsPerUnit?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  totalStems?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  unitPrice?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  lineAmount?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  allocatedExtraFee?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  actualTotalCost?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  actualUnitCost?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
-  usableRate?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  lossRate?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  lossAdjustedTotalCost?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  lossAdjustedUnitCost?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
-  supplierSkuName?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
-  note?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
-  inboundBatchId?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
-  createdAt?: Prisma.DateTimeFilter<"PurchaseOrderLine"> | Date | string
-  updatedAt?: Prisma.DateTimeFilter<"PurchaseOrderLine"> | Date | string
-}
-
 export type PurchaseOrderLineCreateWithoutInboundBatchInput = {
   id?: string
+  itemType?: string
   purchaseName?: string | null
   grade?: string | null
   color?: string | null
@@ -1135,13 +1314,16 @@ export type PurchaseOrderLineCreateWithoutInboundBatchInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   purchaseOrder: Prisma.PurchaseOrderCreateNestedOneWithoutLinesInput
-  flowerWiki: Prisma.FlowerWikiCreateNestedOneWithoutPurchaseOrderLinesInput
+  flowerWiki?: Prisma.FlowerWikiCreateNestedOneWithoutPurchaseOrderLinesInput
+  masterPart?: Prisma.MasterPartCreateNestedOneWithoutPurchaseOrderLinesInput
 }
 
 export type PurchaseOrderLineUncheckedCreateWithoutInboundBatchInput = {
   id?: string
   purchaseOrderId: string
-  flowerWikiId: string
+  itemType?: string
+  flowerWikiId?: string | null
+  masterPartId?: string | null
   purchaseName?: string | null
   grade?: string | null
   color?: string | null
@@ -1183,6 +1365,7 @@ export type PurchaseOrderLineUpdateToOneWithWhereWithoutInboundBatchInput = {
 
 export type PurchaseOrderLineUpdateWithoutInboundBatchInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  itemType?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1205,13 +1388,16 @@ export type PurchaseOrderLineUpdateWithoutInboundBatchInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   purchaseOrder?: Prisma.PurchaseOrderUpdateOneRequiredWithoutLinesNestedInput
-  flowerWiki?: Prisma.FlowerWikiUpdateOneRequiredWithoutPurchaseOrderLinesNestedInput
+  flowerWiki?: Prisma.FlowerWikiUpdateOneWithoutPurchaseOrderLinesNestedInput
+  masterPart?: Prisma.MasterPartUpdateOneWithoutPurchaseOrderLinesNestedInput
 }
 
 export type PurchaseOrderLineUncheckedUpdateWithoutInboundBatchInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseOrderId?: Prisma.StringFieldUpdateOperationsInput | string
-  flowerWikiId?: Prisma.StringFieldUpdateOperationsInput | string
+  itemType?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerWikiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterPartId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1237,6 +1423,7 @@ export type PurchaseOrderLineUncheckedUpdateWithoutInboundBatchInput = {
 
 export type PurchaseOrderLineCreateWithoutFlowerWikiInput = {
   id?: string
+  itemType?: string
   purchaseName?: string | null
   grade?: string | null
   color?: string | null
@@ -1259,12 +1446,15 @@ export type PurchaseOrderLineCreateWithoutFlowerWikiInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   purchaseOrder: Prisma.PurchaseOrderCreateNestedOneWithoutLinesInput
+  masterPart?: Prisma.MasterPartCreateNestedOneWithoutPurchaseOrderLinesInput
   inboundBatch?: Prisma.BatchCreateNestedOneWithoutPurchaseOrderLineInput
 }
 
 export type PurchaseOrderLineUncheckedCreateWithoutFlowerWikiInput = {
   id?: string
   purchaseOrderId: string
+  itemType?: string
+  masterPartId?: string | null
   purchaseName?: string | null
   grade?: string | null
   color?: string | null
@@ -1315,9 +1505,127 @@ export type PurchaseOrderLineUpdateManyWithWhereWithoutFlowerWikiInput = {
   data: Prisma.XOR<Prisma.PurchaseOrderLineUpdateManyMutationInput, Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutFlowerWikiInput>
 }
 
+export type PurchaseOrderLineCreateManyMasterPartInput = {
+  id?: string
+  purchaseOrderId: string
+  itemType?: string
+  flowerWikiId?: string | null
+  purchaseName?: string | null
+  grade?: string | null
+  color?: string | null
+  spec?: string | null
+  purchaseQuantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  purchaseUnit: string
+  stemsPerUnit: runtime.Decimal | runtime.DecimalJsLike | number | string
+  totalStems: runtime.Decimal | runtime.DecimalJsLike | number | string
+  unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lineAmount: runtime.Decimal | runtime.DecimalJsLike | number | string
+  allocatedExtraFee?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierSkuName?: string | null
+  note?: string | null
+  inboundBatchId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type PurchaseOrderLineUpdateWithoutMasterPartInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  itemType?: Prisma.StringFieldUpdateOperationsInput | string
+  purchaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  spec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
+  stemsPerUnit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  totalStems?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lineAmount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  allocatedExtraFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualTotalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualUnitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierSkuName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  purchaseOrder?: Prisma.PurchaseOrderUpdateOneRequiredWithoutLinesNestedInput
+  flowerWiki?: Prisma.FlowerWikiUpdateOneWithoutPurchaseOrderLinesNestedInput
+  inboundBatch?: Prisma.BatchUpdateOneWithoutPurchaseOrderLineNestedInput
+}
+
+export type PurchaseOrderLineUncheckedUpdateWithoutMasterPartInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  purchaseOrderId?: Prisma.StringFieldUpdateOperationsInput | string
+  itemType?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerWikiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  spec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
+  stemsPerUnit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  totalStems?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lineAmount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  allocatedExtraFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualTotalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualUnitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierSkuName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inboundBatchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type PurchaseOrderLineUncheckedUpdateManyWithoutMasterPartInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  purchaseOrderId?: Prisma.StringFieldUpdateOperationsInput | string
+  itemType?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerWikiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  spec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  purchaseQuantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
+  stemsPerUnit?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  totalStems?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lineAmount?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  allocatedExtraFee?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualTotalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualUnitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  usableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedTotalCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  supplierSkuName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  inboundBatchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
 export type PurchaseOrderLineCreateManyPurchaseOrderInput = {
   id?: string
-  flowerWikiId: string
+  itemType?: string
+  flowerWikiId?: string | null
+  masterPartId?: string | null
   purchaseName?: string | null
   grade?: string | null
   color?: string | null
@@ -1344,6 +1652,7 @@ export type PurchaseOrderLineCreateManyPurchaseOrderInput = {
 
 export type PurchaseOrderLineUpdateWithoutPurchaseOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  itemType?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1365,13 +1674,16 @@ export type PurchaseOrderLineUpdateWithoutPurchaseOrderInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
-  flowerWiki?: Prisma.FlowerWikiUpdateOneRequiredWithoutPurchaseOrderLinesNestedInput
+  flowerWiki?: Prisma.FlowerWikiUpdateOneWithoutPurchaseOrderLinesNestedInput
+  masterPart?: Prisma.MasterPartUpdateOneWithoutPurchaseOrderLinesNestedInput
   inboundBatch?: Prisma.BatchUpdateOneWithoutPurchaseOrderLineNestedInput
 }
 
 export type PurchaseOrderLineUncheckedUpdateWithoutPurchaseOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  flowerWikiId?: Prisma.StringFieldUpdateOperationsInput | string
+  itemType?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerWikiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterPartId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1398,7 +1710,9 @@ export type PurchaseOrderLineUncheckedUpdateWithoutPurchaseOrderInput = {
 
 export type PurchaseOrderLineUncheckedUpdateManyWithoutPurchaseOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  flowerWikiId?: Prisma.StringFieldUpdateOperationsInput | string
+  itemType?: Prisma.StringFieldUpdateOperationsInput | string
+  flowerWikiId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  masterPartId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1426,6 +1740,8 @@ export type PurchaseOrderLineUncheckedUpdateManyWithoutPurchaseOrderInput = {
 export type PurchaseOrderLineCreateManyFlowerWikiInput = {
   id?: string
   purchaseOrderId: string
+  itemType?: string
+  masterPartId?: string | null
   purchaseName?: string | null
   grade?: string | null
   color?: string | null
@@ -1452,6 +1768,7 @@ export type PurchaseOrderLineCreateManyFlowerWikiInput = {
 
 export type PurchaseOrderLineUpdateWithoutFlowerWikiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  itemType?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1474,12 +1791,15 @@ export type PurchaseOrderLineUpdateWithoutFlowerWikiInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   purchaseOrder?: Prisma.PurchaseOrderUpdateOneRequiredWithoutLinesNestedInput
+  masterPart?: Prisma.MasterPartUpdateOneWithoutPurchaseOrderLinesNestedInput
   inboundBatch?: Prisma.BatchUpdateOneWithoutPurchaseOrderLineNestedInput
 }
 
 export type PurchaseOrderLineUncheckedUpdateWithoutFlowerWikiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseOrderId?: Prisma.StringFieldUpdateOperationsInput | string
+  itemType?: Prisma.StringFieldUpdateOperationsInput | string
+  masterPartId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1507,6 +1827,8 @@ export type PurchaseOrderLineUncheckedUpdateWithoutFlowerWikiInput = {
 export type PurchaseOrderLineUncheckedUpdateManyWithoutFlowerWikiInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   purchaseOrderId?: Prisma.StringFieldUpdateOperationsInput | string
+  itemType?: Prisma.StringFieldUpdateOperationsInput | string
+  masterPartId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   purchaseName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1536,7 +1858,9 @@ export type PurchaseOrderLineUncheckedUpdateManyWithoutFlowerWikiInput = {
 export type PurchaseOrderLineSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   purchaseOrderId?: boolean
+  itemType?: boolean
   flowerWikiId?: boolean
+  masterPartId?: boolean
   purchaseName?: boolean
   grade?: boolean
   color?: boolean
@@ -1560,14 +1884,17 @@ export type PurchaseOrderLineSelect<ExtArgs extends runtime.Types.Extensions.Int
   createdAt?: boolean
   updatedAt?: boolean
   purchaseOrder?: boolean | Prisma.PurchaseOrderDefaultArgs<ExtArgs>
-  flowerWiki?: boolean | Prisma.FlowerWikiDefaultArgs<ExtArgs>
+  flowerWiki?: boolean | Prisma.PurchaseOrderLine$flowerWikiArgs<ExtArgs>
+  masterPart?: boolean | Prisma.PurchaseOrderLine$masterPartArgs<ExtArgs>
   inboundBatch?: boolean | Prisma.PurchaseOrderLine$inboundBatchArgs<ExtArgs>
 }, ExtArgs["result"]["purchaseOrderLine"]>
 
 export type PurchaseOrderLineSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   purchaseOrderId?: boolean
+  itemType?: boolean
   flowerWikiId?: boolean
+  masterPartId?: boolean
   purchaseName?: boolean
   grade?: boolean
   color?: boolean
@@ -1591,14 +1918,17 @@ export type PurchaseOrderLineSelectCreateManyAndReturn<ExtArgs extends runtime.T
   createdAt?: boolean
   updatedAt?: boolean
   purchaseOrder?: boolean | Prisma.PurchaseOrderDefaultArgs<ExtArgs>
-  flowerWiki?: boolean | Prisma.FlowerWikiDefaultArgs<ExtArgs>
+  flowerWiki?: boolean | Prisma.PurchaseOrderLine$flowerWikiArgs<ExtArgs>
+  masterPart?: boolean | Prisma.PurchaseOrderLine$masterPartArgs<ExtArgs>
   inboundBatch?: boolean | Prisma.PurchaseOrderLine$inboundBatchArgs<ExtArgs>
 }, ExtArgs["result"]["purchaseOrderLine"]>
 
 export type PurchaseOrderLineSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   purchaseOrderId?: boolean
+  itemType?: boolean
   flowerWikiId?: boolean
+  masterPartId?: boolean
   purchaseName?: boolean
   grade?: boolean
   color?: boolean
@@ -1622,14 +1952,17 @@ export type PurchaseOrderLineSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   createdAt?: boolean
   updatedAt?: boolean
   purchaseOrder?: boolean | Prisma.PurchaseOrderDefaultArgs<ExtArgs>
-  flowerWiki?: boolean | Prisma.FlowerWikiDefaultArgs<ExtArgs>
+  flowerWiki?: boolean | Prisma.PurchaseOrderLine$flowerWikiArgs<ExtArgs>
+  masterPart?: boolean | Prisma.PurchaseOrderLine$masterPartArgs<ExtArgs>
   inboundBatch?: boolean | Prisma.PurchaseOrderLine$inboundBatchArgs<ExtArgs>
 }, ExtArgs["result"]["purchaseOrderLine"]>
 
 export type PurchaseOrderLineSelectScalar = {
   id?: boolean
   purchaseOrderId?: boolean
+  itemType?: boolean
   flowerWikiId?: boolean
+  masterPartId?: boolean
   purchaseName?: boolean
   grade?: boolean
   color?: boolean
@@ -1654,20 +1987,23 @@ export type PurchaseOrderLineSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PurchaseOrderLineOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "purchaseOrderId" | "flowerWikiId" | "purchaseName" | "grade" | "color" | "spec" | "purchaseQuantity" | "purchaseUnit" | "stemsPerUnit" | "totalStems" | "unitPrice" | "lineAmount" | "allocatedExtraFee" | "actualTotalCost" | "actualUnitCost" | "usableRate" | "lossRate" | "lossAdjustedTotalCost" | "lossAdjustedUnitCost" | "supplierSkuName" | "note" | "inboundBatchId" | "createdAt" | "updatedAt", ExtArgs["result"]["purchaseOrderLine"]>
+export type PurchaseOrderLineOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "purchaseOrderId" | "itemType" | "flowerWikiId" | "masterPartId" | "purchaseName" | "grade" | "color" | "spec" | "purchaseQuantity" | "purchaseUnit" | "stemsPerUnit" | "totalStems" | "unitPrice" | "lineAmount" | "allocatedExtraFee" | "actualTotalCost" | "actualUnitCost" | "usableRate" | "lossRate" | "lossAdjustedTotalCost" | "lossAdjustedUnitCost" | "supplierSkuName" | "note" | "inboundBatchId" | "createdAt" | "updatedAt", ExtArgs["result"]["purchaseOrderLine"]>
 export type PurchaseOrderLineInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   purchaseOrder?: boolean | Prisma.PurchaseOrderDefaultArgs<ExtArgs>
-  flowerWiki?: boolean | Prisma.FlowerWikiDefaultArgs<ExtArgs>
+  flowerWiki?: boolean | Prisma.PurchaseOrderLine$flowerWikiArgs<ExtArgs>
+  masterPart?: boolean | Prisma.PurchaseOrderLine$masterPartArgs<ExtArgs>
   inboundBatch?: boolean | Prisma.PurchaseOrderLine$inboundBatchArgs<ExtArgs>
 }
 export type PurchaseOrderLineIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   purchaseOrder?: boolean | Prisma.PurchaseOrderDefaultArgs<ExtArgs>
-  flowerWiki?: boolean | Prisma.FlowerWikiDefaultArgs<ExtArgs>
+  flowerWiki?: boolean | Prisma.PurchaseOrderLine$flowerWikiArgs<ExtArgs>
+  masterPart?: boolean | Prisma.PurchaseOrderLine$masterPartArgs<ExtArgs>
   inboundBatch?: boolean | Prisma.PurchaseOrderLine$inboundBatchArgs<ExtArgs>
 }
 export type PurchaseOrderLineIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   purchaseOrder?: boolean | Prisma.PurchaseOrderDefaultArgs<ExtArgs>
-  flowerWiki?: boolean | Prisma.FlowerWikiDefaultArgs<ExtArgs>
+  flowerWiki?: boolean | Prisma.PurchaseOrderLine$flowerWikiArgs<ExtArgs>
+  masterPart?: boolean | Prisma.PurchaseOrderLine$masterPartArgs<ExtArgs>
   inboundBatch?: boolean | Prisma.PurchaseOrderLine$inboundBatchArgs<ExtArgs>
 }
 
@@ -1675,13 +2011,16 @@ export type $PurchaseOrderLinePayload<ExtArgs extends runtime.Types.Extensions.I
   name: "PurchaseOrderLine"
   objects: {
     purchaseOrder: Prisma.$PurchaseOrderPayload<ExtArgs>
-    flowerWiki: Prisma.$FlowerWikiPayload<ExtArgs>
+    flowerWiki: Prisma.$FlowerWikiPayload<ExtArgs> | null
+    masterPart: Prisma.$MasterPartPayload<ExtArgs> | null
     inboundBatch: Prisma.$BatchPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     purchaseOrderId: string
-    flowerWikiId: string
+    itemType: string
+    flowerWikiId: string | null
+    masterPartId: string | null
     purchaseName: string | null
     grade: string | null
     color: string | null
@@ -2099,7 +2438,8 @@ readonly fields: PurchaseOrderLineFieldRefs;
 export interface Prisma__PurchaseOrderLineClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   purchaseOrder<T extends Prisma.PurchaseOrderDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PurchaseOrderDefaultArgs<ExtArgs>>): Prisma.Prisma__PurchaseOrderClient<runtime.Types.Result.GetResult<Prisma.$PurchaseOrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-  flowerWiki<T extends Prisma.FlowerWikiDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.FlowerWikiDefaultArgs<ExtArgs>>): Prisma.Prisma__FlowerWikiClient<runtime.Types.Result.GetResult<Prisma.$FlowerWikiPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  flowerWiki<T extends Prisma.PurchaseOrderLine$flowerWikiArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PurchaseOrderLine$flowerWikiArgs<ExtArgs>>): Prisma.Prisma__FlowerWikiClient<runtime.Types.Result.GetResult<Prisma.$FlowerWikiPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  masterPart<T extends Prisma.PurchaseOrderLine$masterPartArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PurchaseOrderLine$masterPartArgs<ExtArgs>>): Prisma.Prisma__MasterPartClient<runtime.Types.Result.GetResult<Prisma.$MasterPartPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   inboundBatch<T extends Prisma.PurchaseOrderLine$inboundBatchArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.PurchaseOrderLine$inboundBatchArgs<ExtArgs>>): Prisma.Prisma__BatchClient<runtime.Types.Result.GetResult<Prisma.$BatchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -2132,7 +2472,9 @@ export interface Prisma__PurchaseOrderLineClient<T, Null = never, ExtArgs extend
 export interface PurchaseOrderLineFieldRefs {
   readonly id: Prisma.FieldRef<"PurchaseOrderLine", 'String'>
   readonly purchaseOrderId: Prisma.FieldRef<"PurchaseOrderLine", 'String'>
+  readonly itemType: Prisma.FieldRef<"PurchaseOrderLine", 'String'>
   readonly flowerWikiId: Prisma.FieldRef<"PurchaseOrderLine", 'String'>
+  readonly masterPartId: Prisma.FieldRef<"PurchaseOrderLine", 'String'>
   readonly purchaseName: Prisma.FieldRef<"PurchaseOrderLine", 'String'>
   readonly grade: Prisma.FieldRef<"PurchaseOrderLine", 'String'>
   readonly color: Prisma.FieldRef<"PurchaseOrderLine", 'String'>
@@ -2553,6 +2895,44 @@ export type PurchaseOrderLineDeleteManyArgs<ExtArgs extends runtime.Types.Extens
    * Limit how many PurchaseOrderLines to delete.
    */
   limit?: number
+}
+
+/**
+ * PurchaseOrderLine.flowerWiki
+ */
+export type PurchaseOrderLine$flowerWikiArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the FlowerWiki
+   */
+  select?: Prisma.FlowerWikiSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the FlowerWiki
+   */
+  omit?: Prisma.FlowerWikiOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.FlowerWikiInclude<ExtArgs> | null
+  where?: Prisma.FlowerWikiWhereInput
+}
+
+/**
+ * PurchaseOrderLine.masterPart
+ */
+export type PurchaseOrderLine$masterPartArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the MasterPart
+   */
+  select?: Prisma.MasterPartSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the MasterPart
+   */
+  omit?: Prisma.MasterPartOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MasterPartInclude<ExtArgs> | null
+  where?: Prisma.MasterPartWhereInput
 }
 
 /**

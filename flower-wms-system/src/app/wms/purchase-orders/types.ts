@@ -9,6 +9,24 @@ export type PurchaseOrderStatus = "DRAFT" | "ORDERED" | "RECEIVED" | "CANCELLED"
 
 export type PurchaseCostAllocationMethod = "BY_AMOUNT" | "BY_QUANTITY";
 
+export type PurchaseLineItemType =
+  | "FLOWER"
+  | "SUPPLY"
+  | "PACKAGING"
+  | "TOOL"
+  | "OTHER";
+
+export type MasterPartSummary = {
+  id: string;
+  type: string;
+  name: string;
+  spec: string | null;
+  defaultUnit: string | null;
+  brand: string | null;
+  model: string | null;
+  color: string | null;
+};
+
 export type Supplier = {
   id: string;
   name: string;
@@ -43,13 +61,18 @@ export type PurchaseOrderListItem = {
 export type PurchaseOrderLine = {
   id: string;
   purchaseOrderId: string;
-  flowerWikiId: string;
+  itemType: PurchaseLineItemType;
+  flowerWikiId: string | null;
+  masterPartId: string | null;
   flowerWiki: {
     id: string;
     chineseName: string;
     englishName: string;
     colorTags: string[];
-  };
+  } | null;
+  masterPart: MasterPartSummary | null;
+  displayName: string;
+  displaySpec: string | null;
   purchaseName: string | null;
   grade: string | null;
   color: string | null;
@@ -109,7 +132,9 @@ export type PurchaseOrderDetail = {
 };
 
 export type PurchasePreviewLine = {
-  flowerWikiId: string;
+  itemType?: PurchaseLineItemType;
+  flowerWikiId: string | null;
+  masterPartId?: string | null;
   purchaseQuantity: string;
   purchaseUnit: string;
   stemsPerUnit: string;

@@ -794,14 +794,14 @@ export type FlowerWikiUncheckedUpdateManyInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
-export type FlowerWikiScalarRelationFilter = {
-  is?: Prisma.FlowerWikiWhereInput
-  isNot?: Prisma.FlowerWikiWhereInput
-}
-
 export type FlowerWikiNullableScalarRelationFilter = {
   is?: Prisma.FlowerWikiWhereInput | null
   isNot?: Prisma.FlowerWikiWhereInput | null
+}
+
+export type FlowerWikiScalarRelationFilter = {
+  is?: Prisma.FlowerWikiWhereInput
+  isNot?: Prisma.FlowerWikiWhereInput
 }
 
 export type FlowerWikiCountOrderByAggregateInput = {
@@ -917,10 +917,12 @@ export type FlowerWikiCreateNestedOneWithoutPurchaseOrderLinesInput = {
   connect?: Prisma.FlowerWikiWhereUniqueInput
 }
 
-export type FlowerWikiUpdateOneRequiredWithoutPurchaseOrderLinesNestedInput = {
+export type FlowerWikiUpdateOneWithoutPurchaseOrderLinesNestedInput = {
   create?: Prisma.XOR<Prisma.FlowerWikiCreateWithoutPurchaseOrderLinesInput, Prisma.FlowerWikiUncheckedCreateWithoutPurchaseOrderLinesInput>
   connectOrCreate?: Prisma.FlowerWikiCreateOrConnectWithoutPurchaseOrderLinesInput
   upsert?: Prisma.FlowerWikiUpsertWithoutPurchaseOrderLinesInput
+  disconnect?: Prisma.FlowerWikiWhereInput | boolean
+  delete?: Prisma.FlowerWikiWhereInput | boolean
   connect?: Prisma.FlowerWikiWhereUniqueInput
   update?: Prisma.XOR<Prisma.XOR<Prisma.FlowerWikiUpdateToOneWithWhereWithoutPurchaseOrderLinesInput, Prisma.FlowerWikiUpdateWithoutPurchaseOrderLinesInput>, Prisma.FlowerWikiUncheckedUpdateWithoutPurchaseOrderLinesInput>
 }

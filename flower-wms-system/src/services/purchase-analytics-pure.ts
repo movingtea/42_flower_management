@@ -74,7 +74,7 @@ export type PurchaseOrderAnalyticsRow = {
 export type PurchaseLineAnalyticsRow = {
   id: string;
   purchaseOrderId: string;
-  flowerWikiId: string;
+  flowerWikiId: string | null;
   purchaseQuantity: DecimalInput;
   stemsPerUnit: DecimalInput;
   totalStems: DecimalInput;
@@ -91,7 +91,7 @@ export type PurchaseLineAnalyticsRow = {
   flowerWiki: {
     id: string;
     chineseName: string;
-  };
+  } | null;
   purchaseOrder: PurchaseOrderAnalyticsRow;
 };
 
@@ -604,6 +604,7 @@ export function calculateFlowerPurchasePriceTrends(input: {
   >();
 
   for (const line of input.purchaseLines) {
+    if (!line.flowerWikiId) continue;
     const order = line.purchaseOrder;
     const entries =
       groups.get(line.flowerWikiId) ??
@@ -628,7 +629,7 @@ export function calculateFlowerPurchasePriceTrends(input: {
     const previous = sorted[1];
     const flowerName =
       input.purchaseLines.find((line) => line.flowerWikiId === flowerWikiId)?.flowerWiki
-        .chineseName ?? flowerWikiId;
+        ?.chineseName ?? flowerWikiId;
 
     const warnings: string[] = [];
     let actualUnitCostChange: Prisma.Decimal | null = null;

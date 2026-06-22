@@ -213,6 +213,28 @@ function testMissingFeesDefaultToZero() {
   assert.equal(result.totalAmount.toFixed(2), "25.00");
 }
 
+function testNonFlowerLineUsesFullUsableRateByDefault() {
+  const result = calculatePurchaseOrderTotals({
+    lines: [
+      {
+        itemType: "PACKAGING",
+        masterPartId: "mp-paper",
+        purchaseQuantity: 10,
+        purchaseUnit: "张",
+        stemsPerUnit: 1,
+        unitPrice: 2,
+      },
+    ],
+  });
+
+  assert.equal(result.lines[0].lineAmount.toFixed(2), "20.00");
+  assert.equal(result.lines[0].usableRate.toFixed(4), "1.0000");
+  assert.equal(result.lines[0].lossRate.toFixed(4), "0.0000");
+  assert.ok(
+    !result.warnings.some((warning) => warning.includes("花材未设置可用率"))
+  );
+}
+
 function run() {
   testSingleLineWithoutExtraFee();
   testMultiLineByAmountAllocation();
@@ -223,6 +245,7 @@ function run() {
   testMultiLineLossAfterAllocation();
   testDefaultUsableRateWhenMissing();
   testMissingFeesDefaultToZero();
+  testNonFlowerLineUsesFullUsableRateByDefault();
   console.log("purchase-pure tests passed");
 }
 

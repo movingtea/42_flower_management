@@ -2,14 +2,24 @@ import type { InputHTMLAttributes } from "react";
 
 interface InputProps extends InputHTMLAttributes<HTMLInputElement> {
   label?: string;
+  requiredMark?: boolean;
 }
 
-export function Input({ label, className = "", id, ...props }: InputProps) {
+export function Input({
+  label,
+  requiredMark = false,
+  className = "",
+  id,
+  ...props
+}: InputProps) {
   const inputId = id ?? label?.replace(/\s/g, "-").toLowerCase();
   return (
     <label className="block text-sm">
       {label && (
-        <span className="mb-1 block font-medium text-zinc-700">{label}</span>
+        <span className="mb-1 block font-medium text-zinc-700">
+          {label}
+          {requiredMark ? <span className="ml-1 text-red-500">*</span> : null}
+        </span>
       )}
       <input
         id={inputId}

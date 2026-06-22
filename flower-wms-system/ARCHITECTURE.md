@@ -142,6 +142,7 @@ flower-wms-system/
 | `src/services/inventory-sync.ts` | 物理库存向 SKU 虚拟库存投影 |
 | `src/services/recipe.ts` | Recipe / RecipeLine CRUD 和 BOM 编号 |
 | `src/services/wiki.ts` | FlowerWiki CRUD 和检索 |
+| `src/services/master-parts.ts` | MasterPart 通用物料母表 CRUD（辅料 / 包装 / 工具 / 其他） |
 | `src/services/crm-pure.ts` | CRM 纯函数：手机号规范化、客户统计、提醒日期与文案 |
 | `src/services/crm.ts` | CRM Prisma 服务：订单沉淀、客户/收花人/礼赠/提醒 CRUD |
 | `src/lib/cms-product-tags.ts` | CMS 商品运营标签 key / label 常量与解析 |
@@ -177,7 +178,8 @@ flower-wms-system/
 | `/wms/operations` | 仓储日常：手工入库、报损、批次流水线 |
 | `/wms/purchase-orders` | 采购单管理：列表、详情、编辑、取消、到货入库、标准成本更新 |
 | `/wms/suppliers` | 供应商管理 |
-| `/wms/wiki` | FlowerWiki 母表 |
+| `/wms/wiki` | FlowerWiki 花材母表 |
+| `/wms/master-parts` | MasterPart 通用物料母表（辅料 / 包装 / 工具 / 其他） |
 | `/wms/recipes` | 标准配方研发中心 |
 | `/wms/packaging-kits` | 包装方案管理 |
 | `/wms/material-categories` | 原材料分类 |
@@ -526,8 +528,9 @@ Smoke 脚本：
 
 | 模型 | 表 | 说明 |
 |---|---|---|
-| `FlowerWiki` | `flower_wikis` | 花材母表；标准成本字段用于产品预估 |
-| `Material` | `materials` | 仓储原材料，通常通过 `wikiId` 关联 FlowerWiki |
+| `FlowerWiki` | `flower_wikis` | 花材母表；标准成本字段用于产品预估；仅鲜切花 / 叶材 / 需养护指南的花材 |
+| `MasterPart` | `master_parts` | 通用物料母表；非花材采购明细关联（P3）；非花材 Material 来源（P4） |
+| `Material` | `materials` | 仓储原材料；花材 `wikiId`→FlowerWiki，非花材 `masterPartId`→MasterPart |
 | `Batch` | `batches` | 物理库存批次，含 `unitCost`、`remainingQty` |
 | `StockLog` | `stock_logs` | 库存流水 |
 | `StockLossRecord` | `stock_loss_records` | 报损留痕 |
@@ -549,7 +552,7 @@ Smoke 脚本：
 | `OrderCostSnapshot` | `order_cost_snapshots` | 订单真实毛利快照 |
 | `Supplier` | `suppliers` | 供应商 |
 | `PurchaseOrder` | `purchase_orders` | 采购单 |
-| `PurchaseOrderLine` | `purchase_order_lines` | 采购明细，入库后关联 Batch |
+| `PurchaseOrderLine` | `purchase_order_lines` | 采购明细；`itemType=FLOWER` 关联 FlowerWiki，非花材关联 MasterPart；花材入库后关联 Batch |
 | `AuditLog` | `audit_logs` | 后台关键操作审计日志（module / action / entity / snapshot） |
 
 `AuditModule` 枚举：`WMS` / `CMS` / `CRM` / `ORDER` / `INVENTORY` / `PURCHASE` / `REPORT` / `SYSTEM`。
@@ -908,21 +911,15 @@ actualUnitCost = actualTotalCost / totalStems
 receivePurchaseOrder
   -> require wms:write + operator check
   -> transaction
-     1. load PurchaseOrder + Supplier + lines + FlowerWiki
+     1. load PurchaseOrder + Supplier + lines (+ FlowerWiki / MasterPart)
      2. 校验状态：非 CANCELLED / RECEIVED，且有明细
      3. 原子状态锁：DRAFT/ORDERED + receivedAt null -> RECEIVED
-     4. 每行 resolveOrCreate Material(wikiId)
+     4. 每行按 itemType 分支：
+        FLOWER: resolveOrCreate Material(wikiId), qty = totalStems
+        非 FLOWER: resolveOrCreate Material(masterPartId), qty = purchaseQuantity
      5. generate batchNo
-     6. create Batch
-        - originalQty = totalStems
-        - remainingQty = totalStems
-        - unitCost = actualUnitCost
-        - supplier = supplier.name
+     6. create Batch（unitCost = actualUnitCost；花材可写 expiresAt）
      7. create StockLog: INBOUND
-        - materialId / batchId
-        - quantity = totalStems
-        - delta = totalStems
-        - remark 包含 purchaseNo
      8. update PurchaseOrderLine.inboundBatchId
   -> return purchaseOrder + createdBatches + stockLogs
 ```

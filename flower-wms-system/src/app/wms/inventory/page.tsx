@@ -31,7 +31,7 @@ export default async function InventoryPage() {
           库存管理
         </h2>
         <p className="mt-1 text-sm text-zinc-500">
-          仅展示物理批次剩余量 &gt; 0 的在库花材，配方 BOM 不会出现在此列表。
+          展示存在物理批次且剩余量 &gt; 0 的在库物料（花材与非花材）；配方 BOM 不会出现在此列表。
         </p>
       </header>
 

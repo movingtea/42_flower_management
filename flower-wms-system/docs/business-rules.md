@@ -478,6 +478,29 @@ npm run smoke:recommendation-rules  # 无需 DB
 
 ---
 
+## 25. 主数据：FlowerWiki 与 MasterPart（Batch P2 / P3）
+
+| 母表 | 模型 | 适用范围 | 说明 |
+|---|---|---|---|
+| 花材母表 | `FlowerWiki` | 鲜切花、叶材、枝材、需养护指南的花材 | 含醒花 / 养护 / 剪根 / 营养液等花材专属字段 |
+| 通用物料母表 | `MasterPart` | 辅料、包装材料、工具、其他耗材 | `type` 为 `SUPPLY` / `PACKAGING` / `TOOL` / `OTHER`；**不含 FLOWER** |
+
+**采购明细双来源（Batch P3）：**
+
+| `PurchaseOrderLine.itemType` | 关联母表 | 必填外键 |
+|---|---|---|
+| `FLOWER`（默认，兼容历史） | `FlowerWiki` | `flowerWikiId` |
+| `SUPPLY` / `PACKAGING` / `TOOL` / `OTHER` | `MasterPart` | `masterPartId`（且 `MasterPart.type` 须与 `itemType` 一致） |
+
+- MasterPart 已提供 CRUD API 与 WMS 管理页 `/wms/master-parts`。
+- 新建 MasterPart 写入 `tenantId = "universe42"`（Sprint 23-A `withTenant`）。
+- 非花材采购 **不再** 按物料名称匹配 `FlowerWiki.chineseName`。
+- 历史采购明细无 `itemType` 时视为 `FLOWER`，原有 `flowerWikiId` 保持不变。
+- **到货入库（Batch P4）**：花材与非花材采购明细均可 receive；花材走 FlowerWiki→Material，非花材走 MasterPart→Material；均创建 Batch + `StockLog(INBOUND)`。
+- **非花材 FIFO / BOM 消耗** 仍不支持；入库仅进入物理库存。
+
+---
+
 ## 24. 变更记录
 
 | 日期 | 版本 | 说明 |
@@ -485,3 +508,6 @@ npm run smoke:recommendation-rules  # 无需 DB
 | 2026-06-11 | Sprint 12 R1 | 初版：业务规则文档、错误码、纯函数防线、不变量测试、smoke scripts |
 | 2026-06-11 | Sprint 13 | `ProductSku.isActive`：SKU 停用 vs 售罄 vs SPU 下架语义补齐；CMS SKU 启用开关；推荐位/购物车/下单 active SKU 过滤 |
 | 2026-06-11 | Sprint 13 fix | CMS Banner 删除修复：`listCmsBanners` 默认过滤 `isDeleted`；软删除幂等；删除按钮 loading/确认文案 |
+| 2026-06-17 | Batch P2 | 新增 `MasterPart` 通用物料母表；FlowerWiki 仅表示花材 |
+| 2026-06-17 | Batch P3 | 采购明细双来源：FLOWER→FlowerWiki，非 FLOWER→MasterPart；移除 FlowerWiki 名称匹配临时方案 |
+| 2026-06-22 | Batch P4 | 非花材采购入库：MasterPart→Material→Batch→StockLog；花材入库逻辑不变 |

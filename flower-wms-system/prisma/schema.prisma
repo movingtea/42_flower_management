@@ -303,6 +303,35 @@ model Supplier {
   @@map("suppliers")
 }
 
+// ---------------------------------------------------------------------------
+// MasterPart — 通用物料母表（辅料 / 包装 / 工具 / 其他非花材）
+// ---------------------------------------------------------------------------
+
+model MasterPart {
+  id           String   @id @default(cuid())
+  tenantId     String?  @map("tenant_id")
+  type         String
+  name         String
+  spec         String?
+  defaultUnit  String?  @map("default_unit")
+  brand        String?
+  model        String?
+  color        String?
+  isConsumable Boolean  @default(true) @map("is_consumable")
+  isActive     Boolean  @default(true) @map("is_active")
+  note         String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  purchaseOrderLines PurchaseOrderLine[]
+  materials          Material[]
+
+  @@index([type])
+  @@index([isActive])
+  @@index([name])
+  @@map("master_parts")
+}
+
 model PurchaseOrder {
   id                  String                       @id @default(cuid())
   tenantId            String?                      @map("tenant_id")
@@ -335,7 +364,9 @@ model PurchaseOrder {
 model PurchaseOrderLine {
   id                    String   @id @default(cuid())
   purchaseOrderId       String   @map("purchase_order_id")
-  flowerWikiId          String   @map("flower_wiki_id")
+  itemType              String   @default("FLOWER") @map("item_type")
+  flowerWikiId          String?  @map("flower_wiki_id")
+  masterPartId          String?  @map("master_part_id")
   purchaseName          String?  @map("purchase_name")
   grade                 String?
   color                 String?
@@ -360,11 +391,14 @@ model PurchaseOrderLine {
   updatedAt             DateTime @updatedAt @map("updated_at")
 
   purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
-  flowerWiki    FlowerWiki    @relation(fields: [flowerWikiId], references: [id], onDelete: Restrict)
+  flowerWiki    FlowerWiki?   @relation(fields: [flowerWikiId], references: [id], onDelete: Restrict)
+  masterPart    MasterPart?   @relation(fields: [masterPartId], references: [id], onDelete: Restrict)
   inboundBatch  Batch?        @relation("PurchaseLineInboundBatch", fields: [inboundBatchId], references: [id], onDelete: SetNull)
 
   @@index([purchaseOrderId])
   @@index([flowerWikiId])
+  @@index([itemType])
+  @@index([masterPartId])
   @@map("purchase_order_lines")
 }
 
@@ -587,15 +621,18 @@ model Material {
   unit                 String
   safetyStockThreshold Int      @default(0)
   wikiId               String?  @map("wiki_id")
+  masterPartId         String?  @map("master_part_id")
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
   wiki              FlowerWiki?                @relation(fields: [wikiId], references: [id])
+  masterPart        MasterPart?                @relation(fields: [masterPartId], references: [id], onDelete: Restrict)
   batches           Batch[]
   stockLogs         StockLog[]
   categoryRelations MaterialCategoryRelation[]
 
   @@index([wikiId])
+  @@index([masterPartId])
   @@map("materials")
 }
 

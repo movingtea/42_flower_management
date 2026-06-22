@@ -67,6 +67,11 @@ export type MaterialCategoryRelation = Prisma.MaterialCategoryRelationModel
  */
 export type Supplier = Prisma.SupplierModel
 /**
+ * Model MasterPart
+ * 
+ */
+export type MasterPart = Prisma.MasterPartModel
+/**
  * Model PurchaseOrder
  * 
  */

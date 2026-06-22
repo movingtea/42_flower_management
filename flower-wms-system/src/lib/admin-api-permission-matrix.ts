@@ -91,6 +91,42 @@ export const ADMIN_ROUTE_PERMISSION_MATRIX: AdminRoutePermissionSpec[] = [
     fixedInBatchA: true,
   },
   {
+    file: "master-parts/route.ts",
+    method: "GET",
+    permission: "wms:read",
+    notes: "Batch P2 MasterPart 列表",
+  },
+  {
+    file: "master-parts/route.ts",
+    method: "POST",
+    permission: "wms:write",
+    notes: "Batch P2 MasterPart 创建",
+  },
+  {
+    file: "master-parts/[id]/route.ts",
+    method: "GET",
+    permission: "wms:read",
+    notes: "Batch P2 MasterPart 详情",
+  },
+  {
+    file: "master-parts/[id]/route.ts",
+    method: "PUT",
+    permission: "wms:write",
+    notes: "Batch P2 MasterPart 更新",
+  },
+  {
+    file: "master-parts/[id]/route.ts",
+    method: "PATCH",
+    permission: "wms:write",
+    notes: "Batch P2 MasterPart 更新",
+  },
+  {
+    file: "master-parts/[id]/route.ts",
+    method: "DELETE",
+    permission: "wms:write",
+    notes: "Batch P2 MasterPart 停用",
+  },
+  {
     file: "orders/[id]/detail/route.ts",
     method: "GET",
     permission: "wms:read",

@@ -5,6 +5,10 @@ import { Button } from "@/components/ui/button";
 import { AdminDrawer } from "@/components/admin/AdminDrawer";
 import { formatCurrency, formatPercent } from "@/lib/format-money";
 import {
+  purchaseLineItemTypeLabels,
+  isFlowerPurchaseLineItemType,
+} from "@/lib/purchase-line-form-pure";
+import {
   allocationMethodLabels,
   formatDate,
   formatDateTime,
@@ -150,7 +154,8 @@ export function PurchaseOrderDetailModal({
         <table className="w-full min-w-[1200px] text-left text-sm">
           <thead className="border-b bg-zinc-50 text-xs text-zinc-600">
             <tr>
-              <th className="px-3 py-2 font-medium">花材</th>
+              <th className="px-3 py-2 font-medium">品类</th>
+              <th className="px-3 py-2 font-medium">物料</th>
               <th className="px-3 py-2 font-medium">采购名称</th>
               <th className="px-3 py-2 font-medium">等级</th>
               <th className="px-3 py-2 font-medium">颜色</th>
@@ -172,26 +177,39 @@ export function PurchaseOrderDetailModal({
             </tr>
           </thead>
           <tbody className="divide-y">
-            {order.lines.map((line) => (
+            {order.lines.map((line) => {
+              const isFlower = isFlowerPurchaseLineItemType(line.itemType);
+              return (
               <tr key={line.id} className="align-top hover:bg-zinc-50/70">
+                <td className="px-3 py-2 text-zinc-700">
+                  {purchaseLineItemTypeLabels[line.itemType]}
+                </td>
                 <td className="px-3 py-2 font-medium text-zinc-900">
-                  {line.flowerWiki.chineseName}
-                  <p className="text-xs font-normal text-zinc-500">
-                    {line.flowerWiki.englishName}
-                  </p>
+                  {line.displayName}
+                  {isFlower && line.flowerWiki?.englishName ? (
+                    <p className="text-xs font-normal text-zinc-500">
+                      {line.flowerWiki?.englishName}
+                    </p>
+                  ) : line.displaySpec ? (
+                    <p className="text-xs font-normal text-zinc-500">
+                      {line.displaySpec}
+                    </p>
+                  ) : null}
                 </td>
                 <td className="px-3 py-2">{line.purchaseName || "—"}</td>
-                <td className="px-3 py-2">{line.grade || "—"}</td>
-                <td className="px-3 py-2">{line.color || "—"}</td>
-                <td className="px-3 py-2">{line.spec || "—"}</td>
+                <td className="px-3 py-2">{isFlower ? line.grade || "—" : "—"}</td>
+                <td className="px-3 py-2">{isFlower ? line.color || "—" : "—"}</td>
+                <td className="px-3 py-2">{isFlower ? "—" : line.spec || line.displaySpec || "—"}</td>
                 <td className="px-3 py-2">
                   {formatQuantity(line.purchaseQuantity)}
                 </td>
                 <td className="px-3 py-2">{line.purchaseUnit}</td>
                 <td className="px-3 py-2">
-                  {formatQuantity(line.stemsPerUnit)}
+                  {isFlower ? formatQuantity(line.stemsPerUnit) : "—"}
                 </td>
-                <td className="px-3 py-2">{formatQuantity(line.totalStems)}</td>
+                <td className="px-3 py-2">
+                  {isFlower ? formatQuantity(line.totalStems) : "—"}
+                </td>
                 <td className="px-3 py-2">{formatCurrency(line.unitPrice)}</td>
                 <td className="px-3 py-2">{formatCurrency(line.lineAmount)}</td>
                 <td className="px-3 py-2">
@@ -204,18 +222,20 @@ export function PurchaseOrderDetailModal({
                   ¥{Number(line.actualUnitCost).toFixed(4)}
                 </td>
                 <td className="px-3 py-2">
-                  {line.usableRate ? formatPercent(line.usableRate) : "—"}
+                  {isFlower && line.usableRate
+                    ? formatPercent(line.usableRate)
+                    : "—"}
                 </td>
                 <td className="px-3 py-2">
-                  {line.lossRate ? formatPercent(line.lossRate) : "—"}
+                  {isFlower && line.lossRate ? formatPercent(line.lossRate) : "—"}
                 </td>
                 <td className="px-3 py-2">
-                  {line.lossAdjustedUnitCost
+                  {isFlower && line.lossAdjustedUnitCost
                     ? `¥${Number(line.lossAdjustedUnitCost).toFixed(4)}`
                     : "—"}
                 </td>
                 <td className="px-3 py-2">
-                  {line.lossModelExtraCost
+                  {isFlower && line.lossModelExtraCost
                     ? formatCurrency(line.lossModelExtraCost)
                     : "—"}
                 </td>
@@ -234,7 +254,8 @@ export function PurchaseOrderDetailModal({
                   )}
                 </td>
               </tr>
-            ))}
+            );
+            })}
           </tbody>
         </table>
       </section>

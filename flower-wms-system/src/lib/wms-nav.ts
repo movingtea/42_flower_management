@@ -118,6 +118,13 @@ export const WMS_NAV_GROUPS: WmsNavGroup[] = [
         activeMatch: "prefix",
       },
       {
+        label: "通用物料母表",
+        href: "/wms/master-parts",
+        icon: "🧰",
+        anyPermissions: ["wms:read", "wms:write"],
+        activeMatch: "prefix",
+      },
+      {
         label: "原材料分类",
         href: "/wms/material-categories",
         icon: "🏷️",
@@ -229,6 +236,7 @@ const WMS_ROUTE_PERMISSION_RULES: RoutePermissionRule[] = [
   { prefix: "/wms/purchase-orders", anyPermissions: ["wms:read", "wms:write"] },
   { prefix: "/wms/suppliers", anyPermissions: ["wms:read", "wms:write"] },
   { prefix: "/wms/wiki", anyPermissions: ["wms:read", "wms:write"] },
+  { prefix: "/wms/master-parts", anyPermissions: ["wms:read", "wms:write"] },
   { prefix: "/wms/material-categories", permission: "wms:write" },
   { prefix: "/wms/recipes", permission: "wms:write" },
   { prefix: "/wms/packaging-kits", permission: "wms:write" },
