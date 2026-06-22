@@ -384,6 +384,7 @@ export const MaterialScalarFieldEnum = {
   unit: 'unit',
   safetyStockThreshold: 'safetyStockThreshold',
   wikiId: 'wikiId',
+  masterPartId: 'masterPartId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const

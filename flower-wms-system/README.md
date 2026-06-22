@@ -70,6 +70,7 @@ Flower WMS System 是 Universe42 / 万物肆贰鲜花的鲜花行业 **WMS + CMS
 - **花材母表**：`FlowerWiki`，含拉丁名、中文名、花艺角色、养护、简拼、标准单支成本字段。
 - **通用物料母表**：`MasterPart`，维护辅料、包装材料、工具与其他耗材（Batch P2）；花材仍走 `FlowerWiki`。
 - **采购明细双来源（Batch P3）**：`PurchaseOrderLine.itemType = FLOWER` 关联 `FlowerWiki`；`SUPPLY` / `PACKAGING` / `TOOL` / `OTHER` 关联 `MasterPart`；历史明细默认 `FLOWER`。
+- **非花材采购入库（Batch P4）**：非花材 receive 时按 `MasterPart` 复用/创建 `Material`（`Material.masterPartId`），再创建 Batch + `StockLog(INBOUND)`；花材入库逻辑不变。
 - **原材料分类**：`MaterialCategory` / `MaterialCategoryRelation`，与商城商品分类解耦。
 - **配方**：`Recipe` / `RecipeLine`，配方只写 BOM，不产生库存副作用。
 - **包装方案**：`PackagingKit`，标准包装成本用于订单成本和产品预估；当前没有包装库存扣减。

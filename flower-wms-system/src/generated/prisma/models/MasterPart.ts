@@ -255,6 +255,7 @@ export type MasterPartWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"MasterPart"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"MasterPart"> | Date | string
   purchaseOrderLines?: Prisma.PurchaseOrderLineListRelationFilter
+  materials?: Prisma.MaterialListRelationFilter
 }
 
 export type MasterPartOrderByWithRelationInput = {
@@ -273,6 +274,7 @@ export type MasterPartOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   purchaseOrderLines?: Prisma.PurchaseOrderLineOrderByRelationAggregateInput
+  materials?: Prisma.MaterialOrderByRelationAggregateInput
 }
 
 export type MasterPartWhereUniqueInput = Prisma.AtLeast<{
@@ -294,6 +296,7 @@ export type MasterPartWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"MasterPart"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"MasterPart"> | Date | string
   purchaseOrderLines?: Prisma.PurchaseOrderLineListRelationFilter
+  materials?: Prisma.MaterialListRelationFilter
 }, "id">
 
 export type MasterPartOrderByWithAggregationInput = {
@@ -352,6 +355,7 @@ export type MasterPartCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   purchaseOrderLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMasterPartInput
+  materials?: Prisma.MaterialCreateNestedManyWithoutMasterPartInput
 }
 
 export type MasterPartUncheckedCreateInput = {
@@ -370,6 +374,7 @@ export type MasterPartUncheckedCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   purchaseOrderLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMasterPartInput
+  materials?: Prisma.MaterialUncheckedCreateNestedManyWithoutMasterPartInput
 }
 
 export type MasterPartUpdateInput = {
@@ -388,6 +393,7 @@ export type MasterPartUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   purchaseOrderLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMasterPartNestedInput
+  materials?: Prisma.MaterialUpdateManyWithoutMasterPartNestedInput
 }
 
 export type MasterPartUncheckedUpdateInput = {
@@ -406,6 +412,7 @@ export type MasterPartUncheckedUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   purchaseOrderLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMasterPartNestedInput
+  materials?: Prisma.MaterialUncheckedUpdateManyWithoutMasterPartNestedInput
 }
 
 export type MasterPartCreateManyInput = {
@@ -531,6 +538,22 @@ export type MasterPartUpdateOneWithoutPurchaseOrderLinesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MasterPartUpdateToOneWithWhereWithoutPurchaseOrderLinesInput, Prisma.MasterPartUpdateWithoutPurchaseOrderLinesInput>, Prisma.MasterPartUncheckedUpdateWithoutPurchaseOrderLinesInput>
 }
 
+export type MasterPartCreateNestedOneWithoutMaterialsInput = {
+  create?: Prisma.XOR<Prisma.MasterPartCreateWithoutMaterialsInput, Prisma.MasterPartUncheckedCreateWithoutMaterialsInput>
+  connectOrCreate?: Prisma.MasterPartCreateOrConnectWithoutMaterialsInput
+  connect?: Prisma.MasterPartWhereUniqueInput
+}
+
+export type MasterPartUpdateOneWithoutMaterialsNestedInput = {
+  create?: Prisma.XOR<Prisma.MasterPartCreateWithoutMaterialsInput, Prisma.MasterPartUncheckedCreateWithoutMaterialsInput>
+  connectOrCreate?: Prisma.MasterPartCreateOrConnectWithoutMaterialsInput
+  upsert?: Prisma.MasterPartUpsertWithoutMaterialsInput
+  disconnect?: Prisma.MasterPartWhereInput | boolean
+  delete?: Prisma.MasterPartWhereInput | boolean
+  connect?: Prisma.MasterPartWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MasterPartUpdateToOneWithWhereWithoutMaterialsInput, Prisma.MasterPartUpdateWithoutMaterialsInput>, Prisma.MasterPartUncheckedUpdateWithoutMaterialsInput>
+}
+
 export type MasterPartCreateWithoutPurchaseOrderLinesInput = {
   id?: string
   tenantId?: string | null
@@ -546,6 +569,7 @@ export type MasterPartCreateWithoutPurchaseOrderLinesInput = {
   note?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  materials?: Prisma.MaterialCreateNestedManyWithoutMasterPartInput
 }
 
 export type MasterPartUncheckedCreateWithoutPurchaseOrderLinesInput = {
@@ -563,6 +587,7 @@ export type MasterPartUncheckedCreateWithoutPurchaseOrderLinesInput = {
   note?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
+  materials?: Prisma.MaterialUncheckedCreateNestedManyWithoutMasterPartInput
 }
 
 export type MasterPartCreateOrConnectWithoutPurchaseOrderLinesInput = {
@@ -596,6 +621,7 @@ export type MasterPartUpdateWithoutPurchaseOrderLinesInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  materials?: Prisma.MaterialUpdateManyWithoutMasterPartNestedInput
 }
 
 export type MasterPartUncheckedUpdateWithoutPurchaseOrderLinesInput = {
@@ -613,6 +639,95 @@ export type MasterPartUncheckedUpdateWithoutPurchaseOrderLinesInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  materials?: Prisma.MaterialUncheckedUpdateManyWithoutMasterPartNestedInput
+}
+
+export type MasterPartCreateWithoutMaterialsInput = {
+  id?: string
+  tenantId?: string | null
+  type: string
+  name: string
+  spec?: string | null
+  defaultUnit?: string | null
+  brand?: string | null
+  model?: string | null
+  color?: string | null
+  isConsumable?: boolean
+  isActive?: boolean
+  note?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  purchaseOrderLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMasterPartInput
+}
+
+export type MasterPartUncheckedCreateWithoutMaterialsInput = {
+  id?: string
+  tenantId?: string | null
+  type: string
+  name: string
+  spec?: string | null
+  defaultUnit?: string | null
+  brand?: string | null
+  model?: string | null
+  color?: string | null
+  isConsumable?: boolean
+  isActive?: boolean
+  note?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  purchaseOrderLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMasterPartInput
+}
+
+export type MasterPartCreateOrConnectWithoutMaterialsInput = {
+  where: Prisma.MasterPartWhereUniqueInput
+  create: Prisma.XOR<Prisma.MasterPartCreateWithoutMaterialsInput, Prisma.MasterPartUncheckedCreateWithoutMaterialsInput>
+}
+
+export type MasterPartUpsertWithoutMaterialsInput = {
+  update: Prisma.XOR<Prisma.MasterPartUpdateWithoutMaterialsInput, Prisma.MasterPartUncheckedUpdateWithoutMaterialsInput>
+  create: Prisma.XOR<Prisma.MasterPartCreateWithoutMaterialsInput, Prisma.MasterPartUncheckedCreateWithoutMaterialsInput>
+  where?: Prisma.MasterPartWhereInput
+}
+
+export type MasterPartUpdateToOneWithWhereWithoutMaterialsInput = {
+  where?: Prisma.MasterPartWhereInput
+  data: Prisma.XOR<Prisma.MasterPartUpdateWithoutMaterialsInput, Prisma.MasterPartUncheckedUpdateWithoutMaterialsInput>
+}
+
+export type MasterPartUpdateWithoutMaterialsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  spec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isConsumable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  purchaseOrderLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMasterPartNestedInput
+}
+
+export type MasterPartUncheckedUpdateWithoutMaterialsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  type?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  spec?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isConsumable?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  isActive?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  purchaseOrderLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMasterPartNestedInput
 }
 
 
@@ -622,10 +737,12 @@ export type MasterPartUncheckedUpdateWithoutPurchaseOrderLinesInput = {
 
 export type MasterPartCountOutputType = {
   purchaseOrderLines: number
+  materials: number
 }
 
 export type MasterPartCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   purchaseOrderLines?: boolean | MasterPartCountOutputTypeCountPurchaseOrderLinesArgs
+  materials?: boolean | MasterPartCountOutputTypeCountMaterialsArgs
 }
 
 /**
@@ -645,6 +762,13 @@ export type MasterPartCountOutputTypeCountPurchaseOrderLinesArgs<ExtArgs extends
   where?: Prisma.PurchaseOrderLineWhereInput
 }
 
+/**
+ * MasterPartCountOutputType without action
+ */
+export type MasterPartCountOutputTypeCountMaterialsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MaterialWhereInput
+}
+
 
 export type MasterPartSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -662,6 +786,7 @@ export type MasterPartSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   createdAt?: boolean
   updatedAt?: boolean
   purchaseOrderLines?: boolean | Prisma.MasterPart$purchaseOrderLinesArgs<ExtArgs>
+  materials?: boolean | Prisma.MasterPart$materialsArgs<ExtArgs>
   _count?: boolean | Prisma.MasterPartCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["masterPart"]>
 
@@ -719,6 +844,7 @@ export type MasterPartSelectScalar = {
 export type MasterPartOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "type" | "name" | "spec" | "defaultUnit" | "brand" | "model" | "color" | "isConsumable" | "isActive" | "note" | "createdAt" | "updatedAt", ExtArgs["result"]["masterPart"]>
 export type MasterPartInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   purchaseOrderLines?: boolean | Prisma.MasterPart$purchaseOrderLinesArgs<ExtArgs>
+  materials?: boolean | Prisma.MasterPart$materialsArgs<ExtArgs>
   _count?: boolean | Prisma.MasterPartCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type MasterPartIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -728,6 +854,7 @@ export type $MasterPartPayload<ExtArgs extends runtime.Types.Extensions.Internal
   name: "MasterPart"
   objects: {
     purchaseOrderLines: Prisma.$PurchaseOrderLinePayload<ExtArgs>[]
+    materials: Prisma.$MaterialPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1139,6 +1266,7 @@ readonly fields: MasterPartFieldRefs;
 export interface Prisma__MasterPartClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   purchaseOrderLines<T extends Prisma.MasterPart$purchaseOrderLinesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MasterPart$purchaseOrderLinesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PurchaseOrderLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  materials<T extends Prisma.MasterPart$materialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.MasterPart$materialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MaterialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1596,6 +1724,30 @@ export type MasterPart$purchaseOrderLinesArgs<ExtArgs extends runtime.Types.Exte
   take?: number
   skip?: number
   distinct?: Prisma.PurchaseOrderLineScalarFieldEnum | Prisma.PurchaseOrderLineScalarFieldEnum[]
+}
+
+/**
+ * MasterPart.materials
+ */
+export type MasterPart$materialsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Material
+   */
+  select?: Prisma.MaterialSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Material
+   */
+  omit?: Prisma.MaterialOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MaterialInclude<ExtArgs> | null
+  where?: Prisma.MaterialWhereInput
+  orderBy?: Prisma.MaterialOrderByWithRelationInput | Prisma.MaterialOrderByWithRelationInput[]
+  cursor?: Prisma.MaterialWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MaterialScalarFieldEnum | Prisma.MaterialScalarFieldEnum[]
 }
 
 /**

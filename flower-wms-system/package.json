@@ -55,6 +55,7 @@
     "test:purchase-line-form": "tsx src/lib/purchase-line-form-pure.test.ts",
     "test:purchase-line-source": "tsx src/lib/purchase-line-source-pure.test.ts",
     "test:purchase-preview": "tsx src/lib/purchase-preview-pure.test.ts",
+    "test:purchase-receive": "tsx src/lib/purchase-receive-pure.test.ts",
     "test:master-parts": "tsx src/lib/master-parts-pure.test.ts",
     "test:client-image-preview": "tsx src/lib/client-image-preview.test.ts",
     "test:miniprogram-image-url": "node ../42_mp/scripts/test-image-url.mjs",

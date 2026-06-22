@@ -496,7 +496,8 @@ npm run smoke:recommendation-rules  # 无需 DB
 - 新建 MasterPart 写入 `tenantId = "universe42"`（Sprint 23-A `withTenant`）。
 - 非花材采购 **不再** 按物料名称匹配 `FlowerWiki.chineseName`。
 - 历史采购明细无 `itemType` 时视为 `FLOWER`，原有 `flowerWikiId` 保持不变。
-- **到货入库 / FIFO** 仍仅支持花材明细；非花材入库待后续批次。
+- **到货入库（Batch P4）**：花材与非花材采购明细均可 receive；花材走 FlowerWiki→Material，非花材走 MasterPart→Material；均创建 Batch + `StockLog(INBOUND)`。
+- **非花材 FIFO / BOM 消耗** 仍不支持；入库仅进入物理库存。
 
 ---
 
@@ -509,3 +510,4 @@ npm run smoke:recommendation-rules  # 无需 DB
 | 2026-06-11 | Sprint 13 fix | CMS Banner 删除修复：`listCmsBanners` 默认过滤 `isDeleted`；软删除幂等；删除按钮 loading/确认文案 |
 | 2026-06-17 | Batch P2 | 新增 `MasterPart` 通用物料母表；FlowerWiki 仅表示花材 |
 | 2026-06-17 | Batch P3 | 采购明细双来源：FLOWER→FlowerWiki，非 FLOWER→MasterPart；移除 FlowerWiki 名称匹配临时方案 |
+| 2026-06-22 | Batch P4 | 非花材采购入库：MasterPart→Material→Batch→StockLog；花材入库逻辑不变 |

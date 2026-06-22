@@ -324,6 +324,7 @@ model MasterPart {
   updatedAt    DateTime @updatedAt @map("updated_at")
 
   purchaseOrderLines PurchaseOrderLine[]
+  materials          Material[]
 
   @@index([type])
   @@index([isActive])
@@ -620,15 +621,18 @@ model Material {
   unit                 String
   safetyStockThreshold Int      @default(0)
   wikiId               String?  @map("wiki_id")
+  masterPartId         String?  @map("master_part_id")
   createdAt            DateTime @default(now())
   updatedAt            DateTime @updatedAt
 
   wiki              FlowerWiki?                @relation(fields: [wikiId], references: [id])
+  masterPart        MasterPart?                @relation(fields: [masterPartId], references: [id], onDelete: Restrict)
   batches           Batch[]
   stockLogs         StockLog[]
   categoryRelations MaterialCategoryRelation[]
 
   @@index([wikiId])
+  @@index([masterPartId])
   @@map("materials")
 }
 

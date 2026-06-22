@@ -40,6 +40,14 @@ import {
   parsePurchaseLineItemTypeStrict,
   resolvePurchaseLineDisplay,
 } from "@/lib/purchase-line-source-pure";
+import {
+  buildNonFlowerMaterialInput,
+  isFlowerReceiveLine,
+  parseReceiveQuantityFromDecimal,
+  resolvePurchaseLineItemTypeForReceive,
+  validateFlowerReceiveLine,
+  validateNonFlowerReceiveLine,
+} from "@/lib/purchase-receive-pure";
 
 export { calculatePurchaseOrderTotals } from "@/services/purchase-pure";
 
@@ -158,6 +166,7 @@ const purchaseOrderInclude = {
           brand: true,
           model: true,
           color: true,
+          isActive: true,
         },
       },
       inboundBatch: {
@@ -1090,6 +1099,95 @@ export async function cancelPurchaseOrder(id: string) {
   return getPurchaseOrderById(id);
 }
 
+async function resolveOrCreateMaterialFromMasterPart(
+  tx: Tx,
+  masterPartId: string,
+  purchaseUnit: string
+) {
+  const masterPart = await tx.masterPart.findUnique({
+    where: { id: masterPartId },
+    select: {
+      id: true,
+      name: true,
+      spec: true,
+      defaultUnit: true,
+      isActive: true,
+    },
+  });
+  if (!masterPart || !masterPart.isActive) {
+    throw new Error("通用物料不存在或已停用");
+  }
+
+  let material = await tx.material.findFirst({
+    where: { masterPartId },
+  });
+  if (!material) {
+    const materialInput = buildNonFlowerMaterialInput({
+      masterPart,
+      purchaseUnit,
+    });
+    const materialCode = await generateUniqueSku("material", tx);
+    material = await tx.material.create({
+      data: withTenant({
+        materialCode,
+        name: materialInput.name,
+        unit: materialInput.unit,
+        masterPartId: materialInput.masterPartId,
+        wikiId: null,
+      }),
+    });
+  }
+  return material;
+}
+
+async function createInboundBatchAndLog(input: {
+  tx: Tx;
+  materialId: string;
+  receivedAt: Date;
+  quantity: number;
+  line: {
+    actualUnitCost: Prisma.Decimal;
+    lossAdjustedUnitCost: Prisma.Decimal | null;
+    usableRate: Prisma.Decimal | null;
+    lossRate: Prisma.Decimal | null;
+  };
+  supplierName: string;
+  remark: string;
+  operator: OperatorContext;
+  expiresAt?: Date | null;
+}) {
+  const batchNo = await generateBatchNo(input.tx);
+  const batch = await input.tx.batch.create({
+    data: withTenant({
+      materialId: input.materialId,
+      batchNo,
+      inboundAt: input.receivedAt,
+      originalQty: input.quantity,
+      remainingQty: input.quantity,
+      unitCost: input.line.actualUnitCost,
+      lossAdjustedUnitCost: input.line.lossAdjustedUnitCost,
+      usableRate: input.line.usableRate,
+      lossRate: input.line.lossRate,
+      expiresAt: input.expiresAt ?? null,
+      supplier: input.supplierName,
+      note: input.remark,
+    }),
+  });
+  const stockLog = await input.tx.stockLog.create({
+    data: withTenant({
+      materialId: input.materialId,
+      batchId: batch.id,
+      type: StockLogType.INBOUND,
+      delta: input.quantity,
+      quantity: input.quantity,
+      remark: input.remark,
+      operator: input.operator.operatorLabel,
+      operatorStaffId: input.operator.operatorStaffId,
+    }),
+  });
+  return { batch, stockLog };
+}
+
 async function resolveOrCreateMaterial(tx: Tx, flowerWikiId: string) {
   const wiki = await tx.flowerWiki.findUnique({
     where: { id: flowerWikiId },
@@ -1118,12 +1216,11 @@ function resolveBatchExpiresAt(inboundAt: Date, shelfLifeDays?: number | null) {
 }
 
 function decimalStemsToInt(value: Prisma.Decimal, lineLabel: string): number {
-  if (!value.gt(0)) throw new Error(`${lineLabel}入库支数必须大于 0`);
-  const n = value.toNumber();
-  if (!Number.isInteger(n)) {
-    throw new Error(`${lineLabel}折算后的总支数必须是整数，才能生成库存批次`);
-  }
-  return n;
+  return parseReceiveQuantityFromDecimal(value, lineLabel, "入库支数");
+}
+
+function decimalPurchaseQtyToInt(value: Prisma.Decimal, lineLabel: string): number {
+  return parseReceiveQuantityFromDecimal(value, lineLabel, "入库数量");
 }
 
 function serializeBatch(row: BatchRow) {
@@ -1230,44 +1327,53 @@ export async function receivePurchaseOrderWithTrustedOperator(
 
     for (const [index, line] of purchaseOrder.lines.entries()) {
       const lineLabel = `第 ${index + 1} 行`;
-      const itemType = line.itemType ?? "FLOWER";
-      if (itemType !== "FLOWER" || !line.flowerWikiId) {
-        throw new Error(`${lineLabel}为非花材明细，当前版本暂不支持到货入库`);
-      }
-      const totalStems = decimalStemsToInt(line.totalStems, lineLabel);
-      const material = await resolveOrCreateMaterial(tx, line.flowerWikiId);
-      const batchNo = await generateBatchNo(tx);
-      const expiresAt = resolveBatchExpiresAt(
-        receivedAt,
-        line.flowerWiki?.defaultShelfLifeDays ?? null
-      );
-      const batch = await tx.batch.create({
-        data: withTenant({
+      const itemType = resolvePurchaseLineItemTypeForReceive(line);
+
+      if (isFlowerReceiveLine(line)) {
+        validateFlowerReceiveLine(line, index);
+        const totalStems = decimalStemsToInt(line.totalStems, lineLabel);
+        const material = await resolveOrCreateMaterial(tx, line.flowerWikiId!);
+        const expiresAt = resolveBatchExpiresAt(
+          receivedAt,
+          line.flowerWiki?.defaultShelfLifeDays ?? null
+        );
+        const { batch, stockLog } = await createInboundBatchAndLog({
+          tx,
           materialId: material.id,
-          batchNo,
-          inboundAt: receivedAt,
-          originalQty: totalStems,
-          remainingQty: totalStems,
-          unitCost: line.actualUnitCost,
-          lossAdjustedUnitCost: line.lossAdjustedUnitCost,
-          usableRate: line.usableRate,
-          lossRate: line.lossRate,
-          expiresAt,
-          supplier: purchaseOrder.supplier.name,
-          note: remark,
-        }),
-      });
-      const stockLog = await tx.stockLog.create({
-        data: withTenant({
-          materialId: material.id,
-          batchId: batch.id,
-          type: StockLogType.INBOUND,
-          delta: totalStems,
+          receivedAt,
           quantity: totalStems,
+          line,
+          supplierName: purchaseOrder.supplier.name,
           remark,
-          operator: operator.operatorLabel,
-          operatorStaffId: operator.operatorStaffId,
-        }),
+          operator,
+          expiresAt,
+        });
+        await tx.purchaseOrderLine.update({
+          where: { id: line.id },
+          data: { inboundBatchId: batch.id },
+        });
+        createdBatches.push(batch);
+        stockLogs.push(stockLog);
+        continue;
+      }
+
+      validateNonFlowerReceiveLine(line, index);
+      const receivedQty = decimalPurchaseQtyToInt(line.purchaseQuantity, lineLabel);
+      const material = await resolveOrCreateMaterialFromMasterPart(
+        tx,
+        line.masterPartId!,
+        line.purchaseUnit
+      );
+      const { batch, stockLog } = await createInboundBatchAndLog({
+        tx,
+        materialId: material.id,
+        receivedAt,
+        quantity: receivedQty,
+        line,
+        supplierName: purchaseOrder.supplier.name,
+        remark,
+        operator,
+        expiresAt: null,
       });
       await tx.purchaseOrderLine.update({
         where: { id: line.id },

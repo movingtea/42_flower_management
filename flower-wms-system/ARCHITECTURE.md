@@ -529,8 +529,8 @@ Smoke 脚本：
 | 模型 | 表 | 说明 |
 |---|---|---|
 | `FlowerWiki` | `flower_wikis` | 花材母表；标准成本字段用于产品预估；仅鲜切花 / 叶材 / 需养护指南的花材 |
-| `MasterPart` | `master_parts` | 通用物料母表；辅料、包装材料、工具、其他耗材（Batch P2）；非花材采购明细关联（Batch P3） |
-| `Material` | `materials` | 仓储原材料，通常通过 `wikiId` 关联 FlowerWiki |
+| `MasterPart` | `master_parts` | 通用物料母表；非花材采购明细关联（P3）；非花材 Material 来源（P4） |
+| `Material` | `materials` | 仓储原材料；花材 `wikiId`→FlowerWiki，非花材 `masterPartId`→MasterPart |
 | `Batch` | `batches` | 物理库存批次，含 `unitCost`、`remainingQty` |
 | `StockLog` | `stock_logs` | 库存流水 |
 | `StockLossRecord` | `stock_loss_records` | 报损留痕 |
@@ -911,21 +911,15 @@ actualUnitCost = actualTotalCost / totalStems
 receivePurchaseOrder
   -> require wms:write + operator check
   -> transaction
-     1. load PurchaseOrder + Supplier + lines + FlowerWiki
+     1. load PurchaseOrder + Supplier + lines (+ FlowerWiki / MasterPart)
      2. 校验状态：非 CANCELLED / RECEIVED，且有明细
      3. 原子状态锁：DRAFT/ORDERED + receivedAt null -> RECEIVED
-     4. 每行 resolveOrCreate Material(wikiId)
+     4. 每行按 itemType 分支：
+        FLOWER: resolveOrCreate Material(wikiId), qty = totalStems
+        非 FLOWER: resolveOrCreate Material(masterPartId), qty = purchaseQuantity
      5. generate batchNo
-     6. create Batch
-        - originalQty = totalStems
-        - remainingQty = totalStems
-        - unitCost = actualUnitCost
-        - supplier = supplier.name
+     6. create Batch（unitCost = actualUnitCost；花材可写 expiresAt）
      7. create StockLog: INBOUND
-        - materialId / batchId
-        - quantity = totalStems
-        - delta = totalStems
-        - remark 包含 purchaseNo
      8. update PurchaseOrderLine.inboundBatchId
   -> return purchaseOrder + createdBatches + stockLogs
 ```
