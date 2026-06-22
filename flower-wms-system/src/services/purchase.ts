@@ -29,9 +29,17 @@ import {
   type PurchaseOrderTotalsResult,
 } from "@/services/purchase-pure";
 import {
-  parsePurchaseLineItemType,
   type PurchaseLineItemType,
 } from "@/lib/purchase-line-form-pure";
+import {
+  assertFlowerHasNoMasterPart,
+  assertMasterPartTypeMatchesItemType,
+  assertNonFlowerHasNoFlowerWiki,
+  normalizeFlowerWikiIdForLine,
+  normalizeMasterPartIdForLine,
+  parsePurchaseLineItemTypeStrict,
+  resolvePurchaseLineDisplay,
+} from "@/lib/purchase-line-source-pure";
 
 export { calculatePurchaseOrderTotals } from "@/services/purchase-pure";
 
@@ -39,7 +47,9 @@ type Tx = Prisma.TransactionClient;
 type DbClient = Tx | typeof prisma;
 
 type PurchaseOrderLineWriteInput = {
-  flowerWikiId: string;
+  itemType: PurchaseLineItemType;
+  flowerWikiId: string | null;
+  masterPartId: string | null;
   purchaseName?: string | null;
   grade?: string | null;
   color?: string | null;
@@ -51,7 +61,6 @@ type PurchaseOrderLineWriteInput = {
   usableRate?: Prisma.Decimal;
   supplierSkuName?: string | null;
   note?: string | null;
-  itemType?: PurchaseLineItemType;
 };
 
 type PurchaseOrderWriteInput = {
@@ -137,6 +146,18 @@ const purchaseOrderInclude = {
           defaultShelfLifeDays: true,
           defaultUsableRate: true,
           standardUsableRate: true,
+        },
+      },
+      masterPart: {
+        select: {
+          id: true,
+          type: true,
+          name: true,
+          spec: true,
+          defaultUnit: true,
+          brand: true,
+          model: true,
+          color: true,
         },
       },
       inboundBatch: {
@@ -268,17 +289,29 @@ function parsePurchaseLine(raw: unknown, index: number): PurchaseOrderLineWriteI
     throw new Error(`第 ${index + 1} 行采购明细格式不正确`);
   }
   const row = raw as Record<string, unknown>;
-  const itemType = parsePurchaseLineItemType(row.itemType) ?? "FLOWER";
+  const label = `第 ${index + 1} 行：`;
+  const itemType = parsePurchaseLineItemTypeStrict(row.itemType);
   const isFlower = itemType === "FLOWER";
+  const flowerWikiId = normalizeFlowerWikiIdForLine(row.flowerWikiId, itemType);
+  const masterPartId = normalizeMasterPartIdForLine(row.masterPartId, itemType);
+  assertNonFlowerHasNoFlowerWiki(
+    itemType,
+    typeof row.flowerWikiId === "string" ? row.flowerWikiId : null,
+    label
+  );
+  assertFlowerHasNoMasterPart(
+    itemType,
+    typeof row.masterPartId === "string" ? row.masterPartId : null,
+    label
+  );
   const usableRate = isFlower ? parseOptionalLineUsableRate(row.usableRate) : undefined;
   return {
     itemType,
-    flowerWikiId: isFlower
-      ? requiredString(row.flowerWikiId, "花材不存在，请先在花材母表中创建")
-      : optionalString(row.flowerWikiId) ?? "",
+    flowerWikiId,
+    masterPartId,
     purchaseName: isFlower
       ? optionalString(row.purchaseName)
-      : requiredString(row.purchaseName, "物料名称不能为空"),
+      : optionalString(row.purchaseName),
     grade: isFlower ? optionalString(row.grade) : null,
     color: isFlower ? optionalString(row.color) : null,
     spec: isFlower ? null : optionalString(row.spec),
@@ -323,10 +356,18 @@ function parsePurchaseOrderInput(raw: unknown): PurchaseOrderWriteInput {
 function purchaseLineForCalc(
   line: PurchaseOrderLineWriteInput,
   wikiUsableRate?: Prisma.Decimal
-): PurchaseOrderTotalsInput["lines"][number] {
-  const usableRate = line.usableRate ?? wikiUsableRate;
+): PurchaseOrderTotalsInput["lines"][number] & {
+  itemType: PurchaseLineItemType;
+  masterPartId: string | null;
+} {
+  const isFlower = line.itemType === "FLOWER";
+  const usableRate = isFlower
+    ? line.usableRate ?? wikiUsableRate
+    : line.usableRate ?? new Prisma.Decimal(1);
   return {
-    flowerWikiId: line.flowerWikiId,
+    itemType: line.itemType,
+    flowerWikiId: isFlower ? line.flowerWikiId : null,
+    masterPartId: isFlower ? null : line.masterPartId,
     purchaseName: line.purchaseName,
     grade: line.grade,
     color: line.color,
@@ -346,7 +387,12 @@ async function loadWikiUsableRateMap(
   lines: PurchaseOrderLineWriteInput[]
 ) {
   const wikiIds = Array.from(
-    new Set(lines.map((line) => line.flowerWikiId).filter(Boolean))
+    new Set(
+      lines
+        .filter((line) => line.itemType === "FLOWER")
+        .map((line) => line.flowerWikiId)
+        .filter((id): id is string => Boolean(id))
+    )
   );
   if (wikiIds.length === 0) {
     return new Map<string, { id: string; defaultUsableRate: Prisma.Decimal | null; standardUsableRate: Prisma.Decimal | null }>();
@@ -368,9 +414,9 @@ async function buildCalculatedLines(
 ) {
   const wikiMap = await loadWikiUsableRateMap(client, input.lines);
   const lines = input.lines.map((line) => {
-    const wikiRate = resolveWikiDefaultUsableRate(
-      wikiMap.get(line.flowerWikiId) ?? null
-    );
+    const wikiRate = line.flowerWikiId
+      ? resolveWikiDefaultUsableRate(wikiMap.get(line.flowerWikiId) ?? null)
+      : undefined;
     const usableRate = line.usableRate ?? wikiRate ?? undefined;
     return purchaseLineForCalc(line, usableRate);
   });
@@ -395,7 +441,9 @@ export function serializePurchaseTotalsResult(result: PurchaseOrderTotalsResult)
     allocationMethod: result.allocationMethod,
     warnings: result.warnings,
     lines: result.lines.map((line) => ({
-      flowerWikiId: line.flowerWikiId,
+      itemType: line.itemType ?? "FLOWER",
+      flowerWikiId: line.flowerWikiId?.trim() ? line.flowerWikiId : null,
+      masterPartId: line.masterPartId ?? null,
       purchaseName: line.purchaseName ?? null,
       grade: line.grade ?? null,
       color: line.color ?? null,
@@ -422,6 +470,7 @@ export function serializePurchaseTotalsResult(result: PurchaseOrderTotalsResult)
 
 export async function calculatePurchaseOrderPreview(raw: unknown) {
   const input = validatePurchaseOrderInput(raw);
+  await validatePurchaseLinesForPreview(prisma, input.lines);
   const result = await buildCalculatedLines(input);
   return serializePurchaseTotalsResult(result);
 }
@@ -469,9 +518,17 @@ async function assertActiveSupplier(tx: DbClient, supplierId: string) {
   if (!supplier) throw new Error("供应商不存在或已停用");
 }
 
-async function assertFlowerWikiIdsExist(tx: DbClient, lines: PurchaseOrderLineWriteInput[]) {
+async function assertFlowerWikiIdsExist(
+  tx: DbClient,
+  lines: PurchaseOrderLineWriteInput[]
+) {
   const ids = Array.from(
-    new Set(lines.map((line) => line.flowerWikiId).filter(Boolean))
+    new Set(
+      lines
+        .filter((line) => line.itemType === "FLOWER")
+        .map((line) => line.flowerWikiId)
+        .filter((id): id is string => Boolean(id))
+    )
   );
   if (ids.length === 0) return;
   const found = await tx.flowerWiki.findMany({
@@ -479,49 +536,80 @@ async function assertFlowerWikiIdsExist(tx: DbClient, lines: PurchaseOrderLineWr
     select: { id: true },
   });
   if (found.length !== ids.length) {
-    throw new Error("花材不存在，请先在花材母表中创建");
+    throw new Error("所选花材无效，请重新选择");
   }
 }
 
-async function resolveNonFlowerLineWikiIds(
+async function validatePurchaseLinesBeforeSave(
   tx: DbClient,
   lines: PurchaseOrderLineWriteInput[]
 ): Promise<PurchaseOrderLineWriteInput[]> {
-  return Promise.all(
-    lines.map(async (line, index) => {
-      if (!line.itemType || line.itemType === "FLOWER" || line.flowerWikiId) {
-        return line;
-      }
-      const name = cleanString(line.purchaseName);
-      if (!name) {
-        throw new Error(`第 ${index + 1} 行物料名称不能为空`);
-      }
-      const wiki = await tx.flowerWiki.findFirst({
-        where: { chineseName: { equals: name, mode: "insensitive" } },
-        select: { id: true },
-      });
-      if (!wiki) {
-        throw new Error(
-          `第 ${index + 1} 行「${name}」在花材母表中不存在，请先创建后再保存非花材采购明细`
-        );
-      }
-      return { ...line, flowerWikiId: wiki.id };
-    })
+  await assertFlowerWikiIdsExist(tx, lines);
+
+  const nonFlowerLines = lines.filter((line) => line.itemType !== "FLOWER");
+  if (nonFlowerLines.length === 0) return lines;
+
+  const masterPartIds = Array.from(
+    new Set(
+      nonFlowerLines
+        .map((line) => line.masterPartId)
+        .filter((id): id is string => Boolean(id))
+    )
   );
+  const masterParts = await tx.masterPart.findMany({
+    where: { id: { in: masterPartIds } },
+    select: { id: true, type: true, isActive: true },
+  });
+  const masterPartMap = new Map(masterParts.map((part) => [part.id, part]));
+
+  lines.forEach((line, index) => {
+    if (line.itemType === "FLOWER") return;
+    const label = `第 ${index + 1} 行：`;
+    if (!line.masterPartId) {
+      throw new Error(`${label}非花材明细必须选择通用物料母表`);
+    }
+    if (line.flowerWikiId) {
+      throw new Error(`${label}非花材明细不能关联花材母表`);
+    }
+    const masterPart = masterPartMap.get(line.masterPartId);
+    if (!masterPart) {
+      throw new Error(`${label}所选通用物料无效，请重新选择`);
+    }
+    if (!masterPart.isActive) {
+      throw new Error(`${label}所选通用物料已停用`);
+    }
+    assertMasterPartTypeMatchesItemType(masterPart.type, line.itemType, label);
+  });
+
+  return lines;
 }
 
-function stripLineItemType(
-  line: PurchaseOrderLineWriteInput
-): Omit<PurchaseOrderLineWriteInput, "itemType"> {
-  const { itemType, ...rest } = line;
-  void itemType;
-  return rest;
+async function validatePurchaseLinesForPreview(
+  client: DbClient,
+  lines: PurchaseOrderLineWriteInput[]
+): Promise<void> {
+  await validatePurchaseLinesBeforeSave(client, lines);
 }
 
-function lineCreateData(purchaseOrderId: string, line: PurchaseOrderCalcLine) {
+function lineCreateData(
+  purchaseOrderId: string,
+  line: PurchaseOrderCalcLine & {
+    itemType?: PurchaseLineItemType | null;
+    masterPartId?: string | null;
+    flowerWikiId?: string | null;
+  }
+) {
+  const itemType = line.itemType ?? "FLOWER";
+  const isFlower = itemType === "FLOWER";
+  const flowerWikiId =
+    isFlower && line.flowerWikiId?.trim() ? line.flowerWikiId.trim() : null;
+  const masterPartId =
+    !isFlower && line.masterPartId?.trim() ? line.masterPartId.trim() : null;
   return {
     purchaseOrderId,
-    flowerWikiId: line.flowerWikiId,
+    itemType,
+    flowerWikiId,
+    masterPartId,
     purchaseName: line.purchaseName ?? null,
     grade: line.grade ?? null,
     color: line.color ?? null,
@@ -601,11 +689,27 @@ function serializePurchaseOrder(row: Prisma.PurchaseOrderGetPayload<{
     totalAmount: row.totalAmount.toFixed(2),
     allocationMethod: row.allocationMethod,
     note: row.note,
-    lines: row.lines.map((line) => ({
+    lines: row.lines.map((line) => {
+      const display = resolvePurchaseLineDisplay({
+        itemType: line.itemType,
+        purchaseName: line.purchaseName,
+        grade: line.grade,
+        color: line.color,
+        spec: line.spec,
+        purchaseUnit: line.purchaseUnit,
+        flowerWiki: line.flowerWiki,
+        masterPart: line.masterPart,
+      });
+      return {
       id: line.id,
       purchaseOrderId: line.purchaseOrderId,
+      itemType: line.itemType,
       flowerWikiId: line.flowerWikiId,
+      masterPartId: line.masterPartId,
       flowerWiki: line.flowerWiki,
+      masterPart: line.masterPart,
+      displayName: display.displayName,
+      displaySpec: display.displaySpec,
       purchaseName: line.purchaseName,
       grade: line.grade,
       color: line.color,
@@ -646,7 +750,8 @@ function serializePurchaseOrder(row: Prisma.PurchaseOrderGetPayload<{
         : null,
       createdAt: line.createdAt.toISOString(),
       updatedAt: line.updatedAt.toISOString(),
-    })),
+    };
+    }),
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -781,13 +886,10 @@ export async function createPurchaseOrder(raw: unknown) {
       return await prisma.$transaction(
         async (tx) => {
           await assertActiveSupplier(tx, input.supplierId);
-          const resolvedLines = (await resolveNonFlowerLineWikiIds(tx, input.lines)).map(
-            stripLineItemType
-          );
-          await assertFlowerWikiIdsExist(tx, resolvedLines);
+          const validatedLines = await validatePurchaseLinesBeforeSave(tx, input.lines);
           const calculated = await buildCalculatedLines({
             ...input,
-            lines: resolvedLines,
+            lines: validatedLines,
           });
           const purchaseNo = await generatePurchaseNo(tx, input.purchaseDate);
           const purchaseOrder = await tx.purchaseOrder.create({
@@ -855,7 +957,9 @@ function buildUpdateInput(existing: Awaited<ReturnType<typeof getPurchaseOrderBy
     lines:
       body.lines ??
       existing.lines.map((line) => ({
+        itemType: line.itemType,
         flowerWikiId: line.flowerWikiId,
+        masterPartId: line.masterPartId,
         purchaseName: line.purchaseName,
         grade: line.grade,
         color: line.color,
@@ -885,13 +989,10 @@ export async function updatePurchaseOrder(id: string, raw: unknown) {
     if (input.supplierId !== existing.supplierId) {
       await assertActiveSupplier(tx, input.supplierId);
     }
-    const resolvedLines = (await resolveNonFlowerLineWikiIds(tx, input.lines)).map(
-      stripLineItemType
-    );
-    await assertFlowerWikiIdsExist(tx, resolvedLines);
+    const validatedLines = await validatePurchaseLinesBeforeSave(tx, input.lines);
     const calculated = await buildCalculatedLines({
       ...input,
-      lines: resolvedLines,
+      lines: validatedLines,
     });
     await tx.purchaseOrder.update({
       where: { id },
@@ -1129,12 +1230,16 @@ export async function receivePurchaseOrderWithTrustedOperator(
 
     for (const [index, line] of purchaseOrder.lines.entries()) {
       const lineLabel = `第 ${index + 1} 行`;
+      const itemType = line.itemType ?? "FLOWER";
+      if (itemType !== "FLOWER" || !line.flowerWikiId) {
+        throw new Error(`${lineLabel}为非花材明细，当前版本暂不支持到货入库`);
+      }
       const totalStems = decimalStemsToInt(line.totalStems, lineLabel);
       const material = await resolveOrCreateMaterial(tx, line.flowerWikiId);
       const batchNo = await generateBatchNo(tx);
       const expiresAt = resolveBatchExpiresAt(
         receivedAt,
-        line.flowerWiki.defaultShelfLifeDays
+        line.flowerWiki?.defaultShelfLifeDays ?? null
       );
       const batch = await tx.batch.create({
         data: withTenant({
@@ -1191,6 +1296,9 @@ export async function updateFlowerStandardCostFromPurchaseLine(lineId: string) {
   if (line.purchaseOrder.status !== PurchaseOrderStatus.RECEIVED) {
     throw new Error("只有已入库采购单的明细才能更新标准成本");
   }
+  if (!line.flowerWikiId) {
+    throw new Error("非花材明细不支持更新花材标准成本");
+  }
   const wiki = await prisma.flowerWiki.update({
     where: { id: line.flowerWikiId },
     data: {
@@ -1232,12 +1340,16 @@ export async function updateFlowerStandardCostsFromPurchaseOrder(id: string) {
   if (purchaseOrder.lines.length === 0) {
     throw new Error("采购单没有明细，无法更新标准成本");
   }
+  const flowerLines = purchaseOrder.lines.filter((line) => line.flowerWikiId);
+  if (flowerLines.length === 0) {
+    throw new Error("没有花材明细，无法更新花材标准成本");
+  }
 
   const updatedAt = new Date();
   const updated = await prisma.$transaction(
-    purchaseOrder.lines.map((line) =>
+    flowerLines.map((line) =>
       prisma.flowerWiki.update({
-        where: { id: line.flowerWikiId },
+        where: { id: line.flowerWikiId! },
         data: {
           standardUnitCost: line.actualUnitCost,
           costUpdatedAt: updatedAt,

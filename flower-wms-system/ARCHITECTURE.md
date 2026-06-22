@@ -529,7 +529,7 @@ Smoke 脚本：
 | 模型 | 表 | 说明 |
 |---|---|---|
 | `FlowerWiki` | `flower_wikis` | 花材母表；标准成本字段用于产品预估；仅鲜切花 / 叶材 / 需养护指南的花材 |
-| `MasterPart` | `master_parts` | 通用物料母表；辅料、包装材料、工具、其他耗材（Batch P2；尚未接入采购单保存） |
+| `MasterPart` | `master_parts` | 通用物料母表；辅料、包装材料、工具、其他耗材（Batch P2）；非花材采购明细关联（Batch P3） |
 | `Material` | `materials` | 仓储原材料，通常通过 `wikiId` 关联 FlowerWiki |
 | `Batch` | `batches` | 物理库存批次，含 `unitCost`、`remainingQty` |
 | `StockLog` | `stock_logs` | 库存流水 |
@@ -552,7 +552,7 @@ Smoke 脚本：
 | `OrderCostSnapshot` | `order_cost_snapshots` | 订单真实毛利快照 |
 | `Supplier` | `suppliers` | 供应商 |
 | `PurchaseOrder` | `purchase_orders` | 采购单 |
-| `PurchaseOrderLine` | `purchase_order_lines` | 采购明细，入库后关联 Batch |
+| `PurchaseOrderLine` | `purchase_order_lines` | 采购明细；`itemType=FLOWER` 关联 FlowerWiki，非花材关联 MasterPart；花材入库后关联 Batch |
 | `AuditLog` | `audit_logs` | 后台关键操作审计日志（module / action / entity / snapshot） |
 
 `AuditModule` 枚举：`WMS` / `CMS` / `CRM` / `ORDER` / `INVENTORY` / `PURCHASE` / `REPORT` / `SYSTEM`。

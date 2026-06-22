@@ -9,7 +9,7 @@ export type PurchaseLineFormField =
   | "itemType"
   | "flowerSelect"
   | "purchaseName"
-  | "materialName"
+  | "masterPartSelect"
   | "grade"
   | "color"
   | "spec"
@@ -66,7 +66,7 @@ export function getPurchaseLineVisibleFields(
   }
   return [
     "itemType",
-    "materialName",
+    "masterPartSelect",
     "spec",
     "purchaseQuantity",
     "purchaseUnit",
@@ -92,7 +92,7 @@ export function getPurchaseLineRequiredFields(
   }
   return [
     "itemType",
-    "materialName",
+    "masterPartSelect",
     "purchaseQuantity",
     "purchaseUnit",
     "unitPrice",
@@ -117,6 +117,7 @@ export type PurchaseLineDraftDefaults = {
   key: string;
   itemType: PurchaseLineItemType;
   flowerWikiId: string;
+  masterPartId: string;
   flowerName: string;
   purchaseName: string;
   grade: string;
@@ -143,6 +144,7 @@ export function createDefaultPurchaseLine(
     key,
     itemType,
     flowerWikiId: "",
+    masterPartId: "",
     flowerName: "",
     purchaseName: "",
     grade: "",
@@ -162,22 +164,21 @@ export function insertNewPurchaseLineAtTop<T>(lines: T[], newLine: T): T[] {
 }
 
 export function inferPurchaseLineItemTypeFromSavedLine(line: {
+  itemType?: string | null;
+  masterPartId?: string | null;
   flowerWikiId?: string | null;
   grade?: string | null;
   color?: string | null;
   spec?: string | null;
   usableRate?: string | null;
 }): PurchaseLineItemType {
-  if (line.flowerWikiId) {
-    const hasFlowerAttributes =
-      Boolean(line.grade?.trim()) ||
-      Boolean(line.color?.trim()) ||
-      line.usableRate !== null && line.usableRate !== undefined && line.usableRate !== "";
-    if (hasFlowerAttributes || !line.spec?.trim()) {
-      return "FLOWER";
-    }
+  if (
+    line.itemType &&
+    PURCHASE_LINE_ITEM_TYPES.includes(line.itemType as PurchaseLineItemType)
+  ) {
+    return line.itemType as PurchaseLineItemType;
   }
-  if (line.spec?.trim()) {
+  if (line.masterPartId) {
     return "OTHER";
   }
   return DEFAULT_PURCHASE_LINE_ITEM_TYPE;
@@ -197,6 +198,7 @@ export function parsePurchaseLineItemType(
 export function buildPurchaseLinePayloadLine(line: {
   itemType: PurchaseLineItemType;
   flowerWikiId: string;
+  masterPartId: string;
   purchaseName: string;
   grade: string;
   color: string;
@@ -211,7 +213,8 @@ export function buildPurchaseLinePayloadLine(line: {
   const isFlower = isFlowerPurchaseLineItemType(line.itemType);
   return {
     itemType: line.itemType,
-    flowerWikiId: line.flowerWikiId,
+    flowerWikiId: isFlower ? line.flowerWikiId.trim() || null : null,
+    masterPartId: isFlower ? null : line.masterPartId.trim() || null,
     purchaseName: line.purchaseName.trim() || null,
     grade: isFlower ? line.grade.trim() || null : null,
     color: isFlower ? line.color.trim() || null : null,
@@ -229,6 +232,7 @@ export function validatePurchaseLineDraft(
   line: {
     itemType: PurchaseLineItemType;
     flowerWikiId: string;
+    masterPartId: string;
     purchaseName: string;
     purchaseQuantity: string;
     purchaseUnit: string;
@@ -240,13 +244,10 @@ export function validatePurchaseLineDraft(
 ): string | null {
   const requiredFields = getPurchaseLineRequiredFields(line.itemType);
   if (requiredFields.includes("flowerSelect") && !line.flowerWikiId.trim()) {
-    return `${label}请选择花材`;
+    return `${label}花材明细必须选择花材母表`;
   }
-  if (
-    requiredFields.includes("materialName") &&
-    !line.purchaseName.trim()
-  ) {
-    return `${label}物料名称不能为空`;
+  if (requiredFields.includes("masterPartSelect") && !line.masterPartId.trim()) {
+    return `${label}非花材明细必须选择通用物料母表`;
   }
   if (
     requiredFields.includes("purchaseName") &&
@@ -275,7 +276,7 @@ export function validatePurchaseLineDraft(
 export function isPurchaseLineReadyForPreview(line: {
   itemType: PurchaseLineItemType;
   flowerWikiId: string;
-  purchaseName: string;
+  masterPartId: string;
   purchaseQuantity: string;
   purchaseUnit: string;
   stemsPerUnit: string;
@@ -289,5 +290,8 @@ export function isPurchaseLineReadyForPreview(line: {
       Boolean(line.flowerWikiId.trim()) && Number(line.stemsPerUnit) > 0
     );
   }
-  return Boolean(line.purchaseName.trim()) && Number(line.stemsPerUnit) > 0;
+  return Boolean(line.masterPartId.trim()) && Number(line.stemsPerUnit) > 0;
 }
+
+export const MASTER_PART_SELECT_EMPTY_HINT =
+  "请先到 WMS → 库存与采购 → 通用物料母表 维护该物料。";

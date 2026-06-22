@@ -10,7 +10,7 @@
 | 字段 | 内容 |
 |---|---|
 | **标题** | 非花材通用物料母表（MasterPart） |
-| **状态** | **Partially Fixed** |
+| **状态** | **Partially Fixed**（采购保存层 Fixed；库存入库层待后续） |
 | **批次** | Batch P2（母表本身）→ Batch P3（采购单接入） |
 
 ### 已完成（Batch P2）
@@ -22,18 +22,23 @@
 - [x] 权限：`wms:read` / `wms:write`
 - [x] 纯函数测试 + 权限矩阵条目
 
-### 未完成（留待 Batch P3）
+### 已完成（Batch P3 — 采购保存层）
 
-- [ ] `PurchaseOrderLine` 增加 `masterPartId`（或等价关联）
-- [ ] 非花材采购保存正式关联 MasterPart
-- [ ] 移除按 `FlowerWiki.chineseName` 匹配非花材的临时方案
-- [ ] 库存 / 入库链路接入 MasterPart（若需要）
+- [x] `PurchaseOrderLine` 增加 `itemType`（默认 `FLOWER`）、`masterPartId`
+- [x] `flowerWikiId` 改为 nullable；花材必填、非花材为空
+- [x] 非花材采购保存正式关联 MasterPart（`MasterPart.type` 须与 `itemType` 一致）
+- [x] 移除按 `FlowerWiki.chineseName` 匹配非花材的临时方案
+- [x] 采购单新增 / 编辑 / 查看支持混合明细；历史明细兼容为 `FLOWER`
+
+### 未完成（留待后续批次）
+
+- [ ] 非花材采购 **到货入库** / 库存 / FIFO 链路接入 MasterPart（当前 receive 对非花材行拒绝入库）
 
 ### 说明
 
-- **FlowerWiki** 继续仅表示花材母表。
-- **MasterPart** 表示辅料、包装材料、工具、其他耗材。
-- Batch P2 只建立母表，**不修改采购单保存逻辑**。
+- **FlowerWiki** 继续仅表示花材母表，仅用于 `itemType = FLOWER` 的采购明细。
+- **MasterPart** 表示辅料、包装材料、工具、其他耗材，用于非花材采购明细。
+- Batch P3 **不修改** Material / Batch / StockLog schema 与 FIFO 主流程。
 
 ---
 
@@ -42,4 +47,5 @@
 | ID | 说明 | 状态 |
 |---|---|---|
 | Batch P1 | 采购明细表单清理（品类、可用率 100%、隐藏供应商品名等） | Done |
-| Batch P3 | 非花材采购正式接入 MasterPart | Planned |
+| Batch P3 | 非花材采购正式接入 MasterPart（保存层） | Done |
+| Batch P4（待定） | 非花材采购入库 / 库存链路 | Planned |

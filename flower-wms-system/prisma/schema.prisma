@@ -323,6 +323,8 @@ model MasterPart {
   createdAt    DateTime @default(now()) @map("created_at")
   updatedAt    DateTime @updatedAt @map("updated_at")
 
+  purchaseOrderLines PurchaseOrderLine[]
+
   @@index([type])
   @@index([isActive])
   @@index([name])
@@ -361,7 +363,9 @@ model PurchaseOrder {
 model PurchaseOrderLine {
   id                    String   @id @default(cuid())
   purchaseOrderId       String   @map("purchase_order_id")
-  flowerWikiId          String   @map("flower_wiki_id")
+  itemType              String   @default("FLOWER") @map("item_type")
+  flowerWikiId          String?  @map("flower_wiki_id")
+  masterPartId          String?  @map("master_part_id")
   purchaseName          String?  @map("purchase_name")
   grade                 String?
   color                 String?
@@ -386,11 +390,14 @@ model PurchaseOrderLine {
   updatedAt             DateTime @updatedAt @map("updated_at")
 
   purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id], onDelete: Cascade)
-  flowerWiki    FlowerWiki    @relation(fields: [flowerWikiId], references: [id], onDelete: Restrict)
+  flowerWiki    FlowerWiki?   @relation(fields: [flowerWikiId], references: [id], onDelete: Restrict)
+  masterPart    MasterPart?   @relation(fields: [masterPartId], references: [id], onDelete: Restrict)
   inboundBatch  Batch?        @relation("PurchaseLineInboundBatch", fields: [inboundBatchId], references: [id], onDelete: SetNull)
 
   @@index([purchaseOrderId])
   @@index([flowerWikiId])
+  @@index([itemType])
+  @@index([masterPartId])
   @@map("purchase_order_lines")
 }
 

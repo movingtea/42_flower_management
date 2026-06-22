@@ -37,13 +37,13 @@ function testFlowerVisibleFields() {
   assert.ok(fields.includes("usableRate"));
   assert.ok(fields.includes("stemsPerUnit"));
   assert.ok(!fields.includes("spec"));
-  assert.ok(!fields.includes("materialName"));
+  assert.ok(!fields.includes("masterPartSelect"));
 }
 
 function testPackagingVisibleFields() {
   const fields = getPurchaseLineVisibleFields("PACKAGING");
   assert.ok(fields.includes("spec"));
-  assert.ok(fields.includes("materialName"));
+  assert.ok(fields.includes("masterPartSelect"));
   assert.ok(!fields.includes("usableRate"));
   assert.ok(!fields.includes("stemsPerUnit"));
   assert.ok(!fields.includes("grade"));
@@ -63,7 +63,7 @@ function testRequiredFieldsByType() {
   ]);
   assert.deepEqual(getPurchaseLineRequiredFields("SUPPLY"), [
     "itemType",
-    "materialName",
+    "masterPartSelect",
     "purchaseQuantity",
     "purchaseUnit",
     "unitPrice",
@@ -87,7 +87,7 @@ function testValidateFlowerLine() {
   const line = createDefaultPurchaseLine();
   assert.equal(
     validatePurchaseLineDraft(line, "第 1 行："),
-    "第 1 行：请选择花材"
+    "第 1 行：花材明细必须选择花材母表"
   );
   line.flowerWikiId = "fw-1";
   line.purchaseName = "红玫瑰";
@@ -98,9 +98,9 @@ function testValidateNonFlowerLine() {
   const line = createDefaultPurchaseLine("SUPPLY");
   assert.equal(
     validatePurchaseLineDraft(line, "第 1 行："),
-    "第 1 行：物料名称不能为空"
+    "第 1 行：非花材明细必须选择通用物料母表"
   );
-  line.purchaseName = "花艺铁丝";
+  line.masterPartId = "mp-1";
   assert.equal(validatePurchaseLineDraft(line, "第 1 行："), null);
 }
 
@@ -112,7 +112,7 @@ function testPreviewReadiness() {
   assert.equal(isPurchaseLineReadyForPreview(flower), true);
 
   const supply = createDefaultPurchaseLine("SUPPLY");
-  supply.purchaseName = "包装纸";
+  supply.masterPartId = "mp-1";
   assert.equal(isPurchaseLineReadyForPreview(supply), true);
 }
 
@@ -121,14 +121,19 @@ function testInferItemTypeFromSavedLine() {
     inferPurchaseLineItemTypeFromSavedLine({
       flowerWikiId: "fw-1",
       grade: "A",
-      spec: "20cm",
     }),
     "FLOWER"
   );
   assert.equal(
     inferPurchaseLineItemTypeFromSavedLine({
-      flowerWikiId: "fw-1",
-      spec: "50cm 包装纸",
+      itemType: "PACKAGING",
+      masterPartId: "mp-1",
+    }),
+    "PACKAGING"
+  );
+  assert.equal(
+    inferPurchaseLineItemTypeFromSavedLine({
+      masterPartId: "mp-1",
     }),
     "OTHER"
   );

@@ -217,7 +217,9 @@ export type PurchaseOrderScalarFieldEnum = (typeof PurchaseOrderScalarFieldEnum)
 export const PurchaseOrderLineScalarFieldEnum = {
   id: 'id',
   purchaseOrderId: 'purchaseOrderId',
+  itemType: 'itemType',
   flowerWikiId: 'flowerWikiId',
+  masterPartId: 'masterPartId',
   purchaseName: 'purchaseName',
   grade: 'grade',
   color: 'color',

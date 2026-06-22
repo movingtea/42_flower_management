@@ -1,6 +1,10 @@
 import { Prisma } from "@/generated/prisma/client";
 import { PurchaseCostAllocationMethod } from "@/generated/prisma/enums";
 import {
+  isFlowerPurchaseLineItemType,
+  type PurchaseLineItemType,
+} from "@/lib/purchase-line-form-pure";
+import {
   calculateLossAdjustedLineCost,
   DEFAULT_STANDARD_USABLE_RATE,
 } from "@/services/loss-model-pure";
@@ -8,7 +12,9 @@ import {
 export type DecimalInput = Prisma.Decimal | number | string | null | undefined;
 
 export type PurchaseOrderCalcLineInput = {
-  flowerWikiId: string;
+  itemType?: PurchaseLineItemType | null;
+  flowerWikiId?: string | null;
+  masterPartId?: string | null;
   purchaseName?: string | null;
   grade?: string | null;
   color?: string | null;
@@ -107,6 +113,17 @@ function hasExplicitUsableRate(value: DecimalInput | undefined): boolean {
   return value !== null && value !== undefined && value !== "";
 }
 
+function isFlowerCalcLine(line: PurchaseOrderCalcLineInput): boolean {
+  if (line.itemType) {
+    return isFlowerPurchaseLineItemType(line.itemType);
+  }
+  return Boolean(line.flowerWikiId?.trim()) || !line.masterPartId?.trim();
+}
+
+function defaultUsableRateForCalcLine(line: PurchaseOrderCalcLineInput): DecimalInput {
+  return isFlowerCalcLine(line) ? DEFAULT_STANDARD_USABLE_RATE : 1;
+}
+
 export function calculatePurchaseOrderTotals(
   input: PurchaseOrderTotalsInput
 ): PurchaseOrderTotalsResult {
@@ -137,7 +154,8 @@ export function calculatePurchaseOrderTotals(
     const totalStems = quantity(purchaseQuantity.times(stemsPerUnit));
     const lineAmount = money(purchaseQuantity.times(unitPrice));
     goodsAmount = money(goodsAmount.plus(lineAmount));
-    if (totalStems.isZero()) {
+    const isFlower = isFlowerCalcLine(line);
+    if (isFlower && totalStems.isZero()) {
       warnings.push(`第 ${index + 1} 行总支数为 0，实际单支成本按 0 计算`);
     }
     return {
@@ -186,9 +204,12 @@ export function calculatePurchaseOrderTotals(
       : unitCost(actualTotalCost.div(line.totalStems));
 
     let usableRateInput = line.usableRate;
+    const isFlower = isFlowerCalcLine(line);
     if (!hasExplicitUsableRate(usableRateInput)) {
-      warnings.push(`第 ${index + 1} 行花材未设置可用率，已使用默认 85%`);
-      usableRateInput = DEFAULT_STANDARD_USABLE_RATE;
+      if (isFlower) {
+        warnings.push(`第 ${index + 1} 行花材未设置可用率，已使用默认 85%`);
+      }
+      usableRateInput = defaultUsableRateForCalcLine(line);
     }
 
     const lossAdjusted = calculateLossAdjustedLineCost({

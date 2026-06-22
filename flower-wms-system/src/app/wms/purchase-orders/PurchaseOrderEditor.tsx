@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { FlowerMaterialSelect } from "@/components/ui/FlowerMaterialSelect";
+import { MasterPartSelect } from "@/components/ui/MasterPartSelect";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getTodayAppDateString, formatDateInAppTimezoneIso } from "@/lib/datetime";
@@ -19,8 +20,11 @@ import {
   purchaseLineItemTypeLabels,
   PURCHASE_LINE_ITEM_TYPES,
   type PurchaseLineItemType,
+  MASTER_PART_SELECT_EMPTY_HINT,
   validatePurchaseLineDraft,
 } from "@/lib/purchase-line-form-pure";
+import type { MasterPartRef } from "@/lib/purchase-line-source-pure";
+import type { MasterPartType } from "@/lib/master-parts-pure";
 import type { WikiListItem } from "@/lib/wiki-constants";
 import {
   allocationMethodLabels,
@@ -36,6 +40,7 @@ type DraftLine = {
   key: string;
   itemType: PurchaseLineItemType;
   flowerWikiId: string;
+  masterPartId: string;
   flowerName: string;
   purchaseName: string;
   grade: string;
@@ -91,6 +96,8 @@ function resolveWikiUsableRateInput(item: WikiListItem | null): string {
 
 function lineFromOrder(line: PurchaseOrderDetail["lines"][number]): DraftLine {
   const itemType = inferPurchaseLineItemTypeFromSavedLine({
+    itemType: line.itemType,
+    masterPartId: line.masterPartId,
     flowerWikiId: line.flowerWikiId,
     grade: line.grade,
     color: line.color,
@@ -100,12 +107,17 @@ function lineFromOrder(line: PurchaseOrderDetail["lines"][number]): DraftLine {
   return {
     key: line.id,
     itemType,
-    flowerWikiId: line.flowerWikiId,
-    flowerName: line.flowerWiki.chineseName,
-    purchaseName: line.purchaseName ?? line.flowerWiki.chineseName ?? "",
+    flowerWikiId: line.flowerWikiId ?? "",
+    masterPartId: line.masterPartId ?? "",
+    flowerName: line.flowerWiki?.chineseName ?? "",
+    purchaseName:
+      line.purchaseName ??
+      line.masterPart?.name ??
+      line.flowerWiki?.chineseName ??
+      "",
     grade: line.grade ?? "",
     color: line.color ?? "",
-    spec: line.spec ?? "",
+    spec: line.masterPart?.spec ?? line.spec ?? "",
     purchaseQuantity: line.purchaseQuantity,
     purchaseUnit: line.purchaseUnit,
     stemsPerUnit: line.stemsPerUnit,
@@ -307,6 +319,7 @@ export function PurchaseOrderEditor({
           unitPrice: line.unitPrice,
           note: line.note,
           flowerWikiId: itemType === "FLOWER" ? line.flowerWikiId : "",
+          masterPartId: itemType === "FLOWER" ? "" : line.masterPartId,
           flowerName: itemType === "FLOWER" ? line.flowerName : "",
           grade: itemType === "FLOWER" ? line.grade : "",
           color: itemType === "FLOWER" ? line.color : "",
@@ -321,7 +334,20 @@ export function PurchaseOrderEditor({
       flowerWikiId: item?.id ?? "",
       flowerName: item?.chineseName ?? "",
       purchaseName: item?.chineseName ?? "",
+      masterPartId: "",
       usableRate: resolveWikiUsableRateInput(item),
+    });
+  }
+
+  function selectMasterPart(key: string, item: MasterPartRef | null) {
+    updateLine(key, {
+      masterPartId: item?.id ?? "",
+      flowerWikiId: "",
+      flowerName: "",
+      purchaseName: item?.name ?? "",
+      spec: item?.spec ?? "",
+      purchaseUnit: item?.defaultUnit?.trim() || "件",
+      stemsPerUnit: "1",
     });
   }
 
@@ -599,16 +625,21 @@ export function PurchaseOrderEditor({
                       }
                     />
                   )}
-                  {show("materialName") && (
-                    <Input
-                      label="物料名称"
-                      requiredMark={required("materialName")}
-                      disabled={!canEdit}
-                      value={line.purchaseName}
-                      onChange={(e) =>
-                        updateLine(line.key, { purchaseName: e.target.value })
-                      }
-                    />
+                  {show("masterPartSelect") && (
+                    <label className="block text-sm lg:col-span-2">
+                      <FieldLabel required={required("masterPartSelect")}>
+                        通用物料
+                      </FieldLabel>
+                      <MasterPartSelect
+                        value={line.masterPartId || null}
+                        itemType={line.itemType as MasterPartType}
+                        disabled={!canEdit}
+                        onChange={(item) => selectMasterPart(line.key, item)}
+                      />
+                      <p className="mt-1 text-xs text-zinc-500">
+                        {MASTER_PART_SELECT_EMPTY_HINT}
+                      </p>
+                    </label>
                   )}
                   {show("grade") && (
                     <Input
