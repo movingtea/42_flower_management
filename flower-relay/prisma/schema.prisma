@@ -1,0 +1,41 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Material {
+  id             Int              @id @default(autoincrement())
+  name           String           @unique
+  category       String
+  unit           String           @default("枝")
+  unitPrice      Float
+  lossRate       Float            @default(0.1)
+  color          String
+  sampleMaterials SampleMaterial[]
+  createdAt      DateTime         @default(now())
+}
+
+model Sample {
+  id          Int              @id @default(autoincrement())
+  name        String           @unique
+  subtitle    String
+  priority    Int              @default(1)
+  color       String
+  materials   SampleMaterial[]
+  createdAt   DateTime         @default(now())
+}
+
+model SampleMaterial {
+  id         Int      @id @default(autoincrement())
+  sampleId   Int
+  materialId Int
+  quantity   Int
+  sample     Sample   @relation(fields: [sampleId], references: [id], onDelete: Cascade)
+  material   Material @relation(fields: [materialId], references: [id], onDelete: Cascade)
+
+  @@unique([sampleId, materialId])
+}
