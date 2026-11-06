@@ -30,12 +30,13 @@ const EXPECTED = `https://oss.universe42.studio/${SKU_KEY}`;
 function buildSpu(): ProductSpuWithRelations {
   return {
     id: "spu-1",
+    tenantId: null,
     name: "测试花束",
     description: "desc",
     maintenanceGuide: null,
     isActive: true,
     isDeleted: false,
-    shippingFee: new Prisma.Decimal(0),
+    shippingFee: 0,
     allowPreOrder: false,
     productionTime: 0,
     occasionTags: [],
@@ -52,6 +53,7 @@ function buildSpu(): ProductSpuWithRelations {
     skus: [
       {
         id: "sku-1",
+        tenantId: null,
         spuId: "spu-1",
         skuCode: "SKU001",
         specName: "标准款",
@@ -59,6 +61,7 @@ function buildSpu(): ProductSpuWithRelations {
         stock: 5,
         isActive: true,
         isMainImage: true,
+        sortOrder: 0,
         imageUrl: SKU_KEY,
         description: null,
         bulkPreorderEnabled: false,

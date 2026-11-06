@@ -153,7 +153,7 @@ function testLossModelThreeTiers() {
 }
 
 function testLossModelMarginOrdering() {
-  const materialCost = (mode: typeof LossMode.STANDARD) =>
+  const materialCost = (mode: (typeof LossMode)[keyof typeof LossMode]) =>
     calculateMaterialLinesByMode(
       [
         {

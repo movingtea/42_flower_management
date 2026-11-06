@@ -2,7 +2,7 @@
  * Run: npm run test:order-expiry-lifecycle
  */
 import assert from "node:assert/strict";
-import { OrderStatus } from "../src/generated/prisma/enums";
+import { OrderStatus } from "@/generated/prisma/enums";
 import { PENDING_PAYMENT_TIMEOUT_MS } from "./order-invariants-pure";
 
 async function main() {

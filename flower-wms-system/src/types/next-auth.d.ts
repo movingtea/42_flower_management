@@ -1,12 +1,17 @@
 import type { Role } from "@/generated/prisma/enums";
 import type { DefaultSession } from "next-auth";
 
+/** Which database authenticated this session. Legacy and v2 sessions must not cross surfaces. */
+export type AuthSource = "legacy" | "v2";
+
 declare module "next-auth" {
   interface Session {
     user: {
       id: string;
       username: string;
       role: Role;
+      /** v2 sessions are marked explicitly; sessions created before this marker are legacy. */
+      source: AuthSource;
       /** 默认租户 ID（Sprint 21 地基；当前业务 API 尚未强制使用） */
       defaultTenantId: string | null;
       /** 当前租户 ID；单租户阶段与 defaultTenantId 相同 */
@@ -20,6 +25,7 @@ declare module "next-auth" {
     id: string;
     username: string;
     role: Role;
+    source?: AuthSource;
     defaultTenantId?: string | null;
     currentTenantId?: string | null;
     tenantRole?: Role | null;
@@ -31,6 +37,7 @@ declare module "next-auth/jwt" {
     id: string;
     username: string;
     role: Role;
+    source?: AuthSource;
     defaultTenantId?: string | null;
     currentTenantId?: string | null;
     tenantRole?: Role | null;

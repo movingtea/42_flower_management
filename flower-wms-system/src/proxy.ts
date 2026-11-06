@@ -1,12 +1,17 @@
 import { NextResponse } from "next/server";
 import NextAuth from "next-auth";
-import { authConfig } from "@/auth.config";
+import {
+  authConfig,
+  isV2Path,
+  normalizeAuthSource,
+  resolveLoginRedirect,
+  V2_HOME_PATH,
+} from "@/auth.config";
 import { Role } from "@/generated/prisma/enums";
 import {
   getRoleHomePath,
   isStaffProtectedAdminApi,
   isStaffProtectedApi,
-  isStaffProtectedPage,
   isStaffProtectedPath,
 } from "@/lib/auth-routes";
 import {
@@ -28,13 +33,47 @@ export default auth((req) => {
   const { pathname } = req.nextUrl;
   const role = req.auth?.user?.role as Role | undefined;
   const isLoggedIn = !!req.auth?.user?.id && !!role;
+  const source = normalizeAuthSource(req.auth?.user?.source);
+  const isV2Source = isLoggedIn && source === "v2";
 
-  // 已登录访问登录页 → 角色首页
+  // 默认入口固定切到 v2；旧后台通过显式 /wms、/cms、/admin 路由访问。
+  if (pathname === "/") {
+    return NextResponse.redirect(new URL(V2_HOME_PATH, req.nextUrl));
+  }
+
+  // 未带 callback 的 /login 默认 v2；显式 legacy callback 始终保留登录页，
+  // 以便 v2/legacy 会话主动改用 legacy 凭据。
   if (pathname === "/login") {
-    if (isLoggedIn) {
-      return NextResponse.redirect(new URL(getRoleHomePath(role!), req.nextUrl));
+    const decision = resolveLoginRedirect({
+      isLoggedIn,
+      source,
+      callbackUrl: req.nextUrl.searchParams.get("callbackUrl"),
+    });
+    if (decision.kind === "redirect") {
+      return NextResponse.redirect(
+        new URL(decision.destination, req.nextUrl)
+      );
     }
     return NextResponse.next();
+  }
+
+  // v2 工作台只接受带 v2 source 的会话；legacy 会话需重新用 v2 凭据登录。
+  if (isV2Path(pathname)) {
+    if (!isLoggedIn || !isV2Source) {
+      return redirectToLogin(req, pathname);
+    }
+    return NextResponse.next();
+  }
+
+  // v2 会话不得进入任何旧后台页面/API，即使 JWT 中携带了 legacy Role。
+  if (isV2Source && isStaffProtectedPath(pathname)) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json(
+        { success: false, error: "v2 账号无权访问旧后台接口" },
+        { status: 403 }
+      );
+    }
+    return NextResponse.redirect(new URL(V2_HOME_PATH, req.nextUrl));
   }
 
   // 未登录：工作台、WMS/CMS/Admin 页面与后台 API 一律跳转登录
@@ -62,7 +101,6 @@ export default auth((req) => {
       }
     }
     if (
-      pathname === "/" ||
       pathname.startsWith("/wms") ||
       pathname.startsWith("/cms") ||
       (isStaffProtectedAdminApi(pathname) && !isStaffAdminApiPath(pathname))
@@ -76,22 +114,9 @@ export default auth((req) => {
     return NextResponse.next();
   }
 
-  // 门店主理人可访问工作台门户
-  if (pathname === "/" && role === Role.STORE_ADMIN) {
-    return NextResponse.next();
-  }
-
-  // 其他已登录角色访问 /：按角色落地（避免非主理人看到全量入口）
-  if (pathname === "/" && role !== Role.STORE_ADMIN) {
-    return NextResponse.redirect(new URL(getRoleHomePath(role!), req.nextUrl));
-  }
-
   // 前台运营：仅 CMS；配方 API 仅 GET
   if (role === Role.STORE_OPERATOR) {
-    if (
-      pathname.startsWith("/wms") ||
-      pathname.startsWith("/admin")
-    ) {
+    if (pathname.startsWith("/wms") || pathname.startsWith("/admin")) {
       return NextResponse.redirect(new URL("/cms/products", req.nextUrl));
     }
     const recipeReadOnly =
@@ -155,6 +180,8 @@ export const config = {
   matcher: [
     "/",
     "/login",
+    "/v2",
+    "/v2/:path*",
     "/wms/:path*",
     "/cms/:path*",
     "/admin/:path*",
