@@ -62,6 +62,9 @@ export default auth((req) => {
     if (!isLoggedIn || !isV2Source) {
       return redirectToLogin(req, pathname);
     }
+    if (req.auth?.user.v2BootstrapSession) {
+      return NextResponse.redirect(new URL("/account/v2-password", req.nextUrl));
+    }
     return NextResponse.next();
   }
 

@@ -1,6 +1,6 @@
 import {
   LossReason, Prisma, TransactionKind,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 import {
   assertPositiveQuantity,
   decimalNumber,

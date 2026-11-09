@@ -5,7 +5,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import {
   CommercialState, FulfillmentState, LocationKind, LossReason, MaterialKind, OrderEntry,
   PaymentKind, PaymentState, PrismaClient, ProductionState, RefundState, TransactionKind,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 import { recordRefund } from "./record-refund";
 
 config({ quiet: true });

@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import {
   Prisma, PurchaseState, ReservationState,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 import { assertMaterialQuantity } from "../domain/stock-planning";
 import { allocatePurchaseDemand } from "./allocate-purchase-demand";
 

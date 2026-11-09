@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import type { LossReason } from "@/generated/prisma-v2-draft/client";
+import type { LossReason } from "@/generated/prisma-v2/client";
 import { requireV2Store } from "@/v2/auth";
 import { v2db } from "@/v2/db";
 import { generateBatchNumber } from "@/v2/domain/identifiers";

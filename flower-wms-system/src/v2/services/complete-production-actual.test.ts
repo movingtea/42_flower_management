@@ -5,7 +5,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import {
   CostKind, CostStage, LocationKind, LossReason, MaterialKind, PrismaClient,
   ProductionState, RecipeState, ReservationState, TransactionKind,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 import { completeProduction } from "./complete-production";
 import type { ActualUsageInput } from "./complete-production";
 import { confirmManualOrder, createManualOrder } from "./manual-order";

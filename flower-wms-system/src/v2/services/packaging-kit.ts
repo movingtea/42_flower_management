@@ -1,4 +1,4 @@
-import { Prisma } from "../../generated/prisma-v2-draft/client";
+import { Prisma } from "../../generated/prisma-v2/client";
 import { assertMaterialQuantity } from "../domain/stock-planning";
 import { normalizeMasterCode } from "./master-data";
 

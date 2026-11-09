@@ -5,7 +5,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import {
   LocationKind, LossReason, MaterialKind, OrderEntry, OrderItemKind, PrismaClient,
   TransactionKind,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 import {
   recordLoss, type RecordLossInput,
 } from "./loss-management";

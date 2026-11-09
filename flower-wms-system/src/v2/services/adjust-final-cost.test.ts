@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
   CostKind, CostStage, LocationKind, MaterialKind, PrismaClient, RecipeState,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 import { completeDelivery } from "./complete-delivery";
 import { completeProduction } from "./complete-production";
 import { confirmManualOrder, createManualOrder } from "./manual-order";

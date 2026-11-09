@@ -1,6 +1,6 @@
 import {
   OrderEntry, PaymentKind, PaymentState, Prisma, type PaymentTransaction, type PrismaClient,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 
 /**
  * A completed offline payment recorded against a v2 staff-created manual order.

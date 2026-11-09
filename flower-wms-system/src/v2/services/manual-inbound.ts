@@ -1,4 +1,4 @@
-import { Prisma, TransactionKind } from "../../generated/prisma-v2-draft/client";
+import { Prisma, TransactionKind } from "../../generated/prisma-v2/client";
 import { assertMaterialQuantity } from "../domain/stock-planning";
 
 export async function createManualInbound(tx: Prisma.TransactionClient, input: {

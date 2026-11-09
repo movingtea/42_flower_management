@@ -5,7 +5,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import {
   CommercialState, LocationKind, MaterialKind, OrderEntry, OrderItemKind,
   PrismaClient, PurchaseState, SupplyState,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 import { calculatePurchaseProgress } from "../domain/purchase-progress";
 import { receivePurchaseLine } from "./receive-purchase-line";
 import { rejectPurchaseLine } from "./reject-purchase-line";

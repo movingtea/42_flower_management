@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
   MaterialKind, PrismaClient, PurchaseState,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 import { confirmManualOrder, createManualOrder } from "./manual-order";
 import {
   createLinkedPurchaseOrder,

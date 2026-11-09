@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { Prisma } from "@/generated/prisma-v2-draft/client";
+import { Prisma } from "@/generated/prisma-v2/client";
 import { requireV2Store } from "@/v2/auth";
 import { v2db } from "@/v2/db";
 import {

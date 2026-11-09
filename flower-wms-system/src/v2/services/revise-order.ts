@@ -1,7 +1,7 @@
 import {
   CommercialState, FulfillmentState, OrderItemKind, PrismaClient,
   ProductionState, ReservationState, SupplyState,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 import { assertMaterialQuantity, expandRecipe } from "../domain/stock-planning";
 import { reserveOrderMaterial } from "./reserve-order-material";
 

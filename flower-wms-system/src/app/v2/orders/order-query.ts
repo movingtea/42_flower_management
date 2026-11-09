@@ -1,4 +1,4 @@
-import type { Prisma } from "@/generated/prisma-v2-draft/client";
+import type { Prisma } from "@/generated/prisma-v2/client";
 
 /** Compact list projection for the board: no Decimal or nested production payload. */
 export const orderBoardInclude = {

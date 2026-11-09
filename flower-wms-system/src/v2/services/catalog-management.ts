@@ -1,4 +1,4 @@
-import { Prisma } from "../../generated/prisma-v2-draft/client";
+import { Prisma } from "../../generated/prisma-v2/client";
 import { generateProductCode, generateSkuCode } from "../domain/identifiers";
 
 export type CatalogScope = { tenantId: string; storeId: string; actorStaffId: string };

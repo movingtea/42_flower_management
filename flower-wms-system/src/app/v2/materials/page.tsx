@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
-import { MaterialKind } from "@/generated/prisma-v2-draft/client";
+import { MaterialKind } from "@/generated/prisma-v2/client";
 import { requireV2Store } from "@/v2/auth";
 import { v2db } from "@/v2/db";
 import { ActionEmptyState, Field, StatusBadge, V2ModulePage, button, input, tableHead, tableShell } from "../_components/V2Ui";

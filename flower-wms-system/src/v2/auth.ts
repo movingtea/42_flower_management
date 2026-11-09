@@ -57,6 +57,7 @@ export type V2StaffRecord = {
   passwordHash: string;
   displayName: string | null;
   active: boolean;
+  mustChangePassword?: boolean;
   tenantMembers: V2TenantMembership[];
   storeMembers: V2StoreMembership[];
 };
@@ -68,6 +69,7 @@ export type V2StaffPrincipal = {
   /** Legacy Role value carried by the shared Auth.js session for UI compatibility. */
   sessionRole: Role;
   source: Extract<AuthSource, "v2">;
+  mustChangePassword?: boolean;
 };
 
 export type V2AccessContext = {
@@ -149,6 +151,7 @@ export async function authenticateV2Staff(
     displayName: staff.displayName,
     sessionRole: mapV2RolesToSessionRole(roles),
     source: "v2",
+    ...(staff.mustChangePassword ? { mustChangePassword: true } : {}),
   };
 }
 
@@ -163,6 +166,7 @@ export function resolveV2Membership(
 ): V2AccessContext {
   if (source !== "v2") throw new Error("请使用 v2 账号登录");
   if (!staff?.active) throw new Error("员工未获 v2 访问权限");
+  if (staff.mustChangePassword) throw new V2PasswordChangeRequired();
 
   const membership = findActiveMembership(staff);
   if (!membership) throw new Error("员工未获门店访问权限");
@@ -181,6 +185,12 @@ export function resolveV2Membership(
     roles,
     capabilities: capabilitiesForRoles(roles),
   };
+}
+
+export class V2PasswordChangeRequired extends Error {
+  constructor() {
+    super("请先修改初始密码");
+  }
 }
 
 /**
@@ -220,6 +230,7 @@ async function loadV2Context(): Promise<V2AccessContext> {
   if (!session?.user?.id || session.user.source !== "v2") {
     throw new Error("请使用 v2 账号登录");
   }
+  if (session.user.v2BootstrapSession) throw new V2PasswordChangeRequired();
 
   const { v2db } = await import("./db");
   const staff = await v2db.staffUser.findUnique({

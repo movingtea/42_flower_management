@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { config } from "dotenv";
 import { resolve } from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../../generated/prisma-v2-draft/client";
+import { PrismaClient } from "../../generated/prisma-v2/client";
 import {
   saveProduct,
   saveSku,

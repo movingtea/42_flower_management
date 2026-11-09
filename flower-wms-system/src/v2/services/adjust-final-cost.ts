@@ -1,6 +1,6 @@
 import {
   CostKind, CostStage, Prisma, type PrismaClient,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 
 /**
  * Finalizes an estimated inventory batch unit cost and reconciles every already recorded

@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { StaffAppShell } from "@/components/shared/StaffAppShell";
 import { V2Sidebar } from "@/components/v2/sidebar";
-import { requireV2Context, type V2AccessContext } from "@/v2/auth";
+import { requireV2Context, V2PasswordChangeRequired, type V2AccessContext } from "@/v2/auth";
 
 export const metadata = {
   title: "Flower Studio 2.0 · 花店经营管理",
@@ -31,6 +31,7 @@ export default async function V2Layout({
     // authenticated V2 request, even for pages that only read business data.
     context = await requireV2Context("read");
   } catch (cause) {
+    if (cause instanceof V2PasswordChangeRequired) redirect("/account/v2-password");
     denial = denialMessage(cause);
   }
 

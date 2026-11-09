@@ -1,0 +1,230 @@
+{
+  "main": {
+    "id": "ff9903b81edf461e",
+    "type": "split",
+    "children": [
+      {
+        "id": "d577e35fee90168f",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "717b0109b4fa64d1",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "knowledge/04-Engineering/E0-knowledge-governance.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "E0-knowledge-governance"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "6db044f2064c0215",
+    "type": "split",
+    "children": [
+      {
+        "id": "4e8d3d1b79bc8ff6",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "95852ff0252f6a2f",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-folder-closed",
+              "title": "文件列表"
+            }
+          },
+          {
+            "id": "ec045e548c808473",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "搜索"
+            }
+          },
+          {
+            "id": "af8bf57c5db921f6",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-bookmark",
+              "title": "书签"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "e02369f725a0c156",
+    "type": "split",
+    "children": [
+      {
+        "id": "80b80855872bddd4",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "2f1035b274a70906",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "knowledge/04-Engineering/E0-knowledge-governance.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "反向链接"
+            }
+          },
+          {
+            "id": "f5cf98eb28742bb6",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "knowledge/04-Engineering/E0-knowledge-governance.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "出链"
+            }
+          },
+          {
+            "id": "30fe37a9c28fff47",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "标签"
+            }
+          },
+          {
+            "id": "4076f34afd12bed4",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "添加笔记属性"
+            }
+          },
+          {
+            "id": "25bb3fc94412e460",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "knowledge/04-Engineering/E0-knowledge-governance.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "大纲"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:打开快速切换": false,
+      "graph:查看关系图谱": false,
+      "canvas:新建白板": false,
+      "daily-notes:打开/创建今天的日记": false,
+      "templates:插入模板": false,
+      "command-palette:打开命令面板": false,
+      "bases:新建数据库": false
+    }
+  },
+  "active": "717b0109b4fa64d1",
+  "lastOpenFiles": [
+    "flower-wms-system/node_modules/geist/dist/fonts/geist-serif/GeistSerifVF.woff2",
+    "flower-wms-system/node_modules/geist/dist/fonts/geist-serif/GeistSerif-Triangle.woff2",
+    "flower-wms-system/node_modules/geist/dist/fonts/geist-serif/GeistSerif-Square.woff2",
+    "flower-wms-system/node_modules/geist/dist/fonts/geist-serif/GeistSerif-Regular.woff2",
+    "flower-wms-system/node_modules/geist/dist/fonts/geist-serif/GeistSerif-Heart.woff2",
+    "flower-wms-system/node_modules/geist/dist/fonts/geist-serif",
+    "flower-wms-system/node_modules/geist/dist/fonts/geist-pixel/GeistPixelVF.woff2",
+    "flower-wms-system/node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Triangle.woff2",
+    "flower-wms-system/node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Grid.woff2",
+    "flower-wms-system/node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Square.woff2",
+    "flower-wms-system/node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Line.woff2",
+    "knowledge/05-ADR/ADR-005-codex-dsh-responsibilities.md",
+    "knowledge/05-ADR/ADR-004-agent-knowledge-governance.md",
+    "knowledge/05-ADR/ADR-003-inventory-invariants.md",
+    "knowledge/05-ADR/ADR-002-v2-database-migration.md",
+    "knowledge/05-ADR/ADR-001-v1-v2-transition.md",
+    "AGENTS.md",
+    "knowledge/05-ADR/E0-adr-register.md",
+    "knowledge/02-Business/E0-confirmed-stock-and-supply.md",
+    "knowledge/02-Business/E0-confirmed-sample-and-sku.md",
+    "knowledge/02-Business/E0-confirmed-cost.md",
+    "knowledge/02-Business/E0-business-rule-review.md",
+    "knowledge/01-Product/E0-product-scope.md",
+    "knowledge/00-Home/E0-knowledge-index.md",
+    "knowledge/README.md",
+    "docs/flower-studio-2.0-implementation-sequence.md",
+    "knowledge/specifications/test-plans/E0-test-plan-sources.md",
+    "knowledge/specifications/api/E0-api-sources.md",
+    "knowledge/specifications/data-models/E0-data-model-sources.md",
+    "knowledge/specifications/technical-designs/E0-technical-design-sources.md",
+    "knowledge/specifications/features/E0-feature-sources.md",
+    "knowledge/specifications/E0-specifications-index.md",
+    "knowledge/templates/E0-business-rule-template.md",
+    "knowledge/06-Lessons/E0-known-gaps.md",
+    "knowledge/04-Engineering/E0-knowledge-governance.md",
+    "knowledge/03-Architecture/E0-v1-v2-ownership.md"
+  ]
+}

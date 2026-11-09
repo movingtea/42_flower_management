@@ -24,7 +24,7 @@ const stubs: Record<string, string> = {
   "@/auth": "export async function auth() { return null; }",
   "@/v2/auth": "export async function requireV2Store(capability) { globalThis.__v2UiTest.capability = capability; return { tenantId: 'tenant-1', storeId: 'store-1', staffId: 'staff-1' }; }",
   "@/v2/db": "export const v2db = {};",
-  "@/generated/prisma-v2-draft/client": "export const MaterialKind = { FLOWER: 'FLOWER', FOLIAGE: 'FOLIAGE', PACKAGING: 'PACKAGING', CONSUMABLE: 'CONSUMABLE', OTHER: 'OTHER' }; export const RecipeState = { PUBLISHED: 'PUBLISHED', RETIRED: 'RETIRED' };",
+  "@/generated/prisma-v2/client": "export const MaterialKind = { FLOWER: 'FLOWER', FOLIAGE: 'FOLIAGE', PACKAGING: 'PACKAGING', CONSUMABLE: 'CONSUMABLE', OTHER: 'OTHER' }; export const RecipeState = { PUBLISHED: 'PUBLISHED', RETIRED: 'RETIRED' };",
   "@/v2/domain/stock-planning": "export function assertMaterialQuantity() {}",
   "@/v2/domain/identifiers": "export function generateBatchNumber() { return 'B-TEST'; } export function generateProductCode() { return 'P-TEST'; } export function generateSkuCode() { return 'S-TEST'; }",
   "@/v2/services/complete-delivery": "export async function completeDelivery() {}",

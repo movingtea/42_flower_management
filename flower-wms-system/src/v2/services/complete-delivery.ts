@@ -1,7 +1,7 @@
 import {
   CommercialState, DeliveryAttemptState, FulfillmentKind, FulfillmentState,
   ProductionState, type PrismaClient,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 import { calculateOrderCostBreakdown } from "./order-cost-management";
 
 function centsToMoney(value: number): string {

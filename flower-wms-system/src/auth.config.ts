@@ -103,6 +103,7 @@ export const authConfig = {
         token.username = user.username;
         token.role = user.role;
         token.source = normalizeAuthSource(user.source);
+        token.v2BootstrapSession = user.v2BootstrapSession === true;
         token.defaultTenantId = user.defaultTenantId ?? null;
         token.currentTenantId = user.currentTenantId ?? null;
         token.tenantRole = user.tenantRole ?? null;
@@ -120,6 +121,7 @@ export const authConfig = {
         session.user.username = token.username;
         session.user.role = token.role as Role;
         session.user.source = normalizeAuthSource(token.source);
+        if (token.v2BootstrapSession === true) session.user.v2BootstrapSession = true;
         session.user.defaultTenantId =
           typeof token.defaultTenantId === "string" ? token.defaultTenantId : null;
         session.user.currentTenantId =

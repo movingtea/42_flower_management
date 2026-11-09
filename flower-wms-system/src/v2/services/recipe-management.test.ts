@@ -8,7 +8,7 @@ import {
   OrderItemKind,
   PrismaClient,
   RecipeState,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 import {
   publishRecipeVersion,
   retireRecipeVersion,

@@ -1,4 +1,4 @@
-import type { LossReason } from "@/generated/prisma-v2-draft/client";
+import type { LossReason } from "@/generated/prisma-v2/client";
 
 /** Chinese labels for every LossReason value in the V2 draft schema. */
 export const LOSS_REASON_LABELS: Record<LossReason, string> = {

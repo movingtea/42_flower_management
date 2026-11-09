@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
   LocationKind, MaterialKind, OrderEntry, PaymentKind, PaymentState, PrismaClient, RefundState,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 import { recordManualPayment } from "./record-manual-payment";
 import { recordRefund } from "./record-refund";
 

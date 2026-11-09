@@ -1,6 +1,6 @@
 import {
   CommercialState, Prisma, PurchaseState, ReservationState, SupplyState,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 import { calculatePurchaseProgress } from "../domain/purchase-progress";
 import { assertMaterialQuantity } from "../domain/stock-planning";
 

@@ -39,7 +39,7 @@ COPY flower-wms-system/ .
 
 ENV NEXT_TELEMETRY_DISABLED=1
 
-RUN npx prisma generate
+RUN npx prisma generate && npm run db:v2:generate
 
 ARG NEXT_PUBLIC_API_URL=http://localhost:3000
 ARG NEXT_PUBLIC_ASSET_BASE_URL=http://localhost:3000
@@ -48,6 +48,7 @@ ENV NEXT_PUBLIC_ASSET_BASE_URL=$NEXT_PUBLIC_ASSET_BASE_URL
 
 ARG DATABASE_URL="postgresql://build:build@127.0.0.1:5432/build?schema=public"
 ENV DATABASE_URL=$DATABASE_URL
+ENV V2_DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build_v2?schema=public
 
 RUN npm run build
 
@@ -76,19 +77,20 @@ COPY --from=prod-deps --chown=nextjs:nodejs /app/node_modules ./node_modules
 # Prisma + cron-worker TS 源码运行时（npx tsx --tsconfig tsconfig.json scripts/...）
 COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
+COPY --from=builder --chown=nextjs:nodejs /app/prisma.v2.config.ts ./prisma.v2.config.ts
 COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
 COPY --from=builder --chown=nextjs:nodejs /app/next-env.d.ts ./next-env.d.ts
 COPY --from=builder --chown=nextjs:nodejs /app/src ./src
 COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 COPY --from=builder --chown=nextjs:nodejs /app/docker-entrypoint.sh ./docker-entrypoint.sh
 
-RUN chmod +x ./docker-entrypoint.sh
+RUN sed -i 's/\r$//' ./docker-entrypoint.sh && chmod +x ./docker-entrypoint.sh
 
 USER nextjs
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-  CMD wget -qO- "http://127.0.0.1:${PORT}/login" >/dev/null 2>&1 || exit 1
+  CMD wget -qO- "http://127.0.0.1:${PORT}/api/health" >/dev/null 2>&1 || exit 1
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
 CMD ["node", "server.js"]

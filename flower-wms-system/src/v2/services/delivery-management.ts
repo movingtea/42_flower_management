@@ -1,7 +1,7 @@
 import {
   CommercialState, DeliveryAttemptState, FulfillmentKind, FulfillmentState,
   Prisma, ProductionState, type PrismaClient,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 
 export type CreateDeliveryAttemptInput = {
   tenantId: string;

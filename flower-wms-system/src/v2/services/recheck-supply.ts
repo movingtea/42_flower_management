@@ -1,4 +1,4 @@
-import { CommercialState, PrismaClient } from "../../generated/prisma-v2-draft/client";
+import { CommercialState, PrismaClient } from "../../generated/prisma-v2/client";
 import { confirmManualOrder } from "./manual-order";
 
 export type SupplyRecheckOptions = {

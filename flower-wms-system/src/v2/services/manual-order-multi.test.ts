@@ -6,8 +6,9 @@ import {
   CommercialState, CostKind, CostStage, FulfillmentKind, FulfillmentState, LocationKind,
   MaterialKind, PrismaClient, ProductionState, RecipeState,
   ReservationState, SupplyState,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 import { completeDelivery } from "./complete-delivery";
+import { createDeliveryAttempt, startDeliveryAttempt } from "./delivery-management";
 import { completeProduction } from "./complete-production";
 import { confirmManualOrder, createManualOrder } from "./manual-order";
 import { reviseManualOrder } from "./revise-order";
@@ -540,6 +541,9 @@ async function main() {
   console.log("multi-order shared batch actual usage passed");
 
   // Delivery snapshot keeps per-line revenue and per-task material costs.
+  const delivery = { tenantId: tenant.id, storeId: store.id, orderId, actorStaffId: "staff-test" };
+  const { attemptId } = await createDeliveryAttempt(db, delivery);
+  await startDeliveryAttempt(db, { ...delivery, attemptId });
   await completeDelivery(db, orderId, tenant.id, store.id, "staff-test");
   const snapshot = await db.orderCostSnapshot.findFirstOrThrow({ where: { orderId } });
   assert.equal(Number(snapshot.revenue), 607);
@@ -636,6 +640,7 @@ async function cleanup() {
   await db.inventoryReservation.deleteMany({ where: { requirement: { orderItem: { order: tenants } } } });
   await db.orderMaterialRequirement.deleteMany({ where: { orderItem: { order: tenants } } });
   await db.productionTask.deleteMany({ where: { orderItem: { order: tenants } } });
+  await db.deliveryAttempt.deleteMany({ where: { fulfillment: { order: tenants } } });
   await db.fulfillment.deleteMany({ where: { order: tenants } });
   await db.orderItem.deleteMany({ where: { order: tenants } });
   await db.orderRevision.deleteMany({ where: { order: tenants } });

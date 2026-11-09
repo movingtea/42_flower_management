@@ -3,7 +3,7 @@ import { config } from "dotenv";
 import { resolve } from "node:path";
 import bcrypt from "bcryptjs";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../../generated/prisma-v2-draft/client";
+import { PrismaClient } from "../../generated/prisma-v2/client";
 import { authenticateV2Staff, resolveV2Access } from "../auth";
 import {
   createStaffAccount,

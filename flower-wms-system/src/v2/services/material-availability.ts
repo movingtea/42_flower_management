@@ -1,4 +1,4 @@
-import { Prisma, ReservationState } from "../../generated/prisma-v2-draft/client";
+import { Prisma, ReservationState } from "../../generated/prisma-v2/client";
 import { summarizeMaterialAvailability } from "../domain/material-availability";
 
 type AvailabilityDb = Pick<

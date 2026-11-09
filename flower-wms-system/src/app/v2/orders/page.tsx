@@ -35,7 +35,7 @@ import {
   ProductionState,
   SupplyState,
   type Prisma,
-} from "@/generated/prisma-v2-draft/client";
+} from "@/generated/prisma-v2/client";
 
 export const dynamic = "force-dynamic";
 

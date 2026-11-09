@@ -102,6 +102,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           username: principal.username,
           role: principal.sessionRole,
           source: "v2",
+          v2BootstrapSession: principal.mustChangePassword,
           defaultTenantId: null,
           currentTenantId: null,
           tenantRole: null,

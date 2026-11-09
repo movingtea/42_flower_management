@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { TransactionKind } from "@/generated/prisma-v2-draft/client";
+import { TransactionKind } from "@/generated/prisma-v2/client";
 import { auth } from "@/auth";
 import { requireV2Store } from "@/v2/auth";
 import { v2db } from "@/v2/db";

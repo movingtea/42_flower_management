@@ -1,4 +1,4 @@
-import { Prisma, ReservationState } from "../../generated/prisma-v2-draft/client";
+import { Prisma, ReservationState } from "../../generated/prisma-v2/client";
 import { allocateBatches, assertMaterialQuantity } from "../domain/stock-planning";
 
 /** Called inside the transaction that confirms an order. Batch locks serialize order and sample reservations. */

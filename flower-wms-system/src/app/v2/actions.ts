@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { MaterialKind, RecipeState } from "@/generated/prisma-v2-draft/client";
+import { MaterialKind, RecipeState } from "@/generated/prisma-v2/client";
 import { requireV2Store } from "@/v2/auth";
 import { v2db } from "@/v2/db";
 import { generateBatchNumber, generateProductCode, generateSkuCode } from "@/v2/domain/identifiers";

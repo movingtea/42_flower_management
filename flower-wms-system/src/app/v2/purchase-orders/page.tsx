@@ -4,7 +4,7 @@ import { requireV2Store } from "@/v2/auth";
 import { v2db } from "@/v2/db";
 import {
   Prisma, PurchaseState, ReservationState,
-} from "@/generated/prisma-v2-draft/client";
+} from "@/generated/prisma-v2/client";
 import { calculatePurchaseProgress } from "@/v2/domain/purchase-progress";
 import { receivePurchase, rejectPurchase, finalizeBatchCost } from "../actions";
 import { ActionEmptyState, Field, StatusBadge, V2ModulePage, button, card, input, tableHead, tableShell } from "../_components/V2Ui";

@@ -1,7 +1,7 @@
 import {
   CommercialState, FulfillmentState, HoldState, ProductionState, RefundState,
   ReservationState, SupplyState, type PrismaClient,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 
 export type CancelOrderInput = {
   tenantId: string;

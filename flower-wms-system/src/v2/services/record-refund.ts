@@ -1,6 +1,6 @@
 import {
   PaymentState, Prisma, RefundState, type PrismaClient, type RefundTransaction,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 
 /**
  * A completed manual refund. The refund is recorded as its own transaction; the original payment,

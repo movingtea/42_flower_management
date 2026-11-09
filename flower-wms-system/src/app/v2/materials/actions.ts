@@ -1,7 +1,7 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { MaterialKind } from "@/generated/prisma-v2-draft/client";
+import { MaterialKind } from "@/generated/prisma-v2/client";
 import { requireV2Store } from "@/v2/auth";
 import { v2db } from "@/v2/db";
 import { createMaterialMaster, setMaterialActive, updateMaterialMaster } from "@/v2/services/master-data";

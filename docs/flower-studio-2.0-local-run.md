@@ -13,7 +13,23 @@ Set-Location 'D:\My-project\flower-studio-ecosystem\CMS_and_WMS\flower-wms-syste
 npm run dev
 ```
 
-打开 `http://localhost:3000/`，使用 v2 seed 创建的本地管理员登录。首次安装依赖时先运行 `npm ci` 和 `npx prisma generate --config prisma.v2.config.ts`。若重新建立空 v2 数据库，在临时设置 `DATABASE_URL` 为 v2 连接串后运行 `npx prisma migrate deploy --config prisma.v2.config.ts`、`npx prisma db seed --config prisma.v2.config.ts`、`npx prisma generate --config prisma.v2.config.ts`。
+打开 `http://localhost:3000/`，使用本地 seed 创建的管理员登录。首次准备应用时，运行 `npm ci`、`npx prisma generate` 和 `npm run db:v2:generate`。
+
+在 WMS 应用目录的 `.env` 或当前 shell 中设置 `V2_DATABASE_URL`。`DATABASE_URL` 继续指向 V1。准备空 V2 库或升级已有 V2 库时，依次运行：
+
+```powershell
+npm run db:v2:migrate:deploy
+npm run db:v2:migrate:status
+npm run db:v2:migrate:check
+```
+
+`db:v2:seed:dev` 在本机 `_dev` 库创建本地管理员和基础门店资料。`db:v2:seed:test` 在本机 `_test` 库建立测试角色。`db:v2:reset:test` 清空并重建指定测试库，再装入测试数据。这三个命令均限制为本机数据库，在生产模式下拒绝执行。
+
+## 容器与生产初始化
+
+- 在生产主机的 Compose `.env` 配置独立的 `V2_DATABASE_URL`，预先创建目标数据库。应用启动执行两套迁移。发布使用 Git SHA 镜像，并检查 `/api/health` 和 V1/V2 迁移状态。
+- 首次初始化前，把管理员临时强密码存入仅受授权用户可读的文件。以只读方式挂载到一次性应用容器，传入 `V2_BOOTSTRAP_ADMIN_USERNAME` 和指向容器内文件的 `V2_BOOTSTRAP_ADMIN_PASSWORD_FILE`，执行 `npm run db:v2:init:production`。初始化只创建指定管理员，重复执行保留已有账号、密码和权限。
+- 管理员用临时密码登录后必须修改密码并重新登录。初始化后移除临时密码文件和挂载。
 
 若用生产构建的独立服务验证，需要先把 `.env.local` 中的 v2 连接串注入当前 PowerShell，再启动：
 

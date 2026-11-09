@@ -1,7 +1,7 @@
 import {
   CommercialState, CostKind, CostStage, FulfillmentKind,
   type PrismaClient,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 
 /**
  * Canonical order cost kinds. The order matters: it is also the order of `missingKinds`.

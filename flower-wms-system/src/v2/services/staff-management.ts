@@ -1,5 +1,5 @@
 import bcrypt from "bcryptjs";
-import { Prisma } from "../../generated/prisma-v2-draft/client";
+import { Prisma } from "../../generated/prisma-v2/client";
 import {
   V2_ROLES,
   isV2Role,

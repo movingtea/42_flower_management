@@ -3,7 +3,7 @@ import {
   Prisma,
   PurchaseState,
   ReservationState,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 import { assertMaterialQuantity } from "../domain/stock-planning";
 
 const CODE_PATTERN = /^[A-Z0-9][A-Z0-9._-]{1,31}$/;

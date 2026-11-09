@@ -1,13 +1,13 @@
 import "dotenv/config";
 import assert from "node:assert/strict";
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "../../src/generated/prisma-v2-draft/client";
+import { PrismaClient } from "../../src/generated/prisma-v2/client";
 import { confirmManualOrder, createManualOrder } from "../../src/v2/services/manual-order";
 import { receivePurchaseLine } from "../../src/v2/services/receive-purchase-line";
 import { recheckSupplyAfterReceipt } from "../../src/v2/services/recheck-supply";
 
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) throw new Error("DATABASE_URL is required");
+const connectionString = process.env.V2_DATABASE_URL;
+if (!connectionString) throw new Error("V2_DATABASE_URL is required");
 const db = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 
 async function main() {

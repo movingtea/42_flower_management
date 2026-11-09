@@ -12,6 +12,7 @@ declare module "next-auth" {
       role: Role;
       /** v2 sessions are marked explicitly; sessions created before this marker are legacy. */
       source: AuthSource;
+      v2BootstrapSession?: boolean;
       /** 默认租户 ID（Sprint 21 地基；当前业务 API 尚未强制使用） */
       defaultTenantId: string | null;
       /** 当前租户 ID；单租户阶段与 defaultTenantId 相同 */
@@ -26,6 +27,7 @@ declare module "next-auth" {
     username: string;
     role: Role;
     source?: AuthSource;
+    v2BootstrapSession?: boolean;
     defaultTenantId?: string | null;
     currentTenantId?: string | null;
     tenantRole?: Role | null;
@@ -38,6 +40,7 @@ declare module "next-auth/jwt" {
     username: string;
     role: Role;
     source?: AuthSource;
+    v2BootstrapSession?: boolean;
     defaultTenantId?: string | null;
     currentTenantId?: string | null;
     tenantRole?: Role | null;

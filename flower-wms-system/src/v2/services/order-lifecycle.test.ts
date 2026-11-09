@@ -6,7 +6,7 @@ import {
   CommercialState, FulfillmentKind, FulfillmentState, HoldState, LocationKind,
   MaterialKind, PaymentKind, PaymentState, PrismaClient, ProductionState, RecipeState,
   RefundState, ReservationState, SupplyState,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 import { completeProduction } from "./complete-production";
 import { confirmManualOrder, createManualOrder } from "./manual-order";
 import { cancelOrder, closeOrder, startOrderProduction } from "./order-lifecycle";

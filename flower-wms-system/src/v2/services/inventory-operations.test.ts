@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
   LocationKind, MaterialKind, PrismaClient, TransactionKind,
-} from "../../generated/prisma-v2-draft/client";
+} from "../../generated/prisma-v2/client";
 import {
   adjustInventory, transferInventory, type InventoryOperationScope,
 } from "./inventory-operations";

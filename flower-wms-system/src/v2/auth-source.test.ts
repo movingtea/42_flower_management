@@ -63,6 +63,25 @@ const comparePassword = async (password: string, hash: string) =>
   hash === `hashed:${password}`;
 
 async function main() {
+  const bootstrapStaff = makeStaff({ mustChangePassword: true });
+  const bootstrapPrincipal = await authenticateV2Staff(
+    { username: "admin", password: "admin" },
+    async () => bootstrapStaff,
+    comparePassword
+  );
+  assert.equal(bootstrapPrincipal?.mustChangePassword, true);
+  assert.throws(() => resolveV2Access("v2", bootstrapStaff), /请先修改初始密码/);
+
+  const bootstrapToken = await authConfig.callbacks.jwt({
+    token: {},
+    user: { id: bootstrapStaff.id, username: "admin", role: "STORE_ADMIN", source: "v2", v2BootstrapSession: true },
+  } as never);
+  const bootstrapSession = await authConfig.callbacks.session({
+    session: { user: {}, expires: "" },
+    token: bootstrapToken,
+  } as never);
+  assert.equal((bootstrapSession as { user: { v2BootstrapSession?: boolean } }).user.v2BootstrapSession, true);
+
   // Source marker: pre-marker/unknown tokens must be treated as legacy, never v2.
   assert.equal(normalizeAuthSource(undefined), "legacy");
   assert.equal(normalizeAuthSource("legacy"), "legacy");
@@ -536,7 +555,7 @@ async function main() {
     console.log("v2 auth DB integration check skipped: V2_DATABASE_URL not set");
   } else {
     const { PrismaPg } = await import("@prisma/adapter-pg");
-    const { PrismaClient } = await import("../generated/prisma-v2-draft/client");
+    const { PrismaClient } = await import("../generated/prisma-v2/client");
     const db = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
     let dbAvailable = true;
     try {
