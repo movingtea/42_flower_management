@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { TransactionKind } from "@/generated/prisma-v2/client";
 import { auth } from "@/auth";
-import { requireV2Store } from "@/v2/auth";
+import { requireV2Context } from "@/v2/auth";
 import { v2db } from "@/v2/db";
 import { Field, StatusBadge, V2ModulePage, button, card, input, tableHead, tableShell } from "../_components/V2Ui";
 import { readV2Feedback } from "../_lib/search-params";
@@ -20,6 +20,9 @@ import {
   createManualInboundAction,
   createStocktakeAction,
   recordLossAction,
+  reviewUnknownBatchLossAction,
+  reviewStocktakeAction,
+  submitUnknownBatchLossAction,
   transferInventoryAction,
 } from "./actions";
 
@@ -125,11 +128,13 @@ function MissingSetup({ children }: { children: string }) {
 export default async function OperationsPage({ searchParams }: { searchParams: Promise<{ message?: string | string[]; error?: string | string[] }> }) {
   const session = await auth();
   if (!session?.user || session.user.source !== "v2") redirect("/login?callbackUrl=/v2/operations");
-  const { tenantId, storeId } = await requireV2Store("purchase");
+  const access = await requireV2Context("purchase");
+  const { tenantId, storeId } = access;
+  const canReviewInventory = access.capabilities.includes("inventory_review");
   const params = await searchParams;
   const feedback = readV2Feedback(params);
 
-  const [materials, locations, batches, recentInbound, recentTransactions, recentLosses, draftStocktakes, confirmedStocktakes] = await Promise.all([
+  const [materials, locations, batches, recentInbound, recentTransactions, recentLosses, pendingLosses, draftStocktakes, pendingStocktakes, confirmedStocktakes] = await Promise.all([
     v2db.material.findMany({ where: { tenantId, active: true }, orderBy: { code: "asc" }, take: 500 }),
     v2db.inventoryLocation.findMany({ where: { storeId }, orderBy: { code: "asc" }, take: 100 }),
     v2db.inventoryBatch.findMany({
@@ -159,8 +164,18 @@ export default async function OperationsPage({ searchParams }: { searchParams: P
       orderBy: { occurredAt: "desc" },
       take: 20,
     }),
+    v2db.lossRecord.findMany({
+      where: { storeId, reviewStatus: "PENDING", pendingBatchVerification: true },
+      include: { material: true, location: true }, orderBy: { occurredAt: "desc" }, take: 20,
+    }),
     v2db.stocktake.findMany({
       where: { storeId, state: "DRAFT" },
+      include: { lines: { include: { batch: { include: { material: true } }, location: true } } },
+      orderBy: { createdAt: "desc" },
+      take: 20,
+    }),
+    v2db.stocktake.findMany({
+      where: { storeId, state: "PENDING_REVIEW" },
       include: { lines: { include: { batch: { include: { material: true } }, location: true } } },
       orderBy: { createdAt: "desc" },
       take: 20,
@@ -396,6 +411,21 @@ export default async function OperationsPage({ searchParams }: { searchParams: P
           ))}
         </div>
 
+        <div className="mt-6 space-y-3">
+          <h4 className="text-sm font-semibold text-zinc-800">待库存复核</h4>
+          {pendingStocktakes.length === 0 ? <p className="text-sm text-zinc-500">暂无待复核盘点。</p> : pendingStocktakes.map((stocktake) => <div key={stocktake.id} className="rounded-xl border border-amber-300 bg-amber-50 p-4">
+            <p className="font-medium text-amber-950">盘点单 <span className="font-mono text-xs">{shortId(stocktake.id)}</span> <StatusBadge tone="warning">待复核</StatusBadge></p>
+            <p className="mt-1 text-xs text-amber-900">触发原因：{stocktake.reviewReasons.join("、") || "库存风险规则"}；复核通过前库存不会调整。</p>
+            <div className="mt-2 text-xs text-stone-700">{stocktake.lines.map((line) => <div key={line.id}>{line.batch.batchNo} · {line.batch.material.name} @ {line.location.code}：{formatQty(line.recordedQty)} → {formatQty(line.countedQty)}（{signedQty(diffValue(line.countedQty, line.recordedQty))}）</div>)}</div>
+            {canReviewInventory ? <form action={reviewStocktakeAction} className="mt-3 flex flex-wrap gap-2">
+              <input type="hidden" name="stocktakeId" value={stocktake.id} />
+              <input className={`${input} min-w-64 flex-1`} name="note" required placeholder="填写复核意见" />
+              <button className={button} name="decision" value="APPROVE">复核通过并调整库存</button>
+              <button className="rounded-lg border border-red-700 px-4 py-2 text-sm text-red-800" name="decision" value="REJECT">拒绝调整</button>
+            </form> : <p className="mt-2 text-xs text-amber-800">仅本店经理或库存复核授权人员可处理。</p>}
+          </div>)}
+        </div>
+
         <div className="mt-6">
           <h4 className="mb-3 text-sm font-semibold text-zinc-800">最近已确认盘点</h4>
           <div className={tableShell}>
@@ -482,6 +512,27 @@ export default async function OperationsPage({ searchParams }: { searchParams: P
             </div>
           </form>
         )}
+        {setupReady && <details className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4"><summary className="cursor-pointer font-medium text-amber-950">批次不明损耗</summary>
+          <p className="mt-1 text-xs text-amber-900">先提交物料、库位和数量；本店经理或授权人员确认实际批次后才会扣减库存。</p>
+          <form action={submitUnknownBatchLossAction} className="mt-3 grid gap-3 md:grid-cols-2">
+            <input type="hidden" name="idempotencyKey" value={`UNKNOWN-LOSS-${crypto.randomUUID()}`} />
+            <label className="text-sm">物料<select className={`${input} mt-1`} name="materialId" required>{materials.map((material) => <option key={material.id} value={material.id}>{material.code} · {material.name}</option>)}</select></label>
+            <label className="text-sm">发现库位<select className={`${input} mt-1`} name="locationId" required><LocationOptions locations={locations} totals={locationTotals} /></select></label>
+            <Field label="损耗数量" name="quantity" type="number" />
+            <label className="text-sm">损耗原因<select className={`${input} mt-1`} name="reason">{LOSS_REASON_OPTIONS.map((reason) => <option key={reason} value={reason}>{LOSS_REASON_LABELS[reason]}</option>)}</select></label>
+            <label className="text-sm md:col-span-2">说明<input className={`${input} mt-1`} name="note" /></label>
+            <button className={button}>提交复核（不扣库存）</button>
+          </form>
+        </details>}
+        {pendingLosses.length > 0 && <div className="mt-4 space-y-2"><h4 className="text-sm font-semibold">待复核批次不明损耗</h4>{pendingLosses.map((loss) => <div key={loss.id} className="rounded-xl border border-amber-300 p-3 text-sm">
+          <p>{loss.material?.code} · {loss.material?.name} · {formatQty(loss.quantity)} {loss.material?.baseUnit} · 库位 {loss.location?.code}</p>
+          {canReviewInventory ? <form action={reviewUnknownBatchLossAction} className="mt-2 flex flex-wrap gap-2">
+            <input type="hidden" name="lossRecordId" value={loss.id} />
+            <select className={input} name="batchId" defaultValue=""><option value="">选择实际批次</option>{batches.filter((batch) => batch.material.code === loss.material?.code).map((batch) => <option key={batch.id} value={batch.id}>{batch.batchNo}</option>)}</select>
+            <input className={input} name="note" required placeholder="复核意见" />
+            <button className={button} name="decision" value="APPROVE">确认并扣减</button><button className="rounded-lg border border-red-700 px-3" name="decision" value="REJECT">拒绝</button>
+          </form> : <p className="mt-1 text-xs text-amber-800">等待本店经理或授权人员复核。</p>}
+        </div>)}</div>}
       </section>
 
       <section className={card}>

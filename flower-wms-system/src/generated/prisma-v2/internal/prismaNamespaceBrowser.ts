@@ -412,6 +412,9 @@ export const PurchaseOrderLineScalarFieldEnum = {
   expectedBaseQty: 'expectedBaseQty',
   unitPrice: 'unitPrice',
   supplierConfirmedAt: 'supplierConfirmedAt',
+  relationKind: 'relationKind',
+  sourceLineId: 'sourceLineId',
+  relationKey: 'relationKey',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -962,7 +965,12 @@ export const StocktakeScalarFieldEnum = {
   storeId: 'storeId',
   state: 'state',
   createdAt: 'createdAt',
-  confirmedAt: 'confirmedAt'
+  confirmedAt: 'confirmedAt',
+  reviewReasons: 'reviewReasons',
+  submittedById: 'submittedById',
+  reviewedById: 'reviewedById',
+  reviewedAt: 'reviewedAt',
+  reviewNote: 'reviewNote'
 } as const
 
 export type StocktakeScalarFieldEnum = (typeof StocktakeScalarFieldEnum)[keyof typeof StocktakeScalarFieldEnum]
@@ -985,11 +993,18 @@ export const LossRecordScalarFieldEnum = {
   id: 'id',
   storeId: 'storeId',
   batchId: 'batchId',
+  materialId: 'materialId',
+  locationId: 'locationId',
   orderId: 'orderId',
   reason: 'reason',
   quantity: 'quantity',
   note: 'note',
   pendingBatchVerification: 'pendingBatchVerification',
+  reviewStatus: 'reviewStatus',
+  submittedById: 'submittedById',
+  reviewedById: 'reviewedById',
+  reviewedAt: 'reviewedAt',
+  reviewNote: 'reviewNote',
   occurredAt: 'occurredAt'
 } as const
 

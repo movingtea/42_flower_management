@@ -15,15 +15,18 @@ enum MaterialKind {
   CONSUMABLE
   OTHER
 }
+
 enum LocationKind {
   WAREHOUSE
   PRODUCTION
 }
+
 enum RecipeState {
   DRAFT
   PUBLISHED
   RETIRED
 }
+
 enum CommercialState {
   DRAFT
   PENDING_CONFIRMATION
@@ -32,6 +35,7 @@ enum CommercialState {
   CANCELLED
   CLOSED
 }
+
 enum SupplyState {
   NOT_EVALUATED
   ON_HAND_COVERED
@@ -41,6 +45,7 @@ enum SupplyState {
   PARTIALLY_COVERED
   UNFULFILLABLE
 }
+
 enum ProductionState {
   NOT_SCHEDULED
   WAITING_MATERIAL
@@ -49,6 +54,7 @@ enum ProductionState {
   COMPLETED
   EXCEPTION
 }
+
 enum FulfillmentState {
   UNPLANNED
   WAITING_PICKUP
@@ -57,28 +63,33 @@ enum FulfillmentState {
   DELIVERED
   FAILED
 }
+
 enum OrderEntry {
   MINI_PROGRAM
   STAFF_PORTAL
   API
   IMPORT
 }
+
 enum OrderItemKind {
   STANDARD
   CUSTOM
 }
+
 enum HoldState {
   ACTIVE
   RELEASED
   EXPIRED
   CONVERTED
 }
+
 enum ReservationState {
   ACTIVE
   ISSUED
   CONSUMED
   RELEASED
 }
+
 enum PurchaseState {
   DRAFT
   ORDERED
@@ -87,11 +98,13 @@ enum PurchaseState {
   CANCELLED
   CLOSED
 }
+
 enum ReceiptDisposition {
   ACCEPTED
   DOWNGRADED
   REJECTED
 }
+
 enum TransactionKind {
   INBOUND
   TRANSFER
@@ -102,6 +115,7 @@ enum TransactionKind {
   FREEZE
   UNFREEZE
 }
+
 enum CostKind {
   MATERIAL
   PACKAGING
@@ -111,11 +125,13 @@ enum CostKind {
   PLATFORM
   LOSS
 }
+
 enum CostStage {
   STANDARD
   PLANNED
   ACTUAL
 }
+
 enum PaymentKind {
   MINI_PROGRAM
   WECHAT_TRANSFER
@@ -124,32 +140,38 @@ enum PaymentKind {
   CARD
   OTHER
 }
+
 enum PaymentState {
   PENDING
   SUCCEEDED
   FAILED
   VOIDED
 }
+
 enum RefundState {
   REQUESTED
   SUCCEEDED
   FAILED
 }
+
 enum FulfillmentKind {
   DELIVERY
   PICKUP
 }
+
 enum DeliveryAttemptState {
   SCHEDULED
   OUT_FOR_DELIVERY
   DELIVERED
   FAILED
 }
+
 enum SampleState {
   DRAFT
   READY
   ARCHIVED
 }
+
 enum SamplePlanState {
   DRAFT
   PROPOSED
@@ -158,21 +180,39 @@ enum SamplePlanState {
   COMPLETED
   CANCELLED
 }
+
 enum SamplePlanCandidateState {
   REQUIRED
   OPTIONAL
   EXCLUDED
 }
+
 enum ConsumableRollState {
   SEALED
   IN_USE
   EXHAUSTED
 }
+
 enum StocktakeState {
   DRAFT
+  PENDING_REVIEW
   CONFIRMED
+  REJECTED
   CANCELLED
 }
+
+enum PurchaseLineRelationKind {
+  ORIGINAL
+  EXTRA_ORDER
+  REPLACEMENT_DELIVERY
+}
+
+enum InventoryReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum LossReason {
   RECEIPT_REJECTED
   CARE_DAMAGE
@@ -182,6 +222,7 @@ enum LossReason {
   STOCKTAKE_DIFFERENCE
   OTHER
 }
+
 enum ContentTargetKind {
   NONE
   PRODUCT
@@ -191,95 +232,100 @@ enum ContentTargetKind {
 }
 
 model Tenant {
-  id String @id @default(uuid())
-  slug String @unique
-  name String
-  stores Store[]
-  materials Material[]
-  suppliers Supplier[]
-  products Product[]
-  orders Order[]
-  purchases PurchaseOrder[]
-  samples Sample[]
-  samplePlans SamplePlan[]
-  members TenantMember[]
-  customers Customer[]
-  recipients Recipient[]
-  settings StoreSettings[]
-  auditEvents AuditEvent[]
-  productCategories ProductCategory[]
-  materialCategories MaterialCategory[]
-  banners Banner[]
+  id                  String               @id @default(uuid())
+  slug                String               @unique
+  name                String
+  stores              Store[]
+  materials           Material[]
+  suppliers           Supplier[]
+  products            Product[]
+  orders              Order[]
+  purchases           PurchaseOrder[]
+  samples             Sample[]
+  samplePlans         SamplePlan[]
+  members             TenantMember[]
+  customers           Customer[]
+  recipients          Recipient[]
+  settings            StoreSettings[]
+  auditEvents         AuditEvent[]
+  productCategories   ProductCategory[]
+  materialCategories  MaterialCategory[]
+  banners             Banner[]
   recommendationSlots RecommendationSlot[]
-  homeSceneEntries HomeSceneEntry[]
-  packagingKits PackagingKit[]
+  homeSceneEntries    HomeSceneEntry[]
+  packagingKits       PackagingKit[]
 }
 
 model Store {
-  samplePlansByTenant SamplePlan[] @relation("SamplePlan_store_tenant_fkey")
-  purchasesByTenant PurchaseOrder[] @relation("PurchaseOrder_store_tenant_fkey")
-  ordersByTenant Order[] @relation("Order_store_tenant_fkey")
-  id String @id @default(uuid())
-  tenantId String
-  code String
-  name String
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  locations InventoryLocation[]
-  orders Order[]
-  purchases PurchaseOrder[]
-  batches InventoryBatch[]
-  receipts GoodsReceipt[]
-  samplePlans SamplePlan[]
-  members StoreMember[]
-  stocktakes Stocktake[]
-  losses LossRecord[]
-  settings StoreSettings?
+  samplePlansByTenant SamplePlan[]        @relation("SamplePlan_store_tenant_fkey")
+  purchasesByTenant   PurchaseOrder[]     @relation("PurchaseOrder_store_tenant_fkey")
+  ordersByTenant      Order[]             @relation("Order_store_tenant_fkey")
+  id                  String              @id @default(uuid())
+  tenantId            String
+  code                String
+  name                String
+  tenant              Tenant              @relation(fields: [tenantId], references: [id])
+  locations           InventoryLocation[]
+  orders              Order[]
+  purchases           PurchaseOrder[]
+  batches             InventoryBatch[]
+  receipts            GoodsReceipt[]
+  samplePlans         SamplePlan[]
+  members             StoreMember[]
+  stocktakes          Stocktake[]
+  losses              LossRecord[]
+  settings            StoreSettings?
+
   @@unique([tenantId, code])
   @@unique([id, tenantId])
 }
 
 model InventoryLocation {
-  id String @id @default(uuid())
-  storeId String
-  code String
-  kind LocationKind
-  store Store @relation(fields: [storeId], references: [id])
-  balances BatchBalance[]
-  consumableRolls ConsumableRoll[]
-  stocktakeLines StocktakeLine[]
+  id               String           @id @default(uuid())
+  storeId          String
+  code             String
+  kind             LocationKind
+  store            Store            @relation(fields: [storeId], references: [id])
+  balances         BatchBalance[]
+  consumableRolls  ConsumableRoll[]
+  stocktakeLines   StocktakeLine[]
+  unverifiedLosses LossRecord[]     @relation("LossRecordLocation")
+
   @@unique([storeId, code])
 }
 
 model Material {
-  id String @id @default(uuid())
-  tenantId String
-  code String
-  name String
-  kind MaterialKind
-  color String?
-  grade String?
-  gradeSpecification String?
-  specification String?
-  baseUnit String
-  quantityScale Int @default(0)
-  reservePerOrder Boolean @default(true)
-  active Boolean @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  recipeLines RecipeLine[]
-  requirements OrderMaterialRequirement[]
-  orderedLines PurchaseOrderLine[]
-  receivedLines GoodsReceiptLine[]
-  batches InventoryBatch[]
-  sampleMaterials SampleMaterial[]
-  samplePlanMaterials SamplePlanMaterial[]
+  id                       String                        @id @default(uuid())
+  tenantId                 String
+  code                     String
+  name                     String
+  kind                     MaterialKind
+  color                    String?
+  grade                    String?
+  gradeSpecification       String?
+  specification            String?
+  baseUnit                 String
+  quantityScale            Int                           @default(0)
+  reservePerOrder          Boolean                       @default(true)
+  active                   Boolean                       @default(true)
+  createdAt                DateTime                      @default(now())
+  updatedAt                DateTime                      @default(now()) @updatedAt
+  tenant                   Tenant                        @relation(fields: [tenantId], references: [id])
+  unverifiedLosses         LossRecord[]                  @relation("LossRecordMaterial")
+  recipeLines              RecipeLine[]
+  requirements             OrderMaterialRequirement[]
+  orderedLines             PurchaseOrderLine[]
+  receivedLines            GoodsReceiptLine[]
+  batches                  InventoryBatch[]
+  sampleMaterials          SampleMaterial[]
+  samplePlanMaterials      SamplePlanMaterial[]
   sampleInventorySnapshots SamplePlanInventorySnapshot[]
-  sampleStepMaterials SamplePlanStepMaterial[]
-  disassemblyMaterials SampleDisassemblyMaterial[]
-  categories MaterialCategoryRelation[]
-  holdMaterials AvailabilityHoldMaterial[]
-  packagingKitLines PackagingKitLine[]
+  sampleStepMaterials      SamplePlanStepMaterial[]
+  disassemblyMaterials     SampleDisassemblyMaterial[]
+  categories               MaterialCategoryRelation[]
+  holdMaterials            AvailabilityHoldMaterial[]
+  packagingKitLines        PackagingKitLine[]
+
   @@unique([tenantId, code])
   @@unique([id, tenantId])
   @@index([tenantId, active, name])
@@ -287,1015 +333,1091 @@ model Material {
 
 model Supplier {
   purchasesByTenant PurchaseOrder[] @relation("PurchaseOrder_supplier_tenant_fkey")
-  id String @id @default(uuid())
-  tenantId String
-  code String
-  name String
-  contactName String?
-  phone String?
-  wechat String?
-  notes String?
-  active Boolean @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  purchases PurchaseOrder[]
+  id                String          @id @default(uuid())
+  tenantId          String
+  code              String
+  name              String
+  contactName       String?
+  phone             String?
+  wechat            String?
+  notes             String?
+  active            Boolean         @default(true)
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @default(now()) @updatedAt
+  tenant            Tenant          @relation(fields: [tenantId], references: [id])
+  purchases         PurchaseOrder[]
+
   @@unique([tenantId, code])
   @@unique([id, tenantId])
   @@index([tenantId, active, name])
 }
 
 model Product {
-  bannersByTenant Banner[] @relation("Banner_product_tenant_fkey")
-  id String @id @default(uuid())
-  tenantId String
-  code String
-  name String
-  active Boolean @default(false)
-  defaultSkuId String? @unique
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  skus ProductSku[]
-  defaultSku ProductSku? @relation("ProductDefaultSku", fields: [id, defaultSkuId], references: [productId, id])
-  categories ProductCategoryRelation[]
-  banners Banner[]
+  bannersByTenant     Banner[]                  @relation("Banner_product_tenant_fkey")
+  id                  String                    @id @default(uuid())
+  tenantId            String
+  code                String
+  name                String
+  active              Boolean                   @default(false)
+  defaultSkuId        String?                   @unique
+  tenant              Tenant                    @relation(fields: [tenantId], references: [id])
+  skus                ProductSku[]
+  defaultSku          ProductSku?               @relation("ProductDefaultSku", fields: [id, defaultSkuId], references: [productId, id])
+  categories          ProductCategoryRelation[]
+  banners             Banner[]
   recommendationItems RecommendationItem[]
+
   @@unique([tenantId, code])
   @@unique([id, tenantId])
   @@unique([id, defaultSkuId])
 }
 
 model ProductSku {
-  id String @id @default(uuid())
-  productId String
-  sourceSampleId String?
-  code String
-  name String
-  price Decimal @db.Decimal(14, 2)
-  estimatedConsumableCost Decimal @default(0) @db.Decimal(14, 2)
-  estimatedLaborCost Decimal @default(0) @db.Decimal(14, 2)
-  active Boolean @default(false)
-  preorderAllowed Boolean @default(false)
-  product Product @relation(fields: [productId], references: [id])
-  defaultForProduct Product? @relation("ProductDefaultSku")
-  recommendationItems RecommendationItem[]
-  sourceSample Sample? @relation(fields: [sourceSampleId], references: [id])
-  recipe Recipe?
-  orderItems OrderItem[]
-  holds AvailabilityHold[]
+  id                      String               @id @default(uuid())
+  productId               String
+  sourceSampleId          String?
+  code                    String
+  name                    String
+  price                   Decimal              @db.Decimal(14, 2)
+  estimatedConsumableCost Decimal              @default(0) @db.Decimal(14, 2)
+  estimatedLaborCost      Decimal              @default(0) @db.Decimal(14, 2)
+  active                  Boolean              @default(false)
+  preorderAllowed         Boolean              @default(false)
+  product                 Product              @relation(fields: [productId], references: [id])
+  defaultForProduct       Product?             @relation("ProductDefaultSku")
+  recommendationItems     RecommendationItem[]
+  sourceSample            Sample?              @relation(fields: [sourceSampleId], references: [id])
+  recipe                  Recipe?
+  orderItems              OrderItem[]
+  holds                   AvailabilityHold[]
+
   @@unique([productId, code])
   @@unique([productId, id])
 }
 
 model Recipe {
-  id String @id @default(uuid())
-  skuId String @unique
-  sku ProductSku @relation(fields: [skuId], references: [id])
+  id       String          @id @default(uuid())
+  skuId    String          @unique
+  sku      ProductSku      @relation(fields: [skuId], references: [id])
   versions RecipeVersion[]
 }
 
 model RecipeVersion {
-  id String @id @default(uuid())
-  recipeId String
-  versionNo Int
-  state RecipeState @default(DRAFT)
+  id          String       @id @default(uuid())
+  recipeId    String
+  versionNo   Int
+  state       RecipeState  @default(DRAFT)
   effectiveAt DateTime?
   publishedAt DateTime?
-  recipe Recipe @relation(fields: [recipeId], references: [id])
-  lines RecipeLine[]
-  orderItems OrderItem[]
+  recipe      Recipe       @relation(fields: [recipeId], references: [id])
+  lines       RecipeLine[]
+  orderItems  OrderItem[]
+
   @@unique([recipeId, versionNo])
 }
 
 model RecipeLine {
-  id String @id @default(uuid())
-  versionId String
-  materialId String
-  plannedQty Decimal @db.Decimal(14, 3)
-  toleranceQty Decimal @default(0) @db.Decimal(14, 3)
-  expectedLossRate Decimal @default(0) @db.Decimal(7, 4)
-  version RecipeVersion @relation(fields: [versionId], references: [id])
-  material Material @relation(fields: [materialId], references: [id])
+  id               String        @id @default(uuid())
+  versionId        String
+  materialId       String
+  plannedQty       Decimal       @db.Decimal(14, 3)
+  toleranceQty     Decimal       @default(0) @db.Decimal(14, 3)
+  expectedLossRate Decimal       @default(0) @db.Decimal(7, 4)
+  version          RecipeVersion @relation(fields: [versionId], references: [id])
+  material         Material      @relation(fields: [materialId], references: [id])
+
   @@index([versionId])
 }
 
 model PackagingKit {
-  id String @id @default(uuid())
-  tenantId String
-  code String
-  name String
-  notes String?
-  active Boolean @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  lines PackagingKitLine[]
+  id        String             @id @default(uuid())
+  tenantId  String
+  code      String
+  name      String
+  notes     String?
+  active    Boolean            @default(true)
+  createdAt DateTime           @default(now())
+  updatedAt DateTime           @default(now()) @updatedAt
+  tenant    Tenant             @relation(fields: [tenantId], references: [id])
+  lines     PackagingKitLine[]
+
   @@unique([tenantId, code])
   @@index([tenantId, active, name])
 }
 
 model PackagingKitLine {
-  id String @id @default(uuid())
+  id             String       @id @default(uuid())
   packagingKitId String
-  materialId String
-  quantity Decimal @db.Decimal(14, 3)
-  packagingKit PackagingKit @relation(fields: [packagingKitId], references: [id], onDelete: Cascade)
-  material Material @relation(fields: [materialId], references: [id])
+  materialId     String
+  quantity       Decimal      @db.Decimal(14, 3)
+  packagingKit   PackagingKit @relation(fields: [packagingKitId], references: [id], onDelete: Cascade)
+  material       Material     @relation(fields: [materialId], references: [id])
+
   @@unique([packagingKitId, materialId])
 }
 
 model Order {
-  storeTenant Store @relation("Order_store_tenant_fkey", fields: [storeId, tenantId], references: [id, tenantId], onDelete: NoAction, onUpdate: NoAction, map: "Order_store_tenant_fkey")
-  id String @id @default(uuid())
-  tenantId String
-  storeId String
-  number String
-  createdVia OrderEntry
-  sourceChannel String
-  commercialState CommercialState @default(DRAFT)
-  supplyState SupplyState @default(NOT_EVALUATED)
-  productionState ProductionState @default(NOT_SCHEDULED)
-  fulfillmentState FulfillmentState @default(UNPLANNED)
-  deliveryAt DateTime?
-  version Int @default(1)
-  createdAt DateTime @default(now())
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  store Store @relation(fields: [storeId], references: [id])
-  items OrderItem[]
-  holds AvailabilityHold[]
-  revisions OrderRevision[]
-  payments PaymentTransaction[]
-  refunds RefundTransaction[]
-  fulfillment Fulfillment?
-  costEntries CostEntry[]
-  costSnapshots OrderCostSnapshot[]
-  costAdjustments CostAdjustment[]
-  losses LossRecord[]
-  customerId String?
-  recipientId String?
-  buyerNameSnapshot String?
-  buyerPhoneSnapshot String?
-  recipientNameSnapshot String?
+  storeTenant            Store                @relation("Order_store_tenant_fkey", fields: [storeId, tenantId], references: [id, tenantId], onDelete: NoAction, onUpdate: NoAction, map: "Order_store_tenant_fkey")
+  id                     String               @id @default(uuid())
+  tenantId               String
+  storeId                String
+  number                 String
+  createdVia             OrderEntry
+  sourceChannel          String
+  commercialState        CommercialState      @default(DRAFT)
+  supplyState            SupplyState          @default(NOT_EVALUATED)
+  productionState        ProductionState      @default(NOT_SCHEDULED)
+  fulfillmentState       FulfillmentState     @default(UNPLANNED)
+  deliveryAt             DateTime?
+  version                Int                  @default(1)
+  createdAt              DateTime             @default(now())
+  tenant                 Tenant               @relation(fields: [tenantId], references: [id])
+  store                  Store                @relation(fields: [storeId], references: [id])
+  items                  OrderItem[]
+  holds                  AvailabilityHold[]
+  revisions              OrderRevision[]
+  payments               PaymentTransaction[]
+  refunds                RefundTransaction[]
+  fulfillment            Fulfillment?
+  costEntries            CostEntry[]
+  costSnapshots          OrderCostSnapshot[]
+  costAdjustments        CostAdjustment[]
+  losses                 LossRecord[]
+  customerId             String?
+  recipientId            String?
+  buyerNameSnapshot      String?
+  buyerPhoneSnapshot     String?
+  recipientNameSnapshot  String?
   recipientPhoneSnapshot String?
-  addressSnapshot String?
-  greetingCardSnapshot String?
-  customer Customer? @relation(fields: [customerId], references: [id])
-  recipient Recipient? @relation(fields: [recipientId], references: [id])
+  addressSnapshot        String?
+  greetingCardSnapshot   String?
+  customer               Customer?            @relation(fields: [customerId], references: [id])
+  recipient              Recipient?           @relation(fields: [recipientId], references: [id])
+
   @@unique([tenantId, number])
   @@index([storeId, deliveryAt])
 }
 
 model OrderItem {
-  id String @id @default(uuid())
-  orderId String
-  kind OrderItemKind
-  skuId String?
-  recipeVersionId String?
-  nameSnapshot String
-  quantity Int
-  unitPrice Decimal @db.Decimal(14, 2)
-  estimatedConsumableCostSnapshot Decimal @default(0) @db.Decimal(14, 2)
-  estimatedLaborCostSnapshot Decimal @default(0) @db.Decimal(14, 2)
-  order Order @relation(fields: [orderId], references: [id])
-  sku ProductSku? @relation(fields: [skuId], references: [id])
-  recipeVersion RecipeVersion? @relation(fields: [recipeVersionId], references: [id])
-  requirements OrderMaterialRequirement[]
-  tasks ProductionTask[]
+  id                              String                     @id @default(uuid())
+  orderId                         String
+  kind                            OrderItemKind
+  skuId                           String?
+  recipeVersionId                 String?
+  nameSnapshot                    String
+  quantity                        Int
+  unitPrice                       Decimal                    @db.Decimal(14, 2)
+  estimatedConsumableCostSnapshot Decimal                    @default(0) @db.Decimal(14, 2)
+  estimatedLaborCostSnapshot      Decimal                    @default(0) @db.Decimal(14, 2)
+  order                           Order                      @relation(fields: [orderId], references: [id])
+  sku                             ProductSku?                @relation(fields: [skuId], references: [id])
+  recipeVersion                   RecipeVersion?             @relation(fields: [recipeVersionId], references: [id])
+  requirements                    OrderMaterialRequirement[]
+  tasks                           ProductionTask[]
 }
 
 model OrderRevision {
-  id String @id @default(uuid())
-  orderId String
-  number Int
-  reason String?
-  createdAt DateTime @default(now())
-  order Order @relation(fields: [orderId], references: [id])
+  id           String                     @id @default(uuid())
+  orderId      String
+  number       Int
+  reason       String?
+  createdAt    DateTime                   @default(now())
+  order        Order                      @relation(fields: [orderId], references: [id])
   requirements OrderMaterialRequirement[]
+
   @@unique([orderId, number])
 }
 
 model OrderMaterialRequirement {
-  id String @id @default(uuid())
-  orderItemId String
-  revisionId String
-  materialId String
-  plannedQty Decimal @db.Decimal(14, 3)
-  needBy DateTime
-  orderItem OrderItem @relation(fields: [orderItemId], references: [id])
-  revision OrderRevision @relation(fields: [revisionId], references: [id])
-  material Material @relation(fields: [materialId], references: [id])
-  reservations InventoryReservation[]
+  id                  String                     @id @default(uuid())
+  orderItemId         String
+  revisionId          String
+  materialId          String
+  plannedQty          Decimal                    @db.Decimal(14, 3)
+  needBy              DateTime
+  orderItem           OrderItem                  @relation(fields: [orderItemId], references: [id])
+  revision            OrderRevision              @relation(fields: [revisionId], references: [id])
+  material            Material                   @relation(fields: [materialId], references: [id])
+  reservations        InventoryReservation[]
   purchaseAllocations PurchaseDemandAllocation[]
-  futureAllocations FutureSupplyAllocation[]
+  futureAllocations   FutureSupplyAllocation[]
+
   @@index([materialId, needBy])
 }
 
 model AvailabilityHold {
-  id String @id @default(uuid())
-  orderId String
-  skuId String
-  quantity Int
+  id        String                     @id @default(uuid())
+  orderId   String
+  skuId     String
+  quantity  Int
   expiresAt DateTime
-  state HoldState @default(ACTIVE)
-  order Order @relation(fields: [orderId], references: [id])
-  sku ProductSku @relation(fields: [skuId], references: [id])
+  state     HoldState                  @default(ACTIVE)
+  order     Order                      @relation(fields: [orderId], references: [id])
+  sku       ProductSku                 @relation(fields: [skuId], references: [id])
   materials AvailabilityHoldMaterial[]
+
   @@index([skuId, state, expiresAt])
 }
 
 model AvailabilityHoldMaterial {
-  id String @id @default(uuid())
-  holdId String
+  id         String           @id @default(uuid())
+  holdId     String
   materialId String
-  quantity Decimal @db.Decimal(14, 3)
-  hold AvailabilityHold @relation(fields: [holdId], references: [id])
-  material Material @relation(fields: [materialId], references: [id])
+  quantity   Decimal          @db.Decimal(14, 3)
+  hold       AvailabilityHold @relation(fields: [holdId], references: [id])
+  material   Material         @relation(fields: [materialId], references: [id])
+
   @@unique([holdId, materialId])
   @@index([materialId])
 }
 
 model PurchaseOrder {
-  supplierTenant Supplier @relation("PurchaseOrder_supplier_tenant_fkey", fields: [supplierId, tenantId], references: [id, tenantId], onDelete: NoAction, onUpdate: NoAction, map: "PurchaseOrder_supplier_tenant_fkey")
-  storeTenant Store @relation("PurchaseOrder_store_tenant_fkey", fields: [storeId, tenantId], references: [id, tenantId], onDelete: NoAction, onUpdate: NoAction, map: "PurchaseOrder_store_tenant_fkey")
-  id String @id @default(uuid())
-  tenantId String
-  storeId String
-  supplierId String
-  number String
-  state PurchaseState @default(DRAFT)
-  expectedAt DateTime?
-  orderedAt DateTime?
-  cancelledAt DateTime?
+  supplierTenant     Supplier            @relation("PurchaseOrder_supplier_tenant_fkey", fields: [supplierId, tenantId], references: [id, tenantId], onDelete: NoAction, onUpdate: NoAction, map: "PurchaseOrder_supplier_tenant_fkey")
+  storeTenant        Store               @relation("PurchaseOrder_store_tenant_fkey", fields: [storeId, tenantId], references: [id, tenantId], onDelete: NoAction, onUpdate: NoAction, map: "PurchaseOrder_store_tenant_fkey")
+  id                 String              @id @default(uuid())
+  tenantId           String
+  storeId            String
+  supplierId         String
+  number             String
+  state              PurchaseState       @default(DRAFT)
+  expectedAt         DateTime?
+  orderedAt          DateTime?
+  cancelledAt        DateTime?
   cancellationReason String?
-  freightCost Decimal @default(0) @db.Decimal(14, 2)
-  packagingCost Decimal @default(0) @db.Decimal(14, 2)
-  otherCost Decimal @default(0) @db.Decimal(14, 2)
-  notes String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  store Store @relation(fields: [storeId], references: [id])
-  supplier Supplier @relation(fields: [supplierId], references: [id])
-  lines PurchaseOrderLine[]
-  receipts GoodsReceipt[]
+  freightCost        Decimal             @default(0) @db.Decimal(14, 2)
+  packagingCost      Decimal             @default(0) @db.Decimal(14, 2)
+  otherCost          Decimal             @default(0) @db.Decimal(14, 2)
+  notes              String?
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now()) @updatedAt
+  tenant             Tenant              @relation(fields: [tenantId], references: [id])
+  store              Store               @relation(fields: [storeId], references: [id])
+  supplier           Supplier            @relation(fields: [supplierId], references: [id])
+  lines              PurchaseOrderLine[]
+  receipts           GoodsReceipt[]
+
   @@unique([tenantId, number])
   @@index([tenantId, storeId, createdAt(sort: Desc)])
 }
 
 model PurchaseOrderLine {
-  id String @id @default(uuid())
-  purchaseOrderId String
-  materialId String
-  orderedQty Decimal @db.Decimal(14, 3)
-  purchaseUnit String
-  expectedBaseQty Decimal? @db.Decimal(14, 3)
-  unitPrice Decimal @db.Decimal(14, 4)
+  id                  String                     @id @default(uuid())
+  purchaseOrderId     String
+  materialId          String
+  orderedQty          Decimal                    @db.Decimal(14, 3)
+  purchaseUnit        String
+  expectedBaseQty     Decimal?                   @db.Decimal(14, 3)
+  unitPrice           Decimal                    @db.Decimal(14, 4)
   supplierConfirmedAt DateTime?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now()) @updatedAt
-  purchaseOrder PurchaseOrder @relation(fields: [purchaseOrderId], references: [id])
-  material Material @relation(fields: [materialId], references: [id])
-  allocations PurchaseDemandAllocation[]
-  futureAllocations FutureSupplyAllocation[]
-  receiptLines GoodsReceiptLine[]
+  relationKind        PurchaseLineRelationKind   @default(ORIGINAL)
+  sourceLineId        String?
+  relationKey         String?                    @unique
+  createdAt           DateTime                   @default(now())
+  updatedAt           DateTime                   @default(now()) @updatedAt
+  purchaseOrder       PurchaseOrder              @relation(fields: [purchaseOrderId], references: [id])
+  material            Material                   @relation(fields: [materialId], references: [id])
+  allocations         PurchaseDemandAllocation[]
+  futureAllocations   FutureSupplyAllocation[]
+  receiptLines        GoodsReceiptLine[]
+  sourceLine          PurchaseOrderLine?         @relation("PurchaseLineSupplements", fields: [sourceLineId], references: [id], onDelete: Restrict)
+  supplementLines     PurchaseOrderLine[]        @relation("PurchaseLineSupplements")
+
   @@index([purchaseOrderId, createdAt])
+  @@index([sourceLineId, relationKind])
 }
 
 model FutureSupplyAllocation {
-  id String @id @default(uuid())
+  id             String                   @id @default(uuid())
   purchaseLineId String
-  requirementId String
-  quantity Decimal @db.Decimal(14, 3)
-  expectedAt DateTime
-  purchaseLine PurchaseOrderLine @relation(fields: [purchaseLineId], references: [id])
-  requirement OrderMaterialRequirement @relation(fields: [requirementId], references: [id])
+  requirementId  String
+  quantity       Decimal                  @db.Decimal(14, 3)
+  expectedAt     DateTime
+  purchaseLine   PurchaseOrderLine        @relation(fields: [purchaseLineId], references: [id])
+  requirement    OrderMaterialRequirement @relation(fields: [requirementId], references: [id])
+
   @@unique([purchaseLineId, requirementId])
 }
 
 model PurchaseDemandAllocation {
-  id String @id @default(uuid())
+  id             String                   @id @default(uuid())
   purchaseLineId String
-  requirementId String
-  allocatedQty Decimal @db.Decimal(14, 3)
-  purchaseLine PurchaseOrderLine @relation(fields: [purchaseLineId], references: [id])
-  requirement OrderMaterialRequirement @relation(fields: [requirementId], references: [id])
+  requirementId  String
+  allocatedQty   Decimal                  @db.Decimal(14, 3)
+  purchaseLine   PurchaseOrderLine        @relation(fields: [purchaseLineId], references: [id])
+  requirement    OrderMaterialRequirement @relation(fields: [requirementId], references: [id])
+
   @@unique([purchaseLineId, requirementId])
 }
 
 model GoodsReceipt {
-  id String @id @default(uuid())
+  id              String             @id @default(uuid())
   purchaseOrderId String?
-  storeId String
-  receivedAt DateTime @default(now())
+  storeId         String
+  receivedAt      DateTime           @default(now())
   emergencyReason String?
-  purchaseOrder PurchaseOrder? @relation(fields: [purchaseOrderId], references: [id])
-  store Store @relation(fields: [storeId], references: [id])
-  lines GoodsReceiptLine[]
+  purchaseOrder   PurchaseOrder?     @relation(fields: [purchaseOrderId], references: [id])
+  store           Store              @relation(fields: [storeId], references: [id])
+  lines           GoodsReceiptLine[]
 }
 
 model GoodsReceiptLine {
-  id String @id @default(uuid())
-  receiptId String
-  purchaseLineId String?
+  id                 String             @id @default(uuid())
+  receiptId          String
+  purchaseLineId     String?
   acceptedMaterialId String?
-  disposition ReceiptDisposition
-  quantity Decimal @db.Decimal(14, 3)
-  baseUnit String
-  gradeChangeReason String?
-  rejectionReason String?
-  finalUnitCost Decimal? @db.Decimal(14, 4)
-  receipt GoodsReceipt @relation(fields: [receiptId], references: [id])
-  purchaseLine PurchaseOrderLine? @relation(fields: [purchaseLineId], references: [id])
-  acceptedMaterial Material? @relation(fields: [acceptedMaterialId], references: [id])
-  batch InventoryBatch?
+  disposition        ReceiptDisposition
+  quantity           Decimal            @db.Decimal(14, 3)
+  baseUnit           String
+  gradeChangeReason  String?
+  rejectionReason    String?
+  finalUnitCost      Decimal?           @db.Decimal(14, 4)
+  receipt            GoodsReceipt       @relation(fields: [receiptId], references: [id])
+  purchaseLine       PurchaseOrderLine? @relation(fields: [purchaseLineId], references: [id])
+  acceptedMaterial   Material?          @relation(fields: [acceptedMaterialId], references: [id])
+  batch              InventoryBatch?
 }
 
 model InventoryBatch {
-  id String @id @default(uuid())
-  storeId String
-  materialId String
-  receiptLineId String? @unique
-  batchNo String
-  receivedAt DateTime @default(now())
-  usableUntil DateTime?
-  unitCost Decimal @db.Decimal(14, 4)
-  costEstimated Boolean @default(true)
-  store Store @relation(fields: [storeId], references: [id])
-  material Material @relation(fields: [materialId], references: [id])
-  receiptLine GoodsReceiptLine? @relation(fields: [receiptLineId], references: [id])
-  balances BatchBalance[]
-  reservations InventoryReservation[]
-  transactions InventoryTransaction[]
-  usages MaterialUsage[]
-  consumableRolls ConsumableRoll[]
+  id                 String                       @id @default(uuid())
+  storeId            String
+  materialId         String
+  receiptLineId      String?                      @unique
+  batchNo            String
+  receivedAt         DateTime                     @default(now())
+  usableUntil        DateTime?
+  unitCost           Decimal                      @db.Decimal(14, 4)
+  costEstimated      Boolean                      @default(true)
+  store              Store                        @relation(fields: [storeId], references: [id])
+  material           Material                     @relation(fields: [materialId], references: [id])
+  receiptLine        GoodsReceiptLine?            @relation(fields: [receiptLineId], references: [id])
+  balances           BatchBalance[]
+  reservations       InventoryReservation[]
+  transactions       InventoryTransaction[]
+  usages             MaterialUsage[]
+  consumableRolls    ConsumableRoll[]
   sampleReservations SampleInventoryReservation[]
-  stocktakeLines StocktakeLine[]
-  losses LossRecord[]
+  stocktakeLines     StocktakeLine[]
+  losses             LossRecord[]
+
   @@unique([storeId, batchNo])
 }
 
 model BatchBalance {
-  id String @id @default(uuid())
-  batchId String
+  id         String            @id @default(uuid())
+  batchId    String
   locationId String
-  onHandQty Decimal @default(0) @db.Decimal(14, 3)
-  frozenQty Decimal @default(0) @db.Decimal(14, 3)
-  batch InventoryBatch @relation(fields: [batchId], references: [id])
-  location InventoryLocation @relation(fields: [locationId], references: [id])
+  onHandQty  Decimal           @default(0) @db.Decimal(14, 3)
+  frozenQty  Decimal           @default(0) @db.Decimal(14, 3)
+  batch      InventoryBatch    @relation(fields: [batchId], references: [id])
+  location   InventoryLocation @relation(fields: [locationId], references: [id])
+
   @@unique([batchId, locationId])
 }
 
 model ConsumableRoll {
-  id String @id @default(uuid())
-  batchId String
-  locationId String
-  state ConsumableRollState @default(SEALED)
-  openedAt DateTime?
+  id          String              @id @default(uuid())
+  batchId     String
+  locationId  String
+  state       ConsumableRollState @default(SEALED)
+  openedAt    DateTime?
   exhaustedAt DateTime?
-  batch InventoryBatch @relation(fields: [batchId], references: [id])
-  location InventoryLocation @relation(fields: [locationId], references: [id])
+  batch       InventoryBatch      @relation(fields: [batchId], references: [id])
+  location    InventoryLocation   @relation(fields: [locationId], references: [id])
+
   @@index([locationId, state])
 }
 
 model InventoryReservation {
-  id String @id @default(uuid())
+  id            String                   @id @default(uuid())
   requirementId String
-  batchId String
-  quantity Decimal @db.Decimal(14, 3)
-  state ReservationState @default(ACTIVE)
-  requirement OrderMaterialRequirement @relation(fields: [requirementId], references: [id])
-  batch InventoryBatch @relation(fields: [batchId], references: [id])
+  batchId       String
+  quantity      Decimal                  @db.Decimal(14, 3)
+  state         ReservationState         @default(ACTIVE)
+  requirement   OrderMaterialRequirement @relation(fields: [requirementId], references: [id])
+  batch         InventoryBatch           @relation(fields: [batchId], references: [id])
+
   @@index([batchId, state])
 }
 
 model InventoryTransaction {
-  id String @id @default(uuid())
-  batchId String
-  kind TransactionKind
-  quantity Decimal @db.Decimal(14, 3)
+  id             String          @id @default(uuid())
+  batchId        String
+  kind           TransactionKind
+  quantity       Decimal         @db.Decimal(14, 3)
   fromLocationId String?
-  toLocationId String?
-  referenceType String
-  referenceId String
-  idempotencyKey String @unique
-  createdAt DateTime @default(now())
-  batch InventoryBatch @relation(fields: [batchId], references: [id])
+  toLocationId   String?
+  referenceType  String
+  referenceId    String
+  idempotencyKey String          @unique
+  createdAt      DateTime        @default(now())
+  batch          InventoryBatch  @relation(fields: [batchId], references: [id])
+
   @@index([batchId, createdAt])
 }
 
 model ProductionTask {
-  id String @id @default(uuid())
+  id          String          @id @default(uuid())
   orderItemId String
-  quantity Int
-  state ProductionState @default(NOT_SCHEDULED)
-  assigneeId String?
-  startedAt DateTime?
+  quantity    Int
+  state       ProductionState @default(NOT_SCHEDULED)
+  assigneeId  String?
+  startedAt   DateTime?
   completedAt DateTime?
-  orderItem OrderItem @relation(fields: [orderItemId], references: [id])
-  usages MaterialUsage[]
+  orderItem   OrderItem       @relation(fields: [orderItemId], references: [id])
+  usages      MaterialUsage[]
 }
 
 model MaterialUsage {
-  id String @id @default(uuid())
-  taskId String
-  batchId String
-  usedQty Decimal @db.Decimal(14, 3)
-  lostQty Decimal @default(0) @db.Decimal(14, 3)
-  returnedQty Decimal @default(0) @db.Decimal(14, 3)
+  id               String         @id @default(uuid())
+  taskId           String
+  batchId          String
+  usedQty          Decimal        @db.Decimal(14, 3)
+  lostQty          Decimal        @default(0) @db.Decimal(14, 3)
+  returnedQty      Decimal        @default(0) @db.Decimal(14, 3)
   differenceReason String?
-  task ProductionTask @relation(fields: [taskId], references: [id])
-  batch InventoryBatch @relation(fields: [batchId], references: [id])
+  task             ProductionTask @relation(fields: [taskId], references: [id])
+  batch            InventoryBatch @relation(fields: [batchId], references: [id])
 }
 
 // Samples are design candidates, not sellable products or order inventory.
 model Sample {
-  id String @id @default(uuid())
-  tenantId String
-  code String
-  name String
-  state SampleState @default(DRAFT)
-  imageKey String?
+  id          String           @id @default(uuid())
+  tenantId    String
+  code        String
+  name        String
+  state       SampleState      @default(DRAFT)
+  imageKey    String?
   description String?
-  priority Int @default(0)
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  sourceSkus ProductSku[]
-  materials SampleMaterial[]
-  planItems SamplePlanItem[]
-  planSteps SamplePlanStep[]
+  priority    Int              @default(0)
+  tenant      Tenant           @relation(fields: [tenantId], references: [id])
+  sourceSkus  ProductSku[]
+  materials   SampleMaterial[]
+  planItems   SamplePlanItem[]
+  planSteps   SamplePlanStep[]
+
   @@unique([tenantId, code])
 }
 
 model SampleMaterial {
-  id String @id @default(uuid())
-  sampleId String
+  id         String   @id @default(uuid())
+  sampleId   String
   materialId String
-  quantity Decimal @db.Decimal(14, 3)
-  sample Sample @relation(fields: [sampleId], references: [id])
-  material Material @relation(fields: [materialId], references: [id])
+  quantity   Decimal  @db.Decimal(14, 3)
+  sample     Sample   @relation(fields: [sampleId], references: [id])
+  material   Material @relation(fields: [materialId], references: [id])
+
   @@unique([sampleId, materialId])
 }
 
 // A draft plan is simulation only. Approval may create reservations via an explicit service action.
 model SamplePlan {
-  storeTenant Store @relation("SamplePlan_store_tenant_fkey", fields: [storeId, tenantId], references: [id, tenantId], onDelete: NoAction, onUpdate: NoAction, map: "SamplePlan_store_tenant_fkey")
-  id String @id @default(uuid())
-  tenantId String
-  storeId String
-  name String
-  state SamplePlanState @default(DRAFT)
-  inventoryEvaluatedAt DateTime?
-  estimatedPurchaseCost Decimal? @db.Decimal(14, 2)
-  estimatedSaving Decimal? @db.Decimal(14, 2)
-  approvedAt DateTime?
-  selectedRunId String?
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  store Store @relation(fields: [storeId], references: [id])
-  items SamplePlanItem[]
-  materials SamplePlanMaterial[]
-  runs SamplePlanRun[] @relation("PlanRuns")
-  executions SamplePlanExecution[]
+  storeTenant           Store                 @relation("SamplePlan_store_tenant_fkey", fields: [storeId, tenantId], references: [id, tenantId], onDelete: NoAction, onUpdate: NoAction, map: "SamplePlan_store_tenant_fkey")
+  id                    String                @id @default(uuid())
+  tenantId              String
+  storeId               String
+  name                  String
+  state                 SamplePlanState       @default(DRAFT)
+  inventoryEvaluatedAt  DateTime?
+  estimatedPurchaseCost Decimal?              @db.Decimal(14, 2)
+  estimatedSaving       Decimal?              @db.Decimal(14, 2)
+  approvedAt            DateTime?
+  selectedRunId         String?
+  tenant                Tenant                @relation(fields: [tenantId], references: [id])
+  store                 Store                 @relation(fields: [storeId], references: [id])
+  items                 SamplePlanItem[]
+  materials             SamplePlanMaterial[]
+  runs                  SamplePlanRun[]       @relation("PlanRuns")
+  executions            SamplePlanExecution[]
 }
 
 model SamplePlanItem {
-  id String @id @default(uuid())
-  planId String
-  sampleId String
-  quantity Int @default(1)
-  mandatory Boolean @default(false)
+  id             String                   @id @default(uuid())
+  planId         String
+  sampleId       String
+  quantity       Int                      @default(1)
+  mandatory      Boolean                  @default(false)
   candidateState SamplePlanCandidateState @default(OPTIONAL)
-  sequenceNo Int?
-  plan SamplePlan @relation(fields: [planId], references: [id])
-  sample Sample @relation(fields: [sampleId], references: [id])
+  sequenceNo     Int?
+  plan           SamplePlan               @relation(fields: [planId], references: [id])
+  sample         Sample                   @relation(fields: [sampleId], references: [id])
+
   @@unique([planId, sampleId])
   @@unique([planId, sequenceNo])
 }
 
 model SamplePlanMaterial {
-  id String @id @default(uuid())
-  planId String
-  materialId String
-  requiredQty Decimal @db.Decimal(14, 3)
-  fromStockQty Decimal @default(0) @db.Decimal(14, 3)
-  reusedQty Decimal @default(0) @db.Decimal(14, 3)
-  purchaseQty Decimal @default(0) @db.Decimal(14, 3)
-  expectedLossQty Decimal @default(0) @db.Decimal(14, 3)
-  plan SamplePlan @relation(fields: [planId], references: [id])
-  material Material @relation(fields: [materialId], references: [id])
+  id              String     @id @default(uuid())
+  planId          String
+  materialId      String
+  requiredQty     Decimal    @db.Decimal(14, 3)
+  fromStockQty    Decimal    @default(0) @db.Decimal(14, 3)
+  reusedQty       Decimal    @default(0) @db.Decimal(14, 3)
+  purchaseQty     Decimal    @default(0) @db.Decimal(14, 3)
+  expectedLossQty Decimal    @default(0) @db.Decimal(14, 3)
+  plan            SamplePlan @relation(fields: [planId], references: [id])
+  material        Material   @relation(fields: [materialId], references: [id])
+
   @@unique([planId, materialId])
 }
 
 // Immutable calculation result. A new calculation creates a new run.
 model SamplePlanRun {
-  id String @id @default(uuid())
-  planId String
-  runNo Int
-  calculationGroupId String
-  rank Int
-  algorithmVersion String
-  calculatedAt DateTime @default(now())
-  requestedSampleCount Int
-  lossPolicySnapshot Json
-  candidateSnapshot Json
-  inventoryBaselineAt DateTime
-  independentCost Decimal @db.Decimal(14, 2)
-  totalCost Decimal @db.Decimal(14, 2)
-  estimatedSaving Decimal @db.Decimal(14, 2)
-  reuseRate Decimal @db.Decimal(7, 4)
-  plan SamplePlan @relation("PlanRuns", fields: [planId], references: [id])
+  id                    String                        @id @default(uuid())
+  planId                String
+  runNo                 Int
+  calculationGroupId    String
+  rank                  Int
+  algorithmVersion      String
+  calculatedAt          DateTime                      @default(now())
+  requestedSampleCount  Int
+  lossPolicySnapshot    Json
+  candidateSnapshot     Json
+  inventoryBaselineAt   DateTime
+  independentCost       Decimal                       @db.Decimal(14, 2)
+  totalCost             Decimal                       @db.Decimal(14, 2)
+  estimatedSaving       Decimal                       @db.Decimal(14, 2)
+  reuseRate             Decimal                       @db.Decimal(7, 4)
+  plan                  SamplePlan                    @relation("PlanRuns", fields: [planId], references: [id])
   selectedForExecutions SamplePlanExecution[]
-  inventory SamplePlanInventorySnapshot[]
-  steps SamplePlanStep[]
+  inventory             SamplePlanInventorySnapshot[]
+  steps                 SamplePlanStep[]
+
   @@unique([planId, runNo])
   @@unique([planId, id])
   @@unique([calculationGroupId, rank])
 }
 
 model SamplePlanInventorySnapshot {
-  id String @id @default(uuid())
-  runId String
-  materialId String
-  availableQty Decimal @db.Decimal(14, 3)
-  unitCost Decimal @db.Decimal(14, 4)
+  id           String        @id @default(uuid())
+  runId        String
+  materialId   String
+  availableQty Decimal       @db.Decimal(14, 3)
+  unitCost     Decimal       @db.Decimal(14, 4)
   unitSnapshot String
-  run SamplePlanRun @relation(fields: [runId], references: [id])
-  material Material @relation(fields: [materialId], references: [id])
+  run          SamplePlanRun @relation(fields: [runId], references: [id])
+  material     Material      @relation(fields: [materialId], references: [id])
+
   @@unique([runId, materialId])
 }
 
 model SamplePlanStep {
-  id String @id @default(uuid())
-  runId String
-  sequenceNo Int
-  sampleId String
+  id                 String                    @id @default(uuid())
+  runId              String
+  sequenceNo         Int
+  sampleId           String
   sampleNameSnapshot String
-  plannedQuantity Int
-  incrementalCost Decimal @db.Decimal(14, 2)
-  run SamplePlanRun @relation(fields: [runId], references: [id])
-  sample Sample @relation(fields: [sampleId], references: [id])
-  flows SamplePlanStepMaterial[]
-  executions SamplePlanExecutionStep[]
+  plannedQuantity    Int
+  incrementalCost    Decimal                   @db.Decimal(14, 2)
+  run                SamplePlanRun             @relation(fields: [runId], references: [id])
+  sample             Sample                    @relation(fields: [sampleId], references: [id])
+  flows              SamplePlanStepMaterial[]
+  executions         SamplePlanExecutionStep[]
+
   @@unique([runId, sequenceNo])
 }
 
 model SamplePlanStepMaterial {
-  id String @id @default(uuid())
-  stepId String
-  materialId String
-  materialNameSnapshot String
-  gradeSnapshot String?
-  unitSnapshot String
-  requiredQty Decimal @db.Decimal(14, 3)
-  stockQty Decimal @default(0) @db.Decimal(14, 3)
-  reusedQty Decimal @default(0) @db.Decimal(14, 3)
-  purchaseQty Decimal @default(0) @db.Decimal(14, 3)
-  reusableAfterDisassemblyQty Decimal @default(0) @db.Decimal(14, 3)
-  lossQty Decimal @default(0) @db.Decimal(14, 3)
-  poolRemainingQty Decimal @default(0) @db.Decimal(14, 3)
-  incrementalCost Decimal @db.Decimal(14, 2)
-  step SamplePlanStep @relation(fields: [stepId], references: [id])
-  material Material @relation(fields: [materialId], references: [id])
+  id                          String         @id @default(uuid())
+  stepId                      String
+  materialId                  String
+  materialNameSnapshot        String
+  gradeSnapshot               String?
+  unitSnapshot                String
+  requiredQty                 Decimal        @db.Decimal(14, 3)
+  stockQty                    Decimal        @default(0) @db.Decimal(14, 3)
+  reusedQty                   Decimal        @default(0) @db.Decimal(14, 3)
+  purchaseQty                 Decimal        @default(0) @db.Decimal(14, 3)
+  reusableAfterDisassemblyQty Decimal        @default(0) @db.Decimal(14, 3)
+  lossQty                     Decimal        @default(0) @db.Decimal(14, 3)
+  poolRemainingQty            Decimal        @default(0) @db.Decimal(14, 3)
+  incrementalCost             Decimal        @db.Decimal(14, 2)
+  step                        SamplePlanStep @relation(fields: [stepId], references: [id])
+  material                    Material       @relation(fields: [materialId], references: [id])
+
   @@unique([stepId, materialId])
 }
 
 model SamplePlanExecution {
-  id String @id @default(uuid())
-  planId String
+  id            String                       @id @default(uuid())
+  planId        String
   selectedRunId String
-  startedAt DateTime @default(now())
-  completedAt DateTime?
-  plan SamplePlan @relation(fields: [planId], references: [id])
-  selectedRun SamplePlanRun @relation(fields: [planId, selectedRunId], references: [planId, id])
-  steps SamplePlanExecutionStep[]
-  reservations SampleInventoryReservation[]
+  startedAt     DateTime                     @default(now())
+  completedAt   DateTime?
+  plan          SamplePlan                   @relation(fields: [planId], references: [id])
+  selectedRun   SamplePlanRun                @relation(fields: [planId, selectedRunId], references: [planId, id])
+  steps         SamplePlanExecutionStep[]
+  reservations  SampleInventoryReservation[]
 }
 
 model SamplePlanExecutionStep {
-  id String @id @default(uuid())
-  executionId String
-  plannedStepId String
+  id                     String                      @id @default(uuid())
+  executionId            String
+  plannedStepId          String
   actualReusableSnapshot Json?
-  recalculatedAt DateTime?
-  completedAt DateTime?
-  execution SamplePlanExecution @relation(fields: [executionId], references: [id])
-  plannedStep SamplePlanStep @relation(fields: [plannedStepId], references: [id])
-  disassembledMaterials SampleDisassemblyMaterial[]
+  recalculatedAt         DateTime?
+  completedAt            DateTime?
+  execution              SamplePlanExecution         @relation(fields: [executionId], references: [id])
+  plannedStep            SamplePlanStep              @relation(fields: [plannedStepId], references: [id])
+  disassembledMaterials  SampleDisassemblyMaterial[]
+
   @@unique([executionId, plannedStepId])
 }
 
 model SampleDisassemblyMaterial {
-  id String @id @default(uuid())
+  id              String                  @id @default(uuid())
   executionStepId String
-  materialId String
-  sourceBatchId String?
-  usableQty Decimal @db.Decimal(14, 3)
-  rejectedQty Decimal @default(0) @db.Decimal(14, 3)
-  usableUntil DateTime?
-  checkedAt DateTime @default(now())
-  checkedById String?
-  executionStep SamplePlanExecutionStep @relation(fields: [executionStepId], references: [id])
-  material Material @relation(fields: [materialId], references: [id])
+  materialId      String
+  sourceBatchId   String?
+  usableQty       Decimal                 @db.Decimal(14, 3)
+  rejectedQty     Decimal                 @default(0) @db.Decimal(14, 3)
+  usableUntil     DateTime?
+  checkedAt       DateTime                @default(now())
+  checkedById     String?
+  executionStep   SamplePlanExecutionStep @relation(fields: [executionStepId], references: [id])
+  material        Material                @relation(fields: [materialId], references: [id])
+
   @@index([executionStepId, materialId])
 }
 
 model SampleInventoryReservation {
-  id String @id @default(uuid())
+  id          String              @id @default(uuid())
   executionId String
-  batchId String
-  quantity Decimal @db.Decimal(14, 3)
-  state ReservationState @default(ACTIVE)
-  execution SamplePlanExecution @relation(fields: [executionId], references: [id])
-  batch InventoryBatch @relation(fields: [batchId], references: [id])
+  batchId     String
+  quantity    Decimal             @db.Decimal(14, 3)
+  state       ReservationState    @default(ACTIVE)
+  execution   SamplePlanExecution @relation(fields: [executionId], references: [id])
+  batch       InventoryBatch      @relation(fields: [batchId], references: [id])
+
   @@index([batchId, state])
 }
 
 model PaymentTransaction {
-  id String @id @default(uuid())
-  orderId String
-  method PaymentKind
-  state PaymentState @default(PENDING)
-  amount Decimal @db.Decimal(14, 2)
+  id                String              @id @default(uuid())
+  orderId           String
+  method            PaymentKind
+  state             PaymentState        @default(PENDING)
+  amount            Decimal             @db.Decimal(14, 2)
   externalReference String?
-  idempotencyKey String @unique
-  confirmedById String?
-  confirmedAt DateTime?
-  createdAt DateTime @default(now())
-  order Order @relation(fields: [orderId], references: [id])
-  refunds RefundTransaction[]
+  idempotencyKey    String              @unique
+  confirmedById     String?
+  confirmedAt       DateTime?
+  createdAt         DateTime            @default(now())
+  order             Order               @relation(fields: [orderId], references: [id])
+  refunds           RefundTransaction[]
+
   @@index([orderId, state])
 }
 
 model RefundTransaction {
-  id String @id @default(uuid())
-  orderId String
-  paymentId String
-  state RefundState @default(REQUESTED)
-  amount Decimal @db.Decimal(14, 2)
-  reason String
+  id                String             @id @default(uuid())
+  orderId           String
+  paymentId         String
+  state             RefundState        @default(REQUESTED)
+  amount            Decimal            @db.Decimal(14, 2)
+  reason            String
   externalReference String?
-  idempotencyKey String @unique
-  completedAt DateTime?
-  createdAt DateTime @default(now())
-  order Order @relation(fields: [orderId], references: [id])
-  payment PaymentTransaction @relation(fields: [paymentId], references: [id])
+  idempotencyKey    String             @unique
+  completedAt       DateTime?
+  createdAt         DateTime           @default(now())
+  order             Order              @relation(fields: [orderId], references: [id])
+  payment           PaymentTransaction @relation(fields: [paymentId], references: [id])
+
   @@index([orderId, createdAt])
 }
 
 model Fulfillment {
-  id String @id @default(uuid())
-  orderId String @unique
-  kind FulfillmentKind
-  scheduledAt DateTime?
-  recipientName String?
-  recipientPhone String?
-  addressSnapshot String?
-  pickupCode String?
-  handedOverAt DateTime?
-  handedOverById String?
-  deliveryFeeCharged Decimal @default(0) @db.Decimal(14, 2)
-  deliveryCostEstimated Decimal? @db.Decimal(14, 2)
-  deliveryCostActual Decimal? @db.Decimal(14, 2)
-  order Order @relation(fields: [orderId], references: [id])
-  attempts DeliveryAttempt[]
+  id                    String            @id @default(uuid())
+  orderId               String            @unique
+  kind                  FulfillmentKind
+  scheduledAt           DateTime?
+  recipientName         String?
+  recipientPhone        String?
+  addressSnapshot       String?
+  pickupCode            String?
+  handedOverAt          DateTime?
+  handedOverById        String?
+  deliveryFeeCharged    Decimal           @default(0) @db.Decimal(14, 2)
+  deliveryCostEstimated Decimal?          @db.Decimal(14, 2)
+  deliveryCostActual    Decimal?          @db.Decimal(14, 2)
+  order                 Order             @relation(fields: [orderId], references: [id])
+  attempts              DeliveryAttempt[]
 }
 
 model DeliveryAttempt {
-  id String @id @default(uuid())
+  id            String               @id @default(uuid())
   fulfillmentId String
-  attemptNo Int
-  state DeliveryAttemptState @default(SCHEDULED)
-  departedAt DateTime?
-  completedAt DateTime?
+  attemptNo     Int
+  state         DeliveryAttemptState @default(SCHEDULED)
+  departedAt    DateTime?
+  completedAt   DateTime?
   failureReason String?
-  proofKey String?
-  deliveryCost Decimal? @db.Decimal(14, 2)
-  fulfillment Fulfillment @relation(fields: [fulfillmentId], references: [id])
+  proofKey      String?
+  deliveryCost  Decimal?             @db.Decimal(14, 2)
+  fulfillment   Fulfillment          @relation(fields: [fulfillmentId], references: [id])
+
   @@unique([fulfillmentId, attemptNo])
 }
 
 model CostEntry {
-  id String @id @default(uuid())
-  orderId String
-  kind CostKind
-  stage CostStage
-  amount Decimal @db.Decimal(14, 2)
-  estimated Boolean @default(false)
-  sourceType String?
-  sourceId String?
-  calculatedAt DateTime @default(now())
-  order Order @relation(fields: [orderId], references: [id])
+  id           String    @id @default(uuid())
+  orderId      String
+  kind         CostKind
+  stage        CostStage
+  amount       Decimal   @db.Decimal(14, 2)
+  estimated    Boolean   @default(false)
+  sourceType   String?
+  sourceId     String?
+  calculatedAt DateTime  @default(now())
+  order        Order     @relation(fields: [orderId], references: [id])
+
   @@index([orderId, stage, kind])
 }
 
 model OrderCostSnapshot {
-  id String @id @default(uuid())
-  orderId String
-  revisionNo Int
-  revenue Decimal @db.Decimal(14, 2)
-  materialCost Decimal @db.Decimal(14, 2)
-  packagingCost Decimal @db.Decimal(14, 2)
-  consumableCost Decimal @db.Decimal(14, 2)
-  laborCost Decimal @db.Decimal(14, 2)
-  deliveryCost Decimal @db.Decimal(14, 2)
-  platformCost Decimal @db.Decimal(14, 2)
-  attributedLossCost Decimal @db.Decimal(14, 2)
-  estimated Boolean @default(false)
-  closedAt DateTime @default(now())
-  order Order @relation(fields: [orderId], references: [id])
-  adjustments CostAdjustment[]
+  id                 String           @id @default(uuid())
+  orderId            String
+  revisionNo         Int
+  revenue            Decimal          @db.Decimal(14, 2)
+  materialCost       Decimal          @db.Decimal(14, 2)
+  packagingCost      Decimal          @db.Decimal(14, 2)
+  consumableCost     Decimal          @db.Decimal(14, 2)
+  laborCost          Decimal          @db.Decimal(14, 2)
+  deliveryCost       Decimal          @db.Decimal(14, 2)
+  platformCost       Decimal          @db.Decimal(14, 2)
+  attributedLossCost Decimal          @db.Decimal(14, 2)
+  estimated          Boolean          @default(false)
+  closedAt           DateTime         @default(now())
+  order              Order            @relation(fields: [orderId], references: [id])
+  adjustments        CostAdjustment[]
+
   @@unique([orderId, revisionNo])
 }
 
 model CostAdjustment {
-  id String @id @default(uuid())
-  orderId String
-  snapshotId String
-  kind CostKind
-  amountDelta Decimal @db.Decimal(14, 2)
-  reason String
-  sourceType String?
-  sourceId String?
-  createdAt DateTime @default(now())
-  order Order @relation(fields: [orderId], references: [id])
-  snapshot OrderCostSnapshot @relation(fields: [snapshotId], references: [id])
+  id          String            @id @default(uuid())
+  orderId     String
+  snapshotId  String
+  kind        CostKind
+  amountDelta Decimal           @db.Decimal(14, 2)
+  reason      String
+  sourceType  String?
+  sourceId    String?
+  createdAt   DateTime          @default(now())
+  order       Order             @relation(fields: [orderId], references: [id])
+  snapshot    OrderCostSnapshot @relation(fields: [snapshotId], references: [id])
+
   @@index([orderId, createdAt])
 }
 
 model StaffUser {
-  id String @id @default(uuid())
-  username String @unique
-  passwordHash String
-  displayName String?
-  active Boolean @default(true)
-  mustChangePassword Boolean @default(false)
-  tenantMembers TenantMember[]
-  storeMembers StoreMember[]
+  id                 String         @id @default(uuid())
+  username           String         @unique
+  passwordHash       String
+  displayName        String?
+  active             Boolean        @default(true)
+  mustChangePassword Boolean        @default(false)
+  tenantMembers      TenantMember[]
+  storeMembers       StoreMember[]
 }
 
 model TenantMember {
-  id String @id @default(uuid())
-  tenantId String
+  id          String    @id @default(uuid())
+  tenantId    String
   staffUserId String
-  roles String[] @default([])
-  active Boolean @default(true)
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  staffUser StaffUser @relation(fields: [staffUserId], references: [id])
+  roles       String[]  @default([])
+  active      Boolean   @default(true)
+  tenant      Tenant    @relation(fields: [tenantId], references: [id])
+  staffUser   StaffUser @relation(fields: [staffUserId], references: [id])
+
   @@unique([tenantId, staffUserId])
 }
 
 model StoreMember {
-  id String @id @default(uuid())
-  storeId String
+  id          String    @id @default(uuid())
+  storeId     String
   staffUserId String
-  roles String[] @default([])
-  active Boolean @default(true)
-  store Store @relation(fields: [storeId], references: [id])
-  staffUser StaffUser @relation(fields: [staffUserId], references: [id])
+  roles       String[]  @default([])
+  active      Boolean   @default(true)
+  store       Store     @relation(fields: [storeId], references: [id])
+  staffUser   StaffUser @relation(fields: [staffUserId], references: [id])
+
   @@unique([storeId, staffUserId])
 }
 
 model MiniProgramIdentity {
-  id String @id @default(uuid())
-  tenantId String
-  openId String
-  unionId String?
+  id         String    @id @default(uuid())
+  tenantId   String
+  openId     String
+  unionId    String?
   customerId String?
-  customer Customer? @relation(fields: [customerId], references: [id])
+  customer   Customer? @relation(fields: [customerId], references: [id])
+
   @@unique([tenantId, openId])
 }
 
 model Customer {
-  id String @id @default(uuid())
-  tenantId String
-  name String?
-  phone String?
-  sourceChannel String?
-  note String?
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  identities MiniProgramIdentity[]
+  id                 String                      @id @default(uuid())
+  tenantId           String
+  name               String?
+  phone              String?
+  sourceChannel      String?
+  note               String?
+  tenant             Tenant                      @relation(fields: [tenantId], references: [id])
+  identities         MiniProgramIdentity[]
   recipientRelations CustomerRecipientRelation[]
-  occasions GiftOccasion[]
-  reminders CustomerReminder[]
-  orders Order[]
+  occasions          GiftOccasion[]
+  reminders          CustomerReminder[]
+  orders             Order[]
+
   @@index([tenantId, phone])
 }
 
 model Recipient {
-  id String @id @default(uuid())
-  tenantId String
-  name String
-  phone String?
-  address String?
-  preferenceNote String?
-  tenant Tenant @relation(fields: [tenantId], references: [id])
+  id                String                      @id @default(uuid())
+  tenantId          String
+  name              String
+  phone             String?
+  address           String?
+  preferenceNote    String?
+  tenant            Tenant                      @relation(fields: [tenantId], references: [id])
   customerRelations CustomerRecipientRelation[]
-  occasions GiftOccasion[]
-  orders Order[]
+  occasions         GiftOccasion[]
+  orders            Order[]
 }
 
 model CustomerRecipientRelation {
-  id String @id @default(uuid())
-  customerId String
-  recipientId String
-  relationLabel String?
-  defaultRecipient Boolean @default(false)
-  customer Customer @relation(fields: [customerId], references: [id])
-  recipient Recipient @relation(fields: [recipientId], references: [id])
+  id               String    @id @default(uuid())
+  customerId       String
+  recipientId      String
+  relationLabel    String?
+  defaultRecipient Boolean   @default(false)
+  customer         Customer  @relation(fields: [customerId], references: [id])
+  recipient        Recipient @relation(fields: [recipientId], references: [id])
+
   @@unique([customerId, recipientId])
 }
 
 model GiftOccasion {
-  id String @id @default(uuid())
-  customerId String
-  recipientId String?
-  kind String
+  id            String     @id @default(uuid())
+  customerId    String
+  recipientId   String?
+  kind          String
   importantDate DateTime?
-  customer Customer @relation(fields: [customerId], references: [id])
-  recipient Recipient? @relation(fields: [recipientId], references: [id])
+  customer      Customer   @relation(fields: [customerId], references: [id])
+  recipient     Recipient? @relation(fields: [recipientId], references: [id])
 }
 
 model CustomerReminder {
-  id String @id @default(uuid())
+  id         String   @id @default(uuid())
   customerId String
-  remindAt DateTime
-  title String
-  status String @default("PENDING")
-  customer Customer @relation(fields: [customerId], references: [id])
+  remindAt   DateTime
+  title      String
+  status     String   @default("PENDING")
+  customer   Customer @relation(fields: [customerId], references: [id])
+
   @@index([customerId, remindAt])
 }
 
 model Stocktake {
-  id String @id @default(uuid())
-  storeId String
-  state StocktakeState @default(DRAFT)
-  createdAt DateTime @default(now())
-  confirmedAt DateTime?
-  store Store @relation(fields: [storeId], references: [id])
-  lines StocktakeLine[]
+  id            String          @id @default(uuid())
+  storeId       String
+  state         StocktakeState  @default(DRAFT)
+  createdAt     DateTime        @default(now())
+  confirmedAt   DateTime?
+  reviewReasons String[]        @default([])
+  submittedById String?
+  reviewedById  String?
+  reviewedAt    DateTime?
+  reviewNote    String?
+  store         Store           @relation(fields: [storeId], references: [id])
+  lines         StocktakeLine[]
 }
 
 model StocktakeLine {
-  id String @id @default(uuid())
+  id          String            @id @default(uuid())
   stocktakeId String
-  batchId String
-  locationId String
-  countedQty Decimal @db.Decimal(14, 3)
-  recordedQty Decimal @db.Decimal(14, 3)
-  reason String?
-  stocktake Stocktake @relation(fields: [stocktakeId], references: [id])
-  batch InventoryBatch @relation(fields: [batchId], references: [id])
-  location InventoryLocation @relation(fields: [locationId], references: [id])
+  batchId     String
+  locationId  String
+  countedQty  Decimal           @db.Decimal(14, 3)
+  recordedQty Decimal           @db.Decimal(14, 3)
+  reason      String?
+  stocktake   Stocktake         @relation(fields: [stocktakeId], references: [id])
+  batch       InventoryBatch    @relation(fields: [batchId], references: [id])
+  location    InventoryLocation @relation(fields: [locationId], references: [id])
+
   @@unique([stocktakeId, batchId, locationId])
 }
 
 model LossRecord {
-  id String @id @default(uuid())
-  storeId String
-  batchId String?
-  orderId String?
-  reason LossReason
-  quantity Decimal @db.Decimal(14, 3)
-  note String?
-  pendingBatchVerification Boolean @default(false)
-  occurredAt DateTime @default(now())
-  store Store @relation(fields: [storeId], references: [id])
-  batch InventoryBatch? @relation(fields: [batchId], references: [id])
-  order Order? @relation(fields: [orderId], references: [id])
+  id                       String                 @id @default(uuid())
+  storeId                  String
+  batchId                  String?
+  materialId               String?
+  locationId               String?
+  orderId                  String?
+  reason                   LossReason
+  quantity                 Decimal                @db.Decimal(14, 3)
+  note                     String?
+  pendingBatchVerification Boolean                @default(false)
+  reviewStatus             InventoryReviewStatus?
+  submittedById            String?
+  reviewedById             String?
+  reviewedAt               DateTime?
+  reviewNote               String?
+  occurredAt               DateTime               @default(now())
+  store                    Store                  @relation(fields: [storeId], references: [id])
+  batch                    InventoryBatch?        @relation(fields: [batchId], references: [id])
+  material                 Material?              @relation("LossRecordMaterial", fields: [materialId], references: [id])
+  location                 InventoryLocation?     @relation("LossRecordLocation", fields: [locationId], references: [id])
+  order                    Order?                 @relation(fields: [orderId], references: [id])
+
   @@index([storeId, occurredAt])
+  @@index([storeId, reviewStatus, occurredAt(sort: Desc)])
 }
 
 model StoreSettings {
-  id String @id @default(uuid())
-  tenantId String
-  storeId String @unique
-  deliveryConfig Json
-  capacityConfig Json
+  id                  String  @id @default(uuid())
+  tenantId            String
+  storeId             String  @unique
+  deliveryConfig      Json
+  capacityConfig      Json
   lossReviewThreshold Decimal @default(0) @db.Decimal(14, 2)
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  store Store @relation(fields: [storeId], references: [id])
+  tenant              Tenant  @relation(fields: [tenantId], references: [id])
+  store               Store   @relation(fields: [storeId], references: [id])
 }
 
 model AuditEvent {
-  id String @id @default(uuid())
-  tenantId String
-  storeId String?
-  actorStaffId String?
-  action String
-  entityType String
-  entityId String?
+  id             String   @id @default(uuid())
+  tenantId       String
+  storeId        String?
+  actorStaffId   String?
+  action         String
+  entityType     String
+  entityId       String?
   beforeSnapshot Json?
-  afterSnapshot Json?
-  occurredAt DateTime @default(now())
-  tenant Tenant @relation(fields: [tenantId], references: [id])
+  afterSnapshot  Json?
+  occurredAt     DateTime @default(now())
+  tenant         Tenant   @relation(fields: [tenantId], references: [id])
+
   @@index([tenantId, occurredAt])
 }
 
 model ProductCategory {
-  id String @id @default(uuid())
-  tenantId String
-  parentId String?
-  code String
-  name String
-  imageKey String?
-  active Boolean @default(true)
-  sortOrder Int @default(0)
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  parent ProductCategory? @relation("CategoryTree", fields: [parentId], references: [id])
-  children ProductCategory[] @relation("CategoryTree")
-  products ProductCategoryRelation[]
+  id        String                    @id @default(uuid())
+  tenantId  String
+  parentId  String?
+  code      String
+  name      String
+  imageKey  String?
+  active    Boolean                   @default(true)
+  sortOrder Int                       @default(0)
+  tenant    Tenant                    @relation(fields: [tenantId], references: [id])
+  parent    ProductCategory?          @relation("CategoryTree", fields: [parentId], references: [id])
+  children  ProductCategory[]         @relation("CategoryTree")
+  products  ProductCategoryRelation[]
+
   @@unique([tenantId, code])
   @@index([tenantId, parentId, sortOrder])
 }
 
 model ProductCategoryRelation {
-  productId String
+  productId  String
   categoryId String
-  product Product @relation(fields: [productId], references: [id])
-  category ProductCategory @relation(fields: [categoryId], references: [id])
+  product    Product         @relation(fields: [productId], references: [id])
+  category   ProductCategory @relation(fields: [categoryId], references: [id])
+
   @@id([productId, categoryId])
 }
 
 model MaterialCategory {
-  id String @id @default(uuid())
-  tenantId String
-  code String
-  name String
-  active Boolean @default(true)
-  sortOrder Int @default(0)
-  tenant Tenant @relation(fields: [tenantId], references: [id])
+  id        String                     @id @default(uuid())
+  tenantId  String
+  code      String
+  name      String
+  active    Boolean                    @default(true)
+  sortOrder Int                        @default(0)
+  tenant    Tenant                     @relation(fields: [tenantId], references: [id])
   materials MaterialCategoryRelation[]
+
   @@unique([tenantId, code])
 }
 
 model MaterialCategoryRelation {
   materialId String
   categoryId String
-  material Material @relation(fields: [materialId], references: [id])
-  category MaterialCategory @relation(fields: [categoryId], references: [id])
+  material   Material         @relation(fields: [materialId], references: [id])
+  category   MaterialCategory @relation(fields: [categoryId], references: [id])
+
   @@id([materialId, categoryId])
 }
 
 model Banner {
-  productTenant Product? @relation("Banner_product_tenant_fkey", fields: [productId, tenantId], references: [id, tenantId], onDelete: NoAction, onUpdate: NoAction, map: "Banner_product_tenant_fkey")
-  id String @id @default(uuid())
-  tenantId String
-  imageKey String
-  sortOrder Int @default(100)
-  targetKind ContentTargetKind @default(NONE)
-  targetValue String?
-  productId String?
-  active Boolean @default(true)
-  deleted Boolean @default(false)
-  startsAt DateTime?
-  endsAt DateTime?
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  product Product? @relation(fields: [productId], references: [id])
+  productTenant Product?          @relation("Banner_product_tenant_fkey", fields: [productId, tenantId], references: [id, tenantId], onDelete: NoAction, onUpdate: NoAction, map: "Banner_product_tenant_fkey")
+  id            String            @id @default(uuid())
+  tenantId      String
+  imageKey      String
+  sortOrder     Int               @default(100)
+  targetKind    ContentTargetKind @default(NONE)
+  targetValue   String?
+  productId     String?
+  active        Boolean           @default(true)
+  deleted       Boolean           @default(false)
+  startsAt      DateTime?
+  endsAt        DateTime?
+  tenant        Tenant            @relation(fields: [tenantId], references: [id])
+  product       Product?          @relation(fields: [productId], references: [id])
+
   @@index([tenantId, active, sortOrder])
 }
 
 model RecommendationSlot {
-  id String @id @default(uuid())
-  tenantId String
-  key String
-  name String
-  slotType String
-  active Boolean @default(true)
-  sortOrder Int @default(0)
-  maxItems Int @default(10)
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  items RecommendationItem[]
+  id               String               @id @default(uuid())
+  tenantId         String
+  key              String
+  name             String
+  slotType         String
+  active           Boolean              @default(true)
+  sortOrder        Int                  @default(0)
+  maxItems         Int                  @default(10)
+  tenant           Tenant               @relation(fields: [tenantId], references: [id])
+  items            RecommendationItem[]
   homeSceneEntries HomeSceneEntry[]
+
   @@unique([tenantId, key])
 }
 
 model RecommendationItem {
-  id String @id @default(uuid())
-  slotId String
-  productId String
-  skuId String?
-  titleOverride String?
+  id               String             @id @default(uuid())
+  slotId           String
+  productId        String
+  skuId            String?
+  titleOverride    String?
   imageOverrideKey String?
-  sortOrder Int @default(0)
-  active Boolean @default(true)
-  startsAt DateTime?
-  endsAt DateTime?
-  slot RecommendationSlot @relation(fields: [slotId], references: [id])
-  product Product @relation(fields: [productId], references: [id])
-  sku ProductSku? @relation(fields: [skuId], references: [id])
+  sortOrder        Int                @default(0)
+  active           Boolean            @default(true)
+  startsAt         DateTime?
+  endsAt           DateTime?
+  slot             RecommendationSlot @relation(fields: [slotId], references: [id])
+  product          Product            @relation(fields: [productId], references: [id])
+  sku              ProductSku?        @relation(fields: [skuId], references: [id])
+
   @@index([slotId, active, sortOrder])
 }
 
 model HomeSceneEntry {
-  id String @id @default(uuid())
-  tenantId String
-  title String
-  subtitle String?
-  sceneKey String
-  iconKey String
-  sortOrder Int @default(0)
-  active Boolean @default(true)
-  targetKind ContentTargetKind @default(PRODUCT_FILTER)
-  targetValue String?
+  id                   String              @id @default(uuid())
+  tenantId             String
+  title                String
+  subtitle             String?
+  sceneKey             String
+  iconKey              String
+  sortOrder            Int                 @default(0)
+  active               Boolean             @default(true)
+  targetKind           ContentTargetKind   @default(PRODUCT_FILTER)
+  targetValue          String?
   recommendationSlotId String?
-  tenant Tenant @relation(fields: [tenantId], references: [id])
-  recommendationSlot RecommendationSlot? @relation(fields: [recommendationSlotId], references: [id])
+  tenant               Tenant              @relation(fields: [tenantId], references: [id])
+  recommendationSlot   RecommendationSlot? @relation(fields: [recommendationSlotId], references: [id])
+
   @@index([tenantId, active, sortOrder])
 }

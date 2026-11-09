@@ -400,6 +400,13 @@ export type DecimalNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedDecimalNullableFilter<$PrismaModel> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
+export type EnumPurchaseLineRelationKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.PurchaseLineRelationKind | Prisma.EnumPurchaseLineRelationKindFieldRefInput<$PrismaModel>
+  in?: $Enums.PurchaseLineRelationKind[] | Prisma.ListEnumPurchaseLineRelationKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PurchaseLineRelationKind[] | Prisma.ListEnumPurchaseLineRelationKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPurchaseLineRelationKindFilter<$PrismaModel> | $Enums.PurchaseLineRelationKind
+}
+
 export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
   equals?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel> | null
   in?: runtime.Decimal[] | runtime.DecimalJsLike[] | number[] | string[] | Prisma.ListDecimalFieldRefInput<$PrismaModel> | null
@@ -414,6 +421,16 @@ export type DecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedDecimalNullableFilter<$PrismaModel>
   _min?: Prisma.NestedDecimalNullableFilter<$PrismaModel>
   _max?: Prisma.NestedDecimalNullableFilter<$PrismaModel>
+}
+
+export type EnumPurchaseLineRelationKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PurchaseLineRelationKind | Prisma.EnumPurchaseLineRelationKindFieldRefInput<$PrismaModel>
+  in?: $Enums.PurchaseLineRelationKind[] | Prisma.ListEnumPurchaseLineRelationKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PurchaseLineRelationKind[] | Prisma.ListEnumPurchaseLineRelationKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPurchaseLineRelationKindWithAggregatesFilter<$PrismaModel> | $Enums.PurchaseLineRelationKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPurchaseLineRelationKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPurchaseLineRelationKindFilter<$PrismaModel>
 }
 
 export type EnumReceiptDispositionFilter<$PrismaModel = never> = {
@@ -807,6 +824,13 @@ export type EnumLossReasonFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumLossReasonFilter<$PrismaModel> | $Enums.LossReason
 }
 
+export type EnumInventoryReviewStatusNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.InventoryReviewStatus | Prisma.EnumInventoryReviewStatusFieldRefInput<$PrismaModel> | null
+  in?: $Enums.InventoryReviewStatus[] | Prisma.ListEnumInventoryReviewStatusFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.InventoryReviewStatus[] | Prisma.ListEnumInventoryReviewStatusFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumInventoryReviewStatusNullableFilter<$PrismaModel> | $Enums.InventoryReviewStatus | null
+}
+
 export type EnumLossReasonWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.LossReason | Prisma.EnumLossReasonFieldRefInput<$PrismaModel>
   in?: $Enums.LossReason[] | Prisma.ListEnumLossReasonFieldRefInput<$PrismaModel>
@@ -815,6 +839,16 @@ export type EnumLossReasonWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumLossReasonFilter<$PrismaModel>
   _max?: Prisma.NestedEnumLossReasonFilter<$PrismaModel>
+}
+
+export type EnumInventoryReviewStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.InventoryReviewStatus | Prisma.EnumInventoryReviewStatusFieldRefInput<$PrismaModel> | null
+  in?: $Enums.InventoryReviewStatus[] | Prisma.ListEnumInventoryReviewStatusFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.InventoryReviewStatus[] | Prisma.ListEnumInventoryReviewStatusFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumInventoryReviewStatusNullableWithAggregatesFilter<$PrismaModel> | $Enums.InventoryReviewStatus | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumInventoryReviewStatusNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumInventoryReviewStatusNullableFilter<$PrismaModel>
 }
 
 export type EnumContentTargetKindFilter<$PrismaModel = never> = {
@@ -1233,6 +1267,13 @@ export type NestedDecimalNullableFilter<$PrismaModel = never> = {
   not?: Prisma.NestedDecimalNullableFilter<$PrismaModel> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
+export type NestedEnumPurchaseLineRelationKindFilter<$PrismaModel = never> = {
+  equals?: $Enums.PurchaseLineRelationKind | Prisma.EnumPurchaseLineRelationKindFieldRefInput<$PrismaModel>
+  in?: $Enums.PurchaseLineRelationKind[] | Prisma.ListEnumPurchaseLineRelationKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PurchaseLineRelationKind[] | Prisma.ListEnumPurchaseLineRelationKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPurchaseLineRelationKindFilter<$PrismaModel> | $Enums.PurchaseLineRelationKind
+}
+
 export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
   equals?: runtime.Decimal | runtime.DecimalJsLike | number | string | Prisma.DecimalFieldRefInput<$PrismaModel> | null
   in?: runtime.Decimal[] | runtime.DecimalJsLike[] | number[] | string[] | Prisma.ListDecimalFieldRefInput<$PrismaModel> | null
@@ -1247,6 +1288,16 @@ export type NestedDecimalNullableWithAggregatesFilter<$PrismaModel = never> = {
   _sum?: Prisma.NestedDecimalNullableFilter<$PrismaModel>
   _min?: Prisma.NestedDecimalNullableFilter<$PrismaModel>
   _max?: Prisma.NestedDecimalNullableFilter<$PrismaModel>
+}
+
+export type NestedEnumPurchaseLineRelationKindWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.PurchaseLineRelationKind | Prisma.EnumPurchaseLineRelationKindFieldRefInput<$PrismaModel>
+  in?: $Enums.PurchaseLineRelationKind[] | Prisma.ListEnumPurchaseLineRelationKindFieldRefInput<$PrismaModel>
+  notIn?: $Enums.PurchaseLineRelationKind[] | Prisma.ListEnumPurchaseLineRelationKindFieldRefInput<$PrismaModel>
+  not?: Prisma.NestedEnumPurchaseLineRelationKindWithAggregatesFilter<$PrismaModel> | $Enums.PurchaseLineRelationKind
+  _count?: Prisma.NestedIntFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumPurchaseLineRelationKindFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumPurchaseLineRelationKindFilter<$PrismaModel>
 }
 
 export type NestedEnumReceiptDispositionFilter<$PrismaModel = never> = {
@@ -1586,6 +1637,13 @@ export type NestedEnumLossReasonFilter<$PrismaModel = never> = {
   not?: Prisma.NestedEnumLossReasonFilter<$PrismaModel> | $Enums.LossReason
 }
 
+export type NestedEnumInventoryReviewStatusNullableFilter<$PrismaModel = never> = {
+  equals?: $Enums.InventoryReviewStatus | Prisma.EnumInventoryReviewStatusFieldRefInput<$PrismaModel> | null
+  in?: $Enums.InventoryReviewStatus[] | Prisma.ListEnumInventoryReviewStatusFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.InventoryReviewStatus[] | Prisma.ListEnumInventoryReviewStatusFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumInventoryReviewStatusNullableFilter<$PrismaModel> | $Enums.InventoryReviewStatus | null
+}
+
 export type NestedEnumLossReasonWithAggregatesFilter<$PrismaModel = never> = {
   equals?: $Enums.LossReason | Prisma.EnumLossReasonFieldRefInput<$PrismaModel>
   in?: $Enums.LossReason[] | Prisma.ListEnumLossReasonFieldRefInput<$PrismaModel>
@@ -1594,6 +1652,16 @@ export type NestedEnumLossReasonWithAggregatesFilter<$PrismaModel = never> = {
   _count?: Prisma.NestedIntFilter<$PrismaModel>
   _min?: Prisma.NestedEnumLossReasonFilter<$PrismaModel>
   _max?: Prisma.NestedEnumLossReasonFilter<$PrismaModel>
+}
+
+export type NestedEnumInventoryReviewStatusNullableWithAggregatesFilter<$PrismaModel = never> = {
+  equals?: $Enums.InventoryReviewStatus | Prisma.EnumInventoryReviewStatusFieldRefInput<$PrismaModel> | null
+  in?: $Enums.InventoryReviewStatus[] | Prisma.ListEnumInventoryReviewStatusFieldRefInput<$PrismaModel> | null
+  notIn?: $Enums.InventoryReviewStatus[] | Prisma.ListEnumInventoryReviewStatusFieldRefInput<$PrismaModel> | null
+  not?: Prisma.NestedEnumInventoryReviewStatusNullableWithAggregatesFilter<$PrismaModel> | $Enums.InventoryReviewStatus | null
+  _count?: Prisma.NestedIntNullableFilter<$PrismaModel>
+  _min?: Prisma.NestedEnumInventoryReviewStatusNullableFilter<$PrismaModel>
+  _max?: Prisma.NestedEnumInventoryReviewStatusNullableFilter<$PrismaModel>
 }
 
 export type NestedEnumContentTargetKindFilter<$PrismaModel = never> = {

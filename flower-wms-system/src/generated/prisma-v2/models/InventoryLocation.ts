@@ -178,6 +178,7 @@ export type InventoryLocationWhereInput = {
   balances?: Prisma.BatchBalanceListRelationFilter
   consumableRolls?: Prisma.ConsumableRollListRelationFilter
   stocktakeLines?: Prisma.StocktakeLineListRelationFilter
+  unverifiedLosses?: Prisma.LossRecordListRelationFilter
 }
 
 export type InventoryLocationOrderByWithRelationInput = {
@@ -189,6 +190,7 @@ export type InventoryLocationOrderByWithRelationInput = {
   balances?: Prisma.BatchBalanceOrderByRelationAggregateInput
   consumableRolls?: Prisma.ConsumableRollOrderByRelationAggregateInput
   stocktakeLines?: Prisma.StocktakeLineOrderByRelationAggregateInput
+  unverifiedLosses?: Prisma.LossRecordOrderByRelationAggregateInput
 }
 
 export type InventoryLocationWhereUniqueInput = Prisma.AtLeast<{
@@ -204,6 +206,7 @@ export type InventoryLocationWhereUniqueInput = Prisma.AtLeast<{
   balances?: Prisma.BatchBalanceListRelationFilter
   consumableRolls?: Prisma.ConsumableRollListRelationFilter
   stocktakeLines?: Prisma.StocktakeLineListRelationFilter
+  unverifiedLosses?: Prisma.LossRecordListRelationFilter
 }, "id" | "storeId_code">
 
 export type InventoryLocationOrderByWithAggregationInput = {
@@ -234,6 +237,7 @@ export type InventoryLocationCreateInput = {
   balances?: Prisma.BatchBalanceCreateNestedManyWithoutLocationInput
   consumableRolls?: Prisma.ConsumableRollCreateNestedManyWithoutLocationInput
   stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutLocationInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutLocationInput
 }
 
 export type InventoryLocationUncheckedCreateInput = {
@@ -244,6 +248,7 @@ export type InventoryLocationUncheckedCreateInput = {
   balances?: Prisma.BatchBalanceUncheckedCreateNestedManyWithoutLocationInput
   consumableRolls?: Prisma.ConsumableRollUncheckedCreateNestedManyWithoutLocationInput
   stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutLocationInput
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutLocationInput
 }
 
 export type InventoryLocationUpdateInput = {
@@ -254,6 +259,7 @@ export type InventoryLocationUpdateInput = {
   balances?: Prisma.BatchBalanceUpdateManyWithoutLocationNestedInput
   consumableRolls?: Prisma.ConsumableRollUpdateManyWithoutLocationNestedInput
   stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutLocationNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutLocationNestedInput
 }
 
 export type InventoryLocationUncheckedUpdateInput = {
@@ -264,6 +270,7 @@ export type InventoryLocationUncheckedUpdateInput = {
   balances?: Prisma.BatchBalanceUncheckedUpdateManyWithoutLocationNestedInput
   consumableRolls?: Prisma.ConsumableRollUncheckedUpdateManyWithoutLocationNestedInput
   stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutLocationNestedInput
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutLocationNestedInput
 }
 
 export type InventoryLocationCreateManyInput = {
@@ -325,6 +332,11 @@ export type InventoryLocationMinOrderByAggregateInput = {
 export type InventoryLocationScalarRelationFilter = {
   is?: Prisma.InventoryLocationWhereInput
   isNot?: Prisma.InventoryLocationWhereInput
+}
+
+export type InventoryLocationNullableScalarRelationFilter = {
+  is?: Prisma.InventoryLocationWhereInput | null
+  isNot?: Prisma.InventoryLocationWhereInput | null
 }
 
 export type InventoryLocationCreateNestedManyWithoutStoreInput = {
@@ -415,6 +427,22 @@ export type InventoryLocationUpdateOneRequiredWithoutStocktakeLinesNestedInput =
   update?: Prisma.XOR<Prisma.XOR<Prisma.InventoryLocationUpdateToOneWithWhereWithoutStocktakeLinesInput, Prisma.InventoryLocationUpdateWithoutStocktakeLinesInput>, Prisma.InventoryLocationUncheckedUpdateWithoutStocktakeLinesInput>
 }
 
+export type InventoryLocationCreateNestedOneWithoutUnverifiedLossesInput = {
+  create?: Prisma.XOR<Prisma.InventoryLocationCreateWithoutUnverifiedLossesInput, Prisma.InventoryLocationUncheckedCreateWithoutUnverifiedLossesInput>
+  connectOrCreate?: Prisma.InventoryLocationCreateOrConnectWithoutUnverifiedLossesInput
+  connect?: Prisma.InventoryLocationWhereUniqueInput
+}
+
+export type InventoryLocationUpdateOneWithoutUnverifiedLossesNestedInput = {
+  create?: Prisma.XOR<Prisma.InventoryLocationCreateWithoutUnverifiedLossesInput, Prisma.InventoryLocationUncheckedCreateWithoutUnverifiedLossesInput>
+  connectOrCreate?: Prisma.InventoryLocationCreateOrConnectWithoutUnverifiedLossesInput
+  upsert?: Prisma.InventoryLocationUpsertWithoutUnverifiedLossesInput
+  disconnect?: Prisma.InventoryLocationWhereInput | boolean
+  delete?: Prisma.InventoryLocationWhereInput | boolean
+  connect?: Prisma.InventoryLocationWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.InventoryLocationUpdateToOneWithWhereWithoutUnverifiedLossesInput, Prisma.InventoryLocationUpdateWithoutUnverifiedLossesInput>, Prisma.InventoryLocationUncheckedUpdateWithoutUnverifiedLossesInput>
+}
+
 export type InventoryLocationCreateWithoutStoreInput = {
   id?: string
   code: string
@@ -422,6 +450,7 @@ export type InventoryLocationCreateWithoutStoreInput = {
   balances?: Prisma.BatchBalanceCreateNestedManyWithoutLocationInput
   consumableRolls?: Prisma.ConsumableRollCreateNestedManyWithoutLocationInput
   stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutLocationInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutLocationInput
 }
 
 export type InventoryLocationUncheckedCreateWithoutStoreInput = {
@@ -431,6 +460,7 @@ export type InventoryLocationUncheckedCreateWithoutStoreInput = {
   balances?: Prisma.BatchBalanceUncheckedCreateNestedManyWithoutLocationInput
   consumableRolls?: Prisma.ConsumableRollUncheckedCreateNestedManyWithoutLocationInput
   stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutLocationInput
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutLocationInput
 }
 
 export type InventoryLocationCreateOrConnectWithoutStoreInput = {
@@ -476,6 +506,7 @@ export type InventoryLocationCreateWithoutBalancesInput = {
   store: Prisma.StoreCreateNestedOneWithoutLocationsInput
   consumableRolls?: Prisma.ConsumableRollCreateNestedManyWithoutLocationInput
   stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutLocationInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutLocationInput
 }
 
 export type InventoryLocationUncheckedCreateWithoutBalancesInput = {
@@ -485,6 +516,7 @@ export type InventoryLocationUncheckedCreateWithoutBalancesInput = {
   kind: $Enums.LocationKind
   consumableRolls?: Prisma.ConsumableRollUncheckedCreateNestedManyWithoutLocationInput
   stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutLocationInput
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutLocationInput
 }
 
 export type InventoryLocationCreateOrConnectWithoutBalancesInput = {
@@ -510,6 +542,7 @@ export type InventoryLocationUpdateWithoutBalancesInput = {
   store?: Prisma.StoreUpdateOneRequiredWithoutLocationsNestedInput
   consumableRolls?: Prisma.ConsumableRollUpdateManyWithoutLocationNestedInput
   stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutLocationNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutLocationNestedInput
 }
 
 export type InventoryLocationUncheckedUpdateWithoutBalancesInput = {
@@ -519,6 +552,7 @@ export type InventoryLocationUncheckedUpdateWithoutBalancesInput = {
   kind?: Prisma.EnumLocationKindFieldUpdateOperationsInput | $Enums.LocationKind
   consumableRolls?: Prisma.ConsumableRollUncheckedUpdateManyWithoutLocationNestedInput
   stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutLocationNestedInput
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutLocationNestedInput
 }
 
 export type InventoryLocationCreateWithoutConsumableRollsInput = {
@@ -528,6 +562,7 @@ export type InventoryLocationCreateWithoutConsumableRollsInput = {
   store: Prisma.StoreCreateNestedOneWithoutLocationsInput
   balances?: Prisma.BatchBalanceCreateNestedManyWithoutLocationInput
   stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutLocationInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutLocationInput
 }
 
 export type InventoryLocationUncheckedCreateWithoutConsumableRollsInput = {
@@ -537,6 +572,7 @@ export type InventoryLocationUncheckedCreateWithoutConsumableRollsInput = {
   kind: $Enums.LocationKind
   balances?: Prisma.BatchBalanceUncheckedCreateNestedManyWithoutLocationInput
   stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutLocationInput
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutLocationInput
 }
 
 export type InventoryLocationCreateOrConnectWithoutConsumableRollsInput = {
@@ -562,6 +598,7 @@ export type InventoryLocationUpdateWithoutConsumableRollsInput = {
   store?: Prisma.StoreUpdateOneRequiredWithoutLocationsNestedInput
   balances?: Prisma.BatchBalanceUpdateManyWithoutLocationNestedInput
   stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutLocationNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutLocationNestedInput
 }
 
 export type InventoryLocationUncheckedUpdateWithoutConsumableRollsInput = {
@@ -571,6 +608,7 @@ export type InventoryLocationUncheckedUpdateWithoutConsumableRollsInput = {
   kind?: Prisma.EnumLocationKindFieldUpdateOperationsInput | $Enums.LocationKind
   balances?: Prisma.BatchBalanceUncheckedUpdateManyWithoutLocationNestedInput
   stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutLocationNestedInput
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutLocationNestedInput
 }
 
 export type InventoryLocationCreateWithoutStocktakeLinesInput = {
@@ -580,6 +618,7 @@ export type InventoryLocationCreateWithoutStocktakeLinesInput = {
   store: Prisma.StoreCreateNestedOneWithoutLocationsInput
   balances?: Prisma.BatchBalanceCreateNestedManyWithoutLocationInput
   consumableRolls?: Prisma.ConsumableRollCreateNestedManyWithoutLocationInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutLocationInput
 }
 
 export type InventoryLocationUncheckedCreateWithoutStocktakeLinesInput = {
@@ -589,6 +628,7 @@ export type InventoryLocationUncheckedCreateWithoutStocktakeLinesInput = {
   kind: $Enums.LocationKind
   balances?: Prisma.BatchBalanceUncheckedCreateNestedManyWithoutLocationInput
   consumableRolls?: Prisma.ConsumableRollUncheckedCreateNestedManyWithoutLocationInput
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutLocationInput
 }
 
 export type InventoryLocationCreateOrConnectWithoutStocktakeLinesInput = {
@@ -614,6 +654,7 @@ export type InventoryLocationUpdateWithoutStocktakeLinesInput = {
   store?: Prisma.StoreUpdateOneRequiredWithoutLocationsNestedInput
   balances?: Prisma.BatchBalanceUpdateManyWithoutLocationNestedInput
   consumableRolls?: Prisma.ConsumableRollUpdateManyWithoutLocationNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutLocationNestedInput
 }
 
 export type InventoryLocationUncheckedUpdateWithoutStocktakeLinesInput = {
@@ -623,6 +664,63 @@ export type InventoryLocationUncheckedUpdateWithoutStocktakeLinesInput = {
   kind?: Prisma.EnumLocationKindFieldUpdateOperationsInput | $Enums.LocationKind
   balances?: Prisma.BatchBalanceUncheckedUpdateManyWithoutLocationNestedInput
   consumableRolls?: Prisma.ConsumableRollUncheckedUpdateManyWithoutLocationNestedInput
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutLocationNestedInput
+}
+
+export type InventoryLocationCreateWithoutUnverifiedLossesInput = {
+  id?: string
+  code: string
+  kind: $Enums.LocationKind
+  store: Prisma.StoreCreateNestedOneWithoutLocationsInput
+  balances?: Prisma.BatchBalanceCreateNestedManyWithoutLocationInput
+  consumableRolls?: Prisma.ConsumableRollCreateNestedManyWithoutLocationInput
+  stocktakeLines?: Prisma.StocktakeLineCreateNestedManyWithoutLocationInput
+}
+
+export type InventoryLocationUncheckedCreateWithoutUnverifiedLossesInput = {
+  id?: string
+  storeId: string
+  code: string
+  kind: $Enums.LocationKind
+  balances?: Prisma.BatchBalanceUncheckedCreateNestedManyWithoutLocationInput
+  consumableRolls?: Prisma.ConsumableRollUncheckedCreateNestedManyWithoutLocationInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutLocationInput
+}
+
+export type InventoryLocationCreateOrConnectWithoutUnverifiedLossesInput = {
+  where: Prisma.InventoryLocationWhereUniqueInput
+  create: Prisma.XOR<Prisma.InventoryLocationCreateWithoutUnverifiedLossesInput, Prisma.InventoryLocationUncheckedCreateWithoutUnverifiedLossesInput>
+}
+
+export type InventoryLocationUpsertWithoutUnverifiedLossesInput = {
+  update: Prisma.XOR<Prisma.InventoryLocationUpdateWithoutUnverifiedLossesInput, Prisma.InventoryLocationUncheckedUpdateWithoutUnverifiedLossesInput>
+  create: Prisma.XOR<Prisma.InventoryLocationCreateWithoutUnverifiedLossesInput, Prisma.InventoryLocationUncheckedCreateWithoutUnverifiedLossesInput>
+  where?: Prisma.InventoryLocationWhereInput
+}
+
+export type InventoryLocationUpdateToOneWithWhereWithoutUnverifiedLossesInput = {
+  where?: Prisma.InventoryLocationWhereInput
+  data: Prisma.XOR<Prisma.InventoryLocationUpdateWithoutUnverifiedLossesInput, Prisma.InventoryLocationUncheckedUpdateWithoutUnverifiedLossesInput>
+}
+
+export type InventoryLocationUpdateWithoutUnverifiedLossesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumLocationKindFieldUpdateOperationsInput | $Enums.LocationKind
+  store?: Prisma.StoreUpdateOneRequiredWithoutLocationsNestedInput
+  balances?: Prisma.BatchBalanceUpdateManyWithoutLocationNestedInput
+  consumableRolls?: Prisma.ConsumableRollUpdateManyWithoutLocationNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutLocationNestedInput
+}
+
+export type InventoryLocationUncheckedUpdateWithoutUnverifiedLossesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  storeId?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumLocationKindFieldUpdateOperationsInput | $Enums.LocationKind
+  balances?: Prisma.BatchBalanceUncheckedUpdateManyWithoutLocationNestedInput
+  consumableRolls?: Prisma.ConsumableRollUncheckedUpdateManyWithoutLocationNestedInput
+  stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutLocationNestedInput
 }
 
 export type InventoryLocationCreateManyStoreInput = {
@@ -638,6 +736,7 @@ export type InventoryLocationUpdateWithoutStoreInput = {
   balances?: Prisma.BatchBalanceUpdateManyWithoutLocationNestedInput
   consumableRolls?: Prisma.ConsumableRollUpdateManyWithoutLocationNestedInput
   stocktakeLines?: Prisma.StocktakeLineUpdateManyWithoutLocationNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutLocationNestedInput
 }
 
 export type InventoryLocationUncheckedUpdateWithoutStoreInput = {
@@ -647,6 +746,7 @@ export type InventoryLocationUncheckedUpdateWithoutStoreInput = {
   balances?: Prisma.BatchBalanceUncheckedUpdateManyWithoutLocationNestedInput
   consumableRolls?: Prisma.ConsumableRollUncheckedUpdateManyWithoutLocationNestedInput
   stocktakeLines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutLocationNestedInput
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutLocationNestedInput
 }
 
 export type InventoryLocationUncheckedUpdateManyWithoutStoreInput = {
@@ -664,12 +764,14 @@ export type InventoryLocationCountOutputType = {
   balances: number
   consumableRolls: number
   stocktakeLines: number
+  unverifiedLosses: number
 }
 
 export type InventoryLocationCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   balances?: boolean | InventoryLocationCountOutputTypeCountBalancesArgs
   consumableRolls?: boolean | InventoryLocationCountOutputTypeCountConsumableRollsArgs
   stocktakeLines?: boolean | InventoryLocationCountOutputTypeCountStocktakeLinesArgs
+  unverifiedLosses?: boolean | InventoryLocationCountOutputTypeCountUnverifiedLossesArgs
 }
 
 /**
@@ -703,6 +805,13 @@ export type InventoryLocationCountOutputTypeCountStocktakeLinesArgs<ExtArgs exte
   where?: Prisma.StocktakeLineWhereInput
 }
 
+/**
+ * InventoryLocationCountOutputType without action
+ */
+export type InventoryLocationCountOutputTypeCountUnverifiedLossesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LossRecordWhereInput
+}
+
 
 export type InventoryLocationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -713,6 +822,7 @@ export type InventoryLocationSelect<ExtArgs extends runtime.Types.Extensions.Int
   balances?: boolean | Prisma.InventoryLocation$balancesArgs<ExtArgs>
   consumableRolls?: boolean | Prisma.InventoryLocation$consumableRollsArgs<ExtArgs>
   stocktakeLines?: boolean | Prisma.InventoryLocation$stocktakeLinesArgs<ExtArgs>
+  unverifiedLosses?: boolean | Prisma.InventoryLocation$unverifiedLossesArgs<ExtArgs>
   _count?: boolean | Prisma.InventoryLocationCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["inventoryLocation"]>
 
@@ -745,6 +855,7 @@ export type InventoryLocationInclude<ExtArgs extends runtime.Types.Extensions.In
   balances?: boolean | Prisma.InventoryLocation$balancesArgs<ExtArgs>
   consumableRolls?: boolean | Prisma.InventoryLocation$consumableRollsArgs<ExtArgs>
   stocktakeLines?: boolean | Prisma.InventoryLocation$stocktakeLinesArgs<ExtArgs>
+  unverifiedLosses?: boolean | Prisma.InventoryLocation$unverifiedLossesArgs<ExtArgs>
   _count?: boolean | Prisma.InventoryLocationCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type InventoryLocationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -761,6 +872,7 @@ export type $InventoryLocationPayload<ExtArgs extends runtime.Types.Extensions.I
     balances: Prisma.$BatchBalancePayload<ExtArgs>[]
     consumableRolls: Prisma.$ConsumableRollPayload<ExtArgs>[]
     stocktakeLines: Prisma.$StocktakeLinePayload<ExtArgs>[]
+    unverifiedLosses: Prisma.$LossRecordPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1165,6 +1277,7 @@ export interface Prisma__InventoryLocationClient<T, Null = never, ExtArgs extend
   balances<T extends Prisma.InventoryLocation$balancesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InventoryLocation$balancesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BatchBalancePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   consumableRolls<T extends Prisma.InventoryLocation$consumableRollsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InventoryLocation$consumableRollsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ConsumableRollPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   stocktakeLines<T extends Prisma.InventoryLocation$stocktakeLinesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InventoryLocation$stocktakeLinesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$StocktakeLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  unverifiedLosses<T extends Prisma.InventoryLocation$unverifiedLossesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InventoryLocation$unverifiedLossesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LossRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1668,6 +1781,30 @@ export type InventoryLocation$stocktakeLinesArgs<ExtArgs extends runtime.Types.E
   take?: number
   skip?: number
   distinct?: Prisma.StocktakeLineScalarFieldEnum | Prisma.StocktakeLineScalarFieldEnum[]
+}
+
+/**
+ * InventoryLocation.unverifiedLosses
+ */
+export type InventoryLocation$unverifiedLossesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LossRecord
+   */
+  select?: Prisma.LossRecordSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LossRecord
+   */
+  omit?: Prisma.LossRecordOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LossRecordInclude<ExtArgs> | null
+  where?: Prisma.LossRecordWhereInput
+  orderBy?: Prisma.LossRecordOrderByWithRelationInput | Prisma.LossRecordOrderByWithRelationInput[]
+  cursor?: Prisma.LossRecordWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LossRecordScalarFieldEnum | Prisma.LossRecordScalarFieldEnum[]
 }
 
 /**

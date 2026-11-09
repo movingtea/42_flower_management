@@ -1,5 +1,6 @@
 import { config } from "dotenv";
 import assert from "node:assert/strict";
+import { auditRollbackError, failAfterAudit } from "./test-audit-rollback";
 import { resolve } from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
@@ -121,6 +122,7 @@ async function receive(
 }
 
 type RejectOptions = {
+  failAfterAudit?: boolean;
   key?: string;
   tenantId?: string;
   storeId?: string;
@@ -133,15 +135,18 @@ async function reject(
   options: RejectOptions = {},
 ) {
   assert.ok(tenantId && storeId);
-  return db.$transaction((tx) => rejectPurchaseLine(tx, {
-    tenantId: options.tenantId ?? tenantId!,
-    storeId: options.storeId ?? storeId!,
-    purchaseLineId: lineId,
-    quantity,
-    reason,
-    actorStaffId: `staff-${marker}`,
-    idempotencyKey: options.key ?? `REJECT-${marker}-${crypto.randomUUID()}`,
-  }));
+  return db.$transaction((tx) => rejectPurchaseLine(
+    options.failAfterAudit ? failAfterAudit(tx, "PURCHASE_LINE_REJECTED") : tx,
+    {
+      tenantId: options.tenantId ?? tenantId!,
+      storeId: options.storeId ?? storeId!,
+      purchaseLineId: lineId,
+      quantity,
+      reason,
+      actorStaffId: `staff-${marker}`,
+      idempotencyKey: options.key ?? `REJECT-${marker}-${crypto.randomUUID()}`,
+    },
+  ));
 }
 
 async function lineProgress(lineId: string, expectedBaseQty: number) {
@@ -496,6 +501,23 @@ async function main() {
   assert.equal(linkedOrderAfter.productionState, linkedOrderBefore.productionState);
   assert.equal(linkedOrderAfter.fulfillmentState, linkedOrderBefore.fulfillmentState);
   assert.equal(linkedOrderAfter.version, linkedOrderBefore.version);
+
+  const rollback = await createPurchase(concurrentMaterial, 5);
+  const snapshot = async () => ({
+    receipts: await db.goodsReceipt.count({ where: { storeId: storeId! } }),
+    lines: await receiptLineCount(rollback.purchaseLineId),
+    audits: await rejectAuditCount(rollback.purchaseLineId),
+    purchase: await db.purchaseOrder.findUniqueOrThrow({ where: { id: rollback.purchaseOrderId } }),
+  });
+  const beforeRollback = await snapshot();
+  const rollbackKey = `REJECT-ROLLBACK-${marker}`;
+  await assert.rejects(
+    reject(rollback.purchaseLineId, 5, "回滚测试", { key: rollbackKey, failAfterAudit: true }),
+    { message: auditRollbackError },
+  );
+  assert.deepEqual(await snapshot(), beforeRollback);
+  await reject(rollback.purchaseLineId, 5, "回滚测试", { key: rollbackKey });
+  assert.equal(await receiptLineCount(rollback.purchaseLineId), 1);
 
   console.log("v2 reject-purchase-line tests passed");
 }

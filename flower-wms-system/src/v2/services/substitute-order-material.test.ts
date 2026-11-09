@@ -322,6 +322,94 @@ async function main() {
   assert.equal(Number(coverReserved._sum.quantity ?? 0), 15);
   console.log("substitute-order-material covered replacement and later revision passed");
 
+  // Partial shortage: the latest requirement plans 15 units with 5 already covered. Replacing the
+  // exact 10-unit shortage must keep the covered 5 under the original material and move only the
+  // shortage to the replacement material, so the new revision still plans and reserves 15 units.
+  const partialOriginal = await createMaterial("partial-original");
+  const partialOriginalBatch = await addBatch(partialOriginal.id, 5);
+  const partialReplacement = await createMaterial("partial-replacement");
+  const partialReplacementBatch = await addBatch(partialReplacement.id, 100);
+  const partialSku = await createSku("partial", [{ materialId: partialOriginal.id, plannedQty: 5 }]);
+  const partialOrder = await createPendingOrder(partialSku.skuId, 3);
+  assert.equal(partialOrder.covered, false);
+  assert.equal(partialOrder.totalShortage, 10);
+
+  const partialBefore = await loadOrder(partialOrder.orderId);
+  const partialTarget = latestRequirements(partialBefore).requirements
+    .find((requirement) => requirement.materialId === partialOriginal.id);
+  assert.ok(partialTarget);
+  assert.equal(Number(partialTarget.plannedQty), 15);
+  assert.equal(requirementActiveTotal(partialTarget), 5);
+
+  const partialResult = await substituteOrderMaterial(db, baseSubstitution(
+    partialOrder.orderId, partialTarget.id, partialReplacement.id, 10,
+  ));
+  assert.equal(partialResult.covered, true);
+  assert.equal(partialResult.totalShortage, 0);
+  assert.equal(partialResult.totalReserved, 15);
+  assert.equal(partialResult.plannedQty, 10);
+  assert.equal(partialResult.materialId, partialReplacement.id);
+  assert.equal(partialResult.materialCode, partialReplacement.code);
+
+  const partialAfter = await loadOrder(partialOrder.orderId);
+  assert.equal(partialAfter.version, 2);
+  assert.equal(partialAfter.revisions.length, 2);
+  assert.equal(partialAfter.commercialState, CommercialState.CONFIRMED);
+  assert.equal(partialAfter.supplyState, SupplyState.ON_HAND_COVERED);
+  assert.equal(partialAfter.productionState, ProductionState.READY);
+  assert.equal(activeTotal(partialAfter), 15);
+
+  const partialLatest = latestRequirements(partialAfter);
+  assert.equal(partialLatest.requirements.length, 2);
+  assert.equal(
+    partialLatest.requirements.reduce((sum, requirement) => sum + Number(requirement.plannedQty), 0),
+    15,
+  );
+  const partialPreserved = partialLatest.requirements
+    .find((requirement) => requirement.materialId === partialOriginal.id);
+  const partialReplacementRequirement = partialLatest.requirements
+    .find((requirement) => requirement.materialId === partialReplacement.id);
+  assert.ok(partialPreserved);
+  assert.ok(partialReplacementRequirement);
+  assert.equal(Number(partialPreserved.plannedQty), 5);
+  assert.equal(requirementActiveTotal(partialPreserved), 5);
+  assert.equal(Number(partialReplacementRequirement.plannedQty), 10);
+  assert.equal(requirementActiveTotal(partialReplacementRequirement), 10);
+  assert.equal(partialReplacementRequirement.id, partialResult.requirementId);
+
+  const partialOldRequirement = partialAfter.items[0].requirements
+    .find((requirement) => requirement.id === partialTarget.id);
+  assert.ok(partialOldRequirement);
+  assert.equal(Number(partialOldRequirement.plannedQty), 15);
+  assert.equal(partialOldRequirement.materialId, partialOriginal.id);
+  assert.ok(partialOldRequirement.reservations.every(
+    (reservation) => reservation.state === ReservationState.RELEASED,
+  ));
+  const partialOriginalReserved = await db.inventoryReservation.aggregate({
+    where: { batchId: partialOriginalBatch, state: ReservationState.ACTIVE },
+    _sum: { quantity: true },
+  });
+  assert.equal(Number(partialOriginalReserved._sum.quantity ?? 0), 5);
+  const partialReplacementReserved = await db.inventoryReservation.aggregate({
+    where: { batchId: partialReplacementBatch, state: ReservationState.ACTIVE },
+    _sum: { quantity: true },
+  });
+  assert.equal(Number(partialReplacementReserved._sum.quantity ?? 0), 10);
+
+  const partialAudit = await db.auditEvent.findFirstOrThrow({
+    where: { entityId: partialOrder.orderId, action: "ORDER_MATERIAL_SUBSTITUTED" },
+  });
+  const partialBeforeSnapshot = partialAudit.beforeSnapshot as unknown as Record<string, unknown>;
+  const partialAfterSnapshot = partialAudit.afterSnapshot as unknown as Record<string, unknown>;
+  assert.equal(partialBeforeSnapshot.plannedQty, 15);
+  assert.equal(partialBeforeSnapshot.reservedQty, 5);
+  assert.equal(partialBeforeSnapshot.shortage, 10);
+  assert.equal(partialAfterSnapshot.requirementId, partialReplacementRequirement.id);
+  assert.equal(partialAfterSnapshot.preservedRequirementId, partialPreserved.id);
+  assert.equal(partialAfterSnapshot.preservedPlannedQty, 5);
+  assert.equal(partialAfterSnapshot.plannedQty, 10);
+  console.log("substitute-order-material partial shortage preservation passed");
+
   // Insufficient replacement stock is never overridable, even with explicit customer consent.
   // The failed transaction must leave the old revision, reservations and allocation untouched.
   const shortOriginal = await createMaterial("short-original", { baseUnit: "支", quantityScale: 0 });
@@ -366,6 +454,19 @@ async function main() {
   });
 
   const shortActiveBefore = activeTotal(beforeShort);
+  await assert.rejects(
+    substituteOrderMaterial(db, baseSubstitution(
+      shortOrder.orderId, shortTarget.id, shortReplacement.id, 6,
+    )),
+    /替换数量必须等于当前缺口：当前缺口为 10支，本次提交为 6支/,
+  );
+  await assert.rejects(
+    substituteOrderMaterial(db, baseSubstitution(
+      shortOrder.orderId, shortTarget.id, shortReplacement.id, 11,
+    )),
+    /替换数量必须等于当前缺口：当前缺口为 10支，本次提交为 11支/,
+  );
+  assert.equal((await loadOrder(shortOrder.orderId)).revisions.length, 1);
   await assert.rejects(
     substituteOrderMaterial(db, {
       ...baseSubstitution(shortOrder.orderId, shortTarget.id, shortReplacement.id, 10),
@@ -612,7 +713,7 @@ async function main() {
   const rollbackActiveBefore = activeTotal(rollbackBefore);
   await assert.rejects(
     substituteOrderMaterial(db, baseSubstitution(
-      rollbackOrder.orderId, rollbackTarget.id, rollbackReplacement.id, 5,
+      rollbackOrder.orderId, rollbackTarget.id, rollbackReplacement.id, 2,
     )),
     /精度|base unit/,
   );

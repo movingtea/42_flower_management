@@ -2,10 +2,13 @@
 title: ADR-002 V2 数据库、迁移与恢复
 type: adr
 module: database
-status: under-review
-version: 2
+status: approved
+version: 3
 owner: engineering
 updated: 2026-11-09
+approved_by: 项目用户
+approved_on: 2026-11-09
+approval_scope: "批准 E0 的 V2 数据库迁移策略。生产备份和恢复参数在正式发布前另行确认。"
 sources:
   - "flower-wms-system/src/v2/db.ts"
   - "flower-wms-system/prisma.v2.config.ts"

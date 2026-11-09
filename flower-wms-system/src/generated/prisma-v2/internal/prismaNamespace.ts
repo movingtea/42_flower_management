@@ -6187,6 +6187,9 @@ export const PurchaseOrderLineScalarFieldEnum = {
   expectedBaseQty: 'expectedBaseQty',
   unitPrice: 'unitPrice',
   supplierConfirmedAt: 'supplierConfirmedAt',
+  relationKind: 'relationKind',
+  sourceLineId: 'sourceLineId',
+  relationKey: 'relationKey',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -6737,7 +6740,12 @@ export const StocktakeScalarFieldEnum = {
   storeId: 'storeId',
   state: 'state',
   createdAt: 'createdAt',
-  confirmedAt: 'confirmedAt'
+  confirmedAt: 'confirmedAt',
+  reviewReasons: 'reviewReasons',
+  submittedById: 'submittedById',
+  reviewedById: 'reviewedById',
+  reviewedAt: 'reviewedAt',
+  reviewNote: 'reviewNote'
 } as const
 
 export type StocktakeScalarFieldEnum = (typeof StocktakeScalarFieldEnum)[keyof typeof StocktakeScalarFieldEnum]
@@ -6760,11 +6768,18 @@ export const LossRecordScalarFieldEnum = {
   id: 'id',
   storeId: 'storeId',
   batchId: 'batchId',
+  materialId: 'materialId',
+  locationId: 'locationId',
   orderId: 'orderId',
   reason: 'reason',
   quantity: 'quantity',
   note: 'note',
   pendingBatchVerification: 'pendingBatchVerification',
+  reviewStatus: 'reviewStatus',
+  submittedById: 'submittedById',
+  reviewedById: 'reviewedById',
+  reviewedAt: 'reviewedAt',
+  reviewNote: 'reviewNote',
   occurredAt: 'occurredAt'
 } as const
 
@@ -7177,6 +7192,20 @@ export type ListEnumPurchaseStateFieldRefInput<$PrismaModel> = FieldRefInputType
 
 
 /**
+ * Reference to a field of type 'PurchaseLineRelationKind'
+ */
+export type EnumPurchaseLineRelationKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PurchaseLineRelationKind'>
+    
+
+
+/**
+ * Reference to a field of type 'PurchaseLineRelationKind[]'
+ */
+export type ListEnumPurchaseLineRelationKindFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PurchaseLineRelationKind[]'>
+    
+
+
+/**
  * Reference to a field of type 'ReceiptDisposition'
  */
 export type EnumReceiptDispositionFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'ReceiptDisposition'>
@@ -7411,6 +7440,20 @@ export type EnumLossReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$Prism
  * Reference to a field of type 'LossReason[]'
  */
 export type ListEnumLossReasonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LossReason[]'>
+    
+
+
+/**
+ * Reference to a field of type 'InventoryReviewStatus'
+ */
+export type EnumInventoryReviewStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InventoryReviewStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'InventoryReviewStatus[]'
+ */
+export type ListEnumInventoryReviewStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InventoryReviewStatus[]'>
     
 
 

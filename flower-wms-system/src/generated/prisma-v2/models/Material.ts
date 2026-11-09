@@ -297,6 +297,7 @@ export type MaterialWhereInput = {
   createdAt?: Prisma.DateTimeFilter<"Material"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Material"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  unverifiedLosses?: Prisma.LossRecordListRelationFilter
   recipeLines?: Prisma.RecipeLineListRelationFilter
   requirements?: Prisma.OrderMaterialRequirementListRelationFilter
   orderedLines?: Prisma.PurchaseOrderLineListRelationFilter
@@ -329,6 +330,7 @@ export type MaterialOrderByWithRelationInput = {
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
+  unverifiedLosses?: Prisma.LossRecordOrderByRelationAggregateInput
   recipeLines?: Prisma.RecipeLineOrderByRelationAggregateInput
   requirements?: Prisma.OrderMaterialRequirementOrderByRelationAggregateInput
   orderedLines?: Prisma.PurchaseOrderLineOrderByRelationAggregateInput
@@ -366,6 +368,7 @@ export type MaterialWhereUniqueInput = Prisma.AtLeast<{
   createdAt?: Prisma.DateTimeFilter<"Material"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Material"> | Date | string
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
+  unverifiedLosses?: Prisma.LossRecordListRelationFilter
   recipeLines?: Prisma.RecipeLineListRelationFilter
   requirements?: Prisma.OrderMaterialRequirementListRelationFilter
   orderedLines?: Prisma.PurchaseOrderLineListRelationFilter
@@ -441,6 +444,7 @@ export type MaterialCreateInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMaterialsInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
@@ -472,6 +476,7 @@ export type MaterialUncheckedCreateInput = {
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
@@ -503,6 +508,7 @@ export type MaterialUpdateInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialsNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
@@ -534,6 +540,7 @@ export type MaterialUncheckedUpdateInput = {
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
@@ -930,6 +937,22 @@ export type MaterialUpdateOneRequiredWithoutDisassemblyMaterialsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MaterialUpdateToOneWithWhereWithoutDisassemblyMaterialsInput, Prisma.MaterialUpdateWithoutDisassemblyMaterialsInput>, Prisma.MaterialUncheckedUpdateWithoutDisassemblyMaterialsInput>
 }
 
+export type MaterialCreateNestedOneWithoutUnverifiedLossesInput = {
+  create?: Prisma.XOR<Prisma.MaterialCreateWithoutUnverifiedLossesInput, Prisma.MaterialUncheckedCreateWithoutUnverifiedLossesInput>
+  connectOrCreate?: Prisma.MaterialCreateOrConnectWithoutUnverifiedLossesInput
+  connect?: Prisma.MaterialWhereUniqueInput
+}
+
+export type MaterialUpdateOneWithoutUnverifiedLossesNestedInput = {
+  create?: Prisma.XOR<Prisma.MaterialCreateWithoutUnverifiedLossesInput, Prisma.MaterialUncheckedCreateWithoutUnverifiedLossesInput>
+  connectOrCreate?: Prisma.MaterialCreateOrConnectWithoutUnverifiedLossesInput
+  upsert?: Prisma.MaterialUpsertWithoutUnverifiedLossesInput
+  disconnect?: Prisma.MaterialWhereInput | boolean
+  delete?: Prisma.MaterialWhereInput | boolean
+  connect?: Prisma.MaterialWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MaterialUpdateToOneWithWhereWithoutUnverifiedLossesInput, Prisma.MaterialUpdateWithoutUnverifiedLossesInput>, Prisma.MaterialUncheckedUpdateWithoutUnverifiedLossesInput>
+}
+
 export type MaterialCreateNestedOneWithoutCategoriesInput = {
   create?: Prisma.XOR<Prisma.MaterialCreateWithoutCategoriesInput, Prisma.MaterialUncheckedCreateWithoutCategoriesInput>
   connectOrCreate?: Prisma.MaterialCreateOrConnectWithoutCategoriesInput
@@ -959,6 +982,7 @@ export type MaterialCreateWithoutTenantInput = {
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
@@ -989,6 +1013,7 @@ export type MaterialUncheckedCreateWithoutTenantInput = {
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
@@ -1067,6 +1092,7 @@ export type MaterialCreateWithoutRecipeLinesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMaterialsInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
   receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
@@ -1097,6 +1123,7 @@ export type MaterialUncheckedCreateWithoutRecipeLinesInput = {
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
   receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
@@ -1143,6 +1170,7 @@ export type MaterialUpdateWithoutRecipeLinesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialsNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
   receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
@@ -1173,6 +1201,7 @@ export type MaterialUncheckedUpdateWithoutRecipeLinesInput = {
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
   receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
@@ -1203,6 +1232,7 @@ export type MaterialCreateWithoutPackagingKitLinesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMaterialsInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
@@ -1233,6 +1263,7 @@ export type MaterialUncheckedCreateWithoutPackagingKitLinesInput = {
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
@@ -1279,6 +1310,7 @@ export type MaterialUpdateWithoutPackagingKitLinesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialsNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
@@ -1309,6 +1341,7 @@ export type MaterialUncheckedUpdateWithoutPackagingKitLinesInput = {
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
@@ -1339,6 +1372,7 @@ export type MaterialCreateWithoutRequirementsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMaterialsInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
   receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
@@ -1369,6 +1403,7 @@ export type MaterialUncheckedCreateWithoutRequirementsInput = {
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
   receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
@@ -1415,6 +1450,7 @@ export type MaterialUpdateWithoutRequirementsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialsNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
   receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
@@ -1445,6 +1481,7 @@ export type MaterialUncheckedUpdateWithoutRequirementsInput = {
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
   receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
@@ -1475,6 +1512,7 @@ export type MaterialCreateWithoutHoldMaterialsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMaterialsInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
@@ -1505,6 +1543,7 @@ export type MaterialUncheckedCreateWithoutHoldMaterialsInput = {
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
@@ -1551,6 +1590,7 @@ export type MaterialUpdateWithoutHoldMaterialsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialsNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
@@ -1581,6 +1621,7 @@ export type MaterialUncheckedUpdateWithoutHoldMaterialsInput = {
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
@@ -1611,6 +1652,7 @@ export type MaterialCreateWithoutOrderedLinesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMaterialsInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementCreateNestedManyWithoutMaterialInput
   receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
@@ -1641,6 +1683,7 @@ export type MaterialUncheckedCreateWithoutOrderedLinesInput = {
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedCreateNestedManyWithoutMaterialInput
   receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
@@ -1687,6 +1730,7 @@ export type MaterialUpdateWithoutOrderedLinesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialsNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUpdateManyWithoutMaterialNestedInput
   receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
@@ -1717,6 +1761,7 @@ export type MaterialUncheckedUpdateWithoutOrderedLinesInput = {
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedUpdateManyWithoutMaterialNestedInput
   receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
@@ -1747,6 +1792,7 @@ export type MaterialCreateWithoutReceivedLinesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMaterialsInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
@@ -1777,6 +1823,7 @@ export type MaterialUncheckedCreateWithoutReceivedLinesInput = {
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
@@ -1823,6 +1870,7 @@ export type MaterialUpdateWithoutReceivedLinesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialsNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
@@ -1853,6 +1901,7 @@ export type MaterialUncheckedUpdateWithoutReceivedLinesInput = {
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
@@ -1883,6 +1932,7 @@ export type MaterialCreateWithoutBatchesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMaterialsInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
@@ -1913,6 +1963,7 @@ export type MaterialUncheckedCreateWithoutBatchesInput = {
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
@@ -1959,6 +2010,7 @@ export type MaterialUpdateWithoutBatchesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialsNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
@@ -1989,6 +2041,7 @@ export type MaterialUncheckedUpdateWithoutBatchesInput = {
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
@@ -2019,6 +2072,7 @@ export type MaterialCreateWithoutSampleMaterialsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMaterialsInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
@@ -2049,6 +2103,7 @@ export type MaterialUncheckedCreateWithoutSampleMaterialsInput = {
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
@@ -2095,6 +2150,7 @@ export type MaterialUpdateWithoutSampleMaterialsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialsNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
@@ -2125,6 +2181,7 @@ export type MaterialUncheckedUpdateWithoutSampleMaterialsInput = {
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
@@ -2155,6 +2212,7 @@ export type MaterialCreateWithoutSamplePlanMaterialsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMaterialsInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
@@ -2185,6 +2243,7 @@ export type MaterialUncheckedCreateWithoutSamplePlanMaterialsInput = {
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
@@ -2231,6 +2290,7 @@ export type MaterialUpdateWithoutSamplePlanMaterialsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialsNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
@@ -2261,6 +2321,7 @@ export type MaterialUncheckedUpdateWithoutSamplePlanMaterialsInput = {
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
@@ -2291,6 +2352,7 @@ export type MaterialCreateWithoutSampleInventorySnapshotsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMaterialsInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
@@ -2321,6 +2383,7 @@ export type MaterialUncheckedCreateWithoutSampleInventorySnapshotsInput = {
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
@@ -2367,6 +2430,7 @@ export type MaterialUpdateWithoutSampleInventorySnapshotsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialsNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
@@ -2397,6 +2461,7 @@ export type MaterialUncheckedUpdateWithoutSampleInventorySnapshotsInput = {
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
@@ -2427,6 +2492,7 @@ export type MaterialCreateWithoutSampleStepMaterialsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMaterialsInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
@@ -2457,6 +2523,7 @@ export type MaterialUncheckedCreateWithoutSampleStepMaterialsInput = {
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
@@ -2503,6 +2570,7 @@ export type MaterialUpdateWithoutSampleStepMaterialsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialsNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
@@ -2533,6 +2601,7 @@ export type MaterialUncheckedUpdateWithoutSampleStepMaterialsInput = {
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
@@ -2563,6 +2632,7 @@ export type MaterialCreateWithoutDisassemblyMaterialsInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMaterialsInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
@@ -2593,6 +2663,7 @@ export type MaterialUncheckedCreateWithoutDisassemblyMaterialsInput = {
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
@@ -2639,6 +2710,7 @@ export type MaterialUpdateWithoutDisassemblyMaterialsInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialsNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
@@ -2669,6 +2741,7 @@ export type MaterialUncheckedUpdateWithoutDisassemblyMaterialsInput = {
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
@@ -2678,6 +2751,146 @@ export type MaterialUncheckedUpdateWithoutDisassemblyMaterialsInput = {
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  categories?: Prisma.MaterialCategoryRelationUncheckedUpdateManyWithoutMaterialNestedInput
+  holdMaterials?: Prisma.AvailabilityHoldMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  packagingKitLines?: Prisma.PackagingKitLineUncheckedUpdateManyWithoutMaterialNestedInput
+}
+
+export type MaterialCreateWithoutUnverifiedLossesInput = {
+  id?: string
+  code: string
+  name: string
+  kind: $Enums.MaterialKind
+  color?: string | null
+  grade?: string | null
+  gradeSpecification?: string | null
+  specification?: string | null
+  baseUnit: string
+  quantityScale?: number
+  reservePerOrder?: boolean
+  active?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMaterialsInput
+  recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutMaterialInput
+  requirements?: Prisma.OrderMaterialRequirementCreateNestedManyWithoutMaterialInput
+  orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
+  receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
+  batches?: Prisma.InventoryBatchCreateNestedManyWithoutMaterialInput
+  sampleMaterials?: Prisma.SampleMaterialCreateNestedManyWithoutMaterialInput
+  samplePlanMaterials?: Prisma.SamplePlanMaterialCreateNestedManyWithoutMaterialInput
+  sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotCreateNestedManyWithoutMaterialInput
+  sampleStepMaterials?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutMaterialInput
+  disassemblyMaterials?: Prisma.SampleDisassemblyMaterialCreateNestedManyWithoutMaterialInput
+  categories?: Prisma.MaterialCategoryRelationCreateNestedManyWithoutMaterialInput
+  holdMaterials?: Prisma.AvailabilityHoldMaterialCreateNestedManyWithoutMaterialInput
+  packagingKitLines?: Prisma.PackagingKitLineCreateNestedManyWithoutMaterialInput
+}
+
+export type MaterialUncheckedCreateWithoutUnverifiedLossesInput = {
+  id?: string
+  tenantId: string
+  code: string
+  name: string
+  kind: $Enums.MaterialKind
+  color?: string | null
+  grade?: string | null
+  gradeSpecification?: string | null
+  specification?: string | null
+  baseUnit: string
+  quantityScale?: number
+  reservePerOrder?: boolean
+  active?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutMaterialInput
+  requirements?: Prisma.OrderMaterialRequirementUncheckedCreateNestedManyWithoutMaterialInput
+  orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
+  receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
+  batches?: Prisma.InventoryBatchUncheckedCreateNestedManyWithoutMaterialInput
+  sampleMaterials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedCreateNestedManyWithoutMaterialInput
+  sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  disassemblyMaterials?: Prisma.SampleDisassemblyMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  categories?: Prisma.MaterialCategoryRelationUncheckedCreateNestedManyWithoutMaterialInput
+  holdMaterials?: Prisma.AvailabilityHoldMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  packagingKitLines?: Prisma.PackagingKitLineUncheckedCreateNestedManyWithoutMaterialInput
+}
+
+export type MaterialCreateOrConnectWithoutUnverifiedLossesInput = {
+  where: Prisma.MaterialWhereUniqueInput
+  create: Prisma.XOR<Prisma.MaterialCreateWithoutUnverifiedLossesInput, Prisma.MaterialUncheckedCreateWithoutUnverifiedLossesInput>
+}
+
+export type MaterialUpsertWithoutUnverifiedLossesInput = {
+  update: Prisma.XOR<Prisma.MaterialUpdateWithoutUnverifiedLossesInput, Prisma.MaterialUncheckedUpdateWithoutUnverifiedLossesInput>
+  create: Prisma.XOR<Prisma.MaterialCreateWithoutUnverifiedLossesInput, Prisma.MaterialUncheckedCreateWithoutUnverifiedLossesInput>
+  where?: Prisma.MaterialWhereInput
+}
+
+export type MaterialUpdateToOneWithWhereWithoutUnverifiedLossesInput = {
+  where?: Prisma.MaterialWhereInput
+  data: Prisma.XOR<Prisma.MaterialUpdateWithoutUnverifiedLossesInput, Prisma.MaterialUncheckedUpdateWithoutUnverifiedLossesInput>
+}
+
+export type MaterialUpdateWithoutUnverifiedLossesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
+  quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
+  reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialsNestedInput
+  recipeLines?: Prisma.RecipeLineUpdateManyWithoutMaterialNestedInput
+  requirements?: Prisma.OrderMaterialRequirementUpdateManyWithoutMaterialNestedInput
+  orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
+  receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
+  batches?: Prisma.InventoryBatchUpdateManyWithoutMaterialNestedInput
+  sampleMaterials?: Prisma.SampleMaterialUpdateManyWithoutMaterialNestedInput
+  samplePlanMaterials?: Prisma.SamplePlanMaterialUpdateManyWithoutMaterialNestedInput
+  sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUpdateManyWithoutMaterialNestedInput
+  sampleStepMaterials?: Prisma.SamplePlanStepMaterialUpdateManyWithoutMaterialNestedInput
+  disassemblyMaterials?: Prisma.SampleDisassemblyMaterialUpdateManyWithoutMaterialNestedInput
+  categories?: Prisma.MaterialCategoryRelationUpdateManyWithoutMaterialNestedInput
+  holdMaterials?: Prisma.AvailabilityHoldMaterialUpdateManyWithoutMaterialNestedInput
+  packagingKitLines?: Prisma.PackagingKitLineUpdateManyWithoutMaterialNestedInput
+}
+
+export type MaterialUncheckedUpdateWithoutUnverifiedLossesInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
+  quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
+  reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutMaterialNestedInput
+  requirements?: Prisma.OrderMaterialRequirementUncheckedUpdateManyWithoutMaterialNestedInput
+  orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
+  receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
+  batches?: Prisma.InventoryBatchUncheckedUpdateManyWithoutMaterialNestedInput
+  sampleMaterials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
+  sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  disassemblyMaterials?: Prisma.SampleDisassemblyMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   categories?: Prisma.MaterialCategoryRelationUncheckedUpdateManyWithoutMaterialNestedInput
   holdMaterials?: Prisma.AvailabilityHoldMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   packagingKitLines?: Prisma.PackagingKitLineUncheckedUpdateManyWithoutMaterialNestedInput
@@ -2699,6 +2912,7 @@ export type MaterialCreateWithoutCategoriesInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   tenant: Prisma.TenantCreateNestedOneWithoutMaterialsInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
@@ -2729,6 +2943,7 @@ export type MaterialUncheckedCreateWithoutCategoriesInput = {
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutMaterialInput
   recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutMaterialInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedCreateNestedManyWithoutMaterialInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
@@ -2775,6 +2990,7 @@ export type MaterialUpdateWithoutCategoriesInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialsNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
@@ -2805,6 +3021,7 @@ export type MaterialUncheckedUpdateWithoutCategoriesInput = {
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
@@ -2851,6 +3068,7 @@ export type MaterialUpdateWithoutTenantInput = {
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
@@ -2881,6 +3099,7 @@ export type MaterialUncheckedUpdateWithoutTenantInput = {
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutMaterialNestedInput
   recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutMaterialNestedInput
   requirements?: Prisma.OrderMaterialRequirementUncheckedUpdateManyWithoutMaterialNestedInput
   orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
@@ -2919,6 +3138,7 @@ export type MaterialUncheckedUpdateManyWithoutTenantInput = {
  */
 
 export type MaterialCountOutputType = {
+  unverifiedLosses: number
   recipeLines: number
   requirements: number
   orderedLines: number
@@ -2935,6 +3155,7 @@ export type MaterialCountOutputType = {
 }
 
 export type MaterialCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  unverifiedLosses?: boolean | MaterialCountOutputTypeCountUnverifiedLossesArgs
   recipeLines?: boolean | MaterialCountOutputTypeCountRecipeLinesArgs
   requirements?: boolean | MaterialCountOutputTypeCountRequirementsArgs
   orderedLines?: boolean | MaterialCountOutputTypeCountOrderedLinesArgs
@@ -2958,6 +3179,13 @@ export type MaterialCountOutputTypeDefaultArgs<ExtArgs extends runtime.Types.Ext
    * Select specific fields to fetch from the MaterialCountOutputType
    */
   select?: Prisma.MaterialCountOutputTypeSelect<ExtArgs> | null
+}
+
+/**
+ * MaterialCountOutputType without action
+ */
+export type MaterialCountOutputTypeCountUnverifiedLossesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.LossRecordWhereInput
 }
 
 /**
@@ -3069,6 +3297,7 @@ export type MaterialSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   createdAt?: boolean
   updatedAt?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  unverifiedLosses?: boolean | Prisma.Material$unverifiedLossesArgs<ExtArgs>
   recipeLines?: boolean | Prisma.Material$recipeLinesArgs<ExtArgs>
   requirements?: boolean | Prisma.Material$requirementsArgs<ExtArgs>
   orderedLines?: boolean | Prisma.Material$orderedLinesArgs<ExtArgs>
@@ -3144,6 +3373,7 @@ export type MaterialSelectScalar = {
 export type MaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "code" | "name" | "kind" | "color" | "grade" | "gradeSpecification" | "specification" | "baseUnit" | "quantityScale" | "reservePerOrder" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["material"]>
 export type MaterialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
+  unverifiedLosses?: boolean | Prisma.Material$unverifiedLossesArgs<ExtArgs>
   recipeLines?: boolean | Prisma.Material$recipeLinesArgs<ExtArgs>
   requirements?: boolean | Prisma.Material$requirementsArgs<ExtArgs>
   orderedLines?: boolean | Prisma.Material$orderedLinesArgs<ExtArgs>
@@ -3170,6 +3400,7 @@ export type $MaterialPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
   name: "Material"
   objects: {
     tenant: Prisma.$TenantPayload<ExtArgs>
+    unverifiedLosses: Prisma.$LossRecordPayload<ExtArgs>[]
     recipeLines: Prisma.$RecipeLinePayload<ExtArgs>[]
     requirements: Prisma.$OrderMaterialRequirementPayload<ExtArgs>[]
     orderedLines: Prisma.$PurchaseOrderLinePayload<ExtArgs>[]
@@ -3595,6 +3826,7 @@ readonly fields: MaterialFieldRefs;
 export interface Prisma__MaterialClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  unverifiedLosses<T extends Prisma.Material$unverifiedLossesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Material$unverifiedLossesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$LossRecordPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   recipeLines<T extends Prisma.Material$recipeLinesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Material$recipeLinesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$RecipeLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   requirements<T extends Prisma.Material$requirementsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Material$requirementsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OrderMaterialRequirementPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   orderedLines<T extends Prisma.Material$orderedLinesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Material$orderedLinesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PurchaseOrderLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4050,6 +4282,30 @@ export type MaterialDeleteManyArgs<ExtArgs extends runtime.Types.Extensions.Inte
    * Limit how many Materials to delete.
    */
   limit?: number
+}
+
+/**
+ * Material.unverifiedLosses
+ */
+export type Material$unverifiedLossesArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the LossRecord
+   */
+  select?: Prisma.LossRecordSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the LossRecord
+   */
+  omit?: Prisma.LossRecordOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.LossRecordInclude<ExtArgs> | null
+  where?: Prisma.LossRecordWhereInput
+  orderBy?: Prisma.LossRecordOrderByWithRelationInput | Prisma.LossRecordOrderByWithRelationInput[]
+  cursor?: Prisma.LossRecordWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.LossRecordScalarFieldEnum | Prisma.LossRecordScalarFieldEnum[]
 }
 
 /**

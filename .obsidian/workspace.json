@@ -13,12 +13,12 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "knowledge/04-Engineering/E0-knowledge-governance.md",
+                "file": "knowledge/03-Architecture/E0-v1-v2-ownership.md",
                 "mode": "source",
                 "source": false
               },
               "icon": "lucide-file",
-              "title": "E0-knowledge-governance"
+              "title": "E0-v1-v2-ownership"
             }
           }
         ]
@@ -99,7 +99,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "knowledge/04-Engineering/E0-knowledge-governance.md",
+                "file": "knowledge/03-Architecture/E0-v1-v2-ownership.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -118,7 +118,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "knowledge/04-Engineering/E0-knowledge-governance.md",
+                "file": "knowledge/03-Architecture/E0-v1-v2-ownership.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               },
@@ -161,7 +161,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "knowledge/04-Engineering/E0-knowledge-governance.md",
+                "file": "knowledge/03-Architecture/E0-v1-v2-ownership.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
@@ -190,17 +190,20 @@
   },
   "active": "717b0109b4fa64d1",
   "lastOpenFiles": [
-    "flower-wms-system/node_modules/geist/dist/fonts/geist-serif/GeistSerifVF.woff2",
-    "flower-wms-system/node_modules/geist/dist/fonts/geist-serif/GeistSerif-Triangle.woff2",
-    "flower-wms-system/node_modules/geist/dist/fonts/geist-serif/GeistSerif-Square.woff2",
-    "flower-wms-system/node_modules/geist/dist/fonts/geist-serif/GeistSerif-Regular.woff2",
-    "flower-wms-system/node_modules/geist/dist/fonts/geist-serif/GeistSerif-Heart.woff2",
-    "flower-wms-system/node_modules/geist/dist/fonts/geist-serif",
-    "flower-wms-system/node_modules/geist/dist/fonts/geist-pixel/GeistPixelVF.woff2",
-    "flower-wms-system/node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Triangle.woff2",
-    "flower-wms-system/node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Grid.woff2",
-    "flower-wms-system/node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Square.woff2",
-    "flower-wms-system/node_modules/geist/dist/fonts/geist-pixel/GeistPixel-Line.woff2",
+    "flower-wms-system/node_modules/geist/dist/sans.js",
+    "flower-wms-system/node_modules/geist/dist/fonts/geist-sans/Geist-Variable.woff2",
+    "flower-wms-system/node_modules/geist/dist/fonts/geist-mono/GeistMono-Variable.woff2",
+    "flower-wms-system/prisma/v2/migrations/0008_purchase_supplements_and_inventory_review/migration.sql",
+    "flower-wms-system/prisma/v2/migrations/0008_purchase_supplements_and_inventory_review",
+    "flower-wms-system/prisma/migrations/0008_purchase_supplements_and_inventory_review/migration.sql",
+    "flower-wms-system/prisma/migrations/0008_purchase_supplements_and_inventory_review",
+    "knowledge/04-Engineering/E0-knowledge-governance.md",
+    "flower-wms-system/src/v2/services/test-audit-rollback.ts",
+    "flower-wms-system/node_modules/geist/dist/mono.d.ts",
+    "flower-wms-system/node_modules/geist/font.d.ts",
+    "flower-wms-system/node_modules/geist/dist/sans.d.ts",
+    "knowledge/02-Business/E0-confirmed-operating-rules.md",
+    "knowledge/02-Business/E0-confirmed-inventory-decisions.md",
     "knowledge/05-ADR/ADR-005-codex-dsh-responsibilities.md",
     "knowledge/05-ADR/ADR-004-agent-knowledge-governance.md",
     "knowledge/05-ADR/ADR-003-inventory-invariants.md",
@@ -222,9 +225,6 @@
     "knowledge/specifications/technical-designs/E0-technical-design-sources.md",
     "knowledge/specifications/features/E0-feature-sources.md",
     "knowledge/specifications/E0-specifications-index.md",
-    "knowledge/templates/E0-business-rule-template.md",
-    "knowledge/06-Lessons/E0-known-gaps.md",
-    "knowledge/04-Engineering/E0-knowledge-governance.md",
-    "knowledge/03-Architecture/E0-v1-v2-ownership.md"
+    "knowledge/templates/E0-business-rule-template.md"
   ]
 }

@@ -271,11 +271,31 @@ export type ConsumableRollState = (typeof ConsumableRollState)[keyof typeof Cons
 
 export const StocktakeState = {
   DRAFT: 'DRAFT',
+  PENDING_REVIEW: 'PENDING_REVIEW',
   CONFIRMED: 'CONFIRMED',
+  REJECTED: 'REJECTED',
   CANCELLED: 'CANCELLED'
 } as const
 
 export type StocktakeState = (typeof StocktakeState)[keyof typeof StocktakeState]
+
+
+export const PurchaseLineRelationKind = {
+  ORIGINAL: 'ORIGINAL',
+  EXTRA_ORDER: 'EXTRA_ORDER',
+  REPLACEMENT_DELIVERY: 'REPLACEMENT_DELIVERY'
+} as const
+
+export type PurchaseLineRelationKind = (typeof PurchaseLineRelationKind)[keyof typeof PurchaseLineRelationKind]
+
+
+export const InventoryReviewStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED'
+} as const
+
+export type InventoryReviewStatus = (typeof InventoryReviewStatus)[keyof typeof InventoryReviewStatus]
 
 
 export const LossReason = {

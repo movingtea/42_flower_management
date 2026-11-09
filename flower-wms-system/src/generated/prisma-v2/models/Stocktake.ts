@@ -30,6 +30,10 @@ export type StocktakeMinAggregateOutputType = {
   state: $Enums.StocktakeState | null
   createdAt: Date | null
   confirmedAt: Date | null
+  submittedById: string | null
+  reviewedById: string | null
+  reviewedAt: Date | null
+  reviewNote: string | null
 }
 
 export type StocktakeMaxAggregateOutputType = {
@@ -38,6 +42,10 @@ export type StocktakeMaxAggregateOutputType = {
   state: $Enums.StocktakeState | null
   createdAt: Date | null
   confirmedAt: Date | null
+  submittedById: string | null
+  reviewedById: string | null
+  reviewedAt: Date | null
+  reviewNote: string | null
 }
 
 export type StocktakeCountAggregateOutputType = {
@@ -46,6 +54,11 @@ export type StocktakeCountAggregateOutputType = {
   state: number
   createdAt: number
   confirmedAt: number
+  reviewReasons: number
+  submittedById: number
+  reviewedById: number
+  reviewedAt: number
+  reviewNote: number
   _all: number
 }
 
@@ -56,6 +69,10 @@ export type StocktakeMinAggregateInputType = {
   state?: true
   createdAt?: true
   confirmedAt?: true
+  submittedById?: true
+  reviewedById?: true
+  reviewedAt?: true
+  reviewNote?: true
 }
 
 export type StocktakeMaxAggregateInputType = {
@@ -64,6 +81,10 @@ export type StocktakeMaxAggregateInputType = {
   state?: true
   createdAt?: true
   confirmedAt?: true
+  submittedById?: true
+  reviewedById?: true
+  reviewedAt?: true
+  reviewNote?: true
 }
 
 export type StocktakeCountAggregateInputType = {
@@ -72,6 +93,11 @@ export type StocktakeCountAggregateInputType = {
   state?: true
   createdAt?: true
   confirmedAt?: true
+  reviewReasons?: true
+  submittedById?: true
+  reviewedById?: true
+  reviewedAt?: true
+  reviewNote?: true
   _all?: true
 }
 
@@ -153,6 +179,11 @@ export type StocktakeGroupByOutputType = {
   state: $Enums.StocktakeState
   createdAt: Date
   confirmedAt: Date | null
+  reviewReasons: string[]
+  submittedById: string | null
+  reviewedById: string | null
+  reviewedAt: Date | null
+  reviewNote: string | null
   _count: StocktakeCountAggregateOutputType | null
   _min: StocktakeMinAggregateOutputType | null
   _max: StocktakeMaxAggregateOutputType | null
@@ -182,6 +213,11 @@ export type StocktakeWhereInput = {
   state?: Prisma.EnumStocktakeStateFilter<"Stocktake"> | $Enums.StocktakeState
   createdAt?: Prisma.DateTimeFilter<"Stocktake"> | Date | string
   confirmedAt?: Prisma.DateTimeNullableFilter<"Stocktake"> | Date | string | null
+  reviewReasons?: Prisma.StringNullableListFilter<"Stocktake">
+  submittedById?: Prisma.StringNullableFilter<"Stocktake"> | string | null
+  reviewedById?: Prisma.StringNullableFilter<"Stocktake"> | string | null
+  reviewedAt?: Prisma.DateTimeNullableFilter<"Stocktake"> | Date | string | null
+  reviewNote?: Prisma.StringNullableFilter<"Stocktake"> | string | null
   store?: Prisma.XOR<Prisma.StoreScalarRelationFilter, Prisma.StoreWhereInput>
   lines?: Prisma.StocktakeLineListRelationFilter
 }
@@ -192,6 +228,11 @@ export type StocktakeOrderByWithRelationInput = {
   state?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   confirmedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewReasons?: Prisma.SortOrder
+  submittedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewNote?: Prisma.SortOrderInput | Prisma.SortOrder
   store?: Prisma.StoreOrderByWithRelationInput
   lines?: Prisma.StocktakeLineOrderByRelationAggregateInput
 }
@@ -205,6 +246,11 @@ export type StocktakeWhereUniqueInput = Prisma.AtLeast<{
   state?: Prisma.EnumStocktakeStateFilter<"Stocktake"> | $Enums.StocktakeState
   createdAt?: Prisma.DateTimeFilter<"Stocktake"> | Date | string
   confirmedAt?: Prisma.DateTimeNullableFilter<"Stocktake"> | Date | string | null
+  reviewReasons?: Prisma.StringNullableListFilter<"Stocktake">
+  submittedById?: Prisma.StringNullableFilter<"Stocktake"> | string | null
+  reviewedById?: Prisma.StringNullableFilter<"Stocktake"> | string | null
+  reviewedAt?: Prisma.DateTimeNullableFilter<"Stocktake"> | Date | string | null
+  reviewNote?: Prisma.StringNullableFilter<"Stocktake"> | string | null
   store?: Prisma.XOR<Prisma.StoreScalarRelationFilter, Prisma.StoreWhereInput>
   lines?: Prisma.StocktakeLineListRelationFilter
 }, "id">
@@ -215,6 +261,11 @@ export type StocktakeOrderByWithAggregationInput = {
   state?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   confirmedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewReasons?: Prisma.SortOrder
+  submittedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewNote?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.StocktakeCountOrderByAggregateInput
   _max?: Prisma.StocktakeMaxOrderByAggregateInput
   _min?: Prisma.StocktakeMinOrderByAggregateInput
@@ -229,6 +280,11 @@ export type StocktakeScalarWhereWithAggregatesInput = {
   state?: Prisma.EnumStocktakeStateWithAggregatesFilter<"Stocktake"> | $Enums.StocktakeState
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Stocktake"> | Date | string
   confirmedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Stocktake"> | Date | string | null
+  reviewReasons?: Prisma.StringNullableListFilter<"Stocktake">
+  submittedById?: Prisma.StringNullableWithAggregatesFilter<"Stocktake"> | string | null
+  reviewedById?: Prisma.StringNullableWithAggregatesFilter<"Stocktake"> | string | null
+  reviewedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Stocktake"> | Date | string | null
+  reviewNote?: Prisma.StringNullableWithAggregatesFilter<"Stocktake"> | string | null
 }
 
 export type StocktakeCreateInput = {
@@ -236,6 +292,11 @@ export type StocktakeCreateInput = {
   state?: $Enums.StocktakeState
   createdAt?: Date | string
   confirmedAt?: Date | string | null
+  reviewReasons?: Prisma.StocktakeCreatereviewReasonsInput | string[]
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
   store: Prisma.StoreCreateNestedOneWithoutStocktakesInput
   lines?: Prisma.StocktakeLineCreateNestedManyWithoutStocktakeInput
 }
@@ -246,6 +307,11 @@ export type StocktakeUncheckedCreateInput = {
   state?: $Enums.StocktakeState
   createdAt?: Date | string
   confirmedAt?: Date | string | null
+  reviewReasons?: Prisma.StocktakeCreatereviewReasonsInput | string[]
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
   lines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutStocktakeInput
 }
 
@@ -254,6 +320,11 @@ export type StocktakeUpdateInput = {
   state?: Prisma.EnumStocktakeStateFieldUpdateOperationsInput | $Enums.StocktakeState
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewReasons?: Prisma.StocktakeUpdatereviewReasonsInput | string[]
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   store?: Prisma.StoreUpdateOneRequiredWithoutStocktakesNestedInput
   lines?: Prisma.StocktakeLineUpdateManyWithoutStocktakeNestedInput
 }
@@ -264,6 +335,11 @@ export type StocktakeUncheckedUpdateInput = {
   state?: Prisma.EnumStocktakeStateFieldUpdateOperationsInput | $Enums.StocktakeState
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewReasons?: Prisma.StocktakeUpdatereviewReasonsInput | string[]
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutStocktakeNestedInput
 }
 
@@ -273,6 +349,11 @@ export type StocktakeCreateManyInput = {
   state?: $Enums.StocktakeState
   createdAt?: Date | string
   confirmedAt?: Date | string | null
+  reviewReasons?: Prisma.StocktakeCreatereviewReasonsInput | string[]
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
 }
 
 export type StocktakeUpdateManyMutationInput = {
@@ -280,6 +361,11 @@ export type StocktakeUpdateManyMutationInput = {
   state?: Prisma.EnumStocktakeStateFieldUpdateOperationsInput | $Enums.StocktakeState
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewReasons?: Prisma.StocktakeUpdatereviewReasonsInput | string[]
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StocktakeUncheckedUpdateManyInput = {
@@ -288,6 +374,11 @@ export type StocktakeUncheckedUpdateManyInput = {
   state?: Prisma.EnumStocktakeStateFieldUpdateOperationsInput | $Enums.StocktakeState
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewReasons?: Prisma.StocktakeUpdatereviewReasonsInput | string[]
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StocktakeListRelationFilter = {
@@ -306,6 +397,11 @@ export type StocktakeCountOrderByAggregateInput = {
   state?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   confirmedAt?: Prisma.SortOrder
+  reviewReasons?: Prisma.SortOrder
+  submittedById?: Prisma.SortOrder
+  reviewedById?: Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrder
+  reviewNote?: Prisma.SortOrder
 }
 
 export type StocktakeMaxOrderByAggregateInput = {
@@ -314,6 +410,10 @@ export type StocktakeMaxOrderByAggregateInput = {
   state?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   confirmedAt?: Prisma.SortOrder
+  submittedById?: Prisma.SortOrder
+  reviewedById?: Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrder
+  reviewNote?: Prisma.SortOrder
 }
 
 export type StocktakeMinOrderByAggregateInput = {
@@ -322,6 +422,10 @@ export type StocktakeMinOrderByAggregateInput = {
   state?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   confirmedAt?: Prisma.SortOrder
+  submittedById?: Prisma.SortOrder
+  reviewedById?: Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrder
+  reviewNote?: Prisma.SortOrder
 }
 
 export type StocktakeScalarRelationFilter = {
@@ -371,8 +475,17 @@ export type StocktakeUncheckedUpdateManyWithoutStoreNestedInput = {
   deleteMany?: Prisma.StocktakeScalarWhereInput | Prisma.StocktakeScalarWhereInput[]
 }
 
+export type StocktakeCreatereviewReasonsInput = {
+  set: string[]
+}
+
 export type EnumStocktakeStateFieldUpdateOperationsInput = {
   set?: $Enums.StocktakeState
+}
+
+export type StocktakeUpdatereviewReasonsInput = {
+  set?: string[]
+  push?: string | string[]
 }
 
 export type StocktakeCreateNestedOneWithoutLinesInput = {
@@ -394,6 +507,11 @@ export type StocktakeCreateWithoutStoreInput = {
   state?: $Enums.StocktakeState
   createdAt?: Date | string
   confirmedAt?: Date | string | null
+  reviewReasons?: Prisma.StocktakeCreatereviewReasonsInput | string[]
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
   lines?: Prisma.StocktakeLineCreateNestedManyWithoutStocktakeInput
 }
 
@@ -402,6 +520,11 @@ export type StocktakeUncheckedCreateWithoutStoreInput = {
   state?: $Enums.StocktakeState
   createdAt?: Date | string
   confirmedAt?: Date | string | null
+  reviewReasons?: Prisma.StocktakeCreatereviewReasonsInput | string[]
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
   lines?: Prisma.StocktakeLineUncheckedCreateNestedManyWithoutStocktakeInput
 }
 
@@ -440,6 +563,11 @@ export type StocktakeScalarWhereInput = {
   state?: Prisma.EnumStocktakeStateFilter<"Stocktake"> | $Enums.StocktakeState
   createdAt?: Prisma.DateTimeFilter<"Stocktake"> | Date | string
   confirmedAt?: Prisma.DateTimeNullableFilter<"Stocktake"> | Date | string | null
+  reviewReasons?: Prisma.StringNullableListFilter<"Stocktake">
+  submittedById?: Prisma.StringNullableFilter<"Stocktake"> | string | null
+  reviewedById?: Prisma.StringNullableFilter<"Stocktake"> | string | null
+  reviewedAt?: Prisma.DateTimeNullableFilter<"Stocktake"> | Date | string | null
+  reviewNote?: Prisma.StringNullableFilter<"Stocktake"> | string | null
 }
 
 export type StocktakeCreateWithoutLinesInput = {
@@ -447,6 +575,11 @@ export type StocktakeCreateWithoutLinesInput = {
   state?: $Enums.StocktakeState
   createdAt?: Date | string
   confirmedAt?: Date | string | null
+  reviewReasons?: Prisma.StocktakeCreatereviewReasonsInput | string[]
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
   store: Prisma.StoreCreateNestedOneWithoutStocktakesInput
 }
 
@@ -456,6 +589,11 @@ export type StocktakeUncheckedCreateWithoutLinesInput = {
   state?: $Enums.StocktakeState
   createdAt?: Date | string
   confirmedAt?: Date | string | null
+  reviewReasons?: Prisma.StocktakeCreatereviewReasonsInput | string[]
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
 }
 
 export type StocktakeCreateOrConnectWithoutLinesInput = {
@@ -479,6 +617,11 @@ export type StocktakeUpdateWithoutLinesInput = {
   state?: Prisma.EnumStocktakeStateFieldUpdateOperationsInput | $Enums.StocktakeState
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewReasons?: Prisma.StocktakeUpdatereviewReasonsInput | string[]
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   store?: Prisma.StoreUpdateOneRequiredWithoutStocktakesNestedInput
 }
 
@@ -488,6 +631,11 @@ export type StocktakeUncheckedUpdateWithoutLinesInput = {
   state?: Prisma.EnumStocktakeStateFieldUpdateOperationsInput | $Enums.StocktakeState
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewReasons?: Prisma.StocktakeUpdatereviewReasonsInput | string[]
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type StocktakeCreateManyStoreInput = {
@@ -495,6 +643,11 @@ export type StocktakeCreateManyStoreInput = {
   state?: $Enums.StocktakeState
   createdAt?: Date | string
   confirmedAt?: Date | string | null
+  reviewReasons?: Prisma.StocktakeCreatereviewReasonsInput | string[]
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
 }
 
 export type StocktakeUpdateWithoutStoreInput = {
@@ -502,6 +655,11 @@ export type StocktakeUpdateWithoutStoreInput = {
   state?: Prisma.EnumStocktakeStateFieldUpdateOperationsInput | $Enums.StocktakeState
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewReasons?: Prisma.StocktakeUpdatereviewReasonsInput | string[]
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lines?: Prisma.StocktakeLineUpdateManyWithoutStocktakeNestedInput
 }
 
@@ -510,6 +668,11 @@ export type StocktakeUncheckedUpdateWithoutStoreInput = {
   state?: Prisma.EnumStocktakeStateFieldUpdateOperationsInput | $Enums.StocktakeState
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewReasons?: Prisma.StocktakeUpdatereviewReasonsInput | string[]
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   lines?: Prisma.StocktakeLineUncheckedUpdateManyWithoutStocktakeNestedInput
 }
 
@@ -518,6 +681,11 @@ export type StocktakeUncheckedUpdateManyWithoutStoreInput = {
   state?: Prisma.EnumStocktakeStateFieldUpdateOperationsInput | $Enums.StocktakeState
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   confirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewReasons?: Prisma.StocktakeUpdatereviewReasonsInput | string[]
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 
@@ -557,6 +725,11 @@ export type StocktakeSelect<ExtArgs extends runtime.Types.Extensions.InternalArg
   state?: boolean
   createdAt?: boolean
   confirmedAt?: boolean
+  reviewReasons?: boolean
+  submittedById?: boolean
+  reviewedById?: boolean
+  reviewedAt?: boolean
+  reviewNote?: boolean
   store?: boolean | Prisma.StoreDefaultArgs<ExtArgs>
   lines?: boolean | Prisma.Stocktake$linesArgs<ExtArgs>
   _count?: boolean | Prisma.StocktakeCountOutputTypeDefaultArgs<ExtArgs>
@@ -568,6 +741,11 @@ export type StocktakeSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ext
   state?: boolean
   createdAt?: boolean
   confirmedAt?: boolean
+  reviewReasons?: boolean
+  submittedById?: boolean
+  reviewedById?: boolean
+  reviewedAt?: boolean
+  reviewNote?: boolean
   store?: boolean | Prisma.StoreDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["stocktake"]>
 
@@ -577,6 +755,11 @@ export type StocktakeSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ext
   state?: boolean
   createdAt?: boolean
   confirmedAt?: boolean
+  reviewReasons?: boolean
+  submittedById?: boolean
+  reviewedById?: boolean
+  reviewedAt?: boolean
+  reviewNote?: boolean
   store?: boolean | Prisma.StoreDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["stocktake"]>
 
@@ -586,9 +769,14 @@ export type StocktakeSelectScalar = {
   state?: boolean
   createdAt?: boolean
   confirmedAt?: boolean
+  reviewReasons?: boolean
+  submittedById?: boolean
+  reviewedById?: boolean
+  reviewedAt?: boolean
+  reviewNote?: boolean
 }
 
-export type StocktakeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "storeId" | "state" | "createdAt" | "confirmedAt", ExtArgs["result"]["stocktake"]>
+export type StocktakeOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "storeId" | "state" | "createdAt" | "confirmedAt" | "reviewReasons" | "submittedById" | "reviewedById" | "reviewedAt" | "reviewNote", ExtArgs["result"]["stocktake"]>
 export type StocktakeInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   store?: boolean | Prisma.StoreDefaultArgs<ExtArgs>
   lines?: boolean | Prisma.Stocktake$linesArgs<ExtArgs>
@@ -613,6 +801,11 @@ export type $StocktakePayload<ExtArgs extends runtime.Types.Extensions.InternalA
     state: $Enums.StocktakeState
     createdAt: Date
     confirmedAt: Date | null
+    reviewReasons: string[]
+    submittedById: string | null
+    reviewedById: string | null
+    reviewedAt: Date | null
+    reviewNote: string | null
   }, ExtArgs["result"]["stocktake"]>
   composites: {}
 }
@@ -1043,6 +1236,11 @@ export interface StocktakeFieldRefs {
   readonly state: Prisma.FieldRef<"Stocktake", 'StocktakeState'>
   readonly createdAt: Prisma.FieldRef<"Stocktake", 'DateTime'>
   readonly confirmedAt: Prisma.FieldRef<"Stocktake", 'DateTime'>
+  readonly reviewReasons: Prisma.FieldRef<"Stocktake", 'String[]'>
+  readonly submittedById: Prisma.FieldRef<"Stocktake", 'String'>
+  readonly reviewedById: Prisma.FieldRef<"Stocktake", 'String'>
+  readonly reviewedAt: Prisma.FieldRef<"Stocktake", 'DateTime'>
+  readonly reviewNote: Prisma.FieldRef<"Stocktake", 'String'>
 }
     
 

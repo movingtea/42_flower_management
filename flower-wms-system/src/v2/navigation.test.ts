@@ -27,8 +27,10 @@ const EXPECTED_CAPABILITIES: Record<V2Role, readonly string[]> = {
     "production",
     "delivery",
     "staff",
+    "inventory_review",
   ],
-  MANAGER: ["read", "catalog", "purchase", "order", "production", "delivery"],
+  MANAGER: ["read", "catalog", "purchase", "order", "production", "delivery", "inventory_review"],
+  INVENTORY_REVIEWER: ["read", "purchase", "inventory_review"],
   BUYER: ["read", "purchase"],
   SALES: ["read", "order", "delivery"],
   FLORIST: ["read", "production"],
@@ -49,6 +51,7 @@ const EXPECTED_VISIBLE_HREFS: Record<V2Role, string[]> = {
     "/v2/staff",
   ],
   MANAGER: ["/v2", "/v2/materials", "/v2/inventory", "/v2/operations", "/v2/purchase-orders", "/v2/suppliers", "/v2/catalog", "/v2/recipes", "/v2/packaging-kits", "/v2/orders"],
+  INVENTORY_REVIEWER: ["/v2", "/v2/inventory", "/v2/operations", "/v2/purchase-orders", "/v2/suppliers"],
   BUYER: ["/v2", "/v2/inventory", "/v2/operations", "/v2/purchase-orders", "/v2/suppliers"],
   SALES: ["/v2", "/v2/orders"],
   FLORIST: ["/v2", "/v2/orders"],
@@ -69,6 +72,7 @@ function main() {
     "production",
     "delivery",
     "staff",
+    "inventory_review",
   ]);
 
   for (const role of V2_ROLES) {

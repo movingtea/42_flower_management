@@ -2,8 +2,9 @@
 import { redirect } from "next/navigation";
 import { requireV2Store } from "@/v2/auth";
 import { v2db } from "@/v2/db";
+import { PurchaseLineRelationKind } from "@/generated/prisma-v2/client";
 import { allocatePurchaseDemand } from "@/v2/services/allocate-purchase-demand";
-import { cancelPurchaseOrder, createLinkedPurchaseOrder, createPurchaseDraft, submitPurchaseOrder, updatePurchaseDraft, type PurchaseDraftLine } from "@/v2/services/purchase-order-management";
+import { cancelPurchaseOrder, createLinkedPurchaseOrder, createPurchaseDraft, createPurchaseSupplementLine, submitPurchaseOrder, updatePurchaseDraft, type PurchaseDraftLine } from "@/v2/services/purchase-order-management";
 import { formatQuantity } from "../_lib/purchase-ui";
 function text(data: FormData, key: string) { const value = data.get(key); return typeof value === "string" ? value.trim() : ""; }
 function number(data: FormData, key: string) { const value = Number(text(data, key) || 0); if (!Number.isFinite(value)) throw new Error(`${key} 必须为数字`); return value; }
@@ -27,6 +28,27 @@ export async function createPurchaseDraftAction(data: FormData) { return run(asy
 export async function updatePurchaseDraftAction(data: FormData) { return run(async () => { const scope = await requireV2Store("purchase"); await v2db.$transaction((tx) => updatePurchaseDraft(tx, { ...scope, actorStaffId: scope.staffId }, text(data, "purchaseOrderId"), input(data))); }, "采购草稿已更新"); }
 export async function submitPurchaseOrderAction(data: FormData) { return run(async () => { const scope = await requireV2Store("purchase"); await v2db.$transaction((tx) => submitPurchaseOrder(tx, { ...scope, actorStaffId: scope.staffId }, text(data, "purchaseOrderId"))); }, "采购单已下单"); }
 export async function cancelPurchaseOrderAction(data: FormData) { return run(async () => { const scope = await requireV2Store("purchase"); await v2db.$transaction((tx) => cancelPurchaseOrder(tx, { ...scope, actorStaffId: scope.staffId }, text(data, "purchaseOrderId"), text(data, "reason"))); }, "采购单已取消"); }
+export async function createPurchaseSupplementAction(data: FormData) {
+  return run(async () => {
+    const scope = await requireV2Store("purchase");
+    const rawKind = text(data, "kind");
+    const kind = rawKind === PurchaseLineRelationKind.EXTRA_ORDER
+      ? PurchaseLineRelationKind.EXTRA_ORDER
+      : rawKind === PurchaseLineRelationKind.REPLACEMENT_DELIVERY
+        ? PurchaseLineRelationKind.REPLACEMENT_DELIVERY
+        : null;
+    if (!kind) throw new Error("关联明细类型无效");
+    await v2db.$transaction((tx) => createPurchaseSupplementLine(tx, {
+      tenantId: scope.tenantId, storeId: scope.storeId, actorStaffId: scope.staffId,
+    }, {
+      sourceLineId: text(data, "sourceLineId"),
+      kind,
+      quantity: number(data, "quantity"),
+      unitPrice: number(data, "unitPrice"),
+      relationKey: text(data, "relationKey"),
+    }));
+  }, "关联采购明细已创建");
+}
 
 /**
  * Creates one formal purchase order for the latest-revision shortage requirement and allocates it

@@ -3,11 +3,14 @@ import { config } from "dotenv";
 import { resolve } from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
-  MaterialKind, PrismaClient, PurchaseState,
+  LocationKind, MaterialKind, PrismaClient, PurchaseLineRelationKind, PurchaseState, ReceiptDisposition,
+  TransactionKind,
 } from "../../generated/prisma-v2/client";
 import { confirmManualOrder, createManualOrder } from "./manual-order";
+import { receivePurchaseLine } from "./receive-purchase-line";
 import {
   createLinkedPurchaseOrder,
+  createPurchaseSupplementLine,
   linkedPurchaseOrderNumber,
   purchaseDraftTotal,
 } from "./purchase-order-management";
@@ -139,6 +142,78 @@ async function runDatabaseTest(): Promise<void> {
     assert.equal(created.lines[0].allocations.length, 1);
     assert.equal(Number(created.lines[0].allocations[0].allocatedQty), 2.5);
 
+    const rejectionReceipt = await db.goodsReceipt.create({ data: {
+      purchaseOrderId: created.id, storeId,
+      lines: { create: {
+        purchaseLineId: created.lines[0].id, disposition: ReceiptDisposition.REJECTED,
+        quantity: 2, baseUnit: material.baseUnit, rejectionReason: "到货破损",
+      } },
+    } });
+    const reDelivery = await db.$transaction((tx) => createPurchaseSupplementLine(tx, scope, {
+      sourceLineId: created.lines[0].id, kind: PurchaseLineRelationKind.REPLACEMENT_DELIVERY,
+      quantity: 2, relationKey: `REDELIVERY-${marker}`,
+    }));
+    assert.equal(reDelivery.idempotent, false);
+    assert.equal(reDelivery.line.sourceLineId, created.lines[0].id);
+    assert.equal(reDelivery.line.relationKind, PurchaseLineRelationKind.REPLACEMENT_DELIVERY);
+    assert.equal(Number(reDelivery.line.expectedBaseQty), 2);
+    const reDeliveryRetry = await db.$transaction((tx) => createPurchaseSupplementLine(tx, scope, {
+      sourceLineId: created.lines[0].id, kind: PurchaseLineRelationKind.REPLACEMENT_DELIVERY,
+      quantity: 2, relationKey: `REDELIVERY-${marker}`,
+    }));
+    assert.equal(reDeliveryRetry.idempotent, true);
+    await assert.rejects(db.$transaction((tx) => createPurchaseSupplementLine(tx, scope, {
+      sourceLineId: created.lines[0].id, kind: PurchaseLineRelationKind.REPLACEMENT_DELIVERY,
+      quantity: 0.1, relationKey: `REDELIVERY-OVER-${marker}`,
+    })), /尚未补回的拒收数量 0支/);
+    const extra = await db.$transaction((tx) => createPurchaseSupplementLine(tx, scope, {
+      sourceLineId: created.lines[0].id, kind: PurchaseLineRelationKind.EXTRA_ORDER,
+      quantity: 3, relationKey: `EXTRA-${marker}`,
+    }));
+    assert.equal(extra.line.relationKind, PurchaseLineRelationKind.EXTRA_ORDER);
+    const originalAfterSupplements = await db.purchaseOrderLine.findUniqueOrThrow({
+      where: { id: created.lines[0].id }, include: { receiptLines: true, supplementLines: true },
+    });
+    assert.equal(Number(originalAfterSupplements.expectedBaseQty), 5);
+    assert.equal(originalAfterSupplements.receiptLines[0].receiptId, rejectionReceipt.id);
+    assert.equal(originalAfterSupplements.receiptLines[0].rejectionReason, "到货破损");
+    assert.equal(originalAfterSupplements.supplementLines.length, 2);
+
+    const warehouse = await db.inventoryLocation.create({
+      data: { storeId, code: "WH", kind: LocationKind.WAREHOUSE },
+    });
+    const receive = (lineId: string, quantity: number, key = lineId) => db.$transaction((tx) => receivePurchaseLine(tx, {
+      tenantId: scope.tenantId,
+      actorStaffId: scope.actorStaffId,
+      purchaseLineId: lineId,
+      locationId: warehouse.id,
+      acceptedMaterialId: material.id,
+      quantity,
+      batchNo: `B-${key}`,
+      disposition: ReceiptDisposition.ACCEPTED,
+      finalUnitCost: 1.5,
+      idempotencyKey: `RECEIPT-${key}`,
+    }));
+    const originalLineId = created.lines[0].id;
+    await receive(originalLineId, 3);
+    await assert.rejects(receive(originalLineId, 1, `OVER-${marker}`), /累计处理数量将超过采购基础数量/);
+    for (const [lineId, quantity] of [[reDelivery.line.id, 2], [extra.line.id, 3]] as const) {
+      const batchId = await receive(lineId, quantity);
+      assert.equal(await receive(lineId, quantity), batchId);
+      const batch = await db.inventoryBatch.findUniqueOrThrow({
+        where: { id: batchId }, include: { receiptLine: true, balances: true },
+      });
+      assert.equal(batch.receiptLine?.purchaseLineId, lineId);
+      assert.equal(Number(batch.balances[0].onHandQty), quantity);
+      assert.equal(await db.inventoryTransaction.count({
+        where: { batchId, kind: TransactionKind.INBOUND },
+      }), 1);
+    }
+    const originalReceipts = await db.goodsReceiptLine.findMany({ where: { purchaseLineId: originalLineId } });
+    assert.equal(originalReceipts.length, 2);
+    assert.equal(originalReceipts.reduce((sum, row) => sum + Number(row.quantity), 0), 5);
+    assert.equal(originalReceipts.find((row) => row.receiptId === rejectionReceipt.id)?.rejectionReason, "到货破损");
+
     // A repeat submit with the same key reuses the order, line and allocation without writing.
     const retry = await db.$transaction((tx) => createLinkedPurchaseOrder(tx, scope, input));
     assert.equal(retry.idempotent, true);
@@ -206,6 +281,7 @@ async function cleanup(db: PrismaClient): Promise<void> {
   await db.inventoryBatch.deleteMany({ where: { store: tenants } });
   await db.goodsReceiptLine.deleteMany({ where: { receipt: { store: tenants } } });
   await db.goodsReceipt.deleteMany({ where: { store: tenants } });
+  await db.purchaseOrderLine.deleteMany({ where: { purchaseOrder: tenants, sourceLineId: { not: null } } });
   await db.purchaseOrderLine.deleteMany({ where: { purchaseOrder: tenants } });
   await db.purchaseOrder.deleteMany({ where: tenants });
   await db.supplier.deleteMany({ where: tenants });

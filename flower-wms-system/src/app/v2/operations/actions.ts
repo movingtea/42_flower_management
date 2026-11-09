@@ -7,8 +7,8 @@ import { v2db } from "@/v2/db";
 import { generateBatchNumber } from "@/v2/domain/identifiers";
 import { createManualInbound } from "@/v2/services/manual-inbound";
 import { adjustInventory, transferInventory } from "@/v2/services/inventory-operations";
-import { confirmStocktake, createStocktakeDraft } from "@/v2/services/stocktake";
-import { recordLoss } from "@/v2/services/loss-management";
+import { confirmStocktake, createStocktakeDraft, reviewStocktake } from "@/v2/services/stocktake";
+import { recordLoss, reviewUnknownBatchLoss, submitUnknownBatchLoss } from "@/v2/services/loss-management";
 import { LOSS_REASON_LABELS, LOSS_REASON_OPTIONS } from "./labels";
 
 const STOCKTAKE_LINE_LIMIT = 3;
@@ -257,8 +257,29 @@ export async function confirmStocktakeAction(data: FormData) {
       if (asRecord(result).alreadyConfirmed === true) {
         return `盘点单 ${stocktakeId} 此前已确认，本次未重复调整库存（已调整 ${adjustmentCount} 行）。`;
       }
+      if (asRecord(result).pendingReview === true) {
+        const reasons = Array.isArray(asRecord(result).reviewReasons)
+          ? (asRecord(result).reviewReasons as unknown[]).join("、") : "触发库存复核规则";
+        return `盘点单 ${stocktakeId} 已提交复核（${reasons}）；复核通过前不会调整库存。`;
+      }
       return `盘点已确认：盘点单 ${stocktakeId}，调整 ${adjustmentCount} 行，库存已按实盘数更新并生成 ADJUSTMENT 流水。`;
     });
+  });
+}
+
+export async function reviewStocktakeAction(data: FormData) {
+  return run(async () => {
+    const scope = await requireV2Store("inventory_review");
+    const stocktakeId = text(data, "stocktakeId");
+    const decision = text(data, "decision");
+    if (!stocktakeId) throw new Error("缺少盘点单编号");
+    if (decision !== "APPROVE" && decision !== "REJECT") throw new Error("复核决定无效");
+    await v2db.$transaction((tx) => reviewStocktake(
+      tx, serviceScope(scope), stocktakeId, decision, text(data, "note"),
+    ));
+    return decision === "APPROVE"
+      ? `盘点单 ${stocktakeId} 已复核通过并完成库存调整。`
+      : `盘点单 ${stocktakeId} 已复核拒绝，库存未调整。`;
   });
 }
 
@@ -300,5 +321,32 @@ export async function recordLossAction(data: FormData) {
       const materialLabel = batch ? `${batch.material.code} ${batch.material.name}` : "物料";
       return `损耗已登记：损耗单 ${lossId ?? record?.id ?? "—"}，流水 ${transaction?.id ?? "—"}，批次 ${batch?.batchNo ?? batchId}（${materialLabel}）${quantity} ${unit}，库位 ${location?.code ?? locationId}，原因 ${LOSS_REASON_LABELS[reason]}；登记后库位实存 ${formatQty(balance?.onHandQty)} ${unit}。`;
     });
+  });
+}
+
+export async function submitUnknownBatchLossAction(data: FormData) {
+  return run(async () => {
+    const scope = await requireV2Store("purchase");
+    const reasonValue = text(data, "reason");
+    if (!LOSS_REASON_OPTIONS.includes(reasonValue as LossReason)) throw new Error("请选择有效的损耗原因");
+    const result = await v2db.$transaction((tx) => submitUnknownBatchLoss(tx, serviceScope(scope), {
+      materialId: text(data, "materialId"), locationId: text(data, "locationId"),
+      quantity: numeric(data, "quantity", "损耗数量"), reason: reasonValue as LossReason,
+      note: text(data, "note"), idempotencyKey: idempotencyKey(data, "UNKNOWN-LOSS"),
+    }));
+    return `批次不明损耗 ${result.lossRecordId} 已提交复核；复核前不会扣减库存。`;
+  });
+}
+
+export async function reviewUnknownBatchLossAction(data: FormData) {
+  return run(async () => {
+    const scope = await requireV2Store("inventory_review");
+    const decision = text(data, "decision");
+    if (decision !== "APPROVE" && decision !== "REJECT") throw new Error("复核决定无效");
+    await v2db.$transaction((tx) => reviewUnknownBatchLoss(tx, serviceScope(scope), {
+      lossRecordId: text(data, "lossRecordId"), decision,
+      batchId: text(data, "batchId") || undefined, note: text(data, "note"),
+    }));
+    return decision === "APPROVE" ? "批次不明损耗已复核并扣减库存" : "批次不明损耗已拒绝，库存未调整";
   });
 }

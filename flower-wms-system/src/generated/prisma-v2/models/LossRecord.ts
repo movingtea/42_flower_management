@@ -38,11 +38,18 @@ export type LossRecordMinAggregateOutputType = {
   id: string | null
   storeId: string | null
   batchId: string | null
+  materialId: string | null
+  locationId: string | null
   orderId: string | null
   reason: $Enums.LossReason | null
   quantity: runtime.Decimal | null
   note: string | null
   pendingBatchVerification: boolean | null
+  reviewStatus: $Enums.InventoryReviewStatus | null
+  submittedById: string | null
+  reviewedById: string | null
+  reviewedAt: Date | null
+  reviewNote: string | null
   occurredAt: Date | null
 }
 
@@ -50,11 +57,18 @@ export type LossRecordMaxAggregateOutputType = {
   id: string | null
   storeId: string | null
   batchId: string | null
+  materialId: string | null
+  locationId: string | null
   orderId: string | null
   reason: $Enums.LossReason | null
   quantity: runtime.Decimal | null
   note: string | null
   pendingBatchVerification: boolean | null
+  reviewStatus: $Enums.InventoryReviewStatus | null
+  submittedById: string | null
+  reviewedById: string | null
+  reviewedAt: Date | null
+  reviewNote: string | null
   occurredAt: Date | null
 }
 
@@ -62,11 +76,18 @@ export type LossRecordCountAggregateOutputType = {
   id: number
   storeId: number
   batchId: number
+  materialId: number
+  locationId: number
   orderId: number
   reason: number
   quantity: number
   note: number
   pendingBatchVerification: number
+  reviewStatus: number
+  submittedById: number
+  reviewedById: number
+  reviewedAt: number
+  reviewNote: number
   occurredAt: number
   _all: number
 }
@@ -84,11 +105,18 @@ export type LossRecordMinAggregateInputType = {
   id?: true
   storeId?: true
   batchId?: true
+  materialId?: true
+  locationId?: true
   orderId?: true
   reason?: true
   quantity?: true
   note?: true
   pendingBatchVerification?: true
+  reviewStatus?: true
+  submittedById?: true
+  reviewedById?: true
+  reviewedAt?: true
+  reviewNote?: true
   occurredAt?: true
 }
 
@@ -96,11 +124,18 @@ export type LossRecordMaxAggregateInputType = {
   id?: true
   storeId?: true
   batchId?: true
+  materialId?: true
+  locationId?: true
   orderId?: true
   reason?: true
   quantity?: true
   note?: true
   pendingBatchVerification?: true
+  reviewStatus?: true
+  submittedById?: true
+  reviewedById?: true
+  reviewedAt?: true
+  reviewNote?: true
   occurredAt?: true
 }
 
@@ -108,11 +143,18 @@ export type LossRecordCountAggregateInputType = {
   id?: true
   storeId?: true
   batchId?: true
+  materialId?: true
+  locationId?: true
   orderId?: true
   reason?: true
   quantity?: true
   note?: true
   pendingBatchVerification?: true
+  reviewStatus?: true
+  submittedById?: true
+  reviewedById?: true
+  reviewedAt?: true
+  reviewNote?: true
   occurredAt?: true
   _all?: true
 }
@@ -207,11 +249,18 @@ export type LossRecordGroupByOutputType = {
   id: string
   storeId: string
   batchId: string | null
+  materialId: string | null
+  locationId: string | null
   orderId: string | null
   reason: $Enums.LossReason
   quantity: runtime.Decimal
   note: string | null
   pendingBatchVerification: boolean
+  reviewStatus: $Enums.InventoryReviewStatus | null
+  submittedById: string | null
+  reviewedById: string | null
+  reviewedAt: Date | null
+  reviewNote: string | null
   occurredAt: Date
   _count: LossRecordCountAggregateOutputType | null
   _avg: LossRecordAvgAggregateOutputType | null
@@ -242,14 +291,23 @@ export type LossRecordWhereInput = {
   id?: Prisma.StringFilter<"LossRecord"> | string
   storeId?: Prisma.StringFilter<"LossRecord"> | string
   batchId?: Prisma.StringNullableFilter<"LossRecord"> | string | null
+  materialId?: Prisma.StringNullableFilter<"LossRecord"> | string | null
+  locationId?: Prisma.StringNullableFilter<"LossRecord"> | string | null
   orderId?: Prisma.StringNullableFilter<"LossRecord"> | string | null
   reason?: Prisma.EnumLossReasonFilter<"LossRecord"> | $Enums.LossReason
   quantity?: Prisma.DecimalFilter<"LossRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: Prisma.StringNullableFilter<"LossRecord"> | string | null
   pendingBatchVerification?: Prisma.BoolFilter<"LossRecord"> | boolean
+  reviewStatus?: Prisma.EnumInventoryReviewStatusNullableFilter<"LossRecord"> | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.StringNullableFilter<"LossRecord"> | string | null
+  reviewedById?: Prisma.StringNullableFilter<"LossRecord"> | string | null
+  reviewedAt?: Prisma.DateTimeNullableFilter<"LossRecord"> | Date | string | null
+  reviewNote?: Prisma.StringNullableFilter<"LossRecord"> | string | null
   occurredAt?: Prisma.DateTimeFilter<"LossRecord"> | Date | string
   store?: Prisma.XOR<Prisma.StoreScalarRelationFilter, Prisma.StoreWhereInput>
   batch?: Prisma.XOR<Prisma.InventoryBatchNullableScalarRelationFilter, Prisma.InventoryBatchWhereInput> | null
+  material?: Prisma.XOR<Prisma.MaterialNullableScalarRelationFilter, Prisma.MaterialWhereInput> | null
+  location?: Prisma.XOR<Prisma.InventoryLocationNullableScalarRelationFilter, Prisma.InventoryLocationWhereInput> | null
   order?: Prisma.XOR<Prisma.OrderNullableScalarRelationFilter, Prisma.OrderWhereInput> | null
 }
 
@@ -257,14 +315,23 @@ export type LossRecordOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   storeId?: Prisma.SortOrder
   batchId?: Prisma.SortOrderInput | Prisma.SortOrder
+  materialId?: Prisma.SortOrderInput | Prisma.SortOrder
+  locationId?: Prisma.SortOrderInput | Prisma.SortOrder
   orderId?: Prisma.SortOrderInput | Prisma.SortOrder
   reason?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   pendingBatchVerification?: Prisma.SortOrder
+  reviewStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  submittedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewNote?: Prisma.SortOrderInput | Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
   store?: Prisma.StoreOrderByWithRelationInput
   batch?: Prisma.InventoryBatchOrderByWithRelationInput
+  material?: Prisma.MaterialOrderByWithRelationInput
+  location?: Prisma.InventoryLocationOrderByWithRelationInput
   order?: Prisma.OrderOrderByWithRelationInput
 }
 
@@ -275,14 +342,23 @@ export type LossRecordWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.LossRecordWhereInput | Prisma.LossRecordWhereInput[]
   storeId?: Prisma.StringFilter<"LossRecord"> | string
   batchId?: Prisma.StringNullableFilter<"LossRecord"> | string | null
+  materialId?: Prisma.StringNullableFilter<"LossRecord"> | string | null
+  locationId?: Prisma.StringNullableFilter<"LossRecord"> | string | null
   orderId?: Prisma.StringNullableFilter<"LossRecord"> | string | null
   reason?: Prisma.EnumLossReasonFilter<"LossRecord"> | $Enums.LossReason
   quantity?: Prisma.DecimalFilter<"LossRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: Prisma.StringNullableFilter<"LossRecord"> | string | null
   pendingBatchVerification?: Prisma.BoolFilter<"LossRecord"> | boolean
+  reviewStatus?: Prisma.EnumInventoryReviewStatusNullableFilter<"LossRecord"> | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.StringNullableFilter<"LossRecord"> | string | null
+  reviewedById?: Prisma.StringNullableFilter<"LossRecord"> | string | null
+  reviewedAt?: Prisma.DateTimeNullableFilter<"LossRecord"> | Date | string | null
+  reviewNote?: Prisma.StringNullableFilter<"LossRecord"> | string | null
   occurredAt?: Prisma.DateTimeFilter<"LossRecord"> | Date | string
   store?: Prisma.XOR<Prisma.StoreScalarRelationFilter, Prisma.StoreWhereInput>
   batch?: Prisma.XOR<Prisma.InventoryBatchNullableScalarRelationFilter, Prisma.InventoryBatchWhereInput> | null
+  material?: Prisma.XOR<Prisma.MaterialNullableScalarRelationFilter, Prisma.MaterialWhereInput> | null
+  location?: Prisma.XOR<Prisma.InventoryLocationNullableScalarRelationFilter, Prisma.InventoryLocationWhereInput> | null
   order?: Prisma.XOR<Prisma.OrderNullableScalarRelationFilter, Prisma.OrderWhereInput> | null
 }, "id">
 
@@ -290,11 +366,18 @@ export type LossRecordOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   storeId?: Prisma.SortOrder
   batchId?: Prisma.SortOrderInput | Prisma.SortOrder
+  materialId?: Prisma.SortOrderInput | Prisma.SortOrder
+  locationId?: Prisma.SortOrderInput | Prisma.SortOrder
   orderId?: Prisma.SortOrderInput | Prisma.SortOrder
   reason?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   pendingBatchVerification?: Prisma.SortOrder
+  reviewStatus?: Prisma.SortOrderInput | Prisma.SortOrder
+  submittedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewedById?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  reviewNote?: Prisma.SortOrderInput | Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
   _count?: Prisma.LossRecordCountOrderByAggregateInput
   _avg?: Prisma.LossRecordAvgOrderByAggregateInput
@@ -310,11 +393,18 @@ export type LossRecordScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"LossRecord"> | string
   storeId?: Prisma.StringWithAggregatesFilter<"LossRecord"> | string
   batchId?: Prisma.StringNullableWithAggregatesFilter<"LossRecord"> | string | null
+  materialId?: Prisma.StringNullableWithAggregatesFilter<"LossRecord"> | string | null
+  locationId?: Prisma.StringNullableWithAggregatesFilter<"LossRecord"> | string | null
   orderId?: Prisma.StringNullableWithAggregatesFilter<"LossRecord"> | string | null
   reason?: Prisma.EnumLossReasonWithAggregatesFilter<"LossRecord"> | $Enums.LossReason
   quantity?: Prisma.DecimalWithAggregatesFilter<"LossRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: Prisma.StringNullableWithAggregatesFilter<"LossRecord"> | string | null
   pendingBatchVerification?: Prisma.BoolWithAggregatesFilter<"LossRecord"> | boolean
+  reviewStatus?: Prisma.EnumInventoryReviewStatusNullableWithAggregatesFilter<"LossRecord"> | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.StringNullableWithAggregatesFilter<"LossRecord"> | string | null
+  reviewedById?: Prisma.StringNullableWithAggregatesFilter<"LossRecord"> | string | null
+  reviewedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"LossRecord"> | Date | string | null
+  reviewNote?: Prisma.StringNullableWithAggregatesFilter<"LossRecord"> | string | null
   occurredAt?: Prisma.DateTimeWithAggregatesFilter<"LossRecord"> | Date | string
 }
 
@@ -324,9 +414,16 @@ export type LossRecordCreateInput = {
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: string | null
   pendingBatchVerification?: boolean
+  reviewStatus?: $Enums.InventoryReviewStatus | null
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
   occurredAt?: Date | string
   store: Prisma.StoreCreateNestedOneWithoutLossesInput
   batch?: Prisma.InventoryBatchCreateNestedOneWithoutLossesInput
+  material?: Prisma.MaterialCreateNestedOneWithoutUnverifiedLossesInput
+  location?: Prisma.InventoryLocationCreateNestedOneWithoutUnverifiedLossesInput
   order?: Prisma.OrderCreateNestedOneWithoutLossesInput
 }
 
@@ -334,11 +431,18 @@ export type LossRecordUncheckedCreateInput = {
   id?: string
   storeId: string
   batchId?: string | null
+  materialId?: string | null
+  locationId?: string | null
   orderId?: string | null
   reason: $Enums.LossReason
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: string | null
   pendingBatchVerification?: boolean
+  reviewStatus?: $Enums.InventoryReviewStatus | null
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
   occurredAt?: Date | string
 }
 
@@ -348,9 +452,16 @@ export type LossRecordUpdateInput = {
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   store?: Prisma.StoreUpdateOneRequiredWithoutLossesNestedInput
   batch?: Prisma.InventoryBatchUpdateOneWithoutLossesNestedInput
+  material?: Prisma.MaterialUpdateOneWithoutUnverifiedLossesNestedInput
+  location?: Prisma.InventoryLocationUpdateOneWithoutUnverifiedLossesNestedInput
   order?: Prisma.OrderUpdateOneWithoutLossesNestedInput
 }
 
@@ -358,11 +469,18 @@ export type LossRecordUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.StringFieldUpdateOperationsInput | string
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  materialId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reason?: Prisma.EnumLossReasonFieldUpdateOperationsInput | $Enums.LossReason
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -370,11 +488,18 @@ export type LossRecordCreateManyInput = {
   id?: string
   storeId: string
   batchId?: string | null
+  materialId?: string | null
+  locationId?: string | null
   orderId?: string | null
   reason: $Enums.LossReason
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: string | null
   pendingBatchVerification?: boolean
+  reviewStatus?: $Enums.InventoryReviewStatus | null
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
   occurredAt?: Date | string
 }
 
@@ -384,6 +509,11 @@ export type LossRecordUpdateManyMutationInput = {
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -391,11 +521,18 @@ export type LossRecordUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.StringFieldUpdateOperationsInput | string
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  materialId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reason?: Prisma.EnumLossReasonFieldUpdateOperationsInput | $Enums.LossReason
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -413,11 +550,18 @@ export type LossRecordCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   storeId?: Prisma.SortOrder
   batchId?: Prisma.SortOrder
+  materialId?: Prisma.SortOrder
+  locationId?: Prisma.SortOrder
   orderId?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   note?: Prisma.SortOrder
   pendingBatchVerification?: Prisma.SortOrder
+  reviewStatus?: Prisma.SortOrder
+  submittedById?: Prisma.SortOrder
+  reviewedById?: Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrder
+  reviewNote?: Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
 }
 
@@ -429,11 +573,18 @@ export type LossRecordMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   storeId?: Prisma.SortOrder
   batchId?: Prisma.SortOrder
+  materialId?: Prisma.SortOrder
+  locationId?: Prisma.SortOrder
   orderId?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   note?: Prisma.SortOrder
   pendingBatchVerification?: Prisma.SortOrder
+  reviewStatus?: Prisma.SortOrder
+  submittedById?: Prisma.SortOrder
+  reviewedById?: Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrder
+  reviewNote?: Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
 }
 
@@ -441,11 +592,18 @@ export type LossRecordMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   storeId?: Prisma.SortOrder
   batchId?: Prisma.SortOrder
+  materialId?: Prisma.SortOrder
+  locationId?: Prisma.SortOrder
   orderId?: Prisma.SortOrder
   reason?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   note?: Prisma.SortOrder
   pendingBatchVerification?: Prisma.SortOrder
+  reviewStatus?: Prisma.SortOrder
+  submittedById?: Prisma.SortOrder
+  reviewedById?: Prisma.SortOrder
+  reviewedAt?: Prisma.SortOrder
+  reviewNote?: Prisma.SortOrder
   occurredAt?: Prisma.SortOrder
 }
 
@@ -492,6 +650,90 @@ export type LossRecordUncheckedUpdateManyWithoutStoreNestedInput = {
   connect?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
   update?: Prisma.LossRecordUpdateWithWhereUniqueWithoutStoreInput | Prisma.LossRecordUpdateWithWhereUniqueWithoutStoreInput[]
   updateMany?: Prisma.LossRecordUpdateManyWithWhereWithoutStoreInput | Prisma.LossRecordUpdateManyWithWhereWithoutStoreInput[]
+  deleteMany?: Prisma.LossRecordScalarWhereInput | Prisma.LossRecordScalarWhereInput[]
+}
+
+export type LossRecordCreateNestedManyWithoutLocationInput = {
+  create?: Prisma.XOR<Prisma.LossRecordCreateWithoutLocationInput, Prisma.LossRecordUncheckedCreateWithoutLocationInput> | Prisma.LossRecordCreateWithoutLocationInput[] | Prisma.LossRecordUncheckedCreateWithoutLocationInput[]
+  connectOrCreate?: Prisma.LossRecordCreateOrConnectWithoutLocationInput | Prisma.LossRecordCreateOrConnectWithoutLocationInput[]
+  createMany?: Prisma.LossRecordCreateManyLocationInputEnvelope
+  connect?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+}
+
+export type LossRecordUncheckedCreateNestedManyWithoutLocationInput = {
+  create?: Prisma.XOR<Prisma.LossRecordCreateWithoutLocationInput, Prisma.LossRecordUncheckedCreateWithoutLocationInput> | Prisma.LossRecordCreateWithoutLocationInput[] | Prisma.LossRecordUncheckedCreateWithoutLocationInput[]
+  connectOrCreate?: Prisma.LossRecordCreateOrConnectWithoutLocationInput | Prisma.LossRecordCreateOrConnectWithoutLocationInput[]
+  createMany?: Prisma.LossRecordCreateManyLocationInputEnvelope
+  connect?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+}
+
+export type LossRecordUpdateManyWithoutLocationNestedInput = {
+  create?: Prisma.XOR<Prisma.LossRecordCreateWithoutLocationInput, Prisma.LossRecordUncheckedCreateWithoutLocationInput> | Prisma.LossRecordCreateWithoutLocationInput[] | Prisma.LossRecordUncheckedCreateWithoutLocationInput[]
+  connectOrCreate?: Prisma.LossRecordCreateOrConnectWithoutLocationInput | Prisma.LossRecordCreateOrConnectWithoutLocationInput[]
+  upsert?: Prisma.LossRecordUpsertWithWhereUniqueWithoutLocationInput | Prisma.LossRecordUpsertWithWhereUniqueWithoutLocationInput[]
+  createMany?: Prisma.LossRecordCreateManyLocationInputEnvelope
+  set?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+  disconnect?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+  delete?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+  connect?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+  update?: Prisma.LossRecordUpdateWithWhereUniqueWithoutLocationInput | Prisma.LossRecordUpdateWithWhereUniqueWithoutLocationInput[]
+  updateMany?: Prisma.LossRecordUpdateManyWithWhereWithoutLocationInput | Prisma.LossRecordUpdateManyWithWhereWithoutLocationInput[]
+  deleteMany?: Prisma.LossRecordScalarWhereInput | Prisma.LossRecordScalarWhereInput[]
+}
+
+export type LossRecordUncheckedUpdateManyWithoutLocationNestedInput = {
+  create?: Prisma.XOR<Prisma.LossRecordCreateWithoutLocationInput, Prisma.LossRecordUncheckedCreateWithoutLocationInput> | Prisma.LossRecordCreateWithoutLocationInput[] | Prisma.LossRecordUncheckedCreateWithoutLocationInput[]
+  connectOrCreate?: Prisma.LossRecordCreateOrConnectWithoutLocationInput | Prisma.LossRecordCreateOrConnectWithoutLocationInput[]
+  upsert?: Prisma.LossRecordUpsertWithWhereUniqueWithoutLocationInput | Prisma.LossRecordUpsertWithWhereUniqueWithoutLocationInput[]
+  createMany?: Prisma.LossRecordCreateManyLocationInputEnvelope
+  set?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+  disconnect?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+  delete?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+  connect?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+  update?: Prisma.LossRecordUpdateWithWhereUniqueWithoutLocationInput | Prisma.LossRecordUpdateWithWhereUniqueWithoutLocationInput[]
+  updateMany?: Prisma.LossRecordUpdateManyWithWhereWithoutLocationInput | Prisma.LossRecordUpdateManyWithWhereWithoutLocationInput[]
+  deleteMany?: Prisma.LossRecordScalarWhereInput | Prisma.LossRecordScalarWhereInput[]
+}
+
+export type LossRecordCreateNestedManyWithoutMaterialInput = {
+  create?: Prisma.XOR<Prisma.LossRecordCreateWithoutMaterialInput, Prisma.LossRecordUncheckedCreateWithoutMaterialInput> | Prisma.LossRecordCreateWithoutMaterialInput[] | Prisma.LossRecordUncheckedCreateWithoutMaterialInput[]
+  connectOrCreate?: Prisma.LossRecordCreateOrConnectWithoutMaterialInput | Prisma.LossRecordCreateOrConnectWithoutMaterialInput[]
+  createMany?: Prisma.LossRecordCreateManyMaterialInputEnvelope
+  connect?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+}
+
+export type LossRecordUncheckedCreateNestedManyWithoutMaterialInput = {
+  create?: Prisma.XOR<Prisma.LossRecordCreateWithoutMaterialInput, Prisma.LossRecordUncheckedCreateWithoutMaterialInput> | Prisma.LossRecordCreateWithoutMaterialInput[] | Prisma.LossRecordUncheckedCreateWithoutMaterialInput[]
+  connectOrCreate?: Prisma.LossRecordCreateOrConnectWithoutMaterialInput | Prisma.LossRecordCreateOrConnectWithoutMaterialInput[]
+  createMany?: Prisma.LossRecordCreateManyMaterialInputEnvelope
+  connect?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+}
+
+export type LossRecordUpdateManyWithoutMaterialNestedInput = {
+  create?: Prisma.XOR<Prisma.LossRecordCreateWithoutMaterialInput, Prisma.LossRecordUncheckedCreateWithoutMaterialInput> | Prisma.LossRecordCreateWithoutMaterialInput[] | Prisma.LossRecordUncheckedCreateWithoutMaterialInput[]
+  connectOrCreate?: Prisma.LossRecordCreateOrConnectWithoutMaterialInput | Prisma.LossRecordCreateOrConnectWithoutMaterialInput[]
+  upsert?: Prisma.LossRecordUpsertWithWhereUniqueWithoutMaterialInput | Prisma.LossRecordUpsertWithWhereUniqueWithoutMaterialInput[]
+  createMany?: Prisma.LossRecordCreateManyMaterialInputEnvelope
+  set?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+  disconnect?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+  delete?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+  connect?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+  update?: Prisma.LossRecordUpdateWithWhereUniqueWithoutMaterialInput | Prisma.LossRecordUpdateWithWhereUniqueWithoutMaterialInput[]
+  updateMany?: Prisma.LossRecordUpdateManyWithWhereWithoutMaterialInput | Prisma.LossRecordUpdateManyWithWhereWithoutMaterialInput[]
+  deleteMany?: Prisma.LossRecordScalarWhereInput | Prisma.LossRecordScalarWhereInput[]
+}
+
+export type LossRecordUncheckedUpdateManyWithoutMaterialNestedInput = {
+  create?: Prisma.XOR<Prisma.LossRecordCreateWithoutMaterialInput, Prisma.LossRecordUncheckedCreateWithoutMaterialInput> | Prisma.LossRecordCreateWithoutMaterialInput[] | Prisma.LossRecordUncheckedCreateWithoutMaterialInput[]
+  connectOrCreate?: Prisma.LossRecordCreateOrConnectWithoutMaterialInput | Prisma.LossRecordCreateOrConnectWithoutMaterialInput[]
+  upsert?: Prisma.LossRecordUpsertWithWhereUniqueWithoutMaterialInput | Prisma.LossRecordUpsertWithWhereUniqueWithoutMaterialInput[]
+  createMany?: Prisma.LossRecordCreateManyMaterialInputEnvelope
+  set?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+  disconnect?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+  delete?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+  connect?: Prisma.LossRecordWhereUniqueInput | Prisma.LossRecordWhereUniqueInput[]
+  update?: Prisma.LossRecordUpdateWithWhereUniqueWithoutMaterialInput | Prisma.LossRecordUpdateWithWhereUniqueWithoutMaterialInput[]
+  updateMany?: Prisma.LossRecordUpdateManyWithWhereWithoutMaterialInput | Prisma.LossRecordUpdateManyWithWhereWithoutMaterialInput[]
   deleteMany?: Prisma.LossRecordScalarWhereInput | Prisma.LossRecordScalarWhereInput[]
 }
 
@@ -583,25 +825,43 @@ export type EnumLossReasonFieldUpdateOperationsInput = {
   set?: $Enums.LossReason
 }
 
+export type NullableEnumInventoryReviewStatusFieldUpdateOperationsInput = {
+  set?: $Enums.InventoryReviewStatus | null
+}
+
 export type LossRecordCreateWithoutStoreInput = {
   id?: string
   reason: $Enums.LossReason
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: string | null
   pendingBatchVerification?: boolean
+  reviewStatus?: $Enums.InventoryReviewStatus | null
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
   occurredAt?: Date | string
   batch?: Prisma.InventoryBatchCreateNestedOneWithoutLossesInput
+  material?: Prisma.MaterialCreateNestedOneWithoutUnverifiedLossesInput
+  location?: Prisma.InventoryLocationCreateNestedOneWithoutUnverifiedLossesInput
   order?: Prisma.OrderCreateNestedOneWithoutLossesInput
 }
 
 export type LossRecordUncheckedCreateWithoutStoreInput = {
   id?: string
   batchId?: string | null
+  materialId?: string | null
+  locationId?: string | null
   orderId?: string | null
   reason: $Enums.LossReason
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: string | null
   pendingBatchVerification?: boolean
+  reviewStatus?: $Enums.InventoryReviewStatus | null
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
   occurredAt?: Date | string
 }
 
@@ -638,12 +898,143 @@ export type LossRecordScalarWhereInput = {
   id?: Prisma.StringFilter<"LossRecord"> | string
   storeId?: Prisma.StringFilter<"LossRecord"> | string
   batchId?: Prisma.StringNullableFilter<"LossRecord"> | string | null
+  materialId?: Prisma.StringNullableFilter<"LossRecord"> | string | null
+  locationId?: Prisma.StringNullableFilter<"LossRecord"> | string | null
   orderId?: Prisma.StringNullableFilter<"LossRecord"> | string | null
   reason?: Prisma.EnumLossReasonFilter<"LossRecord"> | $Enums.LossReason
   quantity?: Prisma.DecimalFilter<"LossRecord"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: Prisma.StringNullableFilter<"LossRecord"> | string | null
   pendingBatchVerification?: Prisma.BoolFilter<"LossRecord"> | boolean
+  reviewStatus?: Prisma.EnumInventoryReviewStatusNullableFilter<"LossRecord"> | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.StringNullableFilter<"LossRecord"> | string | null
+  reviewedById?: Prisma.StringNullableFilter<"LossRecord"> | string | null
+  reviewedAt?: Prisma.DateTimeNullableFilter<"LossRecord"> | Date | string | null
+  reviewNote?: Prisma.StringNullableFilter<"LossRecord"> | string | null
   occurredAt?: Prisma.DateTimeFilter<"LossRecord"> | Date | string
+}
+
+export type LossRecordCreateWithoutLocationInput = {
+  id?: string
+  reason: $Enums.LossReason
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  note?: string | null
+  pendingBatchVerification?: boolean
+  reviewStatus?: $Enums.InventoryReviewStatus | null
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
+  occurredAt?: Date | string
+  store: Prisma.StoreCreateNestedOneWithoutLossesInput
+  batch?: Prisma.InventoryBatchCreateNestedOneWithoutLossesInput
+  material?: Prisma.MaterialCreateNestedOneWithoutUnverifiedLossesInput
+  order?: Prisma.OrderCreateNestedOneWithoutLossesInput
+}
+
+export type LossRecordUncheckedCreateWithoutLocationInput = {
+  id?: string
+  storeId: string
+  batchId?: string | null
+  materialId?: string | null
+  orderId?: string | null
+  reason: $Enums.LossReason
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  note?: string | null
+  pendingBatchVerification?: boolean
+  reviewStatus?: $Enums.InventoryReviewStatus | null
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
+  occurredAt?: Date | string
+}
+
+export type LossRecordCreateOrConnectWithoutLocationInput = {
+  where: Prisma.LossRecordWhereUniqueInput
+  create: Prisma.XOR<Prisma.LossRecordCreateWithoutLocationInput, Prisma.LossRecordUncheckedCreateWithoutLocationInput>
+}
+
+export type LossRecordCreateManyLocationInputEnvelope = {
+  data: Prisma.LossRecordCreateManyLocationInput | Prisma.LossRecordCreateManyLocationInput[]
+  skipDuplicates?: boolean
+}
+
+export type LossRecordUpsertWithWhereUniqueWithoutLocationInput = {
+  where: Prisma.LossRecordWhereUniqueInput
+  update: Prisma.XOR<Prisma.LossRecordUpdateWithoutLocationInput, Prisma.LossRecordUncheckedUpdateWithoutLocationInput>
+  create: Prisma.XOR<Prisma.LossRecordCreateWithoutLocationInput, Prisma.LossRecordUncheckedCreateWithoutLocationInput>
+}
+
+export type LossRecordUpdateWithWhereUniqueWithoutLocationInput = {
+  where: Prisma.LossRecordWhereUniqueInput
+  data: Prisma.XOR<Prisma.LossRecordUpdateWithoutLocationInput, Prisma.LossRecordUncheckedUpdateWithoutLocationInput>
+}
+
+export type LossRecordUpdateManyWithWhereWithoutLocationInput = {
+  where: Prisma.LossRecordScalarWhereInput
+  data: Prisma.XOR<Prisma.LossRecordUpdateManyMutationInput, Prisma.LossRecordUncheckedUpdateManyWithoutLocationInput>
+}
+
+export type LossRecordCreateWithoutMaterialInput = {
+  id?: string
+  reason: $Enums.LossReason
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  note?: string | null
+  pendingBatchVerification?: boolean
+  reviewStatus?: $Enums.InventoryReviewStatus | null
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
+  occurredAt?: Date | string
+  store: Prisma.StoreCreateNestedOneWithoutLossesInput
+  batch?: Prisma.InventoryBatchCreateNestedOneWithoutLossesInput
+  location?: Prisma.InventoryLocationCreateNestedOneWithoutUnverifiedLossesInput
+  order?: Prisma.OrderCreateNestedOneWithoutLossesInput
+}
+
+export type LossRecordUncheckedCreateWithoutMaterialInput = {
+  id?: string
+  storeId: string
+  batchId?: string | null
+  locationId?: string | null
+  orderId?: string | null
+  reason: $Enums.LossReason
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  note?: string | null
+  pendingBatchVerification?: boolean
+  reviewStatus?: $Enums.InventoryReviewStatus | null
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
+  occurredAt?: Date | string
+}
+
+export type LossRecordCreateOrConnectWithoutMaterialInput = {
+  where: Prisma.LossRecordWhereUniqueInput
+  create: Prisma.XOR<Prisma.LossRecordCreateWithoutMaterialInput, Prisma.LossRecordUncheckedCreateWithoutMaterialInput>
+}
+
+export type LossRecordCreateManyMaterialInputEnvelope = {
+  data: Prisma.LossRecordCreateManyMaterialInput | Prisma.LossRecordCreateManyMaterialInput[]
+  skipDuplicates?: boolean
+}
+
+export type LossRecordUpsertWithWhereUniqueWithoutMaterialInput = {
+  where: Prisma.LossRecordWhereUniqueInput
+  update: Prisma.XOR<Prisma.LossRecordUpdateWithoutMaterialInput, Prisma.LossRecordUncheckedUpdateWithoutMaterialInput>
+  create: Prisma.XOR<Prisma.LossRecordCreateWithoutMaterialInput, Prisma.LossRecordUncheckedCreateWithoutMaterialInput>
+}
+
+export type LossRecordUpdateWithWhereUniqueWithoutMaterialInput = {
+  where: Prisma.LossRecordWhereUniqueInput
+  data: Prisma.XOR<Prisma.LossRecordUpdateWithoutMaterialInput, Prisma.LossRecordUncheckedUpdateWithoutMaterialInput>
+}
+
+export type LossRecordUpdateManyWithWhereWithoutMaterialInput = {
+  where: Prisma.LossRecordScalarWhereInput
+  data: Prisma.XOR<Prisma.LossRecordUpdateManyMutationInput, Prisma.LossRecordUncheckedUpdateManyWithoutMaterialInput>
 }
 
 export type LossRecordCreateWithoutOrderInput = {
@@ -652,19 +1043,33 @@ export type LossRecordCreateWithoutOrderInput = {
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: string | null
   pendingBatchVerification?: boolean
+  reviewStatus?: $Enums.InventoryReviewStatus | null
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
   occurredAt?: Date | string
   store: Prisma.StoreCreateNestedOneWithoutLossesInput
   batch?: Prisma.InventoryBatchCreateNestedOneWithoutLossesInput
+  material?: Prisma.MaterialCreateNestedOneWithoutUnverifiedLossesInput
+  location?: Prisma.InventoryLocationCreateNestedOneWithoutUnverifiedLossesInput
 }
 
 export type LossRecordUncheckedCreateWithoutOrderInput = {
   id?: string
   storeId: string
   batchId?: string | null
+  materialId?: string | null
+  locationId?: string | null
   reason: $Enums.LossReason
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: string | null
   pendingBatchVerification?: boolean
+  reviewStatus?: $Enums.InventoryReviewStatus | null
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
   occurredAt?: Date | string
 }
 
@@ -700,19 +1105,33 @@ export type LossRecordCreateWithoutBatchInput = {
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: string | null
   pendingBatchVerification?: boolean
+  reviewStatus?: $Enums.InventoryReviewStatus | null
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
   occurredAt?: Date | string
   store: Prisma.StoreCreateNestedOneWithoutLossesInput
+  material?: Prisma.MaterialCreateNestedOneWithoutUnverifiedLossesInput
+  location?: Prisma.InventoryLocationCreateNestedOneWithoutUnverifiedLossesInput
   order?: Prisma.OrderCreateNestedOneWithoutLossesInput
 }
 
 export type LossRecordUncheckedCreateWithoutBatchInput = {
   id?: string
   storeId: string
+  materialId?: string | null
+  locationId?: string | null
   orderId?: string | null
   reason: $Enums.LossReason
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: string | null
   pendingBatchVerification?: boolean
+  reviewStatus?: $Enums.InventoryReviewStatus | null
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
   occurredAt?: Date | string
 }
 
@@ -745,11 +1164,18 @@ export type LossRecordUpdateManyWithWhereWithoutBatchInput = {
 export type LossRecordCreateManyStoreInput = {
   id?: string
   batchId?: string | null
+  materialId?: string | null
+  locationId?: string | null
   orderId?: string | null
   reason: $Enums.LossReason
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: string | null
   pendingBatchVerification?: boolean
+  reviewStatus?: $Enums.InventoryReviewStatus | null
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
   occurredAt?: Date | string
 }
 
@@ -759,30 +1185,195 @@ export type LossRecordUpdateWithoutStoreInput = {
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   batch?: Prisma.InventoryBatchUpdateOneWithoutLossesNestedInput
+  material?: Prisma.MaterialUpdateOneWithoutUnverifiedLossesNestedInput
+  location?: Prisma.InventoryLocationUpdateOneWithoutUnverifiedLossesNestedInput
   order?: Prisma.OrderUpdateOneWithoutLossesNestedInput
 }
 
 export type LossRecordUncheckedUpdateWithoutStoreInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  materialId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reason?: Prisma.EnumLossReasonFieldUpdateOperationsInput | $Enums.LossReason
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LossRecordUncheckedUpdateManyWithoutStoreInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  materialId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reason?: Prisma.EnumLossReasonFieldUpdateOperationsInput | $Enums.LossReason
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LossRecordCreateManyLocationInput = {
+  id?: string
+  storeId: string
+  batchId?: string | null
+  materialId?: string | null
+  orderId?: string | null
+  reason: $Enums.LossReason
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  note?: string | null
+  pendingBatchVerification?: boolean
+  reviewStatus?: $Enums.InventoryReviewStatus | null
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
+  occurredAt?: Date | string
+}
+
+export type LossRecordUpdateWithoutLocationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  reason?: Prisma.EnumLossReasonFieldUpdateOperationsInput | $Enums.LossReason
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  store?: Prisma.StoreUpdateOneRequiredWithoutLossesNestedInput
+  batch?: Prisma.InventoryBatchUpdateOneWithoutLossesNestedInput
+  material?: Prisma.MaterialUpdateOneWithoutUnverifiedLossesNestedInput
+  order?: Prisma.OrderUpdateOneWithoutLossesNestedInput
+}
+
+export type LossRecordUncheckedUpdateWithoutLocationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  storeId?: Prisma.StringFieldUpdateOperationsInput | string
+  batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  materialId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reason?: Prisma.EnumLossReasonFieldUpdateOperationsInput | $Enums.LossReason
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LossRecordUncheckedUpdateManyWithoutLocationInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  storeId?: Prisma.StringFieldUpdateOperationsInput | string
+  batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  materialId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reason?: Prisma.EnumLossReasonFieldUpdateOperationsInput | $Enums.LossReason
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LossRecordCreateManyMaterialInput = {
+  id?: string
+  storeId: string
+  batchId?: string | null
+  locationId?: string | null
+  orderId?: string | null
+  reason: $Enums.LossReason
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  note?: string | null
+  pendingBatchVerification?: boolean
+  reviewStatus?: $Enums.InventoryReviewStatus | null
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
+  occurredAt?: Date | string
+}
+
+export type LossRecordUpdateWithoutMaterialInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  reason?: Prisma.EnumLossReasonFieldUpdateOperationsInput | $Enums.LossReason
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  store?: Prisma.StoreUpdateOneRequiredWithoutLossesNestedInput
+  batch?: Prisma.InventoryBatchUpdateOneWithoutLossesNestedInput
+  location?: Prisma.InventoryLocationUpdateOneWithoutUnverifiedLossesNestedInput
+  order?: Prisma.OrderUpdateOneWithoutLossesNestedInput
+}
+
+export type LossRecordUncheckedUpdateWithoutMaterialInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  storeId?: Prisma.StringFieldUpdateOperationsInput | string
+  batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reason?: Prisma.EnumLossReasonFieldUpdateOperationsInput | $Enums.LossReason
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type LossRecordUncheckedUpdateManyWithoutMaterialInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  storeId?: Prisma.StringFieldUpdateOperationsInput | string
+  batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reason?: Prisma.EnumLossReasonFieldUpdateOperationsInput | $Enums.LossReason
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -790,10 +1381,17 @@ export type LossRecordCreateManyOrderInput = {
   id?: string
   storeId: string
   batchId?: string | null
+  materialId?: string | null
+  locationId?: string | null
   reason: $Enums.LossReason
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: string | null
   pendingBatchVerification?: boolean
+  reviewStatus?: $Enums.InventoryReviewStatus | null
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
   occurredAt?: Date | string
 }
 
@@ -803,19 +1401,33 @@ export type LossRecordUpdateWithoutOrderInput = {
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   store?: Prisma.StoreUpdateOneRequiredWithoutLossesNestedInput
   batch?: Prisma.InventoryBatchUpdateOneWithoutLossesNestedInput
+  material?: Prisma.MaterialUpdateOneWithoutUnverifiedLossesNestedInput
+  location?: Prisma.InventoryLocationUpdateOneWithoutUnverifiedLossesNestedInput
 }
 
 export type LossRecordUncheckedUpdateWithoutOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.StringFieldUpdateOperationsInput | string
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  materialId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reason?: Prisma.EnumLossReasonFieldUpdateOperationsInput | $Enums.LossReason
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -823,21 +1435,35 @@ export type LossRecordUncheckedUpdateManyWithoutOrderInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.StringFieldUpdateOperationsInput | string
   batchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  materialId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reason?: Prisma.EnumLossReasonFieldUpdateOperationsInput | $Enums.LossReason
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LossRecordCreateManyBatchInput = {
   id?: string
   storeId: string
+  materialId?: string | null
+  locationId?: string | null
   orderId?: string | null
   reason: $Enums.LossReason
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: string | null
   pendingBatchVerification?: boolean
+  reviewStatus?: $Enums.InventoryReviewStatus | null
+  submittedById?: string | null
+  reviewedById?: string | null
+  reviewedAt?: Date | string | null
+  reviewNote?: string | null
   occurredAt?: Date | string
 }
 
@@ -847,30 +1473,51 @@ export type LossRecordUpdateWithoutBatchInput = {
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   store?: Prisma.StoreUpdateOneRequiredWithoutLossesNestedInput
+  material?: Prisma.MaterialUpdateOneWithoutUnverifiedLossesNestedInput
+  location?: Prisma.InventoryLocationUpdateOneWithoutUnverifiedLossesNestedInput
   order?: Prisma.OrderUpdateOneWithoutLossesNestedInput
 }
 
 export type LossRecordUncheckedUpdateWithoutBatchInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.StringFieldUpdateOperationsInput | string
+  materialId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reason?: Prisma.EnumLossReasonFieldUpdateOperationsInput | $Enums.LossReason
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
 export type LossRecordUncheckedUpdateManyWithoutBatchInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   storeId?: Prisma.StringFieldUpdateOperationsInput | string
+  materialId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   orderId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   reason?: Prisma.EnumLossReasonFieldUpdateOperationsInput | $Enums.LossReason
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   pendingBatchVerification?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  reviewStatus?: Prisma.NullableEnumInventoryReviewStatusFieldUpdateOperationsInput | $Enums.InventoryReviewStatus | null
+  submittedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  reviewedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reviewNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   occurredAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
 
@@ -880,14 +1527,23 @@ export type LossRecordSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   id?: boolean
   storeId?: boolean
   batchId?: boolean
+  materialId?: boolean
+  locationId?: boolean
   orderId?: boolean
   reason?: boolean
   quantity?: boolean
   note?: boolean
   pendingBatchVerification?: boolean
+  reviewStatus?: boolean
+  submittedById?: boolean
+  reviewedById?: boolean
+  reviewedAt?: boolean
+  reviewNote?: boolean
   occurredAt?: boolean
   store?: boolean | Prisma.StoreDefaultArgs<ExtArgs>
   batch?: boolean | Prisma.LossRecord$batchArgs<ExtArgs>
+  material?: boolean | Prisma.LossRecord$materialArgs<ExtArgs>
+  location?: boolean | Prisma.LossRecord$locationArgs<ExtArgs>
   order?: boolean | Prisma.LossRecord$orderArgs<ExtArgs>
 }, ExtArgs["result"]["lossRecord"]>
 
@@ -895,14 +1551,23 @@ export type LossRecordSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   id?: boolean
   storeId?: boolean
   batchId?: boolean
+  materialId?: boolean
+  locationId?: boolean
   orderId?: boolean
   reason?: boolean
   quantity?: boolean
   note?: boolean
   pendingBatchVerification?: boolean
+  reviewStatus?: boolean
+  submittedById?: boolean
+  reviewedById?: boolean
+  reviewedAt?: boolean
+  reviewNote?: boolean
   occurredAt?: boolean
   store?: boolean | Prisma.StoreDefaultArgs<ExtArgs>
   batch?: boolean | Prisma.LossRecord$batchArgs<ExtArgs>
+  material?: boolean | Prisma.LossRecord$materialArgs<ExtArgs>
+  location?: boolean | Prisma.LossRecord$locationArgs<ExtArgs>
   order?: boolean | Prisma.LossRecord$orderArgs<ExtArgs>
 }, ExtArgs["result"]["lossRecord"]>
 
@@ -910,14 +1575,23 @@ export type LossRecordSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   id?: boolean
   storeId?: boolean
   batchId?: boolean
+  materialId?: boolean
+  locationId?: boolean
   orderId?: boolean
   reason?: boolean
   quantity?: boolean
   note?: boolean
   pendingBatchVerification?: boolean
+  reviewStatus?: boolean
+  submittedById?: boolean
+  reviewedById?: boolean
+  reviewedAt?: boolean
+  reviewNote?: boolean
   occurredAt?: boolean
   store?: boolean | Prisma.StoreDefaultArgs<ExtArgs>
   batch?: boolean | Prisma.LossRecord$batchArgs<ExtArgs>
+  material?: boolean | Prisma.LossRecord$materialArgs<ExtArgs>
+  location?: boolean | Prisma.LossRecord$locationArgs<ExtArgs>
   order?: boolean | Prisma.LossRecord$orderArgs<ExtArgs>
 }, ExtArgs["result"]["lossRecord"]>
 
@@ -925,28 +1599,41 @@ export type LossRecordSelectScalar = {
   id?: boolean
   storeId?: boolean
   batchId?: boolean
+  materialId?: boolean
+  locationId?: boolean
   orderId?: boolean
   reason?: boolean
   quantity?: boolean
   note?: boolean
   pendingBatchVerification?: boolean
+  reviewStatus?: boolean
+  submittedById?: boolean
+  reviewedById?: boolean
+  reviewedAt?: boolean
+  reviewNote?: boolean
   occurredAt?: boolean
 }
 
-export type LossRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "storeId" | "batchId" | "orderId" | "reason" | "quantity" | "note" | "pendingBatchVerification" | "occurredAt", ExtArgs["result"]["lossRecord"]>
+export type LossRecordOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "storeId" | "batchId" | "materialId" | "locationId" | "orderId" | "reason" | "quantity" | "note" | "pendingBatchVerification" | "reviewStatus" | "submittedById" | "reviewedById" | "reviewedAt" | "reviewNote" | "occurredAt", ExtArgs["result"]["lossRecord"]>
 export type LossRecordInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   store?: boolean | Prisma.StoreDefaultArgs<ExtArgs>
   batch?: boolean | Prisma.LossRecord$batchArgs<ExtArgs>
+  material?: boolean | Prisma.LossRecord$materialArgs<ExtArgs>
+  location?: boolean | Prisma.LossRecord$locationArgs<ExtArgs>
   order?: boolean | Prisma.LossRecord$orderArgs<ExtArgs>
 }
 export type LossRecordIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   store?: boolean | Prisma.StoreDefaultArgs<ExtArgs>
   batch?: boolean | Prisma.LossRecord$batchArgs<ExtArgs>
+  material?: boolean | Prisma.LossRecord$materialArgs<ExtArgs>
+  location?: boolean | Prisma.LossRecord$locationArgs<ExtArgs>
   order?: boolean | Prisma.LossRecord$orderArgs<ExtArgs>
 }
 export type LossRecordIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   store?: boolean | Prisma.StoreDefaultArgs<ExtArgs>
   batch?: boolean | Prisma.LossRecord$batchArgs<ExtArgs>
+  material?: boolean | Prisma.LossRecord$materialArgs<ExtArgs>
+  location?: boolean | Prisma.LossRecord$locationArgs<ExtArgs>
   order?: boolean | Prisma.LossRecord$orderArgs<ExtArgs>
 }
 
@@ -955,17 +1642,26 @@ export type $LossRecordPayload<ExtArgs extends runtime.Types.Extensions.Internal
   objects: {
     store: Prisma.$StorePayload<ExtArgs>
     batch: Prisma.$InventoryBatchPayload<ExtArgs> | null
+    material: Prisma.$MaterialPayload<ExtArgs> | null
+    location: Prisma.$InventoryLocationPayload<ExtArgs> | null
     order: Prisma.$OrderPayload<ExtArgs> | null
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     storeId: string
     batchId: string | null
+    materialId: string | null
+    locationId: string | null
     orderId: string | null
     reason: $Enums.LossReason
     quantity: runtime.Decimal
     note: string | null
     pendingBatchVerification: boolean
+    reviewStatus: $Enums.InventoryReviewStatus | null
+    submittedById: string | null
+    reviewedById: string | null
+    reviewedAt: Date | null
+    reviewNote: string | null
     occurredAt: Date
   }, ExtArgs["result"]["lossRecord"]>
   composites: {}
@@ -1363,6 +2059,8 @@ export interface Prisma__LossRecordClient<T, Null = never, ExtArgs extends runti
   readonly [Symbol.toStringTag]: "PrismaPromise"
   store<T extends Prisma.StoreDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.StoreDefaultArgs<ExtArgs>>): Prisma.Prisma__StoreClient<runtime.Types.Result.GetResult<Prisma.$StorePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   batch<T extends Prisma.LossRecord$batchArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LossRecord$batchArgs<ExtArgs>>): Prisma.Prisma__InventoryBatchClient<runtime.Types.Result.GetResult<Prisma.$InventoryBatchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  material<T extends Prisma.LossRecord$materialArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LossRecord$materialArgs<ExtArgs>>): Prisma.Prisma__MaterialClient<runtime.Types.Result.GetResult<Prisma.$MaterialPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  location<T extends Prisma.LossRecord$locationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LossRecord$locationArgs<ExtArgs>>): Prisma.Prisma__InventoryLocationClient<runtime.Types.Result.GetResult<Prisma.$InventoryLocationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   order<T extends Prisma.LossRecord$orderArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LossRecord$orderArgs<ExtArgs>>): Prisma.Prisma__OrderClient<runtime.Types.Result.GetResult<Prisma.$OrderPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1396,11 +2094,18 @@ export interface LossRecordFieldRefs {
   readonly id: Prisma.FieldRef<"LossRecord", 'String'>
   readonly storeId: Prisma.FieldRef<"LossRecord", 'String'>
   readonly batchId: Prisma.FieldRef<"LossRecord", 'String'>
+  readonly materialId: Prisma.FieldRef<"LossRecord", 'String'>
+  readonly locationId: Prisma.FieldRef<"LossRecord", 'String'>
   readonly orderId: Prisma.FieldRef<"LossRecord", 'String'>
   readonly reason: Prisma.FieldRef<"LossRecord", 'LossReason'>
   readonly quantity: Prisma.FieldRef<"LossRecord", 'Decimal'>
   readonly note: Prisma.FieldRef<"LossRecord", 'String'>
   readonly pendingBatchVerification: Prisma.FieldRef<"LossRecord", 'Boolean'>
+  readonly reviewStatus: Prisma.FieldRef<"LossRecord", 'InventoryReviewStatus'>
+  readonly submittedById: Prisma.FieldRef<"LossRecord", 'String'>
+  readonly reviewedById: Prisma.FieldRef<"LossRecord", 'String'>
+  readonly reviewedAt: Prisma.FieldRef<"LossRecord", 'DateTime'>
+  readonly reviewNote: Prisma.FieldRef<"LossRecord", 'String'>
   readonly occurredAt: Prisma.FieldRef<"LossRecord", 'DateTime'>
 }
     
@@ -1819,6 +2524,44 @@ export type LossRecord$batchArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   include?: Prisma.InventoryBatchInclude<ExtArgs> | null
   where?: Prisma.InventoryBatchWhereInput
+}
+
+/**
+ * LossRecord.material
+ */
+export type LossRecord$materialArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Material
+   */
+  select?: Prisma.MaterialSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Material
+   */
+  omit?: Prisma.MaterialOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MaterialInclude<ExtArgs> | null
+  where?: Prisma.MaterialWhereInput
+}
+
+/**
+ * LossRecord.location
+ */
+export type LossRecord$locationArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the InventoryLocation
+   */
+  select?: Prisma.InventoryLocationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the InventoryLocation
+   */
+  omit?: Prisma.InventoryLocationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.InventoryLocationInclude<ExtArgs> | null
+  where?: Prisma.InventoryLocationWhereInput
 }
 
 /**

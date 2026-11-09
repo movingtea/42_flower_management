@@ -15,7 +15,9 @@ Use the table to select the documents relevant to the task. Paths in this file a
 | Database or migrations | [Data model sources](knowledge/specifications/data-models/E0-data-model-sources.md) and database or transaction decisions in the [ADR register](knowledge/05-ADR/E0-adr-register.md). Check the relevant Prisma configuration, migration SQL and recovery plan. |
 | Pages, permissions or APIs | [Feature sources](knowledge/specifications/features/E0-feature-sources.md), the permission entry in the [rule review queue](knowledge/02-Business/E0-business-rule-review.md) and the [app instructions](flower-wms-system/AGENTS.md). Check existing UI conventions and authorization. For interface changes, also read the [API contract sources](knowledge/specifications/api/E0-api-sources.md). |
 | Release, deployment or rollback | [Technical design sources](knowledge/specifications/technical-designs/E0-technical-design-sources.md), [known gaps](knowledge/06-Lessons/E0-known-gaps.md) and the applicable [ADR](knowledge/05-ADR/E0-adr-register.md). Locate the release runbook, migration and rollback plans before release execution. |
-| Test planning or regression | [Test plan sources](knowledge/specifications/test-plans/E0-test-plan-sources.md), applicable rules and acceptance criteria. Record the rule or criterion ID next to each high-risk test. |
+| Test planning or regression | [Test plan sources](knowledge/specifications/test-plans/E0-test-plan-sources.md), applicable rules and acceptance criteria. For drafting or revising a test plan, load [`wms-test-plan`](../.agents/skills/wms-test-plan/SKILL.md) before writing, including for short read-only plans. For a review, load [`wms-test-plan-review`](../.agents/skills/wms-test-plan-review/SKILL.md). Record the rule or criterion ID next to each high-risk test. |
+
+Choose the skill by the requested deliverable. A test plan that cites the knowledge base still uses the WMS test-plan skill. Use a wiki context pack when the deliverable is a bounded knowledge bundle for another task or agent.
 
 ## Rule status and gaps
 

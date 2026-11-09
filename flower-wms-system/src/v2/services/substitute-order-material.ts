@@ -89,9 +89,11 @@ function normalizeReason(value: unknown): string {
  *
  * This is a human decision: nothing is suggested, and the caller must supply the replacement and
  * a reason. Only the current revision's unmet requirement can be replaced; the old requirement
- * and its released reservations remain immutable history. If a grade/color/specification changes,
- * the caller must also assert that the customer approved it. Available stock must cover the full
- * replacement quantity; human/customer confirmation never overrides an inventory gap.
+ * and its released reservations remain immutable history. When part of the requirement is already
+ * covered, the new revision keeps that covered quantity under the original material and moves only
+ * the shortage to the replacement material. If a grade/color/specification changes, the caller must
+ * also assert that the customer approved it. Available stock must cover the full replacement
+ * quantity; human/customer confirmation never overrides an inventory gap.
  *
  * The whole new plan lands in one transaction. The order row is always locked first, matching
  * confirmation/revision/reservation writers, then the latest requirement rows and the batches
@@ -186,6 +188,17 @@ export async function substituteOrderMaterial(
     );
     const shortage = Math.max(0, plannedQty - reservedQty);
     if (shortage <= EPSILON) throw new Error("该物料需求已被现货覆盖，不能替换");
+    try {
+      assertMaterialQuantity(input.replacementQty, originalMaterial.quantityScale);
+    } catch {
+      throw new Error("替换数量不符合物料计量精度");
+    }
+    if (Math.abs(input.replacementQty - shortage) > EPSILON) {
+      throw new Error(
+        `替换数量必须等于当前缺口：当前缺口为 ${shortage}${originalMaterial.baseUnit}，` +
+        `本次提交为 ${input.replacementQty}${originalMaterial.baseUnit}`,
+      );
+    }
 
     const replacement = await tx.material.findUnique({
       where: { id: input.replacementMaterialId },
@@ -240,17 +253,56 @@ export async function substituteOrderMaterial(
       data: { state: ReservationState.RELEASED },
     });
 
-    const copiedRequirements = [...latestRequirements]
-      .sort((left, right) => left.id.localeCompare(right.id))
-      .map((requirement) => ({
+    const copiedRequirements: {
+      sourceRequirementId: string;
+      isReplacement: boolean;
+      data: {
+        orderItemId: string;
+        materialId: string;
+        plannedQty: number;
+        needBy: Date;
+      };
+    }[] = [];
+    for (const requirement of [...latestRequirements].sort((left, right) => left.id.localeCompare(right.id))) {
+      if (requirement.id !== target.id) {
+        copiedRequirements.push({
+          sourceRequirementId: requirement.id,
+          isReplacement: false,
+          data: {
+            orderItemId: requirement.orderItemId,
+            materialId: requirement.materialId,
+            plannedQty: Number(requirement.plannedQty),
+            needBy: requirement.needBy,
+          },
+        });
+        continue;
+      }
+      // Keep the already-covered portion under the original material so the new revision's planned
+      // total is unchanged and its active reservations still cover the original quantity. A target
+      // with no active reservation keeps the existing full-shortage single-requirement behavior.
+      if (reservedQty > EPSILON) {
+        copiedRequirements.push({
+          sourceRequirementId: requirement.id,
+          isReplacement: false,
+          data: {
+            orderItemId: requirement.orderItemId,
+            materialId: originalMaterial.id,
+            plannedQty: reservedQty,
+            needBy: requirement.needBy,
+          },
+        });
+      }
+      copiedRequirements.push({
         sourceRequirementId: requirement.id,
+        isReplacement: true,
         data: {
           orderItemId: requirement.orderItemId,
-          materialId: requirement.id === target.id ? replacement.id : requirement.materialId,
-          plannedQty: requirement.id === target.id ? input.replacementQty : Number(requirement.plannedQty),
+          materialId: replacement.id,
+          plannedQty: input.replacementQty,
           needBy: requirement.needBy,
         },
-      }));
+      });
+    }
 
     const revision = await tx.orderRevision.create({
       data: {
@@ -265,7 +317,8 @@ export async function substituteOrderMaterial(
       materialId: string;
       plannedQty: Prisma.Decimal;
     }[] = [];
-    let newTargetRequirementId: string | null = null;
+    let newReplacementRequirementId: string | null = null;
+    let preservedOriginalRequirementId: string | null = null;
     for (const entry of copiedRequirements) {
       const stored = await tx.orderMaterialRequirement.create({
         data: { ...entry.data, revisionId: revision.id },
@@ -275,9 +328,12 @@ export async function substituteOrderMaterial(
         materialId: stored.materialId,
         plannedQty: stored.plannedQty,
       });
-      if (entry.sourceRequirementId === target.id) newTargetRequirementId = stored.id;
+      if (entry.sourceRequirementId === target.id) {
+        if (entry.isReplacement) newReplacementRequirementId = stored.id;
+        else preservedOriginalRequirementId = stored.id;
+      }
     }
-    if (!newTargetRequirementId) throw new Error("替换后的物料需求未生成");
+    if (!newReplacementRequirementId) throw new Error("替换后的物料需求未生成");
 
     // Same material-order reservation sequence as reviseManualOrder, so batch locks stay stable.
     let totalShortage = 0;
@@ -290,7 +346,7 @@ export async function substituteOrderMaterial(
       const allocation = await reserveOrderMaterial(tx, requirement.id);
       totalShortage += allocation.shortage;
       totalReserved += allocation.reserved;
-      if (requirement.id === newTargetRequirementId) {
+      if (requirement.id === newReplacementRequirementId) {
         replacementReservedQty = allocation.reserved;
         replacementShortageQty = allocation.shortage;
       }
@@ -362,7 +418,10 @@ export async function substituteOrderMaterial(
           orderId: order.id,
           revisionId: revision.id,
           revisionNumber,
-          requirementId: newTargetRequirementId,
+          requirementId: newReplacementRequirementId,
+          preservedRequirementId: preservedOriginalRequirementId,
+          preservedMaterialId: preservedOriginalRequirementId ? originalMaterial.id : null,
+          preservedPlannedQty: preservedOriginalRequirementId ? reservedQty : 0,
           materialId: replacement.id,
           materialCode: replacement.code,
           materialName: replacement.name,
@@ -388,7 +447,7 @@ export async function substituteOrderMaterial(
       orderId: order.id,
       revisionId: revision.id,
       revisionNumber,
-      requirementId: newTargetRequirementId,
+      requirementId: newReplacementRequirementId,
       materialId: replacement.id,
       materialCode: replacement.code,
       materialName: replacement.name,

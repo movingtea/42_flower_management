@@ -1,29 +1,31 @@
 ---
-title: 待确认业务规则与冲突
+title: E0 业务规则确认记录
 type: business-rule
 module: wms
-status: under-review
-version: 1
+status: superseded
+version: 3
 owner: product
 updated: 2026-11-09
 sources:
   - "docs/flower-studio-2.0-domain-design.md §§3–10"
   - "docs/flower-studio-2.0-phase1-live-trial.md V2-TRIAL-005 至 007"
   - "docs/flower-studio-2.0-local-run.md"
-related: []
+related:
+  - "[[E0-confirmed-inventory-decisions]]"
+  - "[[E0-confirmed-operating-rules]]"
 ---
 
-# 待确认业务规则与冲突
+# E0 业务规则确认记录
 
-以下条目来自设计基线和试用反馈。确认前按提案阅读。
+用户已确认首批七组业务口径。此页保留原编号和确认结果，正式规则以对应的已批准文档为准。
 
-| ID | 待确认规则或边界 | 确认点 |
+| ID | 确认范围 | 正式规则 |
 |---|---|---|
-| WMS-RV-001 | 物料按等级、规格与基础库存单位管理。按扎或箱采购时记录当次换算，花材按实际枝数验收入库。 | 同一物料的身份字段，以及包材和耗材的计量边界。 |
-| WMS-RV-002 | 默认 SKU 须为同商品的可售 SKU。配方变更产生新版本，历史订单保留原版本与价格。 | 已发布配方是否允许纯文字勘误，以及已使用版本的停用条件。 |
-| WMS-RV-003 | 同一采购明细支持分次验收、原级、降级和拒收，记录数量、原因与成本。到货重检关联缺料，仍缺货保留风险。 | 设计稿写「超收需确认」，试用要求累计处理不得超过采购数量。确定正式规则及允许的补单路径。 |
-| WMS-RV-004 | 仓库可用量从实存扣除有效预留和冻结。库存非负，入库、移库、退料、消耗、损耗和盘点形成流水。 | 明确批次选择顺序及有效期和入库时间的优先级，确定损耗和盘点复核权限。 |
-| WMS-RV-005 | 订单分商业、供应、制作、交付状态，收付款另有记录。确认后的物料或交付变更保留历史，失败保留原方案。正常制作按计划结转，差异记录实际用量、退料和损耗。 | 区分目标变更流程与现有限制。确认后的 SKU 行增删当前记录为取消并重建。人工替换库存不足时也需统一规则。 |
-| WMS-RV-006 | 首版支持自提和门店配送。配送失败保留原因，由员工决定重排或售后。失败后成品不会自动还原为花材库存。 | 确认谁能重排、哪些异常必须走售后，以及失败到重排的状态转换。 |
-| WMS-RV-007 | 物料、商品、配方和供应商按经营主体归属。订单、库位、制作和配送按门店归属。线下收款、较大改价和库存调整等需要对应权限。 | 确认角色与操作权限矩阵、跨门店可见范围及员工停用边界。 |
+| WMS-RV-001 | 物料身份与基础库存单位 | [[E0-confirmed-operating-rules]] 中的 WMS-BR-MAT-001。 |
+| WMS-RV-002 | 默认 SKU、配方勘误和版本生效 | [[E0-confirmed-operating-rules]] 中的 WMS-BR-CAT-001。 |
+| WMS-RV-003 | 采购验收上限和补送路径 | 已确认。见 [[E0-confirmed-inventory-decisions]] 中的 WMS-BR-PUR-001。 |
+| WMS-RV-004 | 批次选择和库存复核 | 已确认。见 [[E0-confirmed-inventory-decisions]] 中的 WMS-BR-INV-005、006。 |
+| WMS-RV-005 | 换料及订单变更边界 | [[E0-confirmed-inventory-decisions]] 中的 WMS-BR-ORD-001、[[E0-confirmed-operating-rules]] 中的 WMS-BR-ORD-002。 |
+| WMS-RV-006 | 配送失败、重排权限与售后分流 | [[E0-confirmed-operating-rules]] 中的 WMS-BR-FUL-001。 |
+| WMS-RV-007 | 库存复核、角色权限、跨店访问与停用 | [[E0-confirmed-inventory-decisions]] 中的 WMS-BR-INV-006、[[E0-confirmed-operating-rules]] 中的 WMS-BR-AUTH-001。 |
 

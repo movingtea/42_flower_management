@@ -1,5 +1,6 @@
 import { config } from "dotenv";
 import assert from "node:assert/strict";
+import { auditRollbackError, failAfterAudit } from "./test-audit-rollback";
 import { resolve } from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
@@ -99,6 +100,7 @@ async function createPurchase(
 }
 
 type ReceiveOptions = {
+  failAfterAudit?: boolean;
   key?: string;
   tenantId?: string;
   locationId?: string;
@@ -113,19 +115,22 @@ async function receive(
   options: ReceiveOptions = {},
 ): Promise<string> {
   assert.ok(tenantId && warehouseId);
-  return db.$transaction((tx) => receivePurchaseLine(tx, {
-    tenantId: options.tenantId ?? tenantId!,
-    actorStaffId: `staff-${marker}`,
-    purchaseLineId: lineId,
-    locationId: options.locationId ?? warehouseId!,
-    acceptedMaterialId,
-    quantity,
-    batchNo: `B-${marker}-${crypto.randomUUID().slice(0, 6)}`,
-    disposition: options.disposition ?? "ACCEPTED",
-    gradeChangeReason: options.reason,
-    finalUnitCost: 1,
-    idempotencyKey: options.key ?? `RECEIPT-${marker}-${crypto.randomUUID()}`,
-  }));
+  return db.$transaction((tx) => receivePurchaseLine(
+    options.failAfterAudit ? failAfterAudit(tx, "PURCHASE_LINE_RECEIVED") : tx,
+    {
+      tenantId: options.tenantId ?? tenantId!,
+      actorStaffId: `staff-${marker}`,
+      purchaseLineId: lineId,
+      locationId: options.locationId ?? warehouseId!,
+      acceptedMaterialId,
+      quantity,
+      batchNo: `B-${marker}-${crypto.randomUUID().slice(0, 6)}`,
+      disposition: options.disposition ?? "ACCEPTED",
+      gradeChangeReason: options.reason,
+      finalUnitCost: 1,
+      idempotencyKey: options.key ?? `RECEIPT-${marker}-${crypto.randomUUID()}`,
+    },
+  ));
 }
 
 async function reject(
@@ -439,6 +444,28 @@ async function main() {
   assert.equal((await db.purchaseOrder.findUniqueOrThrow({
     where: { id: isolated.purchaseOrderId },
   })).state, PurchaseState.ORDERED);
+
+  const rollback = await createPurchase(original, 5);
+  const receiptFilter = { storeId: storeId! };
+  const batchFilter = { storeId: storeId!, materialId: original.id };
+  const snapshot = async () => ({
+    receipts: await db.goodsReceipt.count({ where: receiptFilter }),
+    lines: await receiptLineCount(rollback.purchaseLineId),
+    batches: await db.inventoryBatch.count({ where: batchFilter }),
+    balances: await db.batchBalance.count({ where: { batch: batchFilter } }),
+    movements: await db.inventoryTransaction.count({ where: { batch: batchFilter } }),
+    audits: await receiveAuditCount(rollback.purchaseLineId),
+    purchase: await db.purchaseOrder.findUniqueOrThrow({ where: { id: rollback.purchaseOrderId } }),
+  });
+  const beforeRollback = await snapshot();
+  const rollbackKey = `RECEIPT-ROLLBACK-${marker}`;
+  await assert.rejects(
+    receive(rollback.purchaseLineId, original.id, 5, { key: rollbackKey, failAfterAudit: true }),
+    { message: auditRollbackError },
+  );
+  assert.deepEqual(await snapshot(), beforeRollback);
+  await receive(rollback.purchaseLineId, original.id, 5, { key: rollbackKey });
+  assert.equal(await receiptLineCount(rollback.purchaseLineId), 1);
 
   console.log("v2 receive-purchase-line tests passed");
 }

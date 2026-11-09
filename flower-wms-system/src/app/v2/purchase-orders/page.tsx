@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { requireV2Store } from "@/v2/auth";
 import { v2db } from "@/v2/db";
 import {
-  Prisma, PurchaseState, ReservationState,
+  Prisma, PurchaseLineRelationKind, PurchaseState, ReservationState,
 } from "@/generated/prisma-v2/client";
 import { calculatePurchaseProgress } from "@/v2/domain/purchase-progress";
 import { receivePurchase, rejectPurchase, finalizeBatchCost } from "../actions";
@@ -18,7 +18,7 @@ import {
 } from "../_lib/purchase-ui";
 import {
   allocatePurchaseLineAction, cancelPurchaseOrderAction, createLinkedPurchaseOrderAction,
-  createPurchaseDraftAction, submitPurchaseOrderAction, updatePurchaseDraftAction,
+  createPurchaseDraftAction, createPurchaseSupplementAction, submitPurchaseOrderAction, updatePurchaseDraftAction,
 } from "./actions";
 import { PurchaseOrderEditor } from "./PurchaseOrderEditor";
 
@@ -405,6 +405,9 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
               const open = order.state === "ORDERED" || order.state === "PARTIALLY_RECEIVED";
               return <div key={line.id} className="rounded-lg border border-zinc-200 p-3">
                 <div className="font-medium">{line.material.code} · {line.material.name}</div>
+                {line.relationKind !== PurchaseLineRelationKind.ORIGINAL && <div className="mt-1 text-xs font-medium text-blue-800">
+                  {line.relationKind === PurchaseLineRelationKind.EXTRA_ORDER ? "关联补单 / 额外到货" : "拒收后关联补送"} · 原明细 {line.sourceLineId?.slice(0, 8)}
+                </div>}
                 {progress && expected !== null
                   ? <div className="mt-1 text-xs text-zinc-600">采购 {formatQuantity(expected)}{line.material.baseUnit} · 原级合格 {formatQuantity(progress.acceptedOriginalQty)} · 降级 {formatQuantity(progress.downgradedQty)} · 拒收 {formatQuantity(progress.rejectedQty)} · 已处理 {formatQuantity(progress.processedQty)} · 剩余 {formatQuantity(progress.remainingQty)}</div>
                   : <div className="mt-1 text-xs text-amber-800">采购行缺少有效基础数量，无法计算进度。</div>}
@@ -428,6 +431,16 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
                     <Field label="拒收原因" name="reason" />
                     <button className="rounded-lg border border-red-700 px-4 py-2 text-sm text-red-800">记录拒收</button>
                   </form>
+                </div>}
+                {line.relationKind === PurchaseLineRelationKind.ORIGINAL && order.state !== "DRAFT" && order.state !== "CANCELLED" && <div className="mt-3 flex flex-wrap gap-3 border-t border-zinc-100 pt-3">
+                  <details className="rounded-lg border border-zinc-200 px-3 py-2 text-xs"><summary className="cursor-pointer font-medium text-emerald-800">关联补单 / 额外到货</summary><form action={createPurchaseSupplementAction} className="mt-3 grid gap-2 sm:grid-cols-3">
+                    <input type="hidden" name="sourceLineId" value={line.id} /><input type="hidden" name="kind" value={PurchaseLineRelationKind.EXTRA_ORDER} /><input type="hidden" name="relationKey" value={`EXTRA-${crypto.randomUUID()}`} />
+                    <Field label="额外数量" name="quantity" type="number" /><Field label="采购单价" name="unitPrice" type="number" defaultValue={Number(line.unitPrice)} /><button className={button}>创建关联补单明细</button>
+                  </form></details>
+                  {progress && progress.rejectedQty > PURCHASE_EPSILON && <details className="rounded-lg border border-amber-300 px-3 py-2 text-xs"><summary className="cursor-pointer font-medium text-amber-900">登记供应商补送</summary><form action={createPurchaseSupplementAction} className="mt-3 grid gap-2 sm:grid-cols-3">
+                    <input type="hidden" name="sourceLineId" value={line.id} /><input type="hidden" name="kind" value={PurchaseLineRelationKind.REPLACEMENT_DELIVERY} /><input type="hidden" name="relationKey" value={`REDELIVERY-${crypto.randomUUID()}`} />
+                    <Field label="补送数量" name="quantity" type="number" defaultValue={progress.rejectedQty} /><Field label="采购单价" name="unitPrice" type="number" defaultValue={Number(line.unitPrice)} /><button className={button}>创建关联补送明细</button>
+                  </form></details>}
                 </div>}
               </div>;
             })}</div>

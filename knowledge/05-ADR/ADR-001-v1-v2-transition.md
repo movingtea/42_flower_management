@@ -2,10 +2,13 @@
 title: ADR-001 V1/V2 过渡、认证与切换
 type: adr
 module: platform
-status: under-review
-version: 3
+status: approved
+version: 4
 owner: engineering
 updated: 2026-11-09
+approved_by: 项目用户
+approved_on: 2026-11-09
+approval_scope: "批准 V1/V2 过渡、认证与退役策略。V1 下线须等 V2 完整覆盖 V1 功能并逐项验收。"
 sources:
   - "docs/flower-studio-2.0-v1-v2-gap-matrix.md"
   - "flower-wms-system/src/auth.ts"

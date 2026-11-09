@@ -7,9 +7,10 @@ import {
   TransactionKind,
 } from "../../generated/prisma-v2/client";
 import {
-  recordLoss, type RecordLossInput,
+  recordLoss, reviewUnknownBatchLoss, submitUnknownBatchLoss, type RecordLossInput,
 } from "./loss-management";
-import type { InventoryOperationScope } from "./inventory-operations";
+import { adjustInventory, type InventoryOperationScope } from "./inventory-operations";
+import { auditRollbackError, failAfterAudit } from "./test-audit-rollback";
 
 config({ quiet: true });
 config({ path: resolve(process.cwd(), ".env.local"), quiet: true });
@@ -57,6 +58,11 @@ async function main() {
   const store = await db.store.create({
     data: { tenantId: tenant.id, code: `MAIN-${marker}`, name: "损耗测试店" },
   });
+  const reviewer = await db.staffUser.create({ data: {
+    username: `loss-reviewer-${marker}`, passwordHash: "test-only",
+    tenantMembers: { create: { tenantId: tenant.id, roles: ["MANAGER"] } },
+    storeMembers: { create: { storeId: store.id, roles: ["MANAGER"] } },
+  } });
   const otherStore = await db.store.create({
     data: { tenantId: tenant.id, code: `OTHER-${marker}`, name: "损耗另一门店" },
   });
@@ -388,6 +394,76 @@ async function main() {
     where: { batch: { storeId: store.id }, kind: TransactionKind.LOSS },
   }), 4);
 
+  const rollbackBatch = await createBatch("ROLLBACK");
+  await db.batchBalance.create({
+    data: { batchId: rollbackBatch.id, locationId: locationA.id, onHandQty: 10 },
+  });
+  const rollbackInput = {
+    ...lossInput,
+    batchId: rollbackBatch.id,
+    quantity: 4,
+    idempotencyKey: newKey("LOSS-ROLLBACK"),
+  };
+  const auditFilter = { tenantId: tenant.id, storeId: store.id, action: "LOSS_RECORDED" };
+  const auditsBefore = await db.auditEvent.count({ where: auditFilter });
+  await assert.rejects(
+    db.$transaction((tx) => recordLoss(failAfterAudit(tx, "LOSS_RECORDED"), scope, rollbackInput)),
+    { message: auditRollbackError },
+  );
+  assert.equal(await balanceQty(rollbackBatch.id, locationA.id), 10);
+  assert.equal(await db.lossRecord.count({ where: { batchId: rollbackBatch.id } }), 0);
+  assert.equal(await db.inventoryTransaction.count({ where: { batchId: rollbackBatch.id } }), 0);
+  assert.equal(await db.auditEvent.count({ where: auditFilter }), auditsBefore);
+  await record(scope, rollbackInput);
+  assert.equal(await balanceQty(rollbackBatch.id, locationA.id), 6);
+
+  const raceBatch = await createBatch("CONCURRENT");
+  await db.batchBalance.create({
+    data: { batchId: raceBatch.id, locationId: locationA.id, onHandQty: 10 },
+  });
+  const [lossRace, adjustmentRace] = await Promise.allSettled([
+    record(scope, {
+      ...lossInput,
+      batchId: raceBatch.id,
+      quantity: 7,
+      idempotencyKey: newKey("LOSS-CONCURRENT"),
+    }),
+    db.$transaction((tx) => adjustInventory(tx, scope, {
+      batchId: raceBatch.id,
+      locationId: locationA.id,
+      mode: "DECREASE",
+      quantity: 7,
+      reason: "并发调整",
+      idempotencyKey: newKey("ADJUST-CONCURRENT"),
+    })),
+  ]);
+  assert.notEqual(lossRace.status, adjustmentRace.status);
+  assert.equal(await balanceQty(raceBatch.id, locationA.id), 3);
+  const movements = await db.inventoryTransaction.findMany({ where: { batchId: raceBatch.id } });
+  assert.equal(movements.length, 1);
+  assert.equal(Number(movements[0].quantity), 7);
+  assert.equal(movements[0].kind, lossRace.status === "fulfilled" ? TransactionKind.LOSS : TransactionKind.ADJUSTMENT);
+  assert.equal(await db.lossRecord.count({ where: { batchId: raceBatch.id } }), lossRace.status === "fulfilled" ? 1 : 0);
+
+  const unknownBatch = await createBatch("UNKNOWN-REVIEW");
+  await db.batchBalance.create({ data: { batchId: unknownBatch.id, locationId: locationA.id, onHandQty: 5 } });
+  const pending = await db.$transaction((tx) => submitUnknownBatchLoss(tx, scope, {
+    materialId: material.id, locationId: locationA.id, quantity: 2,
+    reason: LossReason.OTHER, note: "现场无法确认批次", idempotencyKey: newKey("UNKNOWN"),
+  }));
+  assert.equal(await balanceQty(unknownBatch.id, locationA.id), 5);
+  const pendingRecord = await db.lossRecord.findUniqueOrThrow({ where: { id: pending.lossRecordId } });
+  assert.equal(pendingRecord.pendingBatchVerification, true);
+  assert.equal(pendingRecord.reviewStatus, "PENDING");
+  const review = await db.$transaction((tx) => reviewUnknownBatchLoss(tx, {
+    tenantId: tenant.id, storeId: store.id, actorStaffId: reviewer.id,
+  }, { lossRecordId: pending.lossRecordId, decision: "APPROVE", batchId: unknownBatch.id, note: "现场复核批次" }));
+  assert.equal(review.approved, true);
+  assert.equal(await balanceQty(unknownBatch.id, locationA.id), 3);
+  const approvedRecord = await db.lossRecord.findUniqueOrThrow({ where: { id: pending.lossRecordId } });
+  assert.equal(approvedRecord.batchId, unknownBatch.id);
+  assert.equal(approvedRecord.reviewStatus, "APPROVED");
+
   console.log("v2 loss-management tests passed");
 }
 
@@ -408,8 +484,11 @@ async function cleanup() {
   await db.inventoryBatch.deleteMany({ where: storeFilter });
   await db.material.deleteMany({ where: tenantFilter });
   await db.inventoryLocation.deleteMany({ where: storeFilter });
+  await db.storeMember.deleteMany({ where: { store: { tenantId: { in: tenantIds } } } });
+  await db.tenantMember.deleteMany({ where: tenantFilter });
   await db.store.deleteMany({ where: tenantFilter });
   await db.tenant.deleteMany({ where: { id: { in: tenantIds } } });
+  await db.staffUser.deleteMany({ where: { username: { startsWith: "loss-reviewer-" } } });
 }
 
 main()

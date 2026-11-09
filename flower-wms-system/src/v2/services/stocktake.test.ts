@@ -3,13 +3,15 @@ import assert from "node:assert/strict";
 import { resolve } from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import {
-  LocationKind, MaterialKind, PrismaClient, StocktakeState, TransactionKind,
+  CommercialState, LocationKind, MaterialKind, OrderEntry, OrderItemKind, PrismaClient,
+  ProductionState, ReservationState, StocktakeState, SupplyState, TransactionKind,
 } from "../../generated/prisma-v2/client";
 import {
-  confirmStocktake, createStocktakeDraft,
+  confirmStocktake, createStocktakeDraft, reviewStocktake,
   type CreateStocktakeDraftInput, type ConfirmStocktakeLineResult,
 } from "./stocktake";
 import type { InventoryOperationScope } from "./inventory-operations";
+import { cancelOrder } from "./order-lifecycle";
 
 config({ quiet: true });
 config({ path: resolve(process.cwd(), ".env.local"), quiet: true });
@@ -61,6 +63,145 @@ function lineOf(
   return line;
 }
 
+type ConfirmedAuditSnapshot = {
+  supplyRisk?: {
+    deficientBatches?: Array<{
+      batchId: string;
+      onHandQty: number;
+      activeReservationQty: number;
+      shortageQty: number;
+    }>;
+    affectedOrderIds?: string[];
+  };
+};
+
+async function createOrderWithReservation(params: {
+  label: string;
+  tenantId: string;
+  storeId: string;
+  materialId: string;
+  batchId: string;
+  quantity: number;
+  supplyState?: SupplyState;
+  reservationState?: ReservationState;
+  productionState?: ProductionState;
+}) {
+  const {
+    label,
+    tenantId,
+    storeId,
+    materialId,
+    batchId,
+    quantity,
+    supplyState = SupplyState.ON_HAND_COVERED,
+    reservationState = ReservationState.ACTIVE,
+    productionState = ProductionState.READY,
+  } = params;
+  const order = await db.order.create({
+    data: {
+      tenantId,
+      storeId,
+      number: `${label}-${marker}-${crypto.randomUUID().slice(0, 6)}`,
+      createdVia: OrderEntry.STAFF_PORTAL,
+      sourceChannel: "盘点风险回归",
+      commercialState: CommercialState.CONFIRMED,
+      supplyState,
+      productionState,
+      deliveryAt: new Date(Date.now() + 86_400_000),
+    },
+  });
+  const item = await db.orderItem.create({
+    data: {
+      orderId: order.id,
+      kind: OrderItemKind.STANDARD,
+      nameSnapshot: "盘点风险测试商品",
+      quantity: Math.max(1, Math.ceil(quantity)),
+      unitPrice: 10,
+    },
+  });
+  const revision = await db.orderRevision.create({
+    data: { orderId: order.id, number: 1, reason: "盘点风险测试" },
+  });
+  const requirement = await db.orderMaterialRequirement.create({
+    data: {
+      orderItemId: item.id,
+      revisionId: revision.id,
+      materialId,
+      plannedQty: quantity,
+      needBy: new Date(Date.now() + 86_400_000),
+    },
+  });
+  const reservation = await db.inventoryReservation.create({
+    data: {
+      requirementId: requirement.id,
+      batchId,
+      quantity,
+      state: reservationState,
+    },
+  });
+  const task = await db.productionTask.create({
+    data: {
+      orderItemId: item.id,
+      quantity: item.quantity,
+      state: productionState,
+    },
+  });
+  return { order, item, revision, requirement, reservation, task };
+}
+
+async function supplyStateOf(orderId: string): Promise<SupplyState> {
+  return (await db.order.findUniqueOrThrow({
+    where: { id: orderId },
+    select: { supplyState: true },
+  })).supplyState;
+}
+
+async function activeReservationQty(batchId: string): Promise<number> {
+  const result = await db.inventoryReservation.aggregate({
+    where: { batchId, state: ReservationState.ACTIVE },
+    _sum: { quantity: true },
+  });
+  return Number(result._sum.quantity ?? 0);
+}
+
+/**
+ * Runs confirmation with a transaction proxy that triggers a real cancellation immediately before
+ * the service's FOR UPDATE NOWAIT statement is forwarded. This makes the snapshot race
+ * deterministic: the initial risk read still sees both orders, while the order lock and the
+ * following revalidation see the committed cancellation and released reservations.
+ */
+async function confirmWithCancellationBeforeOrderLock(
+  scope: InventoryOperationScope,
+  stocktakeId: string,
+  cancel: () => Promise<void>,
+) {
+  return db.$transaction(async (tx) => {
+    let cancellationTriggered = false;
+    const proxied = new Proxy(tx, {
+      get(target, property) {
+        const value = Reflect.get(target, property, target);
+        if (property !== "$queryRaw") {
+          return typeof value === "function" ? value.bind(target) : value;
+        }
+        return async (...args: unknown[]) => {
+          const query = args[0];
+          const sql = Array.isArray(query) ? query.join("?") : String(query ?? "");
+          if (!cancellationTriggered && sql.includes("FOR UPDATE NOWAIT")) {
+            cancellationTriggered = true;
+            await cancel();
+          }
+          return Reflect.apply(
+            value as (...params: unknown[]) => Promise<unknown>,
+            target,
+            args,
+          );
+        };
+      },
+    });
+    return confirmStocktake(proxied, scope, stocktakeId);
+  });
+}
+
 async function main() {
   const tenant = await db.tenant.create({
     data: { slug: `v2-stocktake-${marker}`, name: "V2 盘点测试租户" },
@@ -73,8 +214,41 @@ async function main() {
   const store = await db.store.create({
     data: { tenantId: tenant.id, code: `MAIN-${marker}`, name: "盘点测试店" },
   });
+  const reviewer = await db.staffUser.create({
+    data: {
+      username: `stocktake-reviewer-${marker}`,
+      passwordHash: "test-only",
+      tenantMembers: { create: { tenantId: tenant.id, roles: ["MANAGER"] } },
+      storeMembers: { create: { storeId: store.id, roles: ["MANAGER"] } },
+    },
+  });
+  const inventoryReviewer = await db.staffUser.create({
+    data: {
+      username: `stocktake-inventory-reviewer-${marker}`,
+      passwordHash: "test-only",
+      tenantMembers: { create: { tenantId: tenant.id, roles: ["INVENTORY_REVIEWER"] } },
+      storeMembers: { create: { storeId: store.id, roles: ["INVENTORY_REVIEWER"] } },
+    },
+  });
   const otherStore = await db.store.create({
     data: { tenantId: tenant.id, code: `OTHER-${marker}`, name: "盘点另一门店" },
+  });
+  const operator = await db.staffUser.create({ data: {
+    username: `stocktake-operator-${marker}`, passwordHash: "test-only",
+    tenantMembers: { create: { tenantId: tenant.id, roles: ["BUYER"] } },
+    storeMembers: { create: { storeId: store.id, roles: ["BUYER"] } },
+  } });
+  const crossStoreManager = await db.staffUser.create({ data: {
+    username: `stocktake-cross-manager-${marker}`, passwordHash: "test-only",
+    tenantMembers: { create: { tenantId: tenant.id, roles: ["MANAGER"] } },
+    storeMembers: { create: { storeId: otherStore.id, roles: ["MANAGER"] } },
+  } });
+  await db.storeSettings.create({ data: {
+    tenantId: tenant.id, storeId: store.id, deliveryConfig: {}, capacityConfig: {},
+    lossReviewThreshold: 2,
+  } });
+  const otherTenantStore = await db.store.create({
+    data: { tenantId: otherTenant.id, code: `FOREIGN-${marker}`, name: "盘点外租户门店" },
   });
   const locationA = await db.inventoryLocation.create({
     data: { storeId: store.id, code: `A-${marker}`, kind: LocationKind.WAREHOUSE },
@@ -125,7 +299,7 @@ async function main() {
     data: { batchId: batchZero.id, locationId: locationA.id, onHandQty: 2 },
   });
 
-  const scope = scopeOf(tenant.id, store.id);
+  const scope = { ...scopeOf(tenant.id, store.id), actorStaffId: reviewer.id };
 
   // Draft snapshots current on hand and never changes inventory.
   const draftKey = newKey("ST-DRAFT");
@@ -389,6 +563,598 @@ async function main() {
     where: { id: scopedDraft.stocktakeId },
   })).state, StocktakeState.DRAFT);
 
+  // A conflict on the last line must undo the balance and ledger writes for the first line.
+  const rollbackDraft = await createDraft(scope, {
+    idempotencyKey: newKey("ST-ROLLBACK"),
+    lines: [
+      { batchId: batchOne.id, locationId: locationA.id, countedQty: 7 },
+      { batchId: batchTwo.id, locationId: locationB.id, countedQty: 4 },
+    ],
+  });
+  const [firstLine, lastLine] = await db.stocktakeLine.findMany({
+    where: { stocktakeId: rollbackDraft.stocktakeId },
+    orderBy: { id: "asc" },
+  });
+  const conflictKey = `STOCKTAKE:${rollbackDraft.stocktakeId}:${lastLine.id}`;
+  await db.inventoryTransaction.create({
+    data: {
+      batchId: lastLine.batchId,
+      kind: TransactionKind.ADJUSTMENT,
+      quantity: 1,
+      fromLocationId: lastLine.locationId,
+      referenceType: "STOCKTAKE_LINE",
+      referenceId: lastLine.id,
+      idempotencyKey: conflictKey,
+    },
+  });
+
+  await assert.rejects(confirm(scope, rollbackDraft.stocktakeId), /已存在调整流水/);
+  assert.equal(await balanceQty(batchOne.id, locationA.id), 8.5);
+  assert.equal(await balanceQty(batchTwo.id, locationB.id), 5);
+  assert.equal(await db.inventoryTransaction.count({
+    where: { idempotencyKey: `STOCKTAKE:${rollbackDraft.stocktakeId}:${firstLine.id}` },
+  }), 0);
+  assert.equal(await db.auditEvent.count({
+    where: { entityId: rollbackDraft.stocktakeId, action: "STOCKTAKE_CONFIRMED" },
+  }), 0);
+  assert.equal((await db.stocktake.findUniqueOrThrow({
+    where: { id: rollbackDraft.stocktakeId },
+  })).state, StocktakeState.DRAFT);
+
+  // WMS-BR-INV-003: a counted shortage keeps every reservation and downgrades all fully covered
+  // orders that hold an active reservation on the deficient batch. No loss-allocation priority
+  // is applied, so the large order is downgraded together with the two small ones.
+  const riskBatch = await createBatch("RISK-A");
+  await db.batchBalance.create({
+    data: { batchId: riskBatch.id, locationId: locationA.id, onHandQty: 10 },
+  });
+  const riskOrderLarge = await createOrderWithReservation({
+    label: "RISK-LARGE",
+    tenantId: tenant.id,
+    storeId: store.id,
+    materialId: material.id,
+    batchId: riskBatch.id,
+    quantity: 6,
+  });
+  const riskOrderSmallOne = await createOrderWithReservation({
+    label: "RISK-SMALL-1",
+    tenantId: tenant.id,
+    storeId: store.id,
+    materialId: material.id,
+    batchId: riskBatch.id,
+    quantity: 2,
+  });
+  const riskOrderSmallTwo = await createOrderWithReservation({
+    label: "RISK-SMALL-2",
+    tenantId: tenant.id,
+    storeId: store.id,
+    materialId: material.id,
+    batchId: riskBatch.id,
+    quantity: 2,
+  });
+
+  const riskDraft = await createDraft(scope, {
+    idempotencyKey: newKey("ST-RISK-A"),
+    lines: [{
+      batchId: riskBatch.id,
+      locationId: locationA.id,
+      countedQty: 8,
+      reason: "盘亏复核",
+    }],
+  });
+  const riskConfirm = await confirm(scope, riskDraft.stocktakeId);
+  assert.equal(riskConfirm.alreadyConfirmed, false);
+  assert.equal(riskConfirm.adjustmentCount, 1);
+  assert.equal(lineOf(riskConfirm.lines, riskBatch.id).adjustmentQty, -2);
+  assert.ok(lineOf(riskConfirm.lines, riskBatch.id).transactionId);
+  assert.equal(await balanceQty(riskBatch.id, locationA.id), 8);
+
+  const riskTransactions = await db.inventoryTransaction.findMany({
+    where: { batchId: riskBatch.id, kind: TransactionKind.ADJUSTMENT },
+  });
+  assert.equal(riskTransactions.length, 1);
+  assert.equal(Number(riskTransactions[0].quantity), 2);
+  assert.equal(riskTransactions[0].fromLocationId, locationA.id);
+  assert.equal(riskTransactions[0].toLocationId, null);
+  assert.equal(await activeReservationQty(riskBatch.id), 10);
+
+  const expectedRiskOrderIds = [
+    riskOrderLarge.order.id,
+    riskOrderSmallOne.order.id,
+    riskOrderSmallTwo.order.id,
+  ].sort();
+  for (const fixture of [riskOrderLarge, riskOrderSmallOne, riskOrderSmallTwo]) {
+    const reservation = await db.inventoryReservation.findUniqueOrThrow({
+      where: { id: fixture.reservation.id },
+    });
+    assert.equal(reservation.state, ReservationState.ACTIVE);
+    assert.equal(Number(reservation.quantity), Number(fixture.reservation.quantity));
+    assert.equal(await supplyStateOf(fixture.order.id), SupplyState.PARTIALLY_COVERED);
+    const order = await db.order.findUniqueOrThrow({ where: { id: fixture.order.id } });
+    assert.equal(order.productionState, ProductionState.READY);
+    assert.equal(order.version, 1);
+    const task = await db.productionTask.findUniqueOrThrow({ where: { id: fixture.task.id } });
+    assert.equal(task.state, ProductionState.READY);
+    assert.equal(task.startedAt, null);
+  }
+  assert.equal(await db.materialUsage.count({
+    where: { task: { orderItem: { orderId: riskOrderLarge.order.id } } },
+  }), 0);
+
+  const riskAudit = await db.auditEvent.findFirstOrThrow({
+    where: { entityId: riskDraft.stocktakeId, action: "STOCKTAKE_CONFIRMED" },
+  });
+  const riskSnapshot = riskAudit.afterSnapshot as ConfirmedAuditSnapshot;
+  assert.deepEqual(riskSnapshot.supplyRisk?.affectedOrderIds, expectedRiskOrderIds);
+  assert.deepEqual(riskSnapshot.supplyRisk?.deficientBatches, [{
+    batchId: riskBatch.id,
+    onHandQty: 8,
+    activeReservationQty: 10,
+    shortageQty: 2,
+  }]);
+
+  const riskRepeated = await confirm(scope, riskDraft.stocktakeId);
+  assert.equal(riskRepeated.alreadyConfirmed, true);
+  assert.equal(riskRepeated.adjustmentCount, 1);
+  assert.equal(await db.inventoryTransaction.count({
+    where: { batchId: riskBatch.id, kind: TransactionKind.ADJUSTMENT },
+  }), 1);
+  assert.equal(await db.auditEvent.count({
+    where: { entityId: riskDraft.stocktakeId, action: "STOCKTAKE_CONFIRMED" },
+  }), 1);
+  assert.equal(await activeReservationQty(riskBatch.id), 10);
+  assert.equal(await supplyStateOf(riskOrderLarge.order.id), SupplyState.PARTIALLY_COVERED);
+
+  // Final totals include every location, even one without a stocktake line. Equality with the
+  // scoped active reservations is not a risk, and a foreign-tenant reservation is ignored.
+  const safeBatch = await createBatch("RISK-SAFE");
+  await db.batchBalance.createMany({
+    data: [
+      { batchId: safeBatch.id, locationId: locationA.id, onHandQty: 10 },
+      { batchId: safeBatch.id, locationId: locationB.id, onHandQty: 2 },
+    ],
+  });
+  const safeOrder = await createOrderWithReservation({
+    label: "RISK-SAFE-ORDER",
+    tenantId: tenant.id,
+    storeId: store.id,
+    materialId: material.id,
+    batchId: safeBatch.id,
+    quantity: 10,
+  });
+  const foreignOrder = await createOrderWithReservation({
+    label: "RISK-FOREIGN-ORDER",
+    tenantId: otherTenant.id,
+    storeId: otherTenantStore.id,
+    materialId: material.id,
+    batchId: safeBatch.id,
+    quantity: 25,
+  });
+
+  const safeDraft = await createDraft(scope, {
+    idempotencyKey: newKey("ST-RISK-SAFE"),
+    lines: [{ batchId: safeBatch.id, locationId: locationA.id, countedQty: 8 }],
+  });
+  const safeConfirm = await confirm(scope, safeDraft.stocktakeId);
+  assert.equal(safeConfirm.adjustmentCount, 1);
+  assert.equal(lineOf(safeConfirm.lines, safeBatch.id).adjustmentQty, -2);
+  assert.equal(await balanceQty(safeBatch.id, locationA.id), 8);
+  assert.equal(await balanceQty(safeBatch.id, locationB.id), 2);
+  assert.equal(await activeReservationQty(safeBatch.id), 35);
+  assert.equal(await supplyStateOf(safeOrder.order.id), SupplyState.ON_HAND_COVERED);
+  assert.equal(await supplyStateOf(foreignOrder.order.id), SupplyState.ON_HAND_COVERED);
+
+  const safeAudit = await db.auditEvent.findFirstOrThrow({
+    where: { entityId: safeDraft.stocktakeId, action: "STOCKTAKE_CONFIRMED" },
+  });
+  assert.deepEqual((safeAudit.afterSnapshot as ConfirmedAuditSnapshot).supplyRisk, {
+    deficientBatches: [],
+    affectedOrderIds: [],
+  });
+
+  // Two counted rows of the same batch and an uncounted location are combined into the final
+  // total. A non-covered order and a released reservation are not candidates for the downgrade.
+  const multiLocation = await db.inventoryLocation.create({
+    data: { storeId: store.id, code: `MULTI-${marker}`, kind: LocationKind.WAREHOUSE },
+  });
+  const multiBatch = await createBatch("RISK-MULTI");
+  await db.batchBalance.createMany({
+    data: [
+      { batchId: multiBatch.id, locationId: locationA.id, onHandQty: 4 },
+      { batchId: multiBatch.id, locationId: locationB.id, onHandQty: 4 },
+      { batchId: multiBatch.id, locationId: multiLocation.id, onHandQty: 2 },
+    ],
+  });
+  const multiCoveredOrder = await createOrderWithReservation({
+    label: "RISK-MULTI-COVERED",
+    tenantId: tenant.id,
+    storeId: store.id,
+    materialId: material.id,
+    batchId: multiBatch.id,
+    quantity: 6,
+  });
+  const multiNonCoveredOrder = await createOrderWithReservation({
+    label: "RISK-MULTI-NONCOVERED",
+    tenantId: tenant.id,
+    storeId: store.id,
+    materialId: material.id,
+    batchId: multiBatch.id,
+    quantity: 2,
+    supplyState: SupplyState.PURCHASE_REQUIRED,
+    productionState: ProductionState.WAITING_MATERIAL,
+  });
+  const multiReleasedOrder = await createOrderWithReservation({
+    label: "RISK-MULTI-RELEASED",
+    tenantId: tenant.id,
+    storeId: store.id,
+    materialId: material.id,
+    batchId: multiBatch.id,
+    quantity: 5,
+    reservationState: ReservationState.RELEASED,
+  });
+
+  const multiDraft = await createDraft(scope, {
+    idempotencyKey: newKey("ST-RISK-MULTI"),
+    lines: [
+      { batchId: multiBatch.id, locationId: locationA.id, countedQty: 2 },
+      { batchId: multiBatch.id, locationId: locationB.id, countedQty: 2 },
+    ],
+  });
+  const multiConfirm = await confirm(scope, multiDraft.stocktakeId);
+  assert.equal(multiConfirm.adjustmentCount, 2);
+  assert.equal(await balanceQty(multiBatch.id, locationA.id), 2);
+  assert.equal(await balanceQty(multiBatch.id, locationB.id), 2);
+  assert.equal(await balanceQty(multiBatch.id, multiLocation.id), 2);
+
+  const multiTransactions = await db.inventoryTransaction.findMany({
+    where: { batchId: multiBatch.id, kind: TransactionKind.ADJUSTMENT },
+  });
+  assert.equal(multiTransactions.length, 2);
+  assert.deepEqual(
+    multiTransactions.map((transaction) => transaction.fromLocationId).sort(),
+    [locationA.id, locationB.id].sort(),
+  );
+  assert.ok(multiTransactions.every((transaction) => transaction.toLocationId === null));
+  assert.equal(await activeReservationQty(multiBatch.id), 8);
+  assert.equal(await supplyStateOf(multiCoveredOrder.order.id), SupplyState.PARTIALLY_COVERED);
+  assert.equal(await supplyStateOf(multiNonCoveredOrder.order.id), SupplyState.PURCHASE_REQUIRED);
+  assert.equal(await supplyStateOf(multiReleasedOrder.order.id), SupplyState.ON_HAND_COVERED);
+
+  const multiAudit = await db.auditEvent.findFirstOrThrow({
+    where: { entityId: multiDraft.stocktakeId, action: "STOCKTAKE_CONFIRMED" },
+  });
+  const multiSnapshot = multiAudit.afterSnapshot as ConfirmedAuditSnapshot;
+  assert.deepEqual(multiSnapshot.supplyRisk?.affectedOrderIds, [multiCoveredOrder.order.id]);
+  assert.deepEqual(multiSnapshot.supplyRisk?.deficientBatches, [{
+    batchId: multiBatch.id,
+    onHandQty: 6,
+    activeReservationQty: 8,
+    shortageQty: 2,
+  }]);
+
+  // An ACTIVE reservation from a superseded revision is historical: it must not increase the
+  // batch total or nominate the order for a downgrade.
+  const historicalBatch = await createBatch("RISK-HISTORICAL");
+  await db.batchBalance.create({
+    data: { batchId: historicalBatch.id, locationId: locationA.id, onHandQty: 6 },
+  });
+  const historicalOrder = await createOrderWithReservation({
+    label: "RISK-HISTORICAL-ORDER",
+    tenantId: tenant.id,
+    storeId: store.id,
+    materialId: material.id,
+    batchId: historicalBatch.id,
+    quantity: 10,
+  });
+  const currentRevision = await db.orderRevision.create({
+    data: { orderId: historicalOrder.order.id, number: 2, reason: "当前修订" },
+  });
+  const currentRequirement = await db.orderMaterialRequirement.create({
+    data: {
+      orderItemId: historicalOrder.item.id,
+      revisionId: currentRevision.id,
+      materialId: material.id,
+      plannedQty: 2,
+      needBy: new Date(Date.now() + 86_400_000),
+    },
+  });
+  await db.inventoryReservation.create({
+    data: {
+      requirementId: currentRequirement.id,
+      batchId: historicalBatch.id,
+      quantity: 2,
+      state: ReservationState.ACTIVE,
+    },
+  });
+  await db.order.update({
+    where: { id: historicalOrder.order.id },
+    data: { version: 2 },
+  });
+
+  const historicalDraft = await createDraft(scope, {
+    idempotencyKey: newKey("ST-RISK-HISTORICAL"),
+    lines: [{ batchId: historicalBatch.id, locationId: locationA.id, countedQty: 6 }],
+  });
+  const historicalConfirm = await confirm(scope, historicalDraft.stocktakeId);
+  assert.equal(historicalConfirm.adjustmentCount, 0);
+  assert.equal(await supplyStateOf(historicalOrder.order.id), SupplyState.ON_HAND_COVERED);
+  assert.equal((await db.inventoryReservation.findUniqueOrThrow({
+    where: { id: historicalOrder.reservation.id },
+  })).state, ReservationState.ACTIVE);
+  const historicalAudit = await db.auditEvent.findFirstOrThrow({
+    where: { entityId: historicalDraft.stocktakeId, action: "STOCKTAKE_CONFIRMED" },
+  });
+  assert.deepEqual((historicalAudit.afterSnapshot as ConfirmedAuditSnapshot).supplyRisk, {
+    deficientBatches: [],
+    affectedOrderIds: [],
+  });
+
+  // An independent transaction holding the affected order lock must make confirmation fail fast
+  // through NOWAIT, leaving the draft, balance, ledger, audit and order untouched. After the lock
+  // is released the same confirmation succeeds normally.
+  const lockBatch = await createBatch("RISK-LOCK");
+  await db.batchBalance.create({
+    data: { batchId: lockBatch.id, locationId: locationA.id, onHandQty: 10 },
+  });
+  const lockOrder = await createOrderWithReservation({
+    label: "RISK-LOCK-ORDER",
+    tenantId: tenant.id,
+    storeId: store.id,
+    materialId: material.id,
+    batchId: lockBatch.id,
+    quantity: 10,
+  });
+  const lockDraft = await createDraft(scope, {
+    idempotencyKey: newKey("ST-RISK-LOCK"),
+    lines: [{ batchId: lockBatch.id, locationId: locationA.id, countedQty: 8 }],
+  });
+
+  let releaseOrderLock: (() => void) | undefined;
+  let signalOrderLock: (() => void) | undefined;
+  const orderLocked = new Promise<void>((resolve) => {
+    signalOrderLock = resolve;
+  });
+  const holdingTransaction = db.$transaction(async (tx) => {
+    await tx.$queryRaw`SELECT id FROM "Order" WHERE id = ${lockOrder.order.id} FOR UPDATE`;
+    signalOrderLock?.();
+    await new Promise<void>((resolve) => {
+      releaseOrderLock = resolve;
+    });
+  }, { timeout: 30_000 });
+
+  try {
+    await orderLocked;
+    await assert.rejects(
+      confirm(scope, lockDraft.stocktakeId),
+      /正在被其他操作处理/,
+    );
+    assert.equal((await db.stocktake.findUniqueOrThrow({
+      where: { id: lockDraft.stocktakeId },
+    })).state, StocktakeState.DRAFT);
+    assert.equal(await balanceQty(lockBatch.id, locationA.id), 10);
+    assert.equal(await db.inventoryTransaction.count({
+      where: { batchId: lockBatch.id, kind: TransactionKind.ADJUSTMENT },
+    }), 0);
+    assert.equal(await db.auditEvent.count({
+      where: { entityId: lockDraft.stocktakeId, action: "STOCKTAKE_CONFIRMED" },
+    }), 0);
+    assert.equal(await supplyStateOf(lockOrder.order.id), SupplyState.ON_HAND_COVERED);
+    assert.equal(await activeReservationQty(lockBatch.id), 10);
+  } finally {
+    releaseOrderLock?.();
+    await holdingTransaction;
+  }
+
+  const lockRetry = await confirm(scope, lockDraft.stocktakeId);
+  assert.equal(lockRetry.alreadyConfirmed, false);
+  assert.equal(lockRetry.adjustmentCount, 1);
+  assert.equal(await balanceQty(lockBatch.id, locationA.id), 8);
+  assert.equal(await supplyStateOf(lockOrder.order.id), SupplyState.PARTIALLY_COVERED);
+  assert.equal(await db.inventoryTransaction.count({
+    where: { batchId: lockBatch.id, kind: TransactionKind.ADJUSTMENT },
+  }), 1);
+
+  // Cancellation releases reservations without a batch lock. If it commits between the initial
+  // risk read and the NOWAIT order lock, confirmation must revalidate and leave both the cancelled
+  // order and the remaining covered order untouched because its reservation now fits.
+  const snapshotBatch = await createBatch("RISK-SNAPSHOT");
+  await db.batchBalance.create({
+    data: { batchId: snapshotBatch.id, locationId: locationA.id, onHandQty: 10 },
+  });
+  const snapshotCancelledOrder = await createOrderWithReservation({
+    label: "RISK-SNAPSHOT-CANCELLED",
+    tenantId: tenant.id,
+    storeId: store.id,
+    materialId: material.id,
+    batchId: snapshotBatch.id,
+    quantity: 8,
+  });
+  const snapshotRemainingOrder = await createOrderWithReservation({
+    label: "RISK-SNAPSHOT-REMAINING",
+    tenantId: tenant.id,
+    storeId: store.id,
+    materialId: material.id,
+    batchId: snapshotBatch.id,
+    quantity: 2,
+  });
+  const snapshotDraft = await createDraft(scope, {
+    idempotencyKey: newKey("ST-RISK-SNAPSHOT"),
+    lines: [{ batchId: snapshotBatch.id, locationId: locationA.id, countedQty: 8 }],
+  });
+
+  const snapshotConfirm = await confirmWithCancellationBeforeOrderLock(
+    scope,
+    snapshotDraft.stocktakeId,
+    async () => {
+      await cancelOrder(db, {
+        tenantId: tenant.id,
+        storeId: store.id,
+        orderId: snapshotCancelledOrder.order.id,
+        actorStaffId: scope.actorStaffId,
+        reason: "并发取消释放预留",
+      });
+    },
+  );
+  assert.equal(snapshotConfirm.alreadyConfirmed, false);
+  assert.equal(snapshotConfirm.adjustmentCount, 1);
+  assert.equal(await balanceQty(snapshotBatch.id, locationA.id), 8);
+  assert.equal(await activeReservationQty(snapshotBatch.id), 2);
+  assert.equal((await db.inventoryReservation.findUniqueOrThrow({
+    where: { id: snapshotCancelledOrder.reservation.id },
+  })).state, ReservationState.RELEASED);
+  assert.equal((await db.inventoryReservation.findUniqueOrThrow({
+    where: { id: snapshotRemainingOrder.reservation.id },
+  })).state, ReservationState.ACTIVE);
+  assert.equal(await supplyStateOf(snapshotCancelledOrder.order.id), SupplyState.ON_HAND_COVERED);
+  assert.equal(await supplyStateOf(snapshotRemainingOrder.order.id), SupplyState.ON_HAND_COVERED);
+  assert.equal((await db.order.findUniqueOrThrow({
+    where: { id: snapshotCancelledOrder.order.id },
+  })).commercialState, CommercialState.CANCELLED);
+
+  const snapshotTransactions = await db.inventoryTransaction.findMany({
+    where: { batchId: snapshotBatch.id, kind: TransactionKind.ADJUSTMENT },
+  });
+  assert.equal(snapshotTransactions.length, 1);
+  assert.equal(Number(snapshotTransactions[0].quantity), 2);
+  const snapshotAudit = await db.auditEvent.findFirstOrThrow({
+    where: { entityId: snapshotDraft.stocktakeId, action: "STOCKTAKE_CONFIRMED" },
+  });
+  assert.deepEqual((snapshotAudit.afterSnapshot as ConfirmedAuditSnapshot).supplyRisk, {
+    deficientBatches: [],
+    affectedOrderIds: [],
+  });
+
+  const snapshotRepeated = await confirm(scope, snapshotDraft.stocktakeId);
+  assert.equal(snapshotRepeated.alreadyConfirmed, true);
+  assert.equal(snapshotRepeated.adjustmentCount, 1);
+  assert.equal(await db.inventoryTransaction.count({
+    where: { batchId: snapshotBatch.id, kind: TransactionKind.ADJUSTMENT },
+  }), 1);
+
+  // WMS-BR-INV-006: equality never needs review, regardless of direction. A difference above
+  // the threshold needs review by absolute value, including an inventory gain.
+  const thresholdEqualBatch = await createBatch("THRESHOLD-EQUAL");
+  await db.batchBalance.create({ data: { batchId: thresholdEqualBatch.id, locationId: locationA.id, onHandQty: 5 } });
+  const operatorScope = { tenantId: tenant.id, storeId: store.id, actorStaffId: operator.id };
+  const thresholdEqualDraft = await createDraft(operatorScope, {
+    idempotencyKey: newKey("THRESHOLD-EQUAL"),
+    lines: [{ batchId: thresholdEqualBatch.id, locationId: locationA.id, countedQty: 3 }],
+  });
+  const thresholdEqualResult = await confirm(operatorScope, thresholdEqualDraft.stocktakeId);
+  assert.equal(thresholdEqualResult.pendingReview, undefined);
+  assert.equal(await balanceQty(thresholdEqualBatch.id, locationA.id), 3);
+
+  const thresholdEqualGainBatch = await createBatch("THRESHOLD-EQUAL-GAIN");
+  await db.batchBalance.create({ data: { batchId: thresholdEqualGainBatch.id, locationId: locationA.id, onHandQty: 5 } });
+  const thresholdEqualGainDraft = await createDraft(operatorScope, {
+    idempotencyKey: newKey("THRESHOLD-EQUAL-GAIN"),
+    lines: [{ batchId: thresholdEqualGainBatch.id, locationId: locationA.id, countedQty: 7 }],
+  });
+  const thresholdEqualGainResult = await confirm(operatorScope, thresholdEqualGainDraft.stocktakeId);
+  assert.equal(thresholdEqualGainResult.pendingReview, undefined);
+  assert.equal(thresholdEqualGainResult.adjustmentCount, 1);
+  assert.equal(await balanceQty(thresholdEqualGainBatch.id, locationA.id), 7);
+  const equalGainTransactions = await db.inventoryTransaction.findMany({
+    where: { batchId: thresholdEqualGainBatch.id, kind: TransactionKind.ADJUSTMENT },
+  });
+  assert.equal(equalGainTransactions.length, 1);
+  assert.equal(Number(equalGainTransactions[0].quantity), 2);
+  assert.equal(equalGainTransactions[0].toLocationId, locationA.id);
+  assert.equal(equalGainTransactions[0].fromLocationId, null);
+
+  const thresholdAboveBatch = await createBatch("THRESHOLD-ABOVE");
+  await db.batchBalance.create({ data: { batchId: thresholdAboveBatch.id, locationId: locationA.id, onHandQty: 5 } });
+  const thresholdAboveDraft = await createDraft(operatorScope, {
+    idempotencyKey: newKey("THRESHOLD-ABOVE"),
+    lines: [{ batchId: thresholdAboveBatch.id, locationId: locationA.id, countedQty: 2 }],
+  });
+  const thresholdAboveResult = await confirm(operatorScope, thresholdAboveDraft.stocktakeId);
+  assert.equal(thresholdAboveResult.pendingReview, true);
+  assert.deepEqual(thresholdAboveResult.reviewReasons, ["盘点差异超过门店阈值"]);
+  assert.equal(await balanceQty(thresholdAboveBatch.id, locationA.id), 5);
+  await assert.rejects(db.$transaction((tx) => reviewStocktake(tx, {
+    tenantId: tenant.id, storeId: store.id, actorStaffId: crossStoreManager.id,
+  }, thresholdAboveDraft.stocktakeId, "APPROVE", "跨店审批")), /本店经理或授权人员/);
+  await db.$transaction((tx) => reviewStocktake(tx, scope, thresholdAboveDraft.stocktakeId, "APPROVE", "本店经理复核"));
+  assert.equal(await balanceQty(thresholdAboveBatch.id, locationA.id), 2);
+
+  const gainBatch = await createBatch("THRESHOLD-GAIN");
+  await db.batchBalance.create({ data: { batchId: gainBatch.id, locationId: locationA.id, onHandQty: 5 } });
+  const gainDraft = await createDraft(operatorScope, {
+    idempotencyKey: newKey("THRESHOLD-GAIN"),
+    lines: [{ batchId: gainBatch.id, locationId: locationA.id, countedQty: 8 }],
+  });
+  const gainConfirm = await confirm(operatorScope, gainDraft.stocktakeId);
+  assert.equal(gainConfirm.alreadyConfirmed, false);
+  assert.equal(gainConfirm.pendingReview, true);
+  assert.equal(gainConfirm.adjustmentCount, 0);
+  assert.deepEqual(gainConfirm.reviewReasons, ["盘点差异超过门店阈值"]);
+  assert.deepEqual(gainConfirm.lines, []);
+  assert.equal(await balanceQty(gainBatch.id, locationA.id), 5);
+  assert.equal(await db.inventoryTransaction.count({
+    where: { batchId: gainBatch.id, kind: TransactionKind.ADJUSTMENT },
+  }), 0);
+  const pendingGain = await db.stocktake.findUniqueOrThrow({
+    where: { id: gainDraft.stocktakeId },
+  });
+  assert.equal(pendingGain.state, StocktakeState.PENDING_REVIEW);
+  assert.deepEqual(pendingGain.reviewReasons, ["盘点差异超过门店阈值"]);
+  assert.equal(pendingGain.submittedById, operator.id);
+  assert.equal(pendingGain.reviewedById, null);
+  assert.equal(pendingGain.confirmedAt, null);
+  assert.equal(await db.auditEvent.count({
+    where: { entityId: gainDraft.stocktakeId, action: "STOCKTAKE_REVIEW_REQUESTED" },
+  }), 1);
+  assert.equal(await db.auditEvent.count({
+    where: { entityId: gainDraft.stocktakeId, action: "STOCKTAKE_CONFIRMED" },
+  }), 0);
+
+  // Neither the operator nor a manager from another store can approve the pending gain.
+  await assert.rejects(db.$transaction((tx) => reviewStocktake(tx, operatorScope,
+    gainDraft.stocktakeId, "APPROVE", "自审")), /本店经理或授权人员/);
+  await assert.rejects(db.$transaction((tx) => reviewStocktake(tx, {
+    tenantId: tenant.id, storeId: store.id, actorStaffId: crossStoreManager.id,
+  }, gainDraft.stocktakeId, "APPROVE", "跨店审批")), /本店经理或授权人员/);
+  assert.equal(await balanceQty(gainBatch.id, locationA.id), 5);
+  assert.equal(await db.inventoryTransaction.count({
+    where: { batchId: gainBatch.id, kind: TransactionKind.ADJUSTMENT },
+  }), 0);
+
+  const inventoryReviewerScope = {
+    ...scopeOf(tenant.id, store.id),
+    actorStaffId: inventoryReviewer.id,
+  };
+  await db.$transaction((tx) => reviewStocktake(
+    tx, inventoryReviewerScope, gainDraft.stocktakeId, "APPROVE", "本店复核盘盈",
+  ));
+  assert.equal(await balanceQty(gainBatch.id, locationA.id), 8);
+  const gainTransactions = await db.inventoryTransaction.findMany({
+    where: { batchId: gainBatch.id, kind: TransactionKind.ADJUSTMENT },
+  });
+  assert.equal(gainTransactions.length, 1);
+  assert.equal(Number(gainTransactions[0].quantity), 3);
+  assert.equal(gainTransactions[0].fromLocationId, null);
+  assert.equal(gainTransactions[0].toLocationId, locationA.id);
+  const approvedGain = await db.stocktake.findUniqueOrThrow({
+    where: { id: gainDraft.stocktakeId },
+  });
+  assert.equal(approvedGain.state, StocktakeState.CONFIRMED);
+  assert.equal(approvedGain.reviewedById, inventoryReviewer.id);
+  assert.equal(approvedGain.reviewNote, "本店复核盘盈");
+  assert.deepEqual(approvedGain.reviewReasons, ["盘点差异超过门店阈值"]);
+  assert.ok(approvedGain.confirmedAt);
+  assert.equal(await db.auditEvent.count({
+    where: { entityId: gainDraft.stocktakeId, action: "STOCKTAKE_CONFIRMED" },
+  }), 1);
+
+  const gainRepeated = await confirm(operatorScope, gainDraft.stocktakeId);
+  assert.equal(gainRepeated.alreadyConfirmed, true);
+  assert.equal(gainRepeated.adjustmentCount, 1);
+  assert.equal(await balanceQty(gainBatch.id, locationA.id), 8);
+  assert.equal(await db.inventoryTransaction.count({
+    where: { batchId: gainBatch.id, kind: TransactionKind.ADJUSTMENT },
+  }), 1);
+
   console.log("v2 stocktake tests passed");
 }
 
@@ -412,11 +1178,26 @@ async function cleanup() {
   await db.batchBalance.deleteMany({ where: { batch: storeFilter } });
   await db.inventoryReservation.deleteMany({ where: { batch: storeFilter } });
   await db.sampleInventoryReservation.deleteMany({ where: { batch: storeFilter } });
+  await db.materialUsage.deleteMany({ where: { task: { orderItem: { order: tenantFilter } } } });
+  await db.productionTask.deleteMany({ where: { orderItem: { order: tenantFilter } } });
+  await db.inventoryReservation.deleteMany({
+    where: { requirement: { orderItem: { order: tenantFilter } } },
+  });
+  await db.orderMaterialRequirement.deleteMany({
+    where: { orderItem: { order: tenantFilter } },
+  });
+  await db.orderItem.deleteMany({ where: { order: tenantFilter } });
+  await db.orderRevision.deleteMany({ where: { order: tenantFilter } });
+  await db.order.deleteMany({ where: tenantFilter });
   await db.inventoryBatch.deleteMany({ where: storeFilter });
   await db.material.deleteMany({ where: tenantFilter });
   await db.inventoryLocation.deleteMany({ where: storeFilter });
+  await db.storeSettings.deleteMany({ where: tenantFilter });
+  await db.storeMember.deleteMany({ where: { store: { tenantId: { in: tenantIds } } } });
+  await db.tenantMember.deleteMany({ where: tenantFilter });
   await db.store.deleteMany({ where: tenantFilter });
   await db.tenant.deleteMany({ where: { id: { in: tenantIds } } });
+  await db.staffUser.deleteMany({ where: { username: { startsWith: "stocktake-" } } });
 }
 
 main()

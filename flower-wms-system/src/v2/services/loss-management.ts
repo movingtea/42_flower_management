@@ -1,9 +1,10 @@
 import {
-  LossReason, Prisma, TransactionKind,
+  InventoryReviewStatus, LossReason, Prisma, TransactionKind,
 } from "../../generated/prisma-v2/client";
 import {
   assertPositiveQuantity,
   decimalNumber,
+  deterministicId,
   lockBatchBalances,
   lockBatchRow,
   lockStoreRow,
@@ -39,6 +40,101 @@ export type RecordLossResult = {
 
 const LOSS_REFERENCE_TYPE = "LOSS_RECORD";
 const LOSS_ACTION = "LOSS_RECORDED";
+
+async function assertLossReviewer(tx: Prisma.TransactionClient, scope: InventoryOperationScope) {
+  const member = await tx.storeMember.findFirst({
+    where: { staffUserId: scope.actorStaffId, storeId: scope.storeId, active: true },
+    include: { staffUser: { include: { tenantMembers: true } } },
+  });
+  const tenantMember = member?.staffUser.tenantMembers.find((row) => row.tenantId === scope.tenantId && row.active);
+  const roles = new Set([...(member?.roles ?? []), ...(tenantMember?.roles ?? [])]);
+  if (!member || !tenantMember ||
+      (!roles.has("ADMIN") && !roles.has("MANAGER") && !roles.has("INVENTORY_REVIEWER"))) {
+    throw new Error("仅本店经理或授权人员可以复核批次不明损耗");
+  }
+}
+
+export async function submitUnknownBatchLoss(
+  tx: Prisma.TransactionClient,
+  scopeInput: InventoryOperationScope,
+  input: { materialId: string; locationId: string; quantity: number; reason: LossReason; note?: string | null; idempotencyKey: string },
+) {
+  const scope = normalizeScope(scopeInput);
+  const materialId = text(input.materialId, "物料");
+  const locationId = text(input.locationId, "库位");
+  const key = text(input.idempotencyKey, "幂等键");
+  if (!lossReasonValid(input.reason)) throw new Error("损耗原因无效，请选择有效的损耗原因");
+  const material = await tx.material.findFirst({ where: { id: materialId, tenantId: scope.tenantId, active: true } });
+  if (!material) throw new Error("物料不存在或不属于当前租户");
+  const location = await tx.inventoryLocation.findFirst({ where: { id: locationId, storeId: scope.storeId } });
+  if (!location) throw new Error("库位不存在或不属于当前门店");
+  assertPositiveQuantity(input.quantity, material.quantityScale, "损耗数量");
+  const id = deterministicId("loss", `unknown:${scope.tenantId}:${scope.storeId}:${key}`);
+  const existing = await tx.lossRecord.findUnique({ where: { id } });
+  if (existing) return { lossRecordId: existing.id, idempotent: true };
+  const loss = await tx.lossRecord.create({ data: {
+    id, storeId: scope.storeId, materialId, locationId, reason: input.reason,
+    quantity: input.quantity, note: input.note?.trim() || null,
+    pendingBatchVerification: true, reviewStatus: InventoryReviewStatus.PENDING,
+    submittedById: scope.actorStaffId,
+  } });
+  await tx.auditEvent.create({ data: {
+    tenantId: scope.tenantId, storeId: scope.storeId, actorStaffId: scope.actorStaffId,
+    action: "UNKNOWN_BATCH_LOSS_REVIEW_REQUESTED", entityType: "LossRecord", entityId: loss.id,
+    afterSnapshot: { materialId, locationId, quantity: input.quantity, reason: input.reason,
+      reviewStatus: InventoryReviewStatus.PENDING },
+  } });
+  return { lossRecordId: loss.id, idempotent: false };
+}
+
+export async function reviewUnknownBatchLoss(
+  tx: Prisma.TransactionClient,
+  scopeInput: InventoryOperationScope,
+  input: { lossRecordId: string; decision: "APPROVE" | "REJECT"; batchId?: string; note: string },
+) {
+  const scope = normalizeScope(scopeInput);
+  await assertLossReviewer(tx, scope);
+  const note = text(input.note, "复核意见");
+  await tx.$queryRaw`SELECT id FROM "LossRecord" WHERE id = ${input.lossRecordId} FOR UPDATE`;
+  const loss = await tx.lossRecord.findFirst({ where: {
+    id: input.lossRecordId, storeId: scope.storeId, reviewStatus: InventoryReviewStatus.PENDING,
+  } });
+  if (!loss || !loss.materialId || !loss.locationId) throw new Error("待复核损耗不存在或状态已变化");
+  if (input.decision === "REJECT") {
+    await tx.lossRecord.update({ where: { id: loss.id }, data: {
+      pendingBatchVerification: false, reviewStatus: InventoryReviewStatus.REJECTED,
+      reviewedById: scope.actorStaffId, reviewedAt: new Date(), reviewNote: note,
+    } });
+    return { approved: false, transactionId: null };
+  }
+  const batchId = text(input.batchId, "确认批次");
+  await lockStoreRow(tx, scope.storeId); await lockBatchRow(tx, batchId); await lockBatchBalances(tx, batchId);
+  const batch = await tx.inventoryBatch.findFirst({ where: { id: batchId, storeId: scope.storeId, materialId: loss.materialId }, include: { material: true } });
+  if (!batch || batch.material.tenantId !== scope.tenantId) throw new Error("确认批次与损耗物料或门店不匹配");
+  const balance = await tx.batchBalance.findUnique({ where: { batchId_locationId: { batchId, locationId: loss.locationId } } });
+  if (!balance) throw new Error("确认批次在所选库位没有库存余额");
+  const availability = await readBatchAvailability(tx, batchId);
+  const locationAvailable = new Prisma.Decimal(balance.onHandQty).minus(balance.frozenQty);
+  const available = availability.batchAvailable.lt(locationAvailable) ? availability.batchAvailable : locationAvailable;
+  if (available.lt(loss.quantity)) throw new Error(`确认批次可用库存不足：当前可用 ${clampNonNegative(available)}${batch.material.baseUnit}`);
+  const next = new Prisma.Decimal(balance.onHandQty).minus(loss.quantity);
+  await tx.batchBalance.update({ where: { id: balance.id }, data: { onHandQty: next } });
+  const transaction = await tx.inventoryTransaction.create({ data: {
+    batchId, kind: TransactionKind.LOSS, quantity: loss.quantity,
+    fromLocationId: loss.locationId, referenceType: LOSS_REFERENCE_TYPE,
+    referenceId: loss.id, idempotencyKey: `UNKNOWN_LOSS:${loss.id}`,
+  } });
+  await tx.lossRecord.update({ where: { id: loss.id }, data: {
+    batchId, pendingBatchVerification: false, reviewStatus: InventoryReviewStatus.APPROVED,
+    reviewedById: scope.actorStaffId, reviewedAt: new Date(), reviewNote: note,
+  } });
+  await tx.auditEvent.create({ data: {
+    tenantId: scope.tenantId, storeId: scope.storeId, actorStaffId: scope.actorStaffId,
+    action: "UNKNOWN_BATCH_LOSS_REVIEW_APPROVED", entityType: "LossRecord", entityId: loss.id,
+    afterSnapshot: { batchId, transactionId: transaction.id, reviewNote: note },
+  } });
+  return { approved: true, transactionId: transaction.id };
+}
 
 function lossReasonValid(reason: LossReason): boolean {
   return (Object.values(LossReason) as string[]).includes(reason);

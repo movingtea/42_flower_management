@@ -10,6 +10,7 @@
 export const V2_ROLES = [
   "ADMIN",
   "MANAGER",
+  "INVENTORY_REVIEWER",
   "BUYER",
   "SALES",
   "FLORIST",
@@ -20,6 +21,7 @@ export type V2Role = (typeof V2_ROLES)[number];
 export const V2_ROLE_LABELS: Readonly<Record<V2Role, string>> = {
   ADMIN: "管理员",
   MANAGER: "门店经理",
+  INVENTORY_REVIEWER: "库存复核员",
   BUYER: "采购人员",
   SALES: "订单履约人员",
   FLORIST: "花艺师",
@@ -33,6 +35,7 @@ export const V2_CAPABILITIES = [
   "production",
   "delivery",
   "staff",
+  "inventory_review",
 ] as const;
 
 export type V2Capability = (typeof V2_CAPABILITIES)[number];
@@ -47,7 +50,8 @@ export const V2_ROLE_CAPABILITIES: Readonly<
   Record<V2Role, readonly V2Capability[]>
 > = {
   ADMIN: [...V2_CAPABILITIES],
-  MANAGER: ["read", "catalog", "purchase", "order", "production", "delivery"],
+  MANAGER: ["read", "catalog", "purchase", "order", "production", "delivery", "inventory_review"],
+  INVENTORY_REVIEWER: ["read", "purchase", "inventory_review"],
   BUYER: ["read", "purchase"],
   SALES: ["read", "order", "delivery"],
   FLORIST: ["read", "production"],

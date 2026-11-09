@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import {
-  Prisma, PurchaseState, ReservationState,
+  Prisma, PurchaseLineRelationKind, PurchaseState, ReceiptDisposition, ReservationState,
 } from "../../generated/prisma-v2/client";
 import { assertMaterialQuantity } from "../domain/stock-planning";
 import { allocatePurchaseDemand } from "./allocate-purchase-demand";
@@ -64,6 +64,132 @@ export async function cancelPurchaseOrder(tx: Prisma.TransactionClient, scope: S
   if (!current) throw new Error("采购单不存在或不属于当前门店"); if (current.state !== PurchaseState.DRAFT && current.state !== PurchaseState.ORDERED) throw new Error("当前采购单不能取消"); if (current.lines.some((line) => line.receiptLines.length)) throw new Error("已有验收记录的采购单不能取消"); if (current.lines.some((line) => line.allocations.length)) throw new Error("已关联订单缺料的采购单需先解除或重建补货关系，不能直接取消");
   const order = await tx.purchaseOrder.update({ where: { id: current.id }, data: { state: PurchaseState.CANCELLED, cancelledAt: new Date(), cancellationReason: cleanReason } });
   await tx.auditEvent.create({ data: { tenantId: scope.tenantId, storeId: scope.storeId, actorStaffId: scope.actorStaffId, action: "PURCHASE_ORDER_CANCELLED", entityType: "PurchaseOrder", entityId: order.id, beforeSnapshot: { state: current.state }, afterSnapshot: { state: order.state, cancellationReason: cleanReason } } }); return order;
+}
+
+export type PurchaseSupplementInput = {
+  sourceLineId: string;
+  kind: "EXTRA_ORDER" | "REPLACEMENT_DELIVERY";
+  quantity: number;
+  unitPrice?: number;
+  relationKey: string;
+};
+
+/**
+ * Appends a separately capped line for extra goods or a supplier re-delivery. The original line
+ * and all of its receipt/rejection history remain immutable. Re-delivery capacity is derived from
+ * rejected quantity that is not already fulfilled or still outstanding on earlier linked lines.
+ */
+export async function createPurchaseSupplementLine(
+  tx: Prisma.TransactionClient,
+  scope: Scope,
+  input: PurchaseSupplementInput,
+) {
+  if (input.kind !== PurchaseLineRelationKind.EXTRA_ORDER &&
+      input.kind !== PurchaseLineRelationKind.REPLACEMENT_DELIVERY) {
+    throw new Error("关联明细类型无效");
+  }
+  const relationKey = input.relationKey?.trim();
+  if (!relationKey) throw new Error("关联明细幂等键不能为空");
+  await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext(${`${scope.tenantId}:${relationKey}`}))`;
+  const existing = await tx.purchaseOrderLine.findUnique({ where: { relationKey } });
+  if (existing) {
+    const order = await tx.purchaseOrder.findFirst({
+      where: { id: existing.purchaseOrderId, tenantId: scope.tenantId, storeId: scope.storeId },
+    });
+    if (!order) throw new Error("关联明细幂等键已被其他门店使用");
+    return { line: existing, idempotent: true };
+  }
+
+  const sourceRef = await tx.purchaseOrderLine.findFirst({
+    where: {
+      id: input.sourceLineId,
+      relationKind: PurchaseLineRelationKind.ORIGINAL,
+      purchaseOrder: { tenantId: scope.tenantId, storeId: scope.storeId },
+    },
+    select: { purchaseOrderId: true },
+  });
+  if (!sourceRef) throw new Error("原采购明细不存在或不属于当前门店");
+  await tx.$queryRaw`SELECT id FROM "PurchaseOrder" WHERE id = ${sourceRef.purchaseOrderId} FOR UPDATE`;
+  await tx.$queryRaw`SELECT id FROM "PurchaseOrderLine" WHERE "purchaseOrderId" = ${sourceRef.purchaseOrderId} ORDER BY id FOR UPDATE`;
+
+  const source = await tx.purchaseOrderLine.findFirst({
+    where: {
+      id: input.sourceLineId,
+      relationKind: PurchaseLineRelationKind.ORIGINAL,
+      purchaseOrder: { tenantId: scope.tenantId, storeId: scope.storeId },
+    },
+    include: {
+      material: true,
+      purchaseOrder: true,
+      receiptLines: { select: { disposition: true, quantity: true } },
+      supplementLines: {
+        where: { relationKind: PurchaseLineRelationKind.REPLACEMENT_DELIVERY },
+        include: { receiptLines: { select: { disposition: true, quantity: true } } },
+      },
+    },
+  });
+  if (!source) throw new Error("原采购明细不存在或不属于当前门店");
+  if (source.purchaseOrder.state === PurchaseState.CANCELLED || source.purchaseOrder.state === PurchaseState.DRAFT) {
+    throw new Error("采购单当前不能创建关联明细");
+  }
+  const quantity = Number(input.quantity);
+  if (!Number.isFinite(quantity) || quantity <= 0) throw new Error("关联数量必须大于零");
+  try { assertMaterialQuantity(quantity, source.material.quantityScale); } catch {
+    throw new Error("关联数量不符合物料计量精度");
+  }
+  const unitPrice = input.unitPrice === undefined
+    ? Number(source.unitPrice)
+    : money(input.unitPrice, "关联明细采购单价");
+
+  if (input.kind === PurchaseLineRelationKind.REPLACEMENT_DELIVERY) {
+    const rejectedOriginal = source.receiptLines
+      .filter((row) => row.disposition === ReceiptDisposition.REJECTED)
+      .reduce((sum, row) => sum + Number(row.quantity), 0);
+    const committedReplacement = source.supplementLines.reduce((sum, line) => {
+      const rejected = line.receiptLines
+        .filter((row) => row.disposition === ReceiptDisposition.REJECTED)
+        .reduce((lineSum, row) => lineSum + Number(row.quantity), 0);
+      return sum + Math.max(0, Number(line.expectedBaseQty ?? line.orderedQty) - rejected);
+    }, 0);
+    const available = Math.max(0, Number((rejectedOriginal - committedReplacement).toFixed(3)));
+    if (quantity > available + LINKED_EPSILON) {
+      throw new Error(`补送数量超过尚未补回的拒收数量 ${available}${source.material.baseUnit}`);
+    }
+  }
+
+  const line = await tx.purchaseOrderLine.create({ data: {
+    purchaseOrderId: source.purchaseOrderId,
+    materialId: source.materialId,
+    orderedQty: quantity,
+    purchaseUnit: source.purchaseUnit,
+    expectedBaseQty: quantity,
+    unitPrice,
+    relationKind: input.kind,
+    sourceLineId: source.id,
+    relationKey,
+  } });
+  const hadReceipts = source.receiptLines.length > 0 || source.supplementLines.some((row) => row.receiptLines.length > 0);
+  await tx.purchaseOrder.update({
+    where: { id: source.purchaseOrderId },
+    data: { state: hadReceipts ? PurchaseState.PARTIALLY_RECEIVED : PurchaseState.ORDERED },
+  });
+  await tx.auditEvent.create({ data: {
+    tenantId: scope.tenantId,
+    storeId: scope.storeId,
+    actorStaffId: scope.actorStaffId,
+    action: input.kind === PurchaseLineRelationKind.EXTRA_ORDER
+      ? "PURCHASE_EXTRA_LINE_CREATED" : "PURCHASE_REDELIVERY_LINE_CREATED",
+    entityType: "PurchaseOrderLine",
+    entityId: line.id,
+    afterSnapshot: {
+      purchaseOrderId: source.purchaseOrderId,
+      sourceLineId: source.id,
+      relationKind: input.kind,
+      quantity,
+      baseUnit: source.material.baseUnit,
+    },
+  } });
+  return { line, idempotent: false };
 }
 
 export type LinkedPurchaseOrderInput = {

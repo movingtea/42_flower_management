@@ -318,6 +318,7 @@ async function main() {
     "order",
     "production",
     "delivery",
+    "inventory_review",
   ]);
   assert.equal(rolesHaveCapability(["MANAGER"], "staff"), false);
   assert.equal(rolesHaveCapability(["ADMIN"], "staff"), true);

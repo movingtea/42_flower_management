@@ -2,10 +2,13 @@
 title: ADR-004 Agent 知识准入、状态与变更治理
 type: adr
 module: project
-status: under-review
-version: 1
+status: approved
+version: 2
 owner: engineering
 updated: 2026-11-09
+approved_by: 项目用户
+approved_on: 2026-11-09
+approval_scope: "批准知识准入、状态与变更治理。知识路由和项目 Skills 验证已通过。"
 sources:
   - "AGENTS.md"
   - "knowledge/04-Engineering/E0-knowledge-governance.md"
