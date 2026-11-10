@@ -100,8 +100,28 @@
     "db:v2:seed:dev": "tsx prisma/v2/seed.ts dev",
     "db:v2:reset:test": "tsx prisma/v2/seed.ts reset-test",
     "db:v2:init:production": "tsx prisma/v2/seed.ts production",
+    "db:v2:seed:test:minimum": "tsx prisma/v2/seed.ts test --tiers=minimum",
+    "db:v2:seed:test:roles": "tsx prisma/v2/seed.ts test --tiers=roles",
+    "db:v2:seed:test:p1": "tsx prisma/v2/seed.ts test --tiers=roles,p1-scenarios",
+    "db:v2:seed:test:e2e": "tsx prisma/v2/seed.ts test --tiers=roles,e2e-fixtures",
+    "db:v2:seed:check": "tsx scripts/check-v2-seed-tiers.ts",
+    "db:v2:seed:check:default": "tsx scripts/check-v2-seed-tiers.ts --tiers=minimum,roles --expect-no-transactions",
+    "db:v2:seed:check:e2e": "tsx scripts/check-v2-seed-tiers.ts --tiers=roles,e2e-fixtures --expect-no-transactions",
     "smoke:purchase": "tsx scripts/smoke-purchase-flow.ts",
-    "seed:test-products": "npx tsx scripts/seed-test-spu-clones.ts"
+    "seed:test-products": "npx tsx scripts/seed-test-spu-clones.ts",
+    "test:unit": "vitest run && node --test scripts/test-v2.test.mjs scripts/with-v2-test-db.test.mjs && node scripts/test-v2.mjs unit",
+    "test:legacy": "node scripts/with-v2-test-db.mjs --legacy -- npm run test:legacy:inner",
+    "test:legacy:inner": "npm run test:all && npm run test:order-expiry-lifecycle",
+    "test:integration:v2": "node scripts/with-v2-test-db.mjs -- node scripts/test-v2.mjs integration",
+    "test:smoke:v2": "node scripts/with-v2-test-db.mjs -- node scripts/test-v2.mjs smoke",
+    "test:v2:integration-and-smoke": "node scripts/test-v2.mjs integration && node scripts/test-v2.mjs smoke",
+    "test:v2:db": "node scripts/with-v2-test-db.mjs -- npm run test:v2:integration-and-smoke",
+    "test:db:harness-specials": "node --test scripts/v2-test-db-harness-specials.test.mjs",
+    "test:e2e": "node scripts/with-v2-test-db.mjs -- npm run test:e2e:inner",
+    "test:e2e:inner": "playwright test",
+    "test:regression:inner": "npm run test:legacy:inner && vitest run && node --test scripts/test-v2.test.mjs scripts/with-v2-test-db.test.mjs && npm run test:v2:integration-and-smoke",
+    "test:regression": "node scripts/with-v2-test-db.mjs --legacy -- npm run test:regression:inner",
+    "test:ci": "npm run test:regression"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
@@ -126,6 +146,7 @@
     "tsx": "^4.22.3"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.0",
     "@tailwindcss/postcss": "^4",
     "@types/ali-oss": "^6.23.3",
     "@types/bcryptjs": "^2.4.6",
@@ -136,6 +157,7 @@
     "eslint": "^9",
     "eslint-config-next": "16.2.6",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "vitest": "^4.1.12"
   }
 }

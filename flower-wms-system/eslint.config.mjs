@@ -12,6 +12,12 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Playwright writes generated reports, traces and screenshots here. They are
+    // build artifacts, not source, and must never be linted (minified bundles).
+    "test-results/**",
+    "playwright-report/**",
+    "blob-report/**",
+    ".playwright/**",
   ]),
 ]);
 

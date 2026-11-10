@@ -1,0 +1,158 @@
+### E1.8 非生产发布演练证据 · 失败停止演练：错误数据库目标 / 不可用数据库 / 缺陷镜像
+run_id: 20261110-105256
+recorded_at: 2026-11-10T10:56:36.6564702+08:00
+mode: all
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=99daac6)
+compose_project: flower-e1-8-rehearsal
+note: 演练使用本地预构建镜像 + 模拟 SHA 标签；真实镜像构建/ACR 推送/GitHub workflow 不在本地演练范围。
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+
+===== F1a 部署前目标校验：V2 与 V1 使用同一数据库名 → 必须停止 =====
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-a11c0de.yml run --rm --no-deps --entrypoint node -e V2_DATABASE_URL=postgresql://flower_e18:REHEARSAL-MASKED@db:5432/flower_e18_v1?schema=public flower-web scripts/check-v2-database-target.mjs
+   Container flower-e1-8-rehearsal-flower-web-run-ade30cb1aff6 Creating 
+   Container flower-e1-8-rehearsal-flower-web-run-ade30cb1aff6 Created 
+  file:///app/scripts/check-v2-database-target.mjs:22
+      throw new Error("V1 and V2 must use distinct PostgreSQL database names");
+            ^
+  Error: V1 and V2 must use distinct PostgreSQL database names
+      at file:///app/scripts/check-v2-database-target.mjs:22:11
+      at ModuleJob.run (node:internal/modules/esm/module_job:343:25)
+      at async onImport.tracePromise.__proto__ (node:internal/modules/esm/loader:681:26)
+      at async asyncRunEntryPointWithESMLoader (node:internal/modules/run_main:117:5)
+  Node.js v22.23.4
+[exit code: 1]
+  [OK] F1a 目标校验失败并停止（exit=1）
+  [OK] F1a 错误信息明确：V1/V2 数据库名必须不同
+  [STOP] 未替换现有 stack，仍运行上一版镜像。
+
+===== F1b 部署前连通性校验：V2_DATABASE_URL 指向不可用数据库端口 → 必须停止 =====
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-a11c0de.yml run --rm --no-deps --entrypoint node -e V2_DATABASE_URL=postgresql://flower_e18:REHEARSAL-MASKED@db:5999/flower_e18_v2?schema=public flower-web scripts/check-v2-database-target.mjs --connect
+   Container flower-e1-8-rehearsal-flower-web-run-ae449dabee5b Creating 
+   Container flower-e1-8-rehearsal-flower-web-run-ae449dabee5b Created 
+  file:///app/scripts/check-v2-database-target.mjs:38
+        throw new Error(`Cannot connect to the database configured by ${name}`);
+              ^
+  Error: Cannot connect to the database configured by V2_DATABASE_URL
+      at file:///app/scripts/check-v2-database-target.mjs:38:13
+      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+  Node.js v22.23.4
+[exit code: 1]
+  [OK] F1b 连通性校验失败并停止（exit=1）
+  [STOP] 发布脚本在替换 stack 前即停止；生产命令见 deploy.yml 的 --connect 预检。
+
+===== F1c entrypoint 迁移失败：V2 目标不可达 → 容器退出，不进入健康/冒烟 =====
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-a11c0de.yml run --rm --no-deps -e V2_DATABASE_URL=postgresql://flower_e18:REHEARSAL-MASKED@db:5999/flower_e18_v2?schema=public flower-web true
+   Container flower-e1-8-rehearsal-flower-web-run-e7bb08392693 Creating 
+   Container flower-e1-8-rehearsal-flower-web-run-e7bb08392693 Created 
+  [entrypoint] disk usage (container root):
+  overlay                1006.9G     12.8G    942.9G   1% /
+  [entrypoint] prisma migrate deploy...
+  Loaded Prisma config from prisma.config.ts.
+  Prisma schema loaded from prisma/schema.prisma.
+  Datasource "db": PostgreSQL database "flower_e18_v1", schema "public" at "db:5432"
+  
+  45 migrations found in prisma/migrations
+  
+  
+  No pending migrations to apply.
+  npm notice
+  npm notice New major version of npm available! 10.9.9 -> 12.2.2
+  npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+  npm notice To update run: npm install -g npm@12.2.2
+  npm notice
+  
+  > flower-wms-system@0.1.0 db:v2:migrate:deploy
+  > node scripts/check-v2-database-target.mjs && prisma migrate deploy --config prisma.v2.config.ts
+  
+  Loaded Prisma config from prisma.v2.config.ts.
+  Prisma schema loaded from prisma/schema.v2.prisma.
+  Datasource "db": PostgreSQL database "flower_e18_v2", schema "public" at "db:5999"
+  
+  Error: P1001: Can't reach database server at `db:5999`
+  Please make sure your database server is running at `db:5999`.
+[exit code: 1]
+  [OK] F1c entrypoint 迁移失败退出（exit=1）
+  [entrypoint] [entrypoint] prisma migrate deploy...
+  [entrypoint] > node scripts/check-v2-database-target.mjs && prisma migrate deploy --config prisma.v2.config.ts
+  [entrypoint] Error: P1001: Can't reach database server at `db:5999`
+  [OK] F1c 失败未影响正在运行的上一版（仍为健康状态） = 200
+  [STOP] 迁移失败即停：不继续执行迁移后核对/冒烟。
+
+===== F2 缺陷镜像发布：健康检查失败 → 停止并回滚 =====
+$ docker build -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\images\Dockerfile.sha-bad -t flower-e18-rehearsal/flower-platform-app:sha-badc0de D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\images
+  #0 building with "desktop-linux" instance using docker driver
+  #1 [internal] load build definition from Dockerfile.sha-bad
+  #1 transferring dockerfile: 809B 0.0s done
+  #1 DONE 0.0s
+  #2 [internal] load metadata for docker.io/library/flower-e05-verification:final
+  #2 DONE 0.1s
+  #3 [internal] load .dockerignore
+  #3 transferring context: 2B done
+  #3 DONE 0.0s
+  #4 [1/2] FROM docker.io/library/flower-e05-verification:final@sha256:e6ed8ef630901b02e3399bc620ac0302bfacc94c4cf89c6ad8d438f650720545
+  #4 resolve docker.io/library/flower-e05-verification:final@sha256:e6ed8ef630901b02e3399bc620ac0302bfacc94c4cf89c6ad8d438f650720545 0.1s done
+  #4 DONE 0.1s
+  #5 [2/2] RUN rm -f /app/server.js
+  #5 CACHED
+  #6 exporting to image
+  #6 exporting layers 0.0s done
+  #6 exporting manifest sha256:84f039c02676263e3011c7c019ca84bf3a6a72388a19f7c2e96e04e7b7195c6d 0.0s done
+  #6 exporting config sha256:92918a935e71a0027e8ab3f425ba48b50a2f2dd642aa3b282dc18bd32775d535 0.0s done
+  #6 exporting attestation manifest sha256:8624aa69ab503ee22e5b6adb62fff2fbbc9f732fd852b634ffa5838eb408034c
+  #6 exporting attestation manifest sha256:8624aa69ab503ee22e5b6adb62fff2fbbc9f732fd852b634ffa5838eb408034c 0.1s done
+  #6 exporting manifest list sha256:8906c9a92c65e7b07e705feba787041ca1377f2f24a05cc966ca3960ad1ed67a 0.1s done
+  #6 naming to docker.io/flower-e18-rehearsal/flower-platform-app:sha-badc0de
+  #6 naming to docker.io/flower-e18-rehearsal/flower-platform-app:sha-badc0de done
+  #6 unpacking to docker.io/flower-e18-rehearsal/flower-platform-app:sha-badc0de 0.1s done
+  #6 DONE 0.5s
+[exit code: 0]
+  [OK] 缺陷镜像已构建：flower-e18-rehearsal/flower-platform-app:sha-badc0de
+  flower-e18-rehearsal/flower-platform-app:sha-badc0de => sha256:8906c9a92c65e7b07e705feba787041ca1377f2f24a05cc966ca3960ad1ed67a（删除 /app/server.js，模拟有缺陷发布）
+  生成镜像 override: deploy/rehearsal/.runtime/overrides/compose.image-sha-badc0de.yml（image=flower-e18-rehearsal/flower-platform-app:sha-badc0de）
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-badc0de.yml up -d flower-web flower-cron-worker
+   Container flower-e18-db Running 
+   Container flower-e18-cron Recreate 
+   Container flower-e18-web Recreate 
+   Container flower-e18-web Recreated 
+   Container flower-e18-cron Recreated 
+   Container flower-e18-db Waiting 
+   Container flower-e18-db Waiting 
+   Container flower-e18-db Healthy 
+   Container flower-e18-cron Starting 
+   Container flower-e18-db Healthy 
+   Container flower-e18-web Starting 
+   Container flower-e18-cron Started 
+   Container flower-e18-web Started 
+[exit code: 0]
+  [health] attempt=1 elapsed=0s code=000 body=
+  [health] attempt=2 elapsed=3.1s code=000 body=
+  [health] attempt=3 elapsed=6.1s code=000 body=
+  [health] attempt=4 elapsed=9.2s code=000 body=
+  [health] attempt=5 elapsed=12.2s code=000 body=
+  [health] attempt=6 elapsed=15.3s code=000 body=
+  [health] attempt=7 elapsed=18.3s code=000 body=
+  [health] attempt=8 elapsed=21.4s code=000 body=
+  [health] attempt=9 elapsed=24.4s code=000 body=
+  [health] attempt=10 elapsed=27.5s code=000 body=
+  [health] attempt=11 elapsed=30.6s code=000 body=
+  [health] attempt=12 elapsed=33.6s code=000 body=
+  [health] attempt=13 elapsed=36.7s code=000 body=
+  [health] attempt=14 elapsed=39.7s code=000 body=
+  [health] attempt=15 elapsed=42.7s code=000 body=
+  [OK] F2 新版本健康检查失败（预期失败，code=000）
+  缺陷镜像 web 容器 health 状态: unhealthy
+  [OK] 缺陷镜像 web 容器未达到 healthy 状态
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-badc0de.yml ps -a
+  NAME              IMAGE                                                  COMMAND                  SERVICE              CREATED          STATUS                             PORTS
+  flower-e18-cron   flower-e18-rehearsal/flower-platform-app:sha-badc0de   "npx tsx --tsconfig …"   flower-cron-worker   49 seconds ago   Up 47 seconds (health: starting)   3000/tcp
+  flower-e18-db     postgres:18-alpine                                     "docker-entrypoint.s…"   db                   4 minutes ago    Up 4 minutes (healthy)             127.0.0.1:15432->5432/tcp
+  flower-e18-web    flower-e18-rehearsal/flower-platform-app:sha-badc0de   "./docker-entrypoint…"   flower-web           48 seconds ago   Exited (1) 37 seconds ago          
+[exit code: 0]
+  [bad-image] Error: Cannot find module '/app/server.js'
+  [bad-image]   code: 'MODULE_NOT_FOUND',
+  [OK] 失败原因可定位（server.js 缺失）
+  [STOP] 健康检查失败：不执行核心冒烟，不继续后续发布步骤；转回滚。
+
+=== 证据结束: e18-failure-stop-20261110-105256.log ===

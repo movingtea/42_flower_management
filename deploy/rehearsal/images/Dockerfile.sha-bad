@@ -1,0 +1,17 @@
+# E1.8 演练专用「坏版本」镜像：模拟一次有缺陷的应用发布。
+#
+# 仅用于非生产演练的失败停止与回滚验证：
+#   FROM 预构建应用镜像（本地无 ACR/GitHub 凭据，真实 docker build 需维护者执行）
+#   删除 /app/server.js → 容器 entrypoint 迁移通过后 `node server.js` 立即失败退出，
+#   健康检查永远不会就绪，部署门禁应停止并要求回滚。
+#
+# 构建命令（在 CMS_and_WMS 仓库根目录）：
+#   docker build -f deploy/rehearsal/images/Dockerfile.sha-bad \
+#     -t flower-e18-rehearsal/flower-platform-app:sha-badc0de .
+# 参考：scripts/Invoke-Rehearsal.ps1 会自动打标签。
+
+FROM flower-e05-verification:final
+
+USER root
+RUN rm -f /app/server.js
+USER nextjs

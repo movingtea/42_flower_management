@@ -4,15 +4,75 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
-import { LocationKind, PrismaClient } from "../../src/generated/prisma-v2/client";
+import { PrismaClient } from "../../src/generated/prisma-v2/client";
 import { isStrongV2Password } from "../../src/v2/password-policy";
+import {
+  DEFAULT_TEST_TIERS,
+  SeedTierError,
+  TIER_FLAG,
+  parseTierList,
+  type SeedTier,
+} from "./seed/contract";
+import { runTieredSeed } from "./seed/orchestrator";
+import { runProductionBootstrap } from "./seed/production";
+import { SEED_MODES, type SeedMode } from "./seed/types";
+
+const rawMode = process.argv[2];
+if (!(SEED_MODES as readonly string[]).includes(rawMode ?? "")) {
+  throw new Error("Choose a db:v2:seed, db:v2:reset or db:v2:init package command");
+}
+const mode = rawMode as SeedMode;
+
+/**
+ * E1.4 tier CLI contract.
+ *
+ * - `test` / `reset-test` accept `--tiers=minimum,roles,p1-scenarios,e2e-fixtures`.
+ *   With no flag the historical default dataset (minimum + roles) is applied.
+ * - `dev` keeps its historical admin-only dataset and rejects `--tiers`.
+ * - `production` always bootstraps the minimum baseline + one admin and rejects
+ *   `--tiers` so test fixtures can never leak into a production initialisation.
+ */
+function parseSeedTiers(seedMode: SeedMode): readonly SeedTier[] {
+  const args = process.argv.slice(3);
+  let rawTiers: string | undefined;
+  for (const arg of args) {
+    if (arg.startsWith(TIER_FLAG)) {
+      if (rawTiers !== undefined) {
+        throw new SeedTierError("--tiers 只能提供一次");
+      }
+      rawTiers = arg.slice(TIER_FLAG.length);
+      continue;
+    }
+    if (arg === "--tiers") {
+      throw new SeedTierError(
+        "--tiers 需要以 --tiers=minimum,roles 的形式提供值",
+      );
+    }
+    throw new SeedTierError(`未知参数 "${arg}"`);
+  }
+
+  if (seedMode === "production") {
+    if (rawTiers !== undefined) {
+      throw new SeedTierError("production 模式不接受 --tiers");
+    }
+    return [];
+  }
+  if (seedMode === "dev") {
+    if (rawTiers !== undefined) {
+      throw new SeedTierError(
+        "--tiers 仅用于 test/reset-test 模式；dev 固定创建 minimum + 管理员账号",
+      );
+    }
+    return DEFAULT_TEST_TIERS;
+  }
+  if (rawTiers === undefined) return DEFAULT_TEST_TIERS;
+  return parseTierList(rawTiers);
+}
+
+const tiers = parseSeedTiers(mode);
 
 const connectionString = process.env.V2_DATABASE_URL;
 if (!connectionString) throw new Error("V2_DATABASE_URL is required");
-const mode = process.argv[2];
-if (mode !== "test" && mode !== "dev" && mode !== "reset-test" && mode !== "production") {
-  throw new Error("Choose a db:v2:seed, db:v2:reset or db:v2:init package command");
-}
 const target = new URL(connectionString);
 if (!["postgres:", "postgresql:"].includes(target.protocol) || !target.hostname ||
     !/^\/[a-z][a-z0-9_]*$/.test(target.pathname)) {
@@ -41,107 +101,33 @@ if (mode === "reset-test") {
 
 const client = new PrismaClient({ adapter: new PrismaPg({ connectionString }) });
 
-const TEST_STAFF = [
-  { username: "admin", password: "admin", displayName: "系统管理员", roles: ["ADMIN"] },
-  { username: "manager", password: "manager", displayName: "门店经理", roles: ["MANAGER"] },
-  { username: "buyer", password: "buyer", displayName: "采购人员", roles: ["BUYER"] },
-  { username: "sales", password: "sales", displayName: "订单履约人员", roles: ["SALES"] },
-  { username: "florist", password: "florist", displayName: "花艺师", roles: ["FLORIST"] },
-] as const;
-
 async function main() {
-  const production = mode === "production";
-  const username = process.env.V2_BOOTSTRAP_ADMIN_USERNAME?.trim();
-  const passwordFile = process.env.V2_BOOTSTRAP_ADMIN_PASSWORD_FILE;
-  if (production && (!username || !passwordFile)) {
-    throw new Error("Set V2_BOOTSTRAP_ADMIN_USERNAME and V2_BOOTSTRAP_ADMIN_PASSWORD_FILE");
-  }
-  if (production && username && await client.staffUser.findUnique({ where: { username } })) {
-    console.log("Bootstrap username already exists. Existing credentials and memberships were preserved.");
+  if (mode === "production") {
+    const username = process.env.V2_BOOTSTRAP_ADMIN_USERNAME?.trim();
+    const passwordFile = process.env.V2_BOOTSTRAP_ADMIN_PASSWORD_FILE;
+    if (!username || !passwordFile) {
+      throw new Error("Set V2_BOOTSTRAP_ADMIN_USERNAME and V2_BOOTSTRAP_ADMIN_PASSWORD_FILE");
+    }
+    if (await client.staffUser.findUnique({ where: { username } })) {
+      console.log("Bootstrap username already exists. Existing credentials and memberships were preserved.");
+      return;
+    }
+    const password = (await readFile(passwordFile, "utf8")).replace(/\r?\n$/, "");
+    if (!isStrongV2Password(password, username)) {
+      throw new Error("The bootstrap password does not meet the V2 password policy");
+    }
+    const passwordHash = await bcrypt.hash(password, 12);
+    await runProductionBootstrap(client, { username, passwordHash });
+    console.log("Seeded tenant default and store MAIN");
     return;
   }
-  const password = production ? (await readFile(passwordFile!, "utf8")).replace(/\r?\n$/, "") : "";
-  if (production && !isStrongV2Password(password, username!)) {
-    throw new Error("The bootstrap password does not meet the V2 password policy");
-  }
-  const accounts = production
-    ? [{ username: username!, password, displayName: "系统管理员", roles: ["ADMIN"] }]
-    : mode === "dev" ? TEST_STAFF.slice(0, 1) : TEST_STAFF;
-  const hashedAccounts = await Promise.all(accounts.map(async (account) => ({
-    ...account,
-    passwordHash: await bcrypt.hash(account.password, 12),
-  })));
 
-  await client.$transaction(async (db) => {
-    const tenant = await db.tenant.upsert({
-      where: { slug: "default" },
-      create: { slug: "default", name: "默认花店" },
-      update: {},
-    });
-    const store = await db.store.upsert({
-      where: { tenantId_code: { tenantId: tenant.id, code: "MAIN" } },
-      create: { tenantId: tenant.id, code: "MAIN", name: "主店" },
-      update: {},
-    });
-    await db.inventoryLocation.upsert({
-      where: { storeId_code: { storeId: store.id, code: "STOCK" } },
-      create: { storeId: store.id, code: "STOCK", kind: LocationKind.WAREHOUSE },
-      update: {},
-    });
-    await db.inventoryLocation.upsert({
-      where: { storeId_code: { storeId: store.id, code: "PRODUCTION" } },
-      create: { storeId: store.id, code: "PRODUCTION", kind: LocationKind.PRODUCTION },
-      update: {},
-    });
-    await db.storeSettings.upsert({
-      where: { storeId: store.id },
-      create: {
-        tenantId: tenant.id,
-        storeId: store.id,
-        deliveryConfig: {},
-        capacityConfig: {},
-      },
-      update: {},
-    });
-    for (const account of hashedAccounts) {
-      if (production) {
-        const inserted = await db.staffUser.createMany({
-          data: {
-            username: account.username,
-            passwordHash: account.passwordHash,
-            displayName: account.displayName,
-            mustChangePassword: true,
-          },
-          skipDuplicates: true,
-        });
-        if (inserted.count === 0) return;
-      }
-      const staff = await db.staffUser.upsert({
-        where: { username: account.username },
-        create: {
-          username: account.username,
-          passwordHash: account.passwordHash,
-          displayName: account.displayName,
-        },
-        update: production ? {} : {
-          passwordHash: account.passwordHash,
-          displayName: account.displayName,
-          active: true,
-        },
-      });
-      await db.tenantMember.upsert({
-        where: { tenantId_staffUserId: { tenantId: tenant.id, staffUserId: staff.id } },
-        create: { tenantId: tenant.id, staffUserId: staff.id, roles: [...account.roles] },
-        update: { roles: [...account.roles], active: true },
-      });
-      await db.storeMember.upsert({
-        where: { storeId_staffUserId: { storeId: store.id, staffUserId: staff.id } },
-        create: { storeId: store.id, staffUserId: staff.id, roles: [...account.roles] },
-        update: { roles: [...account.roles], active: true },
-      });
-    }
-    console.log(`Seeded tenant ${tenant.slug} and store ${store.code}`);
-  });
+  await runTieredSeed(client, { mode, tiers });
 }
 
-main().finally(() => client.$disconnect());
+main()
+  .catch((error: unknown) => {
+    console.error(error instanceof Error ? error.message : error);
+    process.exitCode = 1;
+  })
+  .finally(() => client.$disconnect());

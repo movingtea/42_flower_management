@@ -1,0 +1,79 @@
+### E1.8 非生产发布演练证据 · 清理与隔离校验
+run_id: 20261110-105256
+recorded_at: 2026-11-10T10:58:02.1079176+08:00
+mode: all
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=99daac6)
+compose_project: flower-e1-8-rehearsal
+note: 演练使用本地预构建镜像 + 模拟 SHA 标签；真实镜像构建/ACR 推送/GitHub workflow 不在本地演练范围。
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+
+===== 清理前资源快照 =====
+
+===== 资源快照：清理前 =====
+  project containers:
+    flower-e18-web|flower-e18-rehearsal/flower-platform-app:sha-a11c0de|Up 17 seconds (healthy)
+    flower-e18-cron|flower-e18-rehearsal/flower-platform-app:sha-a11c0de|Up 18 seconds (health: starting)
+    flower-e18-db|postgres:18-alpine|Up 4 minutes (healthy)
+  project volumes:
+    flower-e1-8-rehearsal_next_cache
+    flower-e1-8-rehearsal_postgres_data
+  project networks:
+    flower-e1-8-rehearsal_default
+  本地开发数据库容器（清理前）: 8fe099079fe9|postgres:18-alpine|Up 24 hours
+
+===== 清理演练栈（仅本项目资源，不触碰其他容器/卷/数据） =====
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml down -v --remove-orphans
+   Container flower-e18-web Stopping 
+   Container flower-e18-cron Stopping 
+   Container flower-e18-web Stopped 
+   Container flower-e18-web Removing 
+   Container flower-e18-cron Stopped 
+   Container flower-e18-cron Removing 
+   Container flower-e18-web Removed 
+   Container flower-e18-cron Removed 
+   Container flower-e18-db Stopping 
+   Container flower-e18-db Stopped 
+   Container flower-e18-db Removing 
+   Container flower-e18-db Removed 
+   Network flower-e1-8-rehearsal_default Removing 
+   Volume flower-e1-8-rehearsal_postgres_data Removing 
+   Volume flower-e1-8-rehearsal_next_cache Removing 
+   Network flower-e1-8-rehearsal_default Removed 
+   Volume flower-e1-8-rehearsal_postgres_data Removed 
+   Volume flower-e1-8-rehearsal_next_cache Removed 
+[exit code: 0]
+  compose down -v exit=0
+$ docker rmi flower-e18-rehearsal/flower-platform-app:sha-a11c0de
+  Untagged: flower-e18-rehearsal/flower-platform-app:sha-a11c0de
+[exit code: 0]
+  移除演练镜像标签 flower-e18-rehearsal/flower-platform-app:sha-a11c0de exit=0
+$ docker rmi flower-e18-rehearsal/flower-platform-app:sha-add1t1
+  Untagged: flower-e18-rehearsal/flower-platform-app:sha-add1t1
+  Deleted: sha256:87be8e277800e0ba8f63c3d765f4ff92aa90a762eb337f839d82a4ee2cbe829d
+[exit code: 0]
+  移除演练镜像标签 flower-e18-rehearsal/flower-platform-app:sha-add1t1 exit=0
+$ docker rmi flower-e18-rehearsal/flower-platform-app:sha-badc0de
+  Untagged: flower-e18-rehearsal/flower-platform-app:sha-badc0de
+  Deleted: sha256:8906c9a92c65e7b07e705feba787041ca1377f2f24a05cc966ca3960ad1ed67a
+[exit code: 0]
+  移除演练镜像标签 flower-e18-rehearsal/flower-platform-app:sha-badc0de exit=0
+  清理后剩余容器: 0 卷: 0 网络: 0
+  [OK] 演练项目容器已清理
+  [OK] 演练项目卷已清理
+  [OK] 演练项目网络已清理
+
+===== 清理后资源快照 =====
+  本地开发数据库容器（清理后）: 8fe099079fe9|postgres:18-alpine|Up 24 hours
+  [OK] 演练未触碰原有本地开发数据库容器 = 8fe099079fe9|postgres:18-alpine|Up 24 hours
+  当前全部容器（清理后）:
+    flower-v2-pg|Up 24 hours
+  剩余演练镜像标签检查:
+    flower-e18-rehearsal/flower-platform-app:sha-a11c0de -> 已移除
+    flower-e18-rehearsal/flower-platform-app:sha-add1t1 -> 已移除
+    flower-e18-rehearsal/flower-platform-app:sha-badc0de -> 已移除
+  预构建基础镜像保留: flower-e05-verification:final => sha256:e6ed8ef630901b02e3399bc620ac0302bfacc94c4cf89c6ad8d438f650720545
+  宿主磁盘可用: 143.72 GiB
+
+=== 证据结束: e18-cleanup-20261110-105256.log ===

@@ -1,0 +1,213 @@
+
+> flower-wms-system@0.1.0 test:legacy
+> node scripts/with-v2-test-db.mjs --legacy -- npm run test:legacy:inner
+
+[wms-test-db] ready: PostgreSQL 18.3 on 127.0.0.1:52309; database wms_cf2c41becb1e3e58d97d3a7923e3f047_test
+
+> flower-wms-system@0.1.0 test:legacy:inner
+> npm run test:all && npm run test:order-expiry-lifecycle
+
+
+> flower-wms-system@0.1.0 test:all
+> npm run test:cost && npm run test:reports && npm run test:purchase && npm run test:loss && npm run test:margin && npm run test:purchase-analytics && npm run test:product-decision && npm run test:datetime && npm run test:crm && npm run test:cms-validation && npm run test:miniprogram-products && npm run test:miniprogram-stock && npm run test:preorder-rule && npm run test:cms-home-scene-entries && npm run test:image-url && npm run test:storage && npm run test:upload-validation && npm run test:setup-checklist && npm run test:data-quality && npm run test:system-health && npm run test:disk-status && npm run test:trial-run-check && npm run test:wms-nav && npm run test:cms-pickers && npm run test:delivery-settings && npm run test:recommendation-rules && npm run test:banner-rules && npm run test:order-invariants && npm run test:stock-invariants && npm run test:permission-invariants && npm run test:crm-invariants && npm run test:image-url-invariants && npm run test:order-fifo && npm run test:order-create-delivery && npm run test:recommendation-display && npm run test:banner-validity && npm run test:sku-active-invariants && npm run test:tenant-foundation
+
+
+> flower-wms-system@0.1.0 test:cost
+> tsx src/services/order-cost-pure.test.ts
+
+order-cost-pure.test.ts — 全部通过
+
+> flower-wms-system@0.1.0 test:reports
+> tsx src/services/business-report-pure.test.ts
+
+business-report-pure.test.ts — 全部通过
+
+> flower-wms-system@0.1.0 test:purchase
+> tsx src/services/purchase-pure.test.ts
+
+purchase-pure tests passed
+
+> flower-wms-system@0.1.0 test:loss
+> tsx src/services/loss-model-pure.test.ts
+
+loss-model-pure tests passed
+
+> flower-wms-system@0.1.0 test:margin
+> tsx src/services/product-margin-pure.test.ts
+
+product-margin-pure.test.ts — 全部通过
+
+> flower-wms-system@0.1.0 test:purchase-analytics
+> tsx src/services/purchase-analytics-pure.test.ts
+
+purchase-analytics-pure tests passed
+
+> flower-wms-system@0.1.0 test:product-decision
+> tsx src/services/product-decision-pure.test.ts
+
+product-decision-pure tests passed
+
+> flower-wms-system@0.1.0 test:datetime
+> tsx src/lib/datetime.test.ts
+
+datetime tests passed
+
+> flower-wms-system@0.1.0 test:crm
+> tsx src/services/crm-pure.test.ts
+
+crm-pure tests passed
+
+> flower-wms-system@0.1.0 test:cms-validation
+> tsx src/services/cms-product-validation-pure.test.ts
+
+cms-product-validation-pure tests passed
+
+> flower-wms-system@0.1.0 test:miniprogram-products
+> tsx src/services/miniprogram-product-filter-pure.test.ts
+
+miniprogram-product-filter-pure.test.ts: all passed
+
+> flower-wms-system@0.1.0 test:miniprogram-stock
+> tsx src/services/miniprogram-stock-pure.test.ts
+
+miniprogram-stock-pure.test.ts: all passed
+
+> flower-wms-system@0.1.0 test:preorder-rule
+> tsx src/services/preorder-rule-pure.test.ts
+
+preorder-rule-pure.test.ts: all tests passed
+
+> flower-wms-system@0.1.0 test:cms-home-scene-entries
+> tsx src/services/cms-home-scene-entries-pure.test.ts
+
+cms-home-scene-entries-pure: all tests passed
+
+> flower-wms-system@0.1.0 test:image-url
+> tsx src/lib/image-url.test.ts
+
+image-url.test.ts: all tests passed
+
+> flower-wms-system@0.1.0 test:storage
+> tsx src/lib/storage/storage.test.ts
+
+storage.test.ts: all tests passed
+
+> flower-wms-system@0.1.0 test:upload-validation
+> tsx src/lib/storage/upload-validation.test.ts
+
+upload-validation.test.ts: all tests passed
+
+> flower-wms-system@0.1.0 test:setup-checklist
+> tsx src/services/setup-checklist-pure.test.ts
+
+setup-checklist-pure.test.ts: all passed
+
+> flower-wms-system@0.1.0 test:data-quality
+> tsx src/services/data-quality-pure.test.ts
+
+data-quality-pure.test.ts: all passed
+
+> flower-wms-system@0.1.0 test:system-health
+> tsx src/services/system-health.test.ts
+
+system-health.test.ts: all passed
+
+> flower-wms-system@0.1.0 test:disk-status
+> tsx src/lib/system-health/disk-status.test.ts
+
+disk-status.test.ts: all tests passed
+
+> flower-wms-system@0.1.0 test:trial-run-check
+> tsx src/services/trial-run-check.test.ts
+
+trial-run-check.test.ts: all passed
+
+> flower-wms-system@0.1.0 test:wms-nav
+> tsx src/lib/wms-nav.test.ts
+
+wms-nav.test.ts: all passed
+
+> flower-wms-system@0.1.0 test:cms-pickers
+> tsx src/lib/cms-auto-key.test.ts && tsx src/lib/cms-link-target.test.ts
+
+cms-auto-key tests passed
+cms-link-target tests passed
+
+> flower-wms-system@0.1.0 test:delivery-settings
+> tsx src/services/delivery-settings-pure.test.ts
+
+delivery-settings-pure.test.ts: all tests passed
+
+> flower-wms-system@0.1.0 test:recommendation-rules
+> tsx src/services/recommendation-rules-pure.test.ts
+
+recommendation-rules-pure.test.ts: all tests passed
+
+> flower-wms-system@0.1.0 test:banner-rules
+> tsx src/services/banner-rules-pure.test.ts
+
+banner-rules-pure.test.ts: all tests passed
+
+> flower-wms-system@0.1.0 test:order-invariants
+> tsx src/services/order-flow-invariants.test.ts
+
+order-flow-invariants.test.ts: all tests passed
+
+> flower-wms-system@0.1.0 test:stock-invariants
+> tsx src/services/stock-invariants.test.ts
+
+stock-invariants.test.ts: all tests passed
+
+> flower-wms-system@0.1.0 test:permission-invariants
+> tsx src/lib/permission-invariants.test.ts
+
+permission-invariants.test.ts: all tests passed
+
+> flower-wms-system@0.1.0 test:crm-invariants
+> tsx src/services/crm-invariants.test.ts
+
+crm-invariants.test.ts: all tests passed
+
+> flower-wms-system@0.1.0 test:image-url-invariants
+> tsx src/services/image-url-invariants.test.ts
+
+image-url-invariants.test.ts: all tests passed
+
+> flower-wms-system@0.1.0 test:order-fifo
+> tsx src/services/order-fifo-pure.test.ts
+
+order-fifo-pure.test.ts — 全部通过
+熔断文案常量: 物理大仓花材库存不足
+
+> flower-wms-system@0.1.0 test:order-create-delivery
+> tsx src/services/order-create-delivery.test.ts
+
+order-create-delivery.test.ts: all tests passed
+
+> flower-wms-system@0.1.0 test:recommendation-display
+> tsx src/services/recommendation-display-pure.test.ts
+
+recommendation-display-pure.test.ts: all tests passed
+
+> flower-wms-system@0.1.0 test:banner-validity
+> tsx src/services/banner-validity.test.ts
+
+banner-validity.test.ts: all tests passed
+
+> flower-wms-system@0.1.0 test:sku-active-invariants
+> tsx src/services/sku-active-invariants.test.ts
+
+sku-active-invariants.test.ts: all tests passed
+
+> flower-wms-system@0.1.0 test:tenant-foundation
+> tsx src/services/tenant-pure.test.ts
+
+[test:tenant-foundation] all pure checks passed
+
+> flower-wms-system@0.1.0 test:order-expiry-lifecycle
+> tsx src/services/order-expiry-lifecycle.test.ts
+
+(node:17196) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+[order-expiry] closed pending order ORD-20261109-64H51X (d7ac250c-7741-4bf0-b85d-78c60d358568)
+order-expiry-lifecycle.test.ts: all tests passed

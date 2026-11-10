@@ -1,0 +1,503 @@
+### E1.8 非生产发布演练证据 · 成功路径：启动隔离栈 → V1/V2 迁移 → 健康 → 冒烟 → 生产初始化 → 行数核对
+run_id: 20261110-105256
+recorded_at: 2026-11-10T10:53:06.4585461+08:00
+mode: all
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=99daac6)
+compose_project: flower-e1-8-rehearsal
+note: 演练使用本地预构建镜像 + 模拟 SHA 标签；真实镜像构建/ACR 推送/GitHub workflow 不在本地演练范围。
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+
+===== 模拟 SHA 标签（非真实提交；真实基线见 preflight） =====
+$ docker tag flower-e05-verification:final flower-e18-rehearsal/flower-platform-app:sha-a11c0de
+[exit code: 0]
+  [OK] 模拟发布镜像标签已创建：flower-e18-rehearsal/flower-platform-app:sha-a11c0de
+  flower-e18-rehearsal/flower-platform-app:sha-a11c0de => sha256:e6ed8ef630901b02e3399bc620ac0302bfacc94c4cf89c6ad8d438f650720545（与 flower-e05-verification:final 同一镜像，模拟按 SHA 部署）
+  生成镜像 override: deploy/rehearsal/.runtime/overrides/compose.image-sha-a11c0de.yml（image=flower-e18-rehearsal/flower-platform-app:sha-a11c0de）
+
+===== 启动隔离数据库（独立项目/卷/网络/端口，V1+V2 独立库名） =====
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml up -d db
+   Volume flower-e1-8-rehearsal_postgres_data Creating 
+   Volume flower-e1-8-rehearsal_postgres_data Creating 
+   Network flower-e1-8-rehearsal_default Creating 
+   Network flower-e1-8-rehearsal_default Creating 
+   Volume flower-e1-8-rehearsal_postgres_data Created 
+   Volume flower-e1-8-rehearsal_postgres_data Created 
+   Network flower-e1-8-rehearsal_default Created 
+   Network flower-e1-8-rehearsal_default Created 
+   Container flower-e18-db Creating 
+   Container flower-e18-db Created 
+   Container flower-e18-db Starting 
+   Container flower-e18-db Started 
+[exit code: 0]
+  [OK] db 容器健康
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml ps
+  NAME            IMAGE                COMMAND                  SERVICE   CREATED         STATUS                   PORTS
+  flower-e18-db   postgres:18-alpine   "docker-entrypoint.s…"   db        8 seconds ago   Up 7 seconds (healthy)   127.0.0.1:15432->5432/tcp
+[exit code: 0]
+$ psql -U flower_e18 -d postgres -f <.\deploy\rehearsal\db\checks\db-list.sql>
+  flower_e18_v1
+  flower_e18_v2
+  postgres
+  template0
+  template1
+[exit code: 0]
+  数据库列表：flower_e18_v1, flower_e18_v2
+  [OK] V1 数据库存在：flower_e18_v1
+  [OK] V2 数据库存在：flower_e18_v2
+  PostgreSQL server_version: 18.6
+
+===== 迁移前 migration status（空库，尚未执行迁移） =====
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-a11c0de.yml run --rm --no-deps --entrypoint npx flower-web prisma migrate status
+   Volume flower-e1-8-rehearsal_next_cache Creating 
+   Volume flower-e1-8-rehearsal_next_cache Creating 
+   Volume flower-e1-8-rehearsal_next_cache Created 
+   Volume flower-e1-8-rehearsal_next_cache Created 
+   Container flower-e1-8-rehearsal-flower-web-run-a30cf5aac281 Creating 
+   Container flower-e1-8-rehearsal-flower-web-run-a30cf5aac281 Created 
+  Loaded Prisma config from prisma.config.ts.
+  Prisma schema loaded from prisma/schema.prisma.
+  Datasource "db": PostgreSQL database "flower_e18_v1", schema "public" at "db:5432"
+  
+  45 migrations found in prisma/migrations
+  Following migrations have not yet been applied:
+  20260522032529_init
+  20260522045320_init_flower_wms
+  20260522065216_add_stock_log_in_cancel
+  20260522070326_add_product_care_tips
+  20260522071136_add_product_type
+  20260522081933_add_app_config
+  20260522120000_split_wms_cms_category
+  20260522140000_product_category_string_array
+  20260522160000_category_product_category_m2m
+  20260522180000_split_product_material_bom
+  20260522200000_product_sellable_quantity
+  20260522210000_product_shipping_fee
+  20260522220000_category_tree_remove_key
+  20260523002615_add_sub_category
+  20260523005506_rebuild_catetories
+  20260523100000_split_product_material_categories
+  20260523120000_product_soft_delete
+  20260523140000_banner_and_order_snapshot
+  20260523160000_product_spu_sku
+  20260524120000_users
+  20260525120000_order_checkout_mock_pay
+  20260526120000_order_fulfillment_state_machine
+  20260527100000_order_cancel_source
+  20260529153000_staff_users_rbac
+  20260529160000_sku_recipe_binding
+  20260606120000_flower_wiki_default_shelf_life_days
+  20260606140000_flower_wiki_maintenance_care
+  20260606150000_flower_wiki_flower_language
+  20260609051000_order_margin_mvp
+  20260609053900_product_margin_mvp
+  20260609063300_purchase_supplier_backend
+  20260609120000_loss_model_foundation
+  20260610120000_crm_foundation
+  20260610140000_product_occasion_tags
+  20260610160000_cms_product_operations
+  20260610180000_cms_home_scene_entries
+  20260611120000_audit_logs
+  20260611120000_banner_validity_soft_delete
+  20260611140000_product_sku_is_active
+  20260611180000_sku_bulk_preorder_rules
+  20260615120000_add_tenant_and_tenant_member
+  20260617120000_add_tenant_id_nullable
+  20260617140000_add_master_parts
+  20260617150000_purchase_lines_master_part
+  20260622120000_material_master_part_id
+  
+  To apply migrations in development run prisma migrate dev.
+  To apply migrations in production run prisma migrate deploy.
+  npm notice
+  npm notice New major version of npm available! 10.9.9 -> 12.2.2
+  npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+  npm notice To update run: npm install -g npm@12.2.2
+  npm notice
+[exit code: 1]
+  [V1 migrate status]
+     Volume flower-e1-8-rehearsal_next_cache Creating 
+     Volume flower-e1-8-rehearsal_next_cache Creating 
+     Volume flower-e1-8-rehearsal_next_cache Created 
+     Volume flower-e1-8-rehearsal_next_cache Created 
+     Container flower-e1-8-rehearsal-flower-web-run-a30cf5aac281 Creating 
+     Container flower-e1-8-rehearsal-flower-web-run-a30cf5aac281 Created 
+    Loaded Prisma config from prisma.config.ts.
+    Prisma schema loaded from prisma/schema.prisma.
+    Datasource "db": PostgreSQL database "flower_e18_v1", schema "public" at "db:5432"
+    
+    45 migrations found in prisma/migrations
+    Following migrations have not yet been applied:
+    20260522032529_init
+    20260522045320_init_flower_wms
+    20260522065216_add_stock_log_in_cancel
+    20260522070326_add_product_care_tips
+    20260522071136_add_product_type
+    20260522081933_add_app_config
+    20260522120000_split_wms_cms_category
+    20260522140000_product_category_string_array
+    20260522160000_category_product_category_m2m
+    20260522180000_split_product_material_bom
+    20260522200000_product_sellable_quantity
+    20260522210000_product_shipping_fee
+    20260522220000_category_tree_remove_key
+    20260523002615_add_sub_category
+    20260523005506_rebuild_catetories
+    20260523100000_split_product_material_categories
+    20260523120000_product_soft_delete
+    20260523140000_banner_and_order_snapshot
+    20260523160000_product_spu_sku
+    20260524120000_users
+    20260525120000_order_checkout_mock_pay
+    20260526120000_order_fulfillment_state_machine
+    20260527100000_order_cancel_source
+    20260529153000_staff_users_rbac
+    20260529160000_sku_recipe_binding
+    20260606120000_flower_wiki_default_shelf_life_days
+    20260606140000_flower_wiki_maintenance_care
+    20260606150000_flower_wiki_flower_language
+    20260609051000_order_margin_mvp
+    20260609053900_product_margin_mvp
+    20260609063300_purchase_supplier_backend
+    20260609120000_loss_model_foundation
+    20260610120000_crm_foundation
+    20260610140000_product_occasion_tags
+    20260610160000_cms_product_operations
+    20260610180000_cms_home_scene_entries
+    20260611120000_audit_logs
+    20260611120000_banner_validity_soft_delete
+    20260611140000_product_sku_is_active
+    20260611180000_sku_bulk_preorder_rules
+    20260615120000_add_tenant_and_tenant_member
+    20260617120000_add_tenant_id_nullable
+    20260617140000_add_master_parts
+    20260617150000_purchase_lines_master_part
+    20260622120000_material_master_part_id
+    
+    To apply migrations in development run prisma migrate dev.
+    To apply migrations in production run prisma migrate deploy.
+    npm notice
+    npm notice New major version of npm available! 10.9.9 -> 12.2.2
+    npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+    npm notice To update run: npm install -g npm@12.2.2
+    npm notice
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-a11c0de.yml run --rm --no-deps --entrypoint npx flower-web prisma migrate status --config prisma.v2.config.ts
+   Container flower-e1-8-rehearsal-flower-web-run-7ad97fee7a7a Creating 
+   Container flower-e1-8-rehearsal-flower-web-run-7ad97fee7a7a Created 
+  Loaded Prisma config from prisma.v2.config.ts.
+  Prisma schema loaded from prisma/schema.v2.prisma.
+  Datasource "db": PostgreSQL database "flower_e18_v2", schema "public" at "db:5432"
+  
+  7 migrations found in prisma/migrations
+  Following migrations have not yet been applied:
+  0001_initial
+  0002_sku_estimated_costs
+  0003_purchase_order_timestamps
+  0004_material_supplier_lifecycle
+  0005_purchase_order_lifecycle
+  0006_packaging_kits
+  0007_staff_initial_password
+  
+  To apply migrations in development run prisma migrate dev.
+  To apply migrations in production run prisma migrate deploy.
+  npm notice
+  npm notice New major version of npm available! 10.9.9 -> 12.2.2
+  npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+  npm notice To update run: npm install -g npm@12.2.2
+  npm notice
+[exit code: 1]
+  [V2 migrate status]
+     Container flower-e1-8-rehearsal-flower-web-run-7ad97fee7a7a Creating 
+     Container flower-e1-8-rehearsal-flower-web-run-7ad97fee7a7a Created 
+    Loaded Prisma config from prisma.v2.config.ts.
+    Prisma schema loaded from prisma/schema.v2.prisma.
+    Datasource "db": PostgreSQL database "flower_e18_v2", schema "public" at "db:5432"
+    
+    7 migrations found in prisma/migrations
+    Following migrations have not yet been applied:
+    0001_initial
+    0002_sku_estimated_costs
+    0003_purchase_order_timestamps
+    0004_material_supplier_lifecycle
+    0005_purchase_order_lifecycle
+    0006_packaging_kits
+    0007_staff_initial_password
+    
+    To apply migrations in development run prisma migrate dev.
+    To apply migrations in production run prisma migrate deploy.
+    npm notice
+    npm notice New major version of npm available! 10.9.9 -> 12.2.2
+    npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+    npm notice To update run: npm install -g npm@12.2.2
+    npm notice
+  [OK] V1 migrate status 可执行（空库迁移前）
+  [OK] V2 migrate status 可执行（空库迁移前）
+
+===== 按 SHA 部署 flower-web + flower-cron-worker（compose override 机制，与 deploy.yml 同款） =====
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-a11c0de.yml up -d flower-web flower-cron-worker
+   Container flower-e18-db Running 
+   Container flower-e18-web Creating 
+   Container flower-e18-cron Creating 
+   Container flower-e18-cron Created 
+   Container flower-e18-web Created 
+   Container flower-e18-db Waiting 
+   Container flower-e18-db Waiting 
+   Container flower-e18-db Healthy 
+   Container flower-e18-cron Starting 
+   Container flower-e18-db Healthy 
+   Container flower-e18-web Starting 
+   Container flower-e18-cron Started 
+   Container flower-e18-web Started 
+[exit code: 0]
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-a11c0de.yml ps
+  NAME              IMAGE                                                  COMMAND                  SERVICE              CREATED          STATUS                                     PORTS
+  flower-e18-cron   flower-e18-rehearsal/flower-platform-app:sha-a11c0de   "npx tsx --tsconfig …"   flower-cron-worker   2 seconds ago    Up 1 second (health: starting)             3000/tcp
+  flower-e18-db     postgres:18-alpine                                     "docker-entrypoint.s…"   db                   26 seconds ago   Up 25 seconds (healthy)                    127.0.0.1:15432->5432/tcp
+  flower-e18-web    flower-e18-rehearsal/flower-platform-app:sha-a11c0de   "./docker-entrypoint…"   flower-web           2 seconds ago    Up Less than a second (health: starting)   127.0.0.1:18080->3000/tcp
+[exit code: 0]
+  [health] attempt=1 elapsed=0.1s code=000 body=
+  [health] attempt=2 elapsed=3.1s code=000 body=
+  [health] attempt=3 elapsed=6.3s code=000 body=
+  [health] attempt=4 elapsed=9.4s code=000 body=
+  [health] attempt=5 elapsed=12.4s code=000 body=
+  [health] attempt=6 elapsed=15.6s code=000 body=
+  [health] attempt=7 elapsed=18.7s code=000 body=
+  [health] attempt=8 elapsed=25.6s code=200 body={"status":"ok"}
+  web 容器 health: healthy
+  [OK] flower-web 在模拟 SHA 部署后健康（/api/health 200 + status=ok，用时 25.6s）
+  [OK] flower-web 实际运行镜像 ID 与模拟 SHA 一致 = sha256:e6ed8ef630901b02e3399bc620ac0302bfacc94c4cf89c6ad8d438f650720545
+  [OK] flower-cron-worker 实际运行镜像 ID 与模拟 SHA 一致 = sha256:e6ed8ef630901b02e3399bc620ac0302bfacc94c4cf89c6ad8d438f650720545
+
+===== 入口迁移日志（entrypoint：校验目标 → V1 migrate deploy → V2 migrate deploy） =====
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web] All migrations have been successfully applied.
+  [web] Datasource "db": PostgreSQL database "flower_e18_v2", schema "public" at "db:5432"
+  [web] 7 migrations found in prisma/migrations
+  [web] Applying migration `0001_initial`
+  [web] Applying migration `0002_sku_estimated_costs`
+  [web] Applying migration `0003_purchase_order_timestamps`
+  [web] Applying migration `0004_material_supplier_lifecycle`
+  [web] Applying migration `0005_purchase_order_lifecycle`
+  [web] Applying migration `0006_packaging_kits`
+  [web] Applying migration `0007_staff_initial_password`
+  [web] The following migration(s) have been applied:
+  [web] migrations/
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web]     └─ migration.sql
+  [web] All migrations have been successfully applied.
+  [web] ✓ Ready in 0ms
+  [OK] V1/V2 迁移已由 entrypoint 实际执行
+  [OK] V2 迁移全部成功
+
+===== 核心冒烟 =====
+  [smoke] GET /api/health -> 200 body={"status":"ok"}
+  [smoke] GET /login -> 200
+  [smoke] GET /v2 -> 307 redirect=http://localhost:18080/login?callbackUrl=%2Fv2
+  [OK] 健康检查 /api/health 返回 200 且 status=ok
+  [OK] 登录页 /login 返回 200
+  [OK] 未登录访问 /v2 返回 307 并跳转登录页
+
+===== cron worker 启动与首轮任务（web 迁移完成前可能瞬时告错，下一轮恢复） =====
+  [OK] flower-cron-worker 运行中 = running
+  [cron] [cron-worker] started inventory=900000ms orderExpiry=60000ms
+  [cron] [cron-inventory] sync failed: PrismaClientKnownRequestError: 
+  [cron] [cron-inventory] sync start 2026-11-10T02:53:39.140Z
+  [cron] [cron-order-expiry] failed: PrismaClientKnownRequestError: 
+  [cron] [cron-order-expiry] start 2026-11-10T02:53:40.160Z
+  [cron] [cron-order-expiry] start 2026-11-10T02:54:40.261Z
+  [cron] [cron-order-expiry] done in 73ms: {"scanned":0,"closed":0,"orderIds":[]}
+  [OK] cron worker 在 web 迁移完成后出现成功轮次（[cron-order-expiry] done）
+
+===== 迁移后 migration status（V1/V2 均应为 up to date） =====
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-a11c0de.yml run --rm --no-deps --entrypoint npx flower-web prisma migrate status
+   Container flower-e1-8-rehearsal-flower-web-run-45db977f8102 Creating 
+   Container flower-e1-8-rehearsal-flower-web-run-45db977f8102 Created 
+  Loaded Prisma config from prisma.config.ts.
+  Prisma schema loaded from prisma/schema.prisma.
+  Datasource "db": PostgreSQL database "flower_e18_v1", schema "public" at "db:5432"
+  
+  45 migrations found in prisma/migrations
+  
+  Database schema is up to date!
+  npm notice
+  npm notice New major version of npm available! 10.9.9 -> 12.2.2
+  npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+  npm notice To update run: npm install -g npm@12.2.2
+  npm notice
+[exit code: 0]
+  [V1]  Container flower-e1-8-rehearsal-flower-web-run-45db977f8102 Creating 
+  [V1]  Container flower-e1-8-rehearsal-flower-web-run-45db977f8102 Created 
+  [V1] Loaded Prisma config from prisma.config.ts.
+  [V1] Prisma schema loaded from prisma/schema.prisma.
+  [V1] Datasource "db": PostgreSQL database "flower_e18_v1", schema "public" at "db:5432"
+  [V1] 
+  [V1] 45 migrations found in prisma/migrations
+  [V1] 
+  [V1] Database schema is up to date!
+  [V1] npm notice
+  [V1] npm notice New major version of npm available! 10.9.9 -> 12.2.2
+  [V1] npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+  [V1] npm notice To update run: npm install -g npm@12.2.2
+  [V1] npm notice
+  [OK] V1 migration status: up to date
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-a11c0de.yml run --rm --no-deps --entrypoint npx flower-web prisma migrate status --config prisma.v2.config.ts
+   Container flower-e1-8-rehearsal-flower-web-run-efe65566653e Creating 
+   Container flower-e1-8-rehearsal-flower-web-run-efe65566653e Created 
+  Loaded Prisma config from prisma.v2.config.ts.
+  Prisma schema loaded from prisma/schema.v2.prisma.
+  Datasource "db": PostgreSQL database "flower_e18_v2", schema "public" at "db:5432"
+  
+  7 migrations found in prisma/migrations
+  
+  Database schema is up to date!
+  npm notice
+  npm notice New major version of npm available! 10.9.9 -> 12.2.2
+  npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+  npm notice To update run: npm install -g npm@12.2.2
+  npm notice
+[exit code: 0]
+  [V2]  Container flower-e1-8-rehearsal-flower-web-run-efe65566653e Creating 
+  [V2]  Container flower-e1-8-rehearsal-flower-web-run-efe65566653e Created 
+  [V2] Loaded Prisma config from prisma.v2.config.ts.
+  [V2] Prisma schema loaded from prisma/schema.v2.prisma.
+  [V2] Datasource "db": PostgreSQL database "flower_e18_v2", schema "public" at "db:5432"
+  [V2] 
+  [V2] 7 migrations found in prisma/migrations
+  [V2] 
+  [V2] Database schema is up to date!
+  [V2] npm notice
+  [V2] npm notice New major version of npm available! 10.9.9 -> 12.2.2
+  [V2] npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+  [V2] npm notice To update run: npm install -g npm@12.2.2
+  [V2] npm notice
+  [OK] V2 migration status: up to date
+
+===== 首次生产初始化（V2 生产 bootstrap：租户/门店/基线 + 单个管理员；仅创建不覆盖） =====
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-a11c0de.yml run --rm --no-deps -v D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\secrets:/run/secrets:ro -e V2_BOOTSTRAP_ADMIN_PASSWORD_FILE=/run/secrets/bootstrap-admin-password.txt flower-web npm run db:v2:init:production
+   Container flower-e1-8-rehearsal-flower-web-run-5d3a8299fa12 Creating 
+   Container flower-e1-8-rehearsal-flower-web-run-5d3a8299fa12 Created 
+  [entrypoint] disk usage (container root):
+  overlay                1006.9G     12.8G    942.9G   1% /
+  [entrypoint] prisma migrate deploy...
+  Loaded Prisma config from prisma.config.ts.
+  Prisma schema loaded from prisma/schema.prisma.
+  Datasource "db": PostgreSQL database "flower_e18_v1", schema "public" at "db:5432"
+  
+  45 migrations found in prisma/migrations
+  
+  
+  No pending migrations to apply.
+  npm notice
+  npm notice New major version of npm available! 10.9.9 -> 12.2.2
+  npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+  npm notice To update run: npm install -g npm@12.2.2
+  npm notice
+  
+  > flower-wms-system@0.1.0 db:v2:migrate:deploy
+  > node scripts/check-v2-database-target.mjs && prisma migrate deploy --config prisma.v2.config.ts
+  
+  Loaded Prisma config from prisma.v2.config.ts.
+  Prisma schema loaded from prisma/schema.v2.prisma.
+  Datasource "db": PostgreSQL database "flower_e18_v2", schema "public" at "db:5432"
+  
+  7 migrations found in prisma/migrations
+  
+  
+  ┌─────────────────────────────────────────────────────────┐
+  No pending migrations to apply.
+  │  Update available 7.8.0 -> 8.0.0-rc.33                  │
+  │                                                         │
+  │  This is a major update - please follow the guide at    │
+  │  https://pris.ly/d/major-version-upgrade                │
+  │                                                         │
+  │  Run the following to update                            │
+  │    npm i --save-dev prisma@latest                       │
+  │    npm i @prisma/client@latest                          │
+  └─────────────────────────────────────────────────────────┘
+  
+  > flower-wms-system@0.1.0 db:v2:init:production
+  > tsx prisma/v2/seed.ts production
+  
+  Seeded tenant default and store MAIN
+[exit code: 0]
+  [OK] V2 生产初始化创建了默认租户/门店
+  初始化命令退出码: 0
+
+===== 迁移后行数/关键表/种子核对 =====
+$ psql -U flower_e18 -d flower_e18_v2 -f <.\deploy\rehearsal\db\checks\v2-row-counts.sql>
+  InventoryLocation|2
+  Material|0
+  ProductSku|0
+  PurchaseOrder|0
+  PurchaseOrderLine|0
+  StaffUser|1
+  Store|1
+  StoreMember|1
+  StoreSettings|1
+  Tenant|1
+  TenantMember|1
+  _prisma_migrations_applied|7
+[exit code: 0]
+$ psql -U flower_e18 -d flower_e18_v1 -f <.\deploy\rehearsal\db\checks\v1-row-counts.sql>
+  _prisma_migrations_applied|45
+  orders|0
+  product_skus|0
+  product_spus|0
+  purchase_orders|0
+  staff_users|0
+  tenant_members|0
+  tenants|0
+  users|0
+[exit code: 0]
+  [OK] V2 种子表 Tenant 存在行
+  [OK] V2 种子表 Store 存在行
+  [OK] V2 种子表 StaffUser 存在行
+  [OK] V2 已应用迁移数（预构建镜像包含 7 个） = 7
+  V2 行数: InventoryLocation=2, Material=0, ProductSku=0, PurchaseOrder=0, PurchaseOrderLine=0, StaffUser=1, Store=1, StoreMember=1, StoreSettings=1, Tenant=1, TenantMember=1, _prisma_migrations_applied=7
+  V1 已应用迁移数: 45
+
+===== 部署后 docker compose ps =====
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-a11c0de.yml ps
+  NAME              IMAGE                                                  COMMAND                  SERVICE              CREATED              STATUS                                 PORTS
+  flower-e18-cron   flower-e18-rehearsal/flower-platform-app:sha-a11c0de   "npx tsx --tsconfig …"   flower-cron-worker   About a minute ago   Up About a minute (health: starting)   3000/tcp
+  flower-e18-db     postgres:18-alpine                                     "docker-entrypoint.s…"   db                   2 minutes ago        Up 2 minutes (healthy)                 127.0.0.1:15432->5432/tcp
+  flower-e18-web    flower-e18-rehearsal/flower-platform-app:sha-a11c0de   "./docker-entrypoint…"   flower-web           About a minute ago   Up About a minute (healthy)            127.0.0.1:18080->3000/tcp
+[exit code: 0]
+
+=== 证据结束: e18-success-deploy-20261110-105256.log ===

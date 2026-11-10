@@ -1,0 +1,4 @@
+command: npx tsc --noEmit (from flower-wms-system)
+result: exit code 0
+date: 2026-11-10
+note: includes playwright.config.ts and tests/e2e/**/*.ts

@@ -1,0 +1,83 @@
+### E1.8 非生产发布演练证据 · 应用镜像回滚：缺陷 SHA → 上一版 SHA，健康恢复
+run_id: 20261110-105256
+recorded_at: 2026-11-10T10:57:41.3215945+08:00
+mode: all
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=99daac6)
+compose_project: flower-e1-8-rehearsal
+note: 演练使用本地预构建镜像 + 模拟 SHA 标签；真实镜像构建/ACR 推送/GitHub workflow 不在本地演练范围。
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+
+===== 回滚前状态（缺陷版本） =====
+  /api/health -> 000（缺陷版本预期不可用）
+
+===== 切换回上一版镜像 sha-a11c0de（compose override，数据库不回滚） =====
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-a11c0de.yml up -d flower-web flower-cron-worker
+   Container flower-e18-db Running 
+   Container flower-e18-cron Recreate 
+   Container flower-e18-web Recreate 
+   Container flower-e18-web Recreated 
+   Container flower-e18-cron Recreated 
+   Container flower-e18-db Waiting 
+   Container flower-e18-db Waiting 
+   Container flower-e18-db Healthy 
+   Container flower-e18-cron Starting 
+   Container flower-e18-db Healthy 
+   Container flower-e18-web Starting 
+   Container flower-e18-cron Started 
+   Container flower-e18-web Started 
+[exit code: 0]
+  回滚部署退出码: 0
+  [health] attempt=1 elapsed=0s code=000 body=
+  [health] attempt=2 elapsed=3.1s code=000 body=
+  [health] attempt=3 elapsed=6.1s code=000 body=
+  [health] attempt=4 elapsed=10s code=200 body={"status":"ok"}
+  [OK] 回滚后 /api/health 恢复（200 + status=ok，用时 10s）
+  [OK] 运行镜像已切回上一版 SHA 对应镜像 ID = sha256:e6ed8ef630901b02e3399bc620ac0302bfacc94c4cf89c6ad8d438f650720545
+  [smoke] GET /api/health -> 200 body={"status":"ok"}
+  [smoke] GET /login -> 200
+  [smoke] GET /v2 -> 307 redirect=http://localhost:18080/login?callbackUrl=%2Fv2
+  [OK] 健康检查 /api/health 返回 200 且 status=ok
+  [OK] 登录页 /login 返回 200
+  [OK] 未登录访问 /v2 返回 307 并跳转登录页
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-a11c0de.yml run --rm --no-deps --entrypoint npx flower-web prisma migrate status --config prisma.v2.config.ts
+   Container flower-e1-8-rehearsal-flower-web-run-9f8662457088 Creating 
+   Container flower-e1-8-rehearsal-flower-web-run-9f8662457088 Created 
+  Loaded Prisma config from prisma.v2.config.ts.
+  Prisma schema loaded from prisma/schema.v2.prisma.
+  Datasource "db": PostgreSQL database "flower_e18_v2", schema "public" at "db:5432"
+  
+  7 migrations found in prisma/migrations
+  
+  Database schema is up to date!
+  npm notice
+  npm notice New major version of npm available! 10.9.9 -> 12.2.2
+  npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+  npm notice To update run: npm install -g npm@12.2.2
+  npm notice
+[exit code: 0]
+  [V2]  Container flower-e1-8-rehearsal-flower-web-run-9f8662457088 Creating 
+  [V2]  Container flower-e1-8-rehearsal-flower-web-run-9f8662457088 Created 
+  [V2] Loaded Prisma config from prisma.v2.config.ts.
+  [V2] Prisma schema loaded from prisma/schema.v2.prisma.
+  [V2] Datasource "db": PostgreSQL database "flower_e18_v2", schema "public" at "db:5432"
+  [V2] 
+  [V2] 7 migrations found in prisma/migrations
+  [V2] 
+  [V2] Database schema is up to date!
+  [V2] npm notice
+  [V2] npm notice New major version of npm available! 10.9.9 -> 12.2.2
+  [V2] npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+  [V2] npm notice To update run: npm install -g npm@12.2.2
+  [V2] npm notice
+  回滚后 docker compose ps:
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-a11c0de.yml ps
+  NAME              IMAGE                                                  COMMAND                  SERVICE              CREATED          STATUS                             PORTS
+  flower-e18-cron   flower-e18-rehearsal/flower-platform-app:sha-a11c0de   "npx tsx --tsconfig …"   flower-cron-worker   20 seconds ago   Up 17 seconds (health: starting)   3000/tcp
+  flower-e18-db     postgres:18-alpine                                     "docker-entrypoint.s…"   db                   4 minutes ago    Up 4 minutes (healthy)             127.0.0.1:15432->5432/tcp
+  flower-e18-web    flower-e18-rehearsal/flower-platform-app:sha-a11c0de   "./docker-entrypoint…"   flower-web           19 seconds ago   Up 17 seconds (healthy)            127.0.0.1:18080->3000/tcp
+[exit code: 0]
+  [PASS] 应用镜像回滚完成，健康与核心冒烟恢复；数据库迁移保持前滚（未回滚）。
+
+=== 证据结束: e18-image-rollback-20261110-105256.log ===

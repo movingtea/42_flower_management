@@ -1,0 +1,72 @@
+### E1.8 非生产发布演练证据 · 演练总结（已演练 / 未覆盖 / 残留风险）
+run_id: 20261110-105256
+recorded_at: 2026-11-10T10:58:08.1468209+08:00
+mode: all
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=99daac6)
+compose_project: flower-e1-8-rehearsal
+note: 演练使用本地预构建镜像 + 模拟 SHA 标签；真实镜像构建/ACR 推送/GitHub workflow 不在本地演练范围。
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+  运行模式: all；总用时: 5.2 分钟；run_id: 20261110-105256
+
+
+===== 场景结果 =====
+  preflight = PASS
+  success-deploy = PASS
+  good_image_id = sha256:e6ed8ef630901b02e3399bc620ac0302bfacc94c4cf89c6ad8d438f650720545
+  backup-restore = PASS
+  incremental-migration = PASS
+  incremental_image_id = sha256:87be8e277800e0ba8f63c3d765f4ff92aa90a762eb337f839d82a4ee2cbe829d
+  failure-stop = PASS
+  bad_image_id = sha256:8906c9a92c65e7b07e705feba787041ca1377f2f24a05cc966ca3960ad1ed67a
+  image-rollback = PASS
+  cleanup = PASS
+
+
+===== 模拟 SHA 标签与镜像 ID =====
+  sha-a11c0de（上一版，预构建镜像）: sha256:e6ed8ef630901b02e3399bc620ac0302bfacc94c4cf89c6ad8d438f650720545
+  sha-add1t1（含第 8 个 V2 迁移的模拟新版本）: sha256:87be8e277800e0ba8f63c3d765f4ff92aa90a762eb337f839d82a4ee2cbe829d
+  sha-badc0de（演练用缺陷镜像）: sha256:8906c9a92c65e7b07e705feba787041ca1377f2f24a05cc966ca3960ad1ed67a
+  说明：这些 SHA 是人工模拟标签，不对应真实提交；真实基线 HEAD 见 preflight 日志。
+
+
+===== 已演练验证 =====
+  - 隔离 Compose 栈（独立项目名/容器名/网络/卷、宿主端口 18080/15432、V1/V2 独立库名）
+  - 空库 V1 45 个/V2 7 个迁移由 entrypoint 自动执行；migrate status 前后核对
+  - /api/health、/login、/v2 核心冒烟；production bootstrap 初始化；迁移后行数核对
+  - pg_dump -Fc 备份 + pg_restore 到临时库 + 行数一致（V1/V2）
+  - 已有 V2 库增量迁移（7→8）+ 迁移前后行数不变 + 迁移后旧镜像启动/健康/冒烟（加列加枚举值向后兼容）
+  - 失败停止：V1/V2 同名、目标不可达（预检/--connect/entrypoint 迁移）、缺陷镜像健康失败
+  - 应用镜像回滚：sha-badc0de → sha-a11c0de，health 恢复 200、冒烟通过；数据库保持前滚
+  - 清理并验证不触碰原有本地开发容器
+
+
+===== 本地无法覆盖（需维护者/生产环境办理） =====
+  - 真实 docker build：当前 npm 镜像(npmmirror) vitest 包 500 失败，本机无 ACR/GitHub 凭据；
+    本次以本地预构建镜像 + 模拟 SHA 标签替代，不能证明当前 HEAD 可构建。
+  - ACR 推送、GitHub Actions deploy.yml 真实执行、生产主机 SSH 远程部署
+  - 生产 nginx 边缘/证书/上传限制、真实生产数据备份保留与异地存储、RPO/RTO 与停机窗口
+  - 分支保护、PR 门禁实际阻止合并（需仓库管理员在 GitHub 配置并验证）
+  - 多实例/滚动发布、负载均衡、生产回滚审批流程
+
+
+===== 证据文件 =====
+  e18-bootstrap-cleanup-20261110-105256.log
+  e18-preflight-20261110-105256.log
+  e18-success-deploy-20261110-105256.log
+  e18-backup-restore-20261110-105256.log
+  e18-incremental-migration-20261110-105256.log
+  e18-failure-stop-20261110-105256.log
+  e18-image-rollback-20261110-105256.log
+  e18-cleanup-20261110-105256.log
+  e18-summary-20261110-105256.log
+
+
+===== 残留风险 =====
+  - 生产 compose 的 postgres 卷挂载路径 /var/lib/postgresql/data 与 PostgreSQL 18 的 PGDATA(/var/lib/postgresql/18/docker) 不匹配，浮动 tag postgres:alpine 现为 18.6；重建容器可能丢数据 → 发布前必须处理（见 Runbook 已知风险）。
+  - 本机工作区存在空的 prisma/migrations/0008_* 目录（未跟踪）；若被打入真实构建，可能影响 migrate deploy，发布前需清理核对。
+  - 预构建镜像只含 7 个 V2 迁移，工作区已是 8 个；真实新版本必须由维护者用当前 HEAD 构建并验证。
+  - cron worker 在 web 迁移完成前启动会出现瞬时 P2021/P2022 报错，下一轮恢复；发布后应确认首轮成功轮次。
+
+=== 证据结束: e18-summary-20261110-105256.log ===

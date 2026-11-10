@@ -1,0 +1,18 @@
+Actions used: ['actions/checkout@v5', 'actions/setup-node@v4', 'actions/upload-artifact@v4']
+
+Workflow job/check names in run order:
+  job changes: name=changed-paths required=conditional
+  job knowledge-structure: name=knowledge-structure required=yes
+  job lint: name=lint required=yes
+  job typecheck: name=typecheck required=yes
+  job unit: name=unit required=yes
+  job build: name=build required=yes
+  job db-regression: name=db-regression required=conditional
+  job e2e: name=e2e required=conditional
+  job traceability: name=traceability required=conditional
+
+validation checks=140 passed=140 failed=0
+WORKFLOW_VALIDATION_PASSED
+required_checks: knowledge-structure,lint,typecheck,unit,build
+conditional_checks: db-regression,e2e,traceability
+trigger: pull_request only; no deploy jobs, no repository secrets

@@ -1,0 +1,68 @@
+[wms-test-db] ready: PostgreSQL 18.3 on 127.0.0.1:50854; database wms_fa4413ece813103fcfbfb2ba044d59e1_test
+
+> flower-wms-system@0.1.0 test:e2e:inner
+> playwright test --grep 受控失败
+
+[WebServer] (node:15432) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:28108) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:26280) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:12108) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+
+Running 1 test using 1 worker
+
+(node:15128) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:15128) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+(Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:28964) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+[WebServer] (node:20044) Warning: The 'NO_COLOR' env is ignored due to the 'FORCE_COLOR' env being set.
+[WebServer] (Use `node --trace-warnings ...` to show where the warning was created)
+  x  1 tests\e2e\controlled-failure.spec.ts:17:7 › 受控失败产物 › 故意失败：不存在的标题断言以产出 trace/screenshot (6.1s)
+
+
+  1) tests\e2e\controlled-failure.spec.ts:17:7 › 受控失败产物 › 故意失败：不存在的标题断言以产出 trace/screenshot ────────
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m([22m[2m)[22m failed
+
+    Locator: getByRole('heading', { name: '受控失败占位标题' })
+    Expected: visible
+    Timeout: 5000ms
+    Error: element(s) not found
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 5000ms[22m
+    [2m  - waiting for getByRole('heading', { name: '受控失败占位标题' })[22m
+
+
+      17 |   test("故意失败：不存在的标题断言以产出 trace/screenshot", async ({ page }) => {
+      18 |     await page.goto("/login");
+    > 19 |     await expect(page.getByRole("heading", { name: "受控失败占位标题" })).toBeVisible({ timeout: 5_000 });
+         |                                                                   ^
+      20 |   });
+      21 | });
+      22 |
+        at D:\My-project\flower-studio-ecosystem\CMS_and_WMS\flower-wms-system\tests\e2e\controlled-failure.spec.ts:19:67
+
+    attachment #1: screenshot (image/png) ──────────────────────────────────────────────────────────
+    test-results\controlled-failure-受控失败产物-故意失败：不存在的标题断言以产出-trace-screenshot\test-failed-1.png
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    Error Context: test-results\controlled-failure-受控失败产物-故意失败：不存在的标题断言以产出-trace-screenshot\error-context.md
+
+    attachment #3: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\controlled-failure-受控失败产物-故意失败：不存在的标题断言以产出-trace-screenshot\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\controlled-failure-受控失败产物-故意失败：不存在的标题断言以产出-trace-screenshot\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    tests\e2e\controlled-failure.spec.ts:17:7 › 受控失败产物 › 故意失败：不存在的标题断言以产出 trace/screenshot ─────────
+
+run exit code: 1 (intentional controlled failure)

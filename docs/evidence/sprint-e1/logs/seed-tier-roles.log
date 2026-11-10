@@ -1,0 +1,8 @@
+[wms-test-db] ready: PostgreSQL 18.3 on 127.0.0.1:49697; database wms_b5b0c8ba34a9ecc36598973b94a550a1_test
+Seeded tenant default and store MAIN
+Applied seed tiers: minimum,roles
+Seeded tenant default and store MAIN
+Applied seed tiers: minimum,roles
+check-v2-seed-tiers: database wms_b5b0c8ba34a9ecc36598973b94a550a1_test; expected tiers minimum,roles; absent p1-scenarios,e2e-fixtures
+check-v2-seed-tiers: OK (66 checks)
+TIER_VERIFY_OK tiers=roles

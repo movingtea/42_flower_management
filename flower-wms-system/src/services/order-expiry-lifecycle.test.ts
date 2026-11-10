@@ -5,11 +5,31 @@ import assert from "node:assert/strict";
 import { OrderStatus } from "@/generated/prisma/enums";
 import { PENDING_PAYMENT_TIMEOUT_MS } from "./order-invariants-pure";
 
+// Delivery dates must stay in the future so delivery-availability validation
+// never rejects the fixture. Derive them from the run day in the store time
+// zone (Asia/Shanghai) instead of pinning calendar dates that expire.
+function shanghaiDateAfter(daysFromToday: number): string {
+  const target = new Date(Date.now() + daysFromToday * 24 * 60 * 60 * 1000);
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "Asia/Shanghai",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(target);
+  const value = (type: "year" | "month" | "day") =>
+    parts.find((part) => part.type === type)?.value ?? "";
+  return `${value("year")}-${value("month")}-${value("day")}`;
+}
+
 async function main() {
   if (!process.env.DATABASE_URL) {
     console.log("skip: DATABASE_URL not set");
     return;
   }
+
+  const deliveryDateForExpired = `${shanghaiDateAfter(7)} 下午`;
+  const deliveryDateForRecent = `${shanghaiDateAfter(8)} 下午`;
+  const deliveryDateForPaid = `${shanghaiDateAfter(9)} 下午`;
 
   const { prisma } = await import("@/lib/prisma");
   const {
@@ -31,7 +51,7 @@ async function main() {
           skuCode,
           specName: "标准款",
           price: 199,
-          stock: 10,
+          stock: 11,
           isMainImage: true,
           imageUrl: "https://example.com/test.jpg",
         },
@@ -52,11 +72,11 @@ async function main() {
     receiverName: "测试",
     receiverPhone: "13800001111",
     deliveryAddress: "上海市测试路 1 号",
-    deliveryDate: "2026-12-25 下午",
-    totalAmount: 199,
+    deliveryDate: deliveryDateForExpired,
+    totalAmount: 597,
     deliveryFee: 15,
-    payAmount: 214,
-    items: [{ skuId: sku.id, quantity: 2 }],
+    payAmount: 612,
+    items: [{ skuId: sku.id, quantity: 3 }],
   });
 
   const expiredCreatedAt = new Date(
@@ -76,7 +96,7 @@ async function main() {
     receiverName: "测试",
     receiverPhone: "13800001111",
     deliveryAddress: "上海市测试路 1 号",
-    deliveryDate: "2026-12-26 下午",
+    deliveryDate: deliveryDateForRecent,
     totalAmount: 199,
     deliveryFee: 15,
     payAmount: 214,
@@ -87,7 +107,7 @@ async function main() {
     receiverName: "测试",
     receiverPhone: "13800001111",
     deliveryAddress: "上海市测试路 1 号",
-    deliveryDate: "2026-12-27 下午",
+    deliveryDate: deliveryDateForPaid,
     totalAmount: 199,
     deliveryFee: 15,
     payAmount: 214,
@@ -118,7 +138,11 @@ async function main() {
   });
   assert.notEqual(paidRow.status, OrderStatus.CANCELLED);
 
-  await closeExpiredPendingOrder(expiredOrder.id);
+  await assert.rejects(
+    () => closeExpiredPendingOrder(expiredOrder.id),
+    /仅待支付订单可关闭/,
+    "重复关闭已完成订单应被拒绝"
+  );
   const stockAfterRepeat = await prisma.productSku.findUniqueOrThrow({
     where: { id: sku.id },
   });

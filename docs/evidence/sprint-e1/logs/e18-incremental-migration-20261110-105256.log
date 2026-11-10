@@ -1,0 +1,221 @@
+### E1.8 非生产发布演练证据 · V2 增量迁移（7→8）与迁移后旧镜像回滚兼容性
+run_id: 20261110-105256
+recorded_at: 2026-11-10T10:55:44.2711941+08:00
+mode: all
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=99daac6)
+compose_project: flower-e1-8-rehearsal
+note: 演练使用本地预构建镜像 + 模拟 SHA 标签；真实镜像构建/ACR 推送/GitHub workflow 不在本地演练范围。
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+
+===== 构建「含第 8 个迁移」的模拟发布镜像（不重新 npm install / 不重新构建 Next.js） =====
+$ docker build -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\images\Dockerfile.sha-additive -t flower-e18-rehearsal/flower-platform-app:sha-add1t1 D:\My-project\flower-studio-ecosystem\CMS_and_WMS
+  #0 building with "desktop-linux" instance using docker driver
+  #1 [internal] load build definition from Dockerfile.sha-additive
+  #1 transferring dockerfile: 1.25kB 0.0s done
+  #1 DONE 0.1s
+  #2 [internal] load metadata for docker.io/library/flower-e05-verification:final
+  #2 DONE 0.1s
+  #3 [internal] load .dockerignore
+  #3 transferring context: 772B 0.0s done
+  #3 DONE 0.0s
+  #4 [internal] load build context
+  #4 transferring context: 412B 0.0s done
+  #4 DONE 0.1s
+  #5 [1/2] FROM docker.io/library/flower-e05-verification:final@sha256:e6ed8ef630901b02e3399bc620ac0302bfacc94c4cf89c6ad8d438f650720545
+  #5 resolve docker.io/library/flower-e05-verification:final@sha256:e6ed8ef630901b02e3399bc620ac0302bfacc94c4cf89c6ad8d438f650720545
+  #5 resolve docker.io/library/flower-e05-verification:final@sha256:e6ed8ef630901b02e3399bc620ac0302bfacc94c4cf89c6ad8d438f650720545 0.1s done
+  #5 DONE 0.1s
+  #6 [2/2] COPY flower-wms-system/prisma/v2/migrations/0008_purchase_supplements_and_inventory_review      /app/prisma/v2/migrations/0008_purchase_supplements_and_inventory_review
+  #6 CACHED
+  #7 exporting to image
+  #7 exporting layers 0.0s done
+  #7 exporting manifest sha256:9f55184264f298d178c2f73328b1180592abda64bac0b031b0ba58935ed30661 0.0s done
+  #7 exporting config sha256:f20320a38ae953d09d413bc18891ddaab46cf84c7b635ea73dc9e6fac0542a09 0.0s done
+  #7 exporting attestation manifest sha256:aafcaf44e9e3af252690d9a2b6b885b0198ea0ab9137fbba973f90d771b0f2a4
+  #7 exporting attestation manifest sha256:aafcaf44e9e3af252690d9a2b6b885b0198ea0ab9137fbba973f90d771b0f2a4 0.2s done
+  #7 exporting manifest list sha256:87be8e277800e0ba8f63c3d765f4ff92aa90a762eb337f839d82a4ee2cbe829d
+  #7 exporting manifest list sha256:87be8e277800e0ba8f63c3d765f4ff92aa90a762eb337f839d82a4ee2cbe829d 0.1s done
+  #7 naming to docker.io/flower-e18-rehearsal/flower-platform-app:sha-add1t1 done
+  #7 unpacking to docker.io/flower-e18-rehearsal/flower-platform-app:sha-add1t1 0.1s done
+  #7 DONE 0.7s
+[exit code: 0]
+  [OK] 增量迁移模拟镜像已构建：flower-e18-rehearsal/flower-platform-app:sha-add1t1
+  flower-e18-rehearsal/flower-platform-app:sha-add1t1 => sha256:87be8e277800e0ba8f63c3d765f4ff92aa90a762eb337f839d82a4ee2cbe829d（基于 flower-e05-verification:final + 0008 迁移文件）
+  [OK] 增量迁移镜像与上一版镜像 ID 不同（模拟真实新版本）
+  生成镜像 override: deploy/rehearsal/.runtime/overrides/compose.image-sha-add1t1.yml（image=flower-e18-rehearsal/flower-platform-app:sha-add1t1）
+
+===== 迁移前基线（成功路径 seed 后的行数） =====
+  [before] InventoryLocation=2
+  [before] Material=0
+  [before] ProductSku=0
+  [before] PurchaseOrder=0
+  [before] PurchaseOrderLine=0
+  [before] StaffUser=1
+  [before] Store=1
+  [before] StoreMember=1
+  [before] StoreSettings=1
+  [before] Tenant=1
+  [before] TenantMember=1
+  [before] _prisma_migrations_applied=7
+
+===== 部署模拟新版本（entrypoint 对已有 V2 库执行增量迁移） =====
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-add1t1.yml up -d flower-web flower-cron-worker
+   Container flower-e18-db Running 
+   Container flower-e18-cron Recreate 
+   Container flower-e18-web Recreate 
+   Container flower-e18-web Recreated 
+   Container flower-e18-cron Recreated 
+   Container flower-e18-db Waiting 
+   Container flower-e18-db Waiting 
+   Container flower-e18-db Healthy 
+   Container flower-e18-web Starting 
+   Container flower-e18-db Healthy 
+   Container flower-e18-cron Starting 
+   Container flower-e18-web Started 
+   Container flower-e18-cron Started 
+[exit code: 0]
+  [health] attempt=1 elapsed=0s code=000 body=
+  [health] attempt=2 elapsed=3.1s code=000 body=
+  [health] attempt=3 elapsed=6.1s code=000 body=
+  [health] attempt=4 elapsed=9.2s code=000 body=
+  [health] attempt=5 elapsed=13.1s code=200 body={"status":"ok"}
+  [OK] 增量迁移后 flower-web 健康（用时 13.1s）
+  [web] No pending migrations to apply.
+  [web] Applying migration `0008_purchase_supplements_and_inventory_review`
+  [web]   └─ 0008_purchase_supplements_and_inventory_review/
+  [web] All migrations have been successfully applied.
+  [OK] entrypoint 实际应用了增量迁移 0008
+  [OK] 增量迁移执行成功
+
+===== 迁移后 migration status 与 schema 核对 =====
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-add1t1.yml run --rm --no-deps --entrypoint npx flower-web prisma migrate status --config prisma.v2.config.ts
+   Container flower-e1-8-rehearsal-flower-web-run-2b2f50f8e139 Creating 
+   Container flower-e1-8-rehearsal-flower-web-run-2b2f50f8e139 Created 
+  Loaded Prisma config from prisma.v2.config.ts.
+  Prisma schema loaded from prisma/schema.v2.prisma.
+  Datasource "db": PostgreSQL database "flower_e18_v2", schema "public" at "db:5432"
+  
+  8 migrations found in prisma/migrations
+  
+  Database schema is up to date!
+  npm notice
+  npm notice New major version of npm available! 10.9.9 -> 12.2.2
+  npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+  npm notice To update run: npm install -g npm@12.2.2
+  npm notice
+[exit code: 0]
+  [V2]  Container flower-e1-8-rehearsal-flower-web-run-2b2f50f8e139 Creating 
+  [V2]  Container flower-e1-8-rehearsal-flower-web-run-2b2f50f8e139 Created 
+  [V2] Loaded Prisma config from prisma.v2.config.ts.
+  [V2] Prisma schema loaded from prisma/schema.v2.prisma.
+  [V2] Datasource "db": PostgreSQL database "flower_e18_v2", schema "public" at "db:5432"
+  [V2] 
+  [V2] 8 migrations found in prisma/migrations
+  [V2] 
+  [V2] Database schema is up to date!
+  [V2] npm notice
+  [V2] npm notice New major version of npm available! 10.9.9 -> 12.2.2
+  [V2] npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+  [V2] npm notice To update run: npm install -g npm@12.2.2
+  [V2] npm notice
+  [OK] V2 migration status: up to date（8 个迁移）
+  [OK] 镜像包含 8 个 V2 迁移
+$ psql -U flower_e18 -d flower_e18_v2 -f <.\deploy\rehearsal\db\checks\v2-schema-0008.sql>
+  column:LossRecord:reviewStatus|1
+  column:PurchaseOrderLine:relationKind|1
+  column:PurchaseOrderLine:sourceLineId|1
+  column:Stocktake:reviewReasons|1
+  enum_value:StocktakeState:PENDING_REVIEW|1
+  enum_value:StocktakeState:REJECTED|1
+[exit code: 0]
+  [OK] 迁移 0008 生效：enum_value:StocktakeState:PENDING_REVIEW = 1
+  [OK] 迁移 0008 生效：enum_value:StocktakeState:REJECTED = 1
+  [OK] 迁移 0008 生效：column:PurchaseOrderLine:relationKind = 1
+  [OK] 迁移 0008 生效：column:PurchaseOrderLine:sourceLineId = 1
+  [OK] 迁移 0008 生效：column:Stocktake:reviewReasons = 1
+  [OK] 迁移 0008 生效：column:LossRecord:reviewStatus = 1
+
+===== 迁移前后数据核对（关键表行数应保持，仅迁移历史 +1） =====
+$ psql -U flower_e18 -d flower_e18_v2 -f <.\deploy\rehearsal\db\checks\v2-row-counts.sql>
+  InventoryLocation|2
+  Material|0
+  ProductSku|0
+  PurchaseOrder|0
+  PurchaseOrderLine|0
+  StaffUser|1
+  Store|1
+  StoreMember|1
+  StoreSettings|1
+  Tenant|1
+  TenantMember|1
+  _prisma_migrations_applied|8
+[exit code: 0]
+  [OK] 增量迁移未改变业务数据（差异: ）
+  [OK] 迁移历史由 7 增至 8 = 8
+  迁移后行数: InventoryLocation=2, Material=0, ProductSku=0, PurchaseOrder=0, PurchaseOrderLine=0, StaffUser=1, Store=1, StoreMember=1, StoreSettings=1, Tenant=1, TenantMember=1, _prisma_migrations_applied=8
+
+===== 迁移后回滚到上一版应用镜像（旧镜像 + 新 schema 的兼容前提） =====
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-a11c0de.yml up -d flower-web flower-cron-worker
+   Container flower-e18-db Running 
+   Container flower-e18-cron Recreate 
+   Container flower-e18-web Recreate 
+   Container flower-e18-web Recreated 
+   Container flower-e18-cron Recreated 
+   Container flower-e18-db Waiting 
+   Container flower-e18-db Waiting 
+   Container flower-e18-db Healthy 
+   Container flower-e18-db Healthy 
+   Container flower-e18-cron Starting 
+   Container flower-e18-web Starting 
+   Container flower-e18-cron Started 
+   Container flower-e18-web Started 
+[exit code: 0]
+  回滚命令退出码: 0（应用镜像回滚，数据库不回滚）
+  [health] attempt=1 elapsed=0s code=000 body=
+  [health] attempt=2 elapsed=3.1s code=000 body=
+  [health] attempt=3 elapsed=6.1s code=000 body=
+  [health] attempt=4 elapsed=10.9s code=200 body={"status":"ok"}
+  [OK] 旧镜像在新 schema 上健康（用时 10.9s）
+  [OK] 已回滚到上一版镜像 ID = sha256:e6ed8ef630901b02e3399bc620ac0302bfacc94c4cf89c6ad8d438f650720545
+  [smoke] GET /api/health -> 200 body={"status":"ok"}
+  [smoke] GET /login -> 200
+  [smoke] GET /v2 -> 307 redirect=http://localhost:18080/login?callbackUrl=%2Fv2
+  [OK] 健康检查 /api/health 返回 200 且 status=ok
+  [OK] 登录页 /login 返回 200
+  [OK] 未登录访问 /v2 返回 307 并跳转登录页
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\.runtime\overrides\compose.image-sha-a11c0de.yml run --rm --no-deps --entrypoint npx flower-web prisma migrate status --config prisma.v2.config.ts
+   Container flower-e1-8-rehearsal-flower-web-run-541693232990 Creating 
+   Container flower-e1-8-rehearsal-flower-web-run-541693232990 Created 
+  Loaded Prisma config from prisma.v2.config.ts.
+  Prisma schema loaded from prisma/schema.v2.prisma.
+  Datasource "db": PostgreSQL database "flower_e18_v2", schema "public" at "db:5432"
+  
+  7 migrations found in prisma/migrations
+  
+  Database schema is up to date!
+  npm notice
+  npm notice New major version of npm available! 10.9.9 -> 12.2.2
+  npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+  npm notice To update run: npm install -g npm@12.2.2
+  npm notice
+[exit code: 0]
+  [V2-old-image]  Container flower-e1-8-rehearsal-flower-web-run-541693232990 Creating 
+  [V2-old-image]  Container flower-e1-8-rehearsal-flower-web-run-541693232990 Created 
+  [V2-old-image] Loaded Prisma config from prisma.v2.config.ts.
+  [V2-old-image] Prisma schema loaded from prisma/schema.v2.prisma.
+  [V2-old-image] Datasource "db": PostgreSQL database "flower_e18_v2", schema "public" at "db:5432"
+  [V2-old-image] 
+  [V2-old-image] 7 migrations found in prisma/migrations
+  [V2-old-image] 
+  [V2-old-image] Database schema is up to date!
+  [V2-old-image] npm notice
+  [V2-old-image] npm notice New major version of npm available! 10.9.9 -> 12.2.2
+  [V2-old-image] npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+  [V2-old-image] npm notice To update run: npm install -g npm@12.2.2
+  [V2-old-image] npm notice
+  兼容结论：0008 为加列/加枚举值/加表/加索引的向后兼容迁移；上一版镜像可启动、健康并冒烟通过。
+  边界：若迁移含删除/重命名/收紧约束，旧镜像不保证兼容，必须先按备份恢复或前滚修复（见 Runbook 不可逆迁移清单）。
+
+=== 证据结束: e18-incremental-migration-20261110-105256.log ===

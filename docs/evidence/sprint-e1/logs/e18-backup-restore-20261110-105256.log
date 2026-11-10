@@ -1,0 +1,104 @@
+### E1.8 非生产发布演练证据 · 备份与恢复检查：pg_dump -Fc + pg_restore 到临时库 + 行数核对
+run_id: 20261110-105256
+recorded_at: 2026-11-10T10:55:30.4081468+08:00
+mode: all
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=99daac6)
+compose_project: flower-e1-8-rehearsal
+note: 演练使用本地预构建镜像 + 模拟 SHA 标签；真实镜像构建/ACR 推送/GitHub workflow 不在本地演练范围。
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+
+===== pg_dump（自定义格式 -Fc；生产应落在宿主备份目录并异地保留） =====
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml exec -T db sh -c pg_dump -U flower_e18 -Fc -d flower_e18_v1 -f /backup/v1-20261110-105256.dump && pg_dump -U flower_e18 -Fc -d flower_e18_v2 -f /backup/v2-20261110-105256.dump && ls -l /backup && sha256sum /backup/v1-20261110-105256.dump /backup/v2-20261110-105256.dump
+  total 984
+  -rw-r--r--    1 root     root        136111 Nov 10 02:40 v1-20261110-104007.dump
+  -rw-r--r--    1 root     root        136125 Nov 10 02:49 v1-20261110-104727.dump
+  -rw-r--r--    1 root     root        136118 Nov 10 02:55 v1-20261110-105256.dump
+  -rw-r--r--    1 root     root        194842 Nov 10 02:40 v2-20261110-104007.dump
+  -rw-r--r--    1 root     root        194843 Nov 10 02:49 v2-20261110-104727.dump
+  -rw-r--r--    1 root     root        194847 Nov 10 02:55 v2-20261110-105256.dump
+  d6c47ca97220a601913dd00ead8046235e056f6588718a479d3c7684bcdc2a59  /backup/v1-20261110-105256.dump
+  9e731835b03274cf9856ccd0de04e45858bbb7b25bb457df0bdad4585891b70c  /backup/v2-20261110-105256.dump
+[exit code: 0]
+  [OK] pg_dump 生成 V1/V2 备份文件
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml exec -T db sh -c pg_restore --list /backup/v2-20261110-105256.dump | head -n 8
+  ;
+  ; Archive created at 2026-11-10 02:55:31 UTC
+  ;     dbname: flower_e18_v2
+  ;     TOC Entries: 468
+  ;     Compression: gzip
+  ;     Dump Version: 1.16-0
+  ;     Format: CUSTOM
+  ;     Integer: 4 bytes
+[exit code: 0]
+  [OK] V2 备份可被 pg_restore 识别
+
+===== pg_restore 到临时库（不触碰原库） =====
+$ docker compose -p flower-e1-8-rehearsal -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\rehearsal\compose\docker-compose.rehearsal.yml exec -T db sh -c dropdb --if-exists -U flower_e18 flower_e18_v1_restore && createdb -U flower_e18 flower_e18_v1_restore && pg_restore -U flower_e18 -d flower_e18_v1_restore --no-owner --no-privileges /backup/v1-20261110-105256.dump && dropdb --if-exists -U flower_e18 flower_e18_v2_restore && createdb -U flower_e18 flower_e18_v2_restore && pg_restore -U flower_e18 -d flower_e18_v2_restore --no-owner --no-privileges /backup/v2-20261110-105256.dump
+  NOTICE:  database "flower_e18_v1_restore" does not exist, skipping
+  NOTICE:  database "flower_e18_v2_restore" does not exist, skipping
+[exit code: 0]
+  [OK] V1/V2 备份恢复到临时库成功 = 0
+
+===== 恢复结果与源库行数核对 =====
+$ psql -U flower_e18 -d flower_e18_v2 -f <.\deploy\rehearsal\db\checks\v2-row-counts.sql>
+  InventoryLocation|2
+  Material|0
+  ProductSku|0
+  PurchaseOrder|0
+  PurchaseOrderLine|0
+  StaffUser|1
+  Store|1
+  StoreMember|1
+  StoreSettings|1
+  Tenant|1
+  TenantMember|1
+  _prisma_migrations_applied|7
+[exit code: 0]
+$ psql -U flower_e18 -d flower_e18_v2_restore -f <.\deploy\rehearsal\db\checks\v2-row-counts.sql>
+  InventoryLocation|2
+  Material|0
+  ProductSku|0
+  PurchaseOrder|0
+  PurchaseOrderLine|0
+  StaffUser|1
+  Store|1
+  StoreMember|1
+  StoreSettings|1
+  Tenant|1
+  TenantMember|1
+  _prisma_migrations_applied|7
+[exit code: 0]
+  [OK] V2 恢复库行数与源库一致（差异: ）
+$ psql -U flower_e18 -d flower_e18_v1 -f <.\deploy\rehearsal\db\checks\v1-row-counts.sql>
+  _prisma_migrations_applied|45
+  orders|0
+  product_skus|0
+  product_spus|0
+  purchase_orders|0
+  staff_users|0
+  tenant_members|0
+  tenants|0
+  users|0
+[exit code: 0]
+$ psql -U flower_e18 -d flower_e18_v1_restore -f <.\deploy\rehearsal\db\checks\v1-row-counts.sql>
+  _prisma_migrations_applied|45
+  orders|0
+  product_skus|0
+  product_spus|0
+  purchase_orders|0
+  staff_users|0
+  tenant_members|0
+  tenants|0
+  users|0
+[exit code: 0]
+  [OK] V1 恢复库行数与源库一致（差异: ）
+  恢复核对通过：V2 差异 0 项，V1 差异 0 项
+
+===== 恢复边界说明 =====
+  - 已演练：pg_dump 自定义格式备份、pg_restore 到临时库、关键表行数与迁移历史一致。
+  - 未演练：生产对象存储/OSS 文件、备份异地保留、RPO/RTO 承诺、恢复期间业务停写。
+  - 正式恢复流程须由发布负责人批准后执行，并在隔离环境先验证（本文件命令可作为模板）。
+
+=== 证据结束: e18-backup-restore-20261110-105256.log ===
