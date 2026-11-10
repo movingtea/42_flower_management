@@ -1,0 +1,201 @@
+
+> flower-wms-system@0.1.0 build
+> next build
+
+▲ Next.js 16.2.6 (Turbopack)
+- Environments: .env.local, .env
+
+  Creating an optimized production build ...
+✓ Compiled successfully in 15.2s
+  Running TypeScript ...
+  Finished TypeScript in 36.6s ...
+  Collecting page data using 7 workers ...
+  Generating static pages using 7 workers (0/19) ...
+  Generating static pages using 7 workers (4/19) 
+  Generating static pages using 7 workers (9/19) 
+  Generating static pages using 7 workers (14/19) 
+✓ Generating static pages using 7 workers (19/19) in 618ms
+  Finalizing page optimization ...
+
+Route (app)
+┌ ○ /
+├ ○ /_not-found
+├ ƒ /account/v2-password
+├ ○ /admin
+├ ƒ /admin/staff-users
+├ ƒ /api/admin/app-config
+├ ƒ /api/admin/audit-logs
+├ ƒ /api/admin/banners
+├ ƒ /api/admin/categories
+├ ƒ /api/admin/categories/[id]
+├ ƒ /api/admin/cms/banners
+├ ƒ /api/admin/cms/banners/[id]
+├ ƒ /api/admin/cms/banners/reorder
+├ ƒ /api/admin/cms/delivery-settings
+├ ƒ /api/admin/cms/home-scene-entries
+├ ƒ /api/admin/cms/home-scene-entries/[id]
+├ ƒ /api/admin/cms/home-scene-entries/reorder
+├ ƒ /api/admin/cms/products/[id]/operation-profile
+├ ƒ /api/admin/cms/products/[id]/publish-readiness
+├ ƒ /api/admin/cms/products/[id]/skus
+├ ƒ /api/admin/cms/products/operation-summaries
+├ ƒ /api/admin/cms/products/search
+├ ƒ /api/admin/cms/recommendation-items/[itemId]
+├ ƒ /api/admin/cms/recommendation-slots
+├ ƒ /api/admin/cms/recommendation-slots/[id]
+├ ƒ /api/admin/cms/recommendation-slots/[id]/items
+├ ƒ /api/admin/cms/skus/[id]/margin-estimate
+├ ƒ /api/admin/crm/customers
+├ ƒ /api/admin/crm/customers/[id]
+├ ƒ /api/admin/crm/recipients
+├ ƒ /api/admin/crm/recommendations
+├ ƒ /api/admin/crm/reminders
+├ ƒ /api/admin/crm/reminders/[id]
+├ ƒ /api/admin/crm/summary
+├ ƒ /api/admin/data-quality
+├ ƒ /api/admin/master-parts
+├ ƒ /api/admin/master-parts/[id]
+├ ƒ /api/admin/orders
+├ ƒ /api/admin/orders/[id]/cancel-or-close
+├ ƒ /api/admin/orders/[id]/cost
+├ ƒ /api/admin/orders/[id]/cost/recalculate
+├ ƒ /api/admin/orders/[id]/delivery-cost
+├ ƒ /api/admin/orders/[id]/detail
+├ ƒ /api/admin/orders/[id]/refund
+├ ƒ /api/admin/product-categories
+├ ƒ /api/admin/product-categories/[id]
+├ ƒ /api/admin/products
+├ ƒ /api/admin/products/[id]
+├ ƒ /api/admin/products/[id]/bom
+├ ƒ /api/admin/products/[id]/margin-estimate
+├ ƒ /api/admin/products/[id]/margin-estimate/recalculate
+├ ƒ /api/admin/products/bom
+├ ƒ /api/admin/reports/backfill-cost-snapshots
+├ ƒ /api/admin/reports/business-summary
+├ ƒ /api/admin/reports/cost-structure
+├ ƒ /api/admin/reports/daily-sales
+├ ƒ /api/admin/reports/dashboard
+├ ƒ /api/admin/reports/inventory-alerts
+├ ƒ /api/admin/reports/loss-model-impact
+├ ƒ /api/admin/reports/low-margin-orders
+├ ƒ /api/admin/reports/material-usage
+├ ƒ /api/admin/reports/product-decisions
+├ ƒ /api/admin/reports/product-decisions/[skuId]
+├ ƒ /api/admin/reports/product-profit-ranking
+├ ƒ /api/admin/reports/purchase-analytics
+├ ƒ /api/admin/reports/wastage
+├ ƒ /api/admin/setup/checklist
+├ ƒ /api/admin/staff-users
+├ ƒ /api/admin/stocktake
+├ ƒ /api/admin/system/health
+├ ƒ /api/admin/trial-run/check
+├ ƒ /api/admin/upload
+├ ƒ /api/admin/uploads/image
+├ ƒ /api/admin/wiki
+├ ƒ /api/admin/wiki/[id]
+├ ƒ /api/admin/wms/bom
+├ ƒ /api/admin/wms/material-categories
+├ ƒ /api/admin/wms/material-categories/[id]
+├ ƒ /api/admin/wms/packaging-kits
+├ ƒ /api/admin/wms/packaging-kits/[id]
+├ ƒ /api/admin/wms/purchase-orders
+├ ƒ /api/admin/wms/purchase-orders/[id]
+├ ƒ /api/admin/wms/purchase-orders/[id]/cancel
+├ ƒ /api/admin/wms/purchase-orders/[id]/receive
+├ ƒ /api/admin/wms/purchase-orders/[id]/update-standard-costs
+├ ƒ /api/admin/wms/purchase-orders/calculate-preview
+├ ƒ /api/admin/wms/purchase-orders/lines/[lineId]/update-standard-cost
+├ ƒ /api/admin/wms/recipes
+├ ƒ /api/admin/wms/recipes/[id]
+├ ƒ /api/admin/wms/recipes/search
+├ ƒ /api/admin/wms/stock-batches
+├ ƒ /api/admin/wms/stock-in
+├ ƒ /api/admin/wms/stock-loss
+├ ƒ /api/admin/wms/stock-loss/history
+├ ƒ /api/admin/wms/stock-pipeline
+├ ƒ /api/admin/wms/suppliers
+├ ƒ /api/admin/wms/suppliers/[id]
+├ ƒ /api/ai/complete-flower
+├ ƒ /api/auth/[...nextauth]
+├ ƒ /api/cart
+├ ƒ /api/cms/products
+├ ƒ /api/cms/products/[id]
+├ ƒ /api/cms/skus/[id]
+├ ƒ /api/health
+├ ƒ /api/miniprogram/cart
+├ ƒ /api/miniprogram/delivery-settings
+├ ƒ /api/miniprogram/home-banners
+├ ƒ /api/miniprogram/home-scene-entries
+├ ƒ /api/miniprogram/homepage
+├ ƒ /api/miniprogram/orders
+├ ƒ /api/miniprogram/orders/cancel
+├ ƒ /api/miniprogram/orders/confirm-receipt
+├ ƒ /api/miniprogram/orders/create
+├ ƒ /api/miniprogram/orders/mock-pay
+├ ƒ /api/miniprogram/product-categories
+├ ƒ /api/miniprogram/products
+├ ƒ /api/miniprogram/products/[id]
+├ ƒ /api/miniprogram/recipients
+├ ƒ /api/miniprogram/recipients/[id]
+├ ƒ /api/miniprogram/recommendations
+├ ƒ /api/miniprogram/upload
+├ ƒ /api/miniprogram/user/profile
+├ ƒ /api/wechat/auth/login
+├ ƒ /api/wechat/login
+├ ƒ /api/wechat/orders/callback
+├ ○ /cms
+├ ƒ /cms/banner
+├ ○ /cms/carousel
+├ ○ /cms/categories
+├ ƒ /cms/marketing
+├ ƒ /cms/product-categories
+├ ƒ /cms/products
+├ ƒ /cms/products/[id]
+├ ƒ /cms/recommendations
+├ ○ /login
+├ ƒ /uploads/[[...path]]
+├ ƒ /v2
+├ ƒ /v2/catalog
+├ ƒ /v2/inventory
+├ ƒ /v2/inventory/[id]
+├ ƒ /v2/materials
+├ ƒ /v2/operations
+├ ƒ /v2/orders
+├ ƒ /v2/packaging-kits
+├ ƒ /v2/purchase-orders
+├ ƒ /v2/purchases
+├ ƒ /v2/recipes
+├ ƒ /v2/staff
+├ ƒ /v2/suppliers
+├ ƒ /wms
+├ ƒ /wms/audit-logs
+├ ƒ /wms/batches
+├ ƒ /wms/bom
+├ ƒ /wms/crm
+├ ƒ /wms/crm/customers
+├ ƒ /wms/crm/customers/[id]
+├ ƒ /wms/crm/reminders
+├ ƒ /wms/dashboard
+├ ƒ /wms/data-quality
+├ ƒ /wms/inventory
+├ ƒ /wms/inventory/[id]
+├ ƒ /wms/master-parts
+├ ƒ /wms/material-categories
+├ ƒ /wms/operations
+├ ƒ /wms/orders
+├ ƒ /wms/packaging-kits
+├ ƒ /wms/purchase-orders
+├ ƒ /wms/recipes
+├ ƒ /wms/reports
+├ ƒ /wms/setup
+├ ƒ /wms/suppliers
+├ ƒ /wms/system-health
+├ ƒ /wms/wastage
+└ ƒ /wms/wiki
+
+
+ƒ Proxy (Middleware)
+
+○  (Static)   prerendered as static content
+ƒ  (Dynamic)  server-rendered on demand
+

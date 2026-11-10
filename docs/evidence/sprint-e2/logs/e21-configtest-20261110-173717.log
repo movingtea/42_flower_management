@@ -1,0 +1,18 @@
+### Sprint E2 staging 证据 · compose config 校验
+run_id: 20261110-173717
+recorded_at: 2026-11-10T17:37:17.8335179+08:00
+mode: config-test
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=9112ed3)
+compose_project: flower-e2-staging
+staging_web: http://127.0.0.1:18081  staging_db_port: 15433
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+
+===== 生成 staging 运行时 env 与随机本地凭据（不写入日志） =====
+  env: deploy/staging/.runtime/staging.env（随机密码/AUTH_SECRET 已生成，未打印）
+  [OK] staging env 已生成
+docker compose config 校验（输出可能含密码，只在控制台，不写日志行内容）
+compose config exit=0
+
+=== 证据结束: e21-configtest-20261110-173717.log ===

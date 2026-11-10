@@ -1,0 +1,53 @@
+### Sprint E2 staging 证据 · E2.1 staging 持久化试验（只重建 db 容器）
+run_id: 20261110-222659
+recorded_at: 2026-11-10T22:27:00.0695138+08:00
+mode: persistence
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=9112ed3)
+compose_project: flower-e2-staging
+staging_web: http://127.0.0.1:18081  staging_db_port: 15433
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+
+===== 写入合成标记并重建 db 容器 =====
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db psql -U flower_e2_stage -d flower_e2_v2_test -t -A -c CREATE TABLE IF NOT EXISTS _e2_marker (id text PRIMARY KEY, created_at timestamptz NOT NULL DEFAULT now()); INSERT INTO _e2_marker (id) VALUES ('e21-20261110-222659') ON CONFLICT DO NOTHING; SELECT count(*) FROM _e2_marker;
+  CREATE TABLE
+  INSERT 0 1
+  1
+[exit code: 0]
+  marker=e21-20261110-222659 insert exit=0 output=CREATE TABLE
+INSERT 0 1
+1
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db psql -U flower_e2_stage -d flower_e2_v2_test -t -A -c SELECT count(*) FROM _e2_marker
+  1
+[exit code: 0]
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml up -d --force-recreate --no-deps db
+   Container flower-e2-staging-db Recreate 
+   Container flower-e2-staging-db Recreated 
+   Container flower-e2-staging-db Starting 
+   Container flower-e2-staging-db Started 
+[exit code: 0]
+  db recreate exit=0
+  [OK] 重建后 db 容器健康
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db psql -U flower_e2_stage -d flower_e2_v2_test -t -A -c SELECT count(*) FROM _e2_marker
+  1
+[exit code: 0]
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db psql -U flower_e2_stage -d flower_e2_v2_test -t -A -c SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NOT NULL
+  8
+[exit code: 0]
+  marker count before=1 after=1; v2 applied migrations=8
+  [OK] 重建 db 容器后标记数据保留 = 1
+  [OK] 重建 db 容器后 V2 迁移历史保留（8 个） = 8
+
+===== 重建 db 后重启 web/cron 并确认健康 =====
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml up -d --no-deps flower-web
+   Container flower-e2-staging-web Running 
+[exit code: 0]
+  [health] attempt=1 elapsed=0.1s code=200 body={"status":"ok"}
+  [OK] 重建 db 后 web 健康恢复
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml up -d --no-deps flower-cron-worker
+   Container flower-e2-staging-cron Running 
+[exit code: 0]
+  persistence run_id=e21-20261110-222659 完成
+
+=== 证据结束: e21-persistence-20261110-222659.log ===

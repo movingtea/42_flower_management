@@ -1,0 +1,36 @@
+### Sprint E2 staging 证据 · E2.1 db 初始化（V2 库名 flower_e2_v2_test）
+run_id: 20261110-183830
+recorded_at: 2026-11-10T18:38:30.6548520+08:00
+mode: dbinit2
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=9112ed3)
+compose_project: flower-e2-staging
+staging_web: http://127.0.0.1:18081  staging_db_port: 15433
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+
+===== 生成 staging 运行时 env 与随机本地凭据（不写入日志） =====
+  env: deploy/staging/.runtime/staging.env（随机密码/AUTH_SECRET 已生成，未打印）
+  [OK] staging env 已生成
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml up -d --no-deps db
+   Network flower-e2-staging_default Creating 
+   Volume flower-e2-staging_postgres_data Creating 
+   Network flower-e2-staging_default Creating 
+   Volume flower-e2-staging_postgres_data Creating 
+   Volume flower-e2-staging_postgres_data Created 
+   Volume flower-e2-staging_postgres_data Created 
+   Network flower-e2-staging_default Created 
+   Network flower-e2-staging_default Created 
+   Container flower-e2-staging-db Creating 
+   Container flower-e2-staging-db Created 
+   Container flower-e2-staging-db Starting 
+   Container flower-e2-staging-db Started 
+[exit code: 0]
+  [OK] db 容器健康
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db psql -U flower_e2_stage -d flower_e2_v1 -t -A -c SELECT datname FROM pg_database WHERE datname LIKE 'flower_e2%' ORDER BY 1
+  flower_e2_v1
+  flower_e2_v2_test
+[exit code: 0]
+  staging databases: flower_e2_v1, flower_e2_v2_test
+
+=== 证据结束: e21-dbinit2-20261110-183830.log ===

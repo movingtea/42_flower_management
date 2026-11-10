@@ -1,0 +1,88 @@
+### Sprint E2 staging 证据 · E2.1 staging 启动与验收
+run_id: 20261110-222553
+recorded_at: 2026-11-10T22:25:54.2082131+08:00
+mode: verify
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=9112ed3)
+compose_project: flower-e2-staging
+staging_web: http://127.0.0.1:18081  staging_db_port: 15433
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+
+===== 迁移状态（entrypoint 已执行） =====
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml run --rm --no-deps --entrypoint npx flower-web prisma migrate status
+  error while interpolating services.flower-cron-worker.image: required variable STAGING_IMAGE is missing a value: Set STAGING_IMAGE to the locally built flower-e2-staging image
+  error while interpolating services.flower-web.image: required variable STAGING_IMAGE is missing a value: Set STAGING_IMAGE to the locally built flower-e2-staging image
+[exit code: 1]
+  
+--- V1 migrate status ---
+  error while interpolating services.flower-cron-worker.image: required variable STAGING_IMAGE is missing a value: Set STAGING_IMAGE to the locally built flower-e2-staging image
+  error while interpolating services.flower-web.image: required variable STAGING_IMAGE is missing a value: Set STAGING_IMAGE to the locally built flower-e2-staging image
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml run --rm --no-deps --entrypoint npx flower-web prisma migrate status --config prisma.v2.config.ts
+  error while interpolating services.flower-cron-worker.image: required variable STAGING_IMAGE is missing a value: Set STAGING_IMAGE to the locally built flower-e2-staging image
+  error while interpolating services.flower-web.image: required variable STAGING_IMAGE is missing a value: Set STAGING_IMAGE to the locally built flower-e2-staging image
+[exit code: 1]
+  --- V2 migrate status ---
+  error while interpolating services.flower-cron-worker.image: required variable STAGING_IMAGE is missing a value: Set STAGING_IMAGE to the locally built flower-e2-staging image
+  error while interpolating services.flower-web.image: required variable STAGING_IMAGE is missing a value: Set STAGING_IMAGE to the locally built flower-e2-staging image
+
+===== 迁移历史与关键表行数 =====
+
+===== psql 核对 flower_e2_v1 <v1-row-counts.sql> =====
+  _prisma_migrations_applied|45
+  orders|0
+  product_skus|0
+  product_spus|0
+  purchase_orders|0
+  staff_users|0
+  tenant_members|0
+  tenants|0
+  users|0
+[exit code: 0]
+
+===== psql 核对 flower_e2_v2_test <v2-row-counts.sql> =====
+  InventoryLocation|2
+  Material|0
+  ProductSku|0
+  PurchaseOrder|0
+  PurchaseOrderLine|0
+  StaffUser|5
+  Store|1
+  StoreMember|5
+  StoreSettings|1
+  Tenant|1
+  TenantMember|5
+  _prisma_migrations_applied|8
+[exit code: 0]
+  [OK] V1 已应用迁移数 = 45 = 45
+  [OK] V2 已应用迁移数 = 8 = 8
+  [OK] V2 合成账号已写入（StaffUser >= 5）
+
+===== 核心冒烟（Runbook §7.2 本机可覆盖部分） =====
+  /api/health -> 200 body={"status":"ok"}
+  [OK] 健康检查 200 且 status=ok
+  /login -> 200
+  [OK] 登录页 200
+  /v2 (未登录) -> 307 redirect=http://localhost:18081/login?callbackUrl=%2Fv2
+  [OK] 未登录访问 /v2 返回 307 并跳转登录
+  /v2/inventory (未登录) -> 307
+  [OK] /v2/inventory 未登录跳转登录
+  /v2/orders (未登录) -> 307
+  [OK] /v2/orders 未登录跳转登录
+  /v2/catalog (未登录) -> 307
+  [OK] /v2/catalog 未登录跳转登录
+
+===== 登录冒烟（V2 合成账号完整凭据登录） =====
+  POST /api/auth/callback/v2-credentials -> 302
+  GET /v2 (已登录) -> 200|
+  [OK] V2 凭据登录回调成功
+  [OK] 登录后 /v2 返回 200（工作台可访问）
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml logs --tail=120 flower-cron-worker
+  error while interpolating services.flower-cron-worker.image: required variable STAGING_IMAGE is missing a value: Set STAGING_IMAGE to the locally built flower-e2-staging image
+  error while interpolating services.flower-web.image: required variable STAGING_IMAGE is missing a value: Set STAGING_IMAGE to the locally built flower-e2-staging image
+[exit code: 1]
+
+===== cron worker 日志 =====
+  error while interpolating services.flower-cron-worker.image: required variable STAGING_IMAGE is missing a value: Set STAGING_IMAGE to the locally built flower-e2-staging image
+  error while interpolating services.flower-web.image: required variable STAGING_IMAGE is missing a value: Set STAGING_IMAGE to the locally built flower-e2-staging image
+  cron started marker: False; success round marker: False

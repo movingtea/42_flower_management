@@ -1,0 +1,29 @@
+### Sprint E2 staging 证据 · E2.1 重置 db 卷（V2 库名改为 _test）
+run_id: 20261110-183814
+recorded_at: 2026-11-10T18:38:14.8722664+08:00
+mode: cleanup
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=9112ed3)
+compose_project: flower-e2-staging
+staging_web: http://127.0.0.1:18081  staging_db_port: 15433
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+
+===== 清理 staging 栈（仅本项目资源） =====
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml down -v --remove-orphans
+   Container flower-e2-staging-db Stopping 
+   Container flower-e2-staging-db Stopped 
+   Container flower-e2-staging-db Removing 
+   Container flower-e2-staging-db Removed 
+   Network flower-e2-staging_default Removing 
+   Volume flower-e2-staging_postgres_data Removing 
+   Volume flower-e2-staging_postgres_data Removed 
+   Network flower-e2-staging_default Removed 
+[exit code: 0]
+  compose down -v exit=0
+  清理后剩余容器: 0 卷: 0 网络: 0
+  [OK] staging 容器已清理
+  [OK] staging 卷已清理
+  [OK] staging 网络已清理
+
+=== 证据结束: e21-cleanup-20261110-183814.log ===

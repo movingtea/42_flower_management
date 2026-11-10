@@ -1,0 +1,94 @@
+### Sprint E2 staging 证据 · E2.4 迁移post 检查
+run_id: 20261110-224112
+recorded_at: 2026-11-10T22:41:12.4988796+08:00
+mode: migration-post
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=9112ed3)
+compose_project: flower-e2-staging
+staging_web: http://127.0.0.1:18081  staging_db_port: 15433
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+
+===== 连通性/目标预检 =====
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml run --rm --no-deps --entrypoint sh flower-web -ec node scripts/check-v2-database-target.mjs --connect
+   Container flower-e2-staging-flower-web-run-3da2ebc6bd59 Creating 
+   Container flower-e2-staging-flower-web-run-3da2ebc6bd59 Created 
+[exit code: 0]
+  [OK] V1/V2 目标可连接且库名不同
+
+===== 迁移历史与待应用清单 =====
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml run --rm --no-deps --entrypoint sh flower-web -ec ls prisma/v2/migrations | sort
+   Container flower-e2-staging-flower-web-run-a3117f72c2e2 Creating 
+   Container flower-e2-staging-flower-web-run-a3117f72c2e2 Created 
+  0001_initial
+  0002_sku_estimated_costs
+  0003_purchase_order_timestamps
+  0004_material_supplier_lifecycle
+  0005_purchase_order_lifecycle
+  0006_packaging_kits
+  0007_staff_initial_password
+  0008_purchase_supplements_and_inventory_review
+[exit code: 0]
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db psql -U flower_e2_stage -d flower_e2_v2_test -t -A -c SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NOT NULL ORDER BY migration_name
+  0001_initial
+  0002_sku_estimated_costs
+  0003_purchase_order_timestamps
+  0004_material_supplier_lifecycle
+  0005_purchase_order_lifecycle
+  0006_packaging_kits
+  0007_staff_initial_password
+  0008_purchase_supplements_and_inventory_review
+[exit code: 0]
+  image_migrations=8 applied=8 pending=0 unexpected=0
+
+===== 迁移后状态 =====
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db psql -U flower_e2_stage -d flower_e2_v2_test -t -A -c SELECT count(*) FROM _prisma_migrations WHERE finished_at IS NULL
+  0
+[exit code: 0]
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml run --rm --no-deps --entrypoint npx flower-web prisma migrate status --config prisma.v2.config.ts
+   Container flower-e2-staging-flower-web-run-3652ce671671 Creating 
+   Container flower-e2-staging-flower-web-run-3652ce671671 Created 
+  Loaded Prisma config from prisma.v2.config.ts.
+  Prisma schema loaded from prisma/schema.v2.prisma.
+  Datasource "db": PostgreSQL database "flower_e2_v2_test", schema "public" at "db:5432"
+  
+  8 migrations found in prisma/migrations
+  
+  Database schema is up to date!
+  npm notice
+  npm notice New major version of npm available! 10.9.9 -> 12.2.2
+  npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.2
+  npm notice To update run: npm install -g npm@12.2.2
+  npm notice
+[exit code: 0]
+  V2 migrate status: Database schema is up to date!
+
+===== psql 核对 flower_e2_v2_test <v2-schema-0008.sql> =====
+  column:LossRecord:reviewStatus|1
+  column:PurchaseOrderLine:relationKind|1
+  column:PurchaseOrderLine:sourceLineId|1
+  column:Stocktake:reviewReasons|1
+  enum_value:StocktakeState:PENDING_REVIEW|1
+  enum_value:StocktakeState:REJECTED|1
+[exit code: 0]
+
+===== psql 核对 flower_e2_v2_test <v2-row-counts.sql> =====
+  InventoryLocation|2
+  Material|0
+  ProductSku|0
+  PurchaseOrder|0
+  PurchaseOrderLine|0
+  StaffUser|5
+  Store|1
+  StoreMember|5
+  StoreSettings|1
+  Tenant|1
+  TenantMember|5
+  _prisma_migrations_applied|8
+[exit code: 0]
+  V2 applied=8 StaffUser=5 Tenant=1
+
+===== post 结论 =====
+  OK migrations=8 unfinished=0 schema_ok
+
+=== 证据结束: e24-migration-post-20261110-224112.log ===

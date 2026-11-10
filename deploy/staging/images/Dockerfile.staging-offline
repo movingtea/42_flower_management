@@ -1,0 +1,102 @@
+# Flower WMS Sprint E2 staging-only build variant（离线依赖）
+# 用途：容器网络无法稳定完成 deps 阶段 npm ci（ECONNRESET/长时间挂起），本变体改为复用本地构建的
+# flower-e2-deps:linux（node:22-alpine + 按锁定文件 npm ci 安装的 linux 依赖），其余阶段与仓库根 Dockerfile 相同。
+# 与生产 Dockerfile 的偏差：deps 来源为本地镜像、跳过 npm prune --omit=dev（runner 含 devDependencies，镜像更大）。
+# 生产构建未修改；是否上收修复由 E2 简报提案 + 用户批准决定。
+# 证据：docs/evidence/sprint-e2/logs/e21-build-* 与 deploy/staging/images/README.md
+
+# syntax=docker/dockerfile:1
+
+# ---------------------------------------------------------------------------
+# Flower WMS — Next.js 16 standalone + Prisma 7 + PostgreSQL
+# 构建上下文：monorepo 根目录（42_flower_management/）
+# 应用源码：flower-wms-system/
+#
+# 与 docker-compose.yml 对齐的镜像名：flower-platform-app:latest
+#
+# 本地构建（仓库根目录，Mac 需指定 amd64 以匹配 ECS）：
+#   docker build --platform linux/amd64 \
+#     -t crpi-bp5b6vut8l4d7ebv.cn-hangzhou.personal.cr.aliyuncs.com/universe42/flower-platform-app:latest \
+#     --build-arg NEXT_PUBLIC_API_URL=https://www.universe42.studio \
+#     --build-arg NEXT_PUBLIC_ASSET_BASE_URL=https://www.universe42.studio \
+#     .
+#
+# flower-web：entrypoint 自动 prisma migrate deploy
+# flower-cron-worker：compose 覆盖 entrypoint 为 cron-inventory-daemon.ts
+# ---------------------------------------------------------------------------
+
+FROM node:22-alpine AS base
+RUN apk add --no-cache libc6-compat openssl wget
+WORKDIR /app
+
+# ---------- 依赖 ----------
+FROM flower-e2-deps:linux AS deps
+# deps 镜像 = node:22-alpine + 按 package-lock.json 安装的 linux 依赖（离线/缓存构建变体，见 deploy/staging/images/README.md）
+
+# ---------- 生产依赖（prisma / bcryptjs / tsx / dotenv 供 migrate、seed、cron） ----------
+# staging 变体：跳过 npm prune --omit=dev，runner 直接使用含 devDependencies 的 deps 层（镜像更大，功能一致；证据中注明偏差）
+
+# ---------- 构建 ----------
+FROM base AS builder
+WORKDIR /app
+COPY --from=deps /app/node_modules ./node_modules
+COPY flower-wms-system/ .
+
+ENV NEXT_TELEMETRY_DISABLED=1
+
+RUN npx prisma generate && npm run db:v2:generate
+
+ARG NEXT_PUBLIC_API_URL=http://localhost:3000
+ARG NEXT_PUBLIC_ASSET_BASE_URL=http://localhost:3000
+ENV NEXT_PUBLIC_API_URL=$NEXT_PUBLIC_API_URL
+ENV NEXT_PUBLIC_ASSET_BASE_URL=$NEXT_PUBLIC_ASSET_BASE_URL
+
+ARG DATABASE_URL="postgresql://build:build@127.0.0.1:5432/build?schema=public"
+ENV DATABASE_URL=$DATABASE_URL
+ENV V2_DATABASE_URL=postgresql://build:build@127.0.0.1:5432/build_v2?schema=public
+
+RUN npm run build
+
+# ---------- 运行 ----------
+FROM base AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+ENV PORT=3000
+ENV HOSTNAME=0.0.0.0
+
+RUN addgroup --system --gid 1001 nodejs \
+  && adduser --system --uid 1001 nextjs
+
+# Next.js standalone（flower-web: node server.js）
+COPY --from=builder --chown=nextjs:nodejs /app/public ./public
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+
+# 生产依赖（含 prisma / tsx / dotenv，供 migrate 与 cron-worker）
+COPY --from=deps --chown=nextjs:nodejs /app/package.json ./package.json
+COPY --from=deps --chown=nextjs:nodejs /app/package-lock.json ./package-lock.json
+COPY --from=deps --chown=nextjs:nodejs /app/node_modules ./node_modules
+
+# Prisma + cron-worker TS 源码运行时（npx tsx --tsconfig tsconfig.json scripts/...）
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma
+COPY --from=builder --chown=nextjs:nodejs /app/prisma.config.ts ./prisma.config.ts
+COPY --from=builder --chown=nextjs:nodejs /app/prisma.v2.config.ts ./prisma.v2.config.ts
+COPY --from=builder --chown=nextjs:nodejs /app/tsconfig.json ./tsconfig.json
+COPY --from=builder --chown=nextjs:nodejs /app/next-env.d.ts ./next-env.d.ts
+COPY --from=builder --chown=nextjs:nodejs /app/src ./src
+COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
+COPY --from=builder --chown=nextjs:nodejs /app/docker-entrypoint.sh ./docker-entrypoint.sh
+
+RUN sed -i 's/\r$//' ./docker-entrypoint.sh && chmod +x ./docker-entrypoint.sh
+
+USER nextjs
+EXPOSE 3000
+
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+  CMD wget -qO- "http://127.0.0.1:${PORT}/api/health" >/dev/null 2>&1 || exit 1
+
+ENTRYPOINT ["./docker-entrypoint.sh"]
+CMD ["node", "server.js"]
+

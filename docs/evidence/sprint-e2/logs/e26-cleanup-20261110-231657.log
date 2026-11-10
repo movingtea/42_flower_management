@@ -1,0 +1,42 @@
+### Sprint E2 staging 证据 · E2.6 关闭前资源清理（仅 staging 项目）
+run_id: 20261110-231657
+recorded_at: 2026-11-10T23:16:57.6946132+08:00
+mode: close
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=9112ed3)
+compose_project: flower-e2-staging
+staging_web: http://127.0.0.1:18081  staging_db_port: 15433
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+
+===== 清理 staging 栈（仅本项目资源） =====
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml down -v --remove-orphans
+   Container flower-e2-staging-web Stopping 
+   Container flower-e2-staging-cron Stopping 
+   Container flower-e2-staging-web Stopped 
+   Container flower-e2-staging-web Removing 
+   Container flower-e2-staging-cron Stopped 
+   Container flower-e2-staging-cron Removing 
+   Container flower-e2-staging-web Removed 
+   Container flower-e2-staging-cron Removed 
+   Container flower-e2-staging-db Stopping 
+   Container flower-e2-staging-db Stopped 
+   Container flower-e2-staging-db Removing 
+   Container flower-e2-staging-db Removed 
+   Volume flower-e2-staging_postgres_data Removing 
+   Volume flower-e2-staging_next_cache Removing 
+   Network flower-e2-staging_default Removing 
+   Volume flower-e2-staging_postgres_data Removed 
+   Volume flower-e2-staging_next_cache Removed 
+   Network flower-e2-staging_default Removed 
+[exit code: 0]
+  compose down -v exit=0
+  清理后剩余容器: 0 卷: 0 网络: 0
+  [OK] staging 容器已清理
+  [OK] staging 卷已清理
+  [OK] staging 网络已清理
+
+===== 项目外资源确认 =====
+  running: flower-v2-pg|postgres:18-alpine|Up 36 hours
+
+=== 证据结束: e26-cleanup-20261110-231657.log ===

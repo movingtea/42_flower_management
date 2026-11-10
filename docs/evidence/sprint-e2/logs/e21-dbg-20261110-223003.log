@@ -1,0 +1,14 @@
+### Sprint E2 staging 证据 · dbg
+run_id: 20261110-223003
+recorded_at: 2026-11-10T22:30:03.6724942+08:00
+mode: dbg
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=9112ed3)
+compose_project: flower-e2-staging
+staging_web: http://127.0.0.1:18081  staging_db_port: 15433
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db sh -c pg_dump -U "$POSTGRES_USER" -Fc -d flower_e2_v1 -f /backup/dbg.dump
+[exit code: 0]
+
+=== 证据结束: e21-dbg-20261110-223003.log ===

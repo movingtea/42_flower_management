@@ -1,0 +1,56 @@
+### Sprint E2 staging 证据 · E2.1 db 容器启动与 V2 库初始化
+run_id: 20261110-183517
+recorded_at: 2026-11-10T18:35:18.0047407+08:00
+mode: dbinit
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=9112ed3)
+compose_project: flower-e2-staging
+staging_web: http://127.0.0.1:18081  staging_db_port: 15433
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+
+===== 生成 staging 运行时 env 与随机本地凭据（不写入日志） =====
+  复用已有 env: D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\.runtime\staging.env（随机凭据保持不变）
+
+===== 启动 db（仅 db，不启动 web） =====
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml up -d --no-deps db
+   Network flower-e2-staging_default Creating 
+   Volume flower-e2-staging_postgres_data Creating 
+   Network flower-e2-staging_default Creating 
+   Volume flower-e2-staging_postgres_data Creating 
+   Volume flower-e2-staging_postgres_data Created 
+   Volume flower-e2-staging_postgres_data Created 
+   Network flower-e2-staging_default Created 
+   Network flower-e2-staging_default Created 
+   Container flower-e2-staging-db Creating 
+   Container flower-e2-staging-db Created 
+   Container flower-e2-staging-db Starting 
+   Container flower-e2-staging-db Started 
+[exit code: 0]
+  [OK] db 容器健康
+
+===== 数据库清单与服务版本 =====
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db psql -U flower_e2_stage -d flower_e2_v1 -t -A -c SELECT datname FROM pg_database ORDER BY 1
+  flower_e2_v1
+  flower_e2_v2
+  postgres
+  template0
+  template1
+[exit code: 0]
+  db: flower_e2_v1
+  db: flower_e2_v2
+  db: postgres
+  db: template0
+  db: template1
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db psql -U flower_e2_stage -d flower_e2_v1 -t -A -c SHOW server_version
+  18.6
+[exit code: 0]
+  server_version: 18.6
+
+===== 容器与端口 =====
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml ps
+  NAME                   IMAGE                                                                                        COMMAND                  SERVICE   CREATED          STATUS                    PORTS
+  flower-e2-staging-db   postgres:18-alpine@sha256:10a5c69a83035ab5239f5620d708520e8b28f5aa1f2b20143e6024532edadfb5   "docker-entrypoint.s…"   db        14 seconds ago   Up 12 seconds (healthy)   127.0.0.1:15433->5432/tcp
+[exit code: 0]
+
+=== 证据结束: e21-dbinit-20261110-183517.log ===

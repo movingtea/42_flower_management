@@ -1,0 +1,912 @@
+### Sprint E2 staging 证据 · E2.3 staging 备份（label=manual）
+run_id: 20261110-223030
+recorded_at: 2026-11-10T22:30:30.5130731+08:00
+mode: backup-manual
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=9112ed3)
+compose_project: flower-e2-staging
+staging_web: http://127.0.0.1:18081  staging_db_port: 15433
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+
+===== 生成 staging 运行时 env 与随机本地凭据（不写入日志） =====
+  复用已有 env: D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\.runtime\staging.env（随机凭据保持不变）
+
+===== 备份集 20261110T143030Z-manual =====
+  source_utc: 2026-11-10T14:30:30.5848403Z
+  source_sha: 9112ed3bfa46171a103a92d54c1008e5e6d4a09d
+  project: flower-e2-staging  image: flower-e2-staging:9112ed3bfa46
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db psql -U flower_e2_stage -d flower_e2_v1 -t -A -c SHOW server_version
+  18.6
+[exit code: 0]
+  source_server_version: 18.6
+
+===== 备份 v1：flower_e2_v1 =====
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db psql -U flower_e2_stage -d flower_e2_v1 -t -A -c SELECT current_database()
+  flower_e2_v1
+[exit code: 0]
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db pg_dump -U flower_e2_stage -Fc -d flower_e2_v1 -f /backup/20261110T143030Z-manual/v1-20261110T143030Z.dump
+[exit code: 0]
+  file: v1-20261110T143030Z.dump  size=137715  sha256=d8aff8f1e95194d3fe04a5af2b24a302d0f396bc938f063e1b75c8e02d120c48
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db pg_restore --list /backup/20261110T143030Z-manual/v1-20261110T143030Z.dump
+  ;
+  ; Archive created at 2026-11-10 14:30:31 UTC
+  ;     dbname: flower_e2_v1
+  ;     TOC Entries: 325
+  ;     Compression: gzip
+  ;     Dump Version: 1.16-0
+  ;     Format: CUSTOM
+  ;     Integer: 4 bytes
+  ;     Offset: 8 bytes
+  ;     Dumped from database version: 18.6
+  ;     Dumped by pg_dump version: 18.6
+  ;
+  ;
+  ; Selected TOC Entries:
+  ;
+  1049; 1247 17758 TYPE public AuditModule flower_e2_stage
+  929; 1247 16797 TYPE public BannerTargetType flower_e2_stage
+  1004; 1247 17391 TYPE public CustomerSource flower_e2_stage
+  956; 1247 17010 TYPE public FloralRole flower_e2_stage
+  1010; 1247 17430 TYPE public GiftOccasionType flower_e2_stage
+  1043; 1247 17721 TYPE public HomeSceneEntryTargetType flower_e2_stage
+  1001; 1247 17383 TYPE public LossMode flower_e2_stage
+  947; 1247 16986 TYPE public OrderCancelSource flower_e2_stage
+  944; 1247 16927 TYPE public OrderStatus flower_e2_stage
+  989; 1247 17274 TYPE public PurchaseCostAllocationMethod flower_e2_stage
+  986; 1247 17264 TYPE public PurchaseOrderStatus flower_e2_stage
+  1007; 1247 17408 TYPE public RecipientRelationType flower_e2_stage
+  1034; 1247 17643 TYPE public RecommendationSlotType flower_e2_stage
+  1016; 1247 17470 TYPE public ReminderStatus flower_e2_stage
+  1013; 1247 17458 TYPE public ReminderType flower_e2_stage
+  950; 1247 16994 TYPE public Role flower_e2_stage
+  953; 1247 17006 TYPE public StaffAuditAction flower_e2_stage
+  893; 1247 16403 TYPE public StockLogType flower_e2_stage
+  983; 1247 17252 TYPE public SupplierType flower_e2_stage
+  1058; 1247 17814 TYPE public TenantMemberStatus flower_e2_stage
+  1055; 1247 17806 TYPE public TenantStatus flower_e2_stage
+  219; 1259 16388 TABLE public _prisma_migrations flower_e2_stage
+  224; 1259 16578 TABLE public app_configs flower_e2_stage
+  254; 1259 17775 TABLE public audit_logs flower_e2_stage
+  231; 1259 16805 TABLE public banners flower_e2_stage
+  220; 1259 16443 TABLE public batches flower_e2_stage
+  253; 1259 17727 TABLE public cms_home_scene_entries flower_e2_stage
+  252; 1259 17677 TABLE public cms_recommendation_items flower_e2_stage
+  251; 1259 17657 TABLE public cms_recommendation_slots flower_e2_stage
+  248; 1259 17511 TABLE public customer_recipient_relations flower_e2_stage
+  250; 1259 17542 TABLE public customer_reminders flower_e2_stage
+  246; 1259 17479 TABLE public customers flower_e2_stage
+  236; 1259 17037 TABLE public flower_wikis flower_e2_stage
+  249; 1259 17530 TABLE public gift_occasions flower_e2_stage
+  257; 1259 17871 TABLE public master_parts flower_e2_stage
+  229; 1259 16740 TABLE public material_categories flower_e2_stage
+  230; 1259 16771 TABLE public material_category_relations flower_e2_stage
+  227; 1259 16655 TABLE public materials flower_e2_stage
+  242; 1259 17207 TABLE public order_cost_snapshots flower_e2_stage
+  223; 1259 16490 TABLE public order_items flower_e2_stage
+  222; 1259 16475 TABLE public orders flower_e2_stage
+  241; 1259 17192 TABLE public packaging_kits flower_e2_stage
+  228; 1259 16704 TABLE public product_bom flower_e2_stage
+  226; 1259 16635 TABLE public product_categories flower_e2_stage
+  225; 1259 16619 TABLE public product_categories_list flower_e2_stage
+  233; 1259 16857 TABLE public product_skus flower_e2_stage
+  232; 1259 16832 TABLE public product_spus flower_e2_stage
+  245; 1259 17333 TABLE public purchase_order_lines flower_e2_stage
+  244; 1259 17298 TABLE public purchase_orders flower_e2_stage
+  238; 1259 17079 TABLE public recipe_lines flower_e2_stage
+  237; 1259 17063 TABLE public recipes flower_e2_stage
+  247; 1259 17499 TABLE public recipients flower_e2_stage
+  240; 1259 17110 TABLE public staff_audit_logs flower_e2_stage
+  235; 1259 17019 TABLE public staff_users flower_e2_stage
+  221; 1259 16460 TABLE public stock_logs flower_e2_stage
+  239; 1259 17092 TABLE public stock_loss_records flower_e2_stage
+  243; 1259 17279 TABLE public suppliers flower_e2_stage
+  256; 1259 17836 TABLE public tenant_members flower_e2_stage
+  255; 1259 17821 TABLE public tenants flower_e2_stage
+  234; 1259 16907 TABLE public users flower_e2_stage
+  4062; 0 16388 TABLE DATA public _prisma_migrations flower_e2_stage
+  4067; 0 16578 TABLE DATA public app_configs flower_e2_stage
+  4097; 0 17775 TABLE DATA public audit_logs flower_e2_stage
+  4074; 0 16805 TABLE DATA public banners flower_e2_stage
+  4063; 0 16443 TABLE DATA public batches flower_e2_stage
+  4096; 0 17727 TABLE DATA public cms_home_scene_entries flower_e2_stage
+  4095; 0 17677 TABLE DATA public cms_recommendation_items flower_e2_stage
+  4094; 0 17657 TABLE DATA public cms_recommendation_slots flower_e2_stage
+  4091; 0 17511 TABLE DATA public customer_recipient_relations flower_e2_stage
+  4093; 0 17542 TABLE DATA public customer_reminders flower_e2_stage
+  4089; 0 17479 TABLE DATA public customers flower_e2_stage
+  4079; 0 17037 TABLE DATA public flower_wikis flower_e2_stage
+  4092; 0 17530 TABLE DATA public gift_occasions flower_e2_stage
+  4100; 0 17871 TABLE DATA public master_parts flower_e2_stage
+  4072; 0 16740 TABLE DATA public material_categories flower_e2_stage
+  4073; 0 16771 TABLE DATA public material_category_relations flower_e2_stage
+  4070; 0 16655 TABLE DATA public materials flower_e2_stage
+  4085; 0 17207 TABLE DATA public order_cost_snapshots flower_e2_stage
+  4066; 0 16490 TABLE DATA public order_items flower_e2_stage
+  4065; 0 16475 TABLE DATA public orders flower_e2_stage
+  4084; 0 17192 TABLE DATA public packaging_kits flower_e2_stage
+  4071; 0 16704 TABLE DATA public product_bom flower_e2_stage
+  4069; 0 16635 TABLE DATA public product_categories flower_e2_stage
+  4068; 0 16619 TABLE DATA public product_categories_list flower_e2_stage
+  4076; 0 16857 TABLE DATA public product_skus flower_e2_stage
+  4075; 0 16832 TABLE DATA public product_spus flower_e2_stage
+  4088; 0 17333 TABLE DATA public purchase_order_lines flower_e2_stage
+  4087; 0 17298 TABLE DATA public purchase_orders flower_e2_stage
+  4081; 0 17079 TABLE DATA public recipe_lines flower_e2_stage
+  4080; 0 17063 TABLE DATA public recipes flower_e2_stage
+  4090; 0 17499 TABLE DATA public recipients flower_e2_stage
+  4083; 0 17110 TABLE DATA public staff_audit_logs flower_e2_stage
+  4078; 0 17019 TABLE DATA public staff_users flower_e2_stage
+  4064; 0 16460 TABLE DATA public stock_logs flower_e2_stage
+  4082; 0 17092 TABLE DATA public stock_loss_records flower_e2_stage
+  4086; 0 17279 TABLE DATA public suppliers flower_e2_stage
+  4099; 0 17836 TABLE DATA public tenant_members flower_e2_stage
+  4098; 0 17821 TABLE DATA public tenants flower_e2_stage
+  4077; 0 16907 TABLE DATA public users flower_e2_stage
+  3655; 2606 16401 CONSTRAINT public _prisma_migrations _prisma_migrations_pkey flower_e2_stage
+  3683; 2606 16591 CONSTRAINT public app_configs app_configs_pkey flower_e2_stage
+  3846; 2606 17788 CONSTRAINT public audit_logs audit_logs_pkey flower_e2_stage
+  3712; 2606 16823 CONSTRAINT public banners banners_pkey flower_e2_stage
+  3661; 2606 16459 CONSTRAINT public batches batches_pkey flower_e2_stage
+  3836; 2606 17746 CONSTRAINT public cms_home_scene_entries cms_home_scene_entries_pkey flower_e2_stage
+  3826; 2606 17693 CONSTRAINT public cms_recommendation_items cms_recommendation_items_pkey flower_e2_stage
+  3820; 2606 17676 CONSTRAINT public cms_recommendation_slots cms_recommendation_slots_pkey flower_e2_stage
+  3801; 2606 17529 CONSTRAINT public customer_recipient_relations customer_recipient_relations_pkey flower_e2_stage
+  3812; 2606 17558 CONSTRAINT public customer_reminders customer_reminders_pkey flower_e2_stage
+  3790; 2606 17498 CONSTRAINT public customers customers_pkey flower_e2_stage
+  3739; 2606 17058 CONSTRAINT public flower_wikis flower_wikis_pkey flower_e2_stage
+  3808; 2606 17541 CONSTRAINT public gift_occasions gift_occasions_pkey flower_e2_stage
+  3859; 2606 17887 CONSTRAINT public master_parts master_parts_pkey flower_e2_stage
+  3702; 2606 16755 CONSTRAINT public material_categories material_categories_pkey flower_e2_stage
+  3707; 2606 16780 CONSTRAINT public material_category_relations material_category_relations_pkey flower_e2_stage
+  3695; 2606 16670 CONSTRAINT public materials materials_pkey flower_e2_stage
+  3767; 2606 17235 CONSTRAINT public order_cost_snapshots order_cost_snapshots_pkey flower_e2_stage
+  3679; 2606 16506 CONSTRAINT public order_items order_items_pkey flower_e2_stage
+  3674; 2606 16489 CONSTRAINT public orders orders_pkey flower_e2_stage
+  3762; 2606 17206 CONSTRAINT public packaging_kits packaging_kits_pkey flower_e2_stage
+  3699; 2606 16714 CONSTRAINT public product_bom product_bom_pkey flower_e2_stage
+  3686; 2606 16633 CONSTRAINT public product_categories_list product_categories_list_pkey flower_e2_stage
+  3689; 2606 16759 CONSTRAINT public product_categories product_categories_pkey flower_e2_stage
+  3721; 2606 16878 CONSTRAINT public product_skus product_skus_pkey flower_e2_stage
+  3719; 2606 16854 CONSTRAINT public product_spus product_spus_pkey flower_e2_stage
+  3784; 2606 17358 CONSTRAINT public purchase_order_lines purchase_order_lines_pkey flower_e2_stage
+  3774; 2606 17328 CONSTRAINT public purchase_orders purchase_orders_pkey flower_e2_stage
+  3747; 2606 17089 CONSTRAINT public recipe_lines recipe_lines_pkey flower_e2_stage
+  3743; 2606 17076 CONSTRAINT public recipes recipes_pkey flower_e2_stage
+  3796; 2606 17510 CONSTRAINT public recipients recipients_pkey flower_e2_stage
+  3758; 2606 17122 CONSTRAINT public staff_audit_logs staff_audit_logs_pkey flower_e2_stage
+  3731; 2606 17034 CONSTRAINT public staff_users staff_users_pkey flower_e2_stage
+  3668; 2606 16474 CONSTRAINT public stock_logs stock_logs_pkey flower_e2_stage
+  3753; 2606 17106 CONSTRAINT public stock_loss_records stock_loss_records_pkey flower_e2_stage
+  3771; 2606 17294 CONSTRAINT public suppliers suppliers_pkey flower_e2_stage
+  3852; 2606 17855 CONSTRAINT public tenant_members tenant_members_pkey flower_e2_stage
+  3848; 2606 17835 CONSTRAINT public tenants tenants_pkey flower_e2_stage
+  3729; 2606 16918 CONSTRAINT public users users_pkey flower_e2_stage
+  3681; 1259 16592 INDEX public app_configs_key_key flower_e2_stage
+  3839; 1259 17790 INDEX public audit_logs_action_idx flower_e2_stage
+  3840; 1259 17793 INDEX public audit_logs_actor_id_idx flower_e2_stage
+  3841; 1259 17794 INDEX public audit_logs_created_at_idx flower_e2_stage
+  3842; 1259 17792 INDEX public audit_logs_entity_id_idx flower_e2_stage
+  3843; 1259 17791 INDEX public audit_logs_entity_type_idx flower_e2_stage
+  3844; 1259 17789 INDEX public audit_logs_module_idx flower_e2_stage
+  3708; 1259 17799 INDEX public banners_ends_at_idx flower_e2_stage
+  3709; 1259 16825 INDEX public banners_is_active_idx flower_e2_stage
+  3710; 1259 17797 INDEX public banners_is_deleted_idx flower_e2_stage
+  3713; 1259 16824 INDEX public banners_sort_order_idx flower_e2_stage
+  3714; 1259 17798 INDEX public banners_starts_at_idx flower_e2_stage
+  3715; 1259 16826 INDEX public banners_target_type_idx flower_e2_stage
+  3656; 1259 16510 INDEX public batches_batchNo_key flower_e2_stage
+  3657; 1259 16513 INDEX public batches_expiresAt_idx flower_e2_stage
+  3658; 1259 16678 INDEX public batches_materialId_inboundAt_idx flower_e2_stage
+  3659; 1259 16679 INDEX public batches_materialId_remainingQty_idx flower_e2_stage
+  3832; 1259 17748 INDEX public cms_home_scene_entries_is_active_idx flower_e2_stage
+  3833; 1259 17750 INDEX public cms_home_scene_entries_linked_recommendation_slot_id_idx flower_e2_stage
+  3834; 1259 17751 INDEX public cms_home_scene_entries_linked_recommendation_slot_key_idx flower_e2_stage
+  3837; 1259 17747 INDEX public cms_home_scene_entries_scene_type_idx flower_e2_stage
+  3838; 1259 17749 INDEX public cms_home_scene_entries_sort_order_idx flower_e2_stage
+  3823; 1259 17704 INDEX public cms_recommendation_items_end_at_idx flower_e2_stage
+  3824; 1259 17701 INDEX public cms_recommendation_items_is_active_idx flower_e2_stage
+  3827; 1259 17699 INDEX public cms_recommendation_items_product_id_idx flower_e2_stage
+  3828; 1259 17700 INDEX public cms_recommendation_items_sku_id_idx flower_e2_stage
+  3829; 1259 17698 INDEX public cms_recommendation_items_slot_id_idx flower_e2_stage
+  3830; 1259 17702 INDEX public cms_recommendation_items_sort_order_idx flower_e2_stage
+  3831; 1259 17703 INDEX public cms_recommendation_items_start_at_idx flower_e2_stage
+  3817; 1259 17696 INDEX public cms_recommendation_slots_is_active_idx flower_e2_stage
+  3818; 1259 17694 INDEX public cms_recommendation_slots_key_key flower_e2_stage
+  3821; 1259 17695 INDEX public cms_recommendation_slots_slot_type_idx flower_e2_stage
+  3822; 1259 17697 INDEX public cms_recommendation_slots_sort_order_idx flower_e2_stage
+  3797; 1259 17566 INDEX public customer_recipient_relations_customer_id_idx flower_e2_stage
+  3798; 1259 17568 INDEX public customer_recipient_relations_customer_id_recipient_id_idx flower_e2_stage
+  3799; 1259 17569 INDEX public customer_recipient_relations_customer_id_recipient_id_key flower_e2_stage
+  3802; 1259 17567 INDEX public customer_recipient_relations_recipient_id_idx flower_e2_stage
+  3810; 1259 17575 INDEX public customer_reminders_customer_id_idx flower_e2_stage
+  3813; 1259 17576 INDEX public customer_reminders_recipient_id_idx flower_e2_stage
+  3814; 1259 17578 INDEX public customer_reminders_remind_at_idx flower_e2_stage
+  3815; 1259 17577 INDEX public customer_reminders_status_idx flower_e2_stage
+  3816; 1259 17579 INDEX public customer_reminders_type_idx flower_e2_stage
+  3786; 1259 17563 INDEX public customers_last_order_at_idx flower_e2_stage
+  3787; 1259 17559 INDEX public customers_mini_program_user_id_key flower_e2_stage
+  3788; 1259 17560 INDEX public customers_phone_idx flower_e2_stage
+  3791; 1259 17562 INDEX public customers_source_idx flower_e2_stage
+  3792; 1259 17561 INDEX public customers_wechat_openid_idx flower_e2_stage
+  3734; 1259 17060 INDEX public flower_wikis_chinese_name_idx flower_e2_stage
+  3735; 1259 17059 INDEX public flower_wikis_english_name_key flower_e2_stage
+  3736; 1259 17061 INDEX public flower_wikis_floral_role_idx flower_e2_stage
+  3737; 1259 17062 INDEX public flower_wikis_pinyin_index_idx flower_e2_stage
+  3803; 1259 17570 INDEX public gift_occasions_customer_id_idx flower_e2_stage
+  3804; 1259 17574 INDEX public gift_occasions_important_date_idx flower_e2_stage
+  3805; 1259 17573 INDEX public gift_occasions_occasion_type_idx flower_e2_stage
+  3806; 1259 17572 INDEX public gift_occasions_order_id_idx flower_e2_stage
+  3809; 1259 17571 INDEX public gift_occasions_recipient_id_idx flower_e2_stage
+  3856; 1259 17889 INDEX public master_parts_is_active_idx flower_e2_stage
+  3857; 1259 17890 INDEX public master_parts_name_idx flower_e2_stage
+  3860; 1259 17888 INDEX public master_parts_type_idx flower_e2_stage
+  3703; 1259 16756 INDEX public material_categories_sortOrder_idx flower_e2_stage
+  3704; 1259 16782 INDEX public material_category_relations_material_category_id_idx flower_e2_stage
+  3705; 1259 16781 INDEX public material_category_relations_material_id_material_category_i_key flower_e2_stage
+  3692; 1259 17900 INDEX public materials_master_part_id_idx flower_e2_stage
+  3693; 1259 16671 INDEX public materials_materialCode_key flower_e2_stage
+  3696; 1259 17184 INDEX public materials_wiki_id_idx flower_e2_stage
+  3764; 1259 17239 INDEX public order_cost_snapshots_cost_calculated_at_idx flower_e2_stage
+  3765; 1259 17238 INDEX public order_cost_snapshots_order_id_key flower_e2_stage
+  3677; 1259 16522 INDEX public order_items_orderId_idx flower_e2_stage
+  3680; 1259 16977 INDEX public order_items_sku_id_idx flower_e2_stage
+  3670; 1259 17580 INDEX public orders_customer_id_idx flower_e2_stage
+  3671; 1259 16571 INDEX public orders_orderNo_idx flower_e2_stage
+  3672; 1259 16519 INDEX public orders_orderNo_key flower_e2_stage
+  3675; 1259 16933 INDEX public orders_status_createdAt_idx flower_e2_stage
+  3676; 1259 16920 INDEX public orders_user_id_idx flower_e2_stage
+  3760; 1259 17236 INDEX public packaging_kits_is_active_idx flower_e2_stage
+  3763; 1259 17237 INDEX public packaging_kits_updated_at_idx flower_e2_stage
+  3697; 1259 16716 INDEX public product_bom_materialId_idx flower_e2_stage
+  3700; 1259 16715 INDEX public product_bom_productId_materialId_key flower_e2_stage
+  3684; 1259 16733 INDEX public product_categories_list_parent_id_idx flower_e2_stage
+  3687; 1259 16739 INDEX public product_categories_list_sortOrder_idx flower_e2_stage
+  3690; 1259 16644 INDEX public product_categories_product_category_id_idx flower_e2_stage
+  3691; 1259 16770 INDEX public product_categories_product_id_product_category_id_key flower_e2_stage
+  3722; 1259 17190 INDEX public product_skus_recipe_id_idx flower_e2_stage
+  3723; 1259 16879 INDEX public product_skus_sku_code_key flower_e2_stage
+  3724; 1259 16880 INDEX public product_skus_spu_id_idx flower_e2_stage
+  3725; 1259 17802 INDEX public product_skus_spu_id_is_active_idx flower_e2_stage
+  3726; 1259 16881 INDEX public product_skus_spu_id_is_main_image_idx flower_e2_stage
+  3716; 1259 16855 INDEX public product_spus_is_active_idx flower_e2_stage
+  3717; 1259 16856 INDEX public product_spus_is_deleted_idx flower_e2_stage
+  3779; 1259 17361 INDEX public purchase_order_lines_flower_wiki_id_idx flower_e2_stage
+  3780; 1259 17359 INDEX public purchase_order_lines_inbound_batch_id_key flower_e2_stage
+  3781; 1259 17893 INDEX public purchase_order_lines_item_type_idx flower_e2_stage
+  3782; 1259 17894 INDEX public purchase_order_lines_master_part_id_idx flower_e2_stage
+  3785; 1259 17360 INDEX public purchase_order_lines_purchase_order_id_idx flower_e2_stage
+  3775; 1259 17331 INDEX public purchase_orders_purchase_date_idx flower_e2_stage
+  3776; 1259 17329 INDEX public purchase_orders_purchase_no_key flower_e2_stage
+  3777; 1259 17332 INDEX public purchase_orders_status_idx flower_e2_stage
+  3778; 1259 17330 INDEX public purchase_orders_supplier_id_idx flower_e2_stage
+  3745; 1259 17091 INDEX public recipe_lines_flower_wiki_id_idx flower_e2_stage
+  3748; 1259 17090 INDEX public recipe_lines_recipe_id_flower_wiki_id_key flower_e2_stage
+  3740; 1259 17078 INDEX public recipes_name_idx flower_e2_stage
+  3741; 1259 17240 INDEX public recipes_packaging_kit_id_idx flower_e2_stage
+  3744; 1259 17077 INDEX public recipes_recipe_code_key flower_e2_stage
+  3793; 1259 17565 INDEX public recipients_name_idx flower_e2_stage
+  3794; 1259 17564 INDEX public recipients_phone_idx flower_e2_stage
+  3755; 1259 17125 INDEX public staff_audit_logs_action_created_at_idx flower_e2_stage
+  3756; 1259 17123 INDEX public staff_audit_logs_operator_staff_id_created_at_idx flower_e2_stage
+  3759; 1259 17124 INDEX public staff_audit_logs_target_staff_id_created_at_idx flower_e2_stage
+  3732; 1259 17036 INDEX public staff_users_role_idx flower_e2_stage
+  3733; 1259 17035 INDEX public staff_users_username_key flower_e2_stage
+  3662; 1259 16515 INDEX public stock_logs_batchId_createdAt_idx flower_e2_stage
+  3663; 1259 16686 INDEX public stock_logs_materialId_createdAt_idx flower_e2_stage
+  3664; 1259 17181 INDEX public stock_logs_operator_staff_id_idx flower_e2_stage
+  3665; 1259 16517 INDEX public stock_logs_orderId_idx flower_e2_stage
+  3666; 1259 16518 INDEX public stock_logs_orderItemId_idx flower_e2_stage
+  3669; 1259 16516 INDEX public stock_logs_type_createdAt_idx flower_e2_stage
+  3749; 1259 17109 INDEX public stock_loss_records_batch_id_created_at_idx flower_e2_stage
+  3750; 1259 17108 INDEX public stock_loss_records_flower_wiki_id_created_at_idx flower_e2_stage
+  3751; 1259 17182 INDEX public stock_loss_records_operator_staff_id_idx flower_e2_stage
+  3754; 1259 17107 INDEX public stock_loss_records_stock_log_id_key flower_e2_stage
+  3768; 1259 17297 INDEX public suppliers_is_active_idx flower_e2_stage
+  3769; 1259 17295 INDEX public suppliers_name_idx flower_e2_stage
+  3772; 1259 17296 INDEX public suppliers_supplier_type_idx flower_e2_stage
+  3853; 1259 17858 INDEX public tenant_members_staff_user_id_idx flower_e2_stage
+  3854; 1259 17859 INDEX public tenant_members_tenant_id_idx flower_e2_stage
+  3855; 1259 17860 INDEX public tenant_members_tenant_id_staff_user_id_key flower_e2_stage
+  3849; 1259 17856 INDEX public tenants_slug_key flower_e2_stage
+  3850; 1259 17857 INDEX public tenants_status_idx flower_e2_stage
+  3727; 1259 16919 INDEX public users_open_id_key flower_e2_stage
+  3882; 2606 16902 FK CONSTRAINT public banners banners_product_id_fkey flower_e2_stage
+  3861; 2606 16673 FK CONSTRAINT public batches batches_materialId_fkey flower_e2_stage
+  3912; 2606 17752 FK CONSTRAINT public cms_home_scene_entries cms_home_scene_entries_linked_recommendation_slot_id_fkey flower_e2_stage
+  3909; 2606 17710 FK CONSTRAINT public cms_recommendation_items cms_recommendation_items_product_id_fkey flower_e2_stage
+  3910; 2606 17715 FK CONSTRAINT public cms_recommendation_items cms_recommendation_items_sku_id_fkey flower_e2_stage
+  3911; 2606 17705 FK CONSTRAINT public cms_recommendation_items cms_recommendation_items_slot_id_fkey flower_e2_stage
+  3901; 2606 17586 FK CONSTRAINT public customer_recipient_relations customer_recipient_relations_customer_id_fkey flower_e2_stage
+  3902; 2606 17591 FK CONSTRAINT public customer_recipient_relations customer_recipient_relations_recipient_id_fkey flower_e2_stage
+  3906; 2606 17611 FK CONSTRAINT public customer_reminders customer_reminders_customer_id_fkey flower_e2_stage
+  3907; 2606 17621 FK CONSTRAINT public customer_reminders customer_reminders_occasion_id_fkey flower_e2_stage
+  3908; 2606 17616 FK CONSTRAINT public customer_reminders customer_reminders_recipient_id_fkey flower_e2_stage
+  3900; 2606 17581 FK CONSTRAINT public customers customers_mini_program_user_id_fkey flower_e2_stage
+  3903; 2606 17596 FK CONSTRAINT public gift_occasions gift_occasions_customer_id_fkey flower_e2_stage
+  3904; 2606 17601 FK CONSTRAINT public gift_occasions gift_occasions_recipient_id_fkey flower_e2_stage
+  3905; 2606 17606 FK CONSTRAINT public gift_occasions gift_occasions_relation_id_fkey flower_e2_stage
+  3880; 2606 16788 FK CONSTRAINT public material_category_relations material_category_relations_material_category_id_fkey flower_e2_stage
+  3881; 2606 16783 FK CONSTRAINT public material_category_relations material_category_relations_material_id_fkey flower_e2_stage
+  3876; 2606 17901 FK CONSTRAINT public materials materials_master_part_id_fkey flower_e2_stage
+  3877; 2606 17146 FK CONSTRAINT public materials materials_wiki_id_fkey flower_e2_stage
+  3894; 2606 17246 FK CONSTRAINT public order_cost_snapshots order_cost_snapshots_order_id_fkey flower_e2_stage
+  3871; 2606 16549 FK CONSTRAINT public order_items order_items_orderId_fkey flower_e2_stage
+  3872; 2606 16972 FK CONSTRAINT public order_items order_items_sku_id_fkey flower_e2_stage
+  3867; 2606 17626 FK CONSTRAINT public orders orders_customer_id_fkey flower_e2_stage
+  3868; 2606 17636 FK CONSTRAINT public orders orders_gift_occasion_id_fkey flower_e2_stage
+  3869; 2606 17631 FK CONSTRAINT public orders orders_recipient_id_fkey flower_e2_stage
+  3870; 2606 16921 FK CONSTRAINT public orders orders_user_id_fkey flower_e2_stage
+  3878; 2606 16722 FK CONSTRAINT public product_bom product_bom_materialId_fkey flower_e2_stage
+  3879; 2606 16892 FK CONSTRAINT public product_bom product_bom_productId_fkey flower_e2_stage
+  3873; 2606 16734 FK CONSTRAINT public product_categories_list product_categories_list_parent_id_fkey flower_e2_stage
+  3874; 2606 16765 FK CONSTRAINT public product_categories product_categories_product_category_id_fkey flower_e2_stage
+  3875; 2606 16887 FK CONSTRAINT public product_categories product_categories_product_id_fkey flower_e2_stage
+  3883; 2606 17185 FK CONSTRAINT public product_skus product_skus_recipe_id_fkey flower_e2_stage
+  3884; 2606 16882 FK CONSTRAINT public product_skus product_skus_spu_id_fkey flower_e2_stage
+  3896; 2606 17372 FK CONSTRAINT public purchase_order_lines purchase_order_lines_flower_wiki_id_fkey flower_e2_stage
+  3897; 2606 17377 FK CONSTRAINT public purchase_order_lines purchase_order_lines_inbound_batch_id_fkey flower_e2_stage
+  3898; 2606 17895 FK CONSTRAINT public purchase_order_lines purchase_order_lines_master_part_id_fkey flower_e2_stage
+  3899; 2606 17367 FK CONSTRAINT public purchase_order_lines purchase_order_lines_purchase_order_id_fkey flower_e2_stage
+  3895; 2606 17362 FK CONSTRAINT public purchase_orders purchase_orders_supplier_id_fkey flower_e2_stage
+  3886; 2606 17156 FK CONSTRAINT public recipe_lines recipe_lines_flower_wiki_id_fkey flower_e2_stage
+  3887; 2606 17151 FK CONSTRAINT public recipe_lines recipe_lines_recipe_id_fkey flower_e2_stage
+  3885; 2606 17241 FK CONSTRAINT public recipes recipes_packaging_kit_id_fkey flower_e2_stage
+  3892; 2606 17126 FK CONSTRAINT public staff_audit_logs staff_audit_logs_operator_staff_id_fkey flower_e2_stage
+  3893; 2606 17131 FK CONSTRAINT public staff_audit_logs staff_audit_logs_target_staff_id_fkey flower_e2_stage
+  3862; 2606 16534 FK CONSTRAINT public stock_logs stock_logs_batchId_fkey flower_e2_stage
+  3863; 2606 16681 FK CONSTRAINT public stock_logs stock_logs_materialId_fkey flower_e2_stage
+  3864; 2606 17136 FK CONSTRAINT public stock_logs stock_logs_operator_staff_id_fkey flower_e2_stage
+  3865; 2606 16539 FK CONSTRAINT public stock_logs stock_logs_orderId_fkey flower_e2_stage
+  3866; 2606 16544 FK CONSTRAINT public stock_logs stock_logs_orderItemId_fkey flower_e2_stage
+  3888; 2606 17166 FK CONSTRAINT public stock_loss_records stock_loss_records_batch_id_fkey flower_e2_stage
+  3889; 2606 17161 FK CONSTRAINT public stock_loss_records stock_loss_records_flower_wiki_id_fkey flower_e2_stage
+  3890; 2606 17176 FK CONSTRAINT public stock_loss_records stock_loss_records_operator_staff_id_fkey flower_e2_stage
+  3891; 2606 17171 FK CONSTRAINT public stock_loss_records stock_loss_records_stock_log_id_fkey flower_e2_stage
+  3913; 2606 17866 FK CONSTRAINT public tenant_members tenant_members_staff_user_id_fkey flower_e2_stage
+  3914; 2606 17861 FK CONSTRAINT public tenant_members tenant_members_tenant_id_fkey flower_e2_stage
+[exit code: 0]
+  pg_restore --list exit=0 structure_ok=True
+
+===== 备份 v2：flower_e2_v2_test =====
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db psql -U flower_e2_stage -d flower_e2_v2_test -t -A -c SELECT current_database()
+  flower_e2_v2_test
+[exit code: 0]
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db pg_dump -U flower_e2_stage -Fc -d flower_e2_v2_test -f /backup/20261110T143030Z-manual/v2-20261110T143030Z.dump
+[exit code: 0]
+  file: v2-20261110T143030Z.dump  size=203432  sha256=babc02649733382b4c7edd938db7c91bc86669d7c952bfdefd98b75c00b1e762
+$ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db pg_restore --list /backup/20261110T143030Z-manual/v2-20261110T143030Z.dump
+  ;
+  ; Archive created at 2026-11-10 14:30:36 UTC
+  ;     dbname: flower_e2_v2_test
+  ;     TOC Entries: 479
+  ;     Compression: gzip
+  ;     Dump Version: 1.16-0
+  ;     Format: CUSTOM
+  ;     Integer: 4 bytes
+  ;     Offset: 8 bytes
+  ;     Dumped from database version: 18.6
+  ;     Dumped by pg_dump version: 18.6
+  ;
+  ;
+  ; Selected TOC Entries:
+  ;
+  938; 1247 17946 TYPE public CommercialState flower_e2_stage
+  1001; 1247 18182 TYPE public ConsumableRollState flower_e2_stage
+  1010; 1247 18214 TYPE public ContentTargetKind flower_e2_stage
+  971; 1247 18080 TYPE public CostKind flower_e2_stage
+  974; 1247 18096 TYPE public CostStage flower_e2_stage
+  989; 1247 18142 TYPE public DeliveryAttemptState flower_e2_stage
+  986; 1247 18136 TYPE public FulfillmentKind flower_e2_stage
+  947; 1247 17990 TYPE public FulfillmentState flower_e2_stage
+  956; 1247 18020 TYPE public HoldState flower_e2_stage
+  1235; 1247 20038 TYPE public InventoryReviewStatus flower_e2_stage
+  932; 1247 17932 TYPE public LocationKind flower_e2_stage
+  1007; 1247 18198 TYPE public LossReason flower_e2_stage
+  929; 1247 17921 TYPE public MaterialKind flower_e2_stage
+  950; 1247 18004 TYPE public OrderEntry flower_e2_stage
+  953; 1247 18014 TYPE public OrderItemKind flower_e2_stage
+  977; 1247 18104 TYPE public PaymentKind flower_e2_stage
+  980; 1247 18118 TYPE public PaymentState flower_e2_stage
+  944; 1247 17976 TYPE public ProductionState flower_e2_stage
+  1232; 1247 20030 TYPE public PurchaseLineRelationKind flower_e2_stage
+  962; 1247 18040 TYPE public PurchaseState flower_e2_stage
+  965; 1247 18054 TYPE public ReceiptDisposition flower_e2_stage
+  935; 1247 17938 TYPE public RecipeState flower_e2_stage
+  983; 1247 18128 TYPE public RefundState flower_e2_stage
+  959; 1247 18030 TYPE public ReservationState flower_e2_stage
+  998; 1247 18174 TYPE public SamplePlanCandidateState flower_e2_stage
+  995; 1247 18160 TYPE public SamplePlanState flower_e2_stage
+  992; 1247 18152 TYPE public SampleState flower_e2_stage
+  1004; 1247 18190 TYPE public StocktakeState flower_e2_stage
+  941; 1247 17960 TYPE public SupplyState flower_e2_stage
+  968; 1247 18062 TYPE public TransactionKind flower_e2_stage
+  282; 1259 19076 TABLE public AuditEvent flower_e2_stage
+  234; 1259 18413 TABLE public AvailabilityHold flower_e2_stage
+  235; 1259 18427 TABLE public AvailabilityHoldMaterial flower_e2_stage
+  287; 1259 19137 TABLE public Banner flower_e2_stage
+  243; 1259 18527 TABLE public BatchBalance flower_e2_stage
+  244; 1259 18541 TABLE public ConsumableRoll flower_e2_stage
+  268; 1259 18904 TABLE public CostAdjustment flower_e2_stage
+  266; 1259 18866 TABLE public CostEntry flower_e2_stage
+  273; 1259 18967 TABLE public Customer flower_e2_stage
+  275; 1259 18986 TABLE public CustomerRecipientRelation flower_e2_stage
+  277; 1259 19008 TABLE public CustomerReminder flower_e2_stage
+  265; 1259 18854 TABLE public DeliveryAttempt flower_e2_stage
+  264; 1259 18842 TABLE public Fulfillment flower_e2_stage
+  238; 1259 18465 TABLE public FutureSupplyAllocation flower_e2_stage
+  276; 1259 18998 TABLE public GiftOccasion flower_e2_stage
+  240; 1259 18488 TABLE public GoodsReceipt flower_e2_stage
+  241; 1259 18499 TABLE public GoodsReceiptLine flower_e2_stage
+  290; 1259 19187 TABLE public HomeSceneEntry flower_e2_stage
+  242; 1259 18511 TABLE public InventoryBatch flower_e2_stage
+  222; 1259 18246 TABLE public InventoryLocation flower_e2_stage
+  245; 1259 18553 TABLE public InventoryReservation flower_e2_stage
+  246; 1259 18566 TABLE public InventoryTransaction flower_e2_stage
+  280; 1259 19047 TABLE public LossRecord flower_e2_stage
+  223; 1259 18257 TABLE public Material flower_e2_stage
+  285; 1259 19113 TABLE public MaterialCategory flower_e2_stage
+  286; 1259 19128 TABLE public MaterialCategoryRelation flower_e2_stage
+  248; 1259 18594 TABLE public MaterialUsage flower_e2_stage
+  272; 1259 18957 TABLE public MiniProgramIdentity flower_e2_stage
+  230; 1259 18350 TABLE public Order flower_e2_stage
+  267; 1259 18882 TABLE public OrderCostSnapshot flower_e2_stage
+  231; 1259 18375 TABLE public OrderItem flower_e2_stage
+  233; 1259 18400 TABLE public OrderMaterialRequirement flower_e2_stage
+  232; 1259 18388 TABLE public OrderRevision flower_e2_stage
+  291; 1259 19977 TABLE public PackagingKit flower_e2_stage
+  292; 1259 20001 TABLE public PackagingKitLine flower_e2_stage
+  262; 1259 18809 TABLE public PaymentTransaction flower_e2_stage
+  225; 1259 18285 TABLE public Product flower_e2_stage
+  283; 1259 19089 TABLE public ProductCategory flower_e2_stage
+  284; 1259 19104 TABLE public ProductCategoryRelation flower_e2_stage
+  226; 1259 18298 TABLE public ProductSku flower_e2_stage
+  247; 1259 18582 TABLE public ProductionTask flower_e2_stage
+  239; 1259 18477 TABLE public PurchaseDemandAllocation flower_e2_stage
+  236; 1259 18438 TABLE public PurchaseOrder flower_e2_stage
+  237; 1259 18452 TABLE public PurchaseOrderLine flower_e2_stage
+  227; 1259 18314 TABLE public Recipe flower_e2_stage
+  229; 1259 18335 TABLE public RecipeLine flower_e2_stage
+  228; 1259 18323 TABLE public RecipeVersion flower_e2_stage
+  274; 1259 18976 TABLE public Recipient flower_e2_stage
+  289; 1259 19173 TABLE public RecommendationItem flower_e2_stage
+  288; 1259 19155 TABLE public RecommendationSlot flower_e2_stage
+  263; 1259 18825 TABLE public RefundTransaction flower_e2_stage
+  249; 1259 18609 TABLE public Sample flower_e2_stage
+  260; 1259 18781 TABLE public SampleDisassemblyMaterial flower_e2_stage
+  261; 1259 18796 TABLE public SampleInventoryReservation flower_e2_stage
+  250; 1259 18624 TABLE public SampleMaterial flower_e2_stage
+  251; 1259 18635 TABLE public SamplePlan flower_e2_stage
+  258; 1259 18759 TABLE public SamplePlanExecution flower_e2_stage
+  259; 1259 18771 TABLE public SamplePlanExecutionStep flower_e2_stage
+  255; 1259 18706 TABLE public SamplePlanInventorySnapshot flower_e2_stage
+  252; 1259 18648 TABLE public SamplePlanItem flower_e2_stage
+  253; 1259 18664 TABLE public SamplePlanMaterial flower_e2_stage
+  254; 1259 18683 TABLE public SamplePlanRun flower_e2_stage
+  256; 1259 18719 TABLE public SamplePlanStep flower_e2_stage
+  257; 1259 18733 TABLE public SamplePlanStepMaterial flower_e2_stage
+  269; 1259 18919 TABLE public StaffUser flower_e2_stage
+  278; 1259 19021 TABLE public Stocktake flower_e2_stage
+  279; 1259 19034 TABLE public StocktakeLine flower_e2_stage
+  221; 1259 18235 TABLE public Store flower_e2_stage
+  271; 1259 18944 TABLE public StoreMember flower_e2_stage
+  281; 1259 19062 TABLE public StoreSettings flower_e2_stage
+  224; 1259 18274 TABLE public Supplier flower_e2_stage
+  220; 1259 18225 TABLE public Tenant flower_e2_stage
+  270; 1259 18931 TABLE public TenantMember flower_e2_stage
+  293; 1259 20071 TABLE public _e2_marker flower_e2_stage
+  219; 1259 17906 TABLE public _prisma_migrations flower_e2_stage
+  4418; 0 19076 TABLE DATA public AuditEvent flower_e2_stage
+  4370; 0 18413 TABLE DATA public AvailabilityHold flower_e2_stage
+  4371; 0 18427 TABLE DATA public AvailabilityHoldMaterial flower_e2_stage
+  4423; 0 19137 TABLE DATA public Banner flower_e2_stage
+  4379; 0 18527 TABLE DATA public BatchBalance flower_e2_stage
+  4380; 0 18541 TABLE DATA public ConsumableRoll flower_e2_stage
+  4404; 0 18904 TABLE DATA public CostAdjustment flower_e2_stage
+  4402; 0 18866 TABLE DATA public CostEntry flower_e2_stage
+  4409; 0 18967 TABLE DATA public Customer flower_e2_stage
+  4411; 0 18986 TABLE DATA public CustomerRecipientRelation flower_e2_stage
+  4413; 0 19008 TABLE DATA public CustomerReminder flower_e2_stage
+  4401; 0 18854 TABLE DATA public DeliveryAttempt flower_e2_stage
+  4400; 0 18842 TABLE DATA public Fulfillment flower_e2_stage
+  4374; 0 18465 TABLE DATA public FutureSupplyAllocation flower_e2_stage
+  4412; 0 18998 TABLE DATA public GiftOccasion flower_e2_stage
+  4376; 0 18488 TABLE DATA public GoodsReceipt flower_e2_stage
+  4377; 0 18499 TABLE DATA public GoodsReceiptLine flower_e2_stage
+  4426; 0 19187 TABLE DATA public HomeSceneEntry flower_e2_stage
+  4378; 0 18511 TABLE DATA public InventoryBatch flower_e2_stage
+  4358; 0 18246 TABLE DATA public InventoryLocation flower_e2_stage
+  4381; 0 18553 TABLE DATA public InventoryReservation flower_e2_stage
+  4382; 0 18566 TABLE DATA public InventoryTransaction flower_e2_stage
+  4416; 0 19047 TABLE DATA public LossRecord flower_e2_stage
+  4359; 0 18257 TABLE DATA public Material flower_e2_stage
+  4421; 0 19113 TABLE DATA public MaterialCategory flower_e2_stage
+  4422; 0 19128 TABLE DATA public MaterialCategoryRelation flower_e2_stage
+  4384; 0 18594 TABLE DATA public MaterialUsage flower_e2_stage
+  4408; 0 18957 TABLE DATA public MiniProgramIdentity flower_e2_stage
+  4366; 0 18350 TABLE DATA public Order flower_e2_stage
+  4403; 0 18882 TABLE DATA public OrderCostSnapshot flower_e2_stage
+  4367; 0 18375 TABLE DATA public OrderItem flower_e2_stage
+  4369; 0 18400 TABLE DATA public OrderMaterialRequirement flower_e2_stage
+  4368; 0 18388 TABLE DATA public OrderRevision flower_e2_stage
+  4427; 0 19977 TABLE DATA public PackagingKit flower_e2_stage
+  4428; 0 20001 TABLE DATA public PackagingKitLine flower_e2_stage
+  4398; 0 18809 TABLE DATA public PaymentTransaction flower_e2_stage
+  4361; 0 18285 TABLE DATA public Product flower_e2_stage
+  4419; 0 19089 TABLE DATA public ProductCategory flower_e2_stage
+  4420; 0 19104 TABLE DATA public ProductCategoryRelation flower_e2_stage
+  4362; 0 18298 TABLE DATA public ProductSku flower_e2_stage
+  4383; 0 18582 TABLE DATA public ProductionTask flower_e2_stage
+  4375; 0 18477 TABLE DATA public PurchaseDemandAllocation flower_e2_stage
+  4372; 0 18438 TABLE DATA public PurchaseOrder flower_e2_stage
+  4373; 0 18452 TABLE DATA public PurchaseOrderLine flower_e2_stage
+  4363; 0 18314 TABLE DATA public Recipe flower_e2_stage
+  4365; 0 18335 TABLE DATA public RecipeLine flower_e2_stage
+  4364; 0 18323 TABLE DATA public RecipeVersion flower_e2_stage
+  4410; 0 18976 TABLE DATA public Recipient flower_e2_stage
+  4425; 0 19173 TABLE DATA public RecommendationItem flower_e2_stage
+  4424; 0 19155 TABLE DATA public RecommendationSlot flower_e2_stage
+  4399; 0 18825 TABLE DATA public RefundTransaction flower_e2_stage
+  4385; 0 18609 TABLE DATA public Sample flower_e2_stage
+  4396; 0 18781 TABLE DATA public SampleDisassemblyMaterial flower_e2_stage
+  4397; 0 18796 TABLE DATA public SampleInventoryReservation flower_e2_stage
+  4386; 0 18624 TABLE DATA public SampleMaterial flower_e2_stage
+  4387; 0 18635 TABLE DATA public SamplePlan flower_e2_stage
+  4394; 0 18759 TABLE DATA public SamplePlanExecution flower_e2_stage
+  4395; 0 18771 TABLE DATA public SamplePlanExecutionStep flower_e2_stage
+  4391; 0 18706 TABLE DATA public SamplePlanInventorySnapshot flower_e2_stage
+  4388; 0 18648 TABLE DATA public SamplePlanItem flower_e2_stage
+  4389; 0 18664 TABLE DATA public SamplePlanMaterial flower_e2_stage
+  4390; 0 18683 TABLE DATA public SamplePlanRun flower_e2_stage
+  4392; 0 18719 TABLE DATA public SamplePlanStep flower_e2_stage
+  4393; 0 18733 TABLE DATA public SamplePlanStepMaterial flower_e2_stage
+  4405; 0 18919 TABLE DATA public StaffUser flower_e2_stage
+  4414; 0 19021 TABLE DATA public Stocktake flower_e2_stage
+  4415; 0 19034 TABLE DATA public StocktakeLine flower_e2_stage
+  4357; 0 18235 TABLE DATA public Store flower_e2_stage
+  4407; 0 18944 TABLE DATA public StoreMember flower_e2_stage
+  4417; 0 19062 TABLE DATA public StoreSettings flower_e2_stage
+  4360; 0 18274 TABLE DATA public Supplier flower_e2_stage
+  4356; 0 18225 TABLE DATA public Tenant flower_e2_stage
+  4406; 0 18931 TABLE DATA public TenantMember flower_e2_stage
+  4429; 0 20071 TABLE DATA public _e2_marker flower_e2_stage
+  4355; 0 17906 TABLE DATA public _prisma_migrations flower_e2_stage
+  4039; 2606 19088 CONSTRAINT public AuditEvent AuditEvent_pkey flower_e2_stage
+  3897; 2606 18437 CONSTRAINT public AvailabilityHoldMaterial AvailabilityHoldMaterial_pkey flower_e2_stage
+  3892; 2606 18426 CONSTRAINT public AvailabilityHold AvailabilityHold_pkey flower_e2_stage
+  4053; 2606 19154 CONSTRAINT public Banner Banner_pkey flower_e2_stage
+  3923; 2606 18540 CONSTRAINT public BatchBalance BatchBalance_pkey flower_e2_stage
+  3926; 2606 18552 CONSTRAINT public ConsumableRoll ConsumableRoll_pkey flower_e2_stage
+  4000; 2606 18918 CONSTRAINT public CostAdjustment CostAdjustment_pkey flower_e2_stage
+  3994; 2606 18881 CONSTRAINT public CostEntry CostEntry_pkey flower_e2_stage
+  4020; 2606 18997 CONSTRAINT public CustomerRecipientRelation CustomerRecipientRelation_pkey flower_e2_stage
+  4025; 2606 19020 CONSTRAINT public CustomerReminder CustomerReminder_pkey flower_e2_stage
+  4014; 2606 18975 CONSTRAINT public Customer Customer_pkey flower_e2_stage
+  3991; 2606 18865 CONSTRAINT public DeliveryAttempt DeliveryAttempt_pkey flower_e2_stage
+  3988; 2606 18853 CONSTRAINT public Fulfillment Fulfillment_pkey flower_e2_stage
+  3908; 2606 18476 CONSTRAINT public FutureSupplyAllocation FutureSupplyAllocation_pkey flower_e2_stage
+  4022; 2606 19007 CONSTRAINT public GiftOccasion GiftOccasion_pkey flower_e2_stage
+  3916; 2606 18510 CONSTRAINT public GoodsReceiptLine GoodsReceiptLine_pkey flower_e2_stage
+  3914; 2606 18498 CONSTRAINT public GoodsReceipt GoodsReceipt_pkey flower_e2_stage
+  4062; 2606 19204 CONSTRAINT public HomeSceneEntry HomeSceneEntry_pkey flower_e2_stage
+  3918; 2606 18526 CONSTRAINT public InventoryBatch InventoryBatch_pkey flower_e2_stage
+  3848; 2606 18256 CONSTRAINT public InventoryLocation InventoryLocation_pkey flower_e2_stage
+  3929; 2606 18565 CONSTRAINT public InventoryReservation InventoryReservation_pkey flower_e2_stage
+  3933; 2606 18581 CONSTRAINT public InventoryTransaction InventoryTransaction_pkey flower_e2_stage
+  4032; 2606 19061 CONSTRAINT public LossRecord LossRecord_pkey flower_e2_stage
+  4051; 2606 19136 CONSTRAINT public MaterialCategoryRelation MaterialCategoryRelation_pkey flower_e2_stage
+  4048; 2606 19127 CONSTRAINT public MaterialCategory MaterialCategory_pkey flower_e2_stage
+  3937; 2606 18608 CONSTRAINT public MaterialUsage MaterialUsage_pkey flower_e2_stage
+  3852; 2606 18273 CONSTRAINT public Material Material_pkey flower_e2_stage
+  4011; 2606 18966 CONSTRAINT public MiniProgramIdentity MiniProgramIdentity_pkey flower_e2_stage
+  3997; 2606 18903 CONSTRAINT public OrderCostSnapshot OrderCostSnapshot_pkey flower_e2_stage
+  3884; 2606 18387 CONSTRAINT public OrderItem OrderItem_pkey flower_e2_stage
+  3890; 2606 18412 CONSTRAINT public OrderMaterialRequirement OrderMaterialRequirement_pkey flower_e2_stage
+  3887; 2606 18399 CONSTRAINT public OrderRevision OrderRevision_pkey flower_e2_stage
+  3880; 2606 18374 CONSTRAINT public Order Order_pkey flower_e2_stage
+  4070; 2606 20011 CONSTRAINT public PackagingKitLine PackagingKitLine_pkey flower_e2_stage
+  4065; 2606 19993 CONSTRAINT public PackagingKit PackagingKit_pkey flower_e2_stage
+  3981; 2606 18824 CONSTRAINT public PaymentTransaction PaymentTransaction_pkey flower_e2_stage
+  4046; 2606 19112 CONSTRAINT public ProductCategoryRelation ProductCategoryRelation_pkey flower_e2_stage
+  4042; 2606 19103 CONSTRAINT public ProductCategory ProductCategory_pkey flower_e2_stage
+  3867; 2606 18313 CONSTRAINT public ProductSku ProductSku_pkey flower_e2_stage
+  3864; 2606 18297 CONSTRAINT public Product Product_pkey flower_e2_stage
+  3935; 2606 18593 CONSTRAINT public ProductionTask ProductionTask_pkey flower_e2_stage
+  3911; 2606 18487 CONSTRAINT public PurchaseDemandAllocation PurchaseDemandAllocation_pkey flower_e2_stage
+  3903; 2606 18464 CONSTRAINT public PurchaseOrderLine PurchaseOrderLine_pkey flower_e2_stage
+  3899; 2606 18451 CONSTRAINT public PurchaseOrder PurchaseOrder_pkey flower_e2_stage
+  3877; 2606 18349 CONSTRAINT public RecipeLine RecipeLine_pkey flower_e2_stage
+  3874; 2606 18334 CONSTRAINT public RecipeVersion RecipeVersion_pkey flower_e2_stage
+  3871; 2606 18322 CONSTRAINT public Recipe Recipe_pkey flower_e2_stage
+  4017; 2606 18985 CONSTRAINT public Recipient Recipient_pkey flower_e2_stage
+  4059; 2606 19186 CONSTRAINT public RecommendationItem RecommendationItem_pkey flower_e2_stage
+  4056; 2606 19172 CONSTRAINT public RecommendationSlot RecommendationSlot_pkey flower_e2_stage
+  3985; 2606 18841 CONSTRAINT public RefundTransaction RefundTransaction_pkey flower_e2_stage
+  3974; 2606 18795 CONSTRAINT public SampleDisassemblyMaterial SampleDisassemblyMaterial_pkey flower_e2_stage
+  3977; 2606 18808 CONSTRAINT public SampleInventoryReservation SampleInventoryReservation_pkey flower_e2_stage
+  3942; 2606 18634 CONSTRAINT public SampleMaterial SampleMaterial_pkey flower_e2_stage
+  3971; 2606 18780 CONSTRAINT public SamplePlanExecutionStep SamplePlanExecutionStep_pkey flower_e2_stage
+  3968; 2606 18770 CONSTRAINT public SamplePlanExecution SamplePlanExecution_pkey flower_e2_stage
+  3959; 2606 18718 CONSTRAINT public SamplePlanInventorySnapshot SamplePlanInventorySnapshot_pkey flower_e2_stage
+  3947; 2606 18663 CONSTRAINT public SamplePlanItem SamplePlanItem_pkey flower_e2_stage
+  3951; 2606 18682 CONSTRAINT public SamplePlanMaterial SamplePlanMaterial_pkey flower_e2_stage
+  3955; 2606 18705 CONSTRAINT public SamplePlanRun SamplePlanRun_pkey flower_e2_stage
+  3965; 2606 18758 CONSTRAINT public SamplePlanStepMaterial SamplePlanStepMaterial_pkey flower_e2_stage
+  3962; 2606 18732 CONSTRAINT public SamplePlanStep SamplePlanStep_pkey flower_e2_stage
+  3945; 2606 18647 CONSTRAINT public SamplePlan SamplePlan_pkey flower_e2_stage
+  3939; 2606 18623 CONSTRAINT public Sample Sample_pkey flower_e2_stage
+  4002; 2606 18930 CONSTRAINT public StaffUser StaffUser_pkey flower_e2_stage
+  4029; 2606 19046 CONSTRAINT public StocktakeLine StocktakeLine_pkey flower_e2_stage
+  4027; 2606 19033 CONSTRAINT public Stocktake Stocktake_pkey flower_e2_stage
+  4008; 2606 18956 CONSTRAINT public StoreMember StoreMember_pkey flower_e2_stage
+  4036; 2606 19075 CONSTRAINT public StoreSettings StoreSettings_pkey flower_e2_stage
+  3845; 2606 18245 CONSTRAINT public Store Store_pkey flower_e2_stage
+  3857; 2606 18284 CONSTRAINT public Supplier Supplier_pkey flower_e2_stage
+  4005; 2606 18943 CONSTRAINT public TenantMember TenantMember_pkey flower_e2_stage
+  3841; 2606 18234 CONSTRAINT public Tenant Tenant_pkey flower_e2_stage
+  4072; 2606 20080 CONSTRAINT public _e2_marker _e2_marker_pkey flower_e2_stage
+  3839; 2606 17919 CONSTRAINT public _prisma_migrations _prisma_migrations_pkey flower_e2_stage
+  4040; 1259 19272 INDEX public AuditEvent_tenantId_occurredAt_idx flower_e2_stage
+  3894; 1259 19228 INDEX public AvailabilityHoldMaterial_holdId_materialId_key flower_e2_stage
+  3895; 1259 19227 INDEX public AvailabilityHoldMaterial_materialId_idx flower_e2_stage
+  3893; 1259 19226 INDEX public AvailabilityHold_skuId_state_expiresAt_idx flower_e2_stage
+  4054; 1259 19276 INDEX public Banner_tenantId_active_sortOrder_idx flower_e2_stage
+  3921; 1259 19234 INDEX public BatchBalance_batchId_locationId_key flower_e2_stage
+  3924; 1259 19235 INDEX public ConsumableRoll_locationId_state_idx flower_e2_stage
+  3998; 1259 19261 INDEX public CostAdjustment_orderId_createdAt_idx flower_e2_stage
+  3992; 1259 19259 INDEX public CostEntry_orderId_stage_kind_idx flower_e2_stage
+  4018; 1259 19267 INDEX public CustomerRecipientRelation_customerId_recipientId_key flower_e2_stage
+  4023; 1259 19268 INDEX public CustomerReminder_customerId_remindAt_idx flower_e2_stage
+  4015; 1259 19266 INDEX public Customer_tenantId_phone_idx flower_e2_stage
+  3989; 1259 19258 INDEX public DeliveryAttempt_fulfillmentId_attemptNo_key flower_e2_stage
+  3986; 1259 19257 INDEX public Fulfillment_orderId_key flower_e2_stage
+  3909; 1259 19230 INDEX public FutureSupplyAllocation_purchaseLineId_requirementId_key flower_e2_stage
+  4063; 1259 19279 INDEX public HomeSceneEntry_tenantId_active_sortOrder_idx flower_e2_stage
+  3919; 1259 19232 INDEX public InventoryBatch_receiptLineId_key flower_e2_stage
+  3920; 1259 19233 INDEX public InventoryBatch_storeId_batchNo_key flower_e2_stage
+  3849; 1259 19208 INDEX public InventoryLocation_storeId_code_key flower_e2_stage
+  3927; 1259 19236 INDEX public InventoryReservation_batchId_state_idx flower_e2_stage
+  3930; 1259 19238 INDEX public InventoryTransaction_batchId_createdAt_idx flower_e2_stage
+  3931; 1259 19237 INDEX public InventoryTransaction_idempotencyKey_key flower_e2_stage
+  4033; 1259 19270 INDEX public LossRecord_storeId_occurredAt_idx flower_e2_stage
+  4034; 1259 20067 INDEX public LossRecord_storeId_reviewStatus_occurredAt_idx flower_e2_stage
+  4049; 1259 19275 INDEX public MaterialCategory_tenantId_code_key flower_e2_stage
+  3850; 1259 19210 INDEX public Material_id_tenantId_key flower_e2_stage
+  3853; 1259 19958 INDEX public Material_tenantId_active_name_idx flower_e2_stage
+  3854; 1259 19209 INDEX public Material_tenantId_code_key flower_e2_stage
+  4012; 1259 19265 INDEX public MiniProgramIdentity_tenantId_openId_key flower_e2_stage
+  3995; 1259 19260 INDEX public OrderCostSnapshot_orderId_revisionNo_key flower_e2_stage
+  3888; 1259 19225 INDEX public OrderMaterialRequirement_materialId_needBy_idx flower_e2_stage
+  3885; 1259 19224 INDEX public OrderRevision_orderId_number_key flower_e2_stage
+  3881; 1259 19222 INDEX public Order_storeId_deliveryAt_idx flower_e2_stage
+  3882; 1259 19223 INDEX public Order_tenantId_number_key flower_e2_stage
+  4068; 1259 20022 INDEX public PackagingKitLine_packagingKitId_materialId_key flower_e2_stage
+  4066; 1259 20000 INDEX public PackagingKit_tenantId_active_name_idx flower_e2_stage
+  4067; 1259 19999 INDEX public PackagingKit_tenantId_code_key flower_e2_stage
+  3978; 1259 19253 INDEX public PaymentTransaction_idempotencyKey_key flower_e2_stage
+  3979; 1259 19254 INDEX public PaymentTransaction_orderId_state_idx flower_e2_stage
+  4043; 1259 19274 INDEX public ProductCategory_tenantId_code_key flower_e2_stage
+  4044; 1259 19273 INDEX public ProductCategory_tenantId_parentId_sortOrder_idx flower_e2_stage
+  3868; 1259 19217 INDEX public ProductSku_productId_code_key flower_e2_stage
+  3869; 1259 19218 INDEX public ProductSku_productId_id_key flower_e2_stage
+  3860; 1259 19213 INDEX public Product_defaultSkuId_key flower_e2_stage
+  3861; 1259 19216 INDEX public Product_id_defaultSkuId_key flower_e2_stage
+  3862; 1259 19215 INDEX public Product_id_tenantId_key flower_e2_stage
+  3865; 1259 19214 INDEX public Product_tenantId_code_key flower_e2_stage
+  3912; 1259 19231 INDEX public PurchaseDemandAllocation_purchaseLineId_requirementId_key flower_e2_stage
+  3904; 1259 19976 INDEX public PurchaseOrderLine_purchaseOrderId_createdAt_idx flower_e2_stage
+  3905; 1259 20054 INDEX public PurchaseOrderLine_relationKey_key flower_e2_stage
+  3906; 1259 20053 INDEX public PurchaseOrderLine_sourceLineId_relationKind_idx flower_e2_stage
+  3900; 1259 19229 INDEX public PurchaseOrder_tenantId_number_key flower_e2_stage
+  3901; 1259 19951 INDEX public PurchaseOrder_tenantId_storeId_createdAt_idx flower_e2_stage
+  3878; 1259 19221 INDEX public RecipeLine_versionId_idx flower_e2_stage
+  3875; 1259 19220 INDEX public RecipeVersion_recipeId_versionNo_key flower_e2_stage
+  3872; 1259 19219 INDEX public Recipe_skuId_key flower_e2_stage
+  4060; 1259 19278 INDEX public RecommendationItem_slotId_active_sortOrder_idx flower_e2_stage
+  4057; 1259 19277 INDEX public RecommendationSlot_tenantId_key_key flower_e2_stage
+  3982; 1259 19255 INDEX public RefundTransaction_idempotencyKey_key flower_e2_stage
+  3983; 1259 19256 INDEX public RefundTransaction_orderId_createdAt_idx flower_e2_stage
+  3972; 1259 19251 INDEX public SampleDisassemblyMaterial_executionStepId_materialId_idx flower_e2_stage
+  3975; 1259 19252 INDEX public SampleInventoryReservation_batchId_state_idx flower_e2_stage
+  3943; 1259 19240 INDEX public SampleMaterial_sampleId_materialId_key flower_e2_stage
+  3969; 1259 19250 INDEX public SamplePlanExecutionStep_executionId_plannedStepId_key flower_e2_stage
+  3960; 1259 19247 INDEX public SamplePlanInventorySnapshot_runId_materialId_key flower_e2_stage
+  3948; 1259 19241 INDEX public SamplePlanItem_planId_sampleId_key flower_e2_stage
+  3949; 1259 19242 INDEX public SamplePlanItem_planId_sequenceNo_key flower_e2_stage
+  3952; 1259 19243 INDEX public SamplePlanMaterial_planId_materialId_key flower_e2_stage
+  3953; 1259 19246 INDEX public SamplePlanRun_calculationGroupId_rank_key flower_e2_stage
+  3956; 1259 19245 INDEX public SamplePlanRun_planId_id_key flower_e2_stage
+  3957; 1259 19244 INDEX public SamplePlanRun_planId_runNo_key flower_e2_stage
+  3966; 1259 19249 INDEX public SamplePlanStepMaterial_stepId_materialId_key flower_e2_stage
+  3963; 1259 19248 INDEX public SamplePlanStep_runId_sequenceNo_key flower_e2_stage
+  3940; 1259 19239 INDEX public Sample_tenantId_code_key flower_e2_stage
+  4003; 1259 19262 INDEX public StaffUser_username_key flower_e2_stage
+  4030; 1259 19269 INDEX public StocktakeLine_stocktakeId_batchId_locationId_key flower_e2_stage
+  4009; 1259 19264 INDEX public StoreMember_storeId_staffUserId_key flower_e2_stage
+  4037; 1259 19271 INDEX public StoreSettings_storeId_key flower_e2_stage
+  3843; 1259 19207 INDEX public Store_id_tenantId_key flower_e2_stage
+  3846; 1259 19206 INDEX public Store_tenantId_code_key flower_e2_stage
+  3855; 1259 19212 INDEX public Supplier_id_tenantId_key flower_e2_stage
+  3858; 1259 19965 INDEX public Supplier_tenantId_active_name_idx flower_e2_stage
+  3859; 1259 19211 INDEX public Supplier_tenantId_code_key flower_e2_stage
+  4006; 1259 19263 INDEX public TenantMember_tenantId_staffUserId_key flower_e2_stage
+  3842; 1259 19205 INDEX public Tenant_slug_key flower_e2_stage
+  4188; 2606 19820 FK CONSTRAINT public AuditEvent AuditEvent_tenantId_fkey flower_e2_stage
+  4099; 2606 19405 FK CONSTRAINT public AvailabilityHoldMaterial AvailabilityHoldMaterial_holdId_fkey flower_e2_stage
+  4100; 2606 19410 FK CONSTRAINT public AvailabilityHoldMaterial AvailabilityHoldMaterial_materialId_fkey flower_e2_stage
+  4097; 2606 19395 FK CONSTRAINT public AvailabilityHold AvailabilityHold_orderId_fkey flower_e2_stage
+  4098; 2606 19400 FK CONSTRAINT public AvailabilityHold AvailabilityHold_skuId_fkey flower_e2_stage
+  4196; 2606 19865 FK CONSTRAINT public Banner Banner_productId_fkey flower_e2_stage
+  4197; 2606 19932 FK CONSTRAINT public Banner Banner_product_tenant_fkey flower_e2_stage
+  4198; 2606 19860 FK CONSTRAINT public Banner Banner_tenantId_fkey flower_e2_stage
+  4121; 2606 19500 FK CONSTRAINT public BatchBalance BatchBalance_batchId_fkey flower_e2_stage
+  4122; 2606 19505 FK CONSTRAINT public BatchBalance BatchBalance_locationId_fkey flower_e2_stage
+  4123; 2606 19510 FK CONSTRAINT public ConsumableRoll ConsumableRoll_batchId_fkey flower_e2_stage
+  4124; 2606 19515 FK CONSTRAINT public ConsumableRoll ConsumableRoll_locationId_fkey flower_e2_stage
+  4163; 2606 19705 FK CONSTRAINT public CostAdjustment CostAdjustment_orderId_fkey flower_e2_stage
+  4164; 2606 19710 FK CONSTRAINT public CostAdjustment CostAdjustment_snapshotId_fkey flower_e2_stage
+  4161; 2606 19695 FK CONSTRAINT public CostEntry CostEntry_orderId_fkey flower_e2_stage
+  4172; 2606 19750 FK CONSTRAINT public CustomerRecipientRelation CustomerRecipientRelation_customerId_fkey flower_e2_stage
+  4173; 2606 19755 FK CONSTRAINT public CustomerRecipientRelation CustomerRecipientRelation_recipientId_fkey flower_e2_stage
+  4176; 2606 19770 FK CONSTRAINT public CustomerReminder CustomerReminder_customerId_fkey flower_e2_stage
+  4170; 2606 19740 FK CONSTRAINT public Customer Customer_tenantId_fkey flower_e2_stage
+  4160; 2606 19690 FK CONSTRAINT public DeliveryAttempt DeliveryAttempt_fulfillmentId_fkey flower_e2_stage
+  4159; 2606 19685 FK CONSTRAINT public Fulfillment Fulfillment_orderId_fkey flower_e2_stage
+  4109; 2606 19440 FK CONSTRAINT public FutureSupplyAllocation FutureSupplyAllocation_purchaseLineId_fkey flower_e2_stage
+  4110; 2606 19445 FK CONSTRAINT public FutureSupplyAllocation FutureSupplyAllocation_requirementId_fkey flower_e2_stage
+  4174; 2606 19760 FK CONSTRAINT public GiftOccasion GiftOccasion_customerId_fkey flower_e2_stage
+  4175; 2606 19765 FK CONSTRAINT public GiftOccasion GiftOccasion_recipientId_fkey flower_e2_stage
+  4115; 2606 19480 FK CONSTRAINT public GoodsReceiptLine GoodsReceiptLine_acceptedMaterialId_fkey flower_e2_stage
+  4116; 2606 19475 FK CONSTRAINT public GoodsReceiptLine GoodsReceiptLine_purchaseLineId_fkey flower_e2_stage
+  4117; 2606 19470 FK CONSTRAINT public GoodsReceiptLine GoodsReceiptLine_receiptId_fkey flower_e2_stage
+  4113; 2606 19460 FK CONSTRAINT public GoodsReceipt GoodsReceipt_purchaseOrderId_fkey flower_e2_stage
+  4114; 2606 19465 FK CONSTRAINT public GoodsReceipt GoodsReceipt_storeId_fkey flower_e2_stage
+  4203; 2606 19895 FK CONSTRAINT public HomeSceneEntry HomeSceneEntry_recommendationSlotId_fkey flower_e2_stage
+  4204; 2606 19890 FK CONSTRAINT public HomeSceneEntry HomeSceneEntry_tenantId_fkey flower_e2_stage
+  4118; 2606 19490 FK CONSTRAINT public InventoryBatch InventoryBatch_materialId_fkey flower_e2_stage
+  4119; 2606 19495 FK CONSTRAINT public InventoryBatch InventoryBatch_receiptLineId_fkey flower_e2_stage
+  4120; 2606 19485 FK CONSTRAINT public InventoryBatch InventoryBatch_storeId_fkey flower_e2_stage
+  4074; 2606 19285 FK CONSTRAINT public InventoryLocation InventoryLocation_storeId_fkey flower_e2_stage
+  4125; 2606 19525 FK CONSTRAINT public InventoryReservation InventoryReservation_batchId_fkey flower_e2_stage
+  4126; 2606 19520 FK CONSTRAINT public InventoryReservation InventoryReservation_requirementId_fkey flower_e2_stage
+  4127; 2606 19530 FK CONSTRAINT public InventoryTransaction InventoryTransaction_batchId_fkey flower_e2_stage
+  4181; 2606 19800 FK CONSTRAINT public LossRecord LossRecord_batchId_fkey flower_e2_stage
+  4182; 2606 20062 FK CONSTRAINT public LossRecord LossRecord_locationId_fkey flower_e2_stage
+  4183; 2606 20057 FK CONSTRAINT public LossRecord LossRecord_materialId_fkey flower_e2_stage
+  4184; 2606 19805 FK CONSTRAINT public LossRecord LossRecord_orderId_fkey flower_e2_stage
+  4185; 2606 19795 FK CONSTRAINT public LossRecord LossRecord_storeId_fkey flower_e2_stage
+  4194; 2606 19855 FK CONSTRAINT public MaterialCategoryRelation MaterialCategoryRelation_categoryId_fkey flower_e2_stage
+  4195; 2606 19850 FK CONSTRAINT public MaterialCategoryRelation MaterialCategoryRelation_materialId_fkey flower_e2_stage
+  4193; 2606 19845 FK CONSTRAINT public MaterialCategory MaterialCategory_tenantId_fkey flower_e2_stage
+  4129; 2606 19545 FK CONSTRAINT public MaterialUsage MaterialUsage_batchId_fkey flower_e2_stage
+  4130; 2606 19540 FK CONSTRAINT public MaterialUsage MaterialUsage_taskId_fkey flower_e2_stage
+  4075; 2606 19290 FK CONSTRAINT public Material Material_tenantId_fkey flower_e2_stage
+  4169; 2606 19735 FK CONSTRAINT public MiniProgramIdentity MiniProgramIdentity_customerId_fkey flower_e2_stage
+  4162; 2606 19700 FK CONSTRAINT public OrderCostSnapshot OrderCostSnapshot_orderId_fkey flower_e2_stage
+  4090; 2606 19360 FK CONSTRAINT public OrderItem OrderItem_orderId_fkey flower_e2_stage
+  4091; 2606 19370 FK CONSTRAINT public OrderItem OrderItem_recipeVersionId_fkey flower_e2_stage
+  4092; 2606 19365 FK CONSTRAINT public OrderItem OrderItem_skuId_fkey flower_e2_stage
+  4094; 2606 19390 FK CONSTRAINT public OrderMaterialRequirement OrderMaterialRequirement_materialId_fkey flower_e2_stage
+  4095; 2606 19380 FK CONSTRAINT public OrderMaterialRequirement OrderMaterialRequirement_orderItemId_fkey flower_e2_stage
+  4096; 2606 19385 FK CONSTRAINT public OrderMaterialRequirement OrderMaterialRequirement_revisionId_fkey flower_e2_stage
+  4093; 2606 19375 FK CONSTRAINT public OrderRevision OrderRevision_orderId_fkey flower_e2_stage
+  4085; 2606 19350 FK CONSTRAINT public Order Order_customerId_fkey flower_e2_stage
+  4086; 2606 19355 FK CONSTRAINT public Order Order_recipientId_fkey flower_e2_stage
+  4087; 2606 19345 FK CONSTRAINT public Order Order_storeId_fkey flower_e2_stage
+  4088; 2606 19912 FK CONSTRAINT public Order Order_store_tenant_fkey flower_e2_stage
+  4089; 2606 19340 FK CONSTRAINT public Order Order_tenantId_fkey flower_e2_stage
+  4206; 2606 20017 FK CONSTRAINT public PackagingKitLine PackagingKitLine_materialId_fkey flower_e2_stage
+  4207; 2606 20012 FK CONSTRAINT public PackagingKitLine PackagingKitLine_packagingKitId_fkey flower_e2_stage
+  4205; 2606 19994 FK CONSTRAINT public PackagingKit PackagingKit_tenantId_fkey flower_e2_stage
+  4156; 2606 19670 FK CONSTRAINT public PaymentTransaction PaymentTransaction_orderId_fkey flower_e2_stage
+  4191; 2606 19840 FK CONSTRAINT public ProductCategoryRelation ProductCategoryRelation_categoryId_fkey flower_e2_stage
+  4192; 2606 19835 FK CONSTRAINT public ProductCategoryRelation ProductCategoryRelation_productId_fkey flower_e2_stage
+  4189; 2606 19830 FK CONSTRAINT public ProductCategory ProductCategory_parentId_fkey flower_e2_stage
+  4190; 2606 19825 FK CONSTRAINT public ProductCategory ProductCategory_tenantId_fkey flower_e2_stage
+  4079; 2606 19310 FK CONSTRAINT public ProductSku ProductSku_productId_fkey flower_e2_stage
+  4080; 2606 19315 FK CONSTRAINT public ProductSku ProductSku_sourceSampleId_fkey flower_e2_stage
+  4077; 2606 19305 FK CONSTRAINT public Product Product_id_defaultSkuId_fkey flower_e2_stage
+  4078; 2606 19300 FK CONSTRAINT public Product Product_tenantId_fkey flower_e2_stage
+  4128; 2606 19535 FK CONSTRAINT public ProductionTask ProductionTask_orderItemId_fkey flower_e2_stage
+  4111; 2606 19450 FK CONSTRAINT public PurchaseDemandAllocation PurchaseDemandAllocation_purchaseLineId_fkey flower_e2_stage
+  4112; 2606 19455 FK CONSTRAINT public PurchaseDemandAllocation PurchaseDemandAllocation_requirementId_fkey flower_e2_stage
+  4106; 2606 19435 FK CONSTRAINT public PurchaseOrderLine PurchaseOrderLine_materialId_fkey flower_e2_stage
+  4107; 2606 19430 FK CONSTRAINT public PurchaseOrderLine PurchaseOrderLine_purchaseOrderId_fkey flower_e2_stage
+  4108; 2606 20047 FK CONSTRAINT public PurchaseOrderLine PurchaseOrderLine_sourceLineId_fkey flower_e2_stage
+  4101; 2606 19420 FK CONSTRAINT public PurchaseOrder PurchaseOrder_storeId_fkey flower_e2_stage
+  4102; 2606 19917 FK CONSTRAINT public PurchaseOrder PurchaseOrder_store_tenant_fkey flower_e2_stage
+  4103; 2606 19425 FK CONSTRAINT public PurchaseOrder PurchaseOrder_supplierId_fkey flower_e2_stage
+  4104; 2606 19922 FK CONSTRAINT public PurchaseOrder PurchaseOrder_supplier_tenant_fkey flower_e2_stage
+  4105; 2606 19415 FK CONSTRAINT public PurchaseOrder PurchaseOrder_tenantId_fkey flower_e2_stage
+  4083; 2606 19335 FK CONSTRAINT public RecipeLine RecipeLine_materialId_fkey flower_e2_stage
+  4084; 2606 19330 FK CONSTRAINT public RecipeLine RecipeLine_versionId_fkey flower_e2_stage
+  4082; 2606 19325 FK CONSTRAINT public RecipeVersion RecipeVersion_recipeId_fkey flower_e2_stage
+  4081; 2606 19320 FK CONSTRAINT public Recipe Recipe_skuId_fkey flower_e2_stage
+  4171; 2606 19745 FK CONSTRAINT public Recipient Recipient_tenantId_fkey flower_e2_stage
+  4200; 2606 19880 FK CONSTRAINT public RecommendationItem RecommendationItem_productId_fkey flower_e2_stage
+  4201; 2606 19885 FK CONSTRAINT public RecommendationItem RecommendationItem_skuId_fkey flower_e2_stage
+  4202; 2606 19875 FK CONSTRAINT public RecommendationItem RecommendationItem_slotId_fkey flower_e2_stage
+  4199; 2606 19870 FK CONSTRAINT public RecommendationSlot RecommendationSlot_tenantId_fkey flower_e2_stage
+  4157; 2606 19675 FK CONSTRAINT public RefundTransaction RefundTransaction_orderId_fkey flower_e2_stage
+  4158; 2606 19680 FK CONSTRAINT public RefundTransaction RefundTransaction_paymentId_fkey flower_e2_stage
+  4152; 2606 19650 FK CONSTRAINT public SampleDisassemblyMaterial SampleDisassemblyMaterial_executionStepId_fkey flower_e2_stage
+  4153; 2606 19655 FK CONSTRAINT public SampleDisassemblyMaterial SampleDisassemblyMaterial_materialId_fkey flower_e2_stage
+  4154; 2606 19665 FK CONSTRAINT public SampleInventoryReservation SampleInventoryReservation_batchId_fkey flower_e2_stage
+  4155; 2606 19660 FK CONSTRAINT public SampleInventoryReservation SampleInventoryReservation_executionId_fkey flower_e2_stage
+  4132; 2606 19560 FK CONSTRAINT public SampleMaterial SampleMaterial_materialId_fkey flower_e2_stage
+  4133; 2606 19555 FK CONSTRAINT public SampleMaterial SampleMaterial_sampleId_fkey flower_e2_stage
+  4150; 2606 19640 FK CONSTRAINT public SamplePlanExecutionStep SamplePlanExecutionStep_executionId_fkey flower_e2_stage
+  4151; 2606 19645 FK CONSTRAINT public SamplePlanExecutionStep SamplePlanExecutionStep_plannedStepId_fkey flower_e2_stage
+  4148; 2606 19630 FK CONSTRAINT public SamplePlanExecution SamplePlanExecution_planId_fkey flower_e2_stage
+  4149; 2606 19635 FK CONSTRAINT public SamplePlanExecution SamplePlanExecution_planId_selectedRunId_fkey flower_e2_stage
+  4142; 2606 19605 FK CONSTRAINT public SamplePlanInventorySnapshot SamplePlanInventorySnapshot_materialId_fkey flower_e2_stage
+  4143; 2606 19600 FK CONSTRAINT public SamplePlanInventorySnapshot SamplePlanInventorySnapshot_runId_fkey flower_e2_stage
+  4137; 2606 19575 FK CONSTRAINT public SamplePlanItem SamplePlanItem_planId_fkey flower_e2_stage
+  4138; 2606 19580 FK CONSTRAINT public SamplePlanItem SamplePlanItem_sampleId_fkey flower_e2_stage
+  4139; 2606 19590 FK CONSTRAINT public SamplePlanMaterial SamplePlanMaterial_materialId_fkey flower_e2_stage
+  4140; 2606 19585 FK CONSTRAINT public SamplePlanMaterial SamplePlanMaterial_planId_fkey flower_e2_stage
+  4141; 2606 19595 FK CONSTRAINT public SamplePlanRun SamplePlanRun_planId_fkey flower_e2_stage
+  4146; 2606 19625 FK CONSTRAINT public SamplePlanStepMaterial SamplePlanStepMaterial_materialId_fkey flower_e2_stage
+  4147; 2606 19620 FK CONSTRAINT public SamplePlanStepMaterial SamplePlanStepMaterial_stepId_fkey flower_e2_stage
+  4144; 2606 19610 FK CONSTRAINT public SamplePlanStep SamplePlanStep_runId_fkey flower_e2_stage
+  4145; 2606 19615 FK CONSTRAINT public SamplePlanStep SamplePlanStep_sampleId_fkey flower_e2_stage
+  4134; 2606 19570 FK CONSTRAINT public SamplePlan SamplePlan_storeId_fkey flower_e2_stage
+  4135; 2606 19927 FK CONSTRAINT public SamplePlan SamplePlan_store_tenant_fkey flower_e2_stage
+  4136; 2606 19565 FK CONSTRAINT public SamplePlan SamplePlan_tenantId_fkey flower_e2_stage
+  4131; 2606 19550 FK CONSTRAINT public Sample Sample_tenantId_fkey flower_e2_stage
+  4178; 2606 19785 FK CONSTRAINT public StocktakeLine StocktakeLine_batchId_fkey flower_e2_stage
+  4179; 2606 19790 FK CONSTRAINT public StocktakeLine StocktakeLine_locationId_fkey flower_e2_stage
+  4180; 2606 19780 FK CONSTRAINT public StocktakeLine StocktakeLine_stocktakeId_fkey flower_e2_stage
+  4177; 2606 19775 FK CONSTRAINT public Stocktake Stocktake_storeId_fkey flower_e2_stage
+  4167; 2606 19730 FK CONSTRAINT public StoreMember StoreMember_staffUserId_fkey flower_e2_stage
+  4168; 2606 19725 FK CONSTRAINT public StoreMember StoreMember_storeId_fkey flower_e2_stage
+  4186; 2606 19815 FK CONSTRAINT public StoreSettings StoreSettings_storeId_fkey flower_e2_stage
+  4187; 2606 19810 FK CONSTRAINT public StoreSettings StoreSettings_tenantId_fkey flower_e2_stage
+  4073; 2606 19280 FK CONSTRAINT public Store Store_tenantId_fkey flower_e2_stage
+  4076; 2606 19295 FK CONSTRAINT public Supplier Supplier_tenantId_fkey flower_e2_stage
+  4165; 2606 19720 FK CONSTRAINT public TenantMember TenantMember_staffUserId_fkey flower_e2_stage
+  4166; 2606 19715 FK CONSTRAINT public TenantMember TenantMember_tenantId_fkey flower_e2_stage
+[exit code: 0]
+  pg_restore --list exit=0 structure_ok=True
+
+===== 备份时关键表行数基线（供恢复后比对） =====
+
+===== psql 核对 flower_e2_v1 <v1-row-counts.sql> =====
+  _prisma_migrations_applied|45
+  orders|0
+  product_skus|0
+  product_spus|0
+  purchase_orders|0
+  staff_users|0
+  tenant_members|0
+  tenants|0
+  users|0
+[exit code: 0]
+  v1 migration_applied=45
+
+===== psql 核对 flower_e2_v2_test <v2-row-counts.sql> =====
+  InventoryLocation|2
+  Material|0
+  ProductSku|0
+  PurchaseOrder|0
+  PurchaseOrderLine|0
+  StaffUser|5
+  Store|1
+  StoreMember|5
+  StoreSettings|1
+  Tenant|1
+  TenantMember|5
+  _prisma_migrations_applied|8
+[exit code: 0]
+  v2 migration_applied=8
+
+===== 保留策略 =====
+  keep: 20261110T143030Z-manual
+
+===== 备份完成 =====
+  backup_set: 20261110T143030Z-manual
+  host_path: deploy/staging/.runtime/backup/20261110T143030Z-manual
+  manifest: manifest.json
+  status: success  files=2
+
+=== 证据结束: e21-backup-20261110-223030.log ===

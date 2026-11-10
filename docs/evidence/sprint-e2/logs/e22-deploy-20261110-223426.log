@@ -1,0 +1,74 @@
+### Sprint E2 staging 证据 · E2.2 staging 部署与失败停止
+run_id: 20261110-223426
+recorded_at: 2026-11-10T22:34:26.6791467+08:00
+mode: deploy
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=9112ed3)
+compose_project: flower-e2-staging
+staging_web: http://127.0.0.1:18081  staging_db_port: 15433
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+
+===== 生成 staging 运行时 env 与随机本地凭据（不写入日志） =====
+  复用已有 env: D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\.runtime\staging.env（随机凭据保持不变）
+
+===== 串行化锁 =====
+  lock acquired: deploy/staging/.runtime/deploy.lock
+
+===== 部署前现状 =====
+  current_web: flower-e2-staging:9112ed3bfa46|sha256:ce51b56411863864898bbe32d781711c18b9973b758eba06957123562058882a|running
+  current_cron: flower-e2-staging:9112ed3bfa46|sha256:ce51b56411863864898bbe32d781711c18b9973b758eba06957123562058882a|running
+  rollback_candidate: flower-e2-staging:9112ed3bfa46
+  recorded_at_utc: 2026-11-10T14:34:26.9813078Z
+
+===== 解析目标镜像 =====
+  target_image: flower-e2-staging:9112ed3bfa46  info: sha256:ce51b56411863864898bbe32d781711c18b9973b758eba06957123562058882a|linux/amd64|1804027642
+  target_matches_rollback_candidate: True
+
+===== DryRun 预检 =====
+$ pwsh -NoProfile -File D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\scripts\Test-StagingMigration.ps1 -Mode preflight -Image flower-e2-staging:9112ed3bfa46
+  [evidence] 证据目录: D:\My-project\flower-studio-ecosystem\CMS_and_WMS\docs\evidence\sprint-e2\logs
+  [evidence] D:\My-project\flower-studio-ecosystem\CMS_and_WMS\docs\evidence\sprint-e2\logs\e24-migration-preflight-20261110-223427.log
+  
+  ===== 连通性/目标预检 =====
+  $ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml run --rm --no-deps --entrypoint sh flower-web -ec node scripts/check-v2-database-target.mjs --connect
+     Container flower-e2-staging-flower-web-run-47ec84635c9c Creating 
+     Container flower-e2-staging-flower-web-run-47ec84635c9c Created 
+  [exit code: 0]
+    [OK] V1/V2 目标可连接且库名不同
+  
+  ===== 迁移历史与待应用清单 =====
+  $ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml run --rm --no-deps --entrypoint sh flower-web -ec ls prisma/v2/migrations | sort
+     Container flower-e2-staging-flower-web-run-3278550012ef Creating 
+     Container flower-e2-staging-flower-web-run-3278550012ef Created 
+    0001_initial
+    0002_sku_estimated_costs
+    0003_purchase_order_timestamps
+    0004_material_supplier_lifecycle
+    0005_purchase_order_lifecycle
+    0006_packaging_kits
+    0007_staff_initial_password
+    0008_purchase_supplements_and_inventory_review
+  [exit code: 0]
+  $ docker compose -p flower-e2-staging -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db psql -U flower_e2_stage -d flower_e2_v2_test -t -A -c SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NOT NULL ORDER BY migration_name
+    0001_initial
+    0002_sku_estimated_costs
+    0003_purchase_order_timestamps
+    0004_material_supplier_lifecycle
+    0005_purchase_order_lifecycle
+    0006_packaging_kits
+    0007_staff_initial_password
+    0008_purchase_supplements_and_inventory_review
+  [exit code: 0]
+    image_migrations=8 applied=8 pending=0 unexpected=0
+  
+  ===== preflight 结论 =====
+    OK pending=0（计划内待应用）
+  
+  === 证据结束: e24-migration-preflight-20261110-223427.log ===
+  MIGRATION_PREFLIGHT_OK pending=0
+[exit code: 0]
+  preflight exit=0
+[deploy] exit=0：DryRun 预检通过（未替换应用）
+
+=== 证据结束: e22-deploy-20261110-223426.log ===

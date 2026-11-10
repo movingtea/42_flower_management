@@ -1,0 +1,33 @@
+### Sprint E2 staging 证据 · E2.4 失败分类：非预期历史（3）与迁移后核对失败（5）
+run_id: 20261110-225412
+recorded_at: 2026-11-10T22:54:13.1324644+08:00
+mode: migration-failures
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=9112ed3)
+compose_project: flower-e2-verify
+staging_web: http://127.0.0.1:18082  staging_db_port: 15434
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+
+===== 生成 staging 运行时 env 与随机本地凭据（不写入日志） =====
+  复用已有 env: D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\.runtime\verify.env（随机凭据保持不变）
+
+===== 准备 verify 项目（空库 + 当前镜像迁移） =====
+$ docker compose -p flower-e2-verify -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml down -v --remove-orphans
+[exit code: 0]
+$ docker compose -p flower-e2-verify -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml up -d --no-deps db
+   Network flower-e2-verify_default Creating 
+   Network flower-e2-verify_default Creating 
+   Volume flower-e2-verify_postgres_data Creating 
+   Volume flower-e2-verify_postgres_data Creating 
+   Volume flower-e2-verify_postgres_data Created 
+   Volume flower-e2-verify_postgres_data Created 
+   Network flower-e2-verify_default Created 
+   Network flower-e2-verify_default Created 
+   Container flower-e2-verify-db Creating 
+   Container flower-e2-verify-db Created 
+   Container flower-e2-verify-db Starting 
+   Container flower-e2-verify-db Started 
+[exit code: 0]
+  [OK] db 健康
+$ docker compose -p flower-e2-verify -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml run --rm --no-deps flower-web

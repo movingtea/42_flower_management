@@ -1,0 +1,25 @@
+✔ valid knowledge fixture passes every structural rule (102.0931ms)
+✔ valid fixture tolerates no exception and reports no warning (98.0878ms)
+✔ invalid knowledge fixture fails with one example per rule (106.1931ms)
+✔ explicit exception list converts every fixture failure into visible warnings (101.0819ms)
+✔ tracking check subset only reports Feature Spec / test plan traceability (260.626ms)
+✔ frontmatter parser handles scalars, lists, inline lists and nested maps (2.0396ms)
+✔ frontmatter parser rejects duplicate keys, bad indentation and invalid lines (1.1287ms)
+✔ normalizeChecks expands aliases and rejects unknown checks (0.5881ms)
+✔ machine-readable summary is deterministic between runs (237.4629ms)
+✔ stale exception entries are reported as warnings, not hidden (109.4632ms)
+✔ invalid exception list is rejected with exit code 1 and a SETUP_ERROR summary (79.0577ms)
+✔ unknown CLI check and unknown flag fail with exit code 1 (147.6238ms)
+✔ human output still ends with a parseable machine-readable summary line (104.6976ms)
+✔ markdown summary file is written for CI step summaries (101.6435ms)
+✔ embedded repository exceptions all carry code, target and reason (0.2334ms)
+✔ script only imports Node built-in modules (no network or third-party dependency) (1.5172ms)
+✔ runCheck can be used programmatically without the CLI (30.0796ms)
+ℹ tests 17
+ℹ suites 0
+ℹ pass 17
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1592.5308

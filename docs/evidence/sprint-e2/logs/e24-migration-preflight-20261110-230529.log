@@ -1,0 +1,47 @@
+### Sprint E2 staging 证据 · E2.4 迁移preflight 检查
+run_id: 20261110-230529
+recorded_at: 2026-11-10T23:05:29.3496357+08:00
+mode: migration-preflight
+host: DESKTOP-KKRR7LE / PowerShell 7.4.22
+repo: CMS_and_WMS (branch=dev, HEAD=9112ed3)
+compose_project: flower-e2-verify
+staging_web: http://127.0.0.1:18082  staging_db_port: 15434
+logs_redaction: 连接串密码、AUTH_SECRET 等敏感值不写入本日志。
+---
+
+===== 连通性/目标预检 =====
+$ docker compose -p flower-e2-verify -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml run --rm --no-deps --entrypoint sh flower-web -ec node scripts/check-v2-database-target.mjs --connect
+   Container flower-e2-verify-flower-web-run-024e043da8d0 Creating 
+   Container flower-e2-verify-flower-web-run-024e043da8d0 Created 
+[exit code: 0]
+  [OK] V1/V2 目标可连接且库名不同
+
+===== 迁移历史与待应用清单 =====
+$ docker compose -p flower-e2-verify -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml run --rm --no-deps --entrypoint sh flower-web -ec ls prisma/v2/migrations | sort
+   Container flower-e2-verify-flower-web-run-09e4558715eb Creating 
+   Container flower-e2-verify-flower-web-run-09e4558715eb Created 
+  0001_initial
+  0002_sku_estimated_costs
+  0003_purchase_order_timestamps
+  0004_material_supplier_lifecycle
+  0005_purchase_order_lifecycle
+  0006_packaging_kits
+  0007_staff_initial_password
+  0008_purchase_supplements_and_inventory_review
+[exit code: 0]
+$ docker compose -p flower-e2-verify -f D:\My-project\flower-studio-ecosystem\CMS_and_WMS\deploy\staging\compose\docker-compose.staging.yml exec -T db psql -U flower_e2_stage -d flower_e2_verify_v2_test -t -A -c SELECT migration_name FROM _prisma_migrations WHERE finished_at IS NOT NULL ORDER BY migration_name
+  0001_initial
+  0002_sku_estimated_costs
+  0003_purchase_order_timestamps
+  0004_material_supplier_lifecycle
+  0005_purchase_order_lifecycle
+  0006_packaging_kits
+  0007_staff_initial_password
+  0008_purchase_supplements_and_inventory_review
+  9999_unexpected_history
+[exit code: 0]
+  image_migrations=8 applied=9 pending=0 unexpected=1
+  unexpected: 9999_unexpected_history
+  [FAIL] 数据库存在镜像外的迁移历史（非预期历史）
+
+=== 证据结束: e24-migration-preflight-20261110-230529.log ===

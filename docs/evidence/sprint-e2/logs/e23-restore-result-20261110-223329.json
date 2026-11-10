@@ -1,0 +1,25 @@
+{
+  "runId": "20261110-223329",
+  "archive": "20261110T143244Z-scheduled/v2-20261110T143244Z.dump",
+  "role": "v2",
+  "target": "flower_e2_restore_e23ok",
+  "sha256": "ffe13a2d284f53e1dd9fde96cf0f6bf653efb73197f7b56913a1b9ce383495e1",
+  "restoreSeconds": 3.44,
+  "actualRestorePoint": "2026-11-10T14:32:44.5147038Z",
+  "migrationApplied": 8,
+  "counts": {
+    "InventoryLocation": 2,
+    "Material": 0,
+    "ProductSku": 0,
+    "PurchaseOrder": 0,
+    "PurchaseOrderLine": 0,
+    "StaffUser": 5,
+    "Store": 1,
+    "StoreMember": 5,
+    "StoreSettings": 1,
+    "Tenant": 1,
+    "TenantMember": 5,
+    "_prisma_migrations_applied": 8
+  },
+  "keepTarget": false
+}
