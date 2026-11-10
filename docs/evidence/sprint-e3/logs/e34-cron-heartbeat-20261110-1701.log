@@ -1,0 +1,33 @@
+# Sprint E3.4 cron heartbeat evidence (sanitized)
+# run_id: 20261110-1701 (UTC)
+# Production/dev PG 5432 and container 55432 were not touched.
+
+## 1. Success rounds (cron against an isolated PostgreSQL 18.3 harness with --legacy V1 schema)
+$ CRON_HEARTBEAT_FILE=<temp>/e34-heartbeat.json \
+  node scripts/with-v2-test-db.mjs --legacy -- node node_modules/tsx/dist/cli.mjs scripts/cron-inventory-daemon.ts
+# task rounds succeeded (inventory-sync + order-expiry); the worker then kept polling and was
+# stopped by the operator. Heartbeat file written by the real daemon code path:
+{"updatedAt":"2026-11-10T17:01:00.471Z","tasks":{"inventory-sync":{"lastSuccessAt":"2026-11-10T17:01:00.460Z","consecutiveFailures":0,"lastRunAt":"2026-11-10T17:01:00.460Z","lastOutcome":"success"},"order-expiry":{"lastSuccessAt":"2026-11-10T17:01:00.471Z","consecutiveFailures":0,"lastRunAt":"2026-11-10T17:01:00.471Z","lastOutcome":"success"}}}
+
+## 2. Controlled failure rounds (same heartbeat file; DATABASE_URL -> closed loopback port)
+$ CRON_HEARTBEAT_FILE=<temp>/e34-heartbeat.json \
+  DATABASE_URL=postgres://<placeholder>@127.0.0.1:<closed-port>/... \
+  npx tsx scripts/cron-inventory-daemon.ts
+# both rounds failed with Prisma P1001; heartbeat keeps the previous lastSuccessAt and
+# increments consecutiveFailures (the daemon restores the file at startup):
+{"updatedAt":"2026-11-10T17:01:14.872Z","tasks":{"inventory-sync":{"lastSuccessAt":"2026-11-10T17:01:00.460Z","consecutiveFailures":1,"lastRunAt":"2026-11-10T17:01:14.855Z","lastOutcome":"failure"},"order-expiry":{"lastSuccessAt":"2026-11-10T17:01:00.471Z","consecutiveFailures":1,"lastRunAt":"2026-11-10T17:01:14.872Z","lastOutcome":"failure"}}}
+# The worker stayed alive after both failures (stopped only by the operator), so the polling
+# and exit semantics are unchanged.
+
+## 3. Staging cron healthcheck semantics (same node -e command as the compose healthcheck)
+# Fresh heartbeat (last success < 30 min):  HEALTHCHECK_FRESH_EXIT=0
+# Stale copy (lastSuccessAt moved 31 min back): HEALTHCHECK_STALE_EXIT=1
+# => cron health is now based on "recent successful round", not on the web /api/health probe.
+
+## 4. Notes
+# - CRON_HEARTBEAT_FILE defaults to /tmp/flower-cron-heartbeat.json; staging compose sets
+#   /var/run/flower/cron-heartbeat.json on both services and shares the `cron_heartbeat` volume.
+# - Heartbeat writes are best effort: a filesystem error is swallowed and never changes the
+#   round outcome or the worker loop.
+# - The file contains only ISO timestamps, counters and outcome strings (no credentials,
+#   no request data, no error text).

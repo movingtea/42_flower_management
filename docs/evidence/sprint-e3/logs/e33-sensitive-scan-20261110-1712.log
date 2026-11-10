@@ -1,0 +1,22 @@
+# Sprint E3.3 sensitive-value scan of E3.3 evidence (sanitized)
+# task: task-3 / e33-error-alerting
+# run_id: 20261110-1712 (UTC)
+# scope: docs/evidence/sprint-e3/logs/e33-* only (test fixtures with synthetic credentials are not evidence)
+# note: absolute repo paths were normalized to <repo> before this scan.
+
+PATTERN credentialed_db_url hits=0 files=
+PATTERN bearer_token hits=0 files=
+PATTERN basic_token hits=0 files=
+PATTERN session_cookie_value hits=0 files=
+PATTERN private_ipv4_port hits=0 files=
+PATTERN absolute_repo_path hits=0 files=
+PATTERN secret_assignment hits=0 files=
+PATTERN fake_sentinel hits=0 files=
+TOTAL_SENSITIVE_PATTERN_HITS=0
+EVENT_TOP_KEYS=env,event,fields,level,requestId,service,ts,v,version
+EVENT_FIELD_KEYS=errorCode,errorName,groupKey,kind,reason,route,routeType,stack
+EVENT_HAS_MESSAGE_FIELD=False
+EVENT_HAS_REQUEST_PATH_FIELD=False
+EVENT_STACK_HAS_REDACTED=True
+EVENT_STACK_HAS_REPO_PLACEHOLDER=True
+RESULT=PASS

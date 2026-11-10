@@ -1,0 +1,89 @@
+# E3.7 final consolidated verification (after all deliverables were written)
+# Captured at 2026-11-10T16:35:39Z (UTC)
+# Every command ran from the CMS_and_WMS repository root. Exit code 0 = gate passed.
+$ node scripts/security/check-workflow-pins.mjs
+exit=0
+workflow: D:\My-project\flower-studio-ecosystem\CMS_and_WMS\.github\workflows\security.yml
+action references inspected: 15
+PASS check-workflow-pins: 0 error(s), 0 warning(s)
+$ node scripts/security/check-workflow-pins.mjs --self-test --quiet
+exit=0
+last-line: PASS check-workflow-pins self-test: primitives 11/11, fixtures 12/12, real workflow pass
+$ node scripts/security/check-workflow-pins.mjs --fixtures
+exit=0
+PASS valid.yml — normal workflow accepted
+PASS unpinned-tag.yml — controlled failure detected (uses-not-sha-pinned)
+PASS short-sha.yml — controlled failure detected (uses-not-sha-pinned)
+PASS missing-version-comment.yml — controlled failure detected (uses-missing-version-comment)
+PASS pull-request-target.yml — controlled failure detected (forbidden-pull-request-target, missing-pull-request-trigger)
+PASS missing-permissions.yml — controlled failure detected (missing-permissions)
+PASS write-all-permissions.yml — controlled failure detected (permissions-root-write)
+PASS docker-build.yml — controlled failure detected (docker-build-forbidden)
+PASS unneeded-security-events.yml — controlled failure detected (security-events-write-unneeded)
+PASS missing-jobs.yml — controlled failure detected (missing-job)
+PASS unpinned-image-scan-guard.yml — controlled failure detected (image-scan-guard)
+PASS secret-echo.yml — controlled failure detected (secret-echo)
+PASS check-workflow-pins fixture matrix: 12/12
+$ node scripts/security/check-exceptions.mjs --today 2026-11-11
+exit=0
+policy exceptions: 0
+policy: D:\My-project\flower-studio-ecosystem\CMS_and_WMS\.github\security\policy.yml
+trivy ignore: D:\My-project\flower-studio-ecosystem\CMS_and_WMS\.github\security\trivy-ignore.yaml
+gitleaks config: D:\My-project\flower-studio-ecosystem\CMS_and_WMS\.github\security\gitleaks.toml
+evaluation date (UTC): 2026-11-11
+PASS check-exceptions: 0 error(s), 0 warning(s)
+$ node scripts/security/check-exceptions.mjs --self-test --today 2026-11-11 --quiet
+exit=0
+last-line: PASS check-exceptions self-test: primitives 7/7, fixtures 12/12, real files pass
+$ node scripts/security/check-exceptions.mjs --fixtures --today 2026-11-11
+exit=0
+PASS valid policy with no exceptions — accepted
+PASS active exception backed by trivy ignore — accepted
+PASS expired exception fails — controlled failure detected (exception-expired)
+PASS exception missing compensating controls fails — controlled failure detected (exception-required-field)
+PASS exception missing owner fails — controlled failure detected (exception-required-field)
+PASS exception invalid expiry date fails — controlled failure detected (exception-date)
+PASS trivy ignore without policy exception fails — controlled failure detected (trivy-ignore-unbacked)
+PASS trivy ignore past expiry fails — controlled failure detected (exception-expired, trivy-ignore-expired)
+PASS trivy ignore without expiry fails — controlled failure detected (trivy-ignore-missing-expiry)
+PASS broad gitleaks allowlist fails — controlled failure detected (gitleaks-allowlist-too-broad)
+PASS gitleaks allowlist missing placeholder coverage fails — controlled failure detected (gitleaks-allowlist-coverage)
+PASS gitleaks config without default rules fails — controlled failure detected (gitleaks-default-rules)
+PASS check-exceptions fixture matrix: 12/12
+$ node scripts/security/check-lockfile.mjs
+exit=0
+lockfile: D:\My-project\flower-studio-ecosystem\CMS_and_WMS\flower-wms-system\package-lock.json
+policy: D:\My-project\flower-studio-ecosystem\CMS_and_WMS\.github\security\policy.yml (policy)
+packages: 739, resolved: 739, integrity: 739, legacy mirror: 627
+  host registry.npmmirror.com: 627
+  host registry.npmjs.org: 112
+WARN  [lockfile-legacy-mirror-baseline] 627 package(s) resolve from a documented legacy mirror; this is the known E2 baseline and must not be silently normalised. Fix in a separately approved lockfile work package.
+PASS check-lockfile: 0 error(s), 1 warning(s)
+$ node scripts/security/check-lockfile.mjs --self-test --quiet
+exit=0
+last-line: PASS check-lockfile self-test: primitives 6/6, fixtures 8/8, real lockfile pass
+$ node scripts/security/check-lockfile.mjs --fixtures
+exit=0
+PASS lock-valid.json — accepted
+PASS lock-bad-host.json — controlled failure detected (lockfile-resolved-host)
+PASS lock-missing-integrity.json — controlled failure detected (lockfile-missing-integrity)
+PASS lock-http.json — controlled failure detected (lockfile-resolved-protocol)
+PASS lock-legacy-mirror.json — accepted
+PASS lock-legacy-mirror.json (strict) — controlled failure detected (lockfile-legacy-mirror)
+PASS lock-bad-version.json — controlled failure detected (lockfile-version)
+PASS lock-bad-integrity.json — controlled failure detected (lockfile-integrity-format)
+PASS check-lockfile fixture matrix: 8/8
+$ node scripts/check-knowledge-structure.mjs --json
+exit=0
+last-line: {"tool":"check-knowledge-structure","version":1,"root":".","checks":["links","wikilinks","frontmatter","adr","specs","superseded"],"status":"passed","counts":{"markdownFiles":64,"knowledgeFiles":26,"docsFiles":38,"frontmatterDocs":26,"links":237,"wikilinks":77,"adrDocs":5,"featureSpecs":0,"testPlans":1,"approvedDocs":10},"errors":[],"warnings":[{"code":"EXCEPTION_APPLIED","file":"knowledge/02-Business/E0-business-rule-review.md","message":"historical gap tolerated: superseded document has no superseded_by/replaced_by replacement pointer (reason: 历史文档建立时未设置 superseded_by 字段；正文和 related 已指向 E0-confirmed-inventory-decisions、E0-confirmed-operating-rules 等已批准替代文档。)"},{"code":"EXCEPTION_APPLIED","file":"knowledge/specifications/features","target":"knowledge/specifications/features","message":"historical gap tolerated: no Feature Spec documents (frontmatter type feature-spec) found under knowledge/specifications/features (1 test plan(s) present) (reason: 正式 Feature Spec 与 AC 编号尚未建立；E1.1 交接已登记该缺口，当前规格入口仍为来源索引。)"},{"code":"EXCEPTION_APPLIED","file":"knowledge/specifications/test-plans/E1.1-p1-test-traceability.md","target":"knowledge/specifications/test-plans/E1.1-p1-test-traceability.md","message":"historical gap tolerated: test plan does not reference any Feature Spec document (reason: E1.1 交接已登记正式 Feature Spec AC 待建立，矩阵暂以已批准规则 ID/ADR 条款作为来源锚点；Feature Spec 建立后回填并删除本例外。)"}],"exceptions":[{"code":"FEATURE_SPECS_ABSENT","target":"knowledge/specifications/features","file":"knowledge/specifications/features","reason":"正式 Feature Spec 与 AC 编号尚未建立；E1.1 交接已登记该缺口，当前规格入口仍为来源索引。","owner":"engineering","registered":"2026-11-09"},{"code":"SUPERSEDED_WITHOUT_REPLACEMENT","target":"knowledge/02-Business/E0-business-rule-review.md","file":"knowledge/02-Business/E0-business-rule-review.md","reason":"历史文档建立时未设置 superseded_by 字段；正文和 related 已指向 E0-confirmed-inventory-decisions、E0-confirmed-operating-rules 等已批准替代文档。","owner":"product","registered":"2026-11-09"},{"code":"TEST_PLAN_SPEC_MISSING","target":"knowledge/specifications/test-plans/E1.1-p1-test-traceability.md","file":"knowledge/specifications/test-plans/E1.1-p1-test-traceability.md","reason":"E1.1 交接已登记正式 Feature Spec AC 待建立，矩阵暂以已批准规则 ID/ADR 条款作为来源锚点；Feature Spec 建立后回填并删除本例外。","owner":"engineering","registered":"2026-11-09"}],"unusedExceptions":[]}
+$ node --test scripts/check-knowledge-structure.test.mjs
+exit=0
+last-line: ℹ duration_ms 2194.8433
+overall: PASS - all 11 commands exited 0
+
+# Protected files that must remain untouched (empty diff = unchanged):
+git diff for pr.yml/deploy.yml/Dockerfile/package.json/package-lock.json is empty: UNCHANGED
+# deploy/staging/workflow-proposal.md change (append only):
+warning: in the working copy of 'deploy/staging/workflow-proposal.md', LF will be replaced by CRLF the next time Git touches it
+ deploy/staging/workflow-proposal.md | 13 +++++++++++++
+ 1 file changed, 13 insertions(+)

@@ -1,0 +1,19 @@
+# E3.7 real-scan status: DEFERRED TO MAINTAINER, NOT EXECUTED
+# Captured at 2026-11-10T16:33:01Z (UTC)
+#
+# Not executed locally in Sprint E3.7, and therefore NOT a pass:
+#   - gitleaks real scan (gitleaks binary/action not installed; no network install in this task)
+#   - trivy image scan (no ACR production image access and no scanner installation)
+#   - syft/SBOM generation (sbom-action not executed; only workflow structure verified)
+#   - real GitHub Actions run of .github/workflows/security.yml
+#   - ACR read-only pull authentication and image digest capture
+#
+# Verified instead (see e37-workflow-structure / e37-exceptions / e37-lockfile /
+# e37-config-syntax / e37-knowledge-gate logs):
+#   - workflow structure, least privilege, trigger scope and 40-hex SHA pin format
+#   - policy structure, exception required fields, expiry failure semantics
+#   - trivy-ignore backing/expiry rules and gitleaks allowlist structure
+#   - lockfile resolved host / SRI integrity offline inspection (lockfile untouched)
+#   - controlled failure samples for every check class
+#
+# Maintainer actions: docs/sprint-e3-security-gates.md section 9.

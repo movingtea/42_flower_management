@@ -1,6 +1,7 @@
 import {
   Prisma, ReservationState, StocktakeState, SupplyState, TransactionKind,
 } from "../../generated/prisma-v2/client";
+import { logEvent } from "../../lib/observability/logger";
 import { assertMaterialQuantity } from "../domain/stock-planning";
 import {
   assertNonNegativeQuantity,
@@ -522,15 +523,12 @@ function signedAdjustmentQty(
  * quantity with the current locked balance; only a real difference writes the balance and one
  * ADJUSTMENT movement. Counted quantity can never be negative and the balance is set to it.
  */
-export async function confirmStocktake(
+async function confirmStocktakeCore(
   tx: Prisma.TransactionClient,
-  scopeInput: InventoryOperationScope,
-  stocktakeIdInput: string,
+  scope: InventoryOperationScope,
+  stocktakeId: string,
   reviewApproval?: { approved: true; note?: string },
 ): Promise<ConfirmStocktakeResult> {
-  const scope = normalizeScope(scopeInput);
-  const stocktakeId = text(stocktakeIdInput, "盘点单");
-
   await tx.$queryRaw`SELECT id FROM "Stocktake" WHERE id = ${stocktakeId} FOR UPDATE`;
   const stocktake = await tx.stocktake.findUnique({
     where: { id: stocktakeId },
@@ -864,6 +862,76 @@ export async function confirmStocktake(
     lines: confirmedLines,
     adjustmentCount: confirmedLines.filter((line) => line.transactionId !== null).length,
   };
+}
+
+const STOCKTAKE_CONFLICT_HINTS = [
+  "正在被其他操作处理",
+  "需人工处理",
+  "与本次请求不一致",
+] as const;
+
+/** Map an existing thrown message to the shared E3 stocktake failure enum. */
+function classifyStocktakeFailure(
+  error: unknown,
+): "negative_stock" | "invalid_state" | "permission" | "conflict" | "internal" {
+  const message = error instanceof Error ? error.message : "";
+  if (message.includes("盘点数量不能为负数")) return "negative_stock";
+  if (message.includes("仅本店经理或授权人员可以复核盘点差异")) return "permission";
+  if (STOCKTAKE_CONFLICT_HINTS.some((hint) => message.includes(hint))) return "conflict";
+  if (
+    message.includes("盘点单已取消") ||
+    message.includes("盘点单复核已拒绝") ||
+    message.includes("盘点单正在等待本店经理或授权人员复核") ||
+    message.includes("盘点单没有明细") ||
+    message.includes("盘点单不存在")
+  ) {
+    return "invalid_state";
+  }
+  return "internal";
+}
+
+/**
+ * Export boundary for stocktake confirmation.
+ *
+ * The transaction, lock order, idempotency checks, thrown errors and audit
+ * writes stay exactly in `confirmStocktakeCore`; this wrapper only emits the
+ * structured started/success/failure events required by the E3 contract and
+ * re-throws the original error unchanged.
+ */
+export async function confirmStocktake(
+  tx: Prisma.TransactionClient,
+  scopeInput: InventoryOperationScope,
+  stocktakeIdInput: string,
+  reviewApproval?: { approved: true; note?: string },
+): Promise<ConfirmStocktakeResult> {
+  const scope = normalizeScope(scopeInput);
+  const stocktakeId = text(stocktakeIdInput, "盘点单");
+  const baseFields = { stocktakeId, storeId: scope.storeId };
+
+  logEvent({
+    level: "info",
+    event: "stocktake.confirm",
+    fields: { outcome: "started", ...baseFields },
+  });
+
+  try {
+    const result = await confirmStocktakeCore(tx, scope, stocktakeId, reviewApproval);
+    logEvent({
+      level: "info",
+      event: "stocktake.confirm",
+      fields: { outcome: "success", ...baseFields },
+    });
+    return result;
+  } catch (error) {
+    const reason = classifyStocktakeFailure(error);
+    logEvent({
+      level: reason === "internal" ? "error" : "warn",
+      event: "stocktake.confirm",
+      fields: { outcome: "failure", ...baseFields, reason },
+      error,
+    });
+    throw error;
+  }
 }
 
 export async function reviewStocktake(

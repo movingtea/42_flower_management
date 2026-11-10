@@ -13,6 +13,11 @@ if [ "${SKIP_DB_MIGRATE:-}" != "true" ]; then
   echo "[entrypoint] prisma migrate deploy..."
   npx prisma migrate deploy
   npm run db:v2:migrate:deploy
+  # Read-only credential check. Default V2_CREDENTIAL_CHECK_MODE=warn only logs
+  # a high-severity finding and exits 0; block mode refuses to start. It never
+  # modifies accounts and never prints paths, hashes or passwords.
+  echo "[entrypoint] credential governance check..."
+  node scripts/check-v2-credential-governance.mjs
 else
   echo "[entrypoint] skip migrations (SKIP_DB_MIGRATE=true)"
 fi

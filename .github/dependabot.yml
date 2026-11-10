@@ -1,0 +1,80 @@
+# Flower WMS — Dependabot configuration (Sprint E3.7)
+#
+# Purpose: keep the pinned GitHub Actions, the npm dependency set and the base
+# container image reviewable without silently upgrading anything. Dependabot only
+# opens pull requests; merging stays a maintainer decision and the security gate
+# (`.github/workflows/security.yml`) evaluates every PR.
+#
+# Target branch: `dev` is the Sprint integration branch. The repository default
+# branch is `master`, which `deploy.yml` deploys on push, so dependabot is pointed
+# at `dev` to keep automatic upgrade PRs away from production deployment.
+# Maintainers may change this deliberately; it is not changed by the automation.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/flower-wms-system"
+    target-branch: "dev"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:00"
+      timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "security"
+    groups:
+      npm-runtime-minor-patch:
+        dependency-type: "production"
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+      npm-development-minor-patch:
+        dependency-type: "development"
+        patterns:
+          - "*"
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # Sprint E3 explicitly does not perform major upgrades. Major bumps need a
+      # separate approved work package with compatibility evidence.
+      - dependency-name: "*"
+        update-types:
+          - "version-update:semver-major"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: "dev"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:15"
+      timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "security"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    target-branch: "dev"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "04:30"
+      timezone: "Asia/Shanghai"
+    open-pull-requests-limit: 3
+    labels:
+      - "dependencies"
+      - "security"
+    groups:
+      base-images:
+        patterns:
+          - "*"

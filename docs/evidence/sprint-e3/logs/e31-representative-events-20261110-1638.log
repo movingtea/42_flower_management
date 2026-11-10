@@ -1,0 +1,43 @@
+# Sprint E3.1 representative-path events (sanitized)
+# run_id: 20261110-1638 (UTC)
+# sources:
+#  A) Next dev server + isolated throw-away PostgreSQL 18.3 (DB harness, random loopback port)
+#     LOG_FORMAT=json; GET /api/health; Auth.js credentials postbacks for both providers
+#  B) cron worker against an unreachable 127.0.0.1:<closed-port> database (controlled failure)
+#  C) Next dev server with unreachable V1/V2 database URLs (controlled health failure)
+# Account IDs/emails, passwords, cookies, request headers and DB URLs are not present;
+# account identity is only the 16-char HMAC fingerprint.
+
+## A1. health success (both DBs reachable; response contract unchanged)
+$ curl -s -o NUL -w '%{http_code}' http://127.0.0.1:<port>/api/health
+200
+{"v":1,"ts":"2026-11-10T16:37:37.071Z","level":"info","event":"http.health.check","service":"flower-wms","env":"development","version":"unknown","fields":{"outcome":"success","status":200,"v1DurationMs":171,"v2DurationMs":171}}
+
+## A2. auth success + failure, both providers (external responses unchanged: 302)
+# v2 success (test fixture account; password not recorded)
+POST /api/auth/callback/v2-credentials -> 302
+{"v":1,"ts":"2026-11-10T16:37:45.194Z","level":"info","event":"auth.login.attempt","service":"flower-wms","env":"development","version":"unknown","fields":{"outcome":"success","provider":"v2","reason":"ok","accountFingerprint":"41048fffe48423f7"}}
+# v2 wrong password -> 302 /login?error=CredentialsSignin&code=credentials
+{"v":1,"ts":"2026-11-10T16:37:45.790Z","level":"warn","event":"auth.login.attempt","service":"flower-wms","env":"development","version":"unknown","fields":{"outcome":"failure","provider":"v2","reason":"wrong_password","accountFingerprint":"41048fffe48423f7"}}
+# legacy unknown user -> 302 /login?error=CredentialsSignin&code=credentials
+{"v":1,"ts":"2026-11-10T16:37:45.953Z","level":"warn","event":"auth.login.attempt","service":"flower-wms","env":"development","version":"unknown","fields":{"outcome":"failure","provider":"legacy","reason":"unknown_user","accountFingerprint":"cab6c15fbe2454b3"}}
+# same account => same fingerprint across providers; successful and failed attempts differ
+# only in reason/outcome. No plaintext username, password, hash or request body appears.
+
+## B1. cron worker lifecycle (controlled DB failure; run IDs correlate started with failure)
+$ npx tsx scripts/cron-inventory-daemon.ts   (DATABASE_URL -> closed loopback port)
+{"v":1,"ts":"2026-11-10T16:37:58.339Z","level":"info","event":"cron.worker.started","service":"flower-wms","env":"unknown","version":"unknown","fields":{"pid":23588,"inventoryIntervalMs":900000,"orderExpiryIntervalMs":60000}}
+{"v":1,"ts":"2026-11-10T16:37:58.341Z","level":"info","event":"cron.task.round","service":"flower-wms","env":"unknown","version":"unknown","runId":"2736facc-164f-464f-b7c0-da04a9fd2159","fields":{"task":"inventory-sync","outcome":"started","durationMs":0}}
+{"v":1,"ts":"2026-11-10T16:37:58.640Z","level":"info","event":"cron.task.round","service":"flower-wms","env":"unknown","version":"unknown","runId":"6ea485dd-5aac-488a-b1eb-8b2e1b3490e3","fields":{"task":"order-expiry","outcome":"started","durationMs":0}}
+{"v":1,"ts":"2026-11-10T16:37:58.639Z","level":"error","event":"cron.task.round","service":"flower-wms","env":"unknown","version":"unknown","runId":"2736facc-164f-464f-b7c0-da04a9fd2159","fields":{"task":"inventory-sync","outcome":"failure","durationMs":298,"reason":"internal_error"},"err":{"name":"PrismaClientKnownRequestError","code":"P1001","message":"<sanitized prisma connection error>","stack":"PrismaClientKnownRequestError: <sanitized stack: first 2 frames>"}}
+{"v":1,"ts":"2026-11-10T16:37:58.653Z","level":"error","event":"cron.task.round","service":"flower-wms","env":"unknown","version":"unknown","runId":"6ea485dd-5aac-488a-b1eb-8b2e1b3490e3","fields":{"task":"order-expiry","outcome":"failure","durationMs":13,"reason":"internal_error"},"err":{"name":"PrismaClientKnownRequestError","code":"P1001","message":"<sanitized prisma connection error>","stack":"PrismaClientKnownRequestError: <sanitized stack: first 2 frames>"}}
+# started/failure share the same runId per round; interval values and exit semantics unchanged;
+# the worker kept polling after both task failures (process had to be stopped by the operator).
+
+## C1. health failure (unreachable V1/V2 DB; 503 response contract unchanged)
+$ curl -s -w ' HTTP_STATUS=%{http_code}' http://127.0.0.1:<port>/api/health
+{"status":"unavailable"} HTTP_STATUS=503
+{"v":1,"ts":"2026-11-10T16:34:17.601Z","level":"warn","event":"http.health.check","service":"flower-wms","env":"development","version":"unknown","fields":{"outcome":"failure","status":503,"v1DurationMs":2,"v2DurationMs":2,"failedDb":"both"}}
+
+# Sanitization applied to this evidence file: absolute repository paths -> <repo>,
+# loopback/ephemeral ports -> <port>, DB host:port -> <db>, Prisma messages/stacks truncated.

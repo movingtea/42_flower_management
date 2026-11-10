@@ -1,0 +1,34 @@
+# E3.7 workflow structure and action pin gate
+# Captured at 2026-11-10T16:34:25Z (UTC)
+# Scope: offline structural verification only. No GitHub Actions run was executed.$ node scripts/security/check-workflow-pins.mjs
+workflow: D:\My-project\flower-studio-ecosystem\CMS_and_WMS\.github\workflows\security.yml
+action references inspected: 15
+PASS check-workflow-pins: 0 error(s), 0 warning(s)
+exit=0
+$ node scripts/security/check-workflow-pins.mjs --self-test
+PASS accepts a 40-char lowercase SHA
+PASS rejects a 39-char SHA
+PASS rejects a 41-char SHA
+PASS rejects an uppercase SHA
+PASS rejects a tag ref
+PASS accepts a `# vX.Y.Z` comment
+PASS accepts a `# X.Y.Z` comment
+PASS rejects a branch comment
+PASS splits owner/repo@sha
+PASS rejects a missing @ref
+PASS detects the image-scan guard
+PASS valid.yml — normal workflow accepted
+PASS unpinned-tag.yml — controlled failure detected (uses-not-sha-pinned)
+PASS short-sha.yml — controlled failure detected (uses-not-sha-pinned)
+PASS missing-version-comment.yml — controlled failure detected (uses-missing-version-comment)
+PASS pull-request-target.yml — controlled failure detected (forbidden-pull-request-target, missing-pull-request-trigger)
+PASS missing-permissions.yml — controlled failure detected (missing-permissions)
+PASS write-all-permissions.yml — controlled failure detected (permissions-root-write)
+PASS docker-build.yml — controlled failure detected (docker-build-forbidden)
+PASS unneeded-security-events.yml — controlled failure detected (security-events-write-unneeded)
+PASS missing-jobs.yml — controlled failure detected (missing-job)
+PASS unpinned-image-scan-guard.yml — controlled failure detected (image-scan-guard)
+PASS secret-echo.yml — controlled failure detected (secret-echo)
+PASS real security workflow passes
+PASS check-workflow-pins self-test: primitives 11/11, fixtures 12/12, real workflow pass
+exit=0

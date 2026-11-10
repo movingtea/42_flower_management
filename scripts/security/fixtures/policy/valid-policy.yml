@@ -1,0 +1,42 @@
+# Controlled fixture: a structurally complete E3.7 security policy.
+# Used only by scripts/security/*.mjs --self-test / --fixtures.
+version: 1
+policy:
+  dependency_review:
+    fail_on_severity: high
+    fail_on_scopes: runtime
+    development_findings: report
+    exploitability:
+      known_exploited: block
+      epss_threshold: 0.5
+    fix_availability:
+      fix_available: block
+      no_fix_available: exception_required
+  image_scan:
+    fail_on_severity: HIGH
+    scanners: [vuln]
+    ignore_unfixed: false
+    ignore_file: .github/security/trivy-ignore.yaml
+    exploitability:
+      known_exploited: block
+      epss_threshold: 0.5
+    fix_availability:
+      fix_available: block
+      no_fix_available: exception_required
+  secret_scan:
+    fail_on_findings: true
+    config: .github/security/gitleaks.toml
+  supply_chain:
+    lockfile: flower-wms-system/package-lock.json
+    allowed_resolved_hosts: [registry.npmjs.org]
+    legacy_mirror_hosts: [registry.npmmirror.com]
+    require_integrity: true
+    require_https: true
+  sbom:
+    formats: [spdx-json, cyclonedx-json]
+  exceptions:
+    required_fields: [id, tool, vuln_id, reason, owner, expires_on, compensating_controls]
+    tools: [dependency-review, image-scan, secret-scan]
+    expired_policy: fail
+    max_horizon_days: 365
+exceptions: []

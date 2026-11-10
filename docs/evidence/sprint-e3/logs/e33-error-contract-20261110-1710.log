@@ -1,0 +1,58 @@
+# Sprint E3.3 error contract unit evidence (verbose)
+# task: task-3 / e33-error-alerting
+# run_id: 20261110-1710 (UTC)
+# command: npx vitest run src/lib/observability/error-classify.vitest.ts src/lib/observability/error-events.vitest.ts --reporter=verbose
+# covers: expected filtering (Auth.js / Next control flow / business codes / malformed JSON),
+#   system classification, redaction (headers/cookies/query/body/connection details), requestId
+#   correlation and validation, groupKey stability, stderr/file adapters, forced delivery failure.
+
+
+ RUN  v4.1.12 <repo>
+
+ ✓ src/lib/observability/error-classify.vitest.ts > expected: Auth.js errors > classifies the real AuthError base class as expected 2ms
+ ✓ src/lib/observability/error-classify.vitest.ts > expected: Auth.js errors > classifies the real CredentialsSignin class as expected 1ms
+ ✓ src/lib/observability/error-classify.vitest.ts > expected: Auth.js errors > classifies a throttled CredentialsSignin subclass with its stable code 0ms
+ ✓ src/lib/observability/error-classify.vitest.ts > expected: Auth.js errors > does not treat an ordinary Error as an Auth.js error 0ms
+ ✓ src/lib/observability/error-classify.vitest.ts > expected: Next.js control flow > recognises redirect and not-found digests 0ms
+ ✓ src/lib/observability/error-classify.vitest.ts > expected: Next.js control flow > classifies invalid digest-like values as system errors 0ms
+ ✓ src/lib/observability/error-classify.vitest.ts > expected: Next.js control flow > exposes stable digest classification helpers 0ms
+ ✓ src/lib/observability/error-classify.vitest.ts > expected: stable business error codes > classifies MiniprogramBusinessError by its stable code 0ms
+ ✓ src/lib/observability/error-classify.vitest.ts > expected: stable business error codes > classifies validation and permission codes 0ms
+ ✓ src/lib/observability/error-classify.vitest.ts > expected: stable business error codes > classifies the remaining business codes as controlled conflicts 1ms
+ ✓ src/lib/observability/error-classify.vitest.ts > expected: stable business error codes > classifies validation error classes by name 0ms
+ ✓ src/lib/observability/error-classify.vitest.ts > expected: malformed JSON request bodies > classifies JSON parse errors on route handlers as client input 0ms
+ ✓ src/lib/observability/error-classify.vitest.ts > expected: malformed JSON request bodies > keeps JSON parse errors outside route handlers as system errors 0ms
+ ✓ src/lib/observability/error-classify.vitest.ts > expected: malformed JSON request bodies > does not treat unrelated SyntaxErrors as request body errors 0ms
+ ✓ src/lib/observability/error-classify.vitest.ts > system errors > classifies generic, infrastructure and thrown non-Error values as system 0ms
+ ✓ src/lib/observability/error-classify.vitest.ts > errorName > never falls back to the message 0ms
+ ✓ src/lib/observability/error-events.vitest.ts > buildErrorEvent: schema and correlation > builds the fixed error.server envelope with environment, route and group key 9ms
+ ✓ src/lib/observability/error-events.vitest.ts > buildErrorEvent: schema and correlation > never copies headers, cookies, query strings or the request path 2ms
+ ✓ src/lib/observability/error-events.vitest.ts > buildErrorEvent: schema and correlation > drops the error message from the stack and redacts connection details 1ms
+ ✓ src/lib/observability/error-events.vitest.ts > buildErrorEvent: schema and correlation > omits the stack when LOG_STACKS=false 1ms
+ ✓ src/lib/observability/error-events.vitest.ts > buildErrorEvent: schema and correlation > drops digests that could embed URLs and sanitizes route paths 2ms
+ ✓ src/lib/observability/error-events.vitest.ts > buildErrorEvent: schema and correlation > keeps the group key stable across requests even when IDs differ 2ms
+ ✓ src/lib/observability/error-events.vitest.ts > buildErrorEvent: schema and correlation > handles non-Error thrown values without a stack 1ms
+ ✓ src/lib/observability/error-events.vitest.ts > buildErrorEvent: schema and correlation > sanitizes odd error names and codes 1ms
+ ✓ src/lib/observability/error-events.vitest.ts > request ID extraction > accepts a valid x-request-id from plain header objects 1ms
+ ✓ src/lib/observability/error-events.vitest.ts > request ID extraction > accepts a Headers-like getter 1ms
+ ✓ src/lib/observability/error-events.vitest.ts > request ID extraction > never echoes invalid, oversized or control-character IDs 1ms
+ ✓ src/lib/observability/error-events.vitest.ts > route sanitisation > keeps templates and strips query strings 1ms
+ ✓ src/lib/observability/error-events.vitest.ts > route sanitisation > never returns an empty route and caps the length 2ms
+ ✓ src/lib/observability/error-events.vitest.ts > route sanitisation > normalises route types to the documented enum 4ms
+ ✓ src/lib/observability/error-events.vitest.ts > deliverErrorEvent: local adapters > writes one JSON line to stderr by default 3ms
+ ✓ src/lib/observability/error-events.vitest.ts > deliverErrorEvent: local adapters > appends JSON lines to ERROR_EVENT_FILE 5ms
+ ✓ src/lib/observability/error-events.vitest.ts > deliverErrorEvent: local adapters > returns a stable failure result when the file cannot be written 3ms
+ ✓ src/lib/observability/error-events.vitest.ts > deliverErrorEvent: local adapters > throws only for the test-only ERROR_EVENT_FAIL switch 2ms
+ ✓ src/lib/observability/error-events.vitest.ts > recordServerError: filtering and failure isolation > filters expected errors to a debug-level log line without delivery 3ms
+ ✓ src/lib/observability/error-events.vitest.ts > recordServerError: filtering and failure isolation > delivers a system error as exactly one event and keeps the request ID 4ms
+ ✓ src/lib/observability/error-events.vitest.ts > recordServerError: filtering and failure isolation > keeps the application alive and logs error.delivery.failed when the adapter throws 2ms
+ ✓ src/lib/observability/error-events.vitest.ts > recordServerError: filtering and failure isolation > logs error.delivery.failed when the file adapter fails, without throwing 2ms
+ ✓ src/lib/observability/error-events.vitest.ts > recordServerError: filtering and failure isolation > never throws, even for a hostile error object 1ms
+ ✓ src/lib/observability/error-events.vitest.ts > recordServerError: filtering and failure isolation > treats Auth.js and control-flow errors as expected 2ms
+
+ Test Files  2 passed (2)
+      Tests  40 passed (40)
+   Start at  01:09:59
+   Duration  455ms (transform 179ms, setup 0ms, import 243ms, tests 70ms, environment 0ms)
+
+EXIT=0

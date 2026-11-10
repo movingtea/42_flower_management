@@ -1,0 +1,74 @@
+# Sprint E3.4 gates, scope and residual risk (sanitized)
+# run_id: 20261110-1704 (UTC)
+
+## Quality gates (workdir CMS_and_WMS/flower-wms-system)
+$ npx next typegen                         exit=0
+$ npx tsc --noEmit                         exit=0 (0 errors)
+$ npm run lint                             exit=0 (pre-existing warnings only, 0 errors)
+$ npm run test:unit                        exit=0
+    vitest: 14 files / 154 tests passed (observability metrics.vitest.ts = 13 tests)
+    node --test self-checks: 34 passed
+    test-v2 unit: Passed 9 unit files
+$ npm run test:integration:v2              exit=0
+    Running integration (35 files)
+    [12/35] src/v2/metrics-route.test.ts
+    v2 system metrics route tests passed
+    Passed 35 integration files
+$ docker compose -f deploy/staging/compose/docker-compose.staging.yml config --quiet
+                                           exit=0 (staging YAML valid, cron heartbeat volume +
+                                           freshness healthcheck parsed)
+# Note: `npm run build` was NOT re-run for E3.4 to respect the low C: disk budget; the E3.2
+# production build passed (exit=0, ƒ Proxy) and E3.4 changes are additive files already
+# covered by next typegen + tsc. The integrated build/e2e re-run is owned by the Lead's
+# batch-5 gate and is listed as a residual verification item, not claimed as done here.
+# A transient tsc failure (6 errors in another agent's in-flight E3.3 files) was observed
+# during the E3.4 run and disappeared on re-run; the final tsc above is clean.
+
+## Files delivered by E3.4
+new:      src/lib/observability/metrics.ts        (low-cardinality metrics + Prometheus text + log sink bridge)
+new:      src/lib/observability/metrics.vitest.ts (13 tests)
+new:      src/app/api/admin/system/metrics/route.ts
+new:      src/v2/metrics-route.test.ts            (integration-discovered: 401/403/200 contract)
+new:      deploy/observability/metrics-catalog.md
+modified: src/app/api/health/route.ts             (recordDbProbe x2 + recordHttpRequest; body/status unchanged)
+modified: scripts/cron-inventory-daemon.ts        (CRON_HEARTBEAT_FILE + recordCronRound; event fields unchanged)
+modified: deploy/staging/compose/docker-compose.staging.yml (cron heartbeat shared volume + freshness healthcheck)
+not touched: src/instrumentation.ts, error-classify.ts, error-events.ts, global-error.tsx,
+             docs/sprint-e3-alert-catalog.md, deploy/observability/alert-* (E3.3 owner)
+
+## Metric evidence
+- normal trend: docs/evidence/sprint-e3/logs/e34-metrics-normal-20261110-1700.log
+  6× health 200 -> wms_http_requests_total{2xx}=6, delay histogram, V1/V2 probe success=6,
+  synthetic login failures (legacy/unknown_user, v2/wrong_password), negative-stock business
+  signal, cron gauges; route auth 401 (null staff), 403 (IT_ADMIN), 200 (business role),
+  content-type `text/plain; version=0.0.4; charset=utf-8`, `Cache-Control: no-store`.
+- controlled failure: docs/evidence/sprint-e3/logs/e34-metrics-controlled-failure-20261110-1701.log
+  6× health 503 (DB closed port) -> status_class=5xx=6, wms_http_5xx_total{route="/api/health"}=6,
+  wms_db_probe_total{db="v1"|"v2",outcome="failure"}=6, ALERT_JUDGEMENT_HTTP_5XX_HEALTH=6.
+- cron heartbeat: docs/evidence/sprint-e3/logs/e34-cron-heartbeat-20261110-1701.log
+  success rounds -> lastSuccessAt set/consecutiveFailures=0; controlled failure rounds ->
+  consecutiveFailures=1 with lastSuccessAt preserved; staging healthcheck command fresh=0,
+  stale(31min)=1.
+- unit/route contract: metrics.vitest.ts (13 tests) and src/v2/metrics-route.test.ts (35-file
+  integration run).
+
+## E3.4b proposals (out of allowed scope, not implemented)
+1. Purchase-receive / order-confirm / delivery / cost-recalc failure counters need a stable
+   marker at their existing service boundaries; no allowed file currently exposes one.
+2. Full-route HTTP request/status metrics: proxy cannot know the final status of pass-through
+   responses; a response-layer hook (new file) is required. Current coverage = readiness
+   endpoint + proxy-produced redirect/401/403 branches.
+3. Multi-instance metric aggregation, production scrape network, auth proxy chain and
+   retention: maintainer decisions; single-process snapshot only today.
+4. Prisma/pg connection-pool metrics remain a capability gap (no supported adapter hook).
+5. Production compose heartbeat volume/healthcheck change is not in E3.4 allowed paths;
+   staging only.
+
+## Residual risks
+- Import-time sink installation means events emitted before the first metrics/health/cron
+  module load in a process are not counted; readiness probes make this practically immediate,
+  but the ordering is a known limitation of keeping `src/instrumentation.ts` untouched.
+- In-process route demo used a local `server-only` resolve shim because the raw tsx runtime
+  lacks Next's alias; the real Next runtime imports the route normally (E3.2 dev/e2e runs).
+- Heartbeat `lastSuccessAt` format is ISO-8601 UTC; the healthcheck parses it via Date.parse.
+- Multi-instance and production enablement remain blocking for "production complete" claims.

@@ -1,0 +1,10 @@
+# Sprint E3.5 startup check - block mode (explicit opt-in)
+# UTC: 
+2026-11-10T16:35:06Z
+# CWD: flower-wms-system
+# COMMAND: $env:V2_CREDENTIAL_CHECK_MODE='block'; node scripts/with-v2-test-db.mjs -- node scripts/check-v2-credential-governance.mjs
+# EXIT: 1
+# NOTE: isolated temporary PostgreSQL; managed test seed intentionally contains known-default fixture accounts (no literal credentials recorded).
+
+[wms-test-db] ready: PostgreSQL 18.3 on 127.0.0.1:51311; database wms_0ac2842d39921394abacae183ec48dc9_test
+{"v":1,"ts":"2026-11-10T16:35:01.959Z","level":"warn","event":"security.startup.check","service":"flower-wms","env":"test","fields":{"outcome":"blocked","findings":["v2_known_default_password:7a795420-6329-44d1-b9ec-61806757ff24","v2_known_default_password:b29c0f32-2edb-46e1-9b89-b526f64d9abf","v2_known_default_password:c043aeed-f5b1-471f-9ce5-a69c69e3e54c","v2_known_default_password:d06dc5c7-d8fc-4936-8eeb-a18be6decf9b","v2_known_default_password:f51245e4-9c6a-4372-8737-29468b254cf5","legacy_check_unavailable:42P01"]}}

@@ -1,0 +1,20 @@
+# E3.7 action pin verification (public git refs + action manifest runtime)
+# Captured at 2026-11-10T16:35:04Z (UTC)
+# Method:
+#   git ls-remote https://github.com/<repo>.git refs/tags/<tag> "refs/tags/<tag>^{}"
+#     -> 40-hex tag object (annotated) or commit, and the peeled commit when present
+#   runtime: GET https://raw.githubusercontent.com/<repo>/<commit>/<manifest> -> runs.using
+# Both endpoints are public, unauthenticated and expose no private data.
+# The GitHub REST API was rate-limited for two repositories, so git ls-remote is the
+# recorded method; it resolves the same immutable commit without an API quota.
+#
+# repo | tag | resolved commit (40-hex) | runtime | notes
+actions/checkout | v5.1.0 | fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 | node24 | lightweight tag -> commit
+actions/setup-node | v7.1.0 | 949feb2413d6458794dcd2491c4babbbce0c15c1 | node24 | lightweight tag -> commit
+actions/upload-artifact | v7.0.2 | cf430e030ddbb5b0abf93d22962f4752f3646cd9 | node24 | lightweight tag -> commit
+github/codeql-action | v4.39.3 | 33d7b85da1a04171e211befe2c739303b9a4c066 | node24 | annotated tag f3bbb05694c2f74569081c28664c0866d64dec21 dereferenced to commit
+actions/dependency-review-action | v5.0.0 | a1d282b36b6f3519aa1f3fc636f609c47dddb294 | node24 | lightweight tag -> commit
+gitleaks/gitleaks-action | v3.0.0 | e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e | node24 | lightweight tag -> commit
+anchore/sbom-action | v0.24.3 | 66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c | node24 | annotated tag fffec3d851af758d56fee099cf3fbf8aa8779843 dereferenced to commit
+aquasecurity/trivy-action | v0.36.0 | ed142fd0673e97e23eac54620cfb913e5ce36c25 | composite | annotated tag a9c7b0f06e461e9d4b4d1711f154ee024b8d7ab8 dereferenced to commit
+# result: resolved=8/8, node20-runtime=0, all pinned commits are 40-hex and all runtimes are node24/composite

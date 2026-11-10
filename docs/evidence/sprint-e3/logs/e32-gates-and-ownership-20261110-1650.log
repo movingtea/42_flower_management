@@ -1,0 +1,49 @@
+# Sprint E3.2 gates, contract ownership and residual risk (sanitized)
+# run_id: 20261110-1650 (UTC)
+
+## Quality gates (workdir CMS_and_WMS/flower-wms-system)
+$ npx next typegen           exit=0
+$ npx tsc --noEmit           exit=0 (0 errors)
+$ npm run lint               exit=0 (15 pre-existing warnings, 0 errors)
+$ npm run test:unit          exit=0
+    vitest: 12 files / 125 tests passed (exit=0)
+      observability: redact 17, logger 15, request-id 9, sink 7, context 5 = 53 tests
+    node --test self-checks: 34 passed
+    test-v2 unit: Passed 9 unit files
+$ npm run build              exit=0 (see e32-build-and-e2e)
+$ npm run test:e2e           exit=0 (20 passed, 1 pre-existing intentional skip)
+
+## Files changed by E3.2
+new:      src/lib/observability/request-id.ts
+new:      src/lib/observability/request-id.vitest.ts
+new:      src/instrumentation.ts                (register only; onRequestError left for E3.3)
+modified: src/proxy.ts                           (request ID + upstream header + all-branch response header + matcher)
+modified: src/app/api/health/route.ts            (reads/echoes ID, adds http.request event)
+modified: src/lib/observability/redact.ts        (connection-detail redaction; Lead review item)
+modified: src/lib/observability/redact.vitest.ts (host:port tests)
+modified: src/lib/observability/logger.vitest.ts (host:port serialization test)
+
+## Contract ownership notes
+- index.ts is unchanged: it remains the E3.1 barrel only. E3.2+ modules import concrete
+  files directly (request-id.ts). E3.3/E3.4 must keep doing the same.
+- fingerprintAccount stays in src/lib/observability/redact.ts with signature
+  `fingerprintAccount(username: string): string` (HMAC-SHA256, AUTH_SECRET/NEXTAUTH_SECRET,
+  trimmed+lowercased username, first 16 hex chars). E3.6 may import it directly; do not
+  move or change the signature.
+- Redaction is the only behavioural change from the Lead review: DB host:port / Prisma
+  connection wording is now always redacted. Event names, fields, schema version and the
+  accepted event whitelist are unchanged.
+
+## Residual risks / boundaries (not claimed as complete)
+1. Proxy cannot observe the final status of pass-through responses (route/page renders).
+   E3.2 therefore logs http.request only for branches the proxy itself produces
+   (redirect/401/403 JSON) and the instrumented public route (/api/health). Page-route HTTP
+   logging/metrics over all routes is a follow-up for E3.4/E3.3, not a silent pass.
+2. /api/auth/*, /api/miniprogram/*, /uploads/* and static assets are intentionally outside
+   the matcher; they carry no x-request-id (Auth.js callback 302 verified as unchanged).
+3. Route names in proxy logs collapse UUID/numeric/hex segments to :id because the matched
+   Next route template is not available in proxy. /api/health uses its exact template.
+4. `next dev` rewrites flower-wms-system/tsconfig.json and next-env.d.ts; both were restored
+   to the dev baseline after evidence runs (no generated-file diff left by E3.2).
+5. Native PostgreSQL 5432 and the dev container 55432 were never touched; all DB evidence
+   used throw-away clusters or closed loopback ports.

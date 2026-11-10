@@ -112,7 +112,15 @@ async function main() {
       console.log("Bootstrap username already exists. Existing credentials and memberships were preserved.");
       return;
     }
-    const password = (await readFile(passwordFile, "utf8")).replace(/\r?\n$/, "");
+    // Never surface the file system error: it contains the absolute password
+    // file path. A fixed message keeps the failure actionable without leaking
+    // the path or any credential material.
+    let password: string;
+    try {
+      password = (await readFile(passwordFile, "utf8")).replace(/\r?\n$/, "");
+    } catch {
+      throw new Error("Unable to read the V2 bootstrap password file");
+    }
     if (!isStrongV2Password(password, username)) {
       throw new Error("The bootstrap password does not meet the V2 password policy");
     }

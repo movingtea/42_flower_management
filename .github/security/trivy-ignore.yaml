@@ -1,0 +1,25 @@
+# Flower WMS — Trivy YAML ignore file (Sprint E3.7)
+#
+# Consumed by .github/workflows/security.yml (trivy-action `trivyignores`) and
+# validated by scripts/security/check-exceptions.mjs. There are deliberately no
+# active ignores: every suppressed finding must be backed by a matching
+# `.github/security/policy.yml` exception (same vulnerability id, tool image-scan)
+# and must carry an `expired_at` that is not later than the exception's
+# `expires_on`. Permanent ignores are rejected by the offline gate.
+#
+# To suppress a finding, add both:
+#   1. a policy.yml exception (vuln id, reason, owner, expires_on, compensating
+#      controls), and
+#   2. an entry here, for example:
+#
+# vulnerabilities:
+#   - id: CVE-2099-0001
+#     statement: "Fixed upstream; rollout tracked in an approved work package."
+#     expired_at: 2026-12-31
+#
+# The image scan fails on HIGH/CRITICAL findings (`ignore_unfixed: false`) unless
+# one of the above is present and still valid.
+vulnerabilities: []
+misconfigurations: []
+secrets: []
+licenses: []

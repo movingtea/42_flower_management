@@ -1,0 +1,30 @@
+# Sprint E3.1 stocktake boundary-event evidence (sanitized)
+# run_id: 20261110-1630 (UTC)
+# scope: src/v2/services/stocktake.ts — events only at the exported confirmStocktake boundary;
+#        transaction, lock order, idempotency checks, thrown errors and audit writes unchanged.
+
+## focused transaction suite against isolated throw-away PostgreSQL 18.3
+$ node scripts/with-v2-test-db.mjs -- node node_modules/tsx/dist/cli.mjs src/v2/services/stocktake.test.ts
+[wms-test-db] ready: PostgreSQL 18.3 on 127.0.0.1:<random-port>; database wms_<hex>_test
+... (suite covers create/confirm/review, concurrent confirm, idempotent retry, review rejection and
+    rollback; stocktakeId/storeId here are internal model ids, not personal data)
+{"v":1,"ts":"2026-11-10T16:30:26.703Z","level":"info","event":"stocktake.confirm","service":"flower-wms","env":"test","version":"unknown","fields":{"outcome":"success","stocktakeId":"st-<id>","storeId":"<store-id>"}}
+{"v":1,"ts":"2026-11-10T16:30:26.717Z","level":"info","event":"stocktake.confirm","service":"flower-wms","env":"test","version":"unknown","fields":{"outcome":"started","stocktakeId":"st-<id>","storeId":"<store-id>"}}
+{"v":1,"ts":"2026-11-10T16:30:26.752Z","level":"info","event":"stocktake.confirm","service":"flower-wms","env":"test","version":"unknown","fields":{"outcome":"success","stocktakeId":"st-<id>","storeId":"<store-id>"}}
+v2 stocktake tests passed
+exit=0
+
+# failure classification (message-based, existing throws untouched):
+#   negative_stock  "盘点数量不能为负数"
+#   permission      "仅本店经理或授权人员可以复核盘点差异"
+#   conflict        "正在被其他操作处理" / "需人工处理" / "与本次请求不一致"
+#   invalid_state   cancelled / rejected / pending-review / empty / not-found stocktake
+#   internal        anything else (error level, full sanitized err)
+# The wrapper re-throws the original error object unchanged.
+
+## full integration gate (same command family)
+$ npm run test:integration:v2
+Running integration (33 files)
+v2 stocktake tests passed
+Passed 33 integration files
+exit=0

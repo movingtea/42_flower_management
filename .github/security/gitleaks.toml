@@ -1,0 +1,49 @@
+# Flower WMS gitleaks configuration (Sprint E3.7)
+#
+# Used by .github/workflows/security.yml (GITLEAKS_CONFIG) and by
+# scripts/security/check-exceptions.mjs, which fails the offline gate when:
+#   - the built-in default rules are disabled,
+#   - an allowlist has no description or hides the whole tree, or
+#   - the known placeholder locations below are no longer covered.
+#
+# Default rules stay enabled; allowlists are narrow and explain why a path or
+# value is not a secret. Adding a path/pattern here hides findings, so it needs
+# the same review as an exception in policy.yml.
+title = "Flower WMS gitleaks configuration (E3.7)"
+
+[extend]
+# Keep the full built-in rule set and add only the allowlists below.
+useDefault = true
+
+# 1) Evidence logs must stay in the repository as proof of controlled runs, but
+#    they contain redacted placeholder tokens from earlier sprints. They are not
+#    live credentials. Real secrets must never be written to any evidence file.
+[[allowlists]]
+description = "Historical E2/E3 evidence logs contain redacted placeholder values, not live credentials."
+paths = [
+  '''docs/evidence/.*''',
+]
+
+# 2) Checked-in environment templates document variable names with placeholders
+#    (USER/PASSWORD, __STAGING_*__, "请更换为..."). Real values stay in the
+#    deployment environment and are never committed.
+[[allowlists]]
+description = "Checked-in env templates use placeholder values instead of real secrets."
+paths = [
+  '''(^|/)[^/]*\.env(\.[^/]*)?\.example$''',
+]
+
+# 3) The offline security fixtures contain synthetic values marked with the
+#    E37CONTROLLED- prefix so the negative sample cannot be confused with a live
+#    credential. This is a value-pattern allowlist, not a path allowlist: any
+#    other secret-looking value under fixtures/ is still reported.
+[[allowlists]]
+description = "Controlled fixtures use the E37CONTROLLED- marker; any other value in a fixture is still scanned."
+regexes = [
+  '''E37CONTROLLED-[A-Za-z0-9._-]{8,}''',
+]
+
+# Maintenance: run the gate when this file changes:
+#   node scripts/security/check-exceptions.mjs
+# The real gitleaks scan runs in GitHub Actions (gitleaks-action, pinned SHA);
+# it is not executed locally in Sprint E3 to avoid unverified binary downloads.

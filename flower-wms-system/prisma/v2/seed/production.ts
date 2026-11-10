@@ -38,6 +38,10 @@ export async function runProductionBootstrap(
           username: input.username,
           passwordHash: input.passwordHash,
           displayName: "系统管理员",
+          // Race fallback: if a concurrent bootstrap created the row between
+          // the createMany and this upsert, it must still be a first-login
+          // (must-change) account. Existing rows are never rewritten below.
+          mustChangePassword: true,
         },
         update: {},
       });

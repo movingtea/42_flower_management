@@ -1,0 +1,34 @@
+# Sprint E3.3 controlled failure: real uncaught server error -> sanitized error.server (sanitized)
+# task: task-3 / e33-error-alerting
+# run_id: 20261110-1709 (UTC)
+# environment: production build (.next from e33-build log) started with `next start` inside
+#   `scripts/with-v2-test-db.mjs` throw-away PostgreSQL 18 cluster (random loopback port,
+#   ephemeral credentials, test seed). No production/development database was touched.
+# trigger: `GET /api/miniprogram/home-banners` (public, existing route, NO try/catch; it queries
+#   V1 Prisma) with V1 DATABASE_URL deliberately pointed at a closed loopback port. This is a
+#   genuine uncaught Prisma error -> Next.js 500 -> instrumentation.onRequestError.
+#   Request header `x-request-id: e33-controlled-0001` was supplied by the probe; the same
+#   contract-valid ID is what the proxy would set. `/api/miniprogram/*` is outside the E3.2 proxy
+#   matcher (documented boundary), so the probe sets the header directly instead of relying on proxy.
+# sanitization: absolute repo paths -> <repo>; no cookies, authorization headers, request bodies,
+#   database URLs, credentials or raw Next.js/Prisma error lines are stored. Only the app's own
+#   structured event lines and probe summary counters are kept.
+
+## Probe summary and captured error.server event
+E33 SCENARIO=system
+E33 STARTUP_READY=true
+E33 FAILURE_ROUTE=/api/miniprogram/home-banners
+E33 FAILURE_STATUS=500
+E33 LIVENESS_STATUS=200
+E33 SERVER_ALIVE_AFTER=true
+E33 RAW_STDERR_LINES=20
+E33 STRUCTURED_EVENTS=1
+E33 EVENT={"v":1,"ts":"2026-11-10T17:09:06.579Z","level":"error","event":"error.server","service":"flower-wms","env":"e33-local","version":"e33-local-20261110","requestId":"e33-controlled-0001","fields":{"kind":"system","reason":"unclassified","route":"/api/miniprogram/home-banners","routeType":"route","errorName":"PrismaClientKnownRequestError","errorCode":"P1001","groupKey":"PrismaClientKnownRequestError:P1001:/api/miniprogram/home-banners","stack":"Invalid `prisma.banner.count()` invocation:\n\n\n[redacted]\n    at zr.handleRequestError (<repo>\\node_modules\\@prisma\\client\\runtime\\client.js:65:8286)\n    at zr.handleAndLogRequestError (<repo>\\node_modules\\@prisma\\client\\runtime\\client.js:65:7581)\n    at zr.request (<repo>\\node_modules\\@prisma\\client\\runtime\\client.js:65:7288)\n    at process.processTicksAndRejections (node:internal/process/task_queues:104:5)\n    at async a (<repo>\\node_modules\\@prisma\\client\\runtime\\client.js:75:6862)\n    at async p (<repo>\\.next\\server\\chunks\\[root-of-the-server]__0bs09gk._.js:1:5322)\n    at async m (<repo>\\.next\\server\\chunks\\[root-of-the-server]__0bs09gk._.js:1:5769)\n    at async g (<repo>\\.next\\server\\chunks\\[root-of-the-server]__0bs09gk._.js:1:5968)\n    at async s (<repo>\\.next\\server\\chunks\\[root-of-the-server]__08igmn~._.js:1:18445)\n    at async rW.do (<repo>\\node_modules\\next\\dist\\compiled\\next-server\\app-route-turbo.runtime.prod.js:5:20926)"}}
+E33 REQUEST_ID_CORRELATED=true
+E33 REQUEST_ID_SENT=e33-controlled-0001
+E33 ROUTE_TEMPLATE_MATCHED=true
+E33 ROUTE_TYPE_MATCHED=true
+E33 HAS_SAFE_STACK=true
+E33 GROUP_KEY_OK=true
+E33 LEAKED_SENSITIVE_VALUES=0
+E33 RESULT=PASS

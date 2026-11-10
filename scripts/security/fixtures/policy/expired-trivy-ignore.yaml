@@ -1,0 +1,5 @@
+# Controlled fixture: this ignore expired and must fail the gate.
+vulnerabilities:
+  - id: CVE-2099-0001
+    statement: "Controlled fixture entry that expired in the past."
+    expired_at: 2000-01-01

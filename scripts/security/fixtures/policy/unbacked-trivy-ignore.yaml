@@ -1,0 +1,5 @@
+# Controlled fixture: this ignore has no policy exception and must fail the gate.
+vulnerabilities:
+  - id: CVE-2099-9999
+    statement: "Controlled fixture entry with no policy backing."
+    expired_at: 2099-12-31

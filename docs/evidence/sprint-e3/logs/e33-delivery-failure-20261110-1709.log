@@ -1,0 +1,25 @@
+# Sprint E3.3 controlled failure: ERROR_EVENT_FAIL=1 adapter failure must not be fatal (sanitized)
+# task: task-3 / e33-error-alerting
+# run_id: 20261110-1709 (UTC)
+# environment: same production build + throw-away PostgreSQL harness as e33-system-error.
+# trigger: identical real 500 on `GET /api/miniprogram/home-banners`, server started with
+#   ERROR_EVENT_FAIL=1 so the local delivery adapter throws. Expected behaviour: one
+#   error.delivery.failed event (level=error), NO error.server event (delivery aborted before
+#   write), the 500 response is unchanged, and the server still serves the next request.
+# sanitization: as above; only structured event lines and probe counters are stored.
+
+## Probe summary and captured error.delivery.failed event
+E33 SCENARIO=delivery-failure
+E33 STARTUP_READY=true
+E33 FAILURE_ROUTE=/api/miniprogram/home-banners
+E33 FAILURE_STATUS=500
+E33 LIVENESS_STATUS=200
+E33 SERVER_ALIVE_AFTER=true
+E33 RAW_STDERR_LINES=20
+E33 STRUCTURED_EVENTS=1
+E33 EVENT={"v":1,"ts":"2026-11-10T17:09:33.698Z","level":"error","event":"error.delivery.failed","service":"flower-wms","env":"e33-local","version":"e33-local-20261110","fields":{"adapter":"stderr","reason":"Error"}}
+E33 DELIVERY_FAILED_EVENTS=1
+E33 ERROR_SERVER_EVENTS=0
+E33 LEAKED_SENSITIVE_VALUES=0
+E33 SERVER_ALIVE_AFTER=true
+E33 RESULT=PASS

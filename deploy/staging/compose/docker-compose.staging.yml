@@ -44,8 +44,11 @@ services:
       - ../.runtime/${STAGING_ENV_NAME:-staging}.env
     environment:
       NODE_ENV: production
+      # E3.4: cron 心跳由 web 与 cron 共享卷共享（只读消费）
+      CRON_HEARTBEAT_FILE: /var/run/flower/cron-heartbeat.json
     volumes:
       - next_cache:/app/.next/cache
+      - cron_heartbeat:/var/run/flower:ro
     ports:
       - "127.0.0.1:${STAGING_WEB_PORT:-18081}:3000"
     depends_on:
@@ -61,12 +64,23 @@ services:
       - ../.runtime/${STAGING_ENV_NAME:-staging}.env
     environment:
       NODE_ENV: production
+      # E3.4: 写心跳文件供 staging healthcheck 与 web 指标入口共享
+      CRON_HEARTBEAT_FILE: /var/run/flower/cron-heartbeat.json
     # 与生产一致：覆盖 entrypoint，cron 不执行迁移；迁移只由 flower-web entrypoint 负责
     entrypoint: ["npx", "tsx", "--tsconfig", "tsconfig.json", "scripts/cron-inventory-daemon.ts"]
-    # 镜像内 HEALTHCHECK 探测 /api/health，cron 容器没有 web 服务会长期 unhealthy；
-    # staging 显式禁用该健康检查，cron 是否有效运行以成功轮次日志为准（E2.1/E2.2 证据）。
+    volumes:
+      - cron_heartbeat:/var/run/flower
+    # E3.4：cron 不再复用 web 的 /api/health 语义，改为检查“最近成功轮次时效”。
+    # 30 分钟窗口 = 2 × 默认库存同步间隔；文件缺失或最近成功过期即 unhealthy。
     healthcheck:
-      disable: true
+      test:
+        - "CMD-SHELL"
+        - >-
+          node -e "const fs=require('fs');const p=process.env.CRON_HEARTBEAT_FILE||'/var/run/flower/cron-heartbeat.json';try{const h=JSON.parse(fs.readFileSync(p,'utf8'));const now=Date.now();const ok=Object.values(h.tasks||{}).some(t=>t&&t.lastSuccessAt&&(now-Date.parse(t.lastSuccessAt))<1800000);process.exit(ok?0:1)}catch{process.exit(1)}"
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 120s
     depends_on:
       db:
         condition: service_healthy
@@ -74,4 +88,5 @@ services:
 volumes:
   postgres_data:
   next_cache:
+  cron_heartbeat:
 

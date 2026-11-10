@@ -34,3 +34,16 @@
 - 不修改 `deploy.yml` 的 `push master` 生产触发；
 - 不把 staging workflow 设为生产部署的必经步骤；
 - 不在 workflow 中执行数据库回滚或 `migrate reset`。
+
+## 安全门禁对接（E3.7 追加，2026-11-11）
+
+本节只补充提案与已实现安全门禁的对接说明，不改变本文件上文的 staging 提案状态，也不修改 `.github/workflows/` 既有内容。E3.7 已新增独立 [security.yml](../../../.github/workflows/security.yml)（`pull_request` 同仓 + `workflow_dispatch`），其政策见 [policy.yml](../../../.github/security/policy.yml)，说明见 [sprint-e3-security-gates.md](../../../docs/sprint-e3-security-gates.md)。
+
+若后续批准独立 staging workflow，建议按下述方式复用门禁：
+
+- **PR 阶段**：staging workflow 改动本身受 `security.yml` 的 `dependency-review`、`secret-scan`、`sbom`、`offline-supply-chain` 约束；不把 staging 部署 job 设为 PR 门禁。
+- **镜像扫描**：staging 发布前用同一固定版本 trivy + 同一 [trivy-ignore.yaml](../../../.github/security/trivy-ignore.yaml) 扫描**实际 staging 镜像 digest**，并把 SARIF/JSON 归档为 artifact。不得用 `deploy/staging/images/Dockerfile.staging-offline` 的产物替代生产或 staging 真实镜像扫描。
+- **凭据与权限**：staging workflow 使用 GitHub Environment（如 `staging`）注入只读 ACR 拉取账号；不复制生产 secrets，不使用 `pull_request_target`，日志不打印凭据。镜像扫描优先复用 `security.yml` 的 `workflow_dispatch`（输入 `image_ref`/`image_tag`），避免在 staging workflow 中重复实现扫描逻辑。
+- **artifact 命名**：建议 `staging-image-scan-<sha>`，与 `image-scan-reports` 区分，保留期由维护者统一。
+- **门禁状态**：`image-scan` 仍为手动触发，不作为 staging 发布的自动前置；是否设为 staging workflow 的 required step 由维护者决定。
+- **待决项**：staging 环境 secrets 注入方式与轮换、ACR 只读账号范围、是否要求 Environment protection 人工审批。这些与上文 staging 前置条件一致，仍未批准，不阻塞本机 E3.7 的结构/脚本验证。

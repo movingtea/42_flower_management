@@ -1,0 +1,209 @@
+# Sprint E3.6 full V2 integration suite
+# UTC: 
+2026-11-10T16:54:15Z
+# CWD: flower-wms-system
+# COMMAND: npm run test:integration:v2
+# EXIT: 0
+# NOTE: isolated temporary PostgreSQL on a random loopback port; no 5432/55432 access.
+
+
+> flower-wms-system@0.1.0 test:integration:v2
+> node scripts/with-v2-test-db.mjs -- node scripts/test-v2.mjs integration
+
+[wms-test-db] ready: PostgreSQL 18.3 on 127.0.0.1:60672; database wms_d951693a86c636b111c75c156fab84a7_test
+Running integration (34 files)
+[1/34] src/app/v2/_lib/purchase-ui.test.ts
+v2 purchase UI helper tests passed
+[2/34] src/app/v2/order-ui.test.ts
+v2 order UI helper tests passed
+[3/34] src/app/v2/suppliers/actions.test.ts
+v2 supplier action tests passed
+[4/34] src/v2/auth-source.test.ts
+v2 auth DB integration check passed (seeded admin)
+v2 auth source/credential tests passed
+[5/34] src/v2/credential-governance.test.ts
+[e35] startup check: warn mode on the default-credential fixture -> exit 0, v2_known_default_password reported
+[e35] startup check: block mode -> exit 1, outcome blocked
+[e35] startup check: unfinished bootstrap account flagged as v2_bootstrap_pending, strong hash not flagged as default
+[e35] startup check: clean fixture -> outcome ok, exit 0
+[e35] startup check: account state digest unchanged (read-only)
+[e35] startup check matrix passed: warn(default credentials)=0, block=1, unfinished-bootstrap warning, clean=ok, read-only state unchanged
+[e35] production seed: missing password file -> exit 1, fixed message, no path
+[e35] production seed: weak password -> exit 1, no password echoed
+[e35] production seed: default-credential shape -> exit 1
+[e35] production seed: --tiers in production -> exit 1
+[e35] production seed: shared V1/V2 database name -> exit 1
+[e35] production seed: strong bootstrap -> exit 0, mustChangePassword=true, administrator-role memberships, no-overwrite re-run preserved credentials
+[e35] production seed matrix passed: missing-file, weak-password, default-credential shape, test-tier, shared V1/V2 database, strong bootstrap + no-overwrite re-run
+[e35] production bootstrap race fallback passed: create branch marks mustChangePassword, existing rows preserved
+credential governance integration tests passed
+[6/34] src/v2/domain/identifiers.test.ts
+v2 identifier tests passed
+[7/34] src/v2/domain/inventory-summary.test.ts
+v2 inventory summary tests passed
+[8/34] src/v2/domain/material-availability.test.ts
+v2 material availability tests passed
+[9/34] src/v2/domain/purchase-progress.test.ts
+v2 purchase progress tests passed
+[10/34] src/v2/domain/stock-planning.test.ts
+v2 stock planning tests passed
+[11/34] src/v2/login-throttle.test.ts
+[e36] wiring: both providers call guardCredentialsLogin and receive the Request; throttled error is a CredentialsSignin subclass with code too_many_attempts
+[e36] external parity: unknown_user / wrong_password / inactive all return null, no throw, reasons logged
+[e36] account threshold: 3 failures lock (bucket 60), correct password still blocked, lock release recovers
+[e36] success resets only the account bucket; retained source history still blocks
+[e36] TRUSTED_PROXY_HOPS=0 ignores forged X-Forwarded-For (no source lock)
+[e36] store outage fails open and reports store_error once
+[e36] 12 concurrent failures all counted; the next attempt is throttled
+login throttle integration tests passed
+[12/34] src/v2/navigation.test.ts
+v2 navigation/capability matrix tests passed
+[13/34] src/v2/services/adjust-final-cost.test.ts
+(node:10316) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+v2 adjust-final-cost tests passed
+[14/34] src/v2/services/allocate-purchase-demand.test.ts
+(node:3512) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+v2 allocate-purchase-demand tests passed
+[15/34] src/v2/services/catalog-management.test.ts
+v2 catalog management DB test passed
+[16/34] src/v2/services/complete-delivery.test.ts
+(node:31740) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+v2 complete-delivery tests passed
+[17/34] src/v2/services/complete-production-actual.test.ts
+(node:22124) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+complete-production default one-click path passed
+complete-production higher actual use passed
+complete-production lower actual use and returned stock passed
+complete-production loss reconciliation passed
+complete-production invalid input rollback passed
+complete-production preserves other order and sample reservations passed
+v2 complete-production actual usage tests passed
+[18/34] src/v2/services/delivery-management.test.ts
+(node:11452) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+v2 delivery-management tests passed
+[19/34] src/v2/services/inventory-operations.test.ts
+v2 inventory-operations tests passed
+[20/34] src/v2/services/loss-management.test.ts
+v2 loss-management tests passed
+[21/34] src/v2/services/manual-order-multi.test.ts
+multi-order creation validation passed
+multi-order confirmation and shared inventory passed
+(node:19576) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+multi-order revision rollback passed
+multi-order pre-production revision passed
+multi-order shared batch actual usage passed
+multi-order delivery snapshot passed
+multi-order revision preserves substitution passed
+v2 multi-line manual order tests passed
+[22/34] src/v2/services/order-cost-management.test.ts
+(node:28548) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+v2 order-cost-management tests passed
+[23/34] src/v2/services/order-lifecycle.test.ts
+(node:14528) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+order-lifecycle cancellation release, audit and idempotency passed
+order-lifecycle started production cancellation guard passed
+order-lifecycle requested refund cancellation guard passed
+order-lifecycle tenant/store ownership guard passed
+order-lifecycle delivered close, refund guard and idempotency passed
+order-lifecycle production start, assignee-free start and idempotency passed
+v2 order lifecycle tests passed
+[24/34] src/v2/services/packaging-kit.test.ts
+v2 packaging kit DB test passed
+[25/34] src/v2/services/purchase-order-management.test.ts
+v2 purchase order management pure tests passed
+(node:24392) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+v2 linked purchase order DB test passed
+[26/34] src/v2/services/receive-purchase-line.test.ts
+v2 receive-purchase-line tests passed
+[27/34] src/v2/services/recipe-management.test.ts
+v2 recipe management DB test passed
+[28/34] src/v2/services/record-manual-payment.test.ts
+v2 record-manual-payment tests passed
+[29/34] src/v2/services/record-refund.test.ts
+v2 record-refund tests passed
+[30/34] src/v2/services/reject-purchase-line.test.ts
+v2 reject-purchase-line tests passed
+[31/34] src/v2/services/revise-order.test.ts
+(node:23140) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+revise-order draft revision passed
+revise-order covered revision and latest-revision production passed
+revise-order shortage revision passed
+revise-order validation and ownership passed
+revise-order rollback passed
+v2 revise order tests passed
+[32/34] src/v2/services/staff-management.test.ts
+staff management pure and DB tests passed
+[33/34] src/v2/services/stocktake.test.ts
+2026-11-10T16:54:06.324Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-78af9182554cc5fb195bf735b57cc9765f7f44587d9a35b7bd3f667967fb72a2","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:06.411Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-78af9182554cc5fb195bf735b57cc9765f7f44587d9a35b7bd3f667967fb72a2","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:06.431Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-78af9182554cc5fb195bf735b57cc9765f7f44587d9a35b7bd3f667967fb72a2","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:06.440Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-78af9182554cc5fb195bf735b57cc9765f7f44587d9a35b7bd3f667967fb72a2","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:06.465Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-f1d4da103044896e45269d6063b1aa2dcc1ef3bc0a85ae5ec9def7ffd6d99aa9","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:06.487Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-f1d4da103044896e45269d6063b1aa2dcc1ef3bc0a85ae5ec9def7ffd6d99aa9","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:06.507Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-a24b03ecbbf1caf9d0bac0348474f56256068a39d7ac334e14803c6152913fcd","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:06.510Z WARN  stocktake.confirm {"outcome":"failure","stocktakeId":"st-a24b03ecbbf1caf9d0bac0348474f56256068a39d7ac334e14803c6152913fcd","storeId":"aa668838-f096-4811-a67b-624bb74f05b9","reason":"invalid_state"} err=Error: 盘点单已取消，不能确认
+2026-11-10T16:54:06.526Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-b095e9bbac9d78de213d3e51de3cf249f375a4c2b864844d53697fe244bc451c","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:06.556Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-b095e9bbac9d78de213d3e51de3cf249f375a4c2b864844d53697fe244bc451c","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:06.570Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-0d6f4e96f82ea0565e1ea08030c5199f82354e7b9e75d96cd7b38cd9d043488e","storeId":"9d86cfc4-c1b0-480e-81dc-77b3891d0c00"}
+2026-11-10T16:54:06.573Z WARN  stocktake.confirm {"outcome":"failure","stocktakeId":"st-0d6f4e96f82ea0565e1ea08030c5199f82354e7b9e75d96cd7b38cd9d043488e","storeId":"9d86cfc4-c1b0-480e-81dc-77b3891d0c00","reason":"invalid_state"} err=Error: 盘点单不存在或不属于当前门店
+2026-11-10T16:54:06.574Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-0d6f4e96f82ea0565e1ea08030c5199f82354e7b9e75d96cd7b38cd9d043488e","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:06.577Z WARN  stocktake.confirm {"outcome":"failure","stocktakeId":"st-0d6f4e96f82ea0565e1ea08030c5199f82354e7b9e75d96cd7b38cd9d043488e","storeId":"aa668838-f096-4811-a67b-624bb74f05b9","reason":"invalid_state"} err=Error: 盘点单不存在或不属于当前门店
+2026-11-10T16:54:06.602Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-1666f4f29c16574aa539f5484597bc934626c00218d750b19c52b7d932d61023","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:06.632Z WARN  stocktake.confirm {"outcome":"failure","stocktakeId":"st-1666f4f29c16574aa539f5484597bc934626c00218d750b19c52b7d932d61023","storeId":"aa668838-f096-4811-a67b-624bb74f05b9","reason":"conflict"} err=Error: 盘点明细已存在调整流水，盘点单状态异常，需人工处理
+2026-11-10T16:54:06.693Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-393addb9d1c1260368efcf64d4e894d1b9c03b07314fef4bfff2808fa982363f","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:06.732Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-393addb9d1c1260368efcf64d4e894d1b9c03b07314fef4bfff2808fa982363f","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:06.761Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-393addb9d1c1260368efcf64d4e894d1b9c03b07314fef4bfff2808fa982363f","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:06.766Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-393addb9d1c1260368efcf64d4e894d1b9c03b07314fef4bfff2808fa982363f","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:06.812Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-5878a0d7e001715ba49a180a03b198c813bb41eb7c1df7ffce7f69c1f9f229d0","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:06.844Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-5878a0d7e001715ba49a180a03b198c813bb41eb7c1df7ffce7f69c1f9f229d0","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:06.907Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-b9214f168cc9df27109cfbee4c0e9a4147389f4dcaeb8b76f0927854347eba8a","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:06.951Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-b9214f168cc9df27109cfbee4c0e9a4147389f4dcaeb8b76f0927854347eba8a","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.003Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-64ec0d9047619ac3370957f44d98564efec296540d2637cdc45eb3e5585cf2c1","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.025Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-64ec0d9047619ac3370957f44d98564efec296540d2637cdc45eb3e5585cf2c1","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.092Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-481d9cc1dc03ae7befc44f00f99ee2bb8eceeb64809e0726f2552df79c507f64","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.189Z WARN  stocktake.confirm {"outcome":"failure","stocktakeId":"st-481d9cc1dc03ae7befc44f00f99ee2bb8eceeb64809e0726f2552df79c507f64","storeId":"aa668838-f096-4811-a67b-624bb74f05b9","reason":"conflict"} err=Error: 盘点影响的订单正在被其他操作处理，请稍后重试
+2026-11-10T16:54:07.201Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-481d9cc1dc03ae7befc44f00f99ee2bb8eceeb64809e0726f2552df79c507f64","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.233Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-481d9cc1dc03ae7befc44f00f99ee2bb8eceeb64809e0726f2552df79c507f64","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.277Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-7cc0a2a2123d0e02912dcdb33d3e408a2f4720fefa78de66a2f4addfca91d8d8","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+(node:24548) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+2026-11-10T16:54:07.341Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-7cc0a2a2123d0e02912dcdb33d3e408a2f4720fefa78de66a2f4addfca91d8d8","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.356Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-7cc0a2a2123d0e02912dcdb33d3e408a2f4720fefa78de66a2f4addfca91d8d8","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.360Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-7cc0a2a2123d0e02912dcdb33d3e408a2f4720fefa78de66a2f4addfca91d8d8","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.378Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-1a7423fed1cfe21ac331f16ca32fa64ecab63074a7879f15b0e511d2ad0f30b0","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.404Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-1a7423fed1cfe21ac331f16ca32fa64ecab63074a7879f15b0e511d2ad0f30b0","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.421Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-4539e46a613d486ead8e5f24952b1e89d869265136797507645e5c24ef791300","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.449Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-4539e46a613d486ead8e5f24952b1e89d869265136797507645e5c24ef791300","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.467Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-ed6dd0576bb563e1962e8021e54327798899c37cbc350e8318488246ee52345d","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.490Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-ed6dd0576bb563e1962e8021e54327798899c37cbc350e8318488246ee52345d","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.496Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-ed6dd0576bb563e1962e8021e54327798899c37cbc350e8318488246ee52345d","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.522Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-ed6dd0576bb563e1962e8021e54327798899c37cbc350e8318488246ee52345d","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.538Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-f8f477703026c263f955298e28df01555d9d9e34799893ab9e34b931ec201f66","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.554Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-f8f477703026c263f955298e28df01555d9d9e34799893ab9e34b931ec201f66","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.568Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-f8f477703026c263f955298e28df01555d9d9e34799893ab9e34b931ec201f66","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.591Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-f8f477703026c263f955298e28df01555d9d9e34799893ab9e34b931ec201f66","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.598Z INFO  stocktake.confirm {"outcome":"started","stocktakeId":"st-f8f477703026c263f955298e28df01555d9d9e34799893ab9e34b931ec201f66","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+2026-11-10T16:54:07.602Z INFO  stocktake.confirm {"outcome":"success","stocktakeId":"st-f8f477703026c263f955298e28df01555d9d9e34799893ab9e34b931ec201f66","storeId":"aa668838-f096-4811-a67b-624bb74f05b9"}
+v2 stocktake tests passed
+[34/34] src/v2/services/substitute-order-material.test.ts
+(node:10432) DeprecationWarning: Calling client.query() when the client is already executing a query is deprecated and will be removed in pg@9.0. Use async/await or an external async flow control mechanism instead.
+(Use `node --trace-deprecation ...` to show where the warning was created)
+substitute-order-material covered replacement and later revision passed
+substitute-order-material partial shortage preservation passed
+substitute-order-material mandatory insufficient-stock rejection and rollback passed
+substitute-order-material customer-visible confirmation passed
+substitute-order-material ownership and validation rejection passed
+substitute-order-material rollback passed
+substitute-order-material concurrency passed
+v2 substitute order material tests passed
+Passed 34 integration files
