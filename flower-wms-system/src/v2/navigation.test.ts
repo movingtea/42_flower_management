@@ -40,6 +40,7 @@ const EXPECTED_VISIBLE_HREFS: Record<V2Role, string[]> = {
   ADMIN: [
     "/v2",
     "/v2/materials",
+    "/v2/material-categories",
     "/v2/inventory",
     "/v2/operations",
     "/v2/purchase-orders",
@@ -50,7 +51,7 @@ const EXPECTED_VISIBLE_HREFS: Record<V2Role, string[]> = {
     "/v2/orders",
     "/v2/staff",
   ],
-  MANAGER: ["/v2", "/v2/materials", "/v2/inventory", "/v2/operations", "/v2/purchase-orders", "/v2/suppliers", "/v2/catalog", "/v2/recipes", "/v2/packaging-kits", "/v2/orders"],
+  MANAGER: ["/v2", "/v2/materials", "/v2/material-categories", "/v2/inventory", "/v2/operations", "/v2/purchase-orders", "/v2/suppliers", "/v2/catalog", "/v2/recipes", "/v2/packaging-kits", "/v2/orders"],
   INVENTORY_REVIEWER: ["/v2", "/v2/inventory", "/v2/operations", "/v2/purchase-orders", "/v2/suppliers"],
   BUYER: ["/v2", "/v2/inventory", "/v2/operations", "/v2/purchase-orders", "/v2/suppliers"],
   SALES: ["/v2", "/v2/orders"],

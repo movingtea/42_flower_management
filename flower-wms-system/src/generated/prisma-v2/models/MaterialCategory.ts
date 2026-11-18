@@ -39,6 +39,7 @@ export type MaterialCategoryMinAggregateOutputType = {
   tenantId: string | null
   code: string | null
   name: string | null
+  description: string | null
   active: boolean | null
   sortOrder: number | null
 }
@@ -48,6 +49,7 @@ export type MaterialCategoryMaxAggregateOutputType = {
   tenantId: string | null
   code: string | null
   name: string | null
+  description: string | null
   active: boolean | null
   sortOrder: number | null
 }
@@ -57,6 +59,7 @@ export type MaterialCategoryCountAggregateOutputType = {
   tenantId: number
   code: number
   name: number
+  description: number
   active: number
   sortOrder: number
   _all: number
@@ -76,6 +79,7 @@ export type MaterialCategoryMinAggregateInputType = {
   tenantId?: true
   code?: true
   name?: true
+  description?: true
   active?: true
   sortOrder?: true
 }
@@ -85,6 +89,7 @@ export type MaterialCategoryMaxAggregateInputType = {
   tenantId?: true
   code?: true
   name?: true
+  description?: true
   active?: true
   sortOrder?: true
 }
@@ -94,6 +99,7 @@ export type MaterialCategoryCountAggregateInputType = {
   tenantId?: true
   code?: true
   name?: true
+  description?: true
   active?: true
   sortOrder?: true
   _all?: true
@@ -190,6 +196,7 @@ export type MaterialCategoryGroupByOutputType = {
   tenantId: string
   code: string
   name: string
+  description: string | null
   active: boolean
   sortOrder: number
   _count: MaterialCategoryCountAggregateOutputType | null
@@ -222,6 +229,7 @@ export type MaterialCategoryWhereInput = {
   tenantId?: Prisma.StringFilter<"MaterialCategory"> | string
   code?: Prisma.StringFilter<"MaterialCategory"> | string
   name?: Prisma.StringFilter<"MaterialCategory"> | string
+  description?: Prisma.StringNullableFilter<"MaterialCategory"> | string | null
   active?: Prisma.BoolFilter<"MaterialCategory"> | boolean
   sortOrder?: Prisma.IntFilter<"MaterialCategory"> | number
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -233,6 +241,7 @@ export type MaterialCategoryOrderByWithRelationInput = {
   tenantId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
   active?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
@@ -248,6 +257,7 @@ export type MaterialCategoryWhereUniqueInput = Prisma.AtLeast<{
   tenantId?: Prisma.StringFilter<"MaterialCategory"> | string
   code?: Prisma.StringFilter<"MaterialCategory"> | string
   name?: Prisma.StringFilter<"MaterialCategory"> | string
+  description?: Prisma.StringNullableFilter<"MaterialCategory"> | string | null
   active?: Prisma.BoolFilter<"MaterialCategory"> | boolean
   sortOrder?: Prisma.IntFilter<"MaterialCategory"> | number
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -259,6 +269,7 @@ export type MaterialCategoryOrderByWithAggregationInput = {
   tenantId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  description?: Prisma.SortOrderInput | Prisma.SortOrder
   active?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
   _count?: Prisma.MaterialCategoryCountOrderByAggregateInput
@@ -276,6 +287,7 @@ export type MaterialCategoryScalarWhereWithAggregatesInput = {
   tenantId?: Prisma.StringWithAggregatesFilter<"MaterialCategory"> | string
   code?: Prisma.StringWithAggregatesFilter<"MaterialCategory"> | string
   name?: Prisma.StringWithAggregatesFilter<"MaterialCategory"> | string
+  description?: Prisma.StringNullableWithAggregatesFilter<"MaterialCategory"> | string | null
   active?: Prisma.BoolWithAggregatesFilter<"MaterialCategory"> | boolean
   sortOrder?: Prisma.IntWithAggregatesFilter<"MaterialCategory"> | number
 }
@@ -284,6 +296,7 @@ export type MaterialCategoryCreateInput = {
   id?: string
   code: string
   name: string
+  description?: string | null
   active?: boolean
   sortOrder?: number
   tenant: Prisma.TenantCreateNestedOneWithoutMaterialCategoriesInput
@@ -295,6 +308,7 @@ export type MaterialCategoryUncheckedCreateInput = {
   tenantId: string
   code: string
   name: string
+  description?: string | null
   active?: boolean
   sortOrder?: number
   materials?: Prisma.MaterialCategoryRelationUncheckedCreateNestedManyWithoutCategoryInput
@@ -304,6 +318,7 @@ export type MaterialCategoryUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialCategoriesNestedInput
@@ -315,6 +330,7 @@ export type MaterialCategoryUncheckedUpdateInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   materials?: Prisma.MaterialCategoryRelationUncheckedUpdateManyWithoutCategoryNestedInput
@@ -325,6 +341,7 @@ export type MaterialCategoryCreateManyInput = {
   tenantId: string
   code: string
   name: string
+  description?: string | null
   active?: boolean
   sortOrder?: number
 }
@@ -333,6 +350,7 @@ export type MaterialCategoryUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
@@ -342,6 +360,7 @@ export type MaterialCategoryUncheckedUpdateManyInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
@@ -366,6 +385,7 @@ export type MaterialCategoryCountOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   active?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
 }
@@ -379,6 +399,7 @@ export type MaterialCategoryMaxOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   active?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
 }
@@ -388,6 +409,7 @@ export type MaterialCategoryMinOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  description?: Prisma.SortOrder
   active?: Prisma.SortOrder
   sortOrder?: Prisma.SortOrder
 }
@@ -461,6 +483,7 @@ export type MaterialCategoryCreateWithoutTenantInput = {
   id?: string
   code: string
   name: string
+  description?: string | null
   active?: boolean
   sortOrder?: number
   materials?: Prisma.MaterialCategoryRelationCreateNestedManyWithoutCategoryInput
@@ -470,6 +493,7 @@ export type MaterialCategoryUncheckedCreateWithoutTenantInput = {
   id?: string
   code: string
   name: string
+  description?: string | null
   active?: boolean
   sortOrder?: number
   materials?: Prisma.MaterialCategoryRelationUncheckedCreateNestedManyWithoutCategoryInput
@@ -509,6 +533,7 @@ export type MaterialCategoryScalarWhereInput = {
   tenantId?: Prisma.StringFilter<"MaterialCategory"> | string
   code?: Prisma.StringFilter<"MaterialCategory"> | string
   name?: Prisma.StringFilter<"MaterialCategory"> | string
+  description?: Prisma.StringNullableFilter<"MaterialCategory"> | string | null
   active?: Prisma.BoolFilter<"MaterialCategory"> | boolean
   sortOrder?: Prisma.IntFilter<"MaterialCategory"> | number
 }
@@ -517,6 +542,7 @@ export type MaterialCategoryCreateWithoutMaterialsInput = {
   id?: string
   code: string
   name: string
+  description?: string | null
   active?: boolean
   sortOrder?: number
   tenant: Prisma.TenantCreateNestedOneWithoutMaterialCategoriesInput
@@ -527,6 +553,7 @@ export type MaterialCategoryUncheckedCreateWithoutMaterialsInput = {
   tenantId: string
   code: string
   name: string
+  description?: string | null
   active?: boolean
   sortOrder?: number
 }
@@ -551,6 +578,7 @@ export type MaterialCategoryUpdateWithoutMaterialsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialCategoriesNestedInput
@@ -561,6 +589,7 @@ export type MaterialCategoryUncheckedUpdateWithoutMaterialsInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
@@ -569,6 +598,7 @@ export type MaterialCategoryCreateManyTenantInput = {
   id?: string
   code: string
   name: string
+  description?: string | null
   active?: boolean
   sortOrder?: number
 }
@@ -577,6 +607,7 @@ export type MaterialCategoryUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   materials?: Prisma.MaterialCategoryRelationUpdateManyWithoutCategoryNestedInput
@@ -586,6 +617,7 @@ export type MaterialCategoryUncheckedUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
   materials?: Prisma.MaterialCategoryRelationUncheckedUpdateManyWithoutCategoryNestedInput
@@ -595,6 +627,7 @@ export type MaterialCategoryUncheckedUpdateManyWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sortOrder?: Prisma.IntFieldUpdateOperationsInput | number
 }
@@ -635,6 +668,7 @@ export type MaterialCategorySelect<ExtArgs extends runtime.Types.Extensions.Inte
   tenantId?: boolean
   code?: boolean
   name?: boolean
+  description?: boolean
   active?: boolean
   sortOrder?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -647,6 +681,7 @@ export type MaterialCategorySelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   tenantId?: boolean
   code?: boolean
   name?: boolean
+  description?: boolean
   active?: boolean
   sortOrder?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -657,6 +692,7 @@ export type MaterialCategorySelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   tenantId?: boolean
   code?: boolean
   name?: boolean
+  description?: boolean
   active?: boolean
   sortOrder?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -667,11 +703,12 @@ export type MaterialCategorySelectScalar = {
   tenantId?: boolean
   code?: boolean
   name?: boolean
+  description?: boolean
   active?: boolean
   sortOrder?: boolean
 }
 
-export type MaterialCategoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "code" | "name" | "active" | "sortOrder", ExtArgs["result"]["materialCategory"]>
+export type MaterialCategoryOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "code" | "name" | "description" | "active" | "sortOrder", ExtArgs["result"]["materialCategory"]>
 export type MaterialCategoryInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   materials?: boolean | Prisma.MaterialCategory$materialsArgs<ExtArgs>
@@ -695,6 +732,7 @@ export type $MaterialCategoryPayload<ExtArgs extends runtime.Types.Extensions.In
     tenantId: string
     code: string
     name: string
+    description: string | null
     active: boolean
     sortOrder: number
   }, ExtArgs["result"]["materialCategory"]>
@@ -1126,6 +1164,7 @@ export interface MaterialCategoryFieldRefs {
   readonly tenantId: Prisma.FieldRef<"MaterialCategory", 'String'>
   readonly code: Prisma.FieldRef<"MaterialCategory", 'String'>
   readonly name: Prisma.FieldRef<"MaterialCategory", 'String'>
+  readonly description: Prisma.FieldRef<"MaterialCategory", 'String'>
   readonly active: Prisma.FieldRef<"MaterialCategory", 'Boolean'>
   readonly sortOrder: Prisma.FieldRef<"MaterialCategory", 'Int'>
 }

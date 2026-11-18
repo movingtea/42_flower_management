@@ -307,6 +307,25 @@ model Material {
   baseUnit                 String
   quantityScale            Int                           @default(0)
   reservePerOrder          Boolean                       @default(true)
+  // V1 FlowerWiki knowledge fields migrated onto the unified V2 material master.
+  englishName              String?
+  flowerLanguage           String?                       @db.Text
+  maintenance              String?                       @db.Text
+  maintenanceCare          Json?
+  supplySeason             String?
+  defaultShelfLifeDays     Int?
+  standardUnitCost         Decimal?                      @db.Decimal(14, 4)
+  costUnit                 String?
+  costNote                 String?                       @db.Text
+  optimisticUsableRate     Decimal?                      @db.Decimal(7, 4)
+  standardUsableRate       Decimal?                      @db.Decimal(7, 4)
+  conservativeUsableRate   Decimal?                      @db.Decimal(7, 4)
+  lossRateNote             String?                       @db.Text
+  // V1 MasterPart fields retained on the same unified material record.
+  brand                    String?
+  model                    String?
+  notes                    String?                       @db.Text
+  safetyStockThreshold     Decimal                       @default(0) @db.Decimal(14, 3)
   active                   Boolean                       @default(true)
   createdAt                DateTime                      @default(now())
   updatedAt                DateTime                      @default(now()) @updatedAt
@@ -1330,12 +1349,13 @@ model ProductCategoryRelation {
 }
 
 model MaterialCategory {
-  id        String                     @id @default(uuid())
-  tenantId  String
-  code      String
-  name      String
-  active    Boolean                    @default(true)
-  sortOrder Int                        @default(0)
+  id          String                     @id @default(uuid())
+  tenantId    String
+  code        String
+  name        String
+  description String?                    @db.Text
+  active      Boolean                    @default(true)
+  sortOrder   Int                        @default(0)
   tenant    Tenant                     @relation(fields: [tenantId], references: [id])
   materials MaterialCategoryRelation[]
 

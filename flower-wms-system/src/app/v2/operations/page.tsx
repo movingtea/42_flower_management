@@ -13,6 +13,19 @@ import {
   referenceTypeLabel,
   transactionKindLabel,
 } from "./labels";
+import {
+  LOSS_PAGE_SIZE,
+  LOSS_REVIEW_STATUS_OPTIONS,
+  buildLossHref,
+  buildLossWhere,
+  clampLossPage,
+  lossPageNumbers,
+  lossReviewStatusLabel,
+  lossTotalPages,
+  normalizeLossFilters,
+  parsePage,
+  type LossSearchParams,
+} from "./loss-query";
 import { TransferLocationFields } from "./TransferLocationFields";
 import {
   adjustInventoryAction,
@@ -97,6 +110,13 @@ function transactionTone(kind: string): "success" | "warning" | "danger" | "info
   return "neutral";
 }
 
+function lossReviewStatusTone(status: string | null): "success" | "warning" | "danger" | "neutral" {
+  if (status === "APPROVED") return "success";
+  if (status === "PENDING") return "warning";
+  if (status === "REJECTED") return "danger";
+  return "neutral";
+}
+
 function BatchOptions({ batches }: { batches: BatchOptionData[] }) {
   return (
     <>
@@ -125,7 +145,7 @@ function MissingSetup({ children }: { children: string }) {
   );
 }
 
-export default async function OperationsPage({ searchParams }: { searchParams: Promise<{ message?: string | string[]; error?: string | string[] }> }) {
+export default async function OperationsPage({ searchParams }: { searchParams: Promise<LossSearchParams> }) {
   const session = await auth();
   if (!session?.user || session.user.source !== "v2") redirect("/login?callbackUrl=/v2/operations");
   const access = await requireV2Context("purchase");
@@ -133,6 +153,11 @@ export default async function OperationsPage({ searchParams }: { searchParams: P
   const canReviewInventory = access.capabilities.includes("inventory_review");
   const params = await searchParams;
   const feedback = readV2Feedback(params);
+  const lossFilters = normalizeLossFilters(params);
+  const lossWhere = buildLossWhere(storeId, lossFilters);
+  const lossTotal = await v2db.lossRecord.count({ where: lossWhere });
+  const lossPageCount = lossTotalPages(lossTotal);
+  const lossPage = clampLossPage(parsePage(params.page), lossTotal);
 
   const [materials, locations, batches, recentInbound, recentTransactions, recentLosses, pendingLosses, draftStocktakes, pendingStocktakes, confirmedStocktakes] = await Promise.all([
     v2db.material.findMany({ where: { tenantId, active: true }, orderBy: { code: "asc" }, take: 500 }),
@@ -159,10 +184,11 @@ export default async function OperationsPage({ searchParams }: { searchParams: P
       take: 30,
     }),
     v2db.lossRecord.findMany({
-      where: { storeId },
-      include: { batch: { include: { material: true } } },
+      where: lossWhere,
+      include: { batch: { include: { material: true } }, material: true, location: true },
       orderBy: { occurredAt: "desc" },
-      take: 20,
+      skip: (lossPage - 1) * LOSS_PAGE_SIZE,
+      take: LOSS_PAGE_SIZE,
     }),
     v2db.lossRecord.findMany({
       where: { storeId, reviewStatus: "PENDING", pendingBatchVerification: true },
@@ -608,30 +634,91 @@ export default async function OperationsPage({ searchParams }: { searchParams: P
         </div>
       </section>
 
-      <section>
-        <h3 className="mb-3 font-semibold">最近损耗记录</h3>
+      <section id="loss-history" className="scroll-mt-24">
+        <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
+          <h3 className="font-semibold">损耗历史</h3>
+          <p className="text-xs text-stone-500">共 {lossTotal} 条 · 第 {lossPage} / {lossPageCount} 页</p>
+        </div>
+
+        <form key={JSON.stringify(lossFilters)} method="get" action="/v2/operations" className={`${card} mb-4`}>
+          <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-5 xl:items-end">
+            <label className="block text-sm text-stone-700">损耗原因
+              <select className={`${input} mt-1`} name="reason" defaultValue={lossFilters.reason ?? ""}>
+                <option value="">全部原因</option>
+                {LOSS_REASON_OPTIONS.map((reason) => (
+                  <option key={reason} value={reason}>{LOSS_REASON_LABELS[reason]}</option>
+                ))}
+              </select>
+            </label>
+            <label className="block text-sm text-stone-700">复核状态
+              <select className={`${input} mt-1`} name="reviewStatus" defaultValue={lossFilters.reviewStatus ?? ""}>
+                <option value="">全部状态</option>
+                {LOSS_REVIEW_STATUS_OPTIONS.map((status) => (
+                  <option key={status.value} value={status.value}>{status.label}</option>
+                ))}
+              </select>
+            </label>
+            <label className="block text-sm text-stone-700">开始日期
+              <input className={`${input} mt-1`} name="from" type="date" defaultValue={lossFilters.from ?? ""} />
+            </label>
+            <label className="block text-sm text-stone-700">结束日期
+              <input className={`${input} mt-1`} name="to" type="date" defaultValue={lossFilters.to ?? ""} />
+            </label>
+            <div className="flex flex-wrap items-center gap-2">
+              <button className={button}>筛选</button>
+              <Link href="/v2/operations#loss-history" className="rounded-lg border border-stone-300 px-4 py-2 text-sm font-medium text-stone-700 hover:bg-stone-50">重置</Link>
+            </div>
+          </div>
+          <p className="mt-2 text-xs text-stone-500">日期按 Asia/Shanghai 自然日筛选，默认按发生时间倒序；每页 {LOSS_PAGE_SIZE} 条。</p>
+        </form>
+
         <div className={tableShell}>
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-left text-sm">
+            <table className="w-full min-w-[960px] text-left text-sm">
               <thead className={tableHead}>
-                <tr><th className="px-4 py-3">发生时间</th><th>损耗单</th><th>批次 / 物料</th><th>数量</th><th>原因</th><th className="px-4">备注</th></tr>
+                <tr><th className="px-4 py-3">发生时间</th><th>损耗单</th><th>复核状态</th><th>库位</th><th>批次 / 物料</th><th>数量</th><th>原因</th><th className="px-4">备注</th></tr>
               </thead>
               <tbody className="divide-y divide-zinc-100">
-                {recentLosses.map((record) => (
-                  <tr key={record.id}>
-                    <td className="px-4 py-3">{record.occurredAt.toLocaleString("zh-CN")}</td>
-                    <td className="font-mono text-xs" title={record.id}>{shortId(record.id)}</td>
-                    <td>{record.batch ? <><div className="font-medium">{record.batch.batchNo}</div><div className="text-xs text-zinc-500">{record.batch.material.code} · {record.batch.material.name}</div></> : <span className="text-zinc-500">未关联批次</span>}</td>
-                    <td>{formatQty(record.quantity)} {record.batch?.material.baseUnit ?? ""}</td>
-                    <td>{lossReasonLabel(record.reason)}</td>
-                    <td className="px-4">{record.note || "—"}</td>
-                  </tr>
-                ))}
+                {recentLosses.map((record) => {
+                  const material = record.batch?.material ?? record.material;
+                  return (
+                    <tr key={record.id}>
+                      <td className="px-4 py-3">{record.occurredAt.toLocaleString("zh-CN")}</td>
+                      <td className="font-mono text-xs" title={record.id}>{shortId(record.id)}</td>
+                      <td><StatusBadge tone={lossReviewStatusTone(record.reviewStatus)}>{lossReviewStatusLabel(record.reviewStatus)}</StatusBadge></td>
+                      <td>{record.location?.code ?? "—"}</td>
+                      <td>
+                        <div className="font-medium">{record.batch?.batchNo ?? "未关联批次"}</div>
+                        {material
+                          ? <div className="text-xs text-zinc-500">{material.code} · {material.name}</div>
+                          : <div className="text-xs text-zinc-400">物料未知</div>}
+                      </td>
+                      <td>{formatQty(record.quantity)} {material?.baseUnit ?? ""}</td>
+                      <td>{lossReasonLabel(record.reason)}</td>
+                      <td className="px-4">{record.note || "—"}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
-          {recentLosses.length === 0 && <p className="p-6 text-center text-sm text-zinc-500">暂无损耗记录。</p>}
+          {recentLosses.length === 0 && <p className="p-6 text-center text-sm text-zinc-500">当前筛选下没有损耗记录。</p>}
         </div>
+
+        {lossPageCount > 1 && <nav aria-label="损耗历史分页" className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-stone-200 bg-white px-4 py-3 text-sm">
+          <p className="text-stone-600">共 {lossTotal} 条 · 第 {lossPage} / {lossPageCount} 页</p>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {lossPage > 1
+              ? <Link className="rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-sm font-medium text-stone-700 hover:bg-stone-50" href={buildLossHref(lossFilters, lossPage - 1, feedback)} rel="prev">上一页</Link>
+              : <span className="rounded-lg border border-stone-200 bg-stone-100 px-3 py-1.5 text-sm text-stone-400" aria-disabled="true">上一页</span>}
+            {lossPageNumbers(lossPage, lossPageCount).map((number) => number === lossPage
+              ? <span key={number} className="rounded-lg bg-emerald-700 px-3 py-1.5 text-sm font-semibold text-white" aria-current="page">{number}</span>
+              : <Link key={number} className="rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-sm font-medium text-stone-700 hover:bg-stone-50" href={buildLossHref(lossFilters, number, feedback)}>{number}</Link>)}
+            {lossPage < lossPageCount
+              ? <Link className="rounded-lg border border-stone-300 bg-white px-3 py-1.5 text-sm font-medium text-stone-700 hover:bg-stone-50" href={buildLossHref(lossFilters, lossPage + 1, feedback)} rel="next">下一页</Link>
+              : <span className="rounded-lg border border-stone-200 bg-stone-100 px-3 py-1.5 text-sm text-stone-400" aria-disabled="true">下一页</span>}
+          </div>
+        </nav>}
       </section>
 
       <section>

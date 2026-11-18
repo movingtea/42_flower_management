@@ -26,7 +26,7 @@ export const dynamic = "force-dynamic";
 
 const STATE_LABEL: Record<string, string> = { DRAFT: "草稿", ORDERED: "已下单", PARTIALLY_RECEIVED: "部分验收", RECEIVED: "已处理", CANCELLED: "已取消" };
 const STATE_TONE: Record<string, "neutral" | "info" | "warning" | "success" | "danger"> = { DRAFT: "neutral", ORDERED: "info", PARTIALLY_RECEIVED: "warning", RECEIVED: "success", CANCELLED: "danger" };
-type Search = { q?: string | string[]; state?: string | string[]; message?: string | string[]; error?: string | string[]; requirementId?: string | string[] };
+type Search = { q?: string | string[]; state?: string | string[]; message?: string | string[]; error?: string | string[]; requirementId?: string | string[]; supplierId?: string | string[] };
 function dateTimeLocal(value: Date | null) { if (!value) return ""; const offset = value.getTimezoneOffset() * 60000; return new Date(value.getTime() - offset).toISOString().slice(0, 16); }
 
 const openPurchaseInclude = {
@@ -148,13 +148,19 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
   const query = typeof params.q === "string" ? params.q.trim() : "";
   const state = typeof params.state === "string" ? params.state : "open";
   const requirementId = typeof params.requirementId === "string" ? params.requirementId : "";
+  const requestedSupplierId = typeof params.supplierId === "string" ? params.supplierId : "";
+  // Filter options include inactive suppliers so historical purchase orders can
+  // still be found; an unknown id is ignored rather than producing an empty page.
+  const allSuppliers = await v2db.supplier.findMany({ where: { tenantId }, orderBy: [{ active: "desc" }, { name: "asc" }] });
+  const supplierId = requestedSupplierId && allSuppliers.some((supplier) => supplier.id === requestedSupplierId) ? requestedSupplierId : "";
+  const activeSuppliers = allSuppliers.filter((supplier) => supplier.active);
   const stateFilter: Prisma.PurchaseOrderWhereInput = state === "all" ? {} : state === "open" ? { state: { in: [PurchaseState.DRAFT, PurchaseState.ORDERED, PurchaseState.PARTIALLY_RECEIVED] } } : Object.values(PurchaseState).includes(state as PurchaseState) ? { state: state as PurchaseState } : {};
-  const [suppliers, materials, orders, openPurchases, batches, demandOrders, targetRequirement] = await Promise.all([
-    v2db.supplier.findMany({ where: { tenantId, active: true }, orderBy: { name: "asc" } }),
+  const [materials, orders, openPurchases, batches, demandOrders, targetRequirement] = await Promise.all([
     v2db.material.findMany({ where: { tenantId, active: true }, orderBy: { code: "asc" } }),
     v2db.purchaseOrder.findMany({
       where: {
         tenantId, storeId, ...stateFilter,
+        ...(supplierId ? { supplierId } : {}),
         ...(query ? { OR: [{ number: { contains: query, mode: "insensitive" } }, { supplier: { name: { contains: query, mode: "insensitive" } } }] } : {}),
       },
       include: {
@@ -195,7 +201,7 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
     }) : Promise.resolve(null),
   ]);
   const feedback = readV2Feedback(params);
-  const supplierOptions = suppliers.map((supplier) => ({ id: supplier.id, label: `${supplier.code} · ${supplier.name}` }));
+  const supplierOptions = activeSuppliers.map((supplier) => ({ id: supplier.id, label: `${supplier.code} · ${supplier.name}` }));
   const materialOptions = materials.map((material) => ({ id: material.id, label: `${material.code} · ${material.name}`, unit: material.baseUnit }));
   const openLines = buildOpenLines(openPurchases);
   const targetQuantities = targetRequirement ? summarizeShortageQuantities({
@@ -255,15 +261,15 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
                 <input type="hidden" name="freightCost" value="0" />
                 <input type="hidden" name="packagingCost" value="0" />
                 <input type="hidden" name="otherCost" value="0" />
-                <label className="block text-xs text-stone-600">供应商<select className={`${input} mt-1`} name="supplierId" required disabled={suppliers.length === 0}>{suppliers.map((supplier) => <option key={supplier.id} value={supplier.id}>{supplier.code} · {supplier.name}</option>)}</select></label>
+                <label className="block text-xs text-stone-600">供应商<select className={`${input} mt-1`} name="supplierId" required disabled={activeSuppliers.length === 0}>{activeSuppliers.map((supplier) => <option key={supplier.id} value={supplier.id}>{supplier.code} · {supplier.name}</option>)}</select></label>
                 <label className="block text-xs text-stone-600">预计到货<input className={`${input} mt-1`} name="expectedAt" type="datetime-local" max={dateTimeLocal(targetRequirement.needBy)} required /></label>
                 <label className="block text-xs text-stone-600">采购数量<input className={`${input} mt-1`} name="quantity" type="number" min={baseQuantityStep(targetRequirement.material.quantityScale)} step={baseQuantityStep(targetRequirement.material.quantityScale)} defaultValue={targetPending} required /></label>
                 <label className="block text-xs text-stone-600">分配数量<input className={`${input} mt-1`} name="allocationQuantity" type="number" min={baseQuantityStep(targetRequirement.material.quantityScale)} step={baseQuantityStep(targetRequirement.material.quantityScale)} defaultValue={targetPending} required /></label>
                 <label className="block text-xs text-stone-600">采购单价<input className={`${input} mt-1`} name="unitPrice" type="number" min="0" step="0.0001" defaultValue={0} required /></label>
-                <button className={button} disabled={suppliers.length === 0}>创建采购单并关联</button>
+                <button className={button} disabled={activeSuppliers.length === 0}>创建采购单并关联</button>
               </form>
               : <p className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">该缺料需求的缺口已全部分配给采购明细，等待到货验收；如已发生拒收或采购行全部处理，请在下方缺料需求中重新采购或人工替换。</p>}
-            {suppliers.length === 0 && <p className="mt-2 text-xs text-amber-800">当前没有启用的供应商，无法创建采购单。</p>}
+            {activeSuppliers.length === 0 && <p className="mt-2 text-xs text-amber-800">当前没有启用的供应商，无法创建采购单。</p>}
           </div>}
     </section>}
 
@@ -371,7 +377,7 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
         })}</div>}
     </section>
 
-    <form className="flex flex-wrap gap-2 rounded-xl border border-zinc-200 bg-white p-4"><input className={`${input} max-w-sm`} name="q" defaultValue={query} placeholder="搜索采购单号或供应商" /><select className={`${input} w-40`} name="state" defaultValue={state}><option value="open">进行中</option><option value="DRAFT">草稿</option><option value="ORDERED">已下单</option><option value="PARTIALLY_RECEIVED">部分验收</option><option value="RECEIVED">已处理</option><option value="CANCELLED">已取消</option><option value="all">全部</option></select><button className={button}>查询</button></form>
+    <form className="flex flex-wrap gap-2 rounded-xl border border-zinc-200 bg-white p-4"><input className={`${input} max-w-sm`} name="q" defaultValue={query} placeholder="搜索采购单号或供应商" /><select className={`${input} w-40`} name="state" defaultValue={state}><option value="open">进行中</option><option value="DRAFT">草稿</option><option value="ORDERED">已下单</option><option value="PARTIALLY_RECEIVED">部分验收</option><option value="RECEIVED">已处理</option><option value="CANCELLED">已取消</option><option value="all">全部</option></select><select className={`${input} w-64`} name="supplierId" defaultValue={supplierId}><option value="">全部供应商</option>{allSuppliers.map((supplier) => <option key={supplier.id} value={supplier.id}>{supplier.code} · {supplier.name}{supplier.active ? "" : "（已停用）"}</option>)}</select>{requirementId && <input type="hidden" name="requirementId" value={requirementId} />}<button className={button}>查询</button></form>
 
     {orders.length === 0
       ? <ActionEmptyState title="还没有采购单" description="创建采购草稿，确认明细和费用后再正式下单。" />
@@ -380,7 +386,7 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
         const total = lineTotal + Number(order.freightCost) + Number(order.packagingCost) + Number(order.otherCost);
         return <tr key={order.id} className="align-top hover:bg-zinc-50">
           <td className="px-4 py-3"><div className="font-medium">{order.number}</div><div className="text-xs text-zinc-500">{order.createdAt.toLocaleString("zh-CN")}</div></td>
-          <td>{order.supplier.name}</td>
+          <td><a className="text-emerald-700 hover:underline" href={`/v2/suppliers/${order.supplierId}`}>{order.supplier.name}</a></td>
           <td>{order.lines.length} 项<div className="text-xs text-zinc-500">{order.lines.slice(0, 2).map((line) => line.material.name).join("、")}{order.lines.length > 2 ? "…" : ""}</div></td>
           <td>¥{total.toFixed(2)}<div className="text-xs text-zinc-500">费用 ¥{(total - lineTotal).toFixed(2)}</div></td>
           <td>{order.expectedAt?.toLocaleString("zh-CN") ?? "未设置"}</td>

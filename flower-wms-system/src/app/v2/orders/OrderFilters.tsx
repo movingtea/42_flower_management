@@ -71,7 +71,7 @@ export function OrderFilters({ values, resultCount }: {
           >
             重置
           </Link>
-          <span className="text-xs text-stone-500">当前结果 {resultCount} 单（最多显示 200 单）</span>
+          <span className="text-xs text-stone-500">当前筛选共 {resultCount} 单，翻页查看其余订单</span>
         </div>
       </form>
     </section>

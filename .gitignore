@@ -23,6 +23,7 @@ wechat-mini-program/project.private.config.json
 *.local
 .idea/
 .vscode/
+deploy/
 
 flower-wms-system/.env
 
@@ -38,3 +39,4 @@ flower-wms-system/test-results/
 flower-wms-system/playwright-report/
 flower-wms-system/blob-report/
 flower-wms-system/.playwright/
+*.staging-offline

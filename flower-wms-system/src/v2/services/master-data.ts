@@ -40,7 +40,72 @@ export type MaterialInput = {
   baseUnit: string;
   quantityScale: number;
   reservePerOrder: boolean;
+  /** V1 FlowerWiki knowledge and V1 MasterPart attributes. */
+  englishName?: string | null;
+  flowerLanguage?: string | null;
+  maintenance?: string | null;
+  maintenanceCare?: unknown;
+  supplySeason?: string | null;
+  defaultShelfLifeDays?: number | string | null;
+  standardUnitCost?: number | string | null;
+  costUnit?: string | null;
+  costNote?: string | null;
+  optimisticUsableRate?: number | string | null;
+  standardUsableRate?: number | string | null;
+  conservativeUsableRate?: number | string | null;
+  lossRateNote?: string | null;
+  brand?: string | null;
+  model?: string | null;
+  notes?: string | null;
+  safetyStockThreshold?: number | string | null;
+  categoryIds?: string[];
 };
+
+function optionalNumber(
+  value: number | string | null | undefined,
+  label: string,
+  options: { min?: number; max?: number; decimals: number; integer?: boolean },
+): string | null {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(parsed)) throw new Error(`${label}必须为有效数字`);
+  if (options.min !== undefined && parsed < options.min) throw new Error(`${label}不能小于 ${options.min}`);
+  if (options.max !== undefined && parsed > options.max) throw new Error(`${label}不能大于 ${options.max}`);
+  if (options.integer && !Number.isInteger(parsed)) throw new Error(`${label}必须为整数`);
+  const rounded = Number(parsed.toFixed(options.decimals));
+  if (Math.abs(rounded - parsed) > 1e-8) throw new Error(`${label}最多保留 ${options.decimals} 位小数`);
+  return rounded.toFixed(options.decimals);
+}
+
+function optionalInteger(
+  value: number | string | null | undefined,
+  label: string,
+  min: number,
+): number | null {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = typeof value === "number" ? value : Number(value);
+  if (!Number.isFinite(parsed) || !Number.isInteger(parsed)) throw new Error(`${label}必须为整数`);
+  if (parsed < min) throw new Error(`${label}不能小于 ${min}`);
+  return parsed;
+}
+
+function optionalRate(value: number | string | null | undefined, label: string): string | null {
+  return optionalNumber(value, label, { min: 0, max: 1, decimals: 4 });
+}
+
+function optionalCare(value: unknown): Prisma.InputJsonValue | typeof Prisma.JsonNull | undefined {
+  if (value === undefined) return undefined;
+  if (value === null) return Prisma.JsonNull;
+  if (typeof value !== "object") throw new Error("养护指南表格格式无效");
+  return value as Prisma.InputJsonValue;
+}
+
+function categoryIds(value: string[] | undefined): string[] | undefined {
+  if (value === undefined) return undefined;
+  const unique = [...new Set(value.map((id) => id.trim()).filter(Boolean))];
+  if (unique.length > 20) throw new Error("单个物料最多关联 20 个分类");
+  return unique;
+}
 
 function validateMaterial(input: MaterialInput) {
   if (!Object.values(MaterialKind).includes(input.kind)) throw new Error("物料类别无效");
@@ -53,17 +118,54 @@ function validateMaterial(input: MaterialInput) {
     throw new Error(`${baseUnit}必须使用整数库存`);
   }
   return {
-    code: normalizeMasterCode(input.code),
-    name: required(input.name, "物料名称", 80),
-    kind: input.kind,
-    color: optional(input.color, 40, "颜色"),
-    grade: optional(input.grade, 40, "品质等级"),
-    gradeSpecification: optional(input.gradeSpecification, 80, "等级说明"),
-    specification: optional(input.specification, 80, "规格"),
-    baseUnit,
-    quantityScale: input.quantityScale,
-    reservePerOrder: input.reservePerOrder,
+    data: {
+      code: normalizeMasterCode(input.code),
+      name: required(input.name, "物料名称", 80),
+      kind: input.kind,
+      color: optional(input.color, 40, "颜色"),
+      grade: optional(input.grade, 40, "品质等级"),
+      gradeSpecification: optional(input.gradeSpecification, 80, "等级说明"),
+      specification: optional(input.specification, 80, "规格"),
+      baseUnit,
+      quantityScale: input.quantityScale,
+      reservePerOrder: input.reservePerOrder,
+      englishName: optional(input.englishName, 160, "拉丁学名 / 英文名"),
+      flowerLanguage: optional(input.flowerLanguage, 2000, "花语"),
+      maintenance: optional(input.maintenance, 8000, "养护指南"),
+      supplySeason: optional(input.supplySeason, 120, "供货周期"),
+      costUnit: optional(input.costUnit, 12, "成本单位"),
+      costNote: optional(input.costNote, 1000, "成本备注"),
+      lossRateNote: optional(input.lossRateNote, 1000, "损耗说明"),
+      brand: optional(input.brand, 80, "品牌"),
+      model: optional(input.model, 80, "型号"),
+      notes: optional(input.notes, 2000, "备注"),
+      defaultShelfLifeDays: optionalInteger(input.defaultShelfLifeDays, "默认保质期", 1),
+      standardUnitCost: optionalNumber(input.standardUnitCost, "标准单位成本", {
+        min: 0, decimals: 4,
+      }),
+      safetyStockThreshold: optionalNumber(input.safetyStockThreshold, "安全库存", {
+        min: 0, decimals: 3,
+      }) ?? "0",
+      optimisticUsableRate: optionalRate(input.optimisticUsableRate, "乐观可用率"),
+      standardUsableRate: optionalRate(input.standardUsableRate, "标准可用率"),
+      conservativeUsableRate: optionalRate(input.conservativeUsableRate, "保守可用率"),
+      maintenanceCare: optionalCare(input.maintenanceCare),
+    },
+    categoryIds: categoryIds(input.categoryIds),
   };
+}
+
+async function assertCategories(
+  tx: Prisma.TransactionClient,
+  tenantId: string,
+  ids: string[] | undefined,
+): Promise<void> {
+  if (!ids || ids.length === 0) return;
+  const found = await tx.materialCategory.findMany({
+    where: { tenantId, id: { in: ids } },
+    select: { id: true },
+  });
+  if (found.length !== ids.length) throw new Error("物料分类不存在或不属于当前租户");
 }
 
 type Scope = { tenantId: string; storeId: string; actorStaffId: string };
@@ -73,17 +175,26 @@ export async function createMaterialMaster(
   scope: Scope,
   input: MaterialInput,
 ) {
-  const data = validateMaterial(input);
+  const { data, categoryIds: selectedCategoryIds } = validateMaterial(input);
   const duplicate = await tx.material.findFirst({
     where: { tenantId: scope.tenantId, code: data.code },
     select: { id: true },
   });
   if (duplicate) throw new Error("物料编码已存在");
-  const material = await tx.material.create({ data: { tenantId: scope.tenantId, ...data } });
+  await assertCategories(tx, scope.tenantId, selectedCategoryIds);
+  const material = await tx.material.create({
+    data: {
+      tenantId: scope.tenantId,
+      ...data,
+      ...(selectedCategoryIds && selectedCategoryIds.length > 0
+        ? { categories: { create: selectedCategoryIds.map((categoryId) => ({ categoryId })) } }
+        : {}),
+    },
+  });
   await tx.auditEvent.create({ data: {
     tenantId: scope.tenantId, storeId: scope.storeId, actorStaffId: scope.actorStaffId,
     action: "MATERIAL_CREATED", entityType: "Material", entityId: material.id,
-    afterSnapshot: { code: material.code, name: material.name, kind: material.kind, active: material.active },
+    afterSnapshot: { code: material.code, name: material.name, kind: material.kind, active: material.active, categoryIds: selectedCategoryIds ?? [] },
   } });
   return material;
 }
@@ -94,7 +205,7 @@ export async function updateMaterialMaster(
   materialId: string,
   input: MaterialInput,
 ) {
-  const data = validateMaterial(input);
+  const { data, categoryIds: selectedCategoryIds } = validateMaterial(input);
   await tx.$queryRaw`SELECT id FROM "Material" WHERE id = ${materialId} FOR UPDATE`;
   const current = await tx.material.findFirst({ where: { id: materialId, tenantId: scope.tenantId } });
   if (!current) throw new Error("物料不存在或不属于当前租户");
@@ -106,12 +217,28 @@ export async function updateMaterialMaster(
   if (hasStock && (data.baseUnit !== current.baseUnit || data.quantityScale !== current.quantityScale)) {
     throw new Error("存在库存时不能修改库存单位或小数位数");
   }
-  const material = await tx.material.update({ where: { id: materialId }, data });
+  await assertCategories(tx, scope.tenantId, selectedCategoryIds);
+  const material = await tx.material.update({
+    where: { id: materialId },
+    data: {
+      ...data,
+      ...(selectedCategoryIds === undefined
+        ? {}
+        : {
+            categories: {
+              deleteMany: {},
+              ...(selectedCategoryIds.length > 0
+                ? { create: selectedCategoryIds.map((categoryId) => ({ categoryId })) }
+                : {}),
+            },
+          }),
+    },
+  });
   await tx.auditEvent.create({ data: {
     tenantId: scope.tenantId, storeId: scope.storeId, actorStaffId: scope.actorStaffId,
     action: "MATERIAL_UPDATED", entityType: "Material", entityId: material.id,
-    beforeSnapshot: { name: current.name, kind: current.kind, color: current.color, grade: current.grade, specification: current.specification, baseUnit: current.baseUnit, quantityScale: current.quantityScale, reservePerOrder: current.reservePerOrder },
-    afterSnapshot: { name: material.name, kind: material.kind, color: material.color, grade: material.grade, specification: material.specification, baseUnit: material.baseUnit, quantityScale: material.quantityScale, reservePerOrder: material.reservePerOrder },
+    beforeSnapshot: { name: current.name, kind: current.kind, color: current.color, grade: current.grade, specification: current.specification, baseUnit: current.baseUnit, quantityScale: current.quantityScale, reservePerOrder: current.reservePerOrder, englishName: current.englishName, standardUnitCost: current.standardUnitCost, categoryIds: selectedCategoryIds ?? [] },
+    afterSnapshot: { name: material.name, kind: material.kind, color: material.color, grade: material.grade, specification: material.specification, baseUnit: material.baseUnit, quantityScale: material.quantityScale, reservePerOrder: material.reservePerOrder, englishName: material.englishName, standardUnitCost: material.standardUnitCost, categoryIds: selectedCategoryIds ?? [] },
   } });
   return material;
 }

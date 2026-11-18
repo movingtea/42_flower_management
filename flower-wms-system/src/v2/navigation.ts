@@ -43,6 +43,22 @@ export type V2Capability = (typeof V2_CAPABILITIES)[number];
 export const V2_CAPABILITY_DENIED_MESSAGE = "当前账号没有此操作权限";
 
 /**
+ * Stable authorization failure shared by server-rendered pages and actions.
+ *
+ * Observability classifies the public `PERMISSION_DENIED` code as an expected
+ * access-control outcome, so a rejected request is not reported as a system
+ * outage. Keep the message user-facing and avoid attaching role details.
+ */
+export class V2PermissionDeniedError extends Error {
+  readonly code = "PERMISSION_DENIED" as const;
+
+  constructor() {
+    super(V2_CAPABILITY_DENIED_MESSAGE);
+    this.name = "V2PermissionDeniedError";
+  }
+}
+
+/**
  * The one capability matrix. `staff` is intentionally ADMIN-only so staff
  * administration can never be delegated by navigation visibility alone.
  */
@@ -110,7 +126,7 @@ export function assertV2Capability(
   capability: V2Capability
 ): void {
   if (!rolesHaveCapability(roles, capability)) {
-    throw new Error(V2_CAPABILITY_DENIED_MESSAGE);
+    throw new V2PermissionDeniedError();
   }
 }
 
@@ -119,7 +135,7 @@ export function assertV2AnyCapability(
   capabilities: readonly V2Capability[]
 ): void {
   if (!rolesHaveAnyCapability(roles, capabilities)) {
-    throw new Error(V2_CAPABILITY_DENIED_MESSAGE);
+    throw new V2PermissionDeniedError();
   }
 }
 
@@ -162,6 +178,12 @@ export const V2_NAV_GROUPS: readonly V2NavGroup[] = [
         href: "/v2/materials",
         label: "物料母表",
         icon: "🌸",
+        anyCapabilities: ["catalog"],
+      },
+      {
+        href: "/v2/material-categories",
+        label: "原材料分类",
+        icon: "🗂️",
         anyCapabilities: ["catalog"],
       },
       {

@@ -5959,6 +5959,23 @@ export const MaterialScalarFieldEnum = {
   baseUnit: 'baseUnit',
   quantityScale: 'quantityScale',
   reservePerOrder: 'reservePerOrder',
+  englishName: 'englishName',
+  flowerLanguage: 'flowerLanguage',
+  maintenance: 'maintenance',
+  maintenanceCare: 'maintenanceCare',
+  supplySeason: 'supplySeason',
+  defaultShelfLifeDays: 'defaultShelfLifeDays',
+  standardUnitCost: 'standardUnitCost',
+  costUnit: 'costUnit',
+  costNote: 'costNote',
+  optimisticUsableRate: 'optimisticUsableRate',
+  standardUsableRate: 'standardUsableRate',
+  conservativeUsableRate: 'conservativeUsableRate',
+  lossRateNote: 'lossRateNote',
+  brand: 'brand',
+  model: 'model',
+  notes: 'notes',
+  safetyStockThreshold: 'safetyStockThreshold',
   active: 'active',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -6841,6 +6858,7 @@ export const MaterialCategoryScalarFieldEnum = {
   tenantId: 'tenantId',
   code: 'code',
   name: 'name',
+  description: 'description',
   active: 'active',
   sortOrder: 'sortOrder'
 } as const
@@ -6928,19 +6946,19 @@ export const SortOrder = {
 export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
-export const JsonNullValueInput = {
-  JsonNull: JsonNull
-} as const
-
-export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
-
-
 export const NullableJsonNullValueInput = {
   DbNull: DbNull,
   JsonNull: JsonNull
 } as const
 
 export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
+
+
+export const JsonNullValueInput = {
+  JsonNull: JsonNull
+} as const
+
+export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
 export const QueryMode = {
@@ -6951,14 +6969,6 @@ export const QueryMode = {
 export type QueryMode = (typeof QueryMode)[keyof typeof QueryMode]
 
 
-export const NullsOrder = {
-  first: 'first',
-  last: 'last'
-} as const
-
-export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
-
-
 export const JsonNullValueFilter = {
   DbNull: DbNull,
   JsonNull: JsonNull,
@@ -6966,6 +6976,14 @@ export const JsonNullValueFilter = {
 } as const
 
 export type JsonNullValueFilter = (typeof JsonNullValueFilter)[keyof typeof JsonNullValueFilter]
+
+
+export const NullsOrder = {
+  first: 'first',
+  last: 'last'
+} as const
+
+export type NullsOrder = (typeof NullsOrder)[keyof typeof NullsOrder]
 
 
 
@@ -7038,16 +7056,16 @@ export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
 
 
 /**
- * Reference to a field of type 'DateTime'
+ * Reference to a field of type 'Json'
  */
-export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
     
 
 
 /**
- * Reference to a field of type 'DateTime[]'
+ * Reference to a field of type 'QueryMode'
  */
-export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -7062,6 +7080,20 @@ export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
  * Reference to a field of type 'Decimal[]'
  */
 export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime'
+ */
+export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
+    
+
+
+/**
+ * Reference to a field of type 'DateTime[]'
+ */
+export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
     
 
 
@@ -7300,20 +7332,6 @@ export type EnumSamplePlanCandidateStateFieldRefInput<$PrismaModel> = FieldRefIn
  * Reference to a field of type 'SamplePlanCandidateState[]'
  */
 export type ListEnumSamplePlanCandidateStateFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SamplePlanCandidateState[]'>
-    
-
-
-/**
- * Reference to a field of type 'Json'
- */
-export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-/**
- * Reference to a field of type 'QueryMode'
- */
-export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 

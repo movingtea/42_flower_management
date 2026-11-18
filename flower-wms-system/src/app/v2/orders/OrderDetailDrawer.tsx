@@ -246,6 +246,15 @@ function OrderDetailBody({
 }: Omit<DrawerProps, "requestedOrderId" | "closeHref" | "order"> & { order: OrderDetailData }) {
   const latestRevision = order.revisions[0];
   const revisionNumberById = new Map(order.revisions.map((revision) => [revision.id, revision.number]));
+  const requirementCountByRevisionId = new Map<string, number>();
+  for (const item of order.items) {
+    for (const requirement of item.requirements) {
+      requirementCountByRevisionId.set(
+        requirement.revisionId,
+        (requirementCountByRevisionId.get(requirement.revisionId) ?? 0) + 1,
+      );
+    }
+  }
   const reservedLines = latestReservedBatchLines(order);
   const succeededPayments = order.payments.filter((payment) => payment.state === "SUCCEEDED");
   const refundablePayments = succeededPayments.filter((payment) => refundablePaymentCents(payment) > 0);
@@ -440,6 +449,31 @@ function OrderDetailBody({
         </form>
         <p className="mt-2 text-xs text-stone-500">仅制作开始前可修改；保存后会重新计算预留与缺料状态。</p>
       </details>}
+    </Section>
+
+    <Section title="修订历史" hint={latestRevision ? `共 ${order.revisions.length} 版 · 最新第 ${latestRevision.number} 版` : "暂无修订"}>
+      {order.revisions.length === 0
+        ? <p className="text-sm text-stone-500">暂无修订记录。</p>
+        : <ol className="space-y-2">
+            {order.revisions.map((revision) => {
+              const isLatest = revision.id === latestRevision?.id;
+              const requirementCount = requirementCountByRevisionId.get(revision.id) ?? 0;
+              return <li
+                key={revision.id}
+                className={`rounded-lg border p-3 text-sm ${isLatest ? "border-emerald-300 bg-emerald-50/60" : "border-stone-200 bg-stone-50/60"}`}
+              >
+                <div className="flex flex-wrap items-baseline justify-between gap-2">
+                  <span className="font-medium text-stone-900">
+                    第 {revision.number} 版
+                    {isLatest && <span className="ml-2 rounded-full bg-emerald-700 px-2 py-0.5 text-[10px] font-medium text-white">最新</span>}
+                  </span>
+                  <span className={muted}>{formatPurchaseDateTime(revision.createdAt)}</span>
+                </div>
+                <p className="mt-1 text-xs text-stone-700">改单原因：{revision.reason?.trim() || "—"}</p>
+                <p className={muted}>需求行 {requirementCount} 条</p>
+              </li>;
+            })}
+          </ol>}
     </Section>
 
     <Section title="收款与退款历史" hint={`成功收款 ¥${formatCents(paidCents)} · 已退款 ¥${formatCents(refundedCents)}`}>

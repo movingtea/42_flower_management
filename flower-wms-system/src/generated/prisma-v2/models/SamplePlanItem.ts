@@ -513,14 +513,6 @@ export type EnumSamplePlanCandidateStateFieldUpdateOperationsInput = {
   set?: $Enums.SamplePlanCandidateState
 }
 
-export type NullableIntFieldUpdateOperationsInput = {
-  set?: number | null
-  increment?: number
-  decrement?: number
-  multiply?: number
-  divide?: number
-}
-
 export type SamplePlanItemCreateWithoutSampleInput = {
   id?: string
   quantity?: number

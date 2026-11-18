@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { lossReasonLabel } from "@/app/v2/operations/labels";
 import { auth } from "@/auth";
 import { requireV2AnyStore } from "@/v2/auth";
 import { v2db } from "@/v2/db";
@@ -31,6 +32,19 @@ const referenceLabels: Record<string, string> = {
   PRODUCTION_TASK: "生产领用",
 };
 
+const reviewLabels: Record<string, string> = {
+  PENDING: "待复核",
+  APPROVED: "已通过",
+  REJECTED: "已驳回",
+};
+
+function reviewTone(status: string | null): "success" | "warning" | "danger" | "neutral" {
+  if (status === "APPROVED") return "success";
+  if (status === "PENDING") return "warning";
+  if (status === "REJECTED") return "danger";
+  return "neutral";
+}
+
 function formatQty(value: unknown): string {
   const parsed = Number(value);
   return Number.isFinite(parsed) ? String(parsed) : "—";
@@ -51,7 +65,7 @@ function kindTone(kind: string): "success" | "warning" | "danger" | "info" | "ne
 export default async function InventoryDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const session = await auth(); if (!session?.user || session.user.source !== "v2") redirect("/login?callbackUrl=/v2/inventory");
   const { tenantId, storeId } = await requireV2AnyStore(["catalog", "purchase"]); const { id } = await params;
-  const [material, locations, recentTransactions] = await Promise.all([
+  const [material, locations, recentTransactions, lossRecords] = await Promise.all([
     v2db.material.findFirst({
       where: { id, tenantId },
       include: {
@@ -71,6 +85,15 @@ export default async function InventoryDetailPage({ params }: { params: Promise<
       include: { batch: true },
       orderBy: { createdAt: "desc" },
       take: 30,
+    }),
+    v2db.lossRecord.findMany({
+      where: { storeId, OR: [{ batch: { materialId: id } }, { materialId: id }] },
+      include: {
+        batch: { select: { batchNo: true } },
+        location: { select: { code: true } },
+      },
+      orderBy: { occurredAt: "desc" },
+      take: 100,
     }),
   ]);
   if (!material) notFound();
@@ -138,6 +161,32 @@ export default async function InventoryDetailPage({ params }: { params: Promise<
         </div>
         {recentTransactions.length === 0 && <p className="p-6 text-center text-sm text-zinc-500">该物料暂无库存流水。</p>}
       </div>
+    </section>
+
+    <section>
+      <h3 className="mb-3 font-semibold">历史报损</h3>
+      <div className={tableShell}>
+        <div className="overflow-x-auto">
+          <table className="w-full min-w-[860px] text-left text-sm">
+            <thead className={tableHead}><tr><th className="px-4 py-3">发生时间</th><th>批次</th><th>数量</th><th>原因</th><th>复核状态</th><th>库位</th><th className="px-4">备注</th></tr></thead>
+            <tbody className="divide-y divide-zinc-100">
+              {lossRecords.map((loss) => (
+                <tr key={loss.id}>
+                  <td className="px-4 py-3">{loss.occurredAt.toLocaleString("zh-CN")}</td>
+                  <td className="font-medium">{loss.batch?.batchNo ?? "—"}</td>
+                  <td>{formatQty(loss.quantity)} {material.baseUnit}</td>
+                  <td>{lossReasonLabel(loss.reason)}</td>
+                  <td><StatusBadge tone={reviewTone(loss.reviewStatus)}>{loss.reviewStatus ? reviewLabels[loss.reviewStatus] ?? loss.reviewStatus : "—"}</StatusBadge></td>
+                  <td>{loss.location?.code ?? "—"}</td>
+                  <td className="max-w-xs px-4 text-xs text-zinc-600">{loss.note || "—"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        {lossRecords.length === 0 && <p className="p-6 text-center text-sm text-zinc-500">该物料暂无报损记录。</p>}
+      </div>
+      <p className="mt-2 text-xs text-zinc-400">按发生时间倒序展示最近 100 条；复核状态为 — 表示该报损无需复核或尚未进入复核流程。</p>
     </section>
   </V2ModulePage>;
 }

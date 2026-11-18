@@ -28,10 +28,22 @@ export type AggregateMaterial = {
 
 export type MaterialAvgAggregateOutputType = {
   quantityScale: number | null
+  defaultShelfLifeDays: number | null
+  standardUnitCost: runtime.Decimal | null
+  optimisticUsableRate: runtime.Decimal | null
+  standardUsableRate: runtime.Decimal | null
+  conservativeUsableRate: runtime.Decimal | null
+  safetyStockThreshold: runtime.Decimal | null
 }
 
 export type MaterialSumAggregateOutputType = {
   quantityScale: number | null
+  defaultShelfLifeDays: number | null
+  standardUnitCost: runtime.Decimal | null
+  optimisticUsableRate: runtime.Decimal | null
+  standardUsableRate: runtime.Decimal | null
+  conservativeUsableRate: runtime.Decimal | null
+  safetyStockThreshold: runtime.Decimal | null
 }
 
 export type MaterialMinAggregateOutputType = {
@@ -47,6 +59,22 @@ export type MaterialMinAggregateOutputType = {
   baseUnit: string | null
   quantityScale: number | null
   reservePerOrder: boolean | null
+  englishName: string | null
+  flowerLanguage: string | null
+  maintenance: string | null
+  supplySeason: string | null
+  defaultShelfLifeDays: number | null
+  standardUnitCost: runtime.Decimal | null
+  costUnit: string | null
+  costNote: string | null
+  optimisticUsableRate: runtime.Decimal | null
+  standardUsableRate: runtime.Decimal | null
+  conservativeUsableRate: runtime.Decimal | null
+  lossRateNote: string | null
+  brand: string | null
+  model: string | null
+  notes: string | null
+  safetyStockThreshold: runtime.Decimal | null
   active: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -65,6 +93,22 @@ export type MaterialMaxAggregateOutputType = {
   baseUnit: string | null
   quantityScale: number | null
   reservePerOrder: boolean | null
+  englishName: string | null
+  flowerLanguage: string | null
+  maintenance: string | null
+  supplySeason: string | null
+  defaultShelfLifeDays: number | null
+  standardUnitCost: runtime.Decimal | null
+  costUnit: string | null
+  costNote: string | null
+  optimisticUsableRate: runtime.Decimal | null
+  standardUsableRate: runtime.Decimal | null
+  conservativeUsableRate: runtime.Decimal | null
+  lossRateNote: string | null
+  brand: string | null
+  model: string | null
+  notes: string | null
+  safetyStockThreshold: runtime.Decimal | null
   active: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
@@ -83,6 +127,23 @@ export type MaterialCountAggregateOutputType = {
   baseUnit: number
   quantityScale: number
   reservePerOrder: number
+  englishName: number
+  flowerLanguage: number
+  maintenance: number
+  maintenanceCare: number
+  supplySeason: number
+  defaultShelfLifeDays: number
+  standardUnitCost: number
+  costUnit: number
+  costNote: number
+  optimisticUsableRate: number
+  standardUsableRate: number
+  conservativeUsableRate: number
+  lossRateNote: number
+  brand: number
+  model: number
+  notes: number
+  safetyStockThreshold: number
   active: number
   createdAt: number
   updatedAt: number
@@ -92,10 +153,22 @@ export type MaterialCountAggregateOutputType = {
 
 export type MaterialAvgAggregateInputType = {
   quantityScale?: true
+  defaultShelfLifeDays?: true
+  standardUnitCost?: true
+  optimisticUsableRate?: true
+  standardUsableRate?: true
+  conservativeUsableRate?: true
+  safetyStockThreshold?: true
 }
 
 export type MaterialSumAggregateInputType = {
   quantityScale?: true
+  defaultShelfLifeDays?: true
+  standardUnitCost?: true
+  optimisticUsableRate?: true
+  standardUsableRate?: true
+  conservativeUsableRate?: true
+  safetyStockThreshold?: true
 }
 
 export type MaterialMinAggregateInputType = {
@@ -111,6 +184,22 @@ export type MaterialMinAggregateInputType = {
   baseUnit?: true
   quantityScale?: true
   reservePerOrder?: true
+  englishName?: true
+  flowerLanguage?: true
+  maintenance?: true
+  supplySeason?: true
+  defaultShelfLifeDays?: true
+  standardUnitCost?: true
+  costUnit?: true
+  costNote?: true
+  optimisticUsableRate?: true
+  standardUsableRate?: true
+  conservativeUsableRate?: true
+  lossRateNote?: true
+  brand?: true
+  model?: true
+  notes?: true
+  safetyStockThreshold?: true
   active?: true
   createdAt?: true
   updatedAt?: true
@@ -129,6 +218,22 @@ export type MaterialMaxAggregateInputType = {
   baseUnit?: true
   quantityScale?: true
   reservePerOrder?: true
+  englishName?: true
+  flowerLanguage?: true
+  maintenance?: true
+  supplySeason?: true
+  defaultShelfLifeDays?: true
+  standardUnitCost?: true
+  costUnit?: true
+  costNote?: true
+  optimisticUsableRate?: true
+  standardUsableRate?: true
+  conservativeUsableRate?: true
+  lossRateNote?: true
+  brand?: true
+  model?: true
+  notes?: true
+  safetyStockThreshold?: true
   active?: true
   createdAt?: true
   updatedAt?: true
@@ -147,6 +252,23 @@ export type MaterialCountAggregateInputType = {
   baseUnit?: true
   quantityScale?: true
   reservePerOrder?: true
+  englishName?: true
+  flowerLanguage?: true
+  maintenance?: true
+  maintenanceCare?: true
+  supplySeason?: true
+  defaultShelfLifeDays?: true
+  standardUnitCost?: true
+  costUnit?: true
+  costNote?: true
+  optimisticUsableRate?: true
+  standardUsableRate?: true
+  conservativeUsableRate?: true
+  lossRateNote?: true
+  brand?: true
+  model?: true
+  notes?: true
+  safetyStockThreshold?: true
   active?: true
   createdAt?: true
   updatedAt?: true
@@ -252,6 +374,23 @@ export type MaterialGroupByOutputType = {
   baseUnit: string
   quantityScale: number
   reservePerOrder: boolean
+  englishName: string | null
+  flowerLanguage: string | null
+  maintenance: string | null
+  maintenanceCare: runtime.JsonValue | null
+  supplySeason: string | null
+  defaultShelfLifeDays: number | null
+  standardUnitCost: runtime.Decimal | null
+  costUnit: string | null
+  costNote: string | null
+  optimisticUsableRate: runtime.Decimal | null
+  standardUsableRate: runtime.Decimal | null
+  conservativeUsableRate: runtime.Decimal | null
+  lossRateNote: string | null
+  brand: string | null
+  model: string | null
+  notes: string | null
+  safetyStockThreshold: runtime.Decimal
   active: boolean
   createdAt: Date
   updatedAt: Date
@@ -293,6 +432,23 @@ export type MaterialWhereInput = {
   baseUnit?: Prisma.StringFilter<"Material"> | string
   quantityScale?: Prisma.IntFilter<"Material"> | number
   reservePerOrder?: Prisma.BoolFilter<"Material"> | boolean
+  englishName?: Prisma.StringNullableFilter<"Material"> | string | null
+  flowerLanguage?: Prisma.StringNullableFilter<"Material"> | string | null
+  maintenance?: Prisma.StringNullableFilter<"Material"> | string | null
+  maintenanceCare?: Prisma.JsonNullableFilter<"Material">
+  supplySeason?: Prisma.StringNullableFilter<"Material"> | string | null
+  defaultShelfLifeDays?: Prisma.IntNullableFilter<"Material"> | number | null
+  standardUnitCost?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.StringNullableFilter<"Material"> | string | null
+  costNote?: Prisma.StringNullableFilter<"Material"> | string | null
+  optimisticUsableRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.StringNullableFilter<"Material"> | string | null
+  brand?: Prisma.StringNullableFilter<"Material"> | string | null
+  model?: Prisma.StringNullableFilter<"Material"> | string | null
+  notes?: Prisma.StringNullableFilter<"Material"> | string | null
+  safetyStockThreshold?: Prisma.DecimalFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFilter<"Material"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Material"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Material"> | Date | string
@@ -326,6 +482,23 @@ export type MaterialOrderByWithRelationInput = {
   baseUnit?: Prisma.SortOrder
   quantityScale?: Prisma.SortOrder
   reservePerOrder?: Prisma.SortOrder
+  englishName?: Prisma.SortOrderInput | Prisma.SortOrder
+  flowerLanguage?: Prisma.SortOrderInput | Prisma.SortOrder
+  maintenance?: Prisma.SortOrderInput | Prisma.SortOrder
+  maintenanceCare?: Prisma.SortOrderInput | Prisma.SortOrder
+  supplySeason?: Prisma.SortOrderInput | Prisma.SortOrder
+  defaultShelfLifeDays?: Prisma.SortOrderInput | Prisma.SortOrder
+  standardUnitCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  costUnit?: Prisma.SortOrderInput | Prisma.SortOrder
+  costNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  optimisticUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  standardUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  conservativeUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossRateNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  brand?: Prisma.SortOrderInput | Prisma.SortOrder
+  model?: Prisma.SortOrderInput | Prisma.SortOrder
+  notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  safetyStockThreshold?: Prisma.SortOrder
   active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -364,6 +537,23 @@ export type MaterialWhereUniqueInput = Prisma.AtLeast<{
   baseUnit?: Prisma.StringFilter<"Material"> | string
   quantityScale?: Prisma.IntFilter<"Material"> | number
   reservePerOrder?: Prisma.BoolFilter<"Material"> | boolean
+  englishName?: Prisma.StringNullableFilter<"Material"> | string | null
+  flowerLanguage?: Prisma.StringNullableFilter<"Material"> | string | null
+  maintenance?: Prisma.StringNullableFilter<"Material"> | string | null
+  maintenanceCare?: Prisma.JsonNullableFilter<"Material">
+  supplySeason?: Prisma.StringNullableFilter<"Material"> | string | null
+  defaultShelfLifeDays?: Prisma.IntNullableFilter<"Material"> | number | null
+  standardUnitCost?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.StringNullableFilter<"Material"> | string | null
+  costNote?: Prisma.StringNullableFilter<"Material"> | string | null
+  optimisticUsableRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.StringNullableFilter<"Material"> | string | null
+  brand?: Prisma.StringNullableFilter<"Material"> | string | null
+  model?: Prisma.StringNullableFilter<"Material"> | string | null
+  notes?: Prisma.StringNullableFilter<"Material"> | string | null
+  safetyStockThreshold?: Prisma.DecimalFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFilter<"Material"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Material"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Material"> | Date | string
@@ -397,6 +587,23 @@ export type MaterialOrderByWithAggregationInput = {
   baseUnit?: Prisma.SortOrder
   quantityScale?: Prisma.SortOrder
   reservePerOrder?: Prisma.SortOrder
+  englishName?: Prisma.SortOrderInput | Prisma.SortOrder
+  flowerLanguage?: Prisma.SortOrderInput | Prisma.SortOrder
+  maintenance?: Prisma.SortOrderInput | Prisma.SortOrder
+  maintenanceCare?: Prisma.SortOrderInput | Prisma.SortOrder
+  supplySeason?: Prisma.SortOrderInput | Prisma.SortOrder
+  defaultShelfLifeDays?: Prisma.SortOrderInput | Prisma.SortOrder
+  standardUnitCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  costUnit?: Prisma.SortOrderInput | Prisma.SortOrder
+  costNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  optimisticUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  standardUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  conservativeUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossRateNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  brand?: Prisma.SortOrderInput | Prisma.SortOrder
+  model?: Prisma.SortOrderInput | Prisma.SortOrder
+  notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  safetyStockThreshold?: Prisma.SortOrder
   active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -423,6 +630,23 @@ export type MaterialScalarWhereWithAggregatesInput = {
   baseUnit?: Prisma.StringWithAggregatesFilter<"Material"> | string
   quantityScale?: Prisma.IntWithAggregatesFilter<"Material"> | number
   reservePerOrder?: Prisma.BoolWithAggregatesFilter<"Material"> | boolean
+  englishName?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
+  flowerLanguage?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
+  maintenance?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
+  maintenanceCare?: Prisma.JsonNullableWithAggregatesFilter<"Material">
+  supplySeason?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
+  defaultShelfLifeDays?: Prisma.IntNullableWithAggregatesFilter<"Material"> | number | null
+  standardUnitCost?: Prisma.DecimalNullableWithAggregatesFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
+  costNote?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
+  optimisticUsableRate?: Prisma.DecimalNullableWithAggregatesFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.DecimalNullableWithAggregatesFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.DecimalNullableWithAggregatesFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
+  brand?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
+  model?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
+  notes?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
+  safetyStockThreshold?: Prisma.DecimalWithAggregatesFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolWithAggregatesFilter<"Material"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Material"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Material"> | Date | string
@@ -440,6 +664,23 @@ export type MaterialCreateInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -473,6 +714,23 @@ export type MaterialUncheckedCreateInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -504,6 +762,23 @@ export type MaterialUpdateInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -537,6 +812,23 @@ export type MaterialUncheckedUpdateInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -569,6 +861,23 @@ export type MaterialCreateManyInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -586,6 +895,23 @@ export type MaterialUpdateManyMutationInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -604,6 +930,23 @@ export type MaterialUncheckedUpdateManyInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -642,6 +985,23 @@ export type MaterialCountOrderByAggregateInput = {
   baseUnit?: Prisma.SortOrder
   quantityScale?: Prisma.SortOrder
   reservePerOrder?: Prisma.SortOrder
+  englishName?: Prisma.SortOrder
+  flowerLanguage?: Prisma.SortOrder
+  maintenance?: Prisma.SortOrder
+  maintenanceCare?: Prisma.SortOrder
+  supplySeason?: Prisma.SortOrder
+  defaultShelfLifeDays?: Prisma.SortOrder
+  standardUnitCost?: Prisma.SortOrder
+  costUnit?: Prisma.SortOrder
+  costNote?: Prisma.SortOrder
+  optimisticUsableRate?: Prisma.SortOrder
+  standardUsableRate?: Prisma.SortOrder
+  conservativeUsableRate?: Prisma.SortOrder
+  lossRateNote?: Prisma.SortOrder
+  brand?: Prisma.SortOrder
+  model?: Prisma.SortOrder
+  notes?: Prisma.SortOrder
+  safetyStockThreshold?: Prisma.SortOrder
   active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -649,6 +1009,12 @@ export type MaterialCountOrderByAggregateInput = {
 
 export type MaterialAvgOrderByAggregateInput = {
   quantityScale?: Prisma.SortOrder
+  defaultShelfLifeDays?: Prisma.SortOrder
+  standardUnitCost?: Prisma.SortOrder
+  optimisticUsableRate?: Prisma.SortOrder
+  standardUsableRate?: Prisma.SortOrder
+  conservativeUsableRate?: Prisma.SortOrder
+  safetyStockThreshold?: Prisma.SortOrder
 }
 
 export type MaterialMaxOrderByAggregateInput = {
@@ -664,6 +1030,22 @@ export type MaterialMaxOrderByAggregateInput = {
   baseUnit?: Prisma.SortOrder
   quantityScale?: Prisma.SortOrder
   reservePerOrder?: Prisma.SortOrder
+  englishName?: Prisma.SortOrder
+  flowerLanguage?: Prisma.SortOrder
+  maintenance?: Prisma.SortOrder
+  supplySeason?: Prisma.SortOrder
+  defaultShelfLifeDays?: Prisma.SortOrder
+  standardUnitCost?: Prisma.SortOrder
+  costUnit?: Prisma.SortOrder
+  costNote?: Prisma.SortOrder
+  optimisticUsableRate?: Prisma.SortOrder
+  standardUsableRate?: Prisma.SortOrder
+  conservativeUsableRate?: Prisma.SortOrder
+  lossRateNote?: Prisma.SortOrder
+  brand?: Prisma.SortOrder
+  model?: Prisma.SortOrder
+  notes?: Prisma.SortOrder
+  safetyStockThreshold?: Prisma.SortOrder
   active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -682,6 +1064,22 @@ export type MaterialMinOrderByAggregateInput = {
   baseUnit?: Prisma.SortOrder
   quantityScale?: Prisma.SortOrder
   reservePerOrder?: Prisma.SortOrder
+  englishName?: Prisma.SortOrder
+  flowerLanguage?: Prisma.SortOrder
+  maintenance?: Prisma.SortOrder
+  supplySeason?: Prisma.SortOrder
+  defaultShelfLifeDays?: Prisma.SortOrder
+  standardUnitCost?: Prisma.SortOrder
+  costUnit?: Prisma.SortOrder
+  costNote?: Prisma.SortOrder
+  optimisticUsableRate?: Prisma.SortOrder
+  standardUsableRate?: Prisma.SortOrder
+  conservativeUsableRate?: Prisma.SortOrder
+  lossRateNote?: Prisma.SortOrder
+  brand?: Prisma.SortOrder
+  model?: Prisma.SortOrder
+  notes?: Prisma.SortOrder
+  safetyStockThreshold?: Prisma.SortOrder
   active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
@@ -689,6 +1087,12 @@ export type MaterialMinOrderByAggregateInput = {
 
 export type MaterialSumOrderByAggregateInput = {
   quantityScale?: Prisma.SortOrder
+  defaultShelfLifeDays?: Prisma.SortOrder
+  standardUnitCost?: Prisma.SortOrder
+  optimisticUsableRate?: Prisma.SortOrder
+  standardUsableRate?: Prisma.SortOrder
+  conservativeUsableRate?: Prisma.SortOrder
+  safetyStockThreshold?: Prisma.SortOrder
 }
 
 export type MaterialScalarRelationFilter = {
@@ -761,6 +1165,30 @@ export type IntFieldUpdateOperationsInput = {
 
 export type BoolFieldUpdateOperationsInput = {
   set?: boolean
+}
+
+export type NullableIntFieldUpdateOperationsInput = {
+  set?: number | null
+  increment?: number
+  decrement?: number
+  multiply?: number
+  divide?: number
+}
+
+export type NullableDecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
+export type DecimalFieldUpdateOperationsInput = {
+  set?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  increment?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
 }
 
 export type DateTimeFieldUpdateOperationsInput = {
@@ -979,6 +1407,23 @@ export type MaterialCreateWithoutTenantInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1010,6 +1455,23 @@ export type MaterialUncheckedCreateWithoutTenantInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1071,6 +1533,23 @@ export type MaterialScalarWhereInput = {
   baseUnit?: Prisma.StringFilter<"Material"> | string
   quantityScale?: Prisma.IntFilter<"Material"> | number
   reservePerOrder?: Prisma.BoolFilter<"Material"> | boolean
+  englishName?: Prisma.StringNullableFilter<"Material"> | string | null
+  flowerLanguage?: Prisma.StringNullableFilter<"Material"> | string | null
+  maintenance?: Prisma.StringNullableFilter<"Material"> | string | null
+  maintenanceCare?: Prisma.JsonNullableFilter<"Material">
+  supplySeason?: Prisma.StringNullableFilter<"Material"> | string | null
+  defaultShelfLifeDays?: Prisma.IntNullableFilter<"Material"> | number | null
+  standardUnitCost?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.StringNullableFilter<"Material"> | string | null
+  costNote?: Prisma.StringNullableFilter<"Material"> | string | null
+  optimisticUsableRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.StringNullableFilter<"Material"> | string | null
+  brand?: Prisma.StringNullableFilter<"Material"> | string | null
+  model?: Prisma.StringNullableFilter<"Material"> | string | null
+  notes?: Prisma.StringNullableFilter<"Material"> | string | null
+  safetyStockThreshold?: Prisma.DecimalFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFilter<"Material"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Material"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Material"> | Date | string
@@ -1088,6 +1567,23 @@ export type MaterialCreateWithoutRecipeLinesInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1120,6 +1616,23 @@ export type MaterialUncheckedCreateWithoutRecipeLinesInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1166,6 +1679,23 @@ export type MaterialUpdateWithoutRecipeLinesInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1198,6 +1728,23 @@ export type MaterialUncheckedUpdateWithoutRecipeLinesInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1228,6 +1775,23 @@ export type MaterialCreateWithoutPackagingKitLinesInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1260,6 +1824,23 @@ export type MaterialUncheckedCreateWithoutPackagingKitLinesInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1306,6 +1887,23 @@ export type MaterialUpdateWithoutPackagingKitLinesInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1338,6 +1936,23 @@ export type MaterialUncheckedUpdateWithoutPackagingKitLinesInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1368,6 +1983,23 @@ export type MaterialCreateWithoutRequirementsInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1400,6 +2032,23 @@ export type MaterialUncheckedCreateWithoutRequirementsInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1446,6 +2095,23 @@ export type MaterialUpdateWithoutRequirementsInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1478,6 +2144,23 @@ export type MaterialUncheckedUpdateWithoutRequirementsInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1508,6 +2191,23 @@ export type MaterialCreateWithoutHoldMaterialsInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1540,6 +2240,23 @@ export type MaterialUncheckedCreateWithoutHoldMaterialsInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1586,6 +2303,23 @@ export type MaterialUpdateWithoutHoldMaterialsInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1618,6 +2352,23 @@ export type MaterialUncheckedUpdateWithoutHoldMaterialsInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1648,6 +2399,23 @@ export type MaterialCreateWithoutOrderedLinesInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1680,6 +2448,23 @@ export type MaterialUncheckedCreateWithoutOrderedLinesInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1726,6 +2511,23 @@ export type MaterialUpdateWithoutOrderedLinesInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1758,6 +2560,23 @@ export type MaterialUncheckedUpdateWithoutOrderedLinesInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1788,6 +2607,23 @@ export type MaterialCreateWithoutReceivedLinesInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1820,6 +2656,23 @@ export type MaterialUncheckedCreateWithoutReceivedLinesInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1866,6 +2719,23 @@ export type MaterialUpdateWithoutReceivedLinesInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1898,6 +2768,23 @@ export type MaterialUncheckedUpdateWithoutReceivedLinesInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1928,6 +2815,23 @@ export type MaterialCreateWithoutBatchesInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -1960,6 +2864,23 @@ export type MaterialUncheckedCreateWithoutBatchesInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2006,6 +2927,23 @@ export type MaterialUpdateWithoutBatchesInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2038,6 +2976,23 @@ export type MaterialUncheckedUpdateWithoutBatchesInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2068,6 +3023,23 @@ export type MaterialCreateWithoutSampleMaterialsInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2100,6 +3072,23 @@ export type MaterialUncheckedCreateWithoutSampleMaterialsInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2146,6 +3135,23 @@ export type MaterialUpdateWithoutSampleMaterialsInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2178,6 +3184,23 @@ export type MaterialUncheckedUpdateWithoutSampleMaterialsInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2208,6 +3231,23 @@ export type MaterialCreateWithoutSamplePlanMaterialsInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2240,6 +3280,23 @@ export type MaterialUncheckedCreateWithoutSamplePlanMaterialsInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2286,6 +3343,23 @@ export type MaterialUpdateWithoutSamplePlanMaterialsInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2318,6 +3392,23 @@ export type MaterialUncheckedUpdateWithoutSamplePlanMaterialsInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2348,6 +3439,23 @@ export type MaterialCreateWithoutSampleInventorySnapshotsInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2380,6 +3488,23 @@ export type MaterialUncheckedCreateWithoutSampleInventorySnapshotsInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2426,6 +3551,23 @@ export type MaterialUpdateWithoutSampleInventorySnapshotsInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2458,6 +3600,23 @@ export type MaterialUncheckedUpdateWithoutSampleInventorySnapshotsInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2488,6 +3647,23 @@ export type MaterialCreateWithoutSampleStepMaterialsInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2520,6 +3696,23 @@ export type MaterialUncheckedCreateWithoutSampleStepMaterialsInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2566,6 +3759,23 @@ export type MaterialUpdateWithoutSampleStepMaterialsInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2598,6 +3808,23 @@ export type MaterialUncheckedUpdateWithoutSampleStepMaterialsInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2628,6 +3855,23 @@ export type MaterialCreateWithoutDisassemblyMaterialsInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2660,6 +3904,23 @@ export type MaterialUncheckedCreateWithoutDisassemblyMaterialsInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2706,6 +3967,23 @@ export type MaterialUpdateWithoutDisassemblyMaterialsInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2738,6 +4016,23 @@ export type MaterialUncheckedUpdateWithoutDisassemblyMaterialsInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2768,6 +4063,23 @@ export type MaterialCreateWithoutUnverifiedLossesInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2800,6 +4112,23 @@ export type MaterialUncheckedCreateWithoutUnverifiedLossesInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2846,6 +4175,23 @@ export type MaterialUpdateWithoutUnverifiedLossesInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2878,6 +4224,23 @@ export type MaterialUncheckedUpdateWithoutUnverifiedLossesInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2908,6 +4271,23 @@ export type MaterialCreateWithoutCategoriesInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2940,6 +4320,23 @@ export type MaterialUncheckedCreateWithoutCategoriesInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -2986,6 +4383,23 @@ export type MaterialUpdateWithoutCategoriesInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3018,6 +4432,23 @@ export type MaterialUncheckedUpdateWithoutCategoriesInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3048,6 +4479,23 @@ export type MaterialCreateManyTenantInput = {
   baseUnit: string
   quantityScale?: number
   reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
@@ -3065,6 +4513,23 @@ export type MaterialUpdateWithoutTenantInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3096,6 +4561,23 @@ export type MaterialUncheckedUpdateWithoutTenantInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3127,6 +4609,23 @@ export type MaterialUncheckedUpdateManyWithoutTenantInput = {
   baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
   reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3293,6 +4792,23 @@ export type MaterialSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   baseUnit?: boolean
   quantityScale?: boolean
   reservePerOrder?: boolean
+  englishName?: boolean
+  flowerLanguage?: boolean
+  maintenance?: boolean
+  maintenanceCare?: boolean
+  supplySeason?: boolean
+  defaultShelfLifeDays?: boolean
+  standardUnitCost?: boolean
+  costUnit?: boolean
+  costNote?: boolean
+  optimisticUsableRate?: boolean
+  standardUsableRate?: boolean
+  conservativeUsableRate?: boolean
+  lossRateNote?: boolean
+  brand?: boolean
+  model?: boolean
+  notes?: boolean
+  safetyStockThreshold?: boolean
   active?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -3327,6 +4843,23 @@ export type MaterialSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   baseUnit?: boolean
   quantityScale?: boolean
   reservePerOrder?: boolean
+  englishName?: boolean
+  flowerLanguage?: boolean
+  maintenance?: boolean
+  maintenanceCare?: boolean
+  supplySeason?: boolean
+  defaultShelfLifeDays?: boolean
+  standardUnitCost?: boolean
+  costUnit?: boolean
+  costNote?: boolean
+  optimisticUsableRate?: boolean
+  standardUsableRate?: boolean
+  conservativeUsableRate?: boolean
+  lossRateNote?: boolean
+  brand?: boolean
+  model?: boolean
+  notes?: boolean
+  safetyStockThreshold?: boolean
   active?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -3346,6 +4879,23 @@ export type MaterialSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   baseUnit?: boolean
   quantityScale?: boolean
   reservePerOrder?: boolean
+  englishName?: boolean
+  flowerLanguage?: boolean
+  maintenance?: boolean
+  maintenanceCare?: boolean
+  supplySeason?: boolean
+  defaultShelfLifeDays?: boolean
+  standardUnitCost?: boolean
+  costUnit?: boolean
+  costNote?: boolean
+  optimisticUsableRate?: boolean
+  standardUsableRate?: boolean
+  conservativeUsableRate?: boolean
+  lossRateNote?: boolean
+  brand?: boolean
+  model?: boolean
+  notes?: boolean
+  safetyStockThreshold?: boolean
   active?: boolean
   createdAt?: boolean
   updatedAt?: boolean
@@ -3365,12 +4915,29 @@ export type MaterialSelectScalar = {
   baseUnit?: boolean
   quantityScale?: boolean
   reservePerOrder?: boolean
+  englishName?: boolean
+  flowerLanguage?: boolean
+  maintenance?: boolean
+  maintenanceCare?: boolean
+  supplySeason?: boolean
+  defaultShelfLifeDays?: boolean
+  standardUnitCost?: boolean
+  costUnit?: boolean
+  costNote?: boolean
+  optimisticUsableRate?: boolean
+  standardUsableRate?: boolean
+  conservativeUsableRate?: boolean
+  lossRateNote?: boolean
+  brand?: boolean
+  model?: boolean
+  notes?: boolean
+  safetyStockThreshold?: boolean
   active?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type MaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "code" | "name" | "kind" | "color" | "grade" | "gradeSpecification" | "specification" | "baseUnit" | "quantityScale" | "reservePerOrder" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["material"]>
+export type MaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "code" | "name" | "kind" | "color" | "grade" | "gradeSpecification" | "specification" | "baseUnit" | "quantityScale" | "reservePerOrder" | "englishName" | "flowerLanguage" | "maintenance" | "maintenanceCare" | "supplySeason" | "defaultShelfLifeDays" | "standardUnitCost" | "costUnit" | "costNote" | "optimisticUsableRate" | "standardUsableRate" | "conservativeUsableRate" | "lossRateNote" | "brand" | "model" | "notes" | "safetyStockThreshold" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["material"]>
 export type MaterialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   unverifiedLosses?: boolean | Prisma.Material$unverifiedLossesArgs<ExtArgs>
@@ -3428,6 +4995,23 @@ export type $MaterialPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     baseUnit: string
     quantityScale: number
     reservePerOrder: boolean
+    englishName: string | null
+    flowerLanguage: string | null
+    maintenance: string | null
+    maintenanceCare: runtime.JsonValue | null
+    supplySeason: string | null
+    defaultShelfLifeDays: number | null
+    standardUnitCost: runtime.Decimal | null
+    costUnit: string | null
+    costNote: string | null
+    optimisticUsableRate: runtime.Decimal | null
+    standardUsableRate: runtime.Decimal | null
+    conservativeUsableRate: runtime.Decimal | null
+    lossRateNote: string | null
+    brand: string | null
+    model: string | null
+    notes: string | null
+    safetyStockThreshold: runtime.Decimal
     active: boolean
     createdAt: Date
     updatedAt: Date
@@ -3881,6 +5465,23 @@ export interface MaterialFieldRefs {
   readonly baseUnit: Prisma.FieldRef<"Material", 'String'>
   readonly quantityScale: Prisma.FieldRef<"Material", 'Int'>
   readonly reservePerOrder: Prisma.FieldRef<"Material", 'Boolean'>
+  readonly englishName: Prisma.FieldRef<"Material", 'String'>
+  readonly flowerLanguage: Prisma.FieldRef<"Material", 'String'>
+  readonly maintenance: Prisma.FieldRef<"Material", 'String'>
+  readonly maintenanceCare: Prisma.FieldRef<"Material", 'Json'>
+  readonly supplySeason: Prisma.FieldRef<"Material", 'String'>
+  readonly defaultShelfLifeDays: Prisma.FieldRef<"Material", 'Int'>
+  readonly standardUnitCost: Prisma.FieldRef<"Material", 'Decimal'>
+  readonly costUnit: Prisma.FieldRef<"Material", 'String'>
+  readonly costNote: Prisma.FieldRef<"Material", 'String'>
+  readonly optimisticUsableRate: Prisma.FieldRef<"Material", 'Decimal'>
+  readonly standardUsableRate: Prisma.FieldRef<"Material", 'Decimal'>
+  readonly conservativeUsableRate: Prisma.FieldRef<"Material", 'Decimal'>
+  readonly lossRateNote: Prisma.FieldRef<"Material", 'String'>
+  readonly brand: Prisma.FieldRef<"Material", 'String'>
+  readonly model: Prisma.FieldRef<"Material", 'String'>
+  readonly notes: Prisma.FieldRef<"Material", 'String'>
+  readonly safetyStockThreshold: Prisma.FieldRef<"Material", 'Decimal'>
   readonly active: Prisma.FieldRef<"Material", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Material", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Material", 'DateTime'>

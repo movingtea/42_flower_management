@@ -21,7 +21,16 @@ import { createOrder } from "./actions";
 import { OrderBoard } from "./OrderBoard";
 import { OrderDetailDrawer, type OpenPurchaseLine } from "./OrderDetailDrawer";
 import { OrderFilters } from "./OrderFilters";
+import { OrderPagination } from "./OrderPagination";
 import { orderDetailInclude, orderBoardInclude, type OrderAuditEvent, type OrderDetailData } from "./order-query";
+import {
+  ORDER_PAGE_SIZE,
+  buildOrderQuery,
+  clampPage,
+  pageHref,
+  parsePage,
+  totalPages,
+} from "./pagination";
 import {
   COMMERCIAL_FILTER_OPTIONS,
   FULFILLMENT_FILTER_OPTIONS,
@@ -48,6 +57,7 @@ type OrdersSearchParams = {
   production?: SearchParamValue;
   fulfillment?: SearchParamValue;
   orderId?: SearchParamValue;
+  page?: SearchParamValue;
   message?: SearchParamValue;
   error?: SearchParamValue;
 };
@@ -117,14 +127,6 @@ function buildOrderWhere(
   };
 }
 
-function filterQuery(filters: OrderFilterValues): string {
-  const params = new URLSearchParams();
-  for (const [key, value] of Object.entries(filters)) {
-    if (value) params.set(key, value);
-  }
-  return params.toString();
-}
-
 async function hasV2Capability(capability: "order" | "production" | "delivery" | "purchase"): Promise<boolean> {
   try {
     await requireV2Store(capability);
@@ -145,13 +147,19 @@ export default async function OrdersPage({ searchParams }: PageProps<"/v2/orders
   const requestedOrderId = single(params.orderId)?.trim() || undefined;
   const feedback = readV2Feedback(params);
 
+  const orderWhere = buildOrderWhere(tenantId, storeId, filters);
+  const totalOrderCount = await v2db.order.count({ where: orderWhere });
+  const orderPageCount = totalPages(totalOrderCount);
+  const page = clampPage(parsePage(single(params.page)), totalOrderCount);
+
   const [orders, selectedOrder, materials, purchases, skus, audits, canManageOrders, canManageProduction, canManageDelivery, canManagePurchases, shortageOrderCount] =
     await Promise.all([
       v2db.order.findMany({
-        where: buildOrderWhere(tenantId, storeId, filters),
+        where: orderWhere,
         include: orderBoardInclude,
         orderBy: [{ deliveryAt: "asc" }, { createdAt: "desc" }],
-        take: 200,
+        skip: (page - 1) * ORDER_PAGE_SIZE,
+        take: ORDER_PAGE_SIZE,
       }),
       requestedOrderId
         ? v2db.order.findFirst({
@@ -279,8 +287,8 @@ export default async function OrdersPage({ searchParams }: PageProps<"/v2/orders
     }));
   }
 
-  const currentFilterQuery = filterQuery(filters);
-  const closeHref = currentFilterQuery ? `/v2/orders?${currentFilterQuery}` : "/v2/orders";
+  const currentFilterQuery = buildOrderQuery(filters, page);
+  const closeHref = pageHref(page, filters);
   const selectedAudits: OrderAuditEvent[] = audits.map((audit) => ({
     id: audit.id,
     action: audit.action,
@@ -348,9 +356,11 @@ export default async function OrdersPage({ searchParams }: PageProps<"/v2/orders
       </div>
     </section>
 
-    <OrderFilters values={filters} resultCount={orders.length} />
+    <OrderFilters values={filters} resultCount={totalOrderCount} />
 
-    {orders.length === 0 && <p className="rounded-xl border border-dashed border-stone-300 bg-white px-5 py-4 text-sm text-stone-500">
+    <OrderPagination page={page} pages={orderPageCount} total={totalOrderCount} filters={filters} />
+
+    {totalOrderCount === 0 && <p className="rounded-xl border border-dashed border-stone-300 bg-white px-5 py-4 text-sm text-stone-500">
       当前筛选下没有订单。
     </p>}
 

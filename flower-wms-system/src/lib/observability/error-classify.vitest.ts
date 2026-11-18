@@ -6,6 +6,11 @@ import { describe, expect, it } from "vitest";
 import { MINIPROGRAM_ERROR_CODES } from "../miniprogram-business-error";
 import { MiniprogramBusinessError } from "../miniprogram-business-error";
 import {
+  assertV2AnyCapability,
+  assertV2Capability,
+  V2PermissionDeniedError,
+} from "../../v2/navigation";
+import {
   classifyBusinessCode,
   classifyControlFlowDigest,
   classifyError,
@@ -88,6 +93,28 @@ describe("expected: Next.js control flow", () => {
 });
 
 describe("expected: stable business error codes", () => {
+  it("classifies V2 page and action capability denials as expected", () => {
+    for (const invoke of [
+      () => assertV2Capability(["BUYER"], "order"),
+      () => assertV2AnyCapability(["FLORIST"], ["order", "delivery"]),
+    ]) {
+      let thrown: unknown;
+      try {
+        invoke();
+      } catch (error) {
+        thrown = error;
+      }
+
+      expect(thrown).toBeInstanceOf(V2PermissionDeniedError);
+      expect(classifyError(thrown, { routeType: "render" })).toMatchObject({
+        kind: "expected",
+        reason: "permission_denied",
+        code: "PERMISSION_DENIED",
+        name: "V2PermissionDeniedError",
+      });
+    }
+  });
+
   it("classifies MiniprogramBusinessError by its stable code", () => {
     const stock = new MiniprogramBusinessError(
       MINIPROGRAM_ERROR_CODES.INSUFFICIENT_STOCK,
