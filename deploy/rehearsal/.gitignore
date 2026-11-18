@@ -1,3 +1,0 @@
-# .runtime/ 保存演练生成物（env、随机密码、镜像 override、备份 dump、日志），
-# 均为一次性本地文件，不提交。
-.runtime/

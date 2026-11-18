@@ -1,5 +1,0 @@
-# Sprint E2 受控失败镜像（仅本机 staging 测试；不修改仓库迁移历史）
-FROM flower-e2-staging:9112ed3bfa46
-USER root
-RUN rm -f /app/server.js
-USER nextjs

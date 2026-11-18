@@ -39,7 +39,7 @@ related:
 
 > **发布与生产切换只由项目用户批准。** 本手册不授予任何自动发布权限。
 > 非生产演练资源与证据见 [deploy/rehearsal/README.md](../deploy/rehearsal/README.md) 与
-> `docs/evidence/sprint-e1/logs/e18-*.log`（本次演练 `run_id` 见第 13 节）。
+> `docs/stage-artifacts/evidence/sprint-e1/logs/e18-*.log`（本次演练 `run_id` 见第 13 节）。
 
 ---
 
@@ -656,7 +656,7 @@ docker compose run --rm --no-deps --entrypoint sh flower-web -ec '
 
 ## 13. 非生产演练结论（E1.8）
 
-演练资源见 [deploy/rehearsal/README.md](../deploy/rehearsal/README.md)，证据在 `docs/evidence/sprint-e1/logs/e18-*.log`（`run_id=20261110-105256`）。
+演练资源见 [deploy/rehearsal/README.md](../deploy/rehearsal/README.md)，证据在 `docs/stage-artifacts/evidence/sprint-e1/logs/e18-*.log`（`run_id=20261110-105256`）。
 
 ### 13.1 已演练验证（本地隔离 Compose，不涉及生产）
 
@@ -680,16 +680,16 @@ docker compose run --rm --no-deps --entrypoint sh flower-web -ec '
 | 新版本镜像 `sha-add1t1`（模拟，含第 8 个 V2 迁移） | `sha256:87be8e277800e0ba8f63c3d765f4ff92aa90a762eb337f839d82a4ee2cbe829d` |
 | 缺陷镜像 `sha-badc0de`（模拟，删除 `server.js`） | `sha256:8906c9a92c65e7b07e705feba787041ca1377f2f24a05cc966ca3960ad1ed67a` |
 
-证据文件（`docs/evidence/sprint-e1/logs/`，`*` 均为 `20261110-105256`）：
+证据文件（`docs/stage-artifacts/evidence/sprint-e1/logs/`，`*` 均为 `20261110-105256`）：
 
-- [`e18-preflight-*.log`](evidence/sprint-e1/logs/e18-preflight-20261110-105256.log)：环境/镜像/端口/隔离基线
-- [`e18-success-deploy-*.log`](evidence/sprint-e1/logs/e18-success-deploy-20261110-105256.log)：迁移、健康、冒烟、初始化、行数
-- [`e18-backup-restore-*.log`](evidence/sprint-e1/logs/e18-backup-restore-20261110-105256.log)：`pg_dump`/`pg_restore` 与行数核对
-- [`e18-incremental-migration-*.log`](evidence/sprint-e1/logs/e18-incremental-migration-20261110-105256.log)：7→8 增量迁移与旧镜像兼容
-- [`e18-failure-stop-*.log`](evidence/sprint-e1/logs/e18-failure-stop-20261110-105256.log)：失败停止三类场景
-- [`e18-image-rollback-*.log`](evidence/sprint-e1/logs/e18-image-rollback-20261110-105256.log)：镜像回滚与健康恢复
-- [`e18-cleanup-*.log`](evidence/sprint-e1/logs/e18-cleanup-20261110-105256.log)：清理与隔离校验
-- [`e18-summary-*.log`](evidence/sprint-e1/logs/e18-summary-20261110-105256.log)：场景结果、边界与残留风险
+- [`e18-preflight-*.log`](stage-artifacts/evidence/sprint-e1/logs/e18-preflight-20261110-105256.log)：环境/镜像/端口/隔离基线
+- [`e18-success-deploy-*.log`](stage-artifacts/evidence/sprint-e1/logs/e18-success-deploy-20261110-105256.log)：迁移、健康、冒烟、初始化、行数
+- [`e18-backup-restore-*.log`](stage-artifacts/evidence/sprint-e1/logs/e18-backup-restore-20261110-105256.log)：`pg_dump`/`pg_restore` 与行数核对
+- [`e18-incremental-migration-*.log`](stage-artifacts/evidence/sprint-e1/logs/e18-incremental-migration-20261110-105256.log)：7→8 增量迁移与旧镜像兼容
+- [`e18-failure-stop-*.log`](stage-artifacts/evidence/sprint-e1/logs/e18-failure-stop-20261110-105256.log)：失败停止三类场景
+- [`e18-image-rollback-*.log`](stage-artifacts/evidence/sprint-e1/logs/e18-image-rollback-20261110-105256.log)：镜像回滚与健康恢复
+- [`e18-cleanup-*.log`](stage-artifacts/evidence/sprint-e1/logs/e18-cleanup-20261110-105256.log)：清理与隔离校验
+- [`e18-summary-*.log`](stage-artifacts/evidence/sprint-e1/logs/e18-summary-20261110-105256.log)：场景结果、边界与残留风险
 
 > 注意：模拟 SHA 标签不对应真实提交，仅用于验证「按提交 SHA 部署/回滚」的机制；
 > 真实构建/推送/远程部署未在本地执行（见 13.2）。

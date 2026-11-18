@@ -1,5 +1,0 @@
-# Sprint E2 受控失败镜像（迁移失败；仅本机 staging 测试）
-FROM flower-e2-staging:9112ed3bfa46
-USER root
-COPY deploy/staging/images/bad-migration /app/prisma/v2/migrations/9999_controlled_failure
-USER nextjs

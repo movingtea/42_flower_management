@@ -24,6 +24,7 @@ wechat-mini-program/project.private.config.json
 .idea/
 .vscode/
 deploy/
+docs/stage-artifacts/
 
 flower-wms-system/.env
 
