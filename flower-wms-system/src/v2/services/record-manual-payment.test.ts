@@ -255,6 +255,7 @@ async function cleanup() {
   const tenantIds = [tenantId, otherTenantId].filter((id): id is string => Boolean(id));
   if (tenantIds.length === 0) return;
   const tenants = { tenantId: { in: tenantIds } };
+  await db.auditEvent.deleteMany({ where: tenants });
   await db.refundTransaction.deleteMany({ where: { order: tenants } });
   await db.paymentTransaction.deleteMany({ where: { order: tenants } });
   await db.costAdjustment.deleteMany({ where: { order: tenants } });

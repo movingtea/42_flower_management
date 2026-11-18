@@ -8,6 +8,7 @@ import {
   assertV2AnyCapability,
   assertV2Capability,
   canAccessV2NavItem,
+  canOpenV2Href,
   capabilitiesForRoles,
   getAllV2NavItems,
   getVisibleV2NavGroups,
@@ -49,13 +50,18 @@ const EXPECTED_VISIBLE_HREFS: Record<V2Role, string[]> = {
     "/v2/recipes",
     "/v2/packaging-kits",
     "/v2/orders",
+    "/v2/reports",
+    "/v2/setup",
+    "/v2/data-quality",
+    "/v2/system-health",
+    "/v2/audit",
     "/v2/staff",
   ],
-  MANAGER: ["/v2", "/v2/materials", "/v2/material-categories", "/v2/inventory", "/v2/operations", "/v2/purchase-orders", "/v2/suppliers", "/v2/catalog", "/v2/recipes", "/v2/packaging-kits", "/v2/orders"],
-  INVENTORY_REVIEWER: ["/v2", "/v2/inventory", "/v2/operations", "/v2/purchase-orders", "/v2/suppliers"],
-  BUYER: ["/v2", "/v2/inventory", "/v2/operations", "/v2/purchase-orders", "/v2/suppliers"],
-  SALES: ["/v2", "/v2/orders"],
-  FLORIST: ["/v2", "/v2/orders"],
+  MANAGER: ["/v2", "/v2/materials", "/v2/material-categories", "/v2/inventory", "/v2/operations", "/v2/purchase-orders", "/v2/suppliers", "/v2/catalog", "/v2/recipes", "/v2/packaging-kits", "/v2/orders", "/v2/reports", "/v2/setup", "/v2/data-quality"],
+  INVENTORY_REVIEWER: ["/v2", "/v2/inventory", "/v2/operations", "/v2/purchase-orders", "/v2/suppliers", "/v2/reports", "/v2/setup", "/v2/data-quality"],
+  BUYER: ["/v2", "/v2/inventory", "/v2/operations", "/v2/purchase-orders", "/v2/suppliers", "/v2/reports", "/v2/setup"],
+  SALES: ["/v2", "/v2/orders", "/v2/reports", "/v2/setup"],
+  FLORIST: ["/v2", "/v2/orders", "/v2/reports", "/v2/setup"],
 };
 
 function visibleHrefs(roles: readonly string[]): string[] {
@@ -110,6 +116,31 @@ function main() {
       visibleHrefs([role]).includes("/v2/staff"),
       role === "ADMIN",
       `${role} staff navigation`
+    );
+    assert.equal(
+      visibleHrefs([role]).includes("/v2/system-health"),
+      role === "ADMIN",
+      `${role} system-health navigation`
+    );
+    assert.equal(
+      visibleHrefs([role]).includes("/v2/audit"),
+      role === "ADMIN",
+      `${role} audit navigation`
+    );
+    assert.equal(
+      visibleHrefs([role]).includes("/v2/data-quality"),
+      ["ADMIN", "MANAGER", "INVENTORY_REVIEWER"].includes(role),
+      `${role} data-quality navigation`
+    );
+    assert.equal(
+      visibleHrefs([role]).includes("/v2/reports"),
+      true,
+      `${role} report navigation`
+    );
+    assert.equal(
+      visibleHrefs([role]).includes("/v2/setup"),
+      true,
+      `${role} setup navigation`
     );
   }
 
@@ -198,7 +229,7 @@ function main() {
       `${item.href} is reachable by a role`
     );
   }
-  assert.equal(V2_NAV_GROUPS.length, 5);
+  assert.equal(V2_NAV_GROUPS.length, 6);
 
   assert.equal(isV2NavItemActive("/v2", items[0]), true);
   assert.equal(isV2NavItemActive("/v2/staff", items[0]), false);
@@ -210,6 +241,14 @@ function main() {
   assert.ok(ordersItem);
   assert.equal(isV2NavItemActive("/v2/orders/new", ordersItem), true);
   assert.equal(isV2NavItemActive("/v2/order-status", ordersItem), false);
+
+  // Deep links are gated by their module path, ignoring query/hash fragments.
+  assert.equal(canOpenV2Href(["MANAGER"], "/v2/orders?orderId=1"), true);
+  assert.equal(canOpenV2Href(["MANAGER"], "/v2/operations#loss"), true);
+  assert.equal(canOpenV2Href(["SALES"], "/v2/inventory"), false);
+  assert.equal(canOpenV2Href(["ADMIN"], "/v2/system-health"), true);
+  assert.equal(canOpenV2Href(["MANAGER"], "/v2/system-health"), false);
+  assert.equal(canOpenV2Href(["BUYER"], "/v2/materials"), false);
 
   console.log("v2 navigation/capability matrix tests passed");
 }

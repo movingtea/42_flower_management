@@ -195,7 +195,7 @@ export async function recordManualPayment(
         return existing;
       }
 
-      return tx.paymentTransaction.create({
+      const payment = await tx.paymentTransaction.create({
         data: {
           orderId,
           method,
@@ -207,6 +207,25 @@ export async function recordManualPayment(
           confirmedAt: new Date(),
         },
       });
+      // Only a newly committed payment is audited; both replay paths above return the
+      // existing row without writing another event.
+      await tx.auditEvent.create({
+        data: {
+          tenantId,
+          storeId,
+          actorStaffId: confirmedById,
+          action: "PAYMENT_RECORDED",
+          entityType: "PaymentTransaction",
+          entityId: payment.id,
+          afterSnapshot: {
+            paymentId: payment.id,
+            orderId,
+            method: payment.method,
+            amount: payment.amount.toString(),
+          },
+        },
+      });
+      return payment;
     }, { timeout: 30_000 });
   } catch (error) {
     // The unique index is the last line of defence for two first attempts that race on the same

@@ -117,7 +117,14 @@ function buildOrderWhere(
     conditions.push({ deliveryAt: { gte: range.startUtc, lt: range.endUtcExclusive } });
   }
   if (filters.commercial) conditions.push({ commercialState: filters.commercial as CommercialState });
-  if (filters.supply) conditions.push({ supplyState: filters.supply as SupplyState });
+  if (filters.supply) {
+    conditions.push({ supplyState: filters.supply as SupplyState });
+    // The dashboard "shortage" todo excludes cancelled/closed orders, so the
+    // drill-down list must use the same actionable scope.
+    if (filters.supply === "PURCHASE_REQUIRED") {
+      conditions.push({ commercialState: { notIn: ["CANCELLED", "CLOSED"] } });
+    }
+  }
   if (filters.production) conditions.push({ productionState: filters.production as ProductionState });
   if (filters.fulfillment) conditions.push({ fulfillmentState: filters.fulfillment as FulfillmentState });
   return {

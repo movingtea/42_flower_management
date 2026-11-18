@@ -247,6 +247,41 @@ export const V2_NAV_GROUPS: readonly V2NavGroup[] = [
     ],
   },
   {
+    title: "运营保障",
+    items: [
+      {
+        href: "/v2/reports",
+        label: "报表中心",
+        icon: "📈",
+        anyCapabilities: ["read"],
+      },
+      {
+        href: "/v2/setup",
+        label: "试运营检查",
+        icon: "🚦",
+        anyCapabilities: ["read"],
+      },
+      {
+        href: "/v2/data-quality",
+        label: "数据质量",
+        icon: "🧹",
+        anyCapabilities: ["inventory_review"],
+      },
+      {
+        href: "/v2/system-health",
+        label: "系统健康",
+        icon: "🩺",
+        anyCapabilities: ["staff"],
+      },
+      {
+        href: "/v2/audit",
+        label: "操作日志",
+        icon: "🧾",
+        anyCapabilities: ["staff"],
+      },
+    ],
+  },
+  {
     title: "系统设置",
     items: [
       {
@@ -280,6 +315,19 @@ export function getVisibleV2NavGroups(
 export function isV2NavItemActive(pathname: string, item: V2NavItem): boolean {
   if (item.activeMatch === "exact") return pathname === item.href;
   return pathname === item.href || pathname.startsWith(`${item.href}/`);
+}
+
+/**
+ * True when a destination (including query/hash deep links) belongs to a module
+ * the current roles can see. Callers still enforce authorization on the target.
+ */
+export function canOpenV2Href(roles: readonly string[], href: string): boolean {
+  const path = href.split(/[?#]/)[0];
+  return getVisibleV2NavGroups(roles).some((group) =>
+    group.items.some((item) => item.activeMatch === "exact"
+      ? path === item.href
+      : path === item.href || path.startsWith(`${item.href}/`)),
+  );
 }
 
 /** Flat list for tests and path lookups. */

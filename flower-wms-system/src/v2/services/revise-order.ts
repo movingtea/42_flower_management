@@ -15,11 +15,32 @@ export type ReviseManualOrderInput = {
   storeId: string;
   orderId: string;
   deliveryAt: Date;
+  /** Staff user that revised the order; stored on the ORDER_REVISED audit event. */
+  actorStaffId?: string | null;
   /** Legacy single-line callers keep using one quantity. */
   quantity?: number;
   /** Preferred shape: every existing order item exactly once with its new positive quantity. */
   items?: ReviseManualOrderItemInput[];
 };
+
+type OrderItemQuantitySnapshot = { orderItemId: string; quantity: number };
+
+/** Deterministic before/after quantity projection for the revision audit snapshot. */
+function quantitySnapshot(
+  items: readonly { id: string; quantity: number }[],
+): OrderItemQuantitySnapshot[] {
+  return items
+    .map((item) => ({ orderItemId: item.id, quantity: item.quantity }))
+    .sort((left, right) => left.orderItemId.localeCompare(right.orderItemId));
+}
+
+function requestedQuantitySnapshot(
+  items: readonly RequestedItem[],
+): OrderItemQuantitySnapshot[] {
+  return items
+    .map((requested) => ({ orderItemId: requested.orderItem.id, quantity: requested.quantity }))
+    .sort((left, right) => left.orderItemId.localeCompare(right.orderItemId));
+}
 
 export type ReviseManualOrderResult = {
   orderId: string;
@@ -215,6 +236,28 @@ export async function reviseManualOrder(
         where: { orderId: order.id },
         data: { scheduledAt: input.deliveryAt },
       });
+      await tx.auditEvent.create({
+        data: {
+          tenantId: input.tenantId,
+          storeId: input.storeId,
+          actorStaffId: input.actorStaffId?.trim() || null,
+          action: "ORDER_REVISED",
+          entityType: "Order",
+          entityId: order.id,
+          beforeSnapshot: {
+            revisionNumber: latestRevision.number,
+            deliveryAt: order.deliveryAt?.toISOString() ?? null,
+            items: quantitySnapshot(order.items),
+          },
+          afterSnapshot: {
+            revisionNumber,
+            deliveryAt: input.deliveryAt.toISOString(),
+            items: requestedQuantitySnapshot(requestedItems),
+            covered: false,
+            totalShortage: 0,
+          },
+        },
+      });
       return {
         orderId: order.id,
         revisionId: revision.id,
@@ -336,6 +379,28 @@ export async function reviseManualOrder(
     await tx.fulfillment.updateMany({
       where: { orderId: order.id },
       data: { scheduledAt: input.deliveryAt },
+    });
+    await tx.auditEvent.create({
+      data: {
+        tenantId: input.tenantId,
+        storeId: input.storeId,
+        actorStaffId: input.actorStaffId?.trim() || null,
+        action: "ORDER_REVISED",
+        entityType: "Order",
+        entityId: order.id,
+        beforeSnapshot: {
+          revisionNumber: latestRevision.number,
+          deliveryAt: order.deliveryAt?.toISOString() ?? null,
+          items: quantitySnapshot(order.items),
+        },
+        afterSnapshot: {
+          revisionNumber,
+          deliveryAt: input.deliveryAt.toISOString(),
+          items: requestedQuantitySnapshot(requestedItems),
+          covered,
+          totalShortage,
+        },
+      },
     });
 
     return {

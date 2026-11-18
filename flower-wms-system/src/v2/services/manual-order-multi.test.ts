@@ -580,6 +580,19 @@ async function main() {
   assert.deepEqual(await confirmManualOrder(db, substitutionOrderId, tenant.id, store.id), {
     covered: false, totalShortage: 1,
   });
+  const confirmAuditCount = () => db.auditEvent.count({
+    where: { action: "ORDER_CONFIRMED", entityType: "Order", entityId: substitutionOrderId },
+  });
+  assert.equal(await confirmAuditCount(), 1);
+  const pendingBeforeReplay = await db.order.findUniqueOrThrow({ where: { id: substitutionOrderId } });
+  assert.deepEqual(await confirmManualOrder(db, substitutionOrderId, tenant.id, store.id), {
+    covered: false, totalShortage: 1,
+  });
+  const pendingAfterReplay = await db.order.findUniqueOrThrow({ where: { id: substitutionOrderId } });
+  assert.equal(pendingAfterReplay.commercialState, pendingBeforeReplay.commercialState);
+  assert.equal(pendingAfterReplay.supplyState, pendingBeforeReplay.supplyState);
+  assert.equal(pendingAfterReplay.productionState, pendingBeforeReplay.productionState);
+  assert.equal(await confirmAuditCount(), 1, "a no-op confirmation replay must not append another audit event");
   let substitutionOrder = await loadOrder(substitutionOrderId);
   const substitutionItemC = substitutionOrder.items.find((item) => item.skuId === skuC.skuId);
   const substitutionItemD = substitutionOrder.items.find((item) => item.skuId === skuD.skuId);

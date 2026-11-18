@@ -23,6 +23,8 @@ export type AdjustFinalCostInput = {
   batchId: string;
   finalUnitCost: number | string;
   reason: string;
+  /** Staff user that finalized the batch cost; stored on the BATCH_COST_FINALIZED audit event. */
+  actorStaffId?: string | null;
 };
 
 export type AdjustFinalCostResult = {
@@ -63,6 +65,13 @@ function finiteNumber(value: unknown, label: string): number {
     if (Number.isFinite(parsed)) return parsed;
   }
   throw new Error(`${label}必须为有效数字`);
+}
+
+function optionalText(value: unknown, label: string): string | null {
+  if (value === undefined || value === null) return null;
+  if (typeof value !== "string") throw new Error(`${label}格式无效`);
+  const trimmed = value.trim();
+  return trimmed.length > 0 ? trimmed : null;
 }
 
 /** Unit cost has four decimal places in the schema, so compare micro-units as integers. */
@@ -181,6 +190,7 @@ export async function adjustFinalCost(
   const storeId = requiredText(input.storeId, "门店");
   const batchId = requiredText(input.batchId, "批次");
   const reason = requiredText(input.reason, "成本调整原因");
+  const actorStaffId = optionalText(input.actorStaffId, "操作人");
   const finalMicros = unitCostToMicros(input.finalUnitCost, "最终单位成本");
 
   return db.$transaction(async (tx) => {
@@ -368,6 +378,27 @@ export async function adjustFinalCost(
         orderId, taskId, kind: CostKind.LOSS, amountCents: lossCents, estimated,
       })) costEntriesUpdated += 1;
     }
+
+    await tx.auditEvent.create({
+      data: {
+        tenantId,
+        storeId,
+        actorStaffId,
+        action: "BATCH_COST_FINALIZED",
+        entityType: "InventoryBatch",
+        entityId: batchId,
+        afterSnapshot: {
+          batchId,
+          previousUnitCost: microsToUnitCost(currentMicros),
+          finalUnitCost: microsToUnitCost(finalMicros),
+          unitCostDelta: microsToUnitCost(deltaMicros),
+          adjustmentsCreated,
+          costEntriesUpdated,
+          closedOrders,
+          openOrders: openOrderIds.size,
+        },
+      },
+    });
 
     return {
       applied: true,

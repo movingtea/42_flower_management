@@ -19,6 +19,8 @@ export type RecordRefundInput = {
   reason: string;
   idempotencyKey: string;
   externalReference?: string | null;
+  /** Staff user that recorded the refund; stored on the REFUND_RECORDED audit event. */
+  actorStaffId?: string | null;
 };
 
 const MAX_AMOUNT_CENTS = 99_999_999_999_999; // Decimal(14, 2)
@@ -142,6 +144,7 @@ export async function recordRefund(
   const reason = requiredText(input.reason, "退款原因");
   const idempotencyKey = requiredText(input.idempotencyKey, "幂等键");
   const externalReference = optionalText(input.externalReference, "外部退款单号");
+  const actorStaffId = optionalText(input.actorStaffId, "退款操作人");
   const expected: ExpectedRefund = {
     orderId, paymentId, amountCents, reason, externalReference,
   };
@@ -200,7 +203,7 @@ export async function recordRefund(
         throw new Error("累计退款金额不能超过支付金额");
       }
 
-      return tx.refundTransaction.create({
+      const refund = await tx.refundTransaction.create({
         data: {
           orderId,
           paymentId,
@@ -212,6 +215,26 @@ export async function recordRefund(
           completedAt: new Date(),
         },
       });
+      // Only a newly committed refund is audited; both replay paths above return the
+      // existing row without writing another event.
+      await tx.auditEvent.create({
+        data: {
+          tenantId,
+          storeId,
+          actorStaffId,
+          action: "REFUND_RECORDED",
+          entityType: "RefundTransaction",
+          entityId: refund.id,
+          afterSnapshot: {
+            refundId: refund.id,
+            orderId,
+            paymentId,
+            amount: refund.amount.toString(),
+            reason,
+          },
+        },
+      });
+      return refund;
     }, { timeout: 30_000 });
   } catch (error) {
     // The unique index is the last line of defence for two first attempts that race on the same

@@ -7,6 +7,11 @@ import { assertMaterialQuantity } from "../domain/stock-planning";
 
 const EPSILON = 1e-8;
 
+/** Keeps the summary snapshot free of binary floating-point noise. */
+function roundQuantity(value: number): number {
+  return Math.round(value * 1000) / 1000;
+}
+
 /**
  * One explicit actual-usage line. The identity is task + batch, because the same batch may
  * be reserved by several production tasks. taskId is optional for legacy single-task callers.
@@ -146,6 +151,7 @@ export async function completeProduction(
   tenantId: string,
   storeId: string,
   actualUsage?: ActualUsageInput,
+  actorStaffId?: string | null,
 ) {
   return db.$transaction(async (tx) => {
     await tx.$queryRaw`SELECT id FROM "Order" WHERE id = ${orderId} FOR UPDATE`;
@@ -489,6 +495,33 @@ export async function completeProduction(
         productionState: ProductionState.COMPLETED,
         fulfillmentState: order.fulfillment?.kind === FulfillmentKind.PICKUP
           ? FulfillmentState.WAITING_PICKUP : FulfillmentState.WAITING_DELIVERY,
+      },
+    });
+    const totals = rows.reduce(
+      (sum, row) => ({
+        usedQty: sum.usedQty + row.usedQty,
+        lostQty: sum.lostQty + row.lostQty,
+        returnedQty: sum.returnedQty + row.returnedQty,
+      }),
+      { usedQty: 0, lostQty: 0, returnedQty: 0 },
+    );
+    await tx.auditEvent.create({
+      data: {
+        tenantId,
+        storeId,
+        actorStaffId: actorStaffId?.trim() || null,
+        action: "PRODUCTION_COMPLETED",
+        entityType: "Order",
+        entityId: orderId,
+        afterSnapshot: {
+          orderId,
+          taskCount: order.items.length,
+          usageLineCount: rows.length,
+          usedQty: roundQuantity(totals.usedQty),
+          lostQty: roundQuantity(totals.lostQty),
+          returnedQty: roundQuantity(totals.returnedQty),
+          hasDifferenceReason: rows.some((row) => row.differenceReason !== null),
+        },
       },
     });
   }, { timeout: 30_000 });

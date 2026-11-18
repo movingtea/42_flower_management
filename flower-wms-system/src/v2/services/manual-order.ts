@@ -13,6 +13,8 @@ export type CreateManualOrderItemInput = {
 export type CreateManualOrderInput = {
   tenantId: string;
   storeId: string;
+  /** Staff user that created the order; stored on the ORDER_CREATED audit event. */
+  actorStaffId?: string | null;
   deliveryAt: Date;
   buyerName?: string;
   fulfillmentKind: "PICKUP" | "DELIVERY";
@@ -163,11 +165,33 @@ export async function createManualOrder(
         deliveryCostEstimated: input.fulfillmentKind === "DELIVERY" ? input.estimatedDeliveryCost ?? null : null,
       },
     });
+    await tx.auditEvent.create({
+      data: {
+        tenantId: input.tenantId,
+        storeId: input.storeId,
+        actorStaffId: input.actorStaffId?.trim() || null,
+        action: "ORDER_CREATED",
+        entityType: "Order",
+        entityId: order.id,
+        afterSnapshot: {
+          number: order.number,
+          items: items.map((item) => ({ skuId: item.skuId, quantity: item.quantity })),
+          deliveryAt: input.deliveryAt.toISOString(),
+          fulfillmentKind: input.fulfillmentKind,
+        },
+      },
+    });
     return order.id;
   }, { timeout: 30_000 });
 }
 
-export async function confirmManualOrder(db: PrismaClient, orderId: string, tenantId: string, storeId: string) {
+export async function confirmManualOrder(
+  db: PrismaClient,
+  orderId: string,
+  tenantId: string,
+  storeId: string,
+  actorStaffId?: string | null,
+) {
   return db.$transaction(async (tx) => {
     await tx.$queryRaw`SELECT id FROM "Order" WHERE id = ${orderId} FOR UPDATE`;
     const order = await tx.order.findUnique({
@@ -213,15 +237,44 @@ export async function confirmManualOrder(db: PrismaClient, orderId: string, tena
       if (!task) await tx.productionTask.create({ data: { orderItemId: item.id, quantity: item.quantity, state: ProductionState.WAITING_MATERIAL } });
     }
     const covered = totalShortage <= 1e-8;
+    const nextCommercialState = covered ? CommercialState.CONFIRMED : CommercialState.PENDING_CONFIRMATION;
+    const nextSupplyState = covered ? SupplyState.ON_HAND_COVERED : SupplyState.PURCHASE_REQUIRED;
+    const nextProductionState = covered ? ProductionState.READY : ProductionState.WAITING_MATERIAL;
     await tx.order.update({
       where: { id: orderId },
       data: {
-        commercialState: covered ? CommercialState.CONFIRMED : CommercialState.PENDING_CONFIRMATION,
-        supplyState: covered ? SupplyState.ON_HAND_COVERED : SupplyState.PURCHASE_REQUIRED,
-        productionState: covered ? ProductionState.READY : ProductionState.WAITING_MATERIAL,
+        commercialState: nextCommercialState,
+        supplyState: nextSupplyState,
+        productionState: nextProductionState,
       },
     });
     if (covered) await tx.productionTask.updateMany({ where: { orderItem: { orderId } }, data: { state: ProductionState.READY } });
+    // A supply recheck can run this again while a short order stays pending. Only an
+    // actual state transition is a confirmation event; a no-op replay must not audit.
+    const stateChanged = order.commercialState !== nextCommercialState
+      || order.supplyState !== nextSupplyState
+      || order.productionState !== nextProductionState;
+    if (stateChanged) {
+      await tx.auditEvent.create({
+        data: {
+          tenantId,
+          storeId,
+          actorStaffId: actorStaffId?.trim() || null,
+          action: "ORDER_CONFIRMED",
+          entityType: "Order",
+          entityId: orderId,
+          beforeSnapshot: {
+            commercialState: order.commercialState,
+            supplyState: order.supplyState,
+          },
+          afterSnapshot: {
+            commercialState: nextCommercialState,
+            supplyState: nextSupplyState,
+            totalShortage,
+          },
+        },
+      });
+    }
     return { covered, totalShortage };
   }, { timeout: 30_000 });
 }

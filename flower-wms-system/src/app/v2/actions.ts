@@ -370,13 +370,13 @@ export async function reviseSkuRecipe(data: FormData) {
 
 export async function createOrder(data: FormData) {
   await submit(async () => {
-    const { tenantId, storeId } = await requireV2Store("order");
+    const { tenantId, storeId, staffId } = await requireV2Store("order");
     const itemSkuIds = data.getAll("itemSkuId")
       .map((value) => typeof value === "string" ? value.trim() : "");
     const itemQuantities = data.getAll("itemQuantity")
       .map((value) => typeof value === "string" ? Number(value.trim()) : Number.NaN);
     const common = {
-      tenantId, storeId,
+      tenantId, storeId, actorStaffId: staffId,
       deliveryAt: new Date(field(data, "deliveryAt")), buyerName: field(data, "buyerName"),
       fulfillmentKind: field(data, "fulfillmentKind") === "PICKUP" ? "PICKUP" as const : "DELIVERY" as const,
       recipientName: field(data, "recipientName"), recipientPhone: field(data, "recipientPhone"),
@@ -402,14 +402,14 @@ export async function createOrder(data: FormData) {
 
 export async function confirmOrder(data: FormData) {
   await submit(async () => {
-    const { tenantId, storeId } = await requireV2Store("order");
-    await confirmManualOrder(v2db, field(data, "orderId"), tenantId, storeId);
+    const { tenantId, storeId, staffId } = await requireV2Store("order");
+    await confirmManualOrder(v2db, field(data, "orderId"), tenantId, storeId, staffId);
   }, "订单已核对供应状态");
 }
 
 export async function reviseOrder(data: FormData) {
   await submit(async () => {
-    const { tenantId, storeId } = await requireV2Store("order");
+    const { tenantId, storeId, staffId } = await requireV2Store("order");
     const deliveryAtText = field(data, "deliveryAt");
     if (!deliveryAtText) throw new Error("请选择交付时间");
     const itemQuantityKeys = [...data.keys()]
@@ -440,6 +440,7 @@ export async function reviseOrder(data: FormData) {
           storeId,
           orderId: field(data, "orderId"),
           deliveryAt,
+          actorStaffId: staffId,
           items: revisedItems,
         })
       : await reviseManualOrder(v2db, {
@@ -448,6 +449,7 @@ export async function reviseOrder(data: FormData) {
           orderId: field(data, "orderId"),
           quantity: number(data, "quantity"),
           deliveryAt,
+          actorStaffId: staffId,
         });
     if (result.covered) return `订单已修改为第 ${result.revisionNumber} 版，现货已覆盖，可制作`;
     if (result.totalShortage > 0) return `订单已修改为第 ${result.revisionNumber} 版，仍缺料，待采购`;
@@ -482,17 +484,17 @@ export async function substituteOrderMaterial(data: FormData) {
 
 export async function finishProduction(data: FormData) {
   await submit(async () => {
-    const { tenantId, storeId } = await requireV2Store("production");
-    await completeProduction(v2db, field(data, "orderId"), tenantId, storeId);
+    const { tenantId, storeId, staffId } = await requireV2Store("production");
+    await completeProduction(v2db, field(data, "orderId"), tenantId, storeId, undefined, staffId);
   }, "制作已完成，库存与成本已结转");
 }
 
 export async function finishProductionWithUsage(data: FormData) {
   await submit(async () => {
-    const { tenantId, storeId } = await requireV2Store("production");
+    const { tenantId, storeId, staffId } = await requireV2Store("production");
     const actualUsage = parseActualUsage(data);
     if (actualUsage.length === 0) throw new Error("请至少登记一个批次的实际用料");
-    await completeProduction(v2db, field(data, "orderId"), tenantId, storeId, actualUsage);
+    await completeProduction(v2db, field(data, "orderId"), tenantId, storeId, actualUsage, staffId);
     return `制作完成，已登记 ${actualUsage.length} 个批次的实际用料`;
   }, "制作完成，实际用料已登记");
 }
@@ -534,7 +536,7 @@ export async function recordOfflinePayment(data: FormData) {
 
 export async function recordOfflineRefund(data: FormData) {
   await submit(async () => {
-    const { tenantId, storeId } = await requireV2Store("order");
+    const { tenantId, storeId, staffId } = await requireV2Store("order");
     const { recordRefund } = await import("@/v2/services/record-refund");
     const refund = await recordRefund(v2db, {
       tenantId,
@@ -545,6 +547,7 @@ export async function recordOfflineRefund(data: FormData) {
       reason: field(data, "reason"),
       externalReference: field(data, "externalReference") || null,
       idempotencyKey: formIdempotencyKey(data, "REFUND"),
+      actorStaffId: staffId,
     });
     return `部分退款已记录：¥${Number(refund.amount).toFixed(2)}`;
   }, "部分退款已记录");
@@ -552,7 +555,7 @@ export async function recordOfflineRefund(data: FormData) {
 
 export async function finalizeBatchCost(data: FormData) {
   await submit(async () => {
-    const { tenantId, storeId } = await requireV2Store("purchase");
+    const { tenantId, storeId, staffId } = await requireV2Store("purchase");
     const { adjustFinalCost } = await import("@/v2/services/adjust-final-cost");
     const result = await adjustFinalCost(v2db, {
       tenantId,
@@ -560,6 +563,7 @@ export async function finalizeBatchCost(data: FormData) {
       batchId: field(data, "batchId"),
       finalUnitCost: field(data, "finalUnitCost"),
       reason: field(data, "reason"),
+      actorStaffId: staffId,
     });
     if (result.alreadyFinalized) return `批次成本已是最终成本：¥${result.finalUnitCost.toFixed(4)}`;
     return `批次成本已确认：更新 ${result.costEntriesUpdated} 条成本，生成 ${result.adjustmentsCreated} 条调整`;
