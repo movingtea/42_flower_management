@@ -141,7 +141,7 @@
     "geist": "1.9.2",
     "lucide-react": "^1.17.0",
     "next": "16.2.6",
-    "next-auth": "^5.0.0-beta.30",
+    "next-auth": "^5.0.0-beta.32",
     "pg": "^8.21.0",
     "pinyin-pro": "^3.28.1",
     "prisma": "^7.8.0",
