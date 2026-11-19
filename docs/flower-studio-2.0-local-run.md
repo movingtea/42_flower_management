@@ -15,7 +15,7 @@ npm run dev
 
 打开 `http://localhost:3000/`，使用本地 seed 创建的管理员登录。首次准备应用时，运行 `npm ci`、`npx prisma generate` 和 `npm run db:v2:generate`。
 
-在 WMS 应用目录的 `.env` 或当前 shell 中设置 `V2_DATABASE_URL`。`DATABASE_URL` 继续指向 V1。准备空 V2 库或升级已有 V2 库时，依次运行：
+在 WMS 应用目录的 `.env.local` 设置 `V2_DATABASE_URL`，与 `next dev` 共用同一份本地配置。V2 Prisma 配置、迁移目标检查和 seed 按 Next.js 本地开发优先级读取环境文件：当前 shell 变量优先，其次是 `.env.development.local`、`.env.local`、`.env.development` 和 `.env`，因此无需把 `V2_DATABASE_URL` 复制到 `.env`。`DATABASE_URL` 继续指向 V1，也可在 `.env.local` 中覆盖 `.env`。准备空 V2 库或升级已有 V2 库时，依次运行：
 
 ```powershell
 npm run db:v2:migrate:deploy

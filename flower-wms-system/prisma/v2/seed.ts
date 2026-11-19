@@ -1,10 +1,10 @@
-import "dotenv/config";
 import { execFileSync } from "node:child_process";
 import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import { PrismaClient } from "../../src/generated/prisma-v2/client";
+import { loadV2Env } from "../../scripts/load-v2-env.mjs";
 import { isStrongV2Password } from "../../src/v2/password-policy";
 import {
   DEFAULT_TEST_TIERS,
@@ -16,6 +16,9 @@ import {
 import { runTieredSeed } from "./seed/orchestrator";
 import { runProductionBootstrap } from "./seed/production";
 import { SEED_MODES, type SeedMode } from "./seed/types";
+
+// Load `.env.local` with Next.js precedence before validating the target.
+loadV2Env();
 
 const rawMode = process.argv[2];
 if (!(SEED_MODES as readonly string[]).includes(rawMode ?? "")) {

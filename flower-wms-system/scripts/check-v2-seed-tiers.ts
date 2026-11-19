@@ -14,7 +14,6 @@
  * The script intentionally lives in `scripts/`, not `scripts/v2/`: `scripts/v2`
  * is auto-discovered as the V2 smoke suite and must keep its four known files.
  */
-import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
 import bcrypt from "bcryptjs";
 import {
@@ -57,6 +56,9 @@ import {
   P1_SUPPLIER_CODE,
 } from "../prisma/v2/seed/p1-scenarios";
 import { TEST_STAFF } from "../prisma/v2/seed/roles";
+import { loadV2Env } from "./load-v2-env.mjs";
+
+loadV2Env();
 
 type CheckOptions = {
   expected: SeedTier[];

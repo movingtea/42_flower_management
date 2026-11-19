@@ -1,4 +1,6 @@
-import "dotenv/config";
+import { loadV2Env } from "./load-v2-env.mjs";
+
+loadV2Env();
 
 function readTarget(name) {
   const value = process.env[name];

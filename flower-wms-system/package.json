@@ -109,7 +109,7 @@
     "db:v2:seed:check:e2e": "tsx scripts/check-v2-seed-tiers.ts --tiers=roles,e2e-fixtures --expect-no-transactions",
     "smoke:purchase": "tsx scripts/smoke-purchase-flow.ts",
     "seed:test-products": "npx tsx scripts/seed-test-spu-clones.ts",
-    "test:unit": "vitest run && node --test scripts/test-v2.test.mjs scripts/with-v2-test-db.test.mjs && node scripts/test-v2.mjs unit",
+    "test:unit": "vitest run && node --test scripts/load-v2-env.test.mjs scripts/test-v2.test.mjs scripts/with-v2-test-db.test.mjs && node scripts/test-v2.mjs unit",
     "test:legacy": "node scripts/with-v2-test-db.mjs --legacy -- npm run test:legacy:inner",
     "test:legacy:inner": "npm run test:all && npm run test:order-expiry-lifecycle",
     "test:integration:v2": "node scripts/with-v2-test-db.mjs -- node scripts/test-v2.mjs integration",
