@@ -4,6 +4,8 @@ import {
   PurchaseState,
   ReservationState,
 } from "../../generated/prisma-v2/client";
+import { storageConfigToImageUrlEnv } from "@/lib/storage/config";
+import { normalizeV2ImageKey } from "../domain/media";
 import { assertMaterialQuantity } from "../domain/stock-planning";
 
 const CODE_PATTERN = /^[A-Z0-9][A-Z0-9._-]{1,31}$/;
@@ -57,6 +59,8 @@ export type MaterialInput = {
   brand?: string | null;
   model?: string | null;
   notes?: string | null;
+  /** OSS objectKey under universe42/wms/materials. */
+  imageKey?: string | null;
   safetyStockThreshold?: number | string | null;
   categoryIds?: string[];
 };
@@ -139,6 +143,7 @@ function validateMaterial(input: MaterialInput) {
       brand: optional(input.brand, 80, "品牌"),
       model: optional(input.model, 80, "型号"),
       notes: optional(input.notes, 2000, "备注"),
+      imageKey: normalizeV2ImageKey(input.imageKey, storageConfigToImageUrlEnv()),
       defaultShelfLifeDays: optionalInteger(input.defaultShelfLifeDays, "默认保质期", 1),
       standardUnitCost: optionalNumber(input.standardUnitCost, "标准单位成本", {
         min: 0, decimals: 4,
@@ -194,7 +199,7 @@ export async function createMaterialMaster(
   await tx.auditEvent.create({ data: {
     tenantId: scope.tenantId, storeId: scope.storeId, actorStaffId: scope.actorStaffId,
     action: "MATERIAL_CREATED", entityType: "Material", entityId: material.id,
-    afterSnapshot: { code: material.code, name: material.name, kind: material.kind, active: material.active, categoryIds: selectedCategoryIds ?? [] },
+    afterSnapshot: { code: material.code, name: material.name, kind: material.kind, active: material.active, imageKey: material.imageKey, categoryIds: selectedCategoryIds ?? [] },
   } });
   return material;
 }
@@ -237,8 +242,8 @@ export async function updateMaterialMaster(
   await tx.auditEvent.create({ data: {
     tenantId: scope.tenantId, storeId: scope.storeId, actorStaffId: scope.actorStaffId,
     action: "MATERIAL_UPDATED", entityType: "Material", entityId: material.id,
-    beforeSnapshot: { name: current.name, kind: current.kind, color: current.color, grade: current.grade, specification: current.specification, baseUnit: current.baseUnit, quantityScale: current.quantityScale, reservePerOrder: current.reservePerOrder, englishName: current.englishName, standardUnitCost: current.standardUnitCost, categoryIds: selectedCategoryIds ?? [] },
-    afterSnapshot: { name: material.name, kind: material.kind, color: material.color, grade: material.grade, specification: material.specification, baseUnit: material.baseUnit, quantityScale: material.quantityScale, reservePerOrder: material.reservePerOrder, englishName: material.englishName, standardUnitCost: material.standardUnitCost, categoryIds: selectedCategoryIds ?? [] },
+    beforeSnapshot: { name: current.name, kind: current.kind, color: current.color, grade: current.grade, specification: current.specification, baseUnit: current.baseUnit, quantityScale: current.quantityScale, reservePerOrder: current.reservePerOrder, englishName: current.englishName, standardUnitCost: current.standardUnitCost, imageKey: current.imageKey, categoryIds: selectedCategoryIds ?? [] },
+    afterSnapshot: { name: material.name, kind: material.kind, color: material.color, grade: material.grade, specification: material.specification, baseUnit: material.baseUnit, quantityScale: material.quantityScale, reservePerOrder: material.reservePerOrder, englishName: material.englishName, standardUnitCost: material.standardUnitCost, imageKey: material.imageKey, categoryIds: selectedCategoryIds ?? [] },
   } });
   return material;
 }

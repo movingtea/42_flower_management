@@ -44,6 +44,7 @@ export type ProductSkuMinAggregateOutputType = {
   sourceSampleId: string | null
   code: string | null
   name: string | null
+  imageKey: string | null
   price: runtime.Decimal | null
   estimatedConsumableCost: runtime.Decimal | null
   estimatedLaborCost: runtime.Decimal | null
@@ -57,6 +58,7 @@ export type ProductSkuMaxAggregateOutputType = {
   sourceSampleId: string | null
   code: string | null
   name: string | null
+  imageKey: string | null
   price: runtime.Decimal | null
   estimatedConsumableCost: runtime.Decimal | null
   estimatedLaborCost: runtime.Decimal | null
@@ -70,6 +72,7 @@ export type ProductSkuCountAggregateOutputType = {
   sourceSampleId: number
   code: number
   name: number
+  imageKey: number
   price: number
   estimatedConsumableCost: number
   estimatedLaborCost: number
@@ -97,6 +100,7 @@ export type ProductSkuMinAggregateInputType = {
   sourceSampleId?: true
   code?: true
   name?: true
+  imageKey?: true
   price?: true
   estimatedConsumableCost?: true
   estimatedLaborCost?: true
@@ -110,6 +114,7 @@ export type ProductSkuMaxAggregateInputType = {
   sourceSampleId?: true
   code?: true
   name?: true
+  imageKey?: true
   price?: true
   estimatedConsumableCost?: true
   estimatedLaborCost?: true
@@ -123,6 +128,7 @@ export type ProductSkuCountAggregateInputType = {
   sourceSampleId?: true
   code?: true
   name?: true
+  imageKey?: true
   price?: true
   estimatedConsumableCost?: true
   estimatedLaborCost?: true
@@ -223,6 +229,7 @@ export type ProductSkuGroupByOutputType = {
   sourceSampleId: string | null
   code: string
   name: string
+  imageKey: string | null
   price: runtime.Decimal
   estimatedConsumableCost: runtime.Decimal
   estimatedLaborCost: runtime.Decimal
@@ -259,6 +266,7 @@ export type ProductSkuWhereInput = {
   sourceSampleId?: Prisma.StringNullableFilter<"ProductSku"> | string | null
   code?: Prisma.StringFilter<"ProductSku"> | string
   name?: Prisma.StringFilter<"ProductSku"> | string
+  imageKey?: Prisma.StringNullableFilter<"ProductSku"> | string | null
   price?: Prisma.DecimalFilter<"ProductSku"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFilter<"ProductSku"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFilter<"ProductSku"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -279,6 +287,7 @@ export type ProductSkuOrderByWithRelationInput = {
   sourceSampleId?: Prisma.SortOrderInput | Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  imageKey?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrder
   estimatedConsumableCost?: Prisma.SortOrder
   estimatedLaborCost?: Prisma.SortOrder
@@ -304,6 +313,7 @@ export type ProductSkuWhereUniqueInput = Prisma.AtLeast<{
   sourceSampleId?: Prisma.StringNullableFilter<"ProductSku"> | string | null
   code?: Prisma.StringFilter<"ProductSku"> | string
   name?: Prisma.StringFilter<"ProductSku"> | string
+  imageKey?: Prisma.StringNullableFilter<"ProductSku"> | string | null
   price?: Prisma.DecimalFilter<"ProductSku"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFilter<"ProductSku"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFilter<"ProductSku"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -324,6 +334,7 @@ export type ProductSkuOrderByWithAggregationInput = {
   sourceSampleId?: Prisma.SortOrderInput | Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  imageKey?: Prisma.SortOrderInput | Prisma.SortOrder
   price?: Prisma.SortOrder
   estimatedConsumableCost?: Prisma.SortOrder
   estimatedLaborCost?: Prisma.SortOrder
@@ -345,6 +356,7 @@ export type ProductSkuScalarWhereWithAggregatesInput = {
   sourceSampleId?: Prisma.StringNullableWithAggregatesFilter<"ProductSku"> | string | null
   code?: Prisma.StringWithAggregatesFilter<"ProductSku"> | string
   name?: Prisma.StringWithAggregatesFilter<"ProductSku"> | string
+  imageKey?: Prisma.StringNullableWithAggregatesFilter<"ProductSku"> | string | null
   price?: Prisma.DecimalWithAggregatesFilter<"ProductSku"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalWithAggregatesFilter<"ProductSku"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalWithAggregatesFilter<"ProductSku"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -356,6 +368,7 @@ export type ProductSkuCreateInput = {
   id?: string
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -376,6 +389,7 @@ export type ProductSkuUncheckedCreateInput = {
   sourceSampleId?: string | null
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -392,6 +406,7 @@ export type ProductSkuUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -412,6 +427,7 @@ export type ProductSkuUncheckedUpdateInput = {
   sourceSampleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -430,6 +446,7 @@ export type ProductSkuCreateManyInput = {
   sourceSampleId?: string | null
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -441,6 +458,7 @@ export type ProductSkuUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -454,6 +472,7 @@ export type ProductSkuUncheckedUpdateManyInput = {
   sourceSampleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -492,6 +511,7 @@ export type ProductSkuCountOrderByAggregateInput = {
   sourceSampleId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  imageKey?: Prisma.SortOrder
   price?: Prisma.SortOrder
   estimatedConsumableCost?: Prisma.SortOrder
   estimatedLaborCost?: Prisma.SortOrder
@@ -511,6 +531,7 @@ export type ProductSkuMaxOrderByAggregateInput = {
   sourceSampleId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  imageKey?: Prisma.SortOrder
   price?: Prisma.SortOrder
   estimatedConsumableCost?: Prisma.SortOrder
   estimatedLaborCost?: Prisma.SortOrder
@@ -524,6 +545,7 @@ export type ProductSkuMinOrderByAggregateInput = {
   sourceSampleId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  imageKey?: Prisma.SortOrder
   price?: Prisma.SortOrder
   estimatedConsumableCost?: Prisma.SortOrder
   estimatedLaborCost?: Prisma.SortOrder
@@ -706,6 +728,7 @@ export type ProductSkuCreateWithoutProductInput = {
   id?: string
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -724,6 +747,7 @@ export type ProductSkuUncheckedCreateWithoutProductInput = {
   sourceSampleId?: string | null
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -750,6 +774,7 @@ export type ProductSkuCreateWithoutDefaultForProductInput = {
   id?: string
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -769,6 +794,7 @@ export type ProductSkuUncheckedCreateWithoutDefaultForProductInput = {
   sourceSampleId?: string | null
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -810,6 +836,7 @@ export type ProductSkuScalarWhereInput = {
   sourceSampleId?: Prisma.StringNullableFilter<"ProductSku"> | string | null
   code?: Prisma.StringFilter<"ProductSku"> | string
   name?: Prisma.StringFilter<"ProductSku"> | string
+  imageKey?: Prisma.StringNullableFilter<"ProductSku"> | string | null
   price?: Prisma.DecimalFilter<"ProductSku"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFilter<"ProductSku"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFilter<"ProductSku"> | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -832,6 +859,7 @@ export type ProductSkuUpdateWithoutDefaultForProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -851,6 +879,7 @@ export type ProductSkuUncheckedUpdateWithoutDefaultForProductInput = {
   sourceSampleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -866,6 +895,7 @@ export type ProductSkuCreateWithoutRecipeInput = {
   id?: string
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -885,6 +915,7 @@ export type ProductSkuUncheckedCreateWithoutRecipeInput = {
   sourceSampleId?: string | null
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -916,6 +947,7 @@ export type ProductSkuUpdateWithoutRecipeInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -935,6 +967,7 @@ export type ProductSkuUncheckedUpdateWithoutRecipeInput = {
   sourceSampleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -950,6 +983,7 @@ export type ProductSkuCreateWithoutOrderItemsInput = {
   id?: string
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -969,6 +1003,7 @@ export type ProductSkuUncheckedCreateWithoutOrderItemsInput = {
   sourceSampleId?: string | null
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1000,6 +1035,7 @@ export type ProductSkuUpdateWithoutOrderItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1019,6 +1055,7 @@ export type ProductSkuUncheckedUpdateWithoutOrderItemsInput = {
   sourceSampleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1034,6 +1071,7 @@ export type ProductSkuCreateWithoutHoldsInput = {
   id?: string
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1053,6 +1091,7 @@ export type ProductSkuUncheckedCreateWithoutHoldsInput = {
   sourceSampleId?: string | null
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1084,6 +1123,7 @@ export type ProductSkuUpdateWithoutHoldsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1103,6 +1143,7 @@ export type ProductSkuUncheckedUpdateWithoutHoldsInput = {
   sourceSampleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1118,6 +1159,7 @@ export type ProductSkuCreateWithoutSourceSampleInput = {
   id?: string
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1136,6 +1178,7 @@ export type ProductSkuUncheckedCreateWithoutSourceSampleInput = {
   productId: string
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1178,6 +1221,7 @@ export type ProductSkuCreateWithoutRecommendationItemsInput = {
   id?: string
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1197,6 +1241,7 @@ export type ProductSkuUncheckedCreateWithoutRecommendationItemsInput = {
   sourceSampleId?: string | null
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1228,6 +1273,7 @@ export type ProductSkuUpdateWithoutRecommendationItemsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1247,6 +1293,7 @@ export type ProductSkuUncheckedUpdateWithoutRecommendationItemsInput = {
   sourceSampleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1263,6 +1310,7 @@ export type ProductSkuCreateManyProductInput = {
   sourceSampleId?: string | null
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1274,6 +1322,7 @@ export type ProductSkuUpdateWithoutProductInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1292,6 +1341,7 @@ export type ProductSkuUncheckedUpdateWithoutProductInput = {
   sourceSampleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1309,6 +1359,7 @@ export type ProductSkuUncheckedUpdateManyWithoutProductInput = {
   sourceSampleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1321,6 +1372,7 @@ export type ProductSkuCreateManySourceSampleInput = {
   productId: string
   code: string
   name: string
+  imageKey?: string | null
   price: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1332,6 +1384,7 @@ export type ProductSkuUpdateWithoutSourceSampleInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1350,6 +1403,7 @@ export type ProductSkuUncheckedUpdateWithoutSourceSampleInput = {
   productId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1367,6 +1421,7 @@ export type ProductSkuUncheckedUpdateManyWithoutSourceSampleInput = {
   productId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   price?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedConsumableCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   estimatedLaborCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
@@ -1429,6 +1484,7 @@ export type ProductSkuSelect<ExtArgs extends runtime.Types.Extensions.InternalAr
   sourceSampleId?: boolean
   code?: boolean
   name?: boolean
+  imageKey?: boolean
   price?: boolean
   estimatedConsumableCost?: boolean
   estimatedLaborCost?: boolean
@@ -1450,6 +1506,7 @@ export type ProductSkuSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Ex
   sourceSampleId?: boolean
   code?: boolean
   name?: boolean
+  imageKey?: boolean
   price?: boolean
   estimatedConsumableCost?: boolean
   estimatedLaborCost?: boolean
@@ -1465,6 +1522,7 @@ export type ProductSkuSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Ex
   sourceSampleId?: boolean
   code?: boolean
   name?: boolean
+  imageKey?: boolean
   price?: boolean
   estimatedConsumableCost?: boolean
   estimatedLaborCost?: boolean
@@ -1480,6 +1538,7 @@ export type ProductSkuSelectScalar = {
   sourceSampleId?: boolean
   code?: boolean
   name?: boolean
+  imageKey?: boolean
   price?: boolean
   estimatedConsumableCost?: boolean
   estimatedLaborCost?: boolean
@@ -1487,7 +1546,7 @@ export type ProductSkuSelectScalar = {
   preorderAllowed?: boolean
 }
 
-export type ProductSkuOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "productId" | "sourceSampleId" | "code" | "name" | "price" | "estimatedConsumableCost" | "estimatedLaborCost" | "active" | "preorderAllowed", ExtArgs["result"]["productSku"]>
+export type ProductSkuOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "productId" | "sourceSampleId" | "code" | "name" | "imageKey" | "price" | "estimatedConsumableCost" | "estimatedLaborCost" | "active" | "preorderAllowed", ExtArgs["result"]["productSku"]>
 export type ProductSkuInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   product?: boolean | Prisma.ProductDefaultArgs<ExtArgs>
   defaultForProduct?: boolean | Prisma.ProductSku$defaultForProductArgs<ExtArgs>
@@ -1524,6 +1583,7 @@ export type $ProductSkuPayload<ExtArgs extends runtime.Types.Extensions.Internal
     sourceSampleId: string | null
     code: string
     name: string
+    imageKey: string | null
     price: runtime.Decimal
     estimatedConsumableCost: runtime.Decimal
     estimatedLaborCost: runtime.Decimal
@@ -1964,6 +2024,7 @@ export interface ProductSkuFieldRefs {
   readonly sourceSampleId: Prisma.FieldRef<"ProductSku", 'String'>
   readonly code: Prisma.FieldRef<"ProductSku", 'String'>
   readonly name: Prisma.FieldRef<"ProductSku", 'String'>
+  readonly imageKey: Prisma.FieldRef<"ProductSku", 'String'>
   readonly price: Prisma.FieldRef<"ProductSku", 'Decimal'>
   readonly estimatedConsumableCost: Prisma.FieldRef<"ProductSku", 'Decimal'>
   readonly estimatedLaborCost: Prisma.FieldRef<"ProductSku", 'Decimal'>

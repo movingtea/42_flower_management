@@ -5975,6 +5975,7 @@ export const MaterialScalarFieldEnum = {
   brand: 'brand',
   model: 'model',
   notes: 'notes',
+  imageKey: 'imageKey',
   safetyStockThreshold: 'safetyStockThreshold',
   active: 'active',
   createdAt: 'createdAt',
@@ -6006,6 +6007,7 @@ export const ProductScalarFieldEnum = {
   tenantId: 'tenantId',
   code: 'code',
   name: 'name',
+  imageKey: 'imageKey',
   active: 'active',
   defaultSkuId: 'defaultSkuId'
 } as const
@@ -6019,6 +6021,7 @@ export const ProductSkuScalarFieldEnum = {
   sourceSampleId: 'sourceSampleId',
   code: 'code',
   name: 'name',
+  imageKey: 'imageKey',
   price: 'price',
   estimatedConsumableCost: 'estimatedConsumableCost',
   estimatedLaborCost: 'estimatedLaborCost',

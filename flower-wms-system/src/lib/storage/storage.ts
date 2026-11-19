@@ -1,10 +1,11 @@
 import {
   getStorageConfig,
   isOssStorageConfigured,
+  storageConfigToImageUrlEnv,
   type StorageConfig,
 } from "@/lib/storage/config";
 import { StorageError } from "@/lib/storage/errors";
-import { getPublicImageUrl, type ImageUrlEnv } from "@/lib/storage/image-url";
+import { getPublicImageUrl } from "@/lib/storage/image-url";
 import { buildObjectKey, type UploadModule } from "@/lib/storage/object-key";
 import { deleteObjectFromOss, putObjectToOss } from "@/lib/storage/oss";
 import { validateImageUpload } from "@/lib/storage/upload-validation";
@@ -17,17 +18,7 @@ export type UploadImageResult = {
   mimeType: string;
 };
 
-export function storageConfigToImageUrlEnv(
-  config: StorageConfig = getStorageConfig()
-): ImageUrlEnv {
-  return {
-    objectPrefix: config.objectPrefix,
-    publicBaseUrl: config.publicBaseUrl,
-    enableLegacyUploads: config.enableLegacyUploads,
-    blockLocalhostImageUrl: config.blockLocalhostImageUrl,
-    normalizeLocalhostUploads: config.normalizeLocalhostUploads,
-  };
-}
+export { storageConfigToImageUrlEnv } from "@/lib/storage/config";
 
 export async function uploadImageToStorage(input: {
   file: File;

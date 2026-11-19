@@ -325,6 +325,8 @@ model Material {
   brand                    String?
   model                    String?
   notes                    String?                       @db.Text
+  // OSS objectKey; WMS pages resolve it to a public URL for preview.
+  imageKey                 String?
   safetyStockThreshold     Decimal                       @default(0) @db.Decimal(14, 3)
   active                   Boolean                       @default(true)
   createdAt                DateTime                      @default(now())
@@ -377,6 +379,8 @@ model Product {
   tenantId            String
   code                String
   name                String
+  // OSS objectKey for the sellable product image; SKUs may override it.
+  imageKey            String?
   active              Boolean                   @default(false)
   defaultSkuId        String?                   @unique
   tenant              Tenant                    @relation(fields: [tenantId], references: [id])
@@ -397,6 +401,8 @@ model ProductSku {
   sourceSampleId          String?
   code                    String
   name                    String
+  // OSS objectKey; blank means the product image (if any) is used.
+  imageKey                String?
   price                   Decimal              @db.Decimal(14, 2)
   estimatedConsumableCost Decimal              @default(0) @db.Decimal(14, 2)
   estimatedLaborCost      Decimal              @default(0) @db.Decimal(14, 2)
@@ -719,6 +725,9 @@ model InventoryBatch {
   losses             LossRecord[]
 
   @@unique([storeId, batchNo])
+  // Reservation candidate lookup and material/stock aggregation filter by store + material.
+  // Without this index the planner sequentially scans every batch in the store.
+  @@index([storeId, materialId], map: "InventoryBatch_storeId_materialId_idx")
 }
 
 model BatchBalance {

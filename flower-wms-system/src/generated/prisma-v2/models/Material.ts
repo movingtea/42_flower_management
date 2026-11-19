@@ -74,6 +74,7 @@ export type MaterialMinAggregateOutputType = {
   brand: string | null
   model: string | null
   notes: string | null
+  imageKey: string | null
   safetyStockThreshold: runtime.Decimal | null
   active: boolean | null
   createdAt: Date | null
@@ -108,6 +109,7 @@ export type MaterialMaxAggregateOutputType = {
   brand: string | null
   model: string | null
   notes: string | null
+  imageKey: string | null
   safetyStockThreshold: runtime.Decimal | null
   active: boolean | null
   createdAt: Date | null
@@ -143,6 +145,7 @@ export type MaterialCountAggregateOutputType = {
   brand: number
   model: number
   notes: number
+  imageKey: number
   safetyStockThreshold: number
   active: number
   createdAt: number
@@ -199,6 +202,7 @@ export type MaterialMinAggregateInputType = {
   brand?: true
   model?: true
   notes?: true
+  imageKey?: true
   safetyStockThreshold?: true
   active?: true
   createdAt?: true
@@ -233,6 +237,7 @@ export type MaterialMaxAggregateInputType = {
   brand?: true
   model?: true
   notes?: true
+  imageKey?: true
   safetyStockThreshold?: true
   active?: true
   createdAt?: true
@@ -268,6 +273,7 @@ export type MaterialCountAggregateInputType = {
   brand?: true
   model?: true
   notes?: true
+  imageKey?: true
   safetyStockThreshold?: true
   active?: true
   createdAt?: true
@@ -390,6 +396,7 @@ export type MaterialGroupByOutputType = {
   brand: string | null
   model: string | null
   notes: string | null
+  imageKey: string | null
   safetyStockThreshold: runtime.Decimal
   active: boolean
   createdAt: Date
@@ -448,6 +455,7 @@ export type MaterialWhereInput = {
   brand?: Prisma.StringNullableFilter<"Material"> | string | null
   model?: Prisma.StringNullableFilter<"Material"> | string | null
   notes?: Prisma.StringNullableFilter<"Material"> | string | null
+  imageKey?: Prisma.StringNullableFilter<"Material"> | string | null
   safetyStockThreshold?: Prisma.DecimalFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFilter<"Material"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Material"> | Date | string
@@ -498,6 +506,7 @@ export type MaterialOrderByWithRelationInput = {
   brand?: Prisma.SortOrderInput | Prisma.SortOrder
   model?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  imageKey?: Prisma.SortOrderInput | Prisma.SortOrder
   safetyStockThreshold?: Prisma.SortOrder
   active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -553,6 +562,7 @@ export type MaterialWhereUniqueInput = Prisma.AtLeast<{
   brand?: Prisma.StringNullableFilter<"Material"> | string | null
   model?: Prisma.StringNullableFilter<"Material"> | string | null
   notes?: Prisma.StringNullableFilter<"Material"> | string | null
+  imageKey?: Prisma.StringNullableFilter<"Material"> | string | null
   safetyStockThreshold?: Prisma.DecimalFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFilter<"Material"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Material"> | Date | string
@@ -603,6 +613,7 @@ export type MaterialOrderByWithAggregationInput = {
   brand?: Prisma.SortOrderInput | Prisma.SortOrder
   model?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
+  imageKey?: Prisma.SortOrderInput | Prisma.SortOrder
   safetyStockThreshold?: Prisma.SortOrder
   active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -646,6 +657,7 @@ export type MaterialScalarWhereWithAggregatesInput = {
   brand?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
   model?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
   notes?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
+  imageKey?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
   safetyStockThreshold?: Prisma.DecimalWithAggregatesFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolWithAggregatesFilter<"Material"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Material"> | Date | string
@@ -680,6 +692,7 @@ export type MaterialCreateInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -730,6 +743,7 @@ export type MaterialUncheckedCreateInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -778,6 +792,7 @@ export type MaterialUpdateInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -828,6 +843,7 @@ export type MaterialUncheckedUpdateInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -877,6 +893,7 @@ export type MaterialCreateManyInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -911,6 +928,7 @@ export type MaterialUpdateManyMutationInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -946,6 +964,7 @@ export type MaterialUncheckedUpdateManyInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1001,6 +1020,7 @@ export type MaterialCountOrderByAggregateInput = {
   brand?: Prisma.SortOrder
   model?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  imageKey?: Prisma.SortOrder
   safetyStockThreshold?: Prisma.SortOrder
   active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -1045,6 +1065,7 @@ export type MaterialMaxOrderByAggregateInput = {
   brand?: Prisma.SortOrder
   model?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  imageKey?: Prisma.SortOrder
   safetyStockThreshold?: Prisma.SortOrder
   active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -1079,6 +1100,7 @@ export type MaterialMinOrderByAggregateInput = {
   brand?: Prisma.SortOrder
   model?: Prisma.SortOrder
   notes?: Prisma.SortOrder
+  imageKey?: Prisma.SortOrder
   safetyStockThreshold?: Prisma.SortOrder
   active?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
@@ -1423,6 +1445,7 @@ export type MaterialCreateWithoutTenantInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -1471,6 +1494,7 @@ export type MaterialUncheckedCreateWithoutTenantInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -1549,6 +1573,7 @@ export type MaterialScalarWhereInput = {
   brand?: Prisma.StringNullableFilter<"Material"> | string | null
   model?: Prisma.StringNullableFilter<"Material"> | string | null
   notes?: Prisma.StringNullableFilter<"Material"> | string | null
+  imageKey?: Prisma.StringNullableFilter<"Material"> | string | null
   safetyStockThreshold?: Prisma.DecimalFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFilter<"Material"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Material"> | Date | string
@@ -1583,6 +1608,7 @@ export type MaterialCreateWithoutRecipeLinesInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -1632,6 +1658,7 @@ export type MaterialUncheckedCreateWithoutRecipeLinesInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -1695,6 +1722,7 @@ export type MaterialUpdateWithoutRecipeLinesInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1744,6 +1772,7 @@ export type MaterialUncheckedUpdateWithoutRecipeLinesInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1791,6 +1820,7 @@ export type MaterialCreateWithoutPackagingKitLinesInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -1840,6 +1870,7 @@ export type MaterialUncheckedCreateWithoutPackagingKitLinesInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -1903,6 +1934,7 @@ export type MaterialUpdateWithoutPackagingKitLinesInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1952,6 +1984,7 @@ export type MaterialUncheckedUpdateWithoutPackagingKitLinesInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -1999,6 +2032,7 @@ export type MaterialCreateWithoutRequirementsInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -2048,6 +2082,7 @@ export type MaterialUncheckedCreateWithoutRequirementsInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -2111,6 +2146,7 @@ export type MaterialUpdateWithoutRequirementsInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2160,6 +2196,7 @@ export type MaterialUncheckedUpdateWithoutRequirementsInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2207,6 +2244,7 @@ export type MaterialCreateWithoutHoldMaterialsInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -2256,6 +2294,7 @@ export type MaterialUncheckedCreateWithoutHoldMaterialsInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -2319,6 +2358,7 @@ export type MaterialUpdateWithoutHoldMaterialsInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2368,6 +2408,7 @@ export type MaterialUncheckedUpdateWithoutHoldMaterialsInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2415,6 +2456,7 @@ export type MaterialCreateWithoutOrderedLinesInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -2464,6 +2506,7 @@ export type MaterialUncheckedCreateWithoutOrderedLinesInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -2527,6 +2570,7 @@ export type MaterialUpdateWithoutOrderedLinesInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2576,6 +2620,7 @@ export type MaterialUncheckedUpdateWithoutOrderedLinesInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2623,6 +2668,7 @@ export type MaterialCreateWithoutReceivedLinesInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -2672,6 +2718,7 @@ export type MaterialUncheckedCreateWithoutReceivedLinesInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -2735,6 +2782,7 @@ export type MaterialUpdateWithoutReceivedLinesInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2784,6 +2832,7 @@ export type MaterialUncheckedUpdateWithoutReceivedLinesInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2831,6 +2880,7 @@ export type MaterialCreateWithoutBatchesInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -2880,6 +2930,7 @@ export type MaterialUncheckedCreateWithoutBatchesInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -2943,6 +2994,7 @@ export type MaterialUpdateWithoutBatchesInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -2992,6 +3044,7 @@ export type MaterialUncheckedUpdateWithoutBatchesInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3039,6 +3092,7 @@ export type MaterialCreateWithoutSampleMaterialsInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -3088,6 +3142,7 @@ export type MaterialUncheckedCreateWithoutSampleMaterialsInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -3151,6 +3206,7 @@ export type MaterialUpdateWithoutSampleMaterialsInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3200,6 +3256,7 @@ export type MaterialUncheckedUpdateWithoutSampleMaterialsInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3247,6 +3304,7 @@ export type MaterialCreateWithoutSamplePlanMaterialsInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -3296,6 +3354,7 @@ export type MaterialUncheckedCreateWithoutSamplePlanMaterialsInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -3359,6 +3418,7 @@ export type MaterialUpdateWithoutSamplePlanMaterialsInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3408,6 +3468,7 @@ export type MaterialUncheckedUpdateWithoutSamplePlanMaterialsInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3455,6 +3516,7 @@ export type MaterialCreateWithoutSampleInventorySnapshotsInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -3504,6 +3566,7 @@ export type MaterialUncheckedCreateWithoutSampleInventorySnapshotsInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -3567,6 +3630,7 @@ export type MaterialUpdateWithoutSampleInventorySnapshotsInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3616,6 +3680,7 @@ export type MaterialUncheckedUpdateWithoutSampleInventorySnapshotsInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3663,6 +3728,7 @@ export type MaterialCreateWithoutSampleStepMaterialsInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -3712,6 +3778,7 @@ export type MaterialUncheckedCreateWithoutSampleStepMaterialsInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -3775,6 +3842,7 @@ export type MaterialUpdateWithoutSampleStepMaterialsInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3824,6 +3892,7 @@ export type MaterialUncheckedUpdateWithoutSampleStepMaterialsInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -3871,6 +3940,7 @@ export type MaterialCreateWithoutDisassemblyMaterialsInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -3920,6 +3990,7 @@ export type MaterialUncheckedCreateWithoutDisassemblyMaterialsInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -3983,6 +4054,7 @@ export type MaterialUpdateWithoutDisassemblyMaterialsInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4032,6 +4104,7 @@ export type MaterialUncheckedUpdateWithoutDisassemblyMaterialsInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4079,6 +4152,7 @@ export type MaterialCreateWithoutUnverifiedLossesInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -4128,6 +4202,7 @@ export type MaterialUncheckedCreateWithoutUnverifiedLossesInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -4191,6 +4266,7 @@ export type MaterialUpdateWithoutUnverifiedLossesInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4240,6 +4316,7 @@ export type MaterialUncheckedUpdateWithoutUnverifiedLossesInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4287,6 +4364,7 @@ export type MaterialCreateWithoutCategoriesInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -4336,6 +4414,7 @@ export type MaterialUncheckedCreateWithoutCategoriesInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -4399,6 +4478,7 @@ export type MaterialUpdateWithoutCategoriesInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4448,6 +4528,7 @@ export type MaterialUncheckedUpdateWithoutCategoriesInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4495,6 +4576,7 @@ export type MaterialCreateManyTenantInput = {
   brand?: string | null
   model?: string | null
   notes?: string | null
+  imageKey?: string | null
   safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: boolean
   createdAt?: Date | string
@@ -4529,6 +4611,7 @@ export type MaterialUpdateWithoutTenantInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4577,6 +4660,7 @@ export type MaterialUncheckedUpdateWithoutTenantInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4625,6 +4709,7 @@ export type MaterialUncheckedUpdateManyWithoutTenantInput = {
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
@@ -4808,6 +4893,7 @@ export type MaterialSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   brand?: boolean
   model?: boolean
   notes?: boolean
+  imageKey?: boolean
   safetyStockThreshold?: boolean
   active?: boolean
   createdAt?: boolean
@@ -4859,6 +4945,7 @@ export type MaterialSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   brand?: boolean
   model?: boolean
   notes?: boolean
+  imageKey?: boolean
   safetyStockThreshold?: boolean
   active?: boolean
   createdAt?: boolean
@@ -4895,6 +4982,7 @@ export type MaterialSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   brand?: boolean
   model?: boolean
   notes?: boolean
+  imageKey?: boolean
   safetyStockThreshold?: boolean
   active?: boolean
   createdAt?: boolean
@@ -4931,13 +5019,14 @@ export type MaterialSelectScalar = {
   brand?: boolean
   model?: boolean
   notes?: boolean
+  imageKey?: boolean
   safetyStockThreshold?: boolean
   active?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type MaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "code" | "name" | "kind" | "color" | "grade" | "gradeSpecification" | "specification" | "baseUnit" | "quantityScale" | "reservePerOrder" | "englishName" | "flowerLanguage" | "maintenance" | "maintenanceCare" | "supplySeason" | "defaultShelfLifeDays" | "standardUnitCost" | "costUnit" | "costNote" | "optimisticUsableRate" | "standardUsableRate" | "conservativeUsableRate" | "lossRateNote" | "brand" | "model" | "notes" | "safetyStockThreshold" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["material"]>
+export type MaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "code" | "name" | "kind" | "color" | "grade" | "gradeSpecification" | "specification" | "baseUnit" | "quantityScale" | "reservePerOrder" | "englishName" | "flowerLanguage" | "maintenance" | "maintenanceCare" | "supplySeason" | "defaultShelfLifeDays" | "standardUnitCost" | "costUnit" | "costNote" | "optimisticUsableRate" | "standardUsableRate" | "conservativeUsableRate" | "lossRateNote" | "brand" | "model" | "notes" | "imageKey" | "safetyStockThreshold" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["material"]>
 export type MaterialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   unverifiedLosses?: boolean | Prisma.Material$unverifiedLossesArgs<ExtArgs>
@@ -5011,6 +5100,7 @@ export type $MaterialPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     brand: string | null
     model: string | null
     notes: string | null
+    imageKey: string | null
     safetyStockThreshold: runtime.Decimal
     active: boolean
     createdAt: Date
@@ -5481,6 +5571,7 @@ export interface MaterialFieldRefs {
   readonly brand: Prisma.FieldRef<"Material", 'String'>
   readonly model: Prisma.FieldRef<"Material", 'String'>
   readonly notes: Prisma.FieldRef<"Material", 'String'>
+  readonly imageKey: Prisma.FieldRef<"Material", 'String'>
   readonly safetyStockThreshold: Prisma.FieldRef<"Material", 'Decimal'>
   readonly active: Prisma.FieldRef<"Material", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Material", 'DateTime'>

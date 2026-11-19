@@ -29,6 +29,7 @@ export type ProductMinAggregateOutputType = {
   tenantId: string | null
   code: string | null
   name: string | null
+  imageKey: string | null
   active: boolean | null
   defaultSkuId: string | null
 }
@@ -38,6 +39,7 @@ export type ProductMaxAggregateOutputType = {
   tenantId: string | null
   code: string | null
   name: string | null
+  imageKey: string | null
   active: boolean | null
   defaultSkuId: string | null
 }
@@ -47,6 +49,7 @@ export type ProductCountAggregateOutputType = {
   tenantId: number
   code: number
   name: number
+  imageKey: number
   active: number
   defaultSkuId: number
   _all: number
@@ -58,6 +61,7 @@ export type ProductMinAggregateInputType = {
   tenantId?: true
   code?: true
   name?: true
+  imageKey?: true
   active?: true
   defaultSkuId?: true
 }
@@ -67,6 +71,7 @@ export type ProductMaxAggregateInputType = {
   tenantId?: true
   code?: true
   name?: true
+  imageKey?: true
   active?: true
   defaultSkuId?: true
 }
@@ -76,6 +81,7 @@ export type ProductCountAggregateInputType = {
   tenantId?: true
   code?: true
   name?: true
+  imageKey?: true
   active?: true
   defaultSkuId?: true
   _all?: true
@@ -158,6 +164,7 @@ export type ProductGroupByOutputType = {
   tenantId: string
   code: string
   name: string
+  imageKey: string | null
   active: boolean
   defaultSkuId: string | null
   _count: ProductCountAggregateOutputType | null
@@ -188,6 +195,7 @@ export type ProductWhereInput = {
   tenantId?: Prisma.StringFilter<"Product"> | string
   code?: Prisma.StringFilter<"Product"> | string
   name?: Prisma.StringFilter<"Product"> | string
+  imageKey?: Prisma.StringNullableFilter<"Product"> | string | null
   active?: Prisma.BoolFilter<"Product"> | boolean
   defaultSkuId?: Prisma.StringNullableFilter<"Product"> | string | null
   bannersByTenant?: Prisma.BannerListRelationFilter
@@ -204,6 +212,7 @@ export type ProductOrderByWithRelationInput = {
   tenantId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  imageKey?: Prisma.SortOrderInput | Prisma.SortOrder
   active?: Prisma.SortOrder
   defaultSkuId?: Prisma.SortOrderInput | Prisma.SortOrder
   bannersByTenant?: Prisma.BannerOrderByRelationAggregateInput
@@ -227,6 +236,7 @@ export type ProductWhereUniqueInput = Prisma.AtLeast<{
   tenantId?: Prisma.StringFilter<"Product"> | string
   code?: Prisma.StringFilter<"Product"> | string
   name?: Prisma.StringFilter<"Product"> | string
+  imageKey?: Prisma.StringNullableFilter<"Product"> | string | null
   active?: Prisma.BoolFilter<"Product"> | boolean
   bannersByTenant?: Prisma.BannerListRelationFilter
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
@@ -242,6 +252,7 @@ export type ProductOrderByWithAggregationInput = {
   tenantId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  imageKey?: Prisma.SortOrderInput | Prisma.SortOrder
   active?: Prisma.SortOrder
   defaultSkuId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.ProductCountOrderByAggregateInput
@@ -257,6 +268,7 @@ export type ProductScalarWhereWithAggregatesInput = {
   tenantId?: Prisma.StringWithAggregatesFilter<"Product"> | string
   code?: Prisma.StringWithAggregatesFilter<"Product"> | string
   name?: Prisma.StringWithAggregatesFilter<"Product"> | string
+  imageKey?: Prisma.StringNullableWithAggregatesFilter<"Product"> | string | null
   active?: Prisma.BoolWithAggregatesFilter<"Product"> | boolean
   defaultSkuId?: Prisma.StringNullableWithAggregatesFilter<"Product"> | string | null
 }
@@ -264,6 +276,7 @@ export type ProductScalarWhereWithAggregatesInput = {
 export type ProductCreateInput = {
   code: string
   name: string
+  imageKey?: string | null
   active?: boolean
   bannersByTenant?: Prisma.BannerCreateNestedManyWithoutProductTenantInput
   tenant: Prisma.TenantCreateNestedOneWithoutProductsInput
@@ -279,6 +292,7 @@ export type ProductUncheckedCreateInput = {
   tenantId: string
   code: string
   name: string
+  imageKey?: string | null
   active?: boolean
   defaultSkuId?: string | null
   bannersByTenant?: Prisma.BannerUncheckedCreateNestedManyWithoutProductTenantInput
@@ -291,6 +305,7 @@ export type ProductUncheckedCreateInput = {
 export type ProductUpdateInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   bannersByTenant?: Prisma.BannerUpdateManyWithoutProductTenantNestedInput
   tenant?: Prisma.TenantUpdateOneRequiredWithoutProductsNestedInput
@@ -306,6 +321,7 @@ export type ProductUncheckedUpdateInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   defaultSkuId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bannersByTenant?: Prisma.BannerUncheckedUpdateManyWithoutProductTenantNestedInput
@@ -320,6 +336,7 @@ export type ProductCreateManyInput = {
   tenantId: string
   code: string
   name: string
+  imageKey?: string | null
   active?: boolean
   defaultSkuId?: string | null
 }
@@ -327,6 +344,7 @@ export type ProductCreateManyInput = {
 export type ProductUpdateManyMutationInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -335,6 +353,7 @@ export type ProductUncheckedUpdateManyInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   defaultSkuId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -369,6 +388,7 @@ export type ProductCountOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  imageKey?: Prisma.SortOrder
   active?: Prisma.SortOrder
   defaultSkuId?: Prisma.SortOrder
 }
@@ -378,6 +398,7 @@ export type ProductMaxOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  imageKey?: Prisma.SortOrder
   active?: Prisma.SortOrder
   defaultSkuId?: Prisma.SortOrder
 }
@@ -387,6 +408,7 @@ export type ProductMinOrderByAggregateInput = {
   tenantId?: Prisma.SortOrder
   code?: Prisma.SortOrder
   name?: Prisma.SortOrder
+  imageKey?: Prisma.SortOrder
   active?: Prisma.SortOrder
   defaultSkuId?: Prisma.SortOrder
 }
@@ -552,6 +574,7 @@ export type ProductUpdateOneRequiredWithoutRecommendationItemsNestedInput = {
 export type ProductCreateWithoutTenantInput = {
   code: string
   name: string
+  imageKey?: string | null
   active?: boolean
   bannersByTenant?: Prisma.BannerCreateNestedManyWithoutProductTenantInput
   skus?: Prisma.ProductSkuCreateNestedManyWithoutProductInput
@@ -565,6 +588,7 @@ export type ProductUncheckedCreateWithoutTenantInput = {
   id?: string
   code: string
   name: string
+  imageKey?: string | null
   active?: boolean
   defaultSkuId?: string | null
   bannersByTenant?: Prisma.BannerUncheckedCreateNestedManyWithoutProductTenantInput
@@ -608,6 +632,7 @@ export type ProductScalarWhereInput = {
   tenantId?: Prisma.StringFilter<"Product"> | string
   code?: Prisma.StringFilter<"Product"> | string
   name?: Prisma.StringFilter<"Product"> | string
+  imageKey?: Prisma.StringNullableFilter<"Product"> | string | null
   active?: Prisma.BoolFilter<"Product"> | boolean
   defaultSkuId?: Prisma.StringNullableFilter<"Product"> | string | null
 }
@@ -615,6 +640,7 @@ export type ProductScalarWhereInput = {
 export type ProductCreateWithoutSkusInput = {
   code: string
   name: string
+  imageKey?: string | null
   active?: boolean
   bannersByTenant?: Prisma.BannerCreateNestedManyWithoutProductTenantInput
   tenant: Prisma.TenantCreateNestedOneWithoutProductsInput
@@ -629,6 +655,7 @@ export type ProductUncheckedCreateWithoutSkusInput = {
   tenantId: string
   code: string
   name: string
+  imageKey?: string | null
   active?: boolean
   defaultSkuId?: string | null
   bannersByTenant?: Prisma.BannerUncheckedCreateNestedManyWithoutProductTenantInput
@@ -645,6 +672,7 @@ export type ProductCreateOrConnectWithoutSkusInput = {
 export type ProductCreateWithoutDefaultSkuInput = {
   code: string
   name: string
+  imageKey?: string | null
   active?: boolean
   bannersByTenant?: Prisma.BannerCreateNestedManyWithoutProductTenantInput
   tenant: Prisma.TenantCreateNestedOneWithoutProductsInput
@@ -658,6 +686,7 @@ export type ProductUncheckedCreateWithoutDefaultSkuInput = {
   tenantId: string
   code: string
   name: string
+  imageKey?: string | null
   active?: boolean
   bannersByTenant?: Prisma.BannerUncheckedCreateNestedManyWithoutProductTenantInput
   skus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutProductInput
@@ -685,6 +714,7 @@ export type ProductUpdateToOneWithWhereWithoutSkusInput = {
 export type ProductUpdateWithoutSkusInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   bannersByTenant?: Prisma.BannerUpdateManyWithoutProductTenantNestedInput
   tenant?: Prisma.TenantUpdateOneRequiredWithoutProductsNestedInput
@@ -699,6 +729,7 @@ export type ProductUncheckedUpdateWithoutSkusInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   defaultSkuId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bannersByTenant?: Prisma.BannerUncheckedUpdateManyWithoutProductTenantNestedInput
@@ -721,6 +752,7 @@ export type ProductUpdateToOneWithWhereWithoutDefaultSkuInput = {
 export type ProductUpdateWithoutDefaultSkuInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   bannersByTenant?: Prisma.BannerUpdateManyWithoutProductTenantNestedInput
   tenant?: Prisma.TenantUpdateOneRequiredWithoutProductsNestedInput
@@ -734,6 +766,7 @@ export type ProductUncheckedUpdateWithoutDefaultSkuInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   bannersByTenant?: Prisma.BannerUncheckedUpdateManyWithoutProductTenantNestedInput
   skus?: Prisma.ProductSkuUncheckedUpdateManyWithoutProductNestedInput
@@ -745,6 +778,7 @@ export type ProductUncheckedUpdateWithoutDefaultSkuInput = {
 export type ProductCreateWithoutCategoriesInput = {
   code: string
   name: string
+  imageKey?: string | null
   active?: boolean
   bannersByTenant?: Prisma.BannerCreateNestedManyWithoutProductTenantInput
   tenant: Prisma.TenantCreateNestedOneWithoutProductsInput
@@ -759,6 +793,7 @@ export type ProductUncheckedCreateWithoutCategoriesInput = {
   tenantId: string
   code: string
   name: string
+  imageKey?: string | null
   active?: boolean
   defaultSkuId?: string | null
   bannersByTenant?: Prisma.BannerUncheckedCreateNestedManyWithoutProductTenantInput
@@ -786,6 +821,7 @@ export type ProductUpdateToOneWithWhereWithoutCategoriesInput = {
 export type ProductUpdateWithoutCategoriesInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   bannersByTenant?: Prisma.BannerUpdateManyWithoutProductTenantNestedInput
   tenant?: Prisma.TenantUpdateOneRequiredWithoutProductsNestedInput
@@ -800,6 +836,7 @@ export type ProductUncheckedUpdateWithoutCategoriesInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   defaultSkuId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bannersByTenant?: Prisma.BannerUncheckedUpdateManyWithoutProductTenantNestedInput
@@ -811,6 +848,7 @@ export type ProductUncheckedUpdateWithoutCategoriesInput = {
 export type ProductCreateWithoutBannersByTenantInput = {
   code: string
   name: string
+  imageKey?: string | null
   active?: boolean
   tenant: Prisma.TenantCreateNestedOneWithoutProductsInput
   skus?: Prisma.ProductSkuCreateNestedManyWithoutProductInput
@@ -825,6 +863,7 @@ export type ProductUncheckedCreateWithoutBannersByTenantInput = {
   tenantId: string
   code: string
   name: string
+  imageKey?: string | null
   active?: boolean
   defaultSkuId?: string | null
   skus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutProductInput
@@ -841,6 +880,7 @@ export type ProductCreateOrConnectWithoutBannersByTenantInput = {
 export type ProductCreateWithoutBannersInput = {
   code: string
   name: string
+  imageKey?: string | null
   active?: boolean
   bannersByTenant?: Prisma.BannerCreateNestedManyWithoutProductTenantInput
   tenant: Prisma.TenantCreateNestedOneWithoutProductsInput
@@ -855,6 +895,7 @@ export type ProductUncheckedCreateWithoutBannersInput = {
   tenantId: string
   code: string
   name: string
+  imageKey?: string | null
   active?: boolean
   defaultSkuId?: string | null
   bannersByTenant?: Prisma.BannerUncheckedCreateNestedManyWithoutProductTenantInput
@@ -882,6 +923,7 @@ export type ProductUpdateToOneWithWhereWithoutBannersByTenantInput = {
 export type ProductUpdateWithoutBannersByTenantInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   tenant?: Prisma.TenantUpdateOneRequiredWithoutProductsNestedInput
   skus?: Prisma.ProductSkuUpdateManyWithoutProductNestedInput
@@ -896,6 +938,7 @@ export type ProductUncheckedUpdateWithoutBannersByTenantInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   defaultSkuId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   skus?: Prisma.ProductSkuUncheckedUpdateManyWithoutProductNestedInput
@@ -918,6 +961,7 @@ export type ProductUpdateToOneWithWhereWithoutBannersInput = {
 export type ProductUpdateWithoutBannersInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   bannersByTenant?: Prisma.BannerUpdateManyWithoutProductTenantNestedInput
   tenant?: Prisma.TenantUpdateOneRequiredWithoutProductsNestedInput
@@ -932,6 +976,7 @@ export type ProductUncheckedUpdateWithoutBannersInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   defaultSkuId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bannersByTenant?: Prisma.BannerUncheckedUpdateManyWithoutProductTenantNestedInput
@@ -943,6 +988,7 @@ export type ProductUncheckedUpdateWithoutBannersInput = {
 export type ProductCreateWithoutRecommendationItemsInput = {
   code: string
   name: string
+  imageKey?: string | null
   active?: boolean
   bannersByTenant?: Prisma.BannerCreateNestedManyWithoutProductTenantInput
   tenant: Prisma.TenantCreateNestedOneWithoutProductsInput
@@ -957,6 +1003,7 @@ export type ProductUncheckedCreateWithoutRecommendationItemsInput = {
   tenantId: string
   code: string
   name: string
+  imageKey?: string | null
   active?: boolean
   defaultSkuId?: string | null
   bannersByTenant?: Prisma.BannerUncheckedCreateNestedManyWithoutProductTenantInput
@@ -984,6 +1031,7 @@ export type ProductUpdateToOneWithWhereWithoutRecommendationItemsInput = {
 export type ProductUpdateWithoutRecommendationItemsInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   bannersByTenant?: Prisma.BannerUpdateManyWithoutProductTenantNestedInput
   tenant?: Prisma.TenantUpdateOneRequiredWithoutProductsNestedInput
@@ -998,6 +1046,7 @@ export type ProductUncheckedUpdateWithoutRecommendationItemsInput = {
   tenantId?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   defaultSkuId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bannersByTenant?: Prisma.BannerUncheckedUpdateManyWithoutProductTenantNestedInput
@@ -1010,6 +1059,7 @@ export type ProductCreateManyTenantInput = {
   id?: string
   code: string
   name: string
+  imageKey?: string | null
   active?: boolean
   defaultSkuId?: string | null
 }
@@ -1017,6 +1067,7 @@ export type ProductCreateManyTenantInput = {
 export type ProductUpdateWithoutTenantInput = {
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   bannersByTenant?: Prisma.BannerUpdateManyWithoutProductTenantNestedInput
   skus?: Prisma.ProductSkuUpdateManyWithoutProductNestedInput
@@ -1030,6 +1081,7 @@ export type ProductUncheckedUpdateWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   defaultSkuId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   bannersByTenant?: Prisma.BannerUncheckedUpdateManyWithoutProductTenantNestedInput
@@ -1043,6 +1095,7 @@ export type ProductUncheckedUpdateManyWithoutTenantInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   code?: Prisma.StringFieldUpdateOperationsInput | string
   name?: Prisma.StringFieldUpdateOperationsInput | string
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   active?: Prisma.BoolFieldUpdateOperationsInput | boolean
   defaultSkuId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
@@ -1119,6 +1172,7 @@ export type ProductSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   tenantId?: boolean
   code?: boolean
   name?: boolean
+  imageKey?: boolean
   active?: boolean
   defaultSkuId?: boolean
   bannersByTenant?: boolean | Prisma.Product$bannersByTenantArgs<ExtArgs>
@@ -1136,6 +1190,7 @@ export type ProductSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exten
   tenantId?: boolean
   code?: boolean
   name?: boolean
+  imageKey?: boolean
   active?: boolean
   defaultSkuId?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1147,6 +1202,7 @@ export type ProductSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exten
   tenantId?: boolean
   code?: boolean
   name?: boolean
+  imageKey?: boolean
   active?: boolean
   defaultSkuId?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1158,11 +1214,12 @@ export type ProductSelectScalar = {
   tenantId?: boolean
   code?: boolean
   name?: boolean
+  imageKey?: boolean
   active?: boolean
   defaultSkuId?: boolean
 }
 
-export type ProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "code" | "name" | "active" | "defaultSkuId", ExtArgs["result"]["product"]>
+export type ProductOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "code" | "name" | "imageKey" | "active" | "defaultSkuId", ExtArgs["result"]["product"]>
 export type ProductInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   bannersByTenant?: boolean | Prisma.Product$bannersByTenantArgs<ExtArgs>
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
@@ -1198,6 +1255,7 @@ export type $ProductPayload<ExtArgs extends runtime.Types.Extensions.InternalArg
     tenantId: string
     code: string
     name: string
+    imageKey: string | null
     active: boolean
     defaultSkuId: string | null
   }, ExtArgs["result"]["product"]>
@@ -1634,6 +1692,7 @@ export interface ProductFieldRefs {
   readonly tenantId: Prisma.FieldRef<"Product", 'String'>
   readonly code: Prisma.FieldRef<"Product", 'String'>
   readonly name: Prisma.FieldRef<"Product", 'String'>
+  readonly imageKey: Prisma.FieldRef<"Product", 'String'>
   readonly active: Prisma.FieldRef<"Product", 'Boolean'>
   readonly defaultSkuId: Prisma.FieldRef<"Product", 'String'>
 }

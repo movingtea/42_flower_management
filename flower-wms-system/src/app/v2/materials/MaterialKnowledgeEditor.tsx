@@ -2,6 +2,7 @@
 
 import { useState, type MouseEvent } from "react";
 import { WikiCareTable } from "@/components/wiki/WikiCareTable";
+import { V2ImageField } from "../_components/V2Image";
 import {
   careTableToMaintenanceText,
   emptyCareTable,
@@ -34,6 +35,7 @@ export type MaterialKnowledgeEditorValue = {
   brand: string | null;
   model: string | null;
   notes: string | null;
+  imageKey: string | null;
   safetyStockThreshold: string | null;
   categoryIds: string[];
 };
@@ -160,6 +162,14 @@ export function MaterialKnowledgeEditor({ material, categories }: Props) {
 
   return (
     <div className="space-y-3">
+      <V2ImageField
+        name="imageKey"
+        module="wms-material"
+        initialValue={material?.imageKey}
+        label="物料图片"
+        alt="物料图片"
+        hint="用于物料百科与商品资料展示；支持 JPG、PNG、WebP，单张不超过 3MB。"
+      />
       <div className="flex flex-wrap items-end gap-2">
         <label className="block min-w-0 flex-1 text-sm text-zinc-700">
           拉丁学名 / 英文名

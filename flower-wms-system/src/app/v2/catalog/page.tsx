@@ -13,6 +13,7 @@ import {
   input,
 } from "../_components/V2Ui";
 import { readV2Feedback } from "../_lib/search-params";
+import { V2ImageField, V2ImagePreview } from "../_components/V2Image";
 import {
   createProductAction,
   createSkuAction,
@@ -149,6 +150,15 @@ function SkuFields({ sku, samples }: { sku?: CatalogSku; samples: SampleOption[]
           <SourceSampleSelect samples={samples} defaultValue={sku?.sourceSampleId} />
         </label>
       </div>
+      <V2ImageField
+        name="imageKey"
+        module="wms-sku"
+        initialValue={sku?.imageKey}
+        label="SKU 图片"
+        alt="SKU 图片"
+        hint="留空时使用商品主图；支持 JPG、PNG、WebP，单张不超过 3MB。"
+        compact
+      />
       <label className="flex items-center gap-2 text-sm text-stone-700">
         <input type="checkbox" name="active" defaultChecked={sku ? sku.active : true} />
         启用该 SKU
@@ -174,14 +184,22 @@ function ProductEditForm({ product }: { product: CatalogProduct }) {
             <select className={`${input} mt-1`} name="defaultSkuId" defaultValue={product.defaultSkuId ?? ""}>
               <option value="">未设置（仅停用商品允许）</option>
               {product.skus.map((sku) => (
-                <option key={sku.id} value={sku.id} disabled={!sku.active}>
+                <option key={sku.id} value={sku.id}>
                   {sku.name} · {sku.code}
-                  {sku.active ? "" : "（已停用）"}
+                  {sku.active ? "" : "（当前停用；需同时勾选启用）"}
                 </option>
               ))}
             </select>
           </label>
         </div>
+        <V2ImageField
+          name="imageKey"
+          module="wms-product"
+          initialValue={product.imageKey}
+          label="商品主图"
+          alt="商品主图"
+          hint="商品默认展示图；SKU 图片留空时继承此图。支持 JPG、PNG、WebP，单张不超过 3MB。"
+        />
         <label className="flex items-center gap-2 text-sm text-stone-700">
           <input type="checkbox" name="active" defaultChecked={product.active} />
           启用商品（至少保留一个启用的 SKU）
@@ -189,7 +207,7 @@ function ProductEditForm({ product }: { product: CatalogProduct }) {
         <fieldset>
           <legend className="text-sm text-stone-700">SKU 启用范围</legend>
           <p className="mt-1 text-xs text-stone-500">
-            勾选表示该 SKU 保持启用并包含在商品中；取消勾选会停用该 SKU。默认 SKU 必须是已勾选的 SKU。
+            勾选表示该 SKU 保持启用并包含在商品中；取消勾选会停用该 SKU。默认 SKU 必须是已勾选的 SKU。停用默认 SKU 前请先在上方选择新的默认 SKU；停用最后一个启用 SKU 前请先取消启用商品。
           </p>
           {product.skus.length === 0 ? (
             <p className="mt-2 text-sm text-amber-800">该商品还没有 SKU，请先新增 SKU。</p>
@@ -256,6 +274,7 @@ function SkuList({ product, samples }: { product: CatalogProduct; samples: Sampl
           <summary className={`flex cursor-pointer list-none flex-wrap items-center gap-x-5 gap-y-2 px-4 py-3 ${sku.active ? "" : "bg-zinc-50 text-zinc-600"}`}>
             <div className="min-w-48 flex-1">
               <div className="flex flex-wrap items-center gap-1">
+                <V2ImagePreview stored={sku.imageKey || product.imageKey} alt={sku.name} compact className="mr-1 h-10 w-10" />
                 <span className="font-medium text-zinc-900">{sku.name}</span>
                 {product.defaultSkuId === sku.id && <StatusBadge tone="info">默认</StatusBadge>}
               </div>
@@ -318,6 +337,7 @@ function ProductListItem({ product, samples }: { product: CatalogProduct; sample
   return (
     <details className="rounded-xl border border-stone-200 bg-white shadow-sm">
       <summary className={`flex cursor-pointer list-none flex-wrap items-center gap-x-6 gap-y-3 px-4 py-3 ${product.active ? "" : "bg-zinc-50 text-zinc-600"}`}>
+        <V2ImagePreview stored={product.imageKey} alt={product.name} compact className="h-12 w-12" />
         <div className="min-w-52 flex-1">
           <div className="font-medium text-zinc-900">{product.name}</div>
           <div className="font-mono text-xs text-zinc-500">{product.code}</div>
@@ -443,6 +463,13 @@ export default async function CatalogPage({ searchParams }: PageProps<"/v2/catal
             <form action={createProductAction} className="space-y-3">
               <h3 className="font-semibold">新增商品</h3>
               <Field label="商品名称" name="name" />
+              <V2ImageField
+                name="imageKey"
+                module="wms-product"
+                label="商品主图"
+                alt="商品主图"
+                compact
+              />
               <p className="text-xs text-stone-500">
                 商品编号由系统自动生成。新商品默认为停用，请先添加 SKU，再在商品编辑中设置默认 SKU 并启用商品。
               </p>

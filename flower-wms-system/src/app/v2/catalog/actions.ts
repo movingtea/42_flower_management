@@ -58,7 +58,7 @@ export async function createProductAction(data: FormData) {
   return finish(async () => {
     const name = requiredText(data, "name", "商品名称");
     const result = await v2db.$transaction((tx) =>
-      saveProduct(tx, { ...scope, actorStaffId: scope.staffId }, { name, active: false }),
+      saveProduct(tx, { ...scope, actorStaffId: scope.staffId }, { name, active: false, imageKey: text(data, "imageKey") || null }),
     );
     return `商品 ${result.code} 已创建，请添加 SKU 后再启用`;
   });
@@ -78,6 +78,7 @@ export async function updateProductAction(data: FormData) {
         active: checkbox(data, "active"),
         defaultSkuId,
         activeSkuIds,
+        imageKey: text(data, "imageKey") || null,
       }),
     );
     return "商品已保存";
@@ -97,6 +98,7 @@ export async function createSkuAction(data: FormData) {
         estimatedLaborCost: numberValue(data, "estimatedLaborCost", "人工估算"),
         active: checkbox(data, "active"),
         sourceSampleId: text(data, "sourceSampleId") || null,
+        imageKey: text(data, "imageKey") || null,
       }),
     );
     return `SKU ${result.code} 已创建`;
@@ -118,6 +120,7 @@ export async function updateSkuAction(data: FormData) {
         estimatedLaborCost: numberValue(data, "estimatedLaborCost", "人工估算"),
         active: checkbox(data, "active"),
         sourceSampleId: text(data, "sourceSampleId") || null,
+        imageKey: text(data, "imageKey") || null,
       }),
     );
     return `SKU ${result.code} 已更新`;

@@ -9,6 +9,9 @@ export const UPLOAD_MODULES = [
   "recommendation",
   "home-scene",
   "cms",
+  "wms-material",
+  "wms-product",
+  "wms-sku",
   "test",
 ] as const;
 
@@ -21,6 +24,9 @@ const MODULE_PATH_MAP: Record<UploadModule, string> = {
   recommendation: "recommendations",
   "home-scene": "home-scenes",
   cms: "cms",
+  "wms-material": "wms/materials",
+  "wms-product": "wms/products",
+  "wms-sku": "wms/skus",
   test: "test",
 };
 

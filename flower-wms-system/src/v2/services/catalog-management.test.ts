@@ -186,15 +186,56 @@ async function runDatabaseTest(): Promise<void> {
     assert.equal(defaulted.defaultSkuId, skuB.id);
     await db.$transaction((tx) => setDefaultSku(tx, scope, product.id, skuA.id));
 
-    // Deactivating the default promotes the lowest-code remaining active SKU.
-    const promoted = await db.$transaction((tx) => setSkuActive(tx, scope, skuA.id, false));
-    assert.equal(promoted.active, false);
-    assert.equal(promoted.defaultSkuId, skuB.id);
-    const promotedProduct = await db.product.findUniqueOrThrow({ where: { id: product.id } });
-    assert.equal(promotedProduct.active, true);
-    assert.equal(promotedProduct.defaultSkuId, skuB.id);
+    // Approved rule WMS-BR-CAT-001: the default SKU cannot be disabled until a
+    // replacement is chosen explicitly. No silent promotion is allowed.
+    await assert.rejects(
+      db.$transaction((tx) => setSkuActive(tx, scope, skuA.id, false)),
+      /停用默认 SKU 前请先在商品编辑中选择新的默认 SKU/,
+    );
+    const guardedProduct = await db.product.findUniqueOrThrow({ where: { id: product.id } });
+    assert.equal(guardedProduct.active, true);
+    assert.equal(guardedProduct.defaultSkuId, skuA.id);
 
-    // Deactivating the last active default deactivates the product and clears the default.
+    await db.$transaction((tx) => setDefaultSku(tx, scope, product.id, skuB.id));
+    const deactivated = await db.$transaction((tx) => setSkuActive(tx, scope, skuA.id, false));
+    assert.equal(deactivated.active, false);
+    assert.equal(deactivated.defaultSkuId, skuB.id);
+    const stillActiveProduct = await db.product.findUniqueOrThrow({ where: { id: product.id } });
+    assert.equal(stillActiveProduct.active, true);
+    assert.equal(stillActiveProduct.defaultSkuId, skuB.id);
+
+    // Disabling the current default still requires choosing a replacement first.
+    await assert.rejects(
+      db.$transaction((tx) => setSkuActive(tx, scope, skuB.id, false)),
+      /停用默认 SKU 前请先在商品编辑中选择新的默认 SKU/,
+    );
+
+    // Defensive guard for a legacy inconsistent state: active product, no
+    // default, one remaining active SKU. The last SKU cannot be disabled until
+    // the product is taken offline first.
+    await db.product.update({
+      where: { id: product.id },
+      data: { active: true, defaultSkuId: null },
+    });
+    await assert.rejects(
+      db.$transaction((tx) => setSkuActive(tx, scope, skuB.id, false)),
+      /停用最后一个启用 SKU 前请先下架商品/,
+    );
+    await db.product.update({
+      where: { id: product.id },
+      data: { defaultSkuId: skuB.id },
+    });
+
+    // Take the product offline and clear the default first; then the last SKU can
+    // be disabled without the service auto-deactivating anything.
+    await db.$transaction((tx) =>
+      saveProduct(tx, scope, {
+        id: product.id,
+        name: "测试花束-改名",
+        active: false,
+        defaultSkuId: null,
+      }),
+    );
     const lastDeactivated = await db.$transaction((tx) =>
       setSkuActive(tx, scope, skuB.id, false),
     );

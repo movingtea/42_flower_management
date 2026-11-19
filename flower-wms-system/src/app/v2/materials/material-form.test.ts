@@ -65,6 +65,7 @@ function testBasicFieldsAndBlankOptionals() {
   assert.equal(parsed.brand, null);
   assert.equal(parsed.model, null);
   assert.equal(parsed.notes, null);
+  assert.equal(parsed.imageKey, null);
   assert.equal(parsed.safetyStockThreshold, null);
   assert.deepEqual(parsed.categoryIds, []);
 
@@ -114,6 +115,7 @@ function testKnowledgeAndMasterPartFieldsPassThrough() {
       brand: "测试品牌",
       model: "M-1",
       notes: "测试备注",
+      imageKey: "universe42/wms/materials/2026/11/a.webp",
       safetyStockThreshold: "3.5",
     }),
   );
@@ -128,6 +130,7 @@ function testKnowledgeAndMasterPartFieldsPassThrough() {
   assert.equal(parsed.brand, "测试品牌");
   assert.equal(parsed.model, "M-1");
   assert.equal(parsed.notes, "测试备注");
+  assert.equal(parsed.imageKey, "universe42/wms/materials/2026/11/a.webp");
   assert.equal(parsed.safetyStockThreshold, "3.5");
 }
 

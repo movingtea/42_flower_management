@@ -1,4 +1,6 @@
 import { Prisma } from "../../generated/prisma-v2/client";
+import { storageConfigToImageUrlEnv } from "@/lib/storage/config";
+import { normalizeV2ImageKey } from "../domain/media";
 import { generateProductCode, generateSkuCode } from "../domain/identifiers";
 
 export type CatalogScope = { tenantId: string; storeId: string; actorStaffId: string };
@@ -10,6 +12,8 @@ export type SaveProductInput = {
   defaultSkuId?: string | null;
   /** Edit only: exclusive list of SKUs to remain enabled/contained. undefined = leave current SKU active flags unchanged. */
   activeSkuIds?: string[];
+  /** OSS objectKey under universe42/wms/products. undefined keeps the current value on edit. */
+  imageKey?: string | null;
 };
 
 export type SaveSkuInput = {
@@ -21,6 +25,8 @@ export type SaveSkuInput = {
   estimatedLaborCost: number;
   active: boolean;
   sourceSampleId?: string | null;
+  /** OSS objectKey under universe42/wms/skus. undefined keeps the current value on edit. */
+  imageKey?: string | null;
 };
 
 export type SaveProductResult = { id: string; code: string; active: boolean; defaultSkuId: string | null };
@@ -32,6 +38,7 @@ type ProductRecord = {
   tenantId: string;
   code: string;
   name: string;
+  imageKey: string | null;
   active: boolean;
   defaultSkuId: string | null;
   skus: SkuSummary[];
@@ -49,6 +56,11 @@ function normalizedName(value: string, label: string): string {
   if (!name) throw new Error(`${label}必填`);
   if (name.length > 100) throw new Error(`${label}不能超过 100 个字符`);
   return name;
+}
+
+/** Store only a WMS OSS objectKey; reject URLs, legacy paths and other modules. */
+function normalizedImageKey(value: string | null | undefined): string | null {
+  return normalizeV2ImageKey(value, storageConfigToImageUrlEnv());
 }
 
 function money(value: number, label: string): number {
@@ -110,6 +122,7 @@ async function loadProduct(
       tenantId: true,
       code: true,
       name: true,
+      imageKey: true,
       active: true,
       defaultSkuId: true,
       skus: { select: { id: true, code: true, active: true }, orderBy: { code: "asc" } },
@@ -128,6 +141,7 @@ async function loadSku(
   productId: string;
   code: string;
   name: string;
+  imageKey: string | null;
   active: boolean;
   sourceSampleId: string | null;
 }> {
@@ -138,6 +152,7 @@ async function loadSku(
       productId: true,
       code: true,
       name: true,
+      imageKey: true,
       active: true,
       sourceSampleId: true,
     },
@@ -166,6 +181,20 @@ function pickDefaultSku(skus: readonly SkuSummary[], currentDefaultSkuId: string
   const current = active.find((sku) => sku.id === currentDefaultSkuId);
   if (current) return current;
   return [...active].sort((left, right) => left.code.localeCompare(right.code))[0] ?? null;
+}
+
+/**
+ * Approved rule WMS-BR-CAT-001:
+ * - choose a replacement before disabling the current default SKU;
+ * - take the product offline before disabling its last active SKU.
+ */
+function assertSkuCanBeDeactivated(product: ProductRecord, skuId: string): void {
+  if (product.defaultSkuId === skuId) {
+    throw new Error("停用默认 SKU 前请先在商品编辑中选择新的默认 SKU");
+  }
+  if (product.active && !product.skus.some((sku) => sku.id !== skuId && sku.active)) {
+    throw new Error("停用最后一个启用 SKU 前请先下架商品");
+  }
 }
 
 function productResult(product: {
@@ -203,6 +232,9 @@ export async function saveProduct(
   assertScope(scope);
   const name = normalizedName(input.name, "商品名称");
   const active = Boolean(input.active);
+  const imageKey = input.imageKey === undefined
+    ? undefined
+    : normalizedImageKey(input.imageKey);
 
   if (!input.id) {
     // A product cannot be enabled before its first SKU exists, so creation always starts disabled.
@@ -216,6 +248,7 @@ export async function saveProduct(
         name,
         active: false,
         defaultSkuId: null,
+        imageKey: imageKey ?? null,
       },
       select: { id: true, code: true, active: true, defaultSkuId: true },
     });
@@ -224,6 +257,7 @@ export async function saveProduct(
       name,
       active: product.active,
       defaultSkuId: product.defaultSkuId,
+      imageKey: imageKey ?? null,
     });
     return product;
   }
@@ -274,15 +308,37 @@ export async function saveProduct(
   }
 
   let nextDefaultSkuId: string | null;
+  const currentDefault = current.defaultSkuId
+    ? effectiveSkus.find((sku) => sku.id === current.defaultSkuId)
+    : undefined;
+  const currentDefaultBecomesInactive = Boolean(
+    current.defaultSkuId && !currentDefault?.active,
+  );
   if (input.defaultSkuId !== undefined) {
     if (input.defaultSkuId === null) {
       if (active) throw new Error("启用中的商品必须设置默认 SKU");
       nextDefaultSkuId = null;
     } else {
       const selected = effectiveSkus.find((sku) => sku.id === input.defaultSkuId && sku.active);
-      if (!selected) throw new Error("默认 SKU 必须属于该商品且处于启用状态");
-      nextDefaultSkuId = selected.id;
+      if (!selected) {
+        // When the product itself is being taken offline, clearing the old
+        // default in the same save is allowed; otherwise the caller must pick
+        // an active replacement explicitly.
+        if (input.defaultSkuId === current.defaultSkuId) {
+          if (active) throw new Error("停用默认 SKU 前请先选择新的默认 SKU");
+          nextDefaultSkuId = null;
+        } else {
+          throw new Error("默认 SKU 必须属于该商品且处于启用状态");
+        }
+      } else {
+        nextDefaultSkuId = selected.id;
+      }
     }
+  } else if (currentDefaultBecomesInactive) {
+    // Approved rule WMS-BR-CAT-001: choose a replacement before disabling the
+    // default SKU. An inactive product may clear the default without one.
+    if (active) throw new Error("停用默认 SKU 前请先选择新的默认 SKU");
+    nextDefaultSkuId = null;
   } else {
     const selected = pickDefaultSku(effectiveSkus, current.defaultSkuId);
     if (!selected && active) throw new Error("商品启用前至少需要保留一个启用 SKU");
@@ -291,8 +347,13 @@ export async function saveProduct(
 
   const updated = await tx.product.update({
     where: { id: productId },
-    data: { name, active, defaultSkuId: nextDefaultSkuId },
-    select: { id: true, code: true, active: true, defaultSkuId: true },
+    data: {
+      name,
+      active,
+      defaultSkuId: nextDefaultSkuId,
+      ...(imageKey === undefined ? {} : { imageKey }),
+    },
+    select: { id: true, code: true, active: true, defaultSkuId: true, imageKey: true },
   });
 
   await recordAudit(
@@ -301,8 +362,8 @@ export async function saveProduct(
     "PRODUCT_UPDATED",
     "Product",
     updated.id,
-    { name: current.name, active: current.active, defaultSkuId: current.defaultSkuId },
-    { name, active: updated.active, defaultSkuId: updated.defaultSkuId },
+    { name: current.name, active: current.active, defaultSkuId: current.defaultSkuId, imageKey: current.imageKey },
+    { name, active: updated.active, defaultSkuId: updated.defaultSkuId, imageKey: updated.imageKey },
   );
   if (current.active !== updated.active) {
     await recordAudit(
@@ -339,6 +400,9 @@ export async function saveSku(
   const price = money(input.price, "SKU 售价");
   const estimatedConsumableCost = money(input.estimatedConsumableCost, "SKU 预计耗材成本");
   const estimatedLaborCost = money(input.estimatedLaborCost, "SKU 预计人工成本");
+  const imageKey = input.imageKey === undefined
+    ? undefined
+    : normalizedImageKey(input.imageKey);
 
   if (!input.id) {
     await lockProduct(tx, input.productId);
@@ -352,6 +416,7 @@ export async function saveSku(
         productId: product.id,
         code: generateSkuCode(new Date(), crypto.randomUUID()),
         name,
+        imageKey: imageKey ?? null,
         price,
         estimatedConsumableCost,
         estimatedLaborCost,
@@ -390,6 +455,7 @@ export async function saveSku(
       productId: created.productId,
       code: created.code,
       name,
+      imageKey: imageKey ?? null,
       price,
       estimatedConsumableCost,
       estimatedLaborCost,
@@ -408,6 +474,7 @@ export async function saveSku(
   const product = await loadProduct(tx, scope, existing.productId);
   const current = product.skus.find((sku) => sku.id === existing.id);
   if (!current) throw new Error("SKU 不存在或不属于当前商品");
+  if (!Boolean(input.active)) assertSkuCanBeDeactivated(product, current.id);
 
   const sourceSampleId = input.sourceSampleId === undefined ? existing.sourceSampleId : input.sourceSampleId;
   await assertSampleInTenant(tx, scope, sourceSampleId);
@@ -432,6 +499,7 @@ export async function saveSku(
       estimatedLaborCost,
       active: Boolean(input.active),
       sourceSampleId,
+      ...(imageKey === undefined ? {} : { imageKey }),
     },
     select: { id: true, productId: true, code: true, active: true },
   });
@@ -442,8 +510,8 @@ export async function saveSku(
     "SKU_UPDATED",
     "ProductSku",
     updated.id,
-    { name: existing.name, active: current.active, sourceSampleId: existing.sourceSampleId },
-    { name, price, estimatedConsumableCost, estimatedLaborCost, active: updated.active, sourceSampleId },
+    { name: existing.name, imageKey: existing.imageKey, active: current.active, sourceSampleId: existing.sourceSampleId },
+    { name, imageKey: imageKey === undefined ? existing.imageKey : imageKey, price, estimatedConsumableCost, estimatedLaborCost, active: updated.active, sourceSampleId },
   );
   if (current.active !== updated.active) {
     await recordAudit(
@@ -573,8 +641,8 @@ export async function setSkuActive(
   const product = await loadProduct(tx, scope, existing.productId);
   const current = product.skus.find((sku) => sku.id === existing.id);
   if (!current) throw new Error("SKU 不存在或不属于当前商品");
-
   if (current.active === active) return skuResult(existing, product.defaultSkuId);
+  if (!active) assertSkuCanBeDeactivated(product, current.id);
 
   const plan = planSkuActiveChange(product, current.id, active);
   let nextProduct = productResult(product);

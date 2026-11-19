@@ -71,6 +71,14 @@ function testObjectKeySafety() {
 function testModuleWhitelist() {
   assert.throws(() => parseUploadModule("evil-path"), StorageError);
   assert.equal(parseUploadModule("banner"), "banner");
+  for (const uploadModule of ["wms-material", "wms-product", "wms-sku"] as const) {
+    assert.equal(parseUploadModule(uploadModule), uploadModule);
+  }
+  const wmsKey = buildObjectKey("wms-material", "webp", {
+    objectPrefix: "universe42",
+    now: new Date("2026-11-19T00:00:00Z"),
+  });
+  assert.match(wmsKey, /^universe42\/wms\/materials\/2026\/11\/[0-9a-f-]+\.webp$/);
 }
 
 function testIsOssObjectKey() {

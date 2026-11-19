@@ -121,7 +121,11 @@
     "test:e2e:inner": "playwright test",
     "test:regression:inner": "npm run test:legacy:inner && vitest run && node --test scripts/test-v2.test.mjs scripts/with-v2-test-db.test.mjs && npm run test:v2:integration-and-smoke",
     "test:regression": "node scripts/with-v2-test-db.mjs --legacy -- npm run test:regression:inner",
-    "test:ci": "npm run test:regression"
+    "test:ci": "npm run test:regression",
+    "release:check": "node scripts/release/check-wms-regression.mjs",
+    "release:check:strict": "node scripts/release/check-wms-regression.mjs --fail-on-blocked",
+    "release:perf": "tsx scripts/release-candidate/perf-inventory-query.ts",
+    "release:drill": "pwsh -NoProfile -File ../deploy/release-candidate/scripts/Invoke-ReleaseCandidateDrill.ps1"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"

@@ -81,7 +81,13 @@ function runCli(
 }
 
 function runSeed(args: string[], env: CliEnv): CliResult {
-  return runCli([TSX_CLI, SEED_ENTRY, ...args], {
+  // The DSH Windows sandbox denies esbuild's child-process pipe, so a native
+  // Node type-stripping run is available for local gates. CI keeps using tsx.
+  const runner =
+    process.env.WMS_NATIVE_TS_RUNNER === "1"
+      ? ["--experimental-transform-types", "--import", "./scripts/ts-path-loader.mjs", SEED_ENTRY]
+      : [TSX_CLI, SEED_ENTRY];
+  return runCli([...runner, ...args], {
     ...process.env,
     ...env,
     NODE_ENV: "test",

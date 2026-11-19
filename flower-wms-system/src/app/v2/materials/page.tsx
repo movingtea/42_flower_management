@@ -5,6 +5,7 @@ import { parseStoredCareDocument } from "@/lib/wiki-care";
 import { requireV2Store } from "@/v2/auth";
 import { v2db } from "@/v2/db";
 import { ActionEmptyState, Field, StatusBadge, V2ModulePage, button, input, tableHead, tableShell } from "../_components/V2Ui";
+import { V2ImagePreview } from "../_components/V2Image";
 import { readV2Feedback } from "../_lib/search-params";
 import { createMaterialAction, setMaterialActiveAction, updateMaterialAction } from "./actions";
 import { MaterialKnowledgeEditor, type MaterialKnowledgeEditorValue } from "./MaterialKnowledgeEditor";
@@ -42,6 +43,7 @@ type MaterialRow = {
   brand: string | null;
   model: string | null;
   notes: string | null;
+  imageKey: string | null;
   safetyStockThreshold: { toString(): string };
   categories: Array<{
     categoryId: string;
@@ -94,6 +96,7 @@ function toKnowledgeValue(item: MaterialRow): MaterialKnowledgeEditorValue {
     brand: item.brand,
     model: item.model,
     notes: item.notes,
+    imageKey: item.imageKey,
     safetyStockThreshold: decimalText(item.safetyStockThreshold),
     categoryIds: item.categories.map((relation) => relation.categoryId),
   };
@@ -177,7 +180,7 @@ export default async function MaterialsPage({ searchParams }: PageProps<"/v2/mat
       <select className={`${input} w-36`} name="state" defaultValue={state}><option value="active">启用</option><option value="inactive">已停用</option><option value="all">全部</option></select>
       <button className={button}>查询</button>
     </form>
-    {materials.length === 0 ? <ActionEmptyState title="还没有符合条件的物料" description="新增第一条物料规格，或调整搜索和分类筛选。" /> : <div className={tableShell}><table className="w-full text-left text-sm"><thead className={tableHead}><tr><th className="px-4 py-3">编码 / 名称</th><th>类别</th><th>品质与规格</th><th>库存单位</th><th>状态</th><th className="px-4">操作</th></tr></thead><tbody className="divide-y divide-zinc-100">{materials.map((item) => <tr key={item.id} className={item.active ? "hover:bg-zinc-50" : "bg-zinc-50 text-zinc-500"}><td className="px-4 py-3"><div className="font-medium text-zinc-900">{item.name}</div><div className="text-xs text-zinc-500">{item.code}</div>{item.categories.length > 0 && <div className="mt-1 flex flex-wrap gap-1">{item.categories.map((relation) => <span key={relation.categoryId} className={`inline-flex rounded-full px-2 py-0.5 text-[11px] ${relation.category.active ? "bg-emerald-50 text-emerald-800" : "bg-zinc-100 text-zinc-500"}`}>{relation.category.name}</span>)}</div>}<KnowledgeDetails item={item} /></td><td>{KIND_LABEL[item.kind]}</td><td>{[item.color, item.grade, item.gradeSpecification, item.specification].filter(Boolean).join(" · ") || "—"}</td><td>{item.baseUnit} · {item.quantityScale === 0 ? "整数" : `${item.quantityScale} 位小数`}<div className="text-xs text-zinc-500">{item.reservePerOrder ? "逐单预留" : "不逐单预留"}</div></td><td><StatusBadge tone={item.active ? "success" : "neutral"}>{item.active ? "启用" : "停用"}</StatusBadge></td><td className="px-4"><details><summary className="cursor-pointer text-emerald-700">编辑</summary><form action={updateMaterialAction} className="mt-3 w-[min(60rem,75vw)] space-y-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-lg"><input type="hidden" name="materialId" value={item.id} /><MaterialFields material={item} /><MaterialKnowledgeEditor material={toKnowledgeValue(item)} categories={categories} /><button className={button}>保存修改</button></form></details><form action={setMaterialActiveAction} className="mt-2"><input type="hidden" name="materialId" value={item.id} /><input type="hidden" name="active" value={String(!item.active)} /><button className="text-xs text-zinc-600 underline">{item.active ? "停用" : "重新启用"}</button></form></td></tr>)}</tbody></table></div>}
+    {materials.length === 0 ? <ActionEmptyState title="还没有符合条件的物料" description="新增第一条物料规格，或调整搜索和分类筛选。" /> : <div className={tableShell}><table className="w-full text-left text-sm"><thead className={tableHead}><tr><th className="px-3 py-3">图片</th><th className="px-4 py-3">编码 / 名称</th><th>类别</th><th>品质与规格</th><th>库存单位</th><th>状态</th><th className="px-4">操作</th></tr></thead><tbody className="divide-y divide-zinc-100">{materials.map((item) => <tr key={item.id} className={item.active ? "hover:bg-zinc-50" : "bg-zinc-50 text-zinc-500"}><td className="px-3 py-3"><V2ImagePreview stored={item.imageKey} alt={item.name} compact className="h-14 w-14" /></td><td className="px-4 py-3"><div className="font-medium text-zinc-900">{item.name}</div><div className="text-xs text-zinc-500">{item.code}</div>{item.categories.length > 0 && <div className="mt-1 flex flex-wrap gap-1">{item.categories.map((relation) => <span key={relation.categoryId} className={`inline-flex rounded-full px-2 py-0.5 text-[11px] ${relation.category.active ? "bg-emerald-50 text-emerald-800" : "bg-zinc-100 text-zinc-500"}`}>{relation.category.name}</span>)}</div>}<KnowledgeDetails item={item} /></td><td>{KIND_LABEL[item.kind]}</td><td>{[item.color, item.grade, item.gradeSpecification, item.specification].filter(Boolean).join(" · ") || "—"}</td><td>{item.baseUnit} · {item.quantityScale === 0 ? "整数" : `${item.quantityScale} 位小数`}<div className="text-xs text-zinc-500">{item.reservePerOrder ? "逐单预留" : "不逐单预留"}</div></td><td><StatusBadge tone={item.active ? "success" : "neutral"}>{item.active ? "启用" : "停用"}</StatusBadge></td><td className="px-4"><details><summary className="cursor-pointer text-emerald-700">编辑</summary><form action={updateMaterialAction} className="mt-3 w-[min(60rem,75vw)] space-y-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-lg"><input type="hidden" name="materialId" value={item.id} /><MaterialFields material={item} /><MaterialKnowledgeEditor material={toKnowledgeValue(item)} categories={categories} /><button className={button}>保存修改</button></form></details><form action={setMaterialActiveAction} className="mt-2"><input type="hidden" name="materialId" value={item.id} /><input type="hidden" name="active" value={String(!item.active)} /><button className="text-xs text-zinc-600 underline">{item.active ? "停用" : "重新启用"}</button></form></td></tr>)}</tbody></table></div>}
     <p className="text-xs text-zinc-400">共 {materials.length} 条物料规格。丝带、胶带按“卷”管理；花泥按具体规格建物料并使用整数库存。</p>
   </V2ModulePage>;
 }

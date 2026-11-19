@@ -34,6 +34,7 @@ docker-compose.yml
 !docker-compose.example.yml
 
 flower-wms-system/public/uploads/
+.runtime/
 
 # Playwright E2E artifacts (reports, traces, screenshots)
 flower-wms-system/test-results/

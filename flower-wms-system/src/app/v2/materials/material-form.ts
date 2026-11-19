@@ -113,6 +113,7 @@ export function parseMaterialForm(data: MaterialFormReader): MaterialInput {
     brand: optionalText(data, "brand"),
     model: optionalText(data, "model"),
     notes: optionalText(data, "notes"),
+    imageKey: optionalText(data, "imageKey"),
     safetyStockThreshold: optionalText(data, "safetyStockThreshold"),
     categoryIds: parseCategoryIds(data),
   };

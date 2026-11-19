@@ -88,22 +88,35 @@ function attachRequestId(response: Response, requestId: string): Response {
   }
 }
 
+/** Map the controlled V1 fallback URL back to the V1 policy path it serves. */
+export function policyPathForFallback(pathname: string): string {
+  if (pathname === "/legacy/wms") return "/wms";
+  if (pathname.startsWith("/legacy/wms/")) {
+    return `/wms${pathname.slice("/legacy/wms".length)}`;
+  }
+  return pathname;
+}
+
 /** Auth.js middleware wrapper; every branch below keeps its original status/redirect behavior. */
 const authProxy = auth((req) => {
-  const { pathname } = req.nextUrl;
+  const requestPath = req.nextUrl.pathname;
+  // /legacy/wms/* is a rewrite to the V1 pages. Auth and role checks must use
+  // the effective V1 path; otherwise the fallback would bypass login and
+  // role-path gating that /wms/* normally receives.
+  const pathname = policyPathForFallback(requestPath);
   const role = req.auth?.user?.role as Role | undefined;
   const isLoggedIn = !!req.auth?.user?.id && !!role;
   const source = normalizeAuthSource(req.auth?.user?.source);
   const isV2Source = isLoggedIn && source === "v2";
 
   // 默认入口固定切到 v2；旧后台通过显式 /wms、/cms、/admin 路由访问。
-  if (pathname === "/") {
+  if (requestPath === "/") {
     return NextResponse.redirect(new URL(V2_HOME_PATH, req.nextUrl));
   }
 
   // 未带 callback 的 /login 默认 v2；显式 legacy callback 始终保留登录页，
   // 以便 v2/legacy 会话主动改用 legacy 凭据。
-  if (pathname === "/login") {
+  if (requestPath === "/login") {
     const decision = resolveLoginRedirect({
       isLoggedIn,
       source,
@@ -153,7 +166,7 @@ const authProxy = auth((req) => {
       );
     }
     const login = new URL("/login", req.nextUrl);
-    login.searchParams.set("callbackUrl", pathname);
+    login.searchParams.set("callbackUrl", requestPath);
     return NextResponse.redirect(login);
   }
 
@@ -300,6 +313,11 @@ export const config = {
     "/v2",
     "/v2/:path*",
     "/wms/:path*",
+    // The V1 fallback root gets the normal login callback from the proxy.
+    // Subpaths are still protected by src/app/wms/layout.tsx (anonymous and
+    // V2-sourced sessions are redirected) because this matcher wildcard is not
+    // reliably applied by the production build.
+    "/legacy/wms",
     "/cms/:path*",
     "/admin/:path*",
     "/api/admin/:path*",
