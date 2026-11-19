@@ -1,0 +1,27 @@
+title = "Flower WMS controlled fixture gitleaks configuration"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Historical evidence logs contain redacted placeholder values, not live credentials."
+paths = [
+  '''docs/evidence/.*''',
+]
+
+[[allowlists]]
+description = "Checked-in env templates use placeholder values instead of real secrets."
+paths = [
+  '''(^|/)[^/]*\.env(\.[^/]*)?\.example$''',
+]
+
+[[allowlists]]
+description = "Controlled fixtures use the E37CONTROLLED- marker; any other value in a fixture is still scanned."
+regexes = [
+  '''E37CONTROLLED-[A-Za-z0-9._-]{8,}''',
+]
+[[allowlists]]
+description = "Controlled fixture: an over-broad allowlist that must be rejected."
+paths = [
+  '''.*''',
+]

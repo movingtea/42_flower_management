@@ -69,23 +69,34 @@ jobs:
           chmod 600 /tmp/id_rsa
 
           ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no "root@${HOST_IP}" \
-            "REMOTE_PLATFORM_DIR=${REMOTE_PLATFORM_DIR} bash -s" <<'REMOTE'
+            "REMOTE_PLATFORM_DIR=${REMOTE_PLATFORM_DIR} IMAGE_SHA=${{ github.sha }} bash -s" <<'REMOTE'
           set -euo pipefail
           cd "${REMOTE_PLATFORM_DIR}"
 
-          echo "[deploy] pull latest image from ACR..."
-          docker compose pull flower-web flower-cron-worker
+          image="crpi-bp5b6vut8l4d7ebv.cn-hangzhou.personal.cr.aliyuncs.com/universe42/flower-platform-app:${IMAGE_SHA}"
+          override="$(mktemp)"
+          trap 'rm -f "$override"' EXIT
+          printf 'services:\n  flower-web:\n    image: "%s"\n  flower-cron-worker:\n    image: "%s"\n' "$image" "$image" > "$override"
+          compose() { docker compose -f docker-compose.yml -f "$override" "$@"; }
+
+          echo "[deploy] pull SHA image from ACR..."
+          compose pull flower-web flower-cron-worker
+          compose run --rm --no-deps --entrypoint sh flower-web -ec '
+            : "${DATABASE_URL:?DATABASE_URL is required}"
+            : "${V2_DATABASE_URL:?V2_DATABASE_URL is required}"
+            node scripts/check-v2-database-target.mjs --connect
+          '
 
           echo "[deploy] restart app stack (db container untouched)..."
-          docker compose stop flower-nginx flower-web flower-cron-worker || true
-          docker compose rm -f flower-nginx flower-web flower-cron-worker || true
-          docker compose up -d --no-deps flower-web flower-cron-worker
-          docker compose up -d --no-deps flower-nginx
+          compose stop flower-nginx flower-web flower-cron-worker || true
+          compose rm -f flower-nginx flower-web flower-cron-worker || true
+          compose up -d --no-deps flower-web flower-cron-worker
+          compose up -d --no-deps flower-nginx
 
           echo "[deploy] wait for flower-web entrypoint (migrate + boot)..."
           ok=0
           for i in $(seq 1 30); do
-            if docker compose exec -T flower-web wget -qO- "http://127.0.0.1:3000/login" >/dev/null 2>&1; then
+            if compose exec -T flower-web wget -T 4 -qO- "http://127.0.0.1:3000/api/health" >/dev/null 2>&1; then
               ok=1
               break
             fi
@@ -98,7 +109,8 @@ jobs:
           fi
 
           echo "[deploy] prisma migrate status:"
-          docker compose exec -T flower-web npx prisma migrate status
+          compose exec -T flower-web npx prisma migrate status
+          compose exec -T flower-web npm run db:v2:migrate:status
 
           echo "[deploy] reload nginx (SSL / upstream)..."
           docker exec flower-nginx-edge nginx -s reload || true

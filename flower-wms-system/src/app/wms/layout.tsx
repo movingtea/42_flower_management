@@ -1,7 +1,9 @@
+import { redirect } from "next/navigation";
 import { StaffAppShell } from "@/components/shared/StaffAppShell";
 import { WmsForbiddenNotice } from "@/components/wms/WmsForbiddenNotice";
 import { WmsSidebar } from "@/components/wms/sidebar";
 import { auth } from "@/auth";
+import { normalizeAuthSource, V2_HOME_PATH } from "@/auth.config";
 import { Role } from "@/generated/prisma/enums";
 import { getVisibleNavGroups } from "@/lib/wms-nav";
 
@@ -17,6 +19,11 @@ export default async function WmsLayout({
 }) {
   const session = await auth();
   const role = session?.user?.role as Role | undefined;
+  // Defense in depth for the controlled /legacy/wms fallback: proxy matching is
+  // path-based, but this layout must not render V1 WMS data for an anonymous or
+  // V2-sourced session if a fallback subpath slips past the matcher.
+  if (!session?.user?.id || !role) redirect("/login");
+  if (normalizeAuthSource(session.user.source) === "v2") redirect(V2_HOME_PATH);
   const hasWmsMenu = role ? getVisibleNavGroups(role).length > 0 : false;
 
   return (

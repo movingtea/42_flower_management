@@ -57,7 +57,7 @@ function makeLine(
     lossAdjustedTotalCost: "129.41",
     lossAdjustedUnitCost: "12.9412",
     inboundBatchId: `batch-${overrides.id}`,
-    flowerWiki: {
+    flowerWiki: overrides.flowerWikiId === null ? null : {
       id: overrides.flowerWikiId,
       chineseName: overrides.flowerWiki?.chineseName ?? "测试花材",
     },

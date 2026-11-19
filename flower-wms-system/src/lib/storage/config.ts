@@ -1,5 +1,7 @@
 /** OSS / 本地存储运行时配置（从环境变量读取） */
 
+import type { ImageUrlEnv } from "@/lib/storage/image-url";
+
 export type StorageDriver = "oss" | "local";
 
 export type StorageConfig = {
@@ -96,4 +98,17 @@ export function isOssStorageConfigured(config: StorageConfig = getStorageConfig(
       config.uploadEndpoint &&
       config.publicBaseUrl
   );
+}
+
+/** Map the storage runtime config onto the pure image-URL helpers. */
+export function storageConfigToImageUrlEnv(
+  config: StorageConfig = getStorageConfig()
+): ImageUrlEnv {
+  return {
+    objectPrefix: config.objectPrefix,
+    publicBaseUrl: config.publicBaseUrl,
+    enableLegacyUploads: config.enableLegacyUploads,
+    blockLocalhostImageUrl: config.blockLocalhostImageUrl,
+    normalizeLocalhostUploads: config.normalizeLocalhostUploads,
+  };
 }

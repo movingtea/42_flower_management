@@ -13,7 +13,7 @@ import {
 } from "./single-spec-product";
 
 const categories: CmsProductCategoryItem[] = [
-  { id: "cat-1", name: "测试", isActive: true, sortOrder: 0 },
+  { id: "cat-1", label: "测试", parentId: null, sortOrder: 0 },
 ];
 
 function testDefaultDraft() {

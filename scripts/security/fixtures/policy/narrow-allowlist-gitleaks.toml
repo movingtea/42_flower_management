@@ -1,0 +1,10 @@
+title = "Flower WMS controlled fixture with incomplete placeholder coverage"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Only documentation paths are allowlisted in this fixture."
+paths = [
+  '''docs/evidence/.*''',
+]

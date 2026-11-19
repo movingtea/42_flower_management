@@ -13,9 +13,6 @@ import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export { parseCmsProductBody as parseProductBody };
-export type { CmsProductBody as AdminProductBody } from "@/lib/cms-products";
-
 function mapError(err: unknown): { message: string; status: number } {
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
     if (err.code === "P2002") {

@@ -1,0 +1,117 @@
+{
+  "version": 1,
+  "exceptions": [
+    {
+      "code": "LINK_MISSING",
+      "target": "docs/broken-links.md#../knowledge/00-Home/missing-doc.md",
+      "reason": "Fixture exception: demonstrates that a broken docs→knowledge link can be tolerated only when explicitly registered.",
+      "owner": "engineering",
+      "registered": "2026-11-09"
+    },
+    {
+      "code": "LINK_MISSING",
+      "target": "knowledge/00-Home/index.md#../02-Business/does-not-exist.md",
+      "reason": "Fixture exception: broken relative link is tolerated only through the explicit list.",
+      "owner": "engineering",
+      "registered": "2026-11-09"
+    },
+    {
+      "code": "WIKILINK_HEADING_MISSING",
+      "target": "knowledge/00-Home/index.md#rule-approved#missing-heading",
+      "reason": "Fixture exception: missing wikilink heading is tolerated only through the explicit list.",
+      "owner": "engineering",
+      "registered": "2026-11-09"
+    },
+    {
+      "code": "WIKILINK_UNRESOLVED",
+      "target": "knowledge/00-Home/index.md#assets/picture.png",
+      "reason": "Fixture exception: missing embed is tolerated only through the explicit list.",
+      "owner": "engineering",
+      "registered": "2026-11-09"
+    },
+    {
+      "code": "WIKILINK_UNRESOLVED",
+      "target": "knowledge/00-Home/index.md#does-not-exist",
+      "reason": "Fixture exception: unresolved wikilink is tolerated only through the explicit list.",
+      "owner": "engineering",
+      "registered": "2026-11-09"
+    },
+    {
+      "code": "APPROVED_METADATA_MISSING",
+      "target": "knowledge/02-Business/approved-missing-metadata.md",
+      "reason": "Fixture exception: approved metadata gap is tolerated only through the explicit list.",
+      "owner": "engineering",
+      "registered": "2026-11-09"
+    },
+    {
+      "code": "FM_PARSE_ERROR",
+      "target": "knowledge/02-Business/bad-frontmatter.md",
+      "reason": "Fixture exception: frontmatter parse failure is tolerated only through the explicit list.",
+      "owner": "engineering",
+      "registered": "2026-11-09"
+    },
+    {
+      "code": "FM_MISSING",
+      "target": "knowledge/02-Business/no-frontmatter.md",
+      "reason": "Fixture exception: historical note without frontmatter is tolerated only through the explicit list.",
+      "owner": "engineering",
+      "registered": "2026-11-09"
+    },
+    {
+      "code": "ADR_ID_DUPLICATE",
+      "target": "knowledge/05-ADR/ADR-001-duplicate.md",
+      "reason": "Fixture exception: duplicate ADR file is tolerated only through the explicit list.",
+      "owner": "engineering",
+      "registered": "2026-11-09"
+    },
+    {
+      "code": "ADR_ID_DUPLICATE",
+      "target": "knowledge/05-ADR/ADR-001-first.md",
+      "reason": "Fixture exception: duplicate ADR file is tolerated only through the explicit list.",
+      "owner": "engineering",
+      "registered": "2026-11-09"
+    },
+    {
+      "code": "ADR_FILE_MISSING",
+      "target": "knowledge/05-ADR/E0-adr-register.md#ADR-999",
+      "reason": "Fixture exception: register entry without a file is tolerated only through the explicit list.",
+      "owner": "engineering",
+      "registered": "2026-11-09"
+    },
+    {
+      "code": "SUPERSEDED_WITHOUT_REPLACEMENT",
+      "target": "knowledge/06-Lessons/superseded-orphan.md",
+      "reason": "Fixture exception: historical superseded note is tolerated only through the explicit list.",
+      "owner": "engineering",
+      "registered": "2026-11-09"
+    },
+    {
+      "code": "FEATURE_SPEC_TEST_PLAN_MISSING",
+      "target": "knowledge/specifications/features/FS-001-invalid-spec.md",
+      "reason": "Fixture exception: spec without a test plan reference is tolerated only through the explicit list.",
+      "owner": "engineering",
+      "registered": "2026-11-09"
+    },
+    {
+      "code": "TEST_PLAN_AC_UNKNOWN",
+      "target": "knowledge/specifications/test-plans/TP-001-invalid-plan.md#AC-999",
+      "reason": "Fixture exception: unknown AC citation is tolerated only through the explicit list.",
+      "owner": "engineering",
+      "registered": "2026-11-09"
+    },
+    {
+      "code": "TEST_PLAN_SPEC_UNRESOLVED",
+      "target": "knowledge/specifications/test-plans/TP-001-invalid-plan.md#knowledge/specifications/features/FS-404.md",
+      "reason": "Fixture exception: dangling spec path is tolerated only through the explicit list.",
+      "owner": "engineering",
+      "registered": "2026-11-09"
+    },
+    {
+      "code": "TEST_PLAN_SPEC_MISSING",
+      "target": "knowledge/specifications/test-plans/TP-002-no-spec.md",
+      "reason": "Fixture exception: test plan without a spec reference is tolerated only through the explicit list.",
+      "owner": "engineering",
+      "registered": "2026-11-09"
+    }
+  ]
+}

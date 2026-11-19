@@ -1,0 +1,98 @@
+# Flower WMS — Sprint E3.7 security gate policy
+#
+# Owner: security-maintainer-placeholder  (replace with a named maintainer before
+#        making the security checks required on the protected branches)
+# Status: proposed. Local structure/script verification is complete; the real
+#         GitHub Actions first run, branch protection, Code Scanning enablement
+#         and least-privilege ACR pull credentials are maintainer tasks. See
+#         docs/sprint-e3-security-gates.md.
+# Updated: 2026-11-11
+#
+# This file is the single source of truth for the dependency, secret, SBOM and
+# image-scan gates. It is read by:
+#   scripts/security/check-exceptions.mjs   (policy, exceptions, trivy ignore, gitleaks)
+#   scripts/security/check-workflow-pins.mjs (workflow inputs must match this file)
+#   scripts/security/check-lockfile.mjs      (policy.supply_chain.*)
+#
+# Rules for changing this file:
+#   - Keep the machine-read keys and value domains; the offline gate fails on
+#     unknown or missing keys instead of guessing.
+#   - Update `.github/workflows/security.yml` in the same change when a threshold
+#     is adjusted; check-workflow-pins.mjs fails on policy/workflow drift.
+#   - Expired exceptions fail the gate. Never delete an exception without either
+#     fixing the finding or replacing it with new, owner-approved evidence.
+version: 1
+
+policy:
+  # Dependency review on pull requests. Runtime vulnerabilities block; development
+  # findings are reported (they do not ship in the production image) but stay
+  # visible in the action summary.
+  dependency_review:
+    fail_on_severity: high
+    fail_on_scopes: runtime
+    development_findings: report
+    exploitability:
+      # Known-exploited findings are never waived silently by this policy.
+      known_exploited: block
+      epss_threshold: 0.5
+    fix_availability:
+      fix_available: block
+      no_fix_available: exception_required
+
+  # Image scan of the production image that deploy.yml already pushed to ACR.
+  # Trivy is pinned in the workflow; this policy controls severity, exploitability
+  # and fix availability. The scan does not build an image in CI (E2 showed that
+  # container-internal npm ci is not reliable).
+  image_scan:
+    fail_on_severity: HIGH
+    scanners: [vuln]
+    ignore_unfixed: false
+    ignore_file: .github/security/trivy-ignore.yaml
+    exploitability:
+      known_exploited: block
+      epss_threshold: 0.5
+    fix_availability:
+      fix_available: block
+      no_fix_available: exception_required
+
+  secret_scan:
+    fail_on_findings: true
+    config: .github/security/gitleaks.toml
+
+  # Offline lockfile checks. No network access and no lockfile rewriting:
+  # finding a bad host or missing integrity produces a report, not an automatic fix.
+  supply_chain:
+    lockfile: flower-wms-system/package-lock.json
+    allowed_resolved_hosts: [registry.npmjs.org]
+    legacy_mirror_hosts: [registry.npmmirror.com]
+    require_integrity: true
+    require_https: true
+
+  sbom:
+    formats: [spdx-json, cyclonedx-json]
+    retention_days: 30
+
+  exceptions:
+    required_fields: [id, tool, vuln_id, reason, owner, expires_on, compensating_controls]
+    tools: [dependency-review, image-scan, secret-scan]
+    expired_policy: fail
+    max_horizon_days: 365
+
+# No active exceptions. Add one only with evidence and a named owner, for example:
+#
+# exceptions:
+#   - id: EXC-2026-001
+#     tool: image-scan
+#     vuln_id: CVE-2099-0001
+#     package: "example@1.2.3"
+#     reason: "Vendored library is not reachable from the production runtime."
+#     owner: "security-maintainer-placeholder"
+#     expires_on: "2026-12-31"
+#     compensating_controls: "Egress blocked; weekly review until the base image rebuild lands."
+#     exploitability: "No public exploit; no reachable code path."
+#     fix_availability: "Fixed base image available; rollout tracked separately."
+#     status: active
+#
+# An image-scan exception must also have a matching `.github/security/trivy-ignore.yaml`
+# entry with the same vulnerability id and an `expired_at` no later than `expires_on`.
+exceptions: []

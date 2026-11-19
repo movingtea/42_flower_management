@@ -1,0 +1,4 @@
+# Controlled fixture: no expired_at means a permanent ignore, which is rejected.
+vulnerabilities:
+  - id: CVE-2099-0001
+    statement: "Controlled fixture entry without an expiry."

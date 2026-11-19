@@ -1,0 +1,582 @@
+name: PR Quality Gates
+
+# Independent pull-request gate for Flower WMS.
+#
+# Scope and guarantees:
+#  - Triggered only by pull_request; it never deploys and never reads repository
+#    secrets. Deployment stays in deploy.yml (push to master, ACR push, remote SSH).
+#  - lint, typecheck, unit, build and knowledge-structure always run on every pull
+#    request, so path filters cannot silently skip a required check.
+#  - db-regression, e2e and traceability are conditional. When their paths are not
+#    touched they still run the job and write an explicit "NOT APPLICABLE" step
+#    summary plus a notice; they are never reported as "passed".
+#  - Every job installs from the official npm registry because the npmmirror
+#    mirror used on the maintainer machines serves a broken vitest package.
+#
+# Required status checks for branch protection (exact job names):
+#   knowledge-structure, lint, typecheck, unit, build
+# Conditional checks (recommended to keep non-required, or require them once the
+# team accepts a not-applicable success): db-regression, e2e, traceability.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+
+concurrency:
+  group: pr-gates-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "24"
+  CI: "true"
+  NEXT_TELEMETRY_DISABLED: "1"
+  NPM_CONFIG_REGISTRY: https://registry.npmjs.org
+  NPM_CONFIG_REPLACE_REGISTRY_HOST: always
+  NPM_CONFIG_FUND: "false"
+  NPM_CONFIG_AUDIT: "false"
+
+jobs:
+  changes:
+    name: changed-paths
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      knowledge: ${{ steps.filter.outputs.knowledge }}
+      db: ${{ steps.filter.outputs.db }}
+      e2e: ${{ steps.filter.outputs.e2e }}
+      tracking: ${{ steps.filter.outputs.tracking }}
+      app: ${{ steps.filter.outputs.app }}
+    steps:
+      - name: Checkout pull request merge commit
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed paths
+        id: filter
+        shell: bash
+        run: |
+          set -euo pipefail
+          base_ref="${{ github.base_ref }}"
+          git fetch --no-tags --prune origin "+refs/heads/${base_ref}:refs/remotes/origin/${base_ref}"
+          merge_base="$(git merge-base "origin/${base_ref}" "${GITHUB_SHA}")"
+          git diff --name-only "${merge_base}" "${GITHUB_SHA}" > /tmp/changed-files.txt
+          echo "Changed files ($(wc -l < /tmp/changed-files.txt | tr -d ' ')):"
+          sed -n '1,200p' /tmp/changed-files.txt
+
+          emit_flag() {
+            local name="$1"
+            local pattern="$2"
+            if grep -Eq "${pattern}" /tmp/changed-files.txt; then
+              echo "${name}=true" >> "${GITHUB_OUTPUT}"
+            else
+              echo "${name}=false" >> "${GITHUB_OUTPUT}"
+            fi
+          }
+
+          # Knowledge gate inputs: knowledge notes, docs pages, the checker and
+          # this workflow itself.
+          emit_flag knowledge '^(knowledge/|docs/[^/]+\.md$|docs/evidence/[^/]+/.+\.md$|scripts/check-knowledge-structure(\.test)?\.mjs$|scripts/fixtures/knowledge-structure/|\.github/workflows/pr\.yml$|\.github/pull_request_template\.md$|docs/sprint-e1-ci-gates\.md$)'
+
+          # Database regression inputs: V2 schema/migrations/seed, application
+          # source, test-database harness and dependency manifests.
+          emit_flag db '^(flower-wms-system/prisma/|flower-wms-system/prisma(\.v2)?\.config\.ts|flower-wms-system/src/|flower-wms-system/scripts/(with-v2-test-db|test-v2)\.mjs|flower-wms-system/package(-lock)?\.json)'
+
+          # Key E2E inputs: pages, V2 domain/actions, E2E tests and Playwright config.
+          emit_flag e2e '^(flower-wms-system/src/app/|flower-wms-system/src/v2/|flower-wms-system/src/components/|flower-wms-system/tests/e2e/|flower-wms-system/playwright\.config\.ts|flower-wms-system/package(-lock)?\.json)'
+
+          # Traceability inputs: rules, specs, ADR, test plans, tests and E1 docs.
+          emit_flag tracking '^(knowledge/specifications/|knowledge/02-Business/|knowledge/05-ADR/|flower-wms-system/src/.+\.test\.ts$|flower-wms-system/tests/e2e/|docs/sprint-e1[^/]*\.md$|scripts/check-knowledge-structure)'
+
+          emit_flag app '^flower-wms-system/'
+
+      - name: Write scope summary
+        shell: bash
+        run: |
+          {
+            echo "## Changed-path scope"
+            echo ""
+            echo "| scope | changed |"
+            echo "|---|---|"
+            echo "| knowledge/docs | ${{ steps.filter.outputs.knowledge }} |"
+            echo "| app | ${{ steps.filter.outputs.app }} |"
+            echo "| database | ${{ steps.filter.outputs.db }} |"
+            echo "| e2e | ${{ steps.filter.outputs.e2e }} |"
+            echo "| traceability | ${{ steps.filter.outputs.tracking }} |"
+            echo ""
+            echo "Required checks (lint, typecheck, unit, build, knowledge-structure) run unconditionally."
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+  knowledge-structure:
+    name: knowledge-structure
+    needs: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Check knowledge structure (full repository scan)
+        shell: bash
+        run: |
+          set -o pipefail
+          node scripts/check-knowledge-structure.mjs --json | tee knowledge-structure.json
+
+      - name: Upload machine-readable summary
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: knowledge-structure-summary
+          path: knowledge-structure.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Record trigger scope
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Knowledge structure trigger"
+            echo ""
+            echo "- knowledge/docs paths changed: \`${{ needs.changes.outputs.knowledge }}\`"
+            echo "- The full-repository scan runs on every pull request, so a path filter never skips this check."
+            echo "- Historical gaps are carried in the checker's explicit exception list and appear as warnings."
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+  lint:
+    name: lint
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: flower-wms-system
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: flower-wms-system/package-lock.json
+
+      - name: Use the official npm registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          # npmmirror.com currently serves a broken vitest package; the lockfile is
+          # installed from registry.npmjs.org and its hosts are rewritten.
+          npm config set registry https://registry.npmjs.org
+          npm config set replace-registry-host always
+          npm config get registry
+
+      - name: Install dependencies (clean)
+        run: npm ci
+
+      - name: ESLint
+        run: npm run lint
+
+  typecheck:
+    name: typecheck
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: flower-wms-system
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: flower-wms-system/package-lock.json
+
+      - name: Use the official npm registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm config set registry https://registry.npmjs.org
+          npm config set replace-registry-host always
+          npm config get registry
+
+      - name: Install dependencies (clean)
+        run: npm ci
+
+      - name: Generate Next.js route types
+        run: npx next typegen
+
+      - name: TypeScript
+        run: npx tsc --noEmit
+
+  unit:
+    name: unit
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: flower-wms-system
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: flower-wms-system/package-lock.json
+
+      - name: Use the official npm registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm config set registry https://registry.npmjs.org
+          npm config set replace-registry-host always
+          npm config get registry
+
+      - name: Install dependencies (clean)
+        run: npm ci
+
+      - name: Unit tests (no database required)
+        run: npm run test:unit
+
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    env:
+      # `next build` imports Prisma/Auth modules while collecting page data, and
+      # those modules read process.env at import time. Use placeholders mirroring
+      # the Dockerfile builder stage: no real database or secret is involved. A
+      # build-time database query would fail this job visibly instead of falling
+      # back to a developer or production database.
+      DATABASE_URL: postgresql://build:build@127.0.0.1:5432/build?schema=public
+      V2_DATABASE_URL: postgresql://build:build@127.0.0.1:5432/build_v2?schema=public
+      AUTH_SECRET: ci-build-placeholder-not-a-secret
+      NEXTAUTH_SECRET: ci-build-placeholder-not-a-secret
+      NEXTAUTH_URL: http://127.0.0.1:3000
+      AUTH_TRUST_HOST: "true"
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+      NEXT_PUBLIC_ASSET_BASE_URL: http://localhost:3000
+    defaults:
+      run:
+        working-directory: flower-wms-system
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: flower-wms-system/package-lock.json
+
+      - name: Use the official npm registry
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm config set registry https://registry.npmjs.org
+          npm config set replace-registry-host always
+          npm config get registry
+
+      - name: Install dependencies (clean)
+        run: npm ci
+
+      - name: Production build
+        run: npm run build
+
+  db-regression:
+    name: db-regression
+    needs: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        working-directory: flower-wms-system
+    steps:
+      - name: Classify applicability
+        id: scope
+        working-directory: .
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ needs.changes.outputs.db }}" = "true" ]; then
+            echo "applicable=true" >> "${GITHUB_OUTPUT}"
+            echo "DB regression applies: prisma/schema/migration/seed/src or dependency paths changed."
+          else
+            echo "applicable=false" >> "${GITHUB_OUTPUT}"
+            {
+              echo "## DB regression: NOT APPLICABLE"
+              echo ""
+              echo "No Prisma/schema/migration/seed/src or dependency path changed in this pull request."
+              echo "This is an explicit not-applicable result; no database step was executed."
+              echo "It is not reported as a pass and cannot hide a database failure."
+            } >> "${GITHUB_STEP_SUMMARY}"
+            echo "::notice title=DB regression not applicable::No prisma/schema/migration/seed/src or dependency change"
+          fi
+
+      - name: Checkout
+        if: steps.scope.outputs.applicable == 'true'
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        if: steps.scope.outputs.applicable == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: flower-wms-system/package-lock.json
+
+      - name: Install PostgreSQL 18 tools for the owned test cluster (mode A)
+        if: steps.scope.outputs.applicable == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          # The E1.4 contract runs DB jobs against an owned temporary cluster, so
+          # the job needs initdb/pg_ctl/createdb/psql from PostgreSQL 18 on PATH.
+          sudo install -d /usr/share/postgresql-common/pgdg
+          curl -fsSL -o /tmp/pgdg.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          sudo install -m 0644 /tmp/pgdg.asc /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+          . /etc/os-release
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends postgresql-18 postgresql-client-18
+          echo "PG_BIN=/usr/lib/postgresql/18/bin" >> "${GITHUB_ENV}"
+          /usr/lib/postgresql/18/bin/initdb --version
+
+      - name: Use the official npm registry
+        if: steps.scope.outputs.applicable == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm config set registry https://registry.npmjs.org
+          npm config set replace-registry-host always
+          npm config get registry
+
+      - name: Install dependencies (clean)
+        if: steps.scope.outputs.applicable == 'true'
+        run: npm ci
+
+      - name: Empty-database V2 migration and schema consistency
+        if: steps.scope.outputs.applicable == 'true'
+        run: node scripts/with-v2-test-db.mjs -- npm run db:v2:migrate:check
+
+      - name: Test seed tiers and seed expectations
+        if: steps.scope.outputs.applicable == 'true'
+        run: node scripts/with-v2-test-db.mjs -- npm run db:v2:seed:check:default
+
+      - name: V2 integration and smoke
+        if: steps.scope.outputs.applicable == 'true'
+        run: npm run test:v2:db
+
+      - name: Legacy V1 tests
+        if: steps.scope.outputs.applicable == 'true'
+        run: npm run test:legacy
+
+      - name: Report conclusion
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## DB regression conclusion"
+            echo ""
+            if [ "${{ steps.scope.outputs.applicable }}" != "true" ]; then
+              echo "- result: NOT APPLICABLE (no step executed; see the notice above)"
+            elif [ "${{ job.status }}" = "success" ]; then
+              echo "- result: EXECUTED and PASSED"
+              echo "- empty-db migration + consistency, seed checks, V2 integration/smoke and legacy V1 tests all exited 0"
+            else
+              echo "- result: EXECUTED and FAILED"
+              echo "- inspect the failing step above; do not merge"
+            fi
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+  e2e:
+    name: e2e
+    needs: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      E2E_LABEL: ${{ contains(github.event.pull_request.labels.*.name, 'run-e2e') }}
+    defaults:
+      run:
+        working-directory: flower-wms-system
+    steps:
+      - name: Classify applicability
+        id: scope
+        working-directory: .
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ needs.changes.outputs.e2e }}" = "true" ] || [ "${{ env.E2E_LABEL }}" = "true" ]; then
+            echo "applicable=true" >> "${GITHUB_OUTPUT}"
+            echo "Key E2E applies: app/page/action/test paths changed or the run-e2e label is set."
+          else
+            echo "applicable=false" >> "${GITHUB_OUTPUT}"
+            {
+              echo "## Key E2E: NOT APPLICABLE"
+              echo ""
+              echo "No page/action/domain/test path changed and the \`run-e2e\` label is not set."
+              echo "This is an explicit not-applicable result; no browser test was executed."
+              echo "Add the \`run-e2e\` label to force the E2E job on a pull request."
+            } >> "${GITHUB_STEP_SUMMARY}"
+            echo "::notice title=Key E2E not applicable::No page/action/test change and no run-e2e label"
+          fi
+
+      - name: Checkout
+        if: steps.scope.outputs.applicable == 'true'
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        if: steps.scope.outputs.applicable == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: flower-wms-system/package-lock.json
+
+      - name: Install PostgreSQL 18 tools for the owned test cluster (mode A)
+        if: steps.scope.outputs.applicable == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo install -d /usr/share/postgresql-common/pgdg
+          curl -fsSL -o /tmp/pgdg.asc https://www.postgresql.org/media/keys/ACCC4CF8.asc
+          sudo install -m 0644 /tmp/pgdg.asc /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc
+          . /etc/os-release
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt ${VERSION_CODENAME}-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends postgresql-18 postgresql-client-18
+          echo "PG_BIN=/usr/lib/postgresql/18/bin" >> "${GITHUB_ENV}"
+          /usr/lib/postgresql/18/bin/initdb --version
+
+      - name: Use the official npm registry
+        if: steps.scope.outputs.applicable == 'true'
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm config set registry https://registry.npmjs.org
+          npm config set replace-registry-host always
+          npm config get registry
+
+      - name: Install dependencies (clean)
+        if: steps.scope.outputs.applicable == 'true'
+        run: npm ci
+
+      - name: Install Playwright browsers
+        if: steps.scope.outputs.applicable == 'true'
+        run: npx playwright install --with-deps chromium
+
+      - name: Key browser E2E (E1.5 entry point)
+        if: steps.scope.outputs.applicable == 'true'
+        run: npm run test:e2e
+
+      - name: Upload Playwright failure artifacts
+        if: always() && steps.scope.outputs.applicable == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-artifacts
+          path: |
+            flower-wms-system/test-results
+            flower-wms-system/playwright-report
+            flower-wms-system/blob-report
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Report conclusion
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Key E2E conclusion"
+            echo ""
+            if [ "${{ steps.scope.outputs.applicable }}" != "true" ]; then
+              echo "- result: NOT APPLICABLE (no browser test executed; see the notice above)"
+            elif [ "${{ job.status }}" = "success" ]; then
+              echo "- result: EXECUTED and PASSED"
+              echo "- command: \`npm run test:e2e\`"
+            else
+              echo "- result: EXECUTED and FAILED"
+              echo "- failure artifacts (trace/screenshot/report) are attached to this run when produced"
+            fi
+          } >> "${GITHUB_STEP_SUMMARY}"
+
+  traceability:
+    name: traceability
+    needs: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Classify applicability
+        id: scope
+        working-directory: .
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ "${{ needs.changes.outputs.tracking }}" = "true" ]; then
+            echo "applicable=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "applicable=false" >> "${GITHUB_OUTPUT}"
+            {
+              echo "## Traceability: NOT APPLICABLE"
+              echo ""
+              echo "No rules/spec/ADR/test-plan/test path changed in this pull request."
+              echo "This is an explicit not-applicable result; the tracking check did not run."
+            } >> "${GITHUB_STEP_SUMMARY}"
+            echo "::notice title=Traceability not applicable::No rules/spec/ADR/test-plan/test path change"
+          fi
+
+      - name: Checkout
+        if: steps.scope.outputs.applicable == 'true'
+        uses: actions/checkout@v5
+
+      - name: Set up Node.js
+        if: steps.scope.outputs.applicable == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Feature Spec and test-plan traceability
+        if: steps.scope.outputs.applicable == 'true'
+        shell: bash
+        run: |
+          set -o pipefail
+          node scripts/check-knowledge-structure.mjs --checks tracking --json | tee traceability.json
+
+      - name: Upload traceability summary
+        if: always() && steps.scope.outputs.applicable == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: traceability-summary
+          path: traceability.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Report conclusion
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Traceability conclusion"
+            echo ""
+            if [ "${{ steps.scope.outputs.applicable }}" != "true" ]; then
+              echo "- result: NOT APPLICABLE (tracking check did not run)"
+            elif [ "${{ job.status }}" = "success" ]; then
+              echo "- result: EXECUTED and PASSED"
+            else
+              echo "- result: EXECUTED and FAILED"
+            fi
+          } >> "${GITHUB_STEP_SUMMARY}"

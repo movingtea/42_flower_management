@@ -1,0 +1,5 @@
+# Controlled fixture: an active ignore backed by an active policy exception.
+vulnerabilities:
+  - id: CVE-2099-0001
+    statement: "Controlled fixture entry backed by policy exception EXC-FIXTURE-001."
+    expired_at: 2099-12-31

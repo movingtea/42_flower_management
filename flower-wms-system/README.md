@@ -268,6 +268,29 @@ npm run db:seed
 - Prisma Client 输出目录为 `src/generated/prisma`。
 - Prisma 7 使用 `@prisma/adapter-pg`，需要 `DATABASE_URL`。
 
+### 本地测试与隔离数据库
+
+安装依赖后，使用 `npm run test:unit` 运行单元测试和测试工具自检。使用 `npm run test:integration:v2`、`npm run test:smoke:v2` 或 `npm run test:legacy` 分别复跑相应测试组。全量回归入口为 `npm run test:ci`（等同 `npm run test:regression`）。
+
+数据库测试需要本机 PostgreSQL 18 工具 `initdb`、`pg_ctl`、`createdb` 和 `psql`。通过 PATH 或 `PG_BIN` 指向工具目录，以可启动 PostgreSQL 的普通用户运行。测试入口为每次运行创建独立、只监听本机随机端口的临时实例，执行 V2 迁移、一致性检查和测试 Seed，运行结束后关闭并清理。旧测试需要 V1 时，在同一临时实例中使用独立数据库并按当前 V1 schema 初始化。该初始化用于旧测试夹具，V1 历史迁移验证另行处理。
+
+保留原有 `test:all` 和独立测试命令以兼容旧用法。需要隔离数据库时使用上述统一入口。浏览器 E2E 和 GitHub PR 门禁分别在 E1.5 和 E1.6 接入。
+
+### V2 测试数据分层
+
+V2 测试 Seed 按 tier 分层，默认入口 `npm run db:v2:seed:test` 保持原有数据（`minimum` + `roles`）。需要额外参考数据时使用：
+
+| 命令 | tier | 用途 |
+|---|---|---|
+| `npm run db:v2:seed:test:minimum` | minimum | 租户、`MAIN` 门店、库位和门店设置 |
+| `npm run db:v2:seed:test:roles` | roles（含 minimum） | 五个测试账号 `admin`/`manager`/`buyer`/`sales`/`florist` |
+| `npm run db:v2:seed:test:p1` | roles + p1-scenarios | E1.1 P1 场景参考数据：供应商、花材、耗材、SPU/SKU、已发布配方和库存批次，编码以 `P1-` 开头 |
+| `npm run db:v2:seed:test:e2e` | roles + e2e-fixtures | E1.5 浏览器夹具：独立 `E2E` 门店、库位和五个 `e2e-*` 合成账号，包含 P1 参考数据 |
+
+tier 按 `minimum → roles → p1-scenarios → e2e-fixtures` 顺序应用，请求的 tier 会自动补齐依赖。`tsx prisma/v2/seed.ts test --tiers=...` 可显式指定，未知、重复或空值会报错；`dev` 和 `production` 模式不接受 `--tiers`。`npm run db:v2:seed:check`（可加 `--tiers=`、`--expect-no-transactions`）只读校验分层数据；`db:v2:seed:check:default` 和 `db:v2:seed:check:e2e` 是常用组合。
+
+Seed 是初始化而不是 teardown：重复应用会把被测试修改的固定参考字段恢复为规范值，但已有库存余额不会被重置。E2E 账号口令常量只用于本地迁移出的临时测试库，不得用于生产或共享环境。数据库专项用例（并发隔离、数据库不可用、迁移失败、中断退出）使用 `npm run test:db:harness-specials` 复跑，耗时较长，不进入默认单元入口。
+
 ## 9. 环境变量
 
 参考 `flower-wms-system/.env.example`。

@@ -1,0 +1,343 @@
+name: Security Gates
+
+# Independent security gate for Flower WMS (Sprint E3.7).
+#
+# Scope and guarantees:
+#  - Triggered by same-repository pull_request and by workflow_dispatch. It never
+#    deploys, never pushes images and never uses pull_request_target.
+#  - Every third-party action is pinned to an immutable 40-character commit SHA
+#    with a trailing version comment; re-verify tag -> commit with the GitHub API
+#    when bumping (scripts/security/check-workflow-pins.mjs enforces the format).
+#  - Least privilege: the workflow default is `contents: read`. Only the job that
+#    uploads SARIF gets `security-events: write`; only dependency-review gets
+#    `pull-requests: read`.
+#  - Pull requests never pull a production image and never need ACR credentials.
+#    The image scan runs on workflow_dispatch (or a future push trigger) against
+#    the image digest that deploy.yml already pushed to ACR, so CI never rebuilds
+#    the production image (E2 proved container-internal npm ci is unreliable).
+#  - Policy, exceptions and ignore files live in `.github/security/` and are
+#    enforced offline by scripts/security/*.mjs before any scan runs.
+#
+# Suggested required status checks (maintainer configures branch protection):
+#   dependency-review, secret-scan, sbom, offline-supply-chain
+# `image-scan` is manual/dispatch-only and is not a pull-request check.
+#
+# Maintainer prerequisites are listed in docs/sprint-e3-security-gates.md:
+# real first run, branch protection, Code Scanning, ACR read-only pull account,
+# GITLEAKS_LICENSE (organisations only) and network allowlists.
+#
+# Offline verification of this file and the policy:
+#   node scripts/security/check-workflow-pins.mjs --self-test
+#   node scripts/security/check-exceptions.mjs --self-test
+#   node scripts/security/check-lockfile.mjs --self-test
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+    inputs:
+      image_ref:
+        description: "Full image reference to scan (defaults to the ACR image for this dispatch commit)"
+        required: false
+        type: string
+      image_tag:
+        description: "ACR tag to scan when image_ref is empty (defaults to the dispatch commit SHA)"
+        required: false
+        default: ""
+        type: string
+
+concurrency:
+  group: security-gates-${{ github.event_name }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: "24"
+  # Repository variables may override the ACR coordinates; the defaults match
+  # deploy.yml so the scan targets the image that was actually deployed.
+  ACR_REGISTRY: ${{ vars.ACR_REGISTRY || 'crpi-bp5b6vut8l4d7ebv.cn-hangzhou.personal.cr.aliyuncs.com' }}
+  ACR_NAMESPACE: ${{ vars.ACR_NAMESPACE || 'universe42' }}
+  IMAGE_REPO: ${{ vars.IMAGE_REPO || 'flower-platform-app' }}
+
+jobs:
+  dependency-review:
+    name: dependency-review
+    # dependency-review needs the repository dependency graph and same-repository
+    # PR refs. Fork pull requests are outside this gate; document the residual risk
+    # instead of granting write-scoped tokens to fork code.
+    if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Dependency review (runtime blocks, development reported)
+        uses: actions/dependency-review-action@a1d282b36b6f3519aa1f3fc636f609c47dddb294 # v5.0.0
+        with:
+          # Mirrors .github/security/policy.yml:
+          #   dependency_review.fail_on_severity = high
+          #   dependency_review.fail_on_scopes   = runtime
+          fail-on-severity: high
+          fail-on-scopes: runtime
+          vulnerability-check: true
+          license-check: false
+          comment-summary-in-pr: never
+
+  secret-scan:
+    name: secret-scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout full history for gitleaks
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: gitleaks secret scan
+        uses: gitleaks/gitleaks-action@e0c47f4f8be36e29cdc102c57e68cb5cbf0e8d1e # v3.0.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Required for organisation-owned repositories only; a personal
+          # repository runs without it. Never commit the value.
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
+          GITLEAKS_CONFIG: ${{ github.workspace }}/.github/security/gitleaks.toml
+          GITLEAKS_ENABLE_COMMENTS: "false"
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "true"
+          GITLEAKS_ENABLE_SUMMARY: "true"
+          # Pin the scanner binary as well as the action wrapper.
+          GITLEAKS_VERSION: "8.30.1"
+
+  sbom:
+    name: sbom
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - name: Prepare report directory
+        shell: bash
+        run: mkdir -p security-reports
+
+      - name: Generate SPDX SBOM (source tree)
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          path: .
+          format: spdx-json
+          output-file: security-reports/sbom-source.spdx.json
+          artifact-name: sbom-source-spdx
+          upload-artifact: false
+          upload-release-assets: false
+          dependency-snapshot: false
+
+      - name: Generate CycloneDX SBOM (source tree)
+        uses: anchore/sbom-action@66cbf4bc1f1c0d2edc94016e65bc221b6bb0ad6c # v0.24.3
+        with:
+          path: .
+          format: cyclonedx-json
+          output-file: security-reports/sbom-source.cyclonedx.json
+          artifact-name: sbom-source-cyclonedx
+          upload-artifact: false
+          upload-release-assets: false
+          dependency-snapshot: false
+
+      - name: Upload SBOM artifact
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: sbom-source
+          path: security-reports/sbom-source.*.json
+          if-no-files-found: error
+          retention-days: 30
+
+  offline-supply-chain:
+    name: offline-supply-chain
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Prepare report directory
+        shell: bash
+        run: mkdir -p security-reports
+
+      - name: Workflow action pin assertion
+        shell: bash
+        run: node scripts/security/check-workflow-pins.mjs --output security-reports/workflow-pins.json
+
+      - name: Policy and exception expiry
+        shell: bash
+        run: node scripts/security/check-exceptions.mjs --output security-reports/exceptions.json
+
+      - name: Lockfile supply chain (report only, never rewrites the lockfile)
+        shell: bash
+        run: node scripts/security/check-lockfile.mjs --json --output security-reports/lockfile.json
+
+      - name: Controlled fixture self-tests
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/security/check-workflow-pins.mjs --self-test --quiet
+          node scripts/security/check-exceptions.mjs --self-test --quiet
+          node scripts/security/check-lockfile.mjs --self-test --quiet
+
+      - name: Upload offline gate reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: security-offline-reports
+          path: security-reports/
+          if-no-files-found: warn
+          retention-days: 30
+
+  image-scan:
+    name: image-scan
+    # Manual/dispatch-only, and compatible with a future `push: branches: [master]`
+    # trigger. Pull requests never scan (and never pull) the production image.
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout (trivy ignore configuration only)
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+        with:
+          persist-credentials: false
+
+      - name: Prepare report directory
+        shell: bash
+        run: mkdir -p security-reports
+
+      - name: Resolve production image reference
+        id: image
+        shell: bash
+        env:
+          INPUT_IMAGE_REF: ${{ inputs.image_ref }}
+          INPUT_IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          set -euo pipefail
+          if [ -n "${INPUT_IMAGE_REF}" ]; then
+            image_ref="${INPUT_IMAGE_REF}"
+          else
+            tag="${INPUT_IMAGE_TAG:-${GITHUB_SHA}}"
+            image_ref="${ACR_REGISTRY}/${ACR_NAMESPACE}/${IMAGE_REPO}:${tag}"
+          fi
+          printf 'ref=%s\n' "${image_ref}" >> "${GITHUB_OUTPUT}"
+          printf 'image reference: %s\n' "${image_ref}"
+
+      - name: Log in to ACR with a read-only pull account
+        shell: bash
+        env:
+          ACR_USERNAME: ${{ secrets.ACR_USERNAME }}
+          ACR_PASSWORD: ${{ secrets.ACR_PASSWORD }}
+        run: |
+          set -euo pipefail
+          if [ -z "${ACR_USERNAME}" ] || [ -z "${ACR_PASSWORD}" ]; then
+            echo "::error title=ACR credentials missing::The image scan needs ACR_USERNAME/ACR_PASSWORD repository secrets for a read-only pull account."
+            exit 1
+          fi
+          if [ "$(printf '%s' "${ACR_PASSWORD}" | wc -c)" -lt 8 ]; then
+            echo "::error title=ACR credentials invalid::ACR_PASSWORD looks empty or truncated; recreate the repository secret."
+            exit 1
+          fi
+          printf '%s' "${ACR_PASSWORD}" | docker login "${ACR_REGISTRY}" --username "${ACR_USERNAME}" --password-stdin
+          echo "authenticated to ${ACR_REGISTRY}"
+
+      - name: Pull image and record immutable digest
+        id: pull
+        shell: bash
+        run: |
+          set -euo pipefail
+          image_ref="${{ steps.image.outputs.ref }}"
+          docker pull "${image_ref}"
+          digest="$(docker image inspect --format '{{index .RepoDigests 0}}' "${image_ref}")"
+          if [ -z "${digest}" ] || [ "${digest}" = "<no value>" ]; then
+            echo "::error title=Image digest missing::docker pull did not return a repo digest; refusing to scan an unverifiable image."
+            exit 1
+          fi
+          printf 'digest=%s\n' "${digest}" >> "${GITHUB_OUTPUT}"
+          {
+            printf 'image-reference: %s\n' "${image_ref}"
+            printf 'image-digest: %s\n' "${digest}"
+          } > security-reports/image-ref.txt
+          echo "scanning digest: ${digest}"
+
+      - name: Trivy image scan (gate on HIGH/CRITICAL)
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ steps.pull.outputs.digest }}
+          scan-type: image
+          format: json
+          output: security-reports/trivy-image.json
+          severity: HIGH,CRITICAL
+          scanners: vuln
+          ignore-unfixed: false
+          trivyignores: .github/security/trivy-ignore.yaml
+          exit-code: "1"
+          timeout: 20m
+
+      - name: Trivy image scan (SARIF archive)
+        if: always()
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ steps.pull.outputs.digest || steps.image.outputs.ref }}
+          scan-type: image
+          format: sarif
+          output: security-reports/trivy-image.sarif
+          severity: HIGH,CRITICAL
+          scanners: vuln
+          ignore-unfixed: false
+          trivyignores: .github/security/trivy-ignore.yaml
+          limit-severities-for-sarif: true
+          exit-code: "0"
+          timeout: 20m
+
+      - name: Upload SARIF to code scanning
+        # Best-effort until Code Scanning is enabled for the repository (maintainer
+        # task). The SARIF file is always archived in the artifact below, so the
+        # finding evidence is never lost. Remove continue-on-error after enabling
+        # Code Scanning to make the upload itself a hard failure.
+        if: always()
+        continue-on-error: true
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          sarif_file: security-reports/trivy-image.sarif
+          category: trivy-image
+
+      - name: Upload image scan reports
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: image-scan-reports
+          path: security-reports/
+          if-no-files-found: warn
+          retention-days: 30
+
+      - name: Record image scan conclusion
+        if: always()
+        shell: bash
+        run: |
+          {
+            echo "## Image scan conclusion"
+            echo ""
+            echo "- target: \`${{ steps.image.outputs.ref }}\`"
+            echo "- digest: \`${{ steps.pull.outputs.digest || 'unknown' }}\`"
+            echo "- gate: HIGH/CRITICAL, unfixed included, ignores from \`.github/security/trivy-ignore.yaml\`"
+            echo "- SARIF upload is best-effort until Code Scanning is enabled; the SARIF and JSON files are archived as \`image-scan-reports\`."
+            echo "- A red job means the image scan gate failed; it is not a SKIPPED result."
+          } >> "${GITHUB_STEP_SUMMARY}"
