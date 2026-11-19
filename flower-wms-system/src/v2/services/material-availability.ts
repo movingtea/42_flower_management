@@ -1,4 +1,4 @@
-import { Prisma, ReservationState } from "../../generated/prisma-v2/client";
+import { LocationKind, Prisma, ReservationState } from "../../generated/prisma-v2/client";
 import { summarizeMaterialAvailability } from "../domain/material-availability";
 
 type AvailabilityDb = Pick<
@@ -64,26 +64,32 @@ export async function getMaterialAvailableQuantities(
     select: {
       id: true,
       materialId: true,
-      balances: { select: { onHandQty: true, frozenQty: true } },
+      balances: {
+        select: {
+          onHandQty: true,
+          frozenQty: true,
+          location: { select: { kind: true } },
+        },
+      },
     },
     orderBy: { id: "asc" },
   });
   const batchIds = batches.map((batch) => batch.id);
 
-  const [orderReservations, sampleReservations] = batchIds.length === 0
-    ? [[], []]
-    : await Promise.all([
-        db.inventoryReservation.groupBy({
-          by: ["batchId"],
-          where: { batchId: { in: batchIds }, state: ReservationState.ACTIVE },
-          _sum: { quantity: true },
-        }),
-        db.sampleInventoryReservation.groupBy({
-          by: ["batchId"],
-          where: { batchId: { in: batchIds }, state: ReservationState.ACTIVE },
-          _sum: { quantity: true },
-        }),
-      ]);
+  const orderReservations = batchIds.length === 0
+    ? []
+    : await db.inventoryReservation.groupBy({
+        by: ["batchId"],
+        where: { batchId: { in: batchIds }, state: ReservationState.ACTIVE },
+        _sum: { quantity: true },
+      });
+  const sampleReservations = batchIds.length === 0
+    ? []
+    : await db.sampleInventoryReservation.groupBy({
+        by: ["batchId"],
+        where: { batchId: { in: batchIds }, state: ReservationState.ACTIVE },
+        _sum: { quantity: true },
+      });
   const orderReservedByBatch = new Map(
     orderReservations.map((row) => [row.batchId, quantity(row._sum.quantity)]),
   );
@@ -94,12 +100,19 @@ export async function getMaterialAvailableQuantities(
   const result = new Map<string, MaterialAvailability>();
   for (const material of materials) {
     const materialBatches = batches.filter((batch) => batch.materialId === material.id);
-    const totals = summarizeMaterialAvailability(materialBatches.map((batch) => ({
-      onHand: batch.balances.reduce((sum, balance) => sum + quantity(balance.onHandQty), 0),
-      frozen: batch.balances.reduce((sum, balance) => sum + quantity(balance.frozenQty), 0),
-      orderReserved: orderReservedByBatch.get(batch.id) ?? 0,
-      sampleReserved: sampleReservedByBatch.get(batch.id) ?? 0,
-    })));
+    const totals = summarizeMaterialAvailability(materialBatches.map((batch) => {
+      // Stock already issued to the production area is not warehouse availability
+      // and must never be promised to a customer order or another sample plan.
+      const warehouseBalances = batch.balances.filter(
+        (balance) => balance.location.kind === LocationKind.WAREHOUSE,
+      );
+      return {
+        onHand: warehouseBalances.reduce((sum, balance) => sum + quantity(balance.onHandQty), 0),
+        frozen: warehouseBalances.reduce((sum, balance) => sum + quantity(balance.frozenQty), 0),
+        orderReserved: orderReservedByBatch.get(batch.id) ?? 0,
+        sampleReserved: sampleReservedByBatch.get(batch.id) ?? 0,
+      };
+    }));
     result.set(material.id, {
       materialId: material.id,
       baseUnit: material.baseUnit,

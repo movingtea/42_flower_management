@@ -457,26 +457,31 @@ export default async function CatalogPage({ searchParams }: PageProps<"/v2/catal
       message={feedback.message}
       error={feedback.error}
       actions={
-        <details className="relative">
-          <summary className={`${button} cursor-pointer list-none`}>新增商品</summary>
-          <div className="absolute right-0 z-20 mt-2 w-[min(28rem,90vw)] rounded-xl border border-stone-200 bg-white p-5 shadow-xl">
-            <form action={createProductAction} className="space-y-3">
-              <h3 className="font-semibold">新增商品</h3>
-              <Field label="商品名称" name="name" />
-              <V2ImageField
-                name="imageKey"
-                module="wms-product"
-                label="商品主图"
-                alt="商品主图"
-                compact
-              />
-              <p className="text-xs text-stone-500">
-                商品编号由系统自动生成。新商品默认为停用，请先添加 SKU，再在商品编辑中设置默认 SKU 并启用商品。
-              </p>
-              <button className={button}>创建商品</button>
-            </form>
-          </div>
-        </details>
+        <>
+          <Link className="rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-700" href="/v2/samples">
+            样品库与转 SKU
+          </Link>
+          <details className="relative">
+            <summary className={`${button} cursor-pointer list-none`}>新增商品</summary>
+            <div className="absolute right-0 z-20 mt-2 w-[min(28rem,90vw)] rounded-xl border border-stone-200 bg-white p-5 shadow-xl">
+              <form action={createProductAction} className="space-y-3">
+                <h3 className="font-semibold">新增商品</h3>
+                <Field label="商品名称" name="name" />
+                <V2ImageField
+                  name="imageKey"
+                  module="wms-product"
+                  label="商品主图"
+                  alt="商品主图"
+                  compact
+                />
+                <p className="text-xs text-stone-500">
+                  商品编号由系统自动生成。新商品默认为停用，请先添加 SKU，再在商品编辑中设置默认 SKU 并启用商品。
+                </p>
+                <button className={button}>创建商品</button>
+              </form>
+            </div>
+          </details>
+        </>
       }
     >
       <form className="flex flex-wrap items-end gap-2 rounded-xl border border-stone-200 bg-white p-4">

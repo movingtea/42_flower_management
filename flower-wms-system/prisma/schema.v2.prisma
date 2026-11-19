@@ -176,6 +176,7 @@ enum SamplePlanState {
   DRAFT
   PROPOSED
   APPROVED
+  PAUSED
   IN_PROGRESS
   COMPLETED
   CANCELLED
@@ -809,19 +810,21 @@ model MaterialUsage {
 
 // Samples are design candidates, not sellable products or order inventory.
 model Sample {
-  id          String           @id @default(uuid())
-  tenantId    String
-  code        String
-  name        String
-  state       SampleState      @default(DRAFT)
-  imageKey    String?
-  description String?
-  priority    Int              @default(0)
-  tenant      Tenant           @relation(fields: [tenantId], references: [id])
-  sourceSkus  ProductSku[]
-  materials   SampleMaterial[]
-  planItems   SamplePlanItem[]
-  planSteps   SamplePlanStep[]
+  id               String           @id @default(uuid())
+  tenantId         String
+  code             String
+  name             String
+  state            SampleState      @default(DRAFT)
+  imageKey         String?
+  description      String?
+  priority         Int              @default(0)
+  // Target gross margin used by the sample cost / target price calculator.
+  targetMarginRate Decimal?         @db.Decimal(7, 4)
+  tenant           Tenant           @relation(fields: [tenantId], references: [id])
+  sourceSkus       ProductSku[]
+  materials        SampleMaterial[]
+  planItems        SamplePlanItem[]
+  planSteps        SamplePlanStep[]
 
   @@unique([tenantId, code])
 }
@@ -969,8 +972,12 @@ model SamplePlanExecution {
   id            String                       @id @default(uuid())
   planId        String
   selectedRunId String
-  startedAt     DateTime                     @default(now())
+  approvedAt    DateTime?
+  startedAt     DateTime?
   completedAt   DateTime?
+  cancelledAt   DateTime?
+  actualCost    Decimal?                     @db.Decimal(14, 2)
+  costEstimated Boolean                      @default(true)
   plan          SamplePlan                   @relation(fields: [planId], references: [id])
   selectedRun   SamplePlanRun                @relation(fields: [planId, selectedRunId], references: [planId, id])
   steps         SamplePlanExecutionStep[]
@@ -981,12 +988,21 @@ model SamplePlanExecutionStep {
   id                     String                      @id @default(uuid())
   executionId            String
   plannedStepId          String
+  startedAt              DateTime?
+  completedAt            DateTime?
+  usedQty                Decimal                     @default(0) @db.Decimal(14, 3)
+  reusedQty              Decimal                     @default(0) @db.Decimal(14, 3)
+  lostQty                Decimal                     @default(0) @db.Decimal(14, 3)
+  returnedQty            Decimal                     @default(0) @db.Decimal(14, 3)
+  reusableQty            Decimal                     @default(0) @db.Decimal(14, 3)
+  actualCost             Decimal                     @default(0) @db.Decimal(14, 2)
+  costEstimated          Boolean                     @default(true)
   actualReusableSnapshot Json?
   recalculatedAt         DateTime?
-  completedAt            DateTime?
   execution              SamplePlanExecution         @relation(fields: [executionId], references: [id])
   plannedStep            SamplePlanStep              @relation(fields: [plannedStepId], references: [id])
   disassembledMaterials  SampleDisassemblyMaterial[]
+  reservations           SampleInventoryReservation[]
 
   @@unique([executionId, plannedStepId])
 }
@@ -1008,15 +1024,18 @@ model SampleDisassemblyMaterial {
 }
 
 model SampleInventoryReservation {
-  id          String              @id @default(uuid())
-  executionId String
-  batchId     String
-  quantity    Decimal             @db.Decimal(14, 3)
-  state       ReservationState    @default(ACTIVE)
-  execution   SamplePlanExecution @relation(fields: [executionId], references: [id])
-  batch       InventoryBatch      @relation(fields: [batchId], references: [id])
+  id              String                  @id @default(uuid())
+  executionId     String
+  executionStepId String?
+  batchId         String
+  quantity        Decimal                 @db.Decimal(14, 3)
+  state           ReservationState        @default(ACTIVE)
+  execution       SamplePlanExecution     @relation(fields: [executionId], references: [id])
+  executionStep   SamplePlanExecutionStep? @relation(fields: [executionStepId], references: [id])
+  batch           InventoryBatch          @relation(fields: [batchId], references: [id])
 
   @@index([batchId, state])
+  @@index([executionStepId, state])
 }
 
 model PaymentTransaction {

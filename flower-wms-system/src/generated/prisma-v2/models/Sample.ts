@@ -28,10 +28,12 @@ export type AggregateSample = {
 
 export type SampleAvgAggregateOutputType = {
   priority: number | null
+  targetMarginRate: runtime.Decimal | null
 }
 
 export type SampleSumAggregateOutputType = {
   priority: number | null
+  targetMarginRate: runtime.Decimal | null
 }
 
 export type SampleMinAggregateOutputType = {
@@ -43,6 +45,7 @@ export type SampleMinAggregateOutputType = {
   imageKey: string | null
   description: string | null
   priority: number | null
+  targetMarginRate: runtime.Decimal | null
 }
 
 export type SampleMaxAggregateOutputType = {
@@ -54,6 +57,7 @@ export type SampleMaxAggregateOutputType = {
   imageKey: string | null
   description: string | null
   priority: number | null
+  targetMarginRate: runtime.Decimal | null
 }
 
 export type SampleCountAggregateOutputType = {
@@ -65,16 +69,19 @@ export type SampleCountAggregateOutputType = {
   imageKey: number
   description: number
   priority: number
+  targetMarginRate: number
   _all: number
 }
 
 
 export type SampleAvgAggregateInputType = {
   priority?: true
+  targetMarginRate?: true
 }
 
 export type SampleSumAggregateInputType = {
   priority?: true
+  targetMarginRate?: true
 }
 
 export type SampleMinAggregateInputType = {
@@ -86,6 +93,7 @@ export type SampleMinAggregateInputType = {
   imageKey?: true
   description?: true
   priority?: true
+  targetMarginRate?: true
 }
 
 export type SampleMaxAggregateInputType = {
@@ -97,6 +105,7 @@ export type SampleMaxAggregateInputType = {
   imageKey?: true
   description?: true
   priority?: true
+  targetMarginRate?: true
 }
 
 export type SampleCountAggregateInputType = {
@@ -108,6 +117,7 @@ export type SampleCountAggregateInputType = {
   imageKey?: true
   description?: true
   priority?: true
+  targetMarginRate?: true
   _all?: true
 }
 
@@ -206,6 +216,7 @@ export type SampleGroupByOutputType = {
   imageKey: string | null
   description: string | null
   priority: number
+  targetMarginRate: runtime.Decimal | null
   _count: SampleCountAggregateOutputType | null
   _avg: SampleAvgAggregateOutputType | null
   _sum: SampleSumAggregateOutputType | null
@@ -240,6 +251,7 @@ export type SampleWhereInput = {
   imageKey?: Prisma.StringNullableFilter<"Sample"> | string | null
   description?: Prisma.StringNullableFilter<"Sample"> | string | null
   priority?: Prisma.IntFilter<"Sample"> | number
+  targetMarginRate?: Prisma.DecimalNullableFilter<"Sample"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   sourceSkus?: Prisma.ProductSkuListRelationFilter
   materials?: Prisma.SampleMaterialListRelationFilter
@@ -256,6 +268,7 @@ export type SampleOrderByWithRelationInput = {
   imageKey?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   priority?: Prisma.SortOrder
+  targetMarginRate?: Prisma.SortOrderInput | Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
   sourceSkus?: Prisma.ProductSkuOrderByRelationAggregateInput
   materials?: Prisma.SampleMaterialOrderByRelationAggregateInput
@@ -276,6 +289,7 @@ export type SampleWhereUniqueInput = Prisma.AtLeast<{
   imageKey?: Prisma.StringNullableFilter<"Sample"> | string | null
   description?: Prisma.StringNullableFilter<"Sample"> | string | null
   priority?: Prisma.IntFilter<"Sample"> | number
+  targetMarginRate?: Prisma.DecimalNullableFilter<"Sample"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   sourceSkus?: Prisma.ProductSkuListRelationFilter
   materials?: Prisma.SampleMaterialListRelationFilter
@@ -292,6 +306,7 @@ export type SampleOrderByWithAggregationInput = {
   imageKey?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   priority?: Prisma.SortOrder
+  targetMarginRate?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.SampleCountOrderByAggregateInput
   _avg?: Prisma.SampleAvgOrderByAggregateInput
   _max?: Prisma.SampleMaxOrderByAggregateInput
@@ -311,6 +326,7 @@ export type SampleScalarWhereWithAggregatesInput = {
   imageKey?: Prisma.StringNullableWithAggregatesFilter<"Sample"> | string | null
   description?: Prisma.StringNullableWithAggregatesFilter<"Sample"> | string | null
   priority?: Prisma.IntWithAggregatesFilter<"Sample"> | number
+  targetMarginRate?: Prisma.DecimalNullableWithAggregatesFilter<"Sample"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type SampleCreateInput = {
@@ -321,6 +337,7 @@ export type SampleCreateInput = {
   imageKey?: string | null
   description?: string | null
   priority?: number
+  targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tenant: Prisma.TenantCreateNestedOneWithoutSamplesInput
   sourceSkus?: Prisma.ProductSkuCreateNestedManyWithoutSourceSampleInput
   materials?: Prisma.SampleMaterialCreateNestedManyWithoutSampleInput
@@ -337,6 +354,7 @@ export type SampleUncheckedCreateInput = {
   imageKey?: string | null
   description?: string | null
   priority?: number
+  targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSourceSampleInput
   materials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutSampleInput
   planItems?: Prisma.SamplePlanItemUncheckedCreateNestedManyWithoutSampleInput
@@ -351,6 +369,7 @@ export type SampleUpdateInput = {
   imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tenant?: Prisma.TenantUpdateOneRequiredWithoutSamplesNestedInput
   sourceSkus?: Prisma.ProductSkuUpdateManyWithoutSourceSampleNestedInput
   materials?: Prisma.SampleMaterialUpdateManyWithoutSampleNestedInput
@@ -367,6 +386,7 @@ export type SampleUncheckedUpdateInput = {
   imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSourceSampleNestedInput
   materials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutSampleNestedInput
   planItems?: Prisma.SamplePlanItemUncheckedUpdateManyWithoutSampleNestedInput
@@ -382,6 +402,7 @@ export type SampleCreateManyInput = {
   imageKey?: string | null
   description?: string | null
   priority?: number
+  targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type SampleUpdateManyMutationInput = {
@@ -392,6 +413,7 @@ export type SampleUpdateManyMutationInput = {
   imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type SampleUncheckedUpdateManyInput = {
@@ -403,6 +425,7 @@ export type SampleUncheckedUpdateManyInput = {
   imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type SampleListRelationFilter = {
@@ -434,10 +457,12 @@ export type SampleCountOrderByAggregateInput = {
   imageKey?: Prisma.SortOrder
   description?: Prisma.SortOrder
   priority?: Prisma.SortOrder
+  targetMarginRate?: Prisma.SortOrder
 }
 
 export type SampleAvgOrderByAggregateInput = {
   priority?: Prisma.SortOrder
+  targetMarginRate?: Prisma.SortOrder
 }
 
 export type SampleMaxOrderByAggregateInput = {
@@ -449,6 +474,7 @@ export type SampleMaxOrderByAggregateInput = {
   imageKey?: Prisma.SortOrder
   description?: Prisma.SortOrder
   priority?: Prisma.SortOrder
+  targetMarginRate?: Prisma.SortOrder
 }
 
 export type SampleMinOrderByAggregateInput = {
@@ -460,10 +486,12 @@ export type SampleMinOrderByAggregateInput = {
   imageKey?: Prisma.SortOrder
   description?: Prisma.SortOrder
   priority?: Prisma.SortOrder
+  targetMarginRate?: Prisma.SortOrder
 }
 
 export type SampleSumOrderByAggregateInput = {
   priority?: Prisma.SortOrder
+  targetMarginRate?: Prisma.SortOrder
 }
 
 export type SampleScalarRelationFilter = {
@@ -583,6 +611,7 @@ export type SampleCreateWithoutTenantInput = {
   imageKey?: string | null
   description?: string | null
   priority?: number
+  targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   sourceSkus?: Prisma.ProductSkuCreateNestedManyWithoutSourceSampleInput
   materials?: Prisma.SampleMaterialCreateNestedManyWithoutSampleInput
   planItems?: Prisma.SamplePlanItemCreateNestedManyWithoutSampleInput
@@ -597,6 +626,7 @@ export type SampleUncheckedCreateWithoutTenantInput = {
   imageKey?: string | null
   description?: string | null
   priority?: number
+  targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSourceSampleInput
   materials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutSampleInput
   planItems?: Prisma.SamplePlanItemUncheckedCreateNestedManyWithoutSampleInput
@@ -641,6 +671,7 @@ export type SampleScalarWhereInput = {
   imageKey?: Prisma.StringNullableFilter<"Sample"> | string | null
   description?: Prisma.StringNullableFilter<"Sample"> | string | null
   priority?: Prisma.IntFilter<"Sample"> | number
+  targetMarginRate?: Prisma.DecimalNullableFilter<"Sample"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type SampleCreateWithoutSourceSkusInput = {
@@ -651,6 +682,7 @@ export type SampleCreateWithoutSourceSkusInput = {
   imageKey?: string | null
   description?: string | null
   priority?: number
+  targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tenant: Prisma.TenantCreateNestedOneWithoutSamplesInput
   materials?: Prisma.SampleMaterialCreateNestedManyWithoutSampleInput
   planItems?: Prisma.SamplePlanItemCreateNestedManyWithoutSampleInput
@@ -666,6 +698,7 @@ export type SampleUncheckedCreateWithoutSourceSkusInput = {
   imageKey?: string | null
   description?: string | null
   priority?: number
+  targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   materials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutSampleInput
   planItems?: Prisma.SamplePlanItemUncheckedCreateNestedManyWithoutSampleInput
   planSteps?: Prisma.SamplePlanStepUncheckedCreateNestedManyWithoutSampleInput
@@ -695,6 +728,7 @@ export type SampleUpdateWithoutSourceSkusInput = {
   imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tenant?: Prisma.TenantUpdateOneRequiredWithoutSamplesNestedInput
   materials?: Prisma.SampleMaterialUpdateManyWithoutSampleNestedInput
   planItems?: Prisma.SamplePlanItemUpdateManyWithoutSampleNestedInput
@@ -710,6 +744,7 @@ export type SampleUncheckedUpdateWithoutSourceSkusInput = {
   imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   materials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutSampleNestedInput
   planItems?: Prisma.SamplePlanItemUncheckedUpdateManyWithoutSampleNestedInput
   planSteps?: Prisma.SamplePlanStepUncheckedUpdateManyWithoutSampleNestedInput
@@ -723,6 +758,7 @@ export type SampleCreateWithoutMaterialsInput = {
   imageKey?: string | null
   description?: string | null
   priority?: number
+  targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tenant: Prisma.TenantCreateNestedOneWithoutSamplesInput
   sourceSkus?: Prisma.ProductSkuCreateNestedManyWithoutSourceSampleInput
   planItems?: Prisma.SamplePlanItemCreateNestedManyWithoutSampleInput
@@ -738,6 +774,7 @@ export type SampleUncheckedCreateWithoutMaterialsInput = {
   imageKey?: string | null
   description?: string | null
   priority?: number
+  targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSourceSampleInput
   planItems?: Prisma.SamplePlanItemUncheckedCreateNestedManyWithoutSampleInput
   planSteps?: Prisma.SamplePlanStepUncheckedCreateNestedManyWithoutSampleInput
@@ -767,6 +804,7 @@ export type SampleUpdateWithoutMaterialsInput = {
   imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tenant?: Prisma.TenantUpdateOneRequiredWithoutSamplesNestedInput
   sourceSkus?: Prisma.ProductSkuUpdateManyWithoutSourceSampleNestedInput
   planItems?: Prisma.SamplePlanItemUpdateManyWithoutSampleNestedInput
@@ -782,6 +820,7 @@ export type SampleUncheckedUpdateWithoutMaterialsInput = {
   imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSourceSampleNestedInput
   planItems?: Prisma.SamplePlanItemUncheckedUpdateManyWithoutSampleNestedInput
   planSteps?: Prisma.SamplePlanStepUncheckedUpdateManyWithoutSampleNestedInput
@@ -795,6 +834,7 @@ export type SampleCreateWithoutPlanItemsInput = {
   imageKey?: string | null
   description?: string | null
   priority?: number
+  targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tenant: Prisma.TenantCreateNestedOneWithoutSamplesInput
   sourceSkus?: Prisma.ProductSkuCreateNestedManyWithoutSourceSampleInput
   materials?: Prisma.SampleMaterialCreateNestedManyWithoutSampleInput
@@ -810,6 +850,7 @@ export type SampleUncheckedCreateWithoutPlanItemsInput = {
   imageKey?: string | null
   description?: string | null
   priority?: number
+  targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSourceSampleInput
   materials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutSampleInput
   planSteps?: Prisma.SamplePlanStepUncheckedCreateNestedManyWithoutSampleInput
@@ -839,6 +880,7 @@ export type SampleUpdateWithoutPlanItemsInput = {
   imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tenant?: Prisma.TenantUpdateOneRequiredWithoutSamplesNestedInput
   sourceSkus?: Prisma.ProductSkuUpdateManyWithoutSourceSampleNestedInput
   materials?: Prisma.SampleMaterialUpdateManyWithoutSampleNestedInput
@@ -854,6 +896,7 @@ export type SampleUncheckedUpdateWithoutPlanItemsInput = {
   imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSourceSampleNestedInput
   materials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutSampleNestedInput
   planSteps?: Prisma.SamplePlanStepUncheckedUpdateManyWithoutSampleNestedInput
@@ -867,6 +910,7 @@ export type SampleCreateWithoutPlanStepsInput = {
   imageKey?: string | null
   description?: string | null
   priority?: number
+  targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tenant: Prisma.TenantCreateNestedOneWithoutSamplesInput
   sourceSkus?: Prisma.ProductSkuCreateNestedManyWithoutSourceSampleInput
   materials?: Prisma.SampleMaterialCreateNestedManyWithoutSampleInput
@@ -882,6 +926,7 @@ export type SampleUncheckedCreateWithoutPlanStepsInput = {
   imageKey?: string | null
   description?: string | null
   priority?: number
+  targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSourceSampleInput
   materials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutSampleInput
   planItems?: Prisma.SamplePlanItemUncheckedCreateNestedManyWithoutSampleInput
@@ -911,6 +956,7 @@ export type SampleUpdateWithoutPlanStepsInput = {
   imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   tenant?: Prisma.TenantUpdateOneRequiredWithoutSamplesNestedInput
   sourceSkus?: Prisma.ProductSkuUpdateManyWithoutSourceSampleNestedInput
   materials?: Prisma.SampleMaterialUpdateManyWithoutSampleNestedInput
@@ -926,6 +972,7 @@ export type SampleUncheckedUpdateWithoutPlanStepsInput = {
   imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSourceSampleNestedInput
   materials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutSampleNestedInput
   planItems?: Prisma.SamplePlanItemUncheckedUpdateManyWithoutSampleNestedInput
@@ -939,6 +986,7 @@ export type SampleCreateManyTenantInput = {
   imageKey?: string | null
   description?: string | null
   priority?: number
+  targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type SampleUpdateWithoutTenantInput = {
@@ -949,6 +997,7 @@ export type SampleUpdateWithoutTenantInput = {
   imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   sourceSkus?: Prisma.ProductSkuUpdateManyWithoutSourceSampleNestedInput
   materials?: Prisma.SampleMaterialUpdateManyWithoutSampleNestedInput
   planItems?: Prisma.SamplePlanItemUpdateManyWithoutSampleNestedInput
@@ -963,6 +1012,7 @@ export type SampleUncheckedUpdateWithoutTenantInput = {
   imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSourceSampleNestedInput
   materials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutSampleNestedInput
   planItems?: Prisma.SamplePlanItemUncheckedUpdateManyWithoutSampleNestedInput
@@ -977,6 +1027,7 @@ export type SampleUncheckedUpdateManyWithoutTenantInput = {
   imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
+  targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 
@@ -1046,6 +1097,7 @@ export type SampleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   imageKey?: boolean
   description?: boolean
   priority?: boolean
+  targetMarginRate?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   sourceSkus?: boolean | Prisma.Sample$sourceSkusArgs<ExtArgs>
   materials?: boolean | Prisma.Sample$materialsArgs<ExtArgs>
@@ -1063,6 +1115,7 @@ export type SampleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   imageKey?: boolean
   description?: boolean
   priority?: boolean
+  targetMarginRate?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sample"]>
 
@@ -1075,6 +1128,7 @@ export type SampleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   imageKey?: boolean
   description?: boolean
   priority?: boolean
+  targetMarginRate?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sample"]>
 
@@ -1087,9 +1141,10 @@ export type SampleSelectScalar = {
   imageKey?: boolean
   description?: boolean
   priority?: boolean
+  targetMarginRate?: boolean
 }
 
-export type SampleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "code" | "name" | "state" | "imageKey" | "description" | "priority", ExtArgs["result"]["sample"]>
+export type SampleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "code" | "name" | "state" | "imageKey" | "description" | "priority" | "targetMarginRate", ExtArgs["result"]["sample"]>
 export type SampleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   sourceSkus?: boolean | Prisma.Sample$sourceSkusArgs<ExtArgs>
@@ -1123,6 +1178,7 @@ export type $SamplePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     imageKey: string | null
     description: string | null
     priority: number
+    targetMarginRate: runtime.Decimal | null
   }, ExtArgs["result"]["sample"]>
   composites: {}
 }
@@ -1559,6 +1615,7 @@ export interface SampleFieldRefs {
   readonly imageKey: Prisma.FieldRef<"Sample", 'String'>
   readonly description: Prisma.FieldRef<"Sample", 'String'>
   readonly priority: Prisma.FieldRef<"Sample", 'Int'>
+  readonly targetMarginRate: Prisma.FieldRef<"Sample", 'Decimal'>
 }
     
 

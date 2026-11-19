@@ -2,6 +2,7 @@
 export const BATCH_NUMBER_PREFIX = "BATCH";
 export const PRODUCT_CODE_PREFIX = "PRD";
 export const SKU_CODE_PREFIX = "SKU";
+export const SAMPLE_CODE_PREFIX = "SMP";
 
 const ENTROPY_PATTERN = /^[0-9A-Za-z-]+$/;
 
@@ -21,6 +22,10 @@ export function generateProductCode(now: Date, entropy: string): string {
 
 export function generateSkuCode(now: Date, entropy: string): string {
   return generateDatedIdentifier(SKU_CODE_PREFIX, now, entropy);
+}
+
+export function generateSampleCode(now: Date, entropy: string): string {
+  return generateDatedIdentifier(SAMPLE_CODE_PREFIX, now, entropy);
 }
 
 function generateDatedIdentifier(prefix: string, now: Date, entropy: string): string {

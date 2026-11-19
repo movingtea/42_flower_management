@@ -233,6 +233,18 @@ export const V2_NAV_GROUPS: readonly V2NavGroup[] = [
         icon: "🎁",
         anyCapabilities: ["catalog"],
       },
+      {
+        href: "/v2/samples",
+        label: "样品库",
+        icon: "🌷",
+        anyCapabilities: ["catalog"],
+      },
+      {
+        href: "/v2/sample-plans",
+        label: "打样计划",
+        icon: "🧵",
+        anyCapabilities: ["production"],
+      },
     ],
   },
   {
@@ -253,6 +265,12 @@ export const V2_NAV_GROUPS: readonly V2NavGroup[] = [
         href: "/v2/reports",
         label: "报表中心",
         icon: "📈",
+        anyCapabilities: ["read"],
+      },
+      {
+        href: "/v2/sample-reports",
+        label: "样品报表",
+        icon: "📊",
         anyCapabilities: ["read"],
       },
       {

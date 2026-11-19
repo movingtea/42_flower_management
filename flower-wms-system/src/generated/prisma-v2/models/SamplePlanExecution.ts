@@ -20,58 +20,100 @@ export type SamplePlanExecutionModel = runtime.Types.Result.DefaultSelection<Pri
 
 export type AggregateSamplePlanExecution = {
   _count: SamplePlanExecutionCountAggregateOutputType | null
+  _avg: SamplePlanExecutionAvgAggregateOutputType | null
+  _sum: SamplePlanExecutionSumAggregateOutputType | null
   _min: SamplePlanExecutionMinAggregateOutputType | null
   _max: SamplePlanExecutionMaxAggregateOutputType | null
+}
+
+export type SamplePlanExecutionAvgAggregateOutputType = {
+  actualCost: runtime.Decimal | null
+}
+
+export type SamplePlanExecutionSumAggregateOutputType = {
+  actualCost: runtime.Decimal | null
 }
 
 export type SamplePlanExecutionMinAggregateOutputType = {
   id: string | null
   planId: string | null
   selectedRunId: string | null
+  approvedAt: Date | null
   startedAt: Date | null
   completedAt: Date | null
+  cancelledAt: Date | null
+  actualCost: runtime.Decimal | null
+  costEstimated: boolean | null
 }
 
 export type SamplePlanExecutionMaxAggregateOutputType = {
   id: string | null
   planId: string | null
   selectedRunId: string | null
+  approvedAt: Date | null
   startedAt: Date | null
   completedAt: Date | null
+  cancelledAt: Date | null
+  actualCost: runtime.Decimal | null
+  costEstimated: boolean | null
 }
 
 export type SamplePlanExecutionCountAggregateOutputType = {
   id: number
   planId: number
   selectedRunId: number
+  approvedAt: number
   startedAt: number
   completedAt: number
+  cancelledAt: number
+  actualCost: number
+  costEstimated: number
   _all: number
 }
 
+
+export type SamplePlanExecutionAvgAggregateInputType = {
+  actualCost?: true
+}
+
+export type SamplePlanExecutionSumAggregateInputType = {
+  actualCost?: true
+}
 
 export type SamplePlanExecutionMinAggregateInputType = {
   id?: true
   planId?: true
   selectedRunId?: true
+  approvedAt?: true
   startedAt?: true
   completedAt?: true
+  cancelledAt?: true
+  actualCost?: true
+  costEstimated?: true
 }
 
 export type SamplePlanExecutionMaxAggregateInputType = {
   id?: true
   planId?: true
   selectedRunId?: true
+  approvedAt?: true
   startedAt?: true
   completedAt?: true
+  cancelledAt?: true
+  actualCost?: true
+  costEstimated?: true
 }
 
 export type SamplePlanExecutionCountAggregateInputType = {
   id?: true
   planId?: true
   selectedRunId?: true
+  approvedAt?: true
   startedAt?: true
   completedAt?: true
+  cancelledAt?: true
+  actualCost?: true
+  costEstimated?: true
   _all?: true
 }
 
@@ -113,6 +155,18 @@ export type SamplePlanExecutionAggregateArgs<ExtArgs extends runtime.Types.Exten
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: SamplePlanExecutionAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: SamplePlanExecutionSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: SamplePlanExecutionMinAggregateInputType
@@ -143,6 +197,8 @@ export type SamplePlanExecutionGroupByArgs<ExtArgs extends runtime.Types.Extensi
   take?: number
   skip?: number
   _count?: SamplePlanExecutionCountAggregateInputType | true
+  _avg?: SamplePlanExecutionAvgAggregateInputType
+  _sum?: SamplePlanExecutionSumAggregateInputType
   _min?: SamplePlanExecutionMinAggregateInputType
   _max?: SamplePlanExecutionMaxAggregateInputType
 }
@@ -151,9 +207,15 @@ export type SamplePlanExecutionGroupByOutputType = {
   id: string
   planId: string
   selectedRunId: string
-  startedAt: Date
+  approvedAt: Date | null
+  startedAt: Date | null
   completedAt: Date | null
+  cancelledAt: Date | null
+  actualCost: runtime.Decimal | null
+  costEstimated: boolean
   _count: SamplePlanExecutionCountAggregateOutputType | null
+  _avg: SamplePlanExecutionAvgAggregateOutputType | null
+  _sum: SamplePlanExecutionSumAggregateOutputType | null
   _min: SamplePlanExecutionMinAggregateOutputType | null
   _max: SamplePlanExecutionMaxAggregateOutputType | null
 }
@@ -180,8 +242,12 @@ export type SamplePlanExecutionWhereInput = {
   id?: Prisma.StringFilter<"SamplePlanExecution"> | string
   planId?: Prisma.StringFilter<"SamplePlanExecution"> | string
   selectedRunId?: Prisma.StringFilter<"SamplePlanExecution"> | string
-  startedAt?: Prisma.DateTimeFilter<"SamplePlanExecution"> | Date | string
+  approvedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecution"> | Date | string | null
+  startedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecution"> | Date | string | null
   completedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecution"> | Date | string | null
+  cancelledAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecution"> | Date | string | null
+  actualCost?: Prisma.DecimalNullableFilter<"SamplePlanExecution"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: Prisma.BoolFilter<"SamplePlanExecution"> | boolean
   plan?: Prisma.XOR<Prisma.SamplePlanScalarRelationFilter, Prisma.SamplePlanWhereInput>
   selectedRun?: Prisma.XOR<Prisma.SamplePlanRunScalarRelationFilter, Prisma.SamplePlanRunWhereInput>
   steps?: Prisma.SamplePlanExecutionStepListRelationFilter
@@ -192,8 +258,12 @@ export type SamplePlanExecutionOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   planId?: Prisma.SortOrder
   selectedRunId?: Prisma.SortOrder
-  startedAt?: Prisma.SortOrder
+  approvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  actualCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  costEstimated?: Prisma.SortOrder
   plan?: Prisma.SamplePlanOrderByWithRelationInput
   selectedRun?: Prisma.SamplePlanRunOrderByWithRelationInput
   steps?: Prisma.SamplePlanExecutionStepOrderByRelationAggregateInput
@@ -207,8 +277,12 @@ export type SamplePlanExecutionWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.SamplePlanExecutionWhereInput | Prisma.SamplePlanExecutionWhereInput[]
   planId?: Prisma.StringFilter<"SamplePlanExecution"> | string
   selectedRunId?: Prisma.StringFilter<"SamplePlanExecution"> | string
-  startedAt?: Prisma.DateTimeFilter<"SamplePlanExecution"> | Date | string
+  approvedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecution"> | Date | string | null
+  startedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecution"> | Date | string | null
   completedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecution"> | Date | string | null
+  cancelledAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecution"> | Date | string | null
+  actualCost?: Prisma.DecimalNullableFilter<"SamplePlanExecution"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: Prisma.BoolFilter<"SamplePlanExecution"> | boolean
   plan?: Prisma.XOR<Prisma.SamplePlanScalarRelationFilter, Prisma.SamplePlanWhereInput>
   selectedRun?: Prisma.XOR<Prisma.SamplePlanRunScalarRelationFilter, Prisma.SamplePlanRunWhereInput>
   steps?: Prisma.SamplePlanExecutionStepListRelationFilter
@@ -219,11 +293,17 @@ export type SamplePlanExecutionOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   planId?: Prisma.SortOrder
   selectedRunId?: Prisma.SortOrder
-  startedAt?: Prisma.SortOrder
+  approvedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  actualCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  costEstimated?: Prisma.SortOrder
   _count?: Prisma.SamplePlanExecutionCountOrderByAggregateInput
+  _avg?: Prisma.SamplePlanExecutionAvgOrderByAggregateInput
   _max?: Prisma.SamplePlanExecutionMaxOrderByAggregateInput
   _min?: Prisma.SamplePlanExecutionMinOrderByAggregateInput
+  _sum?: Prisma.SamplePlanExecutionSumOrderByAggregateInput
 }
 
 export type SamplePlanExecutionScalarWhereWithAggregatesInput = {
@@ -233,14 +313,22 @@ export type SamplePlanExecutionScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"SamplePlanExecution"> | string
   planId?: Prisma.StringWithAggregatesFilter<"SamplePlanExecution"> | string
   selectedRunId?: Prisma.StringWithAggregatesFilter<"SamplePlanExecution"> | string
-  startedAt?: Prisma.DateTimeWithAggregatesFilter<"SamplePlanExecution"> | Date | string
+  approvedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SamplePlanExecution"> | Date | string | null
+  startedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SamplePlanExecution"> | Date | string | null
   completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SamplePlanExecution"> | Date | string | null
+  cancelledAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SamplePlanExecution"> | Date | string | null
+  actualCost?: Prisma.DecimalNullableWithAggregatesFilter<"SamplePlanExecution"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: Prisma.BoolWithAggregatesFilter<"SamplePlanExecution"> | boolean
 }
 
 export type SamplePlanExecutionCreateInput = {
   id?: string
-  startedAt?: Date | string
+  approvedAt?: Date | string | null
+  startedAt?: Date | string | null
   completedAt?: Date | string | null
+  cancelledAt?: Date | string | null
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: boolean
   plan: Prisma.SamplePlanCreateNestedOneWithoutExecutionsInput
   selectedRun: Prisma.SamplePlanRunCreateNestedOneWithoutSelectedForExecutionsInput
   steps?: Prisma.SamplePlanExecutionStepCreateNestedManyWithoutExecutionInput
@@ -251,16 +339,24 @@ export type SamplePlanExecutionUncheckedCreateInput = {
   id?: string
   planId: string
   selectedRunId: string
-  startedAt?: Date | string
+  approvedAt?: Date | string | null
+  startedAt?: Date | string | null
   completedAt?: Date | string | null
+  cancelledAt?: Date | string | null
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: boolean
   steps?: Prisma.SamplePlanExecutionStepUncheckedCreateNestedManyWithoutExecutionInput
   reservations?: Prisma.SampleInventoryReservationUncheckedCreateNestedManyWithoutExecutionInput
 }
 
 export type SamplePlanExecutionUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  actualCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   plan?: Prisma.SamplePlanUpdateOneRequiredWithoutExecutionsNestedInput
   selectedRun?: Prisma.SamplePlanRunUpdateOneRequiredWithoutSelectedForExecutionsNestedInput
   steps?: Prisma.SamplePlanExecutionStepUpdateManyWithoutExecutionNestedInput
@@ -271,8 +367,12 @@ export type SamplePlanExecutionUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   planId?: Prisma.StringFieldUpdateOperationsInput | string
   selectedRunId?: Prisma.StringFieldUpdateOperationsInput | string
-  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  actualCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   steps?: Prisma.SamplePlanExecutionStepUncheckedUpdateManyWithoutExecutionNestedInput
   reservations?: Prisma.SampleInventoryReservationUncheckedUpdateManyWithoutExecutionNestedInput
 }
@@ -281,22 +381,34 @@ export type SamplePlanExecutionCreateManyInput = {
   id?: string
   planId: string
   selectedRunId: string
-  startedAt?: Date | string
+  approvedAt?: Date | string | null
+  startedAt?: Date | string | null
   completedAt?: Date | string | null
+  cancelledAt?: Date | string | null
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: boolean
 }
 
 export type SamplePlanExecutionUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  actualCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type SamplePlanExecutionUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   planId?: Prisma.StringFieldUpdateOperationsInput | string
   selectedRunId?: Prisma.StringFieldUpdateOperationsInput | string
-  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  actualCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type SamplePlanExecutionListRelationFilter = {
@@ -313,24 +425,44 @@ export type SamplePlanExecutionCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   planId?: Prisma.SortOrder
   selectedRunId?: Prisma.SortOrder
+  approvedAt?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrder
+  actualCost?: Prisma.SortOrder
+  costEstimated?: Prisma.SortOrder
+}
+
+export type SamplePlanExecutionAvgOrderByAggregateInput = {
+  actualCost?: Prisma.SortOrder
 }
 
 export type SamplePlanExecutionMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   planId?: Prisma.SortOrder
   selectedRunId?: Prisma.SortOrder
+  approvedAt?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrder
+  actualCost?: Prisma.SortOrder
+  costEstimated?: Prisma.SortOrder
 }
 
 export type SamplePlanExecutionMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   planId?: Prisma.SortOrder
   selectedRunId?: Prisma.SortOrder
+  approvedAt?: Prisma.SortOrder
   startedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  cancelledAt?: Prisma.SortOrder
+  actualCost?: Prisma.SortOrder
+  costEstimated?: Prisma.SortOrder
+}
+
+export type SamplePlanExecutionSumOrderByAggregateInput = {
+  actualCost?: Prisma.SortOrder
 }
 
 export type SamplePlanExecutionScalarRelationFilter = {
@@ -452,8 +584,12 @@ export type SamplePlanExecutionUpdateOneRequiredWithoutReservationsNestedInput =
 
 export type SamplePlanExecutionCreateWithoutPlanInput = {
   id?: string
-  startedAt?: Date | string
+  approvedAt?: Date | string | null
+  startedAt?: Date | string | null
   completedAt?: Date | string | null
+  cancelledAt?: Date | string | null
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: boolean
   selectedRun: Prisma.SamplePlanRunCreateNestedOneWithoutSelectedForExecutionsInput
   steps?: Prisma.SamplePlanExecutionStepCreateNestedManyWithoutExecutionInput
   reservations?: Prisma.SampleInventoryReservationCreateNestedManyWithoutExecutionInput
@@ -462,8 +598,12 @@ export type SamplePlanExecutionCreateWithoutPlanInput = {
 export type SamplePlanExecutionUncheckedCreateWithoutPlanInput = {
   id?: string
   selectedRunId: string
-  startedAt?: Date | string
+  approvedAt?: Date | string | null
+  startedAt?: Date | string | null
   completedAt?: Date | string | null
+  cancelledAt?: Date | string | null
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: boolean
   steps?: Prisma.SamplePlanExecutionStepUncheckedCreateNestedManyWithoutExecutionInput
   reservations?: Prisma.SampleInventoryReservationUncheckedCreateNestedManyWithoutExecutionInput
 }
@@ -501,14 +641,22 @@ export type SamplePlanExecutionScalarWhereInput = {
   id?: Prisma.StringFilter<"SamplePlanExecution"> | string
   planId?: Prisma.StringFilter<"SamplePlanExecution"> | string
   selectedRunId?: Prisma.StringFilter<"SamplePlanExecution"> | string
-  startedAt?: Prisma.DateTimeFilter<"SamplePlanExecution"> | Date | string
+  approvedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecution"> | Date | string | null
+  startedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecution"> | Date | string | null
   completedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecution"> | Date | string | null
+  cancelledAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecution"> | Date | string | null
+  actualCost?: Prisma.DecimalNullableFilter<"SamplePlanExecution"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: Prisma.BoolFilter<"SamplePlanExecution"> | boolean
 }
 
 export type SamplePlanExecutionCreateWithoutSelectedRunInput = {
   id?: string
-  startedAt?: Date | string
+  approvedAt?: Date | string | null
+  startedAt?: Date | string | null
   completedAt?: Date | string | null
+  cancelledAt?: Date | string | null
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: boolean
   plan: Prisma.SamplePlanCreateNestedOneWithoutExecutionsInput
   steps?: Prisma.SamplePlanExecutionStepCreateNestedManyWithoutExecutionInput
   reservations?: Prisma.SampleInventoryReservationCreateNestedManyWithoutExecutionInput
@@ -516,8 +664,12 @@ export type SamplePlanExecutionCreateWithoutSelectedRunInput = {
 
 export type SamplePlanExecutionUncheckedCreateWithoutSelectedRunInput = {
   id?: string
-  startedAt?: Date | string
+  approvedAt?: Date | string | null
+  startedAt?: Date | string | null
   completedAt?: Date | string | null
+  cancelledAt?: Date | string | null
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: boolean
   steps?: Prisma.SamplePlanExecutionStepUncheckedCreateNestedManyWithoutExecutionInput
   reservations?: Prisma.SampleInventoryReservationUncheckedCreateNestedManyWithoutExecutionInput
 }
@@ -550,8 +702,12 @@ export type SamplePlanExecutionUpdateManyWithWhereWithoutSelectedRunInput = {
 
 export type SamplePlanExecutionCreateWithoutStepsInput = {
   id?: string
-  startedAt?: Date | string
+  approvedAt?: Date | string | null
+  startedAt?: Date | string | null
   completedAt?: Date | string | null
+  cancelledAt?: Date | string | null
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: boolean
   plan: Prisma.SamplePlanCreateNestedOneWithoutExecutionsInput
   selectedRun: Prisma.SamplePlanRunCreateNestedOneWithoutSelectedForExecutionsInput
   reservations?: Prisma.SampleInventoryReservationCreateNestedManyWithoutExecutionInput
@@ -561,8 +717,12 @@ export type SamplePlanExecutionUncheckedCreateWithoutStepsInput = {
   id?: string
   planId: string
   selectedRunId: string
-  startedAt?: Date | string
+  approvedAt?: Date | string | null
+  startedAt?: Date | string | null
   completedAt?: Date | string | null
+  cancelledAt?: Date | string | null
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: boolean
   reservations?: Prisma.SampleInventoryReservationUncheckedCreateNestedManyWithoutExecutionInput
 }
 
@@ -584,8 +744,12 @@ export type SamplePlanExecutionUpdateToOneWithWhereWithoutStepsInput = {
 
 export type SamplePlanExecutionUpdateWithoutStepsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  actualCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   plan?: Prisma.SamplePlanUpdateOneRequiredWithoutExecutionsNestedInput
   selectedRun?: Prisma.SamplePlanRunUpdateOneRequiredWithoutSelectedForExecutionsNestedInput
   reservations?: Prisma.SampleInventoryReservationUpdateManyWithoutExecutionNestedInput
@@ -595,15 +759,23 @@ export type SamplePlanExecutionUncheckedUpdateWithoutStepsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   planId?: Prisma.StringFieldUpdateOperationsInput | string
   selectedRunId?: Prisma.StringFieldUpdateOperationsInput | string
-  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  actualCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   reservations?: Prisma.SampleInventoryReservationUncheckedUpdateManyWithoutExecutionNestedInput
 }
 
 export type SamplePlanExecutionCreateWithoutReservationsInput = {
   id?: string
-  startedAt?: Date | string
+  approvedAt?: Date | string | null
+  startedAt?: Date | string | null
   completedAt?: Date | string | null
+  cancelledAt?: Date | string | null
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: boolean
   plan: Prisma.SamplePlanCreateNestedOneWithoutExecutionsInput
   selectedRun: Prisma.SamplePlanRunCreateNestedOneWithoutSelectedForExecutionsInput
   steps?: Prisma.SamplePlanExecutionStepCreateNestedManyWithoutExecutionInput
@@ -613,8 +785,12 @@ export type SamplePlanExecutionUncheckedCreateWithoutReservationsInput = {
   id?: string
   planId: string
   selectedRunId: string
-  startedAt?: Date | string
+  approvedAt?: Date | string | null
+  startedAt?: Date | string | null
   completedAt?: Date | string | null
+  cancelledAt?: Date | string | null
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: boolean
   steps?: Prisma.SamplePlanExecutionStepUncheckedCreateNestedManyWithoutExecutionInput
 }
 
@@ -636,8 +812,12 @@ export type SamplePlanExecutionUpdateToOneWithWhereWithoutReservationsInput = {
 
 export type SamplePlanExecutionUpdateWithoutReservationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  actualCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   plan?: Prisma.SamplePlanUpdateOneRequiredWithoutExecutionsNestedInput
   selectedRun?: Prisma.SamplePlanRunUpdateOneRequiredWithoutSelectedForExecutionsNestedInput
   steps?: Prisma.SamplePlanExecutionStepUpdateManyWithoutExecutionNestedInput
@@ -647,22 +827,34 @@ export type SamplePlanExecutionUncheckedUpdateWithoutReservationsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   planId?: Prisma.StringFieldUpdateOperationsInput | string
   selectedRunId?: Prisma.StringFieldUpdateOperationsInput | string
-  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  actualCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   steps?: Prisma.SamplePlanExecutionStepUncheckedUpdateManyWithoutExecutionNestedInput
 }
 
 export type SamplePlanExecutionCreateManyPlanInput = {
   id?: string
   selectedRunId: string
-  startedAt?: Date | string
+  approvedAt?: Date | string | null
+  startedAt?: Date | string | null
   completedAt?: Date | string | null
+  cancelledAt?: Date | string | null
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: boolean
 }
 
 export type SamplePlanExecutionUpdateWithoutPlanInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  actualCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   selectedRun?: Prisma.SamplePlanRunUpdateOneRequiredWithoutSelectedForExecutionsNestedInput
   steps?: Prisma.SamplePlanExecutionStepUpdateManyWithoutExecutionNestedInput
   reservations?: Prisma.SampleInventoryReservationUpdateManyWithoutExecutionNestedInput
@@ -671,8 +863,12 @@ export type SamplePlanExecutionUpdateWithoutPlanInput = {
 export type SamplePlanExecutionUncheckedUpdateWithoutPlanInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   selectedRunId?: Prisma.StringFieldUpdateOperationsInput | string
-  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  actualCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   steps?: Prisma.SamplePlanExecutionStepUncheckedUpdateManyWithoutExecutionNestedInput
   reservations?: Prisma.SampleInventoryReservationUncheckedUpdateManyWithoutExecutionNestedInput
 }
@@ -680,20 +876,32 @@ export type SamplePlanExecutionUncheckedUpdateWithoutPlanInput = {
 export type SamplePlanExecutionUncheckedUpdateManyWithoutPlanInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   selectedRunId?: Prisma.StringFieldUpdateOperationsInput | string
-  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  actualCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type SamplePlanExecutionCreateManySelectedRunInput = {
   id?: string
-  startedAt?: Date | string
+  approvedAt?: Date | string | null
+  startedAt?: Date | string | null
   completedAt?: Date | string | null
+  cancelledAt?: Date | string | null
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: boolean
 }
 
 export type SamplePlanExecutionUpdateWithoutSelectedRunInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  actualCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   plan?: Prisma.SamplePlanUpdateOneRequiredWithoutExecutionsNestedInput
   steps?: Prisma.SamplePlanExecutionStepUpdateManyWithoutExecutionNestedInput
   reservations?: Prisma.SampleInventoryReservationUpdateManyWithoutExecutionNestedInput
@@ -701,16 +909,24 @@ export type SamplePlanExecutionUpdateWithoutSelectedRunInput = {
 
 export type SamplePlanExecutionUncheckedUpdateWithoutSelectedRunInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  actualCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   steps?: Prisma.SamplePlanExecutionStepUncheckedUpdateManyWithoutExecutionNestedInput
   reservations?: Prisma.SampleInventoryReservationUncheckedUpdateManyWithoutExecutionNestedInput
 }
 
 export type SamplePlanExecutionUncheckedUpdateManyWithoutSelectedRunInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
-  startedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  approvedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  cancelledAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  actualCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -757,8 +973,12 @@ export type SamplePlanExecutionSelect<ExtArgs extends runtime.Types.Extensions.I
   id?: boolean
   planId?: boolean
   selectedRunId?: boolean
+  approvedAt?: boolean
   startedAt?: boolean
   completedAt?: boolean
+  cancelledAt?: boolean
+  actualCost?: boolean
+  costEstimated?: boolean
   plan?: boolean | Prisma.SamplePlanDefaultArgs<ExtArgs>
   selectedRun?: boolean | Prisma.SamplePlanRunDefaultArgs<ExtArgs>
   steps?: boolean | Prisma.SamplePlanExecution$stepsArgs<ExtArgs>
@@ -770,8 +990,12 @@ export type SamplePlanExecutionSelectCreateManyAndReturn<ExtArgs extends runtime
   id?: boolean
   planId?: boolean
   selectedRunId?: boolean
+  approvedAt?: boolean
   startedAt?: boolean
   completedAt?: boolean
+  cancelledAt?: boolean
+  actualCost?: boolean
+  costEstimated?: boolean
   plan?: boolean | Prisma.SamplePlanDefaultArgs<ExtArgs>
   selectedRun?: boolean | Prisma.SamplePlanRunDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["samplePlanExecution"]>
@@ -780,8 +1004,12 @@ export type SamplePlanExecutionSelectUpdateManyAndReturn<ExtArgs extends runtime
   id?: boolean
   planId?: boolean
   selectedRunId?: boolean
+  approvedAt?: boolean
   startedAt?: boolean
   completedAt?: boolean
+  cancelledAt?: boolean
+  actualCost?: boolean
+  costEstimated?: boolean
   plan?: boolean | Prisma.SamplePlanDefaultArgs<ExtArgs>
   selectedRun?: boolean | Prisma.SamplePlanRunDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["samplePlanExecution"]>
@@ -790,11 +1018,15 @@ export type SamplePlanExecutionSelectScalar = {
   id?: boolean
   planId?: boolean
   selectedRunId?: boolean
+  approvedAt?: boolean
   startedAt?: boolean
   completedAt?: boolean
+  cancelledAt?: boolean
+  actualCost?: boolean
+  costEstimated?: boolean
 }
 
-export type SamplePlanExecutionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "planId" | "selectedRunId" | "startedAt" | "completedAt", ExtArgs["result"]["samplePlanExecution"]>
+export type SamplePlanExecutionOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "planId" | "selectedRunId" | "approvedAt" | "startedAt" | "completedAt" | "cancelledAt" | "actualCost" | "costEstimated", ExtArgs["result"]["samplePlanExecution"]>
 export type SamplePlanExecutionInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   plan?: boolean | Prisma.SamplePlanDefaultArgs<ExtArgs>
   selectedRun?: boolean | Prisma.SamplePlanRunDefaultArgs<ExtArgs>
@@ -823,8 +1055,12 @@ export type $SamplePlanExecutionPayload<ExtArgs extends runtime.Types.Extensions
     id: string
     planId: string
     selectedRunId: string
-    startedAt: Date
+    approvedAt: Date | null
+    startedAt: Date | null
     completedAt: Date | null
+    cancelledAt: Date | null
+    actualCost: runtime.Decimal | null
+    costEstimated: boolean
   }, ExtArgs["result"]["samplePlanExecution"]>
   composites: {}
 }
@@ -1255,8 +1491,12 @@ export interface SamplePlanExecutionFieldRefs {
   readonly id: Prisma.FieldRef<"SamplePlanExecution", 'String'>
   readonly planId: Prisma.FieldRef<"SamplePlanExecution", 'String'>
   readonly selectedRunId: Prisma.FieldRef<"SamplePlanExecution", 'String'>
+  readonly approvedAt: Prisma.FieldRef<"SamplePlanExecution", 'DateTime'>
   readonly startedAt: Prisma.FieldRef<"SamplePlanExecution", 'DateTime'>
   readonly completedAt: Prisma.FieldRef<"SamplePlanExecution", 'DateTime'>
+  readonly cancelledAt: Prisma.FieldRef<"SamplePlanExecution", 'DateTime'>
+  readonly actualCost: Prisma.FieldRef<"SamplePlanExecution", 'Decimal'>
+  readonly costEstimated: Prisma.FieldRef<"SamplePlanExecution", 'Boolean'>
 }
     
 

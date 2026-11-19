@@ -37,6 +37,7 @@ export type SampleInventoryReservationSumAggregateOutputType = {
 export type SampleInventoryReservationMinAggregateOutputType = {
   id: string | null
   executionId: string | null
+  executionStepId: string | null
   batchId: string | null
   quantity: runtime.Decimal | null
   state: $Enums.ReservationState | null
@@ -45,6 +46,7 @@ export type SampleInventoryReservationMinAggregateOutputType = {
 export type SampleInventoryReservationMaxAggregateOutputType = {
   id: string | null
   executionId: string | null
+  executionStepId: string | null
   batchId: string | null
   quantity: runtime.Decimal | null
   state: $Enums.ReservationState | null
@@ -53,6 +55,7 @@ export type SampleInventoryReservationMaxAggregateOutputType = {
 export type SampleInventoryReservationCountAggregateOutputType = {
   id: number
   executionId: number
+  executionStepId: number
   batchId: number
   quantity: number
   state: number
@@ -71,6 +74,7 @@ export type SampleInventoryReservationSumAggregateInputType = {
 export type SampleInventoryReservationMinAggregateInputType = {
   id?: true
   executionId?: true
+  executionStepId?: true
   batchId?: true
   quantity?: true
   state?: true
@@ -79,6 +83,7 @@ export type SampleInventoryReservationMinAggregateInputType = {
 export type SampleInventoryReservationMaxAggregateInputType = {
   id?: true
   executionId?: true
+  executionStepId?: true
   batchId?: true
   quantity?: true
   state?: true
@@ -87,6 +92,7 @@ export type SampleInventoryReservationMaxAggregateInputType = {
 export type SampleInventoryReservationCountAggregateInputType = {
   id?: true
   executionId?: true
+  executionStepId?: true
   batchId?: true
   quantity?: true
   state?: true
@@ -182,6 +188,7 @@ export type SampleInventoryReservationGroupByArgs<ExtArgs extends runtime.Types.
 export type SampleInventoryReservationGroupByOutputType = {
   id: string
   executionId: string
+  executionStepId: string | null
   batchId: string
   quantity: runtime.Decimal
   state: $Enums.ReservationState
@@ -213,20 +220,24 @@ export type SampleInventoryReservationWhereInput = {
   NOT?: Prisma.SampleInventoryReservationWhereInput | Prisma.SampleInventoryReservationWhereInput[]
   id?: Prisma.StringFilter<"SampleInventoryReservation"> | string
   executionId?: Prisma.StringFilter<"SampleInventoryReservation"> | string
+  executionStepId?: Prisma.StringNullableFilter<"SampleInventoryReservation"> | string | null
   batchId?: Prisma.StringFilter<"SampleInventoryReservation"> | string
   quantity?: Prisma.DecimalFilter<"SampleInventoryReservation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: Prisma.EnumReservationStateFilter<"SampleInventoryReservation"> | $Enums.ReservationState
   execution?: Prisma.XOR<Prisma.SamplePlanExecutionScalarRelationFilter, Prisma.SamplePlanExecutionWhereInput>
+  executionStep?: Prisma.XOR<Prisma.SamplePlanExecutionStepNullableScalarRelationFilter, Prisma.SamplePlanExecutionStepWhereInput> | null
   batch?: Prisma.XOR<Prisma.InventoryBatchScalarRelationFilter, Prisma.InventoryBatchWhereInput>
 }
 
 export type SampleInventoryReservationOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   executionId?: Prisma.SortOrder
+  executionStepId?: Prisma.SortOrderInput | Prisma.SortOrder
   batchId?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   state?: Prisma.SortOrder
   execution?: Prisma.SamplePlanExecutionOrderByWithRelationInput
+  executionStep?: Prisma.SamplePlanExecutionStepOrderByWithRelationInput
   batch?: Prisma.InventoryBatchOrderByWithRelationInput
 }
 
@@ -236,16 +247,19 @@ export type SampleInventoryReservationWhereUniqueInput = Prisma.AtLeast<{
   OR?: Prisma.SampleInventoryReservationWhereInput[]
   NOT?: Prisma.SampleInventoryReservationWhereInput | Prisma.SampleInventoryReservationWhereInput[]
   executionId?: Prisma.StringFilter<"SampleInventoryReservation"> | string
+  executionStepId?: Prisma.StringNullableFilter<"SampleInventoryReservation"> | string | null
   batchId?: Prisma.StringFilter<"SampleInventoryReservation"> | string
   quantity?: Prisma.DecimalFilter<"SampleInventoryReservation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: Prisma.EnumReservationStateFilter<"SampleInventoryReservation"> | $Enums.ReservationState
   execution?: Prisma.XOR<Prisma.SamplePlanExecutionScalarRelationFilter, Prisma.SamplePlanExecutionWhereInput>
+  executionStep?: Prisma.XOR<Prisma.SamplePlanExecutionStepNullableScalarRelationFilter, Prisma.SamplePlanExecutionStepWhereInput> | null
   batch?: Prisma.XOR<Prisma.InventoryBatchScalarRelationFilter, Prisma.InventoryBatchWhereInput>
 }, "id">
 
 export type SampleInventoryReservationOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   executionId?: Prisma.SortOrder
+  executionStepId?: Prisma.SortOrderInput | Prisma.SortOrder
   batchId?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   state?: Prisma.SortOrder
@@ -262,6 +276,7 @@ export type SampleInventoryReservationScalarWhereWithAggregatesInput = {
   NOT?: Prisma.SampleInventoryReservationScalarWhereWithAggregatesInput | Prisma.SampleInventoryReservationScalarWhereWithAggregatesInput[]
   id?: Prisma.StringWithAggregatesFilter<"SampleInventoryReservation"> | string
   executionId?: Prisma.StringWithAggregatesFilter<"SampleInventoryReservation"> | string
+  executionStepId?: Prisma.StringNullableWithAggregatesFilter<"SampleInventoryReservation"> | string | null
   batchId?: Prisma.StringWithAggregatesFilter<"SampleInventoryReservation"> | string
   quantity?: Prisma.DecimalWithAggregatesFilter<"SampleInventoryReservation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: Prisma.EnumReservationStateWithAggregatesFilter<"SampleInventoryReservation"> | $Enums.ReservationState
@@ -272,12 +287,14 @@ export type SampleInventoryReservationCreateInput = {
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: $Enums.ReservationState
   execution: Prisma.SamplePlanExecutionCreateNestedOneWithoutReservationsInput
+  executionStep?: Prisma.SamplePlanExecutionStepCreateNestedOneWithoutReservationsInput
   batch: Prisma.InventoryBatchCreateNestedOneWithoutSampleReservationsInput
 }
 
 export type SampleInventoryReservationUncheckedCreateInput = {
   id?: string
   executionId: string
+  executionStepId?: string | null
   batchId: string
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: $Enums.ReservationState
@@ -288,12 +305,14 @@ export type SampleInventoryReservationUpdateInput = {
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: Prisma.EnumReservationStateFieldUpdateOperationsInput | $Enums.ReservationState
   execution?: Prisma.SamplePlanExecutionUpdateOneRequiredWithoutReservationsNestedInput
+  executionStep?: Prisma.SamplePlanExecutionStepUpdateOneWithoutReservationsNestedInput
   batch?: Prisma.InventoryBatchUpdateOneRequiredWithoutSampleReservationsNestedInput
 }
 
 export type SampleInventoryReservationUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   executionId?: Prisma.StringFieldUpdateOperationsInput | string
+  executionStepId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   batchId?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: Prisma.EnumReservationStateFieldUpdateOperationsInput | $Enums.ReservationState
@@ -302,6 +321,7 @@ export type SampleInventoryReservationUncheckedUpdateInput = {
 export type SampleInventoryReservationCreateManyInput = {
   id?: string
   executionId: string
+  executionStepId?: string | null
   batchId: string
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: $Enums.ReservationState
@@ -316,6 +336,7 @@ export type SampleInventoryReservationUpdateManyMutationInput = {
 export type SampleInventoryReservationUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   executionId?: Prisma.StringFieldUpdateOperationsInput | string
+  executionStepId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   batchId?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: Prisma.EnumReservationStateFieldUpdateOperationsInput | $Enums.ReservationState
@@ -334,6 +355,7 @@ export type SampleInventoryReservationOrderByRelationAggregateInput = {
 export type SampleInventoryReservationCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   executionId?: Prisma.SortOrder
+  executionStepId?: Prisma.SortOrder
   batchId?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   state?: Prisma.SortOrder
@@ -346,6 +368,7 @@ export type SampleInventoryReservationAvgOrderByAggregateInput = {
 export type SampleInventoryReservationMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   executionId?: Prisma.SortOrder
+  executionStepId?: Prisma.SortOrder
   batchId?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   state?: Prisma.SortOrder
@@ -354,6 +377,7 @@ export type SampleInventoryReservationMaxOrderByAggregateInput = {
 export type SampleInventoryReservationMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   executionId?: Prisma.SortOrder
+  executionStepId?: Prisma.SortOrder
   batchId?: Prisma.SortOrder
   quantity?: Prisma.SortOrder
   state?: Prisma.SortOrder
@@ -447,16 +471,60 @@ export type SampleInventoryReservationUncheckedUpdateManyWithoutExecutionNestedI
   deleteMany?: Prisma.SampleInventoryReservationScalarWhereInput | Prisma.SampleInventoryReservationScalarWhereInput[]
 }
 
+export type SampleInventoryReservationCreateNestedManyWithoutExecutionStepInput = {
+  create?: Prisma.XOR<Prisma.SampleInventoryReservationCreateWithoutExecutionStepInput, Prisma.SampleInventoryReservationUncheckedCreateWithoutExecutionStepInput> | Prisma.SampleInventoryReservationCreateWithoutExecutionStepInput[] | Prisma.SampleInventoryReservationUncheckedCreateWithoutExecutionStepInput[]
+  connectOrCreate?: Prisma.SampleInventoryReservationCreateOrConnectWithoutExecutionStepInput | Prisma.SampleInventoryReservationCreateOrConnectWithoutExecutionStepInput[]
+  createMany?: Prisma.SampleInventoryReservationCreateManyExecutionStepInputEnvelope
+  connect?: Prisma.SampleInventoryReservationWhereUniqueInput | Prisma.SampleInventoryReservationWhereUniqueInput[]
+}
+
+export type SampleInventoryReservationUncheckedCreateNestedManyWithoutExecutionStepInput = {
+  create?: Prisma.XOR<Prisma.SampleInventoryReservationCreateWithoutExecutionStepInput, Prisma.SampleInventoryReservationUncheckedCreateWithoutExecutionStepInput> | Prisma.SampleInventoryReservationCreateWithoutExecutionStepInput[] | Prisma.SampleInventoryReservationUncheckedCreateWithoutExecutionStepInput[]
+  connectOrCreate?: Prisma.SampleInventoryReservationCreateOrConnectWithoutExecutionStepInput | Prisma.SampleInventoryReservationCreateOrConnectWithoutExecutionStepInput[]
+  createMany?: Prisma.SampleInventoryReservationCreateManyExecutionStepInputEnvelope
+  connect?: Prisma.SampleInventoryReservationWhereUniqueInput | Prisma.SampleInventoryReservationWhereUniqueInput[]
+}
+
+export type SampleInventoryReservationUpdateManyWithoutExecutionStepNestedInput = {
+  create?: Prisma.XOR<Prisma.SampleInventoryReservationCreateWithoutExecutionStepInput, Prisma.SampleInventoryReservationUncheckedCreateWithoutExecutionStepInput> | Prisma.SampleInventoryReservationCreateWithoutExecutionStepInput[] | Prisma.SampleInventoryReservationUncheckedCreateWithoutExecutionStepInput[]
+  connectOrCreate?: Prisma.SampleInventoryReservationCreateOrConnectWithoutExecutionStepInput | Prisma.SampleInventoryReservationCreateOrConnectWithoutExecutionStepInput[]
+  upsert?: Prisma.SampleInventoryReservationUpsertWithWhereUniqueWithoutExecutionStepInput | Prisma.SampleInventoryReservationUpsertWithWhereUniqueWithoutExecutionStepInput[]
+  createMany?: Prisma.SampleInventoryReservationCreateManyExecutionStepInputEnvelope
+  set?: Prisma.SampleInventoryReservationWhereUniqueInput | Prisma.SampleInventoryReservationWhereUniqueInput[]
+  disconnect?: Prisma.SampleInventoryReservationWhereUniqueInput | Prisma.SampleInventoryReservationWhereUniqueInput[]
+  delete?: Prisma.SampleInventoryReservationWhereUniqueInput | Prisma.SampleInventoryReservationWhereUniqueInput[]
+  connect?: Prisma.SampleInventoryReservationWhereUniqueInput | Prisma.SampleInventoryReservationWhereUniqueInput[]
+  update?: Prisma.SampleInventoryReservationUpdateWithWhereUniqueWithoutExecutionStepInput | Prisma.SampleInventoryReservationUpdateWithWhereUniqueWithoutExecutionStepInput[]
+  updateMany?: Prisma.SampleInventoryReservationUpdateManyWithWhereWithoutExecutionStepInput | Prisma.SampleInventoryReservationUpdateManyWithWhereWithoutExecutionStepInput[]
+  deleteMany?: Prisma.SampleInventoryReservationScalarWhereInput | Prisma.SampleInventoryReservationScalarWhereInput[]
+}
+
+export type SampleInventoryReservationUncheckedUpdateManyWithoutExecutionStepNestedInput = {
+  create?: Prisma.XOR<Prisma.SampleInventoryReservationCreateWithoutExecutionStepInput, Prisma.SampleInventoryReservationUncheckedCreateWithoutExecutionStepInput> | Prisma.SampleInventoryReservationCreateWithoutExecutionStepInput[] | Prisma.SampleInventoryReservationUncheckedCreateWithoutExecutionStepInput[]
+  connectOrCreate?: Prisma.SampleInventoryReservationCreateOrConnectWithoutExecutionStepInput | Prisma.SampleInventoryReservationCreateOrConnectWithoutExecutionStepInput[]
+  upsert?: Prisma.SampleInventoryReservationUpsertWithWhereUniqueWithoutExecutionStepInput | Prisma.SampleInventoryReservationUpsertWithWhereUniqueWithoutExecutionStepInput[]
+  createMany?: Prisma.SampleInventoryReservationCreateManyExecutionStepInputEnvelope
+  set?: Prisma.SampleInventoryReservationWhereUniqueInput | Prisma.SampleInventoryReservationWhereUniqueInput[]
+  disconnect?: Prisma.SampleInventoryReservationWhereUniqueInput | Prisma.SampleInventoryReservationWhereUniqueInput[]
+  delete?: Prisma.SampleInventoryReservationWhereUniqueInput | Prisma.SampleInventoryReservationWhereUniqueInput[]
+  connect?: Prisma.SampleInventoryReservationWhereUniqueInput | Prisma.SampleInventoryReservationWhereUniqueInput[]
+  update?: Prisma.SampleInventoryReservationUpdateWithWhereUniqueWithoutExecutionStepInput | Prisma.SampleInventoryReservationUpdateWithWhereUniqueWithoutExecutionStepInput[]
+  updateMany?: Prisma.SampleInventoryReservationUpdateManyWithWhereWithoutExecutionStepInput | Prisma.SampleInventoryReservationUpdateManyWithWhereWithoutExecutionStepInput[]
+  deleteMany?: Prisma.SampleInventoryReservationScalarWhereInput | Prisma.SampleInventoryReservationScalarWhereInput[]
+}
+
 export type SampleInventoryReservationCreateWithoutBatchInput = {
   id?: string
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: $Enums.ReservationState
   execution: Prisma.SamplePlanExecutionCreateNestedOneWithoutReservationsInput
+  executionStep?: Prisma.SamplePlanExecutionStepCreateNestedOneWithoutReservationsInput
 }
 
 export type SampleInventoryReservationUncheckedCreateWithoutBatchInput = {
   id?: string
   executionId: string
+  executionStepId?: string | null
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: $Enums.ReservationState
 }
@@ -493,6 +561,7 @@ export type SampleInventoryReservationScalarWhereInput = {
   NOT?: Prisma.SampleInventoryReservationScalarWhereInput | Prisma.SampleInventoryReservationScalarWhereInput[]
   id?: Prisma.StringFilter<"SampleInventoryReservation"> | string
   executionId?: Prisma.StringFilter<"SampleInventoryReservation"> | string
+  executionStepId?: Prisma.StringNullableFilter<"SampleInventoryReservation"> | string | null
   batchId?: Prisma.StringFilter<"SampleInventoryReservation"> | string
   quantity?: Prisma.DecimalFilter<"SampleInventoryReservation"> | runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: Prisma.EnumReservationStateFilter<"SampleInventoryReservation"> | $Enums.ReservationState
@@ -502,11 +571,13 @@ export type SampleInventoryReservationCreateWithoutExecutionInput = {
   id?: string
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: $Enums.ReservationState
+  executionStep?: Prisma.SamplePlanExecutionStepCreateNestedOneWithoutReservationsInput
   batch: Prisma.InventoryBatchCreateNestedOneWithoutSampleReservationsInput
 }
 
 export type SampleInventoryReservationUncheckedCreateWithoutExecutionInput = {
   id?: string
+  executionStepId?: string | null
   batchId: string
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: $Enums.ReservationState
@@ -538,9 +609,52 @@ export type SampleInventoryReservationUpdateManyWithWhereWithoutExecutionInput =
   data: Prisma.XOR<Prisma.SampleInventoryReservationUpdateManyMutationInput, Prisma.SampleInventoryReservationUncheckedUpdateManyWithoutExecutionInput>
 }
 
+export type SampleInventoryReservationCreateWithoutExecutionStepInput = {
+  id?: string
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  state?: $Enums.ReservationState
+  execution: Prisma.SamplePlanExecutionCreateNestedOneWithoutReservationsInput
+  batch: Prisma.InventoryBatchCreateNestedOneWithoutSampleReservationsInput
+}
+
+export type SampleInventoryReservationUncheckedCreateWithoutExecutionStepInput = {
+  id?: string
+  executionId: string
+  batchId: string
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  state?: $Enums.ReservationState
+}
+
+export type SampleInventoryReservationCreateOrConnectWithoutExecutionStepInput = {
+  where: Prisma.SampleInventoryReservationWhereUniqueInput
+  create: Prisma.XOR<Prisma.SampleInventoryReservationCreateWithoutExecutionStepInput, Prisma.SampleInventoryReservationUncheckedCreateWithoutExecutionStepInput>
+}
+
+export type SampleInventoryReservationCreateManyExecutionStepInputEnvelope = {
+  data: Prisma.SampleInventoryReservationCreateManyExecutionStepInput | Prisma.SampleInventoryReservationCreateManyExecutionStepInput[]
+  skipDuplicates?: boolean
+}
+
+export type SampleInventoryReservationUpsertWithWhereUniqueWithoutExecutionStepInput = {
+  where: Prisma.SampleInventoryReservationWhereUniqueInput
+  update: Prisma.XOR<Prisma.SampleInventoryReservationUpdateWithoutExecutionStepInput, Prisma.SampleInventoryReservationUncheckedUpdateWithoutExecutionStepInput>
+  create: Prisma.XOR<Prisma.SampleInventoryReservationCreateWithoutExecutionStepInput, Prisma.SampleInventoryReservationUncheckedCreateWithoutExecutionStepInput>
+}
+
+export type SampleInventoryReservationUpdateWithWhereUniqueWithoutExecutionStepInput = {
+  where: Prisma.SampleInventoryReservationWhereUniqueInput
+  data: Prisma.XOR<Prisma.SampleInventoryReservationUpdateWithoutExecutionStepInput, Prisma.SampleInventoryReservationUncheckedUpdateWithoutExecutionStepInput>
+}
+
+export type SampleInventoryReservationUpdateManyWithWhereWithoutExecutionStepInput = {
+  where: Prisma.SampleInventoryReservationScalarWhereInput
+  data: Prisma.XOR<Prisma.SampleInventoryReservationUpdateManyMutationInput, Prisma.SampleInventoryReservationUncheckedUpdateManyWithoutExecutionStepInput>
+}
+
 export type SampleInventoryReservationCreateManyBatchInput = {
   id?: string
   executionId: string
+  executionStepId?: string | null
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: $Enums.ReservationState
 }
@@ -550,11 +664,13 @@ export type SampleInventoryReservationUpdateWithoutBatchInput = {
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: Prisma.EnumReservationStateFieldUpdateOperationsInput | $Enums.ReservationState
   execution?: Prisma.SamplePlanExecutionUpdateOneRequiredWithoutReservationsNestedInput
+  executionStep?: Prisma.SamplePlanExecutionStepUpdateOneWithoutReservationsNestedInput
 }
 
 export type SampleInventoryReservationUncheckedUpdateWithoutBatchInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   executionId?: Prisma.StringFieldUpdateOperationsInput | string
+  executionStepId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: Prisma.EnumReservationStateFieldUpdateOperationsInput | $Enums.ReservationState
 }
@@ -562,12 +678,14 @@ export type SampleInventoryReservationUncheckedUpdateWithoutBatchInput = {
 export type SampleInventoryReservationUncheckedUpdateManyWithoutBatchInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   executionId?: Prisma.StringFieldUpdateOperationsInput | string
+  executionStepId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: Prisma.EnumReservationStateFieldUpdateOperationsInput | $Enums.ReservationState
 }
 
 export type SampleInventoryReservationCreateManyExecutionInput = {
   id?: string
+  executionStepId?: string | null
   batchId: string
   quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: $Enums.ReservationState
@@ -577,11 +695,13 @@ export type SampleInventoryReservationUpdateWithoutExecutionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: Prisma.EnumReservationStateFieldUpdateOperationsInput | $Enums.ReservationState
+  executionStep?: Prisma.SamplePlanExecutionStepUpdateOneWithoutReservationsNestedInput
   batch?: Prisma.InventoryBatchUpdateOneRequiredWithoutSampleReservationsNestedInput
 }
 
 export type SampleInventoryReservationUncheckedUpdateWithoutExecutionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  executionStepId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   batchId?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: Prisma.EnumReservationStateFieldUpdateOperationsInput | $Enums.ReservationState
@@ -589,6 +709,39 @@ export type SampleInventoryReservationUncheckedUpdateWithoutExecutionInput = {
 
 export type SampleInventoryReservationUncheckedUpdateManyWithoutExecutionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  executionStepId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  batchId?: Prisma.StringFieldUpdateOperationsInput | string
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  state?: Prisma.EnumReservationStateFieldUpdateOperationsInput | $Enums.ReservationState
+}
+
+export type SampleInventoryReservationCreateManyExecutionStepInput = {
+  id?: string
+  executionId: string
+  batchId: string
+  quantity: runtime.Decimal | runtime.DecimalJsLike | number | string
+  state?: $Enums.ReservationState
+}
+
+export type SampleInventoryReservationUpdateWithoutExecutionStepInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  state?: Prisma.EnumReservationStateFieldUpdateOperationsInput | $Enums.ReservationState
+  execution?: Prisma.SamplePlanExecutionUpdateOneRequiredWithoutReservationsNestedInput
+  batch?: Prisma.InventoryBatchUpdateOneRequiredWithoutSampleReservationsNestedInput
+}
+
+export type SampleInventoryReservationUncheckedUpdateWithoutExecutionStepInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  executionId?: Prisma.StringFieldUpdateOperationsInput | string
+  batchId?: Prisma.StringFieldUpdateOperationsInput | string
+  quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  state?: Prisma.EnumReservationStateFieldUpdateOperationsInput | $Enums.ReservationState
+}
+
+export type SampleInventoryReservationUncheckedUpdateManyWithoutExecutionStepInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  executionId?: Prisma.StringFieldUpdateOperationsInput | string
   batchId?: Prisma.StringFieldUpdateOperationsInput | string
   quantity?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
   state?: Prisma.EnumReservationStateFieldUpdateOperationsInput | $Enums.ReservationState
@@ -599,52 +752,62 @@ export type SampleInventoryReservationUncheckedUpdateManyWithoutExecutionInput =
 export type SampleInventoryReservationSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   executionId?: boolean
+  executionStepId?: boolean
   batchId?: boolean
   quantity?: boolean
   state?: boolean
   execution?: boolean | Prisma.SamplePlanExecutionDefaultArgs<ExtArgs>
+  executionStep?: boolean | Prisma.SampleInventoryReservation$executionStepArgs<ExtArgs>
   batch?: boolean | Prisma.InventoryBatchDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sampleInventoryReservation"]>
 
 export type SampleInventoryReservationSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   executionId?: boolean
+  executionStepId?: boolean
   batchId?: boolean
   quantity?: boolean
   state?: boolean
   execution?: boolean | Prisma.SamplePlanExecutionDefaultArgs<ExtArgs>
+  executionStep?: boolean | Prisma.SampleInventoryReservation$executionStepArgs<ExtArgs>
   batch?: boolean | Prisma.InventoryBatchDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sampleInventoryReservation"]>
 
 export type SampleInventoryReservationSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   executionId?: boolean
+  executionStepId?: boolean
   batchId?: boolean
   quantity?: boolean
   state?: boolean
   execution?: boolean | Prisma.SamplePlanExecutionDefaultArgs<ExtArgs>
+  executionStep?: boolean | Prisma.SampleInventoryReservation$executionStepArgs<ExtArgs>
   batch?: boolean | Prisma.InventoryBatchDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sampleInventoryReservation"]>
 
 export type SampleInventoryReservationSelectScalar = {
   id?: boolean
   executionId?: boolean
+  executionStepId?: boolean
   batchId?: boolean
   quantity?: boolean
   state?: boolean
 }
 
-export type SampleInventoryReservationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "executionId" | "batchId" | "quantity" | "state", ExtArgs["result"]["sampleInventoryReservation"]>
+export type SampleInventoryReservationOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "executionId" | "executionStepId" | "batchId" | "quantity" | "state", ExtArgs["result"]["sampleInventoryReservation"]>
 export type SampleInventoryReservationInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   execution?: boolean | Prisma.SamplePlanExecutionDefaultArgs<ExtArgs>
+  executionStep?: boolean | Prisma.SampleInventoryReservation$executionStepArgs<ExtArgs>
   batch?: boolean | Prisma.InventoryBatchDefaultArgs<ExtArgs>
 }
 export type SampleInventoryReservationIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   execution?: boolean | Prisma.SamplePlanExecutionDefaultArgs<ExtArgs>
+  executionStep?: boolean | Prisma.SampleInventoryReservation$executionStepArgs<ExtArgs>
   batch?: boolean | Prisma.InventoryBatchDefaultArgs<ExtArgs>
 }
 export type SampleInventoryReservationIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   execution?: boolean | Prisma.SamplePlanExecutionDefaultArgs<ExtArgs>
+  executionStep?: boolean | Prisma.SampleInventoryReservation$executionStepArgs<ExtArgs>
   batch?: boolean | Prisma.InventoryBatchDefaultArgs<ExtArgs>
 }
 
@@ -652,11 +815,13 @@ export type $SampleInventoryReservationPayload<ExtArgs extends runtime.Types.Ext
   name: "SampleInventoryReservation"
   objects: {
     execution: Prisma.$SamplePlanExecutionPayload<ExtArgs>
+    executionStep: Prisma.$SamplePlanExecutionStepPayload<ExtArgs> | null
     batch: Prisma.$InventoryBatchPayload<ExtArgs>
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     executionId: string
+    executionStepId: string | null
     batchId: string
     quantity: runtime.Decimal
     state: $Enums.ReservationState
@@ -1055,6 +1220,7 @@ readonly fields: SampleInventoryReservationFieldRefs;
 export interface Prisma__SampleInventoryReservationClient<T, Null = never, ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
   readonly [Symbol.toStringTag]: "PrismaPromise"
   execution<T extends Prisma.SamplePlanExecutionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SamplePlanExecutionDefaultArgs<ExtArgs>>): Prisma.Prisma__SamplePlanExecutionClient<runtime.Types.Result.GetResult<Prisma.$SamplePlanExecutionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+  executionStep<T extends Prisma.SampleInventoryReservation$executionStepArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SampleInventoryReservation$executionStepArgs<ExtArgs>>): Prisma.Prisma__SamplePlanExecutionStepClient<runtime.Types.Result.GetResult<Prisma.$SamplePlanExecutionStepPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   batch<T extends Prisma.InventoryBatchDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.InventoryBatchDefaultArgs<ExtArgs>>): Prisma.Prisma__InventoryBatchClient<runtime.Types.Result.GetResult<Prisma.$InventoryBatchPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1087,6 +1253,7 @@ export interface Prisma__SampleInventoryReservationClient<T, Null = never, ExtAr
 export interface SampleInventoryReservationFieldRefs {
   readonly id: Prisma.FieldRef<"SampleInventoryReservation", 'String'>
   readonly executionId: Prisma.FieldRef<"SampleInventoryReservation", 'String'>
+  readonly executionStepId: Prisma.FieldRef<"SampleInventoryReservation", 'String'>
   readonly batchId: Prisma.FieldRef<"SampleInventoryReservation", 'String'>
   readonly quantity: Prisma.FieldRef<"SampleInventoryReservation", 'Decimal'>
   readonly state: Prisma.FieldRef<"SampleInventoryReservation", 'ReservationState'>
@@ -1488,6 +1655,25 @@ export type SampleInventoryReservationDeleteManyArgs<ExtArgs extends runtime.Typ
    * Limit how many SampleInventoryReservations to delete.
    */
   limit?: number
+}
+
+/**
+ * SampleInventoryReservation.executionStep
+ */
+export type SampleInventoryReservation$executionStepArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SamplePlanExecutionStep
+   */
+  select?: Prisma.SamplePlanExecutionStepSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SamplePlanExecutionStep
+   */
+  omit?: Prisma.SamplePlanExecutionStepOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SamplePlanExecutionStepInclude<ExtArgs> | null
+  where?: Prisma.SamplePlanExecutionStepWhereInput
 }
 
 /**

@@ -6364,7 +6364,8 @@ export const SampleScalarFieldEnum = {
   state: 'state',
   imageKey: 'imageKey',
   description: 'description',
-  priority: 'priority'
+  priority: 'priority',
+  targetMarginRate: 'targetMarginRate'
 } as const
 
 export type SampleScalarFieldEnum = (typeof SampleScalarFieldEnum)[keyof typeof SampleScalarFieldEnum]
@@ -6493,8 +6494,12 @@ export const SamplePlanExecutionScalarFieldEnum = {
   id: 'id',
   planId: 'planId',
   selectedRunId: 'selectedRunId',
+  approvedAt: 'approvedAt',
   startedAt: 'startedAt',
-  completedAt: 'completedAt'
+  completedAt: 'completedAt',
+  cancelledAt: 'cancelledAt',
+  actualCost: 'actualCost',
+  costEstimated: 'costEstimated'
 } as const
 
 export type SamplePlanExecutionScalarFieldEnum = (typeof SamplePlanExecutionScalarFieldEnum)[keyof typeof SamplePlanExecutionScalarFieldEnum]
@@ -6504,9 +6509,17 @@ export const SamplePlanExecutionStepScalarFieldEnum = {
   id: 'id',
   executionId: 'executionId',
   plannedStepId: 'plannedStepId',
+  startedAt: 'startedAt',
+  completedAt: 'completedAt',
+  usedQty: 'usedQty',
+  reusedQty: 'reusedQty',
+  lostQty: 'lostQty',
+  returnedQty: 'returnedQty',
+  reusableQty: 'reusableQty',
+  actualCost: 'actualCost',
+  costEstimated: 'costEstimated',
   actualReusableSnapshot: 'actualReusableSnapshot',
-  recalculatedAt: 'recalculatedAt',
-  completedAt: 'completedAt'
+  recalculatedAt: 'recalculatedAt'
 } as const
 
 export type SamplePlanExecutionStepScalarFieldEnum = (typeof SamplePlanExecutionStepScalarFieldEnum)[keyof typeof SamplePlanExecutionStepScalarFieldEnum]
@@ -6530,6 +6543,7 @@ export type SampleDisassemblyMaterialScalarFieldEnum = (typeof SampleDisassembly
 export const SampleInventoryReservationScalarFieldEnum = {
   id: 'id',
   executionId: 'executionId',
+  executionStepId: 'executionStepId',
   batchId: 'batchId',
   quantity: 'quantity',
   state: 'state'

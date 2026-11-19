@@ -20,60 +20,146 @@ export type SamplePlanExecutionStepModel = runtime.Types.Result.DefaultSelection
 
 export type AggregateSamplePlanExecutionStep = {
   _count: SamplePlanExecutionStepCountAggregateOutputType | null
+  _avg: SamplePlanExecutionStepAvgAggregateOutputType | null
+  _sum: SamplePlanExecutionStepSumAggregateOutputType | null
   _min: SamplePlanExecutionStepMinAggregateOutputType | null
   _max: SamplePlanExecutionStepMaxAggregateOutputType | null
+}
+
+export type SamplePlanExecutionStepAvgAggregateOutputType = {
+  usedQty: runtime.Decimal | null
+  reusedQty: runtime.Decimal | null
+  lostQty: runtime.Decimal | null
+  returnedQty: runtime.Decimal | null
+  reusableQty: runtime.Decimal | null
+  actualCost: runtime.Decimal | null
+}
+
+export type SamplePlanExecutionStepSumAggregateOutputType = {
+  usedQty: runtime.Decimal | null
+  reusedQty: runtime.Decimal | null
+  lostQty: runtime.Decimal | null
+  returnedQty: runtime.Decimal | null
+  reusableQty: runtime.Decimal | null
+  actualCost: runtime.Decimal | null
 }
 
 export type SamplePlanExecutionStepMinAggregateOutputType = {
   id: string | null
   executionId: string | null
   plannedStepId: string | null
-  recalculatedAt: Date | null
+  startedAt: Date | null
   completedAt: Date | null
+  usedQty: runtime.Decimal | null
+  reusedQty: runtime.Decimal | null
+  lostQty: runtime.Decimal | null
+  returnedQty: runtime.Decimal | null
+  reusableQty: runtime.Decimal | null
+  actualCost: runtime.Decimal | null
+  costEstimated: boolean | null
+  recalculatedAt: Date | null
 }
 
 export type SamplePlanExecutionStepMaxAggregateOutputType = {
   id: string | null
   executionId: string | null
   plannedStepId: string | null
-  recalculatedAt: Date | null
+  startedAt: Date | null
   completedAt: Date | null
+  usedQty: runtime.Decimal | null
+  reusedQty: runtime.Decimal | null
+  lostQty: runtime.Decimal | null
+  returnedQty: runtime.Decimal | null
+  reusableQty: runtime.Decimal | null
+  actualCost: runtime.Decimal | null
+  costEstimated: boolean | null
+  recalculatedAt: Date | null
 }
 
 export type SamplePlanExecutionStepCountAggregateOutputType = {
   id: number
   executionId: number
   plannedStepId: number
+  startedAt: number
+  completedAt: number
+  usedQty: number
+  reusedQty: number
+  lostQty: number
+  returnedQty: number
+  reusableQty: number
+  actualCost: number
+  costEstimated: number
   actualReusableSnapshot: number
   recalculatedAt: number
-  completedAt: number
   _all: number
 }
 
+
+export type SamplePlanExecutionStepAvgAggregateInputType = {
+  usedQty?: true
+  reusedQty?: true
+  lostQty?: true
+  returnedQty?: true
+  reusableQty?: true
+  actualCost?: true
+}
+
+export type SamplePlanExecutionStepSumAggregateInputType = {
+  usedQty?: true
+  reusedQty?: true
+  lostQty?: true
+  returnedQty?: true
+  reusableQty?: true
+  actualCost?: true
+}
 
 export type SamplePlanExecutionStepMinAggregateInputType = {
   id?: true
   executionId?: true
   plannedStepId?: true
-  recalculatedAt?: true
+  startedAt?: true
   completedAt?: true
+  usedQty?: true
+  reusedQty?: true
+  lostQty?: true
+  returnedQty?: true
+  reusableQty?: true
+  actualCost?: true
+  costEstimated?: true
+  recalculatedAt?: true
 }
 
 export type SamplePlanExecutionStepMaxAggregateInputType = {
   id?: true
   executionId?: true
   plannedStepId?: true
-  recalculatedAt?: true
+  startedAt?: true
   completedAt?: true
+  usedQty?: true
+  reusedQty?: true
+  lostQty?: true
+  returnedQty?: true
+  reusableQty?: true
+  actualCost?: true
+  costEstimated?: true
+  recalculatedAt?: true
 }
 
 export type SamplePlanExecutionStepCountAggregateInputType = {
   id?: true
   executionId?: true
   plannedStepId?: true
+  startedAt?: true
+  completedAt?: true
+  usedQty?: true
+  reusedQty?: true
+  lostQty?: true
+  returnedQty?: true
+  reusableQty?: true
+  actualCost?: true
+  costEstimated?: true
   actualReusableSnapshot?: true
   recalculatedAt?: true
-  completedAt?: true
   _all?: true
 }
 
@@ -115,6 +201,18 @@ export type SamplePlanExecutionStepAggregateArgs<ExtArgs extends runtime.Types.E
   /**
    * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
    * 
+   * Select which fields to average
+  **/
+  _avg?: SamplePlanExecutionStepAvgAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
+   * Select which fields to sum
+  **/
+  _sum?: SamplePlanExecutionStepSumAggregateInputType
+  /**
+   * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+   * 
    * Select which fields to find the minimum value
   **/
   _min?: SamplePlanExecutionStepMinAggregateInputType
@@ -145,6 +243,8 @@ export type SamplePlanExecutionStepGroupByArgs<ExtArgs extends runtime.Types.Ext
   take?: number
   skip?: number
   _count?: SamplePlanExecutionStepCountAggregateInputType | true
+  _avg?: SamplePlanExecutionStepAvgAggregateInputType
+  _sum?: SamplePlanExecutionStepSumAggregateInputType
   _min?: SamplePlanExecutionStepMinAggregateInputType
   _max?: SamplePlanExecutionStepMaxAggregateInputType
 }
@@ -153,10 +253,20 @@ export type SamplePlanExecutionStepGroupByOutputType = {
   id: string
   executionId: string
   plannedStepId: string
+  startedAt: Date | null
+  completedAt: Date | null
+  usedQty: runtime.Decimal
+  reusedQty: runtime.Decimal
+  lostQty: runtime.Decimal
+  returnedQty: runtime.Decimal
+  reusableQty: runtime.Decimal
+  actualCost: runtime.Decimal
+  costEstimated: boolean
   actualReusableSnapshot: runtime.JsonValue | null
   recalculatedAt: Date | null
-  completedAt: Date | null
   _count: SamplePlanExecutionStepCountAggregateOutputType | null
+  _avg: SamplePlanExecutionStepAvgAggregateOutputType | null
+  _sum: SamplePlanExecutionStepSumAggregateOutputType | null
   _min: SamplePlanExecutionStepMinAggregateOutputType | null
   _max: SamplePlanExecutionStepMaxAggregateOutputType | null
 }
@@ -183,24 +293,42 @@ export type SamplePlanExecutionStepWhereInput = {
   id?: Prisma.StringFilter<"SamplePlanExecutionStep"> | string
   executionId?: Prisma.StringFilter<"SamplePlanExecutionStep"> | string
   plannedStepId?: Prisma.StringFilter<"SamplePlanExecutionStep"> | string
+  startedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecutionStep"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecutionStep"> | Date | string | null
+  usedQty?: Prisma.DecimalFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: Prisma.DecimalFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: Prisma.DecimalFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: Prisma.DecimalFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: Prisma.DecimalFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: Prisma.DecimalFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: Prisma.BoolFilter<"SamplePlanExecutionStep"> | boolean
   actualReusableSnapshot?: Prisma.JsonNullableFilter<"SamplePlanExecutionStep">
   recalculatedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecutionStep"> | Date | string | null
-  completedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecutionStep"> | Date | string | null
   execution?: Prisma.XOR<Prisma.SamplePlanExecutionScalarRelationFilter, Prisma.SamplePlanExecutionWhereInput>
   plannedStep?: Prisma.XOR<Prisma.SamplePlanStepScalarRelationFilter, Prisma.SamplePlanStepWhereInput>
   disassembledMaterials?: Prisma.SampleDisassemblyMaterialListRelationFilter
+  reservations?: Prisma.SampleInventoryReservationListRelationFilter
 }
 
 export type SamplePlanExecutionStepOrderByWithRelationInput = {
   id?: Prisma.SortOrder
   executionId?: Prisma.SortOrder
   plannedStepId?: Prisma.SortOrder
+  startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  usedQty?: Prisma.SortOrder
+  reusedQty?: Prisma.SortOrder
+  lostQty?: Prisma.SortOrder
+  returnedQty?: Prisma.SortOrder
+  reusableQty?: Prisma.SortOrder
+  actualCost?: Prisma.SortOrder
+  costEstimated?: Prisma.SortOrder
   actualReusableSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
   recalculatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   execution?: Prisma.SamplePlanExecutionOrderByWithRelationInput
   plannedStep?: Prisma.SamplePlanStepOrderByWithRelationInput
   disassembledMaterials?: Prisma.SampleDisassemblyMaterialOrderByRelationAggregateInput
+  reservations?: Prisma.SampleInventoryReservationOrderByRelationAggregateInput
 }
 
 export type SamplePlanExecutionStepWhereUniqueInput = Prisma.AtLeast<{
@@ -211,24 +339,43 @@ export type SamplePlanExecutionStepWhereUniqueInput = Prisma.AtLeast<{
   NOT?: Prisma.SamplePlanExecutionStepWhereInput | Prisma.SamplePlanExecutionStepWhereInput[]
   executionId?: Prisma.StringFilter<"SamplePlanExecutionStep"> | string
   plannedStepId?: Prisma.StringFilter<"SamplePlanExecutionStep"> | string
+  startedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecutionStep"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecutionStep"> | Date | string | null
+  usedQty?: Prisma.DecimalFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: Prisma.DecimalFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: Prisma.DecimalFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: Prisma.DecimalFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: Prisma.DecimalFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: Prisma.DecimalFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: Prisma.BoolFilter<"SamplePlanExecutionStep"> | boolean
   actualReusableSnapshot?: Prisma.JsonNullableFilter<"SamplePlanExecutionStep">
   recalculatedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecutionStep"> | Date | string | null
-  completedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecutionStep"> | Date | string | null
   execution?: Prisma.XOR<Prisma.SamplePlanExecutionScalarRelationFilter, Prisma.SamplePlanExecutionWhereInput>
   plannedStep?: Prisma.XOR<Prisma.SamplePlanStepScalarRelationFilter, Prisma.SamplePlanStepWhereInput>
   disassembledMaterials?: Prisma.SampleDisassemblyMaterialListRelationFilter
+  reservations?: Prisma.SampleInventoryReservationListRelationFilter
 }, "id" | "executionId_plannedStepId">
 
 export type SamplePlanExecutionStepOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
   executionId?: Prisma.SortOrder
   plannedStepId?: Prisma.SortOrder
+  startedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  usedQty?: Prisma.SortOrder
+  reusedQty?: Prisma.SortOrder
+  lostQty?: Prisma.SortOrder
+  returnedQty?: Prisma.SortOrder
+  reusableQty?: Prisma.SortOrder
+  actualCost?: Prisma.SortOrder
+  costEstimated?: Prisma.SortOrder
   actualReusableSnapshot?: Prisma.SortOrderInput | Prisma.SortOrder
   recalculatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
-  completedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.SamplePlanExecutionStepCountOrderByAggregateInput
+  _avg?: Prisma.SamplePlanExecutionStepAvgOrderByAggregateInput
   _max?: Prisma.SamplePlanExecutionStepMaxOrderByAggregateInput
   _min?: Prisma.SamplePlanExecutionStepMinOrderByAggregateInput
+  _sum?: Prisma.SamplePlanExecutionStepSumOrderByAggregateInput
 }
 
 export type SamplePlanExecutionStepScalarWhereWithAggregatesInput = {
@@ -238,74 +385,142 @@ export type SamplePlanExecutionStepScalarWhereWithAggregatesInput = {
   id?: Prisma.StringWithAggregatesFilter<"SamplePlanExecutionStep"> | string
   executionId?: Prisma.StringWithAggregatesFilter<"SamplePlanExecutionStep"> | string
   plannedStepId?: Prisma.StringWithAggregatesFilter<"SamplePlanExecutionStep"> | string
+  startedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SamplePlanExecutionStep"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SamplePlanExecutionStep"> | Date | string | null
+  usedQty?: Prisma.DecimalWithAggregatesFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: Prisma.DecimalWithAggregatesFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: Prisma.DecimalWithAggregatesFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: Prisma.DecimalWithAggregatesFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: Prisma.DecimalWithAggregatesFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: Prisma.DecimalWithAggregatesFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: Prisma.BoolWithAggregatesFilter<"SamplePlanExecutionStep"> | boolean
   actualReusableSnapshot?: Prisma.JsonNullableWithAggregatesFilter<"SamplePlanExecutionStep">
   recalculatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SamplePlanExecutionStep"> | Date | string | null
-  completedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SamplePlanExecutionStep"> | Date | string | null
 }
 
 export type SamplePlanExecutionStepCreateInput = {
   id?: string
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  usedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Date | string | null
-  completedAt?: Date | string | null
   execution: Prisma.SamplePlanExecutionCreateNestedOneWithoutStepsInput
   plannedStep: Prisma.SamplePlanStepCreateNestedOneWithoutExecutionsInput
   disassembledMaterials?: Prisma.SampleDisassemblyMaterialCreateNestedManyWithoutExecutionStepInput
+  reservations?: Prisma.SampleInventoryReservationCreateNestedManyWithoutExecutionStepInput
 }
 
 export type SamplePlanExecutionStepUncheckedCreateInput = {
   id?: string
   executionId: string
   plannedStepId: string
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  usedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Date | string | null
-  completedAt?: Date | string | null
   disassembledMaterials?: Prisma.SampleDisassemblyMaterialUncheckedCreateNestedManyWithoutExecutionStepInput
+  reservations?: Prisma.SampleInventoryReservationUncheckedCreateNestedManyWithoutExecutionStepInput
 }
 
 export type SamplePlanExecutionStepUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   execution?: Prisma.SamplePlanExecutionUpdateOneRequiredWithoutStepsNestedInput
   plannedStep?: Prisma.SamplePlanStepUpdateOneRequiredWithoutExecutionsNestedInput
   disassembledMaterials?: Prisma.SampleDisassemblyMaterialUpdateManyWithoutExecutionStepNestedInput
+  reservations?: Prisma.SampleInventoryReservationUpdateManyWithoutExecutionStepNestedInput
 }
 
 export type SamplePlanExecutionStepUncheckedUpdateInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   executionId?: Prisma.StringFieldUpdateOperationsInput | string
   plannedStepId?: Prisma.StringFieldUpdateOperationsInput | string
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   disassembledMaterials?: Prisma.SampleDisassemblyMaterialUncheckedUpdateManyWithoutExecutionStepNestedInput
+  reservations?: Prisma.SampleInventoryReservationUncheckedUpdateManyWithoutExecutionStepNestedInput
 }
 
 export type SamplePlanExecutionStepCreateManyInput = {
   id?: string
   executionId: string
   plannedStepId: string
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  usedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Date | string | null
-  completedAt?: Date | string | null
 }
 
 export type SamplePlanExecutionStepUpdateManyMutationInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type SamplePlanExecutionStepUncheckedUpdateManyInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   executionId?: Prisma.StringFieldUpdateOperationsInput | string
   plannedStepId?: Prisma.StringFieldUpdateOperationsInput | string
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type SamplePlanExecutionStepListRelationFilter = {
@@ -327,30 +542,77 @@ export type SamplePlanExecutionStepCountOrderByAggregateInput = {
   id?: Prisma.SortOrder
   executionId?: Prisma.SortOrder
   plannedStepId?: Prisma.SortOrder
+  startedAt?: Prisma.SortOrder
+  completedAt?: Prisma.SortOrder
+  usedQty?: Prisma.SortOrder
+  reusedQty?: Prisma.SortOrder
+  lostQty?: Prisma.SortOrder
+  returnedQty?: Prisma.SortOrder
+  reusableQty?: Prisma.SortOrder
+  actualCost?: Prisma.SortOrder
+  costEstimated?: Prisma.SortOrder
   actualReusableSnapshot?: Prisma.SortOrder
   recalculatedAt?: Prisma.SortOrder
-  completedAt?: Prisma.SortOrder
+}
+
+export type SamplePlanExecutionStepAvgOrderByAggregateInput = {
+  usedQty?: Prisma.SortOrder
+  reusedQty?: Prisma.SortOrder
+  lostQty?: Prisma.SortOrder
+  returnedQty?: Prisma.SortOrder
+  reusableQty?: Prisma.SortOrder
+  actualCost?: Prisma.SortOrder
 }
 
 export type SamplePlanExecutionStepMaxOrderByAggregateInput = {
   id?: Prisma.SortOrder
   executionId?: Prisma.SortOrder
   plannedStepId?: Prisma.SortOrder
-  recalculatedAt?: Prisma.SortOrder
+  startedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  usedQty?: Prisma.SortOrder
+  reusedQty?: Prisma.SortOrder
+  lostQty?: Prisma.SortOrder
+  returnedQty?: Prisma.SortOrder
+  reusableQty?: Prisma.SortOrder
+  actualCost?: Prisma.SortOrder
+  costEstimated?: Prisma.SortOrder
+  recalculatedAt?: Prisma.SortOrder
 }
 
 export type SamplePlanExecutionStepMinOrderByAggregateInput = {
   id?: Prisma.SortOrder
   executionId?: Prisma.SortOrder
   plannedStepId?: Prisma.SortOrder
-  recalculatedAt?: Prisma.SortOrder
+  startedAt?: Prisma.SortOrder
   completedAt?: Prisma.SortOrder
+  usedQty?: Prisma.SortOrder
+  reusedQty?: Prisma.SortOrder
+  lostQty?: Prisma.SortOrder
+  returnedQty?: Prisma.SortOrder
+  reusableQty?: Prisma.SortOrder
+  actualCost?: Prisma.SortOrder
+  costEstimated?: Prisma.SortOrder
+  recalculatedAt?: Prisma.SortOrder
+}
+
+export type SamplePlanExecutionStepSumOrderByAggregateInput = {
+  usedQty?: Prisma.SortOrder
+  reusedQty?: Prisma.SortOrder
+  lostQty?: Prisma.SortOrder
+  returnedQty?: Prisma.SortOrder
+  reusableQty?: Prisma.SortOrder
+  actualCost?: Prisma.SortOrder
 }
 
 export type SamplePlanExecutionStepScalarRelationFilter = {
   is?: Prisma.SamplePlanExecutionStepWhereInput
   isNot?: Prisma.SamplePlanExecutionStepWhereInput
+}
+
+export type SamplePlanExecutionStepNullableScalarRelationFilter = {
+  is?: Prisma.SamplePlanExecutionStepWhereInput | null
+  isNot?: Prisma.SamplePlanExecutionStepWhereInput | null
 }
 
 export type SamplePlanExecutionStepCreateNestedManyWithoutPlannedStepInput = {
@@ -451,22 +713,56 @@ export type SamplePlanExecutionStepUpdateOneRequiredWithoutDisassembledMaterials
   update?: Prisma.XOR<Prisma.XOR<Prisma.SamplePlanExecutionStepUpdateToOneWithWhereWithoutDisassembledMaterialsInput, Prisma.SamplePlanExecutionStepUpdateWithoutDisassembledMaterialsInput>, Prisma.SamplePlanExecutionStepUncheckedUpdateWithoutDisassembledMaterialsInput>
 }
 
+export type SamplePlanExecutionStepCreateNestedOneWithoutReservationsInput = {
+  create?: Prisma.XOR<Prisma.SamplePlanExecutionStepCreateWithoutReservationsInput, Prisma.SamplePlanExecutionStepUncheckedCreateWithoutReservationsInput>
+  connectOrCreate?: Prisma.SamplePlanExecutionStepCreateOrConnectWithoutReservationsInput
+  connect?: Prisma.SamplePlanExecutionStepWhereUniqueInput
+}
+
+export type SamplePlanExecutionStepUpdateOneWithoutReservationsNestedInput = {
+  create?: Prisma.XOR<Prisma.SamplePlanExecutionStepCreateWithoutReservationsInput, Prisma.SamplePlanExecutionStepUncheckedCreateWithoutReservationsInput>
+  connectOrCreate?: Prisma.SamplePlanExecutionStepCreateOrConnectWithoutReservationsInput
+  upsert?: Prisma.SamplePlanExecutionStepUpsertWithoutReservationsInput
+  disconnect?: Prisma.SamplePlanExecutionStepWhereInput | boolean
+  delete?: Prisma.SamplePlanExecutionStepWhereInput | boolean
+  connect?: Prisma.SamplePlanExecutionStepWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SamplePlanExecutionStepUpdateToOneWithWhereWithoutReservationsInput, Prisma.SamplePlanExecutionStepUpdateWithoutReservationsInput>, Prisma.SamplePlanExecutionStepUncheckedUpdateWithoutReservationsInput>
+}
+
 export type SamplePlanExecutionStepCreateWithoutPlannedStepInput = {
   id?: string
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  usedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Date | string | null
-  completedAt?: Date | string | null
   execution: Prisma.SamplePlanExecutionCreateNestedOneWithoutStepsInput
   disassembledMaterials?: Prisma.SampleDisassemblyMaterialCreateNestedManyWithoutExecutionStepInput
+  reservations?: Prisma.SampleInventoryReservationCreateNestedManyWithoutExecutionStepInput
 }
 
 export type SamplePlanExecutionStepUncheckedCreateWithoutPlannedStepInput = {
   id?: string
   executionId: string
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  usedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Date | string | null
-  completedAt?: Date | string | null
   disassembledMaterials?: Prisma.SampleDisassemblyMaterialUncheckedCreateNestedManyWithoutExecutionStepInput
+  reservations?: Prisma.SampleInventoryReservationUncheckedCreateNestedManyWithoutExecutionStepInput
 }
 
 export type SamplePlanExecutionStepCreateOrConnectWithoutPlannedStepInput = {
@@ -502,27 +798,53 @@ export type SamplePlanExecutionStepScalarWhereInput = {
   id?: Prisma.StringFilter<"SamplePlanExecutionStep"> | string
   executionId?: Prisma.StringFilter<"SamplePlanExecutionStep"> | string
   plannedStepId?: Prisma.StringFilter<"SamplePlanExecutionStep"> | string
+  startedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecutionStep"> | Date | string | null
+  completedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecutionStep"> | Date | string | null
+  usedQty?: Prisma.DecimalFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: Prisma.DecimalFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: Prisma.DecimalFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: Prisma.DecimalFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: Prisma.DecimalFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: Prisma.DecimalFilter<"SamplePlanExecutionStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: Prisma.BoolFilter<"SamplePlanExecutionStep"> | boolean
   actualReusableSnapshot?: Prisma.JsonNullableFilter<"SamplePlanExecutionStep">
   recalculatedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecutionStep"> | Date | string | null
-  completedAt?: Prisma.DateTimeNullableFilter<"SamplePlanExecutionStep"> | Date | string | null
 }
 
 export type SamplePlanExecutionStepCreateWithoutExecutionInput = {
   id?: string
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  usedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Date | string | null
-  completedAt?: Date | string | null
   plannedStep: Prisma.SamplePlanStepCreateNestedOneWithoutExecutionsInput
   disassembledMaterials?: Prisma.SampleDisassemblyMaterialCreateNestedManyWithoutExecutionStepInput
+  reservations?: Prisma.SampleInventoryReservationCreateNestedManyWithoutExecutionStepInput
 }
 
 export type SamplePlanExecutionStepUncheckedCreateWithoutExecutionInput = {
   id?: string
   plannedStepId: string
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  usedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Date | string | null
-  completedAt?: Date | string | null
   disassembledMaterials?: Prisma.SampleDisassemblyMaterialUncheckedCreateNestedManyWithoutExecutionStepInput
+  reservations?: Prisma.SampleInventoryReservationUncheckedCreateNestedManyWithoutExecutionStepInput
 }
 
 export type SamplePlanExecutionStepCreateOrConnectWithoutExecutionInput = {
@@ -553,20 +875,38 @@ export type SamplePlanExecutionStepUpdateManyWithWhereWithoutExecutionInput = {
 
 export type SamplePlanExecutionStepCreateWithoutDisassembledMaterialsInput = {
   id?: string
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  usedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Date | string | null
-  completedAt?: Date | string | null
   execution: Prisma.SamplePlanExecutionCreateNestedOneWithoutStepsInput
   plannedStep: Prisma.SamplePlanStepCreateNestedOneWithoutExecutionsInput
+  reservations?: Prisma.SampleInventoryReservationCreateNestedManyWithoutExecutionStepInput
 }
 
 export type SamplePlanExecutionStepUncheckedCreateWithoutDisassembledMaterialsInput = {
   id?: string
   executionId: string
   plannedStepId: string
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  usedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Date | string | null
-  completedAt?: Date | string | null
+  reservations?: Prisma.SampleInventoryReservationUncheckedCreateNestedManyWithoutExecutionStepInput
 }
 
 export type SamplePlanExecutionStepCreateOrConnectWithoutDisassembledMaterialsInput = {
@@ -587,88 +927,262 @@ export type SamplePlanExecutionStepUpdateToOneWithWhereWithoutDisassembledMateri
 
 export type SamplePlanExecutionStepUpdateWithoutDisassembledMaterialsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   execution?: Prisma.SamplePlanExecutionUpdateOneRequiredWithoutStepsNestedInput
   plannedStep?: Prisma.SamplePlanStepUpdateOneRequiredWithoutExecutionsNestedInput
+  reservations?: Prisma.SampleInventoryReservationUpdateManyWithoutExecutionStepNestedInput
 }
 
 export type SamplePlanExecutionStepUncheckedUpdateWithoutDisassembledMaterialsInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   executionId?: Prisma.StringFieldUpdateOperationsInput | string
   plannedStepId?: Prisma.StringFieldUpdateOperationsInput | string
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  reservations?: Prisma.SampleInventoryReservationUncheckedUpdateManyWithoutExecutionStepNestedInput
+}
+
+export type SamplePlanExecutionStepCreateWithoutReservationsInput = {
+  id?: string
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  usedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: boolean
+  actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  recalculatedAt?: Date | string | null
+  execution: Prisma.SamplePlanExecutionCreateNestedOneWithoutStepsInput
+  plannedStep: Prisma.SamplePlanStepCreateNestedOneWithoutExecutionsInput
+  disassembledMaterials?: Prisma.SampleDisassemblyMaterialCreateNestedManyWithoutExecutionStepInput
+}
+
+export type SamplePlanExecutionStepUncheckedCreateWithoutReservationsInput = {
+  id?: string
+  executionId: string
+  plannedStepId: string
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  usedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: boolean
+  actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  recalculatedAt?: Date | string | null
+  disassembledMaterials?: Prisma.SampleDisassemblyMaterialUncheckedCreateNestedManyWithoutExecutionStepInput
+}
+
+export type SamplePlanExecutionStepCreateOrConnectWithoutReservationsInput = {
+  where: Prisma.SamplePlanExecutionStepWhereUniqueInput
+  create: Prisma.XOR<Prisma.SamplePlanExecutionStepCreateWithoutReservationsInput, Prisma.SamplePlanExecutionStepUncheckedCreateWithoutReservationsInput>
+}
+
+export type SamplePlanExecutionStepUpsertWithoutReservationsInput = {
+  update: Prisma.XOR<Prisma.SamplePlanExecutionStepUpdateWithoutReservationsInput, Prisma.SamplePlanExecutionStepUncheckedUpdateWithoutReservationsInput>
+  create: Prisma.XOR<Prisma.SamplePlanExecutionStepCreateWithoutReservationsInput, Prisma.SamplePlanExecutionStepUncheckedCreateWithoutReservationsInput>
+  where?: Prisma.SamplePlanExecutionStepWhereInput
+}
+
+export type SamplePlanExecutionStepUpdateToOneWithWhereWithoutReservationsInput = {
+  where?: Prisma.SamplePlanExecutionStepWhereInput
+  data: Prisma.XOR<Prisma.SamplePlanExecutionStepUpdateWithoutReservationsInput, Prisma.SamplePlanExecutionStepUncheckedUpdateWithoutReservationsInput>
+}
+
+export type SamplePlanExecutionStepUpdateWithoutReservationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  recalculatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  execution?: Prisma.SamplePlanExecutionUpdateOneRequiredWithoutStepsNestedInput
+  plannedStep?: Prisma.SamplePlanStepUpdateOneRequiredWithoutExecutionsNestedInput
+  disassembledMaterials?: Prisma.SampleDisassemblyMaterialUpdateManyWithoutExecutionStepNestedInput
+}
+
+export type SamplePlanExecutionStepUncheckedUpdateWithoutReservationsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  executionId?: Prisma.StringFieldUpdateOperationsInput | string
+  plannedStepId?: Prisma.StringFieldUpdateOperationsInput | string
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  recalculatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  disassembledMaterials?: Prisma.SampleDisassemblyMaterialUncheckedUpdateManyWithoutExecutionStepNestedInput
 }
 
 export type SamplePlanExecutionStepCreateManyPlannedStepInput = {
   id?: string
   executionId: string
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  usedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Date | string | null
-  completedAt?: Date | string | null
 }
 
 export type SamplePlanExecutionStepUpdateWithoutPlannedStepInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   execution?: Prisma.SamplePlanExecutionUpdateOneRequiredWithoutStepsNestedInput
   disassembledMaterials?: Prisma.SampleDisassemblyMaterialUpdateManyWithoutExecutionStepNestedInput
+  reservations?: Prisma.SampleInventoryReservationUpdateManyWithoutExecutionStepNestedInput
 }
 
 export type SamplePlanExecutionStepUncheckedUpdateWithoutPlannedStepInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   executionId?: Prisma.StringFieldUpdateOperationsInput | string
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   disassembledMaterials?: Prisma.SampleDisassemblyMaterialUncheckedUpdateManyWithoutExecutionStepNestedInput
+  reservations?: Prisma.SampleInventoryReservationUncheckedUpdateManyWithoutExecutionStepNestedInput
 }
 
 export type SamplePlanExecutionStepUncheckedUpdateManyWithoutPlannedStepInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   executionId?: Prisma.StringFieldUpdateOperationsInput | string
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type SamplePlanExecutionStepCreateManyExecutionInput = {
   id?: string
   plannedStepId: string
+  startedAt?: Date | string | null
+  completedAt?: Date | string | null
+  usedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Date | string | null
-  completedAt?: Date | string | null
 }
 
 export type SamplePlanExecutionStepUpdateWithoutExecutionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   plannedStep?: Prisma.SamplePlanStepUpdateOneRequiredWithoutExecutionsNestedInput
   disassembledMaterials?: Prisma.SampleDisassemblyMaterialUpdateManyWithoutExecutionStepNestedInput
+  reservations?: Prisma.SampleInventoryReservationUpdateManyWithoutExecutionStepNestedInput
 }
 
 export type SamplePlanExecutionStepUncheckedUpdateWithoutExecutionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   plannedStepId?: Prisma.StringFieldUpdateOperationsInput | string
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   disassembledMaterials?: Prisma.SampleDisassemblyMaterialUncheckedUpdateManyWithoutExecutionStepNestedInput
+  reservations?: Prisma.SampleInventoryReservationUncheckedUpdateManyWithoutExecutionStepNestedInput
 }
 
 export type SamplePlanExecutionStepUncheckedUpdateManyWithoutExecutionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   plannedStepId?: Prisma.StringFieldUpdateOperationsInput | string
+  startedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  usedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  lostQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  returnedQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  reusableQty?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  actualCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   actualReusableSnapshot?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   recalculatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-  completedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -678,10 +1192,12 @@ export type SamplePlanExecutionStepUncheckedUpdateManyWithoutExecutionInput = {
 
 export type SamplePlanExecutionStepCountOutputType = {
   disassembledMaterials: number
+  reservations: number
 }
 
 export type SamplePlanExecutionStepCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   disassembledMaterials?: boolean | SamplePlanExecutionStepCountOutputTypeCountDisassembledMaterialsArgs
+  reservations?: boolean | SamplePlanExecutionStepCountOutputTypeCountReservationsArgs
 }
 
 /**
@@ -701,17 +1217,33 @@ export type SamplePlanExecutionStepCountOutputTypeCountDisassembledMaterialsArgs
   where?: Prisma.SampleDisassemblyMaterialWhereInput
 }
 
+/**
+ * SamplePlanExecutionStepCountOutputType without action
+ */
+export type SamplePlanExecutionStepCountOutputTypeCountReservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SampleInventoryReservationWhereInput
+}
+
 
 export type SamplePlanExecutionStepSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
   executionId?: boolean
   plannedStepId?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
+  usedQty?: boolean
+  reusedQty?: boolean
+  lostQty?: boolean
+  returnedQty?: boolean
+  reusableQty?: boolean
+  actualCost?: boolean
+  costEstimated?: boolean
   actualReusableSnapshot?: boolean
   recalculatedAt?: boolean
-  completedAt?: boolean
   execution?: boolean | Prisma.SamplePlanExecutionDefaultArgs<ExtArgs>
   plannedStep?: boolean | Prisma.SamplePlanStepDefaultArgs<ExtArgs>
   disassembledMaterials?: boolean | Prisma.SamplePlanExecutionStep$disassembledMaterialsArgs<ExtArgs>
+  reservations?: boolean | Prisma.SamplePlanExecutionStep$reservationsArgs<ExtArgs>
   _count?: boolean | Prisma.SamplePlanExecutionStepCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["samplePlanExecutionStep"]>
 
@@ -719,9 +1251,17 @@ export type SamplePlanExecutionStepSelectCreateManyAndReturn<ExtArgs extends run
   id?: boolean
   executionId?: boolean
   plannedStepId?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
+  usedQty?: boolean
+  reusedQty?: boolean
+  lostQty?: boolean
+  returnedQty?: boolean
+  reusableQty?: boolean
+  actualCost?: boolean
+  costEstimated?: boolean
   actualReusableSnapshot?: boolean
   recalculatedAt?: boolean
-  completedAt?: boolean
   execution?: boolean | Prisma.SamplePlanExecutionDefaultArgs<ExtArgs>
   plannedStep?: boolean | Prisma.SamplePlanStepDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["samplePlanExecutionStep"]>
@@ -730,9 +1270,17 @@ export type SamplePlanExecutionStepSelectUpdateManyAndReturn<ExtArgs extends run
   id?: boolean
   executionId?: boolean
   plannedStepId?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
+  usedQty?: boolean
+  reusedQty?: boolean
+  lostQty?: boolean
+  returnedQty?: boolean
+  reusableQty?: boolean
+  actualCost?: boolean
+  costEstimated?: boolean
   actualReusableSnapshot?: boolean
   recalculatedAt?: boolean
-  completedAt?: boolean
   execution?: boolean | Prisma.SamplePlanExecutionDefaultArgs<ExtArgs>
   plannedStep?: boolean | Prisma.SamplePlanStepDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["samplePlanExecutionStep"]>
@@ -741,16 +1289,25 @@ export type SamplePlanExecutionStepSelectScalar = {
   id?: boolean
   executionId?: boolean
   plannedStepId?: boolean
+  startedAt?: boolean
+  completedAt?: boolean
+  usedQty?: boolean
+  reusedQty?: boolean
+  lostQty?: boolean
+  returnedQty?: boolean
+  reusableQty?: boolean
+  actualCost?: boolean
+  costEstimated?: boolean
   actualReusableSnapshot?: boolean
   recalculatedAt?: boolean
-  completedAt?: boolean
 }
 
-export type SamplePlanExecutionStepOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "executionId" | "plannedStepId" | "actualReusableSnapshot" | "recalculatedAt" | "completedAt", ExtArgs["result"]["samplePlanExecutionStep"]>
+export type SamplePlanExecutionStepOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "executionId" | "plannedStepId" | "startedAt" | "completedAt" | "usedQty" | "reusedQty" | "lostQty" | "returnedQty" | "reusableQty" | "actualCost" | "costEstimated" | "actualReusableSnapshot" | "recalculatedAt", ExtArgs["result"]["samplePlanExecutionStep"]>
 export type SamplePlanExecutionStepInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   execution?: boolean | Prisma.SamplePlanExecutionDefaultArgs<ExtArgs>
   plannedStep?: boolean | Prisma.SamplePlanStepDefaultArgs<ExtArgs>
   disassembledMaterials?: boolean | Prisma.SamplePlanExecutionStep$disassembledMaterialsArgs<ExtArgs>
+  reservations?: boolean | Prisma.SamplePlanExecutionStep$reservationsArgs<ExtArgs>
   _count?: boolean | Prisma.SamplePlanExecutionStepCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type SamplePlanExecutionStepIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -768,14 +1325,23 @@ export type $SamplePlanExecutionStepPayload<ExtArgs extends runtime.Types.Extens
     execution: Prisma.$SamplePlanExecutionPayload<ExtArgs>
     plannedStep: Prisma.$SamplePlanStepPayload<ExtArgs>
     disassembledMaterials: Prisma.$SampleDisassemblyMaterialPayload<ExtArgs>[]
+    reservations: Prisma.$SampleInventoryReservationPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
     executionId: string
     plannedStepId: string
+    startedAt: Date | null
+    completedAt: Date | null
+    usedQty: runtime.Decimal
+    reusedQty: runtime.Decimal
+    lostQty: runtime.Decimal
+    returnedQty: runtime.Decimal
+    reusableQty: runtime.Decimal
+    actualCost: runtime.Decimal
+    costEstimated: boolean
     actualReusableSnapshot: runtime.JsonValue | null
     recalculatedAt: Date | null
-    completedAt: Date | null
   }, ExtArgs["result"]["samplePlanExecutionStep"]>
   composites: {}
 }
@@ -1173,6 +1739,7 @@ export interface Prisma__SamplePlanExecutionStepClient<T, Null = never, ExtArgs 
   execution<T extends Prisma.SamplePlanExecutionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SamplePlanExecutionDefaultArgs<ExtArgs>>): Prisma.Prisma__SamplePlanExecutionClient<runtime.Types.Result.GetResult<Prisma.$SamplePlanExecutionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   plannedStep<T extends Prisma.SamplePlanStepDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SamplePlanStepDefaultArgs<ExtArgs>>): Prisma.Prisma__SamplePlanStepClient<runtime.Types.Result.GetResult<Prisma.$SamplePlanStepPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   disassembledMaterials<T extends Prisma.SamplePlanExecutionStep$disassembledMaterialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SamplePlanExecutionStep$disassembledMaterialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SampleDisassemblyMaterialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  reservations<T extends Prisma.SamplePlanExecutionStep$reservationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.SamplePlanExecutionStep$reservationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SampleInventoryReservationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1205,9 +1772,17 @@ export interface SamplePlanExecutionStepFieldRefs {
   readonly id: Prisma.FieldRef<"SamplePlanExecutionStep", 'String'>
   readonly executionId: Prisma.FieldRef<"SamplePlanExecutionStep", 'String'>
   readonly plannedStepId: Prisma.FieldRef<"SamplePlanExecutionStep", 'String'>
+  readonly startedAt: Prisma.FieldRef<"SamplePlanExecutionStep", 'DateTime'>
+  readonly completedAt: Prisma.FieldRef<"SamplePlanExecutionStep", 'DateTime'>
+  readonly usedQty: Prisma.FieldRef<"SamplePlanExecutionStep", 'Decimal'>
+  readonly reusedQty: Prisma.FieldRef<"SamplePlanExecutionStep", 'Decimal'>
+  readonly lostQty: Prisma.FieldRef<"SamplePlanExecutionStep", 'Decimal'>
+  readonly returnedQty: Prisma.FieldRef<"SamplePlanExecutionStep", 'Decimal'>
+  readonly reusableQty: Prisma.FieldRef<"SamplePlanExecutionStep", 'Decimal'>
+  readonly actualCost: Prisma.FieldRef<"SamplePlanExecutionStep", 'Decimal'>
+  readonly costEstimated: Prisma.FieldRef<"SamplePlanExecutionStep", 'Boolean'>
   readonly actualReusableSnapshot: Prisma.FieldRef<"SamplePlanExecutionStep", 'Json'>
   readonly recalculatedAt: Prisma.FieldRef<"SamplePlanExecutionStep", 'DateTime'>
-  readonly completedAt: Prisma.FieldRef<"SamplePlanExecutionStep", 'DateTime'>
 }
     
 
@@ -1630,6 +2205,30 @@ export type SamplePlanExecutionStep$disassembledMaterialsArgs<ExtArgs extends ru
   take?: number
   skip?: number
   distinct?: Prisma.SampleDisassemblyMaterialScalarFieldEnum | Prisma.SampleDisassemblyMaterialScalarFieldEnum[]
+}
+
+/**
+ * SamplePlanExecutionStep.reservations
+ */
+export type SamplePlanExecutionStep$reservationsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SampleInventoryReservation
+   */
+  select?: Prisma.SampleInventoryReservationSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SampleInventoryReservation
+   */
+  omit?: Prisma.SampleInventoryReservationOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SampleInventoryReservationInclude<ExtArgs> | null
+  where?: Prisma.SampleInventoryReservationWhereInput
+  orderBy?: Prisma.SampleInventoryReservationOrderByWithRelationInput | Prisma.SampleInventoryReservationOrderByWithRelationInput[]
+  cursor?: Prisma.SampleInventoryReservationWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SampleInventoryReservationScalarFieldEnum | Prisma.SampleInventoryReservationScalarFieldEnum[]
 }
 
 /**
