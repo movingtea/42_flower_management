@@ -48,6 +48,9 @@ type Props = {
 type CareMode = "table" | "text";
 type Feedback = { tone: "success" | "error"; message: string };
 
+/** Flower-role values accepted by the AI contract and the `<select>` options. */
+const FLORAL_ROLE_VALUES = ["MAIN", "FILLER", "LINE", "FOLIAGE"] as const;
+
 type AiResponse = {
   success?: boolean;
   error?: string;
@@ -57,8 +60,26 @@ type AiResponse = {
     englishName?: string;
     flowerLanguage?: string;
     careTable?: WikiCareRow[];
+    /** Material-library parity fields (all optional so older responders stay valid). */
+    colorTags?: string[];
+    morphology?: string;
+    supplySeason?: string;
+    floralRole?: string;
+    suggestedAliases?: string[];
   };
 };
+
+/**
+ * Fill one uncontrolled field of the enclosing drawer form. The AI button lives
+ * in this knowledge editor but the identity inputs (role, colours, morphology,
+ * aliases) are rendered by the page, always inside the same `<form>`.
+ */
+function fillFormField(form: HTMLFormElement | null, name: string, value: string | null | undefined): void {
+  if (!form || !value) return;
+  const field = form.querySelector<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>(`[name="${name}"]`);
+  if (!field) return;
+  field.value = value;
+}
 
 const inputClass =
   "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900";
@@ -149,7 +170,20 @@ export function MaterialKnowledgeEditor({ material, categories }: Props) {
         setCareMode("table");
         setMaintenance(careTableToMaintenanceText(normalized));
       }
-      showFeedback("success", "AI 智能补全成功，请核对内容后保存");
+      // New parity fields stay optional: an older/partial response just skips them.
+      if (data.supplySeason) fillFormField(form, "supplySeason", data.supplySeason);
+      if (data.morphology) fillFormField(form, "morphology", data.morphology);
+      if (data.colorTags?.length) {
+        fillFormField(form, "colorTags", data.colorTags.join("，"));
+      }
+      if (data.suggestedAliases?.length) {
+        fillFormField(form, "aliases", data.suggestedAliases.join("，"));
+      }
+      if (data.floralRole &&
+        (FLORAL_ROLE_VALUES as readonly string[]).includes(data.floralRole)) {
+        fillFormField(form, "floralRole", data.floralRole);
+      }
+      showFeedback("success", "AI 智能补全成功，已填入角色、颜色、形态与别名（如有），请核对后保存");
     } catch (cause) {
       showFeedback(
         "error",

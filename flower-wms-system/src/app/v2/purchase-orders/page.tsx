@@ -8,6 +8,7 @@ import {
 import { calculatePurchaseProgress } from "@/v2/domain/purchase-progress";
 import { receivePurchase, rejectPurchase, finalizeBatchCost } from "../actions";
 import { ActionEmptyState, Field, StatusBadge, V2ModulePage, button, card, input, tableHead, tableShell } from "../_components/V2Ui";
+import { V2DrawerForm } from "../_components/V2Drawer";
 import { readV2Feedback } from "../_lib/search-params";
 import {
   PURCHASE_EPSILON, baseQuantityStep, describeProgressState, formatPurchaseDateTime, formatQuantity,
@@ -231,7 +232,17 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
     }
   }
 
-  return <V2ModulePage title="采购单管理" description="创建多明细采购草稿、下单、验收、拒收和追踪关联订单缺料；缺料补货与采购关联均在此完成。" message={feedback.message} error={feedback.error} actions={<details id="new-purchase-order" className="relative"><summary className={`${button} cursor-pointer list-none`}>新建采购单</summary><div className="absolute right-0 z-30 mt-2 max-h-[80vh] w-[min(52rem,92vw)] overflow-auto rounded-xl border border-zinc-200 bg-white p-5 shadow-xl"><h3 className="mb-4 font-semibold">新建采购草稿</h3><PurchaseOrderEditor action={createPurchaseDraftAction} suppliers={supplierOptions} materials={materialOptions} /></div></details>}>
+  return <V2ModulePage title="采购单管理" description="创建多明细采购草稿、下单、验收、拒收和追踪关联订单缺料；缺料补货与采购关联均在此完成。" message={feedback.message} error={feedback.error} actions={<div id="new-purchase-order" className="scroll-mt-24"><V2DrawerForm
+    triggerLabel="新建采购单"
+    title="新建采购草稿"
+    description="选择供应商、录入明细与费用；采购单号由系统自动生成。"
+    action={createPurchaseDraftAction}
+    submitLabel="创建采购草稿"
+    size="xl"
+    triggerClassName={button}
+  >
+    <PurchaseOrderEditor suppliers={supplierOptions} materials={materialOptions} />
+  </V2DrawerForm></div>}>
     {requirementId && <section className={`${card} border-amber-300`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div><h2 className="text-xl font-semibold">为订单缺料补货</h2><p className="mt-1 text-sm text-stone-600">为当前缺料需求创建一张正式的采购单，并在同一事务内关联到该需求；重复提交不会创建第二张采购单。</p></div>
@@ -333,7 +344,7 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
                           {line.purchaseOrderNumber} · {line.material.code} {line.material.name} · 可分配 {formatQuantity(line.allocatableQty)}{line.material.baseUnit} · {describeProgressState(line.progress)}
                         </div>)}
                       </div>
-                      : <p className="mt-1 text-stone-600">没有同物料的兼容开放采购明细。请先 <a className="font-medium text-amber-900 underline" href="#new-purchase-order">创建采购单</a>，再到此关联。</p>}
+                      : <p className="mt-1 text-stone-600">没有同物料的兼容开放采购明细。请先点击页头“新建采购单”创建采购单，再到此关联。</p>}
             </div>
             {requirement.purchaseAllocations.length > 0 && <div className="mt-2 space-y-1">
               <div className="font-medium text-stone-700">已关联采购行与补货进度</div>
@@ -451,7 +462,19 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
               </div>;
             })}</div>
             {order.state === "DRAFT" && <>
-              <details className="mt-5"><summary className="cursor-pointer font-medium text-emerald-700">编辑采购草稿</summary><div className="mt-3"><PurchaseOrderEditor action={updatePurchaseDraftAction} suppliers={supplierOptions} materials={materialOptions} initial={{ purchaseOrderId: order.id, supplierId: order.supplierId, expectedAt: dateTimeLocal(order.expectedAt), freightCost: Number(order.freightCost), packagingCost: Number(order.packagingCost), otherCost: Number(order.otherCost), notes: order.notes ?? "", lines: order.lines.map((line) => ({ materialId: line.materialId, quantity: Number(line.orderedQty), unitPrice: Number(line.unitPrice) })) }} /></div></details>
+              <div className="mt-5">
+                <V2DrawerForm
+                  triggerLabel="编辑采购草稿"
+                  title={`编辑采购草稿 · ${order.number}`}
+                  description="修改供应商、明细与费用；采购单号保持不变。"
+                  action={updatePurchaseDraftAction}
+                  submitLabel="保存草稿"
+                  size="xl"
+                  triggerClassName="rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-sm font-medium text-emerald-800 hover:bg-emerald-50"
+                >
+                  <PurchaseOrderEditor suppliers={supplierOptions} materials={materialOptions} initial={{ purchaseOrderId: order.id, supplierId: order.supplierId, expectedAt: dateTimeLocal(order.expectedAt), freightCost: Number(order.freightCost), packagingCost: Number(order.packagingCost), otherCost: Number(order.otherCost), notes: order.notes ?? "", lines: order.lines.map((line) => ({ materialId: line.materialId, quantity: Number(line.orderedQty), unitPrice: Number(line.unitPrice) })) }} />
+                </V2DrawerForm>
+              </div>
               <form action={submitPurchaseOrderAction} className="mt-4"><input type="hidden" name="purchaseOrderId" value={order.id} /><button className={button}>确认下单</button></form>
             </>}
             {["DRAFT", "ORDERED"].includes(order.state) && <form action={cancelPurchaseOrderAction} className="mt-4 flex gap-2 border-t border-zinc-200 pt-4"><input type="hidden" name="purchaseOrderId" value={order.id} /><input className={input} name="reason" placeholder="填写取消原因" required /><button className="whitespace-nowrap rounded-lg border border-red-700 px-4 py-2 text-sm text-red-800">取消采购单</button></form>}

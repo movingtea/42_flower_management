@@ -33,6 +33,8 @@ export type MaterialAvgAggregateOutputType = {
   optimisticUsableRate: runtime.Decimal | null
   standardUsableRate: runtime.Decimal | null
   conservativeUsableRate: runtime.Decimal | null
+  defaultUsableRate: runtime.Decimal | null
+  defaultLossRate: runtime.Decimal | null
   safetyStockThreshold: runtime.Decimal | null
 }
 
@@ -43,6 +45,8 @@ export type MaterialSumAggregateOutputType = {
   optimisticUsableRate: runtime.Decimal | null
   standardUsableRate: runtime.Decimal | null
   conservativeUsableRate: runtime.Decimal | null
+  defaultUsableRate: runtime.Decimal | null
+  defaultLossRate: runtime.Decimal | null
   safetyStockThreshold: runtime.Decimal | null
 }
 
@@ -71,6 +75,15 @@ export type MaterialMinAggregateOutputType = {
   standardUsableRate: runtime.Decimal | null
   conservativeUsableRate: runtime.Decimal | null
   lossRateNote: string | null
+  pinyinIndex: string | null
+  aliasText: string | null
+  floralRole: $Enums.FloralRole | null
+  morphology: string | null
+  defaultUsableRate: runtime.Decimal | null
+  defaultLossRate: runtime.Decimal | null
+  lossMode: $Enums.LossMode | null
+  lossRateUpdatedAt: Date | null
+  costUpdatedAt: Date | null
   brand: string | null
   model: string | null
   notes: string | null
@@ -106,6 +119,15 @@ export type MaterialMaxAggregateOutputType = {
   standardUsableRate: runtime.Decimal | null
   conservativeUsableRate: runtime.Decimal | null
   lossRateNote: string | null
+  pinyinIndex: string | null
+  aliasText: string | null
+  floralRole: $Enums.FloralRole | null
+  morphology: string | null
+  defaultUsableRate: runtime.Decimal | null
+  defaultLossRate: runtime.Decimal | null
+  lossMode: $Enums.LossMode | null
+  lossRateUpdatedAt: Date | null
+  costUpdatedAt: Date | null
   brand: string | null
   model: string | null
   notes: string | null
@@ -142,6 +164,17 @@ export type MaterialCountAggregateOutputType = {
   standardUsableRate: number
   conservativeUsableRate: number
   lossRateNote: number
+  pinyinIndex: number
+  aliasText: number
+  aliasMap: number
+  floralRole: number
+  colorTags: number
+  morphology: number
+  defaultUsableRate: number
+  defaultLossRate: number
+  lossMode: number
+  lossRateUpdatedAt: number
+  costUpdatedAt: number
   brand: number
   model: number
   notes: number
@@ -161,6 +194,8 @@ export type MaterialAvgAggregateInputType = {
   optimisticUsableRate?: true
   standardUsableRate?: true
   conservativeUsableRate?: true
+  defaultUsableRate?: true
+  defaultLossRate?: true
   safetyStockThreshold?: true
 }
 
@@ -171,6 +206,8 @@ export type MaterialSumAggregateInputType = {
   optimisticUsableRate?: true
   standardUsableRate?: true
   conservativeUsableRate?: true
+  defaultUsableRate?: true
+  defaultLossRate?: true
   safetyStockThreshold?: true
 }
 
@@ -199,6 +236,15 @@ export type MaterialMinAggregateInputType = {
   standardUsableRate?: true
   conservativeUsableRate?: true
   lossRateNote?: true
+  pinyinIndex?: true
+  aliasText?: true
+  floralRole?: true
+  morphology?: true
+  defaultUsableRate?: true
+  defaultLossRate?: true
+  lossMode?: true
+  lossRateUpdatedAt?: true
+  costUpdatedAt?: true
   brand?: true
   model?: true
   notes?: true
@@ -234,6 +280,15 @@ export type MaterialMaxAggregateInputType = {
   standardUsableRate?: true
   conservativeUsableRate?: true
   lossRateNote?: true
+  pinyinIndex?: true
+  aliasText?: true
+  floralRole?: true
+  morphology?: true
+  defaultUsableRate?: true
+  defaultLossRate?: true
+  lossMode?: true
+  lossRateUpdatedAt?: true
+  costUpdatedAt?: true
   brand?: true
   model?: true
   notes?: true
@@ -270,6 +325,17 @@ export type MaterialCountAggregateInputType = {
   standardUsableRate?: true
   conservativeUsableRate?: true
   lossRateNote?: true
+  pinyinIndex?: true
+  aliasText?: true
+  aliasMap?: true
+  floralRole?: true
+  colorTags?: true
+  morphology?: true
+  defaultUsableRate?: true
+  defaultLossRate?: true
+  lossMode?: true
+  lossRateUpdatedAt?: true
+  costUpdatedAt?: true
   brand?: true
   model?: true
   notes?: true
@@ -393,6 +459,17 @@ export type MaterialGroupByOutputType = {
   standardUsableRate: runtime.Decimal | null
   conservativeUsableRate: runtime.Decimal | null
   lossRateNote: string | null
+  pinyinIndex: string
+  aliasText: string
+  aliasMap: runtime.JsonValue
+  floralRole: $Enums.FloralRole | null
+  colorTags: string[]
+  morphology: string | null
+  defaultUsableRate: runtime.Decimal | null
+  defaultLossRate: runtime.Decimal | null
+  lossMode: $Enums.LossMode
+  lossRateUpdatedAt: Date | null
+  costUpdatedAt: Date | null
   brand: string | null
   model: string | null
   notes: string | null
@@ -452,6 +529,17 @@ export type MaterialWhereInput = {
   standardUsableRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.StringNullableFilter<"Material"> | string | null
+  pinyinIndex?: Prisma.StringFilter<"Material"> | string
+  aliasText?: Prisma.StringFilter<"Material"> | string
+  aliasMap?: Prisma.JsonFilter<"Material">
+  floralRole?: Prisma.EnumFloralRoleNullableFilter<"Material"> | $Enums.FloralRole | null
+  colorTags?: Prisma.StringNullableListFilter<"Material">
+  morphology?: Prisma.StringNullableFilter<"Material"> | string | null
+  defaultUsableRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFilter<"Material"> | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.DateTimeNullableFilter<"Material"> | Date | string | null
+  costUpdatedAt?: Prisma.DateTimeNullableFilter<"Material"> | Date | string | null
   brand?: Prisma.StringNullableFilter<"Material"> | string | null
   model?: Prisma.StringNullableFilter<"Material"> | string | null
   notes?: Prisma.StringNullableFilter<"Material"> | string | null
@@ -503,6 +591,17 @@ export type MaterialOrderByWithRelationInput = {
   standardUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
   conservativeUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
   lossRateNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  pinyinIndex?: Prisma.SortOrder
+  aliasText?: Prisma.SortOrder
+  aliasMap?: Prisma.SortOrder
+  floralRole?: Prisma.SortOrderInput | Prisma.SortOrder
+  colorTags?: Prisma.SortOrder
+  morphology?: Prisma.SortOrderInput | Prisma.SortOrder
+  defaultUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  defaultLossRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossMode?: Prisma.SortOrder
+  lossRateUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  costUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   brand?: Prisma.SortOrderInput | Prisma.SortOrder
   model?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -559,6 +658,17 @@ export type MaterialWhereUniqueInput = Prisma.AtLeast<{
   standardUsableRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.StringNullableFilter<"Material"> | string | null
+  pinyinIndex?: Prisma.StringFilter<"Material"> | string
+  aliasText?: Prisma.StringFilter<"Material"> | string
+  aliasMap?: Prisma.JsonFilter<"Material">
+  floralRole?: Prisma.EnumFloralRoleNullableFilter<"Material"> | $Enums.FloralRole | null
+  colorTags?: Prisma.StringNullableListFilter<"Material">
+  morphology?: Prisma.StringNullableFilter<"Material"> | string | null
+  defaultUsableRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFilter<"Material"> | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.DateTimeNullableFilter<"Material"> | Date | string | null
+  costUpdatedAt?: Prisma.DateTimeNullableFilter<"Material"> | Date | string | null
   brand?: Prisma.StringNullableFilter<"Material"> | string | null
   model?: Prisma.StringNullableFilter<"Material"> | string | null
   notes?: Prisma.StringNullableFilter<"Material"> | string | null
@@ -610,6 +720,17 @@ export type MaterialOrderByWithAggregationInput = {
   standardUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
   conservativeUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
   lossRateNote?: Prisma.SortOrderInput | Prisma.SortOrder
+  pinyinIndex?: Prisma.SortOrder
+  aliasText?: Prisma.SortOrder
+  aliasMap?: Prisma.SortOrder
+  floralRole?: Prisma.SortOrderInput | Prisma.SortOrder
+  colorTags?: Prisma.SortOrder
+  morphology?: Prisma.SortOrderInput | Prisma.SortOrder
+  defaultUsableRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  defaultLossRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossMode?: Prisma.SortOrder
+  lossRateUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  costUpdatedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   brand?: Prisma.SortOrderInput | Prisma.SortOrder
   model?: Prisma.SortOrderInput | Prisma.SortOrder
   notes?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -654,6 +775,17 @@ export type MaterialScalarWhereWithAggregatesInput = {
   standardUsableRate?: Prisma.DecimalNullableWithAggregatesFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.DecimalNullableWithAggregatesFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
+  pinyinIndex?: Prisma.StringWithAggregatesFilter<"Material"> | string
+  aliasText?: Prisma.StringWithAggregatesFilter<"Material"> | string
+  aliasMap?: Prisma.JsonWithAggregatesFilter<"Material">
+  floralRole?: Prisma.EnumFloralRoleNullableWithAggregatesFilter<"Material"> | $Enums.FloralRole | null
+  colorTags?: Prisma.StringNullableListFilter<"Material">
+  morphology?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
+  defaultUsableRate?: Prisma.DecimalNullableWithAggregatesFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.DecimalNullableWithAggregatesFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeWithAggregatesFilter<"Material"> | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Material"> | Date | string | null
+  costUpdatedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Material"> | Date | string | null
   brand?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
   model?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
   notes?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
@@ -689,6 +821,17 @@ export type MaterialCreateInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -740,6 +883,17 @@ export type MaterialUncheckedCreateInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -789,6 +943,17 @@ export type MaterialUpdateInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -840,6 +1005,17 @@ export type MaterialUncheckedUpdateInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -890,6 +1066,17 @@ export type MaterialCreateManyInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -925,6 +1112,17 @@ export type MaterialUpdateManyMutationInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -961,6 +1159,17 @@ export type MaterialUncheckedUpdateManyInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -979,6 +1188,14 @@ export type MaterialListRelationFilter = {
 
 export type MaterialOrderByRelationAggregateInput = {
   _count?: Prisma.SortOrder
+}
+
+export type StringNullableListFilter<$PrismaModel = never> = {
+  equals?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel> | null
+  has?: string | Prisma.StringFieldRefInput<$PrismaModel> | null
+  hasEvery?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  hasSome?: string[] | Prisma.ListStringFieldRefInput<$PrismaModel>
+  isEmpty?: boolean
 }
 
 export type MaterialTenantIdCodeCompoundUniqueInput = {
@@ -1017,6 +1234,17 @@ export type MaterialCountOrderByAggregateInput = {
   standardUsableRate?: Prisma.SortOrder
   conservativeUsableRate?: Prisma.SortOrder
   lossRateNote?: Prisma.SortOrder
+  pinyinIndex?: Prisma.SortOrder
+  aliasText?: Prisma.SortOrder
+  aliasMap?: Prisma.SortOrder
+  floralRole?: Prisma.SortOrder
+  colorTags?: Prisma.SortOrder
+  morphology?: Prisma.SortOrder
+  defaultUsableRate?: Prisma.SortOrder
+  defaultLossRate?: Prisma.SortOrder
+  lossMode?: Prisma.SortOrder
+  lossRateUpdatedAt?: Prisma.SortOrder
+  costUpdatedAt?: Prisma.SortOrder
   brand?: Prisma.SortOrder
   model?: Prisma.SortOrder
   notes?: Prisma.SortOrder
@@ -1034,6 +1262,8 @@ export type MaterialAvgOrderByAggregateInput = {
   optimisticUsableRate?: Prisma.SortOrder
   standardUsableRate?: Prisma.SortOrder
   conservativeUsableRate?: Prisma.SortOrder
+  defaultUsableRate?: Prisma.SortOrder
+  defaultLossRate?: Prisma.SortOrder
   safetyStockThreshold?: Prisma.SortOrder
 }
 
@@ -1062,6 +1292,15 @@ export type MaterialMaxOrderByAggregateInput = {
   standardUsableRate?: Prisma.SortOrder
   conservativeUsableRate?: Prisma.SortOrder
   lossRateNote?: Prisma.SortOrder
+  pinyinIndex?: Prisma.SortOrder
+  aliasText?: Prisma.SortOrder
+  floralRole?: Prisma.SortOrder
+  morphology?: Prisma.SortOrder
+  defaultUsableRate?: Prisma.SortOrder
+  defaultLossRate?: Prisma.SortOrder
+  lossMode?: Prisma.SortOrder
+  lossRateUpdatedAt?: Prisma.SortOrder
+  costUpdatedAt?: Prisma.SortOrder
   brand?: Prisma.SortOrder
   model?: Prisma.SortOrder
   notes?: Prisma.SortOrder
@@ -1097,6 +1336,15 @@ export type MaterialMinOrderByAggregateInput = {
   standardUsableRate?: Prisma.SortOrder
   conservativeUsableRate?: Prisma.SortOrder
   lossRateNote?: Prisma.SortOrder
+  pinyinIndex?: Prisma.SortOrder
+  aliasText?: Prisma.SortOrder
+  floralRole?: Prisma.SortOrder
+  morphology?: Prisma.SortOrder
+  defaultUsableRate?: Prisma.SortOrder
+  defaultLossRate?: Prisma.SortOrder
+  lossMode?: Prisma.SortOrder
+  lossRateUpdatedAt?: Prisma.SortOrder
+  costUpdatedAt?: Prisma.SortOrder
   brand?: Prisma.SortOrder
   model?: Prisma.SortOrder
   notes?: Prisma.SortOrder
@@ -1114,6 +1362,8 @@ export type MaterialSumOrderByAggregateInput = {
   optimisticUsableRate?: Prisma.SortOrder
   standardUsableRate?: Prisma.SortOrder
   conservativeUsableRate?: Prisma.SortOrder
+  defaultUsableRate?: Prisma.SortOrder
+  defaultLossRate?: Prisma.SortOrder
   safetyStockThreshold?: Prisma.SortOrder
 }
 
@@ -1169,6 +1419,10 @@ export type MaterialUncheckedUpdateManyWithoutTenantNestedInput = {
   deleteMany?: Prisma.MaterialScalarWhereInput | Prisma.MaterialScalarWhereInput[]
 }
 
+export type MaterialCreatecolorTagsInput = {
+  set: string[]
+}
+
 export type EnumMaterialKindFieldUpdateOperationsInput = {
   set?: $Enums.MaterialKind
 }
@@ -1203,6 +1457,23 @@ export type NullableDecimalFieldUpdateOperationsInput = {
   decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string
   multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string
   divide?: runtime.Decimal | runtime.DecimalJsLike | number | string
+}
+
+export type NullableEnumFloralRoleFieldUpdateOperationsInput = {
+  set?: $Enums.FloralRole | null
+}
+
+export type MaterialUpdatecolorTagsInput = {
+  set?: string[]
+  push?: string | string[]
+}
+
+export type EnumLossModeFieldUpdateOperationsInput = {
+  set?: $Enums.LossMode
+}
+
+export type NullableDateTimeFieldUpdateOperationsInput = {
+  set?: Date | string | null
 }
 
 export type DecimalFieldUpdateOperationsInput = {
@@ -1442,6 +1713,17 @@ export type MaterialCreateWithoutTenantInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -1491,6 +1773,17 @@ export type MaterialUncheckedCreateWithoutTenantInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -1570,6 +1863,17 @@ export type MaterialScalarWhereInput = {
   standardUsableRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.StringNullableFilter<"Material"> | string | null
+  pinyinIndex?: Prisma.StringFilter<"Material"> | string
+  aliasText?: Prisma.StringFilter<"Material"> | string
+  aliasMap?: Prisma.JsonFilter<"Material">
+  floralRole?: Prisma.EnumFloralRoleNullableFilter<"Material"> | $Enums.FloralRole | null
+  colorTags?: Prisma.StringNullableListFilter<"Material">
+  morphology?: Prisma.StringNullableFilter<"Material"> | string | null
+  defaultUsableRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.DecimalNullableFilter<"Material"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFilter<"Material"> | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.DateTimeNullableFilter<"Material"> | Date | string | null
+  costUpdatedAt?: Prisma.DateTimeNullableFilter<"Material"> | Date | string | null
   brand?: Prisma.StringNullableFilter<"Material"> | string | null
   model?: Prisma.StringNullableFilter<"Material"> | string | null
   notes?: Prisma.StringNullableFilter<"Material"> | string | null
@@ -1605,6 +1909,17 @@ export type MaterialCreateWithoutRecipeLinesInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -1655,6 +1970,17 @@ export type MaterialUncheckedCreateWithoutRecipeLinesInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -1719,6 +2045,17 @@ export type MaterialUpdateWithoutRecipeLinesInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1769,6 +2106,17 @@ export type MaterialUncheckedUpdateWithoutRecipeLinesInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1817,6 +2165,17 @@ export type MaterialCreateWithoutPackagingKitLinesInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -1867,6 +2226,17 @@ export type MaterialUncheckedCreateWithoutPackagingKitLinesInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -1931,6 +2301,17 @@ export type MaterialUpdateWithoutPackagingKitLinesInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1981,6 +2362,17 @@ export type MaterialUncheckedUpdateWithoutPackagingKitLinesInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2029,6 +2421,17 @@ export type MaterialCreateWithoutRequirementsInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -2079,6 +2482,17 @@ export type MaterialUncheckedCreateWithoutRequirementsInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -2143,6 +2557,17 @@ export type MaterialUpdateWithoutRequirementsInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2193,6 +2618,17 @@ export type MaterialUncheckedUpdateWithoutRequirementsInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2241,6 +2677,17 @@ export type MaterialCreateWithoutHoldMaterialsInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -2291,6 +2738,17 @@ export type MaterialUncheckedCreateWithoutHoldMaterialsInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -2355,6 +2813,17 @@ export type MaterialUpdateWithoutHoldMaterialsInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2405,6 +2874,17 @@ export type MaterialUncheckedUpdateWithoutHoldMaterialsInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2453,6 +2933,17 @@ export type MaterialCreateWithoutOrderedLinesInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -2503,6 +2994,17 @@ export type MaterialUncheckedCreateWithoutOrderedLinesInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -2567,6 +3069,17 @@ export type MaterialUpdateWithoutOrderedLinesInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2617,6 +3130,17 @@ export type MaterialUncheckedUpdateWithoutOrderedLinesInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2665,6 +3189,17 @@ export type MaterialCreateWithoutReceivedLinesInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -2715,6 +3250,17 @@ export type MaterialUncheckedCreateWithoutReceivedLinesInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -2779,6 +3325,17 @@ export type MaterialUpdateWithoutReceivedLinesInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2829,6 +3386,17 @@ export type MaterialUncheckedUpdateWithoutReceivedLinesInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2877,6 +3445,17 @@ export type MaterialCreateWithoutBatchesInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -2927,6 +3506,17 @@ export type MaterialUncheckedCreateWithoutBatchesInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -2991,6 +3581,17 @@ export type MaterialUpdateWithoutBatchesInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3041,6 +3642,17 @@ export type MaterialUncheckedUpdateWithoutBatchesInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3089,6 +3701,17 @@ export type MaterialCreateWithoutSampleMaterialsInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -3139,6 +3762,17 @@ export type MaterialUncheckedCreateWithoutSampleMaterialsInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -3203,6 +3837,17 @@ export type MaterialUpdateWithoutSampleMaterialsInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3253,6 +3898,17 @@ export type MaterialUncheckedUpdateWithoutSampleMaterialsInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3301,6 +3957,17 @@ export type MaterialCreateWithoutSamplePlanMaterialsInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -3351,6 +4018,17 @@ export type MaterialUncheckedCreateWithoutSamplePlanMaterialsInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -3415,6 +4093,17 @@ export type MaterialUpdateWithoutSamplePlanMaterialsInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3465,6 +4154,17 @@ export type MaterialUncheckedUpdateWithoutSamplePlanMaterialsInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3513,6 +4213,17 @@ export type MaterialCreateWithoutSampleInventorySnapshotsInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -3563,6 +4274,17 @@ export type MaterialUncheckedCreateWithoutSampleInventorySnapshotsInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -3627,6 +4349,17 @@ export type MaterialUpdateWithoutSampleInventorySnapshotsInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3677,6 +4410,17 @@ export type MaterialUncheckedUpdateWithoutSampleInventorySnapshotsInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3725,6 +4469,17 @@ export type MaterialCreateWithoutSampleStepMaterialsInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -3775,6 +4530,17 @@ export type MaterialUncheckedCreateWithoutSampleStepMaterialsInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -3839,6 +4605,17 @@ export type MaterialUpdateWithoutSampleStepMaterialsInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3889,6 +4666,17 @@ export type MaterialUncheckedUpdateWithoutSampleStepMaterialsInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3937,6 +4725,17 @@ export type MaterialCreateWithoutDisassemblyMaterialsInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -3987,6 +4786,17 @@ export type MaterialUncheckedCreateWithoutDisassemblyMaterialsInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -4051,6 +4861,17 @@ export type MaterialUpdateWithoutDisassemblyMaterialsInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4101,6 +4922,17 @@ export type MaterialUncheckedUpdateWithoutDisassemblyMaterialsInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4149,6 +4981,17 @@ export type MaterialCreateWithoutUnverifiedLossesInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -4199,6 +5042,17 @@ export type MaterialUncheckedCreateWithoutUnverifiedLossesInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -4263,6 +5117,17 @@ export type MaterialUpdateWithoutUnverifiedLossesInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4313,6 +5178,17 @@ export type MaterialUncheckedUpdateWithoutUnverifiedLossesInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4361,6 +5237,17 @@ export type MaterialCreateWithoutCategoriesInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -4411,6 +5298,17 @@ export type MaterialUncheckedCreateWithoutCategoriesInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -4475,6 +5373,17 @@ export type MaterialUpdateWithoutCategoriesInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4525,6 +5434,17 @@ export type MaterialUncheckedUpdateWithoutCategoriesInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4573,6 +5493,17 @@ export type MaterialCreateManyTenantInput = {
   standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
   brand?: string | null
   model?: string | null
   notes?: string | null
@@ -4608,6 +5539,17 @@ export type MaterialUpdateWithoutTenantInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4657,6 +5599,17 @@ export type MaterialUncheckedUpdateWithoutTenantInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4706,6 +5659,17 @@ export type MaterialUncheckedUpdateManyWithoutTenantInput = {
   standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4890,6 +5854,17 @@ export type MaterialSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   standardUsableRate?: boolean
   conservativeUsableRate?: boolean
   lossRateNote?: boolean
+  pinyinIndex?: boolean
+  aliasText?: boolean
+  aliasMap?: boolean
+  floralRole?: boolean
+  colorTags?: boolean
+  morphology?: boolean
+  defaultUsableRate?: boolean
+  defaultLossRate?: boolean
+  lossMode?: boolean
+  lossRateUpdatedAt?: boolean
+  costUpdatedAt?: boolean
   brand?: boolean
   model?: boolean
   notes?: boolean
@@ -4942,6 +5917,17 @@ export type MaterialSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   standardUsableRate?: boolean
   conservativeUsableRate?: boolean
   lossRateNote?: boolean
+  pinyinIndex?: boolean
+  aliasText?: boolean
+  aliasMap?: boolean
+  floralRole?: boolean
+  colorTags?: boolean
+  morphology?: boolean
+  defaultUsableRate?: boolean
+  defaultLossRate?: boolean
+  lossMode?: boolean
+  lossRateUpdatedAt?: boolean
+  costUpdatedAt?: boolean
   brand?: boolean
   model?: boolean
   notes?: boolean
@@ -4979,6 +5965,17 @@ export type MaterialSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   standardUsableRate?: boolean
   conservativeUsableRate?: boolean
   lossRateNote?: boolean
+  pinyinIndex?: boolean
+  aliasText?: boolean
+  aliasMap?: boolean
+  floralRole?: boolean
+  colorTags?: boolean
+  morphology?: boolean
+  defaultUsableRate?: boolean
+  defaultLossRate?: boolean
+  lossMode?: boolean
+  lossRateUpdatedAt?: boolean
+  costUpdatedAt?: boolean
   brand?: boolean
   model?: boolean
   notes?: boolean
@@ -5016,6 +6013,17 @@ export type MaterialSelectScalar = {
   standardUsableRate?: boolean
   conservativeUsableRate?: boolean
   lossRateNote?: boolean
+  pinyinIndex?: boolean
+  aliasText?: boolean
+  aliasMap?: boolean
+  floralRole?: boolean
+  colorTags?: boolean
+  morphology?: boolean
+  defaultUsableRate?: boolean
+  defaultLossRate?: boolean
+  lossMode?: boolean
+  lossRateUpdatedAt?: boolean
+  costUpdatedAt?: boolean
   brand?: boolean
   model?: boolean
   notes?: boolean
@@ -5026,7 +6034,7 @@ export type MaterialSelectScalar = {
   updatedAt?: boolean
 }
 
-export type MaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "code" | "name" | "kind" | "color" | "grade" | "gradeSpecification" | "specification" | "baseUnit" | "quantityScale" | "reservePerOrder" | "englishName" | "flowerLanguage" | "maintenance" | "maintenanceCare" | "supplySeason" | "defaultShelfLifeDays" | "standardUnitCost" | "costUnit" | "costNote" | "optimisticUsableRate" | "standardUsableRate" | "conservativeUsableRate" | "lossRateNote" | "brand" | "model" | "notes" | "imageKey" | "safetyStockThreshold" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["material"]>
+export type MaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "code" | "name" | "kind" | "color" | "grade" | "gradeSpecification" | "specification" | "baseUnit" | "quantityScale" | "reservePerOrder" | "englishName" | "flowerLanguage" | "maintenance" | "maintenanceCare" | "supplySeason" | "defaultShelfLifeDays" | "standardUnitCost" | "costUnit" | "costNote" | "optimisticUsableRate" | "standardUsableRate" | "conservativeUsableRate" | "lossRateNote" | "pinyinIndex" | "aliasText" | "aliasMap" | "floralRole" | "colorTags" | "morphology" | "defaultUsableRate" | "defaultLossRate" | "lossMode" | "lossRateUpdatedAt" | "costUpdatedAt" | "brand" | "model" | "notes" | "imageKey" | "safetyStockThreshold" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["material"]>
 export type MaterialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   unverifiedLosses?: boolean | Prisma.Material$unverifiedLossesArgs<ExtArgs>
@@ -5097,6 +6105,17 @@ export type $MaterialPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     standardUsableRate: runtime.Decimal | null
     conservativeUsableRate: runtime.Decimal | null
     lossRateNote: string | null
+    pinyinIndex: string
+    aliasText: string
+    aliasMap: runtime.JsonValue
+    floralRole: $Enums.FloralRole | null
+    colorTags: string[]
+    morphology: string | null
+    defaultUsableRate: runtime.Decimal | null
+    defaultLossRate: runtime.Decimal | null
+    lossMode: $Enums.LossMode
+    lossRateUpdatedAt: Date | null
+    costUpdatedAt: Date | null
     brand: string | null
     model: string | null
     notes: string | null
@@ -5568,6 +6587,17 @@ export interface MaterialFieldRefs {
   readonly standardUsableRate: Prisma.FieldRef<"Material", 'Decimal'>
   readonly conservativeUsableRate: Prisma.FieldRef<"Material", 'Decimal'>
   readonly lossRateNote: Prisma.FieldRef<"Material", 'String'>
+  readonly pinyinIndex: Prisma.FieldRef<"Material", 'String'>
+  readonly aliasText: Prisma.FieldRef<"Material", 'String'>
+  readonly aliasMap: Prisma.FieldRef<"Material", 'Json'>
+  readonly floralRole: Prisma.FieldRef<"Material", 'FloralRole'>
+  readonly colorTags: Prisma.FieldRef<"Material", 'String[]'>
+  readonly morphology: Prisma.FieldRef<"Material", 'String'>
+  readonly defaultUsableRate: Prisma.FieldRef<"Material", 'Decimal'>
+  readonly defaultLossRate: Prisma.FieldRef<"Material", 'Decimal'>
+  readonly lossMode: Prisma.FieldRef<"Material", 'LossMode'>
+  readonly lossRateUpdatedAt: Prisma.FieldRef<"Material", 'DateTime'>
+  readonly costUpdatedAt: Prisma.FieldRef<"Material", 'DateTime'>
   readonly brand: Prisma.FieldRef<"Material", 'String'>
   readonly model: Prisma.FieldRef<"Material", 'String'>
   readonly notes: Prisma.FieldRef<"Material", 'String'>

@@ -1,7 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { button, input } from "../_components/V2Ui";
+import { input } from "../_components/V2Ui";
+
+/**
+ * Fields-only recipe draft editor rendered inside `V2DrawerForm`.
+ *
+ * The drawer owns the `<form action=...>`, the footer buttons and the
+ * reset-on-close behaviour; this client component only keeps the dynamic line
+ * state and renders hidden inputs for the server action. It must never render
+ * another `<form>`.
+ */
 
 type Line = { materialId: string; quantity: number };
 type Material = {
@@ -40,21 +49,17 @@ function toRows(lines: Line[], materials: Material[]): Row[] {
 }
 
 export function RecipeDraftEditor({
-  action,
   materials,
   skus,
   skuId,
   versionId,
   initialLines,
-  submitLabel = "保存草稿",
 }: {
-  action: (data: FormData) => void | Promise<void>;
   materials: Material[];
   skus?: Sku[];
   skuId?: string;
   versionId?: string;
   initialLines: Line[];
-  submitLabel?: string;
 }) {
   const firstSku = skus?.[0];
   const [selectedSkuId, setSelectedSkuId] = useState(skuId ?? firstSku?.id ?? "");
@@ -82,7 +87,7 @@ export function RecipeDraftEditor({
   }));
 
   return (
-    <form action={action} className="space-y-4">
+    <div className="space-y-4">
       <input type="hidden" name="skuId" value={selectedSkuId} />
       {versionId && <input type="hidden" name="versionId" value={versionId} />}
       <input type="hidden" name="lines" value={JSON.stringify(hidden)} />
@@ -202,18 +207,6 @@ export function RecipeDraftEditor({
           ＋ 添加物料
         </button>
       </div>
-
-      <div className="flex flex-wrap items-center gap-3">
-        <button
-          className={button}
-          disabled={materials.length === 0 || !selectedSkuId}
-        >
-          {submitLabel}
-        </button>
-        <span className="text-xs text-stone-500">
-          保存后进入配方详情；草稿可继续编辑，发布后不可修改。
-        </span>
-      </div>
-    </form>
+    </div>
   );
 }

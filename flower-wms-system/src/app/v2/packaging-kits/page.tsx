@@ -13,6 +13,7 @@ import {
   tableHead,
 } from "../_components/V2Ui";
 import { readV2Feedback } from "../_lib/search-params";
+import { V2DrawerForm } from "../_components/V2Drawer";
 import { PackagingKitEditor } from "./PackagingKitEditor";
 import {
   savePackagingKitAction,
@@ -122,18 +123,17 @@ export default async function PackagingKitsPage({
           >
             标准配方
           </Link>
-          <details className="relative">
-            <summary className={`${button} cursor-pointer list-none`}>
-              新建包装方案
-            </summary>
-            <div className="absolute right-0 z-30 mt-2 w-[min(42rem,90vw)] rounded-xl border border-zinc-200 bg-white p-5 shadow-xl">
-              <h3 className="mb-3 font-semibold">新建包装方案</h3>
-              <PackagingKitEditor
-                action={savePackagingKitAction}
-                materials={materialOptions}
-              />
-            </div>
-          </details>
+          <V2DrawerForm
+            triggerLabel="新建包装方案"
+            title="新建包装方案"
+            description="方案编码由系统自动生成，创建后不可修改。"
+            action={savePackagingKitAction}
+            submitLabel="保存包装方案"
+            size="xl"
+            triggerClassName={button}
+          >
+            <PackagingKitEditor materials={materialOptions} />
+          </V2DrawerForm>
         </>
       }
     >
@@ -175,7 +175,10 @@ export default async function PackagingKitsPage({
                       {kit.name}
                     </h3>
                     <p className="mt-0.5 text-xs text-zinc-500">
-                      {kit.code} · {kit.lines.length} 项物料
+                      方案编码 <span className="font-mono">{kit.code}</span>
+                    </p>
+                    <p className="mt-0.5 text-xs text-zinc-500">
+                      {kit.lines.length} 项物料
                     </p>
                   </div>
                   <StatusBadge tone={kit.active ? "success" : "neutral"}>
@@ -225,28 +228,29 @@ export default async function PackagingKitsPage({
                 </details>
 
                 <div className="mt-4 flex flex-wrap items-start gap-3">
-                  <details>
-                    <summary className="cursor-pointer text-sm text-emerald-700">
-                      编辑方案
-                    </summary>
-                    <div className="absolute left-0 right-0 z-20 mt-2 rounded-xl border border-zinc-200 bg-white p-5 shadow-xl">
-                      <h4 className="mb-3 font-semibold">编辑包装方案</h4>
-                      <PackagingKitEditor
-                        action={savePackagingKitAction}
-                        materials={materialOptions}
-                        initial={{
-                          id: kit.id,
-                          code: kit.code,
-                          name: kit.name,
-                          notes: kit.notes ?? "",
-                          lines: kit.lines.map((line) => ({
-                            materialId: line.materialId,
-                            quantity: Number(line.quantity),
-                          })),
-                        }}
-                      />
-                    </div>
-                  </details>
+                  <V2DrawerForm
+                    triggerLabel="编辑方案"
+                    title={`编辑包装方案：${kit.name}`}
+                    description={`方案编码 ${kit.code} 创建后不可修改。`}
+                    action={savePackagingKitAction}
+                    submitLabel="保存包装方案"
+                    size="xl"
+                    triggerClassName="text-sm text-emerald-700 hover:underline"
+                  >
+                    <PackagingKitEditor
+                      materials={materialOptions}
+                      initial={{
+                        id: kit.id,
+                        code: kit.code,
+                        name: kit.name,
+                        notes: kit.notes ?? "",
+                        lines: kit.lines.map((line) => ({
+                          materialId: line.materialId,
+                          quantity: Number(line.quantity),
+                        })),
+                      }}
+                    />
+                  </V2DrawerForm>
 
                   <form action={setPackagingKitActiveAction}>
                     <input type="hidden" name="id" value={kit.id} />

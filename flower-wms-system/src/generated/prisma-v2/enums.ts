@@ -20,6 +20,25 @@ export const MaterialKind = {
 export type MaterialKind = (typeof MaterialKind)[keyof typeof MaterialKind]
 
 
+export const FloralRole = {
+  MAIN: 'MAIN',
+  FILLER: 'FILLER',
+  LINE: 'LINE',
+  FOLIAGE: 'FOLIAGE'
+} as const
+
+export type FloralRole = (typeof FloralRole)[keyof typeof FloralRole]
+
+
+export const LossMode = {
+  OPTIMISTIC: 'OPTIMISTIC',
+  STANDARD: 'STANDARD',
+  CONSERVATIVE: 'CONSERVATIVE'
+} as const
+
+export type LossMode = (typeof LossMode)[keyof typeof LossMode]
+
+
 export const LocationKind = {
   WAREHOUSE: 'WAREHOUSE',
   PRODUCTION: 'PRODUCTION'

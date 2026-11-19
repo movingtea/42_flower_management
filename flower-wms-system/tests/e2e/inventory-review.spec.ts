@@ -21,13 +21,12 @@ test.describe("独立用例 · 库存复核与权限（E11-INV-006）", () => {
 
   test("普通员工提交盘点差异进入待复核，经理批准后只调整一次", async ({ browser }) => {
     const marker = createMarker("INV");
-    const materialCode = `${marker}-ROSE`;
+    let materialCode = "";
     const stocktakeReason = "护理损耗未登记";
 
     const admin = await openRolePage(browser, "admin", "/v2/materials");
     try {
-      await createMaterial(admin.page, {
-        code: materialCode,
+      materialCode = await createMaterial(admin.page, {
         name: `${marker} 盘点玫瑰`,
         kind: "花材",
         color: "白",

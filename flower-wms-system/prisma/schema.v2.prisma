@@ -16,6 +16,19 @@ enum MaterialKind {
   OTHER
 }
 
+enum FloralRole {
+  MAIN
+  FILLER
+  LINE
+  FOLIAGE
+}
+
+enum LossMode {
+  OPTIMISTIC
+  STANDARD
+  CONSERVATIVE
+}
+
 enum LocationKind {
   WAREHOUSE
   PRODUCTION
@@ -322,6 +335,18 @@ model Material {
   standardUsableRate       Decimal?                      @db.Decimal(7, 4)
   conservativeUsableRate   Decimal?                      @db.Decimal(7, 4)
   lossRateNote             String?                       @db.Text
+  // V1 material library parity: search index, flower knowledge and loss policy.
+  pinyinIndex              String                        @default("")
+  aliasText                String                        @default("")
+  aliasMap                 Json                          @default("{}")
+  floralRole               FloralRole?
+  colorTags                String[]                      @default([])
+  morphology               String?                       @db.Text
+  defaultUsableRate        Decimal?                      @db.Decimal(7, 4)
+  defaultLossRate          Decimal?                      @db.Decimal(7, 4)
+  lossMode                 LossMode                      @default(STANDARD)
+  lossRateUpdatedAt        DateTime?
+  costUpdatedAt            DateTime?
   // V1 MasterPart fields retained on the same unified material record.
   brand                    String?
   model                    String?
@@ -351,6 +376,7 @@ model Material {
   @@unique([tenantId, code])
   @@unique([id, tenantId])
   @@index([tenantId, active, name])
+  @@index([tenantId, pinyinIndex])
 }
 
 model Supplier {

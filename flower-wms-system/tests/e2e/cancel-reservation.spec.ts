@@ -14,8 +14,7 @@ test.describe("独立用例 · 取消订单释放预留", () => {
 
   test("确认后取消：预留全部释放且批次实存不变", async ({ browser }) => {
     const marker = createMarker("CANCEL");
-    const materialCode = `${marker}-ROSE`;
-    const supplierCode = `${marker}-SUP`;
+    let materialCode = "";
     const productName = markerLabel(marker);
     const skuName = `${marker} 单支花束`;
     const buyerName = markerLabel(marker);
@@ -23,8 +22,7 @@ test.describe("独立用例 · 取消订单释放预留", () => {
     const admin = await openRolePage(browser, "admin", "/v2/materials");
     let skuCode: string;
     try {
-      await createMaterial(admin.page, {
-        code: materialCode,
+      materialCode = await createMaterial(admin.page, {
         name: `${marker} 白玫瑰`,
         kind: "花材",
         color: "白",

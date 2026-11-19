@@ -1,6 +1,6 @@
 "use client";
 import { useMemo, useState } from "react";
-import { button, input } from "../_components/V2Ui";
+import { input } from "../_components/V2Ui";
 import { allocatePurchaseFees, type FeeAllocationMethod } from "./fee-allocation";
 
 type MaterialOption = { id: string; label: string; unit: string };
@@ -12,8 +12,13 @@ const ALLOCATION_METHODS: { value: FeeAllocationMethod; label: string }[] = [
   { value: "BY_QUANTITY", label: "按数量分摊" },
 ];
 
-export function PurchaseOrderEditor({ action, suppliers, materials, initial }: {
-  action: (data: FormData) => void | Promise<void>; suppliers: SupplierOption[]; materials: MaterialOption[];
+/**
+ * Draft fields for a purchase order. The surrounding V2DrawerForm owns the
+ * `<form>` element, the server action and the footer submit button, so this
+ * component stays a pure client-side field group (lines and fee preview).
+ */
+export function PurchaseOrderEditor({ suppliers, materials, initial }: {
+  suppliers: SupplierOption[]; materials: MaterialOption[];
   initial?: { purchaseOrderId: string; supplierId: string; expectedAt: string; freightCost: number; packagingCost: number; otherCost: number; notes: string; lines: Line[] };
 }) {
   const [lines, setLines] = useState<Line[]>(initial?.lines.length ? initial.lines : [{ materialId: materials[0]?.id ?? "", quantity: 1, unitPrice: 0 }]);
@@ -28,7 +33,7 @@ export function PurchaseOrderEditor({ action, suppliers, materials, initial }: {
   const feeTotal = allocation.feeTotal;
   const allocatedTotal = allocation.lines.reduce((sum, line) => sum + line.allocatedFee, 0);
   const total = allocation.actualTotal;
-  return <form action={action} className="space-y-4">
+  return <>
     {initial && <input type="hidden" name="purchaseOrderId" value={initial.purchaseOrderId} />}
     <input type="hidden" name="lines" value={JSON.stringify(lines)} />
     <div className="grid gap-3 md:grid-cols-2"><label className="text-sm">供应商<select className={`${input} mt-1`} name="supplierId" defaultValue={initial?.supplierId} required>{suppliers.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label><label className="text-sm">预计到货时间<input className={`${input} mt-1`} name="expectedAt" type="datetime-local" defaultValue={initial?.expectedAt} /></label></div>
@@ -61,6 +66,8 @@ export function PurchaseOrderEditor({ action, suppliers, materials, initial }: {
       <span>明细小计 ¥{subtotal.toFixed(2)} ＋ 费用 ¥{feeTotal.toFixed(2)}（已分摊 ¥{allocatedTotal.toFixed(2)}）</span>
       <strong>实际总成本合计 ¥{total.toFixed(2)}</strong>
     </div>
-    <button className={button} disabled={!suppliers.length || !materials.length}>{initial ? "保存草稿" : "创建采购草稿"}</button>
-  </form>;
+    {(!suppliers.length || !materials.length) && (
+      <p className="text-xs text-amber-800">创建采购单前需先启用供应商与物料。</p>
+    )}
+  </>;
 }

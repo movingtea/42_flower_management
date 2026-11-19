@@ -23,13 +23,12 @@ test.describe("独立用例 · 补送与额外收货（E11-PUR-02）", () => {
 
   test("订 5 拒收 2，关联补送 2 与额外收货 3 分别入库且原明细封顶", async ({ browser }) => {
     const marker = createMarker("PUR");
-    const materialCode = `${marker}-ROSE`;
-    const supplierCode = `${marker}-SUP`;
+    let materialCode = "";
+    let supplierCode = "";
 
     const { context, page } = await openRolePage(browser, "admin", "/v2/materials");
     try {
-      await createMaterial(page, {
-        code: materialCode,
+      materialCode = await createMaterial(page, {
         name: `${marker} 拒收玫瑰`,
         kind: "花材",
         color: "香槟",
@@ -37,7 +36,7 @@ test.describe("独立用例 · 补送与额外收货（E11-PUR-02）", () => {
         baseUnit: "支",
         quantityScale: 0,
       });
-      await createSupplier(page, { code: supplierCode, name: `${marker} 补送供应商` });
+      supplierCode = await createSupplier(page, { name: `${marker} 补送供应商` });
 
       // Create and submit one purchase order with a single 5-stem original line.
       await gotoApp(page, "/v2/purchase-orders");

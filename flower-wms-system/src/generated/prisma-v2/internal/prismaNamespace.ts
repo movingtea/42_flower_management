@@ -5972,6 +5972,17 @@ export const MaterialScalarFieldEnum = {
   standardUsableRate: 'standardUsableRate',
   conservativeUsableRate: 'conservativeUsableRate',
   lossRateNote: 'lossRateNote',
+  pinyinIndex: 'pinyinIndex',
+  aliasText: 'aliasText',
+  aliasMap: 'aliasMap',
+  floralRole: 'floralRole',
+  colorTags: 'colorTags',
+  morphology: 'morphology',
+  defaultUsableRate: 'defaultUsableRate',
+  defaultLossRate: 'defaultLossRate',
+  lossMode: 'lossMode',
+  lossRateUpdatedAt: 'lossRateUpdatedAt',
+  costUpdatedAt: 'costUpdatedAt',
   brand: 'brand',
   model: 'model',
   notes: 'notes',
@@ -7097,6 +7108,34 @@ export type DecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel,
  * Reference to a field of type 'Decimal[]'
  */
 export type ListDecimalFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Decimal[]'>
+    
+
+
+/**
+ * Reference to a field of type 'FloralRole'
+ */
+export type EnumFloralRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FloralRole'>
+    
+
+
+/**
+ * Reference to a field of type 'FloralRole[]'
+ */
+export type ListEnumFloralRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FloralRole[]'>
+    
+
+
+/**
+ * Reference to a field of type 'LossMode'
+ */
+export type EnumLossModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LossMode'>
+    
+
+
+/**
+ * Reference to a field of type 'LossMode[]'
+ */
+export type ListEnumLossModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'LossMode[]'>
     
 
 

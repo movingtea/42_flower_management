@@ -5,6 +5,7 @@ import { auth } from "@/auth";
 import { requireV2Context } from "@/v2/auth";
 import { v2db } from "@/v2/db";
 import { Field, StatusBadge, V2ModulePage, button, card, input, tableHead, tableShell } from "../_components/V2Ui";
+import { V2DrawerForm } from "../_components/V2Drawer";
 import { readV2Feedback } from "../_lib/search-params";
 import {
   LOSS_REASON_LABELS,
@@ -538,18 +539,32 @@ export default async function OperationsPage({ searchParams }: { searchParams: P
             </div>
           </form>
         )}
-        {setupReady && <details className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4"><summary className="cursor-pointer font-medium text-amber-950">批次不明损耗</summary>
-          <p className="mt-1 text-xs text-amber-900">先提交物料、库位和数量；本店经理或授权人员确认实际批次后才会扣减库存。</p>
-          <form action={submitUnknownBatchLossAction} className="mt-3 grid gap-3 md:grid-cols-2">
-            <input type="hidden" name="idempotencyKey" value={`UNKNOWN-LOSS-${crypto.randomUUID()}`} />
-            <label className="text-sm">物料<select className={`${input} mt-1`} name="materialId" required>{materials.map((material) => <option key={material.id} value={material.id}>{material.code} · {material.name}</option>)}</select></label>
-            <label className="text-sm">发现库位<select className={`${input} mt-1`} name="locationId" required><LocationOptions locations={locations} totals={locationTotals} /></select></label>
-            <Field label="损耗数量" name="quantity" type="number" />
-            <label className="text-sm">损耗原因<select className={`${input} mt-1`} name="reason">{LOSS_REASON_OPTIONS.map((reason) => <option key={reason} value={reason}>{LOSS_REASON_LABELS[reason]}</option>)}</select></label>
-            <label className="text-sm md:col-span-2">说明<input className={`${input} mt-1`} name="note" /></label>
-            <button className={button}>提交复核（不扣库存）</button>
-          </form>
-        </details>}
+        {setupReady && (
+          <section className="mt-4 rounded-xl border border-amber-300 bg-amber-50 p-4">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+              <div>
+                <h4 className="font-medium text-amber-950">批次不明损耗</h4>
+                <p className="mt-1 text-xs text-amber-900">先提交物料、库位和数量；本店经理或授权人员确认实际批次后才会扣减库存。</p>
+              </div>
+              <V2DrawerForm
+                triggerLabel="登记批次不明损耗"
+                title="批次不明损耗"
+                description="提交后进入待复核；确认实际批次前不会扣减库存。"
+                action={submitUnknownBatchLossAction}
+                submitLabel="提交复核（不扣库存）"
+                size="md"
+                triggerClassName="rounded-lg border border-amber-400 bg-white px-3 py-1.5 text-sm font-medium text-amber-900 hover:bg-amber-100"
+              >
+                <input type="hidden" name="idempotencyKey" value={`UNKNOWN-LOSS-${crypto.randomUUID()}`} />
+                <label className="block text-sm text-stone-700">物料<select className={`${input} mt-1`} name="materialId" required>{materials.map((material) => <option key={material.id} value={material.id}>{material.code} · {material.name}</option>)}</select></label>
+                <label className="block text-sm text-stone-700">发现库位<select className={`${input} mt-1`} name="locationId" required><LocationOptions locations={locations} totals={locationTotals} /></select></label>
+                <Field label="损耗数量" name="quantity" type="number" />
+                <label className="block text-sm text-stone-700">损耗原因<select className={`${input} mt-1`} name="reason">{LOSS_REASON_OPTIONS.map((reason) => <option key={reason} value={reason}>{LOSS_REASON_LABELS[reason]}</option>)}</select></label>
+                <label className="block text-sm text-stone-700">说明<input className={`${input} mt-1`} name="note" /></label>
+              </V2DrawerForm>
+            </div>
+          </section>
+        )}
         {pendingLosses.length > 0 && <div className="mt-4 space-y-2"><h4 className="text-sm font-semibold">待复核批次不明损耗</h4>{pendingLosses.map((loss) => <div key={loss.id} className="rounded-xl border border-amber-300 p-3 text-sm">
           <p>{loss.material?.code} · {loss.material?.name} · {formatQty(loss.quantity)} {loss.material?.baseUnit} · 库位 {loss.location?.code}</p>
           {canReviewInventory ? <form action={reviewUnknownBatchLossAction} className="mt-2 flex flex-wrap gap-2">

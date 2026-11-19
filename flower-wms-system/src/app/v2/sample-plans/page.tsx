@@ -15,6 +15,7 @@ import {
   button,
   input,
 } from "../_components/V2Ui";
+import { V2DrawerForm } from "../_components/V2Drawer";
 import { readV2Feedback } from "../_lib/search-params";
 import {
   SamplePlanItemsEditor,
@@ -565,20 +566,21 @@ export default async function SamplePlansPage({
       message={feedback.message}
       error={feedback.error}
       actions={
-        <details className="relative">
-          <summary className={`${button} cursor-pointer list-none`}>新建打样计划</summary>
-          <div className="absolute right-0 z-20 mt-2 w-[min(38rem,94vw)] rounded-xl border border-stone-200 bg-white p-5 shadow-xl">
-            <form action={createSamplePlanAction} className="space-y-3">
-              <h3 className="font-semibold">新建打样计划</h3>
-              <label className="block text-sm text-stone-700">
-                计划名称
-                <input className={`${input} mt-1`} name="name" maxLength={100} required />
-              </label>
-              <SamplePlanItemsEditor samples={sampleOptions} />
-              <button className={button}>创建并稍后计算</button>
-            </form>
-          </div>
-        </details>
+        <V2DrawerForm
+          triggerLabel="新建打样计划"
+          title="新建打样计划"
+          description="选择样品与制作顺序；创建后再计算现货覆盖、复用与补购方案。"
+          action={createSamplePlanAction}
+          submitLabel="创建并稍后计算"
+          size="xl"
+          triggerClassName={button}
+        >
+          <label className="block text-sm text-stone-700">
+            计划名称
+            <input className={`${input} mt-1`} name="name" maxLength={100} required />
+          </label>
+          <SamplePlanItemsEditor samples={sampleOptions} />
+        </V2DrawerForm>
       }
     >
       <p className="text-xs text-stone-500">
@@ -680,15 +682,24 @@ export default async function SamplePlansPage({
                         ))}
                       </div>
                       {canEdit && (
-                        <form action={updateSamplePlanAction} className="mt-3 space-y-2 border-t border-stone-200 pt-3">
-                          <input type="hidden" name="planId" value={plan.id} />
-                          <label className="block text-sm text-stone-700">
-                            计划名称
-                            <input className={`${input} mt-1`} name="name" defaultValue={plan.name} maxLength={100} required />
-                          </label>
-                          <SamplePlanItemsEditor samples={sampleOptions} initialItems={initialItems} />
-                          <button className={button}>保存计划</button>
-                        </form>
+                        <div className="mt-3 border-t border-stone-200 pt-3">
+                          <V2DrawerForm
+                            triggerLabel="编辑计划"
+                            title="编辑计划样品与制作顺序"
+                            description="修改计划名称、样品与制作顺序；保存后需重新计算方案。"
+                            action={updateSamplePlanAction}
+                            submitLabel="保存计划"
+                            size="xl"
+                            triggerClassName={button}
+                          >
+                            <input type="hidden" name="planId" value={plan.id} />
+                            <label className="block text-sm text-stone-700">
+                              计划名称
+                              <input className={`${input} mt-1`} name="name" defaultValue={plan.name} maxLength={100} required />
+                            </label>
+                            <SamplePlanItemsEditor samples={sampleOptions} initialItems={initialItems} />
+                          </V2DrawerForm>
+                        </div>
                       )}
                       <div className="flex flex-wrap gap-2">
                         {!execution && (plan.state === SamplePlanState.DRAFT || plan.state === SamplePlanState.PROPOSED) && (

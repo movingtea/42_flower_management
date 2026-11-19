@@ -1,4 +1,8 @@
 import { Prisma } from "../../generated/prisma-v2/client";
+import {
+  generateEntropy,
+  generatePackagingKitCode,
+} from "../domain/identifiers";
 import { assertMaterialQuantity } from "../domain/stock-planning";
 import { normalizeMasterCode } from "./master-data";
 
@@ -15,7 +19,12 @@ export type PackagingKitLineInput = {
 
 export type SavePackagingKitInput = {
   id?: string;
-  code: string;
+  /**
+   * Optional on create: an empty value means the system-generated kit code.
+   * On update the submitted code is only validated against the stored code;
+   * the code itself is immutable after creation.
+   */
+  code?: string;
   name: string;
   notes?: string | null;
   lines: PackagingKitLineInput[];
@@ -46,7 +55,8 @@ export async function savePackagingKit(
 ) {
   assertScope(scope);
 
-  const code = normalizeMasterCode(typeof input.code === "string" ? input.code : "");
+  const submittedCode =
+    typeof input.code === "string" ? input.code.trim() : "";
   const name = typeof input.name === "string" ? input.name.trim() : "";
   if (!name) throw new Error("包装方案名称必填");
   if (name.length > 80) throw new Error("包装方案名称不能超过 80 个字符");
@@ -103,7 +113,11 @@ export async function savePackagingKit(
       include: { _count: { select: { lines: true } } },
     });
     if (!current) throw new Error("包装方案不存在");
-    if (current.code !== code) throw new Error("包装方案编码创建后不能修改");
+    // The UI never submits a code on edit; a submitted code is only checked so
+    // the "code is immutable after creation" rule also holds for API callers.
+    if (submittedCode && current.code !== normalizeMasterCode(submittedCode)) {
+      throw new Error("包装方案编码创建后不能修改");
+    }
 
     await tx.packagingKitLine.deleteMany({ where: { packagingKitId: current.id } });
     const kit = await tx.packagingKit.update({
@@ -140,6 +154,12 @@ export async function savePackagingKit(
     });
     return kit;
   }
+
+  // New kits get a system identifier unless the caller supplies one explicitly
+  // (imports, integrations and tests keep that escape hatch).
+  const code = submittedCode
+    ? normalizeMasterCode(submittedCode)
+    : generatePackagingKitCode(new Date(), generateEntropy());
 
   const duplicate = await tx.packagingKit.findFirst({
     where: { tenantId: scope.tenantId, code },

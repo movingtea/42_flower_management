@@ -12,6 +12,7 @@ import {
   tableHead,
   tableShell,
 } from "../_components/V2Ui";
+import { V2DrawerForm } from "../_components/V2Drawer";
 import { readV2Feedback } from "../_lib/search-params";
 import {
   createMaterialCategoryAction,
@@ -62,16 +63,17 @@ export default async function MaterialCategoriesPage({ searchParams }: {
     description="维护物料的业务分类、展示顺序和启停状态；分类编码由系统自动生成，无需手工填写。"
     message={feedback.message}
     error={feedback.error}
-    actions={<details className="relative">
-      <summary className={`${button} cursor-pointer list-none`}>新增分类</summary>
-      <div className="absolute right-0 z-20 mt-2 w-[min(32rem,90vw)] rounded-xl border border-zinc-200 bg-white p-5 shadow-xl">
-        <form action={createMaterialCategoryAction} className="space-y-4">
-          <h3 className="font-semibold">新增原材料分类</h3>
-          <CategoryFields create />
-          <button className={button}>保存分类</button>
-        </form>
-      </div>
-    </details>}
+    actions={<V2DrawerForm
+      triggerLabel="新增分类"
+      title="新增原材料分类"
+      description="分类编码由系统自动生成，无需手工填写。"
+      action={createMaterialCategoryAction}
+      submitLabel="保存分类"
+      size="md"
+      triggerClassName={button}
+    >
+      <CategoryFields create />
+    </V2DrawerForm>}
   >
     <form className="flex flex-wrap gap-2 rounded-xl border border-zinc-200 bg-white p-4">
       <input className={`${input} max-w-sm`} name="q" defaultValue={query} placeholder="搜索分类名称" />
@@ -106,14 +108,18 @@ export default async function MaterialCategoriesPage({ searchParams }: {
               <td>{category._count.materials}</td>
               <td><StatusBadge tone={category.active ? "success" : "neutral"}>{category.active ? "启用" : "停用"}</StatusBadge></td>
               <td className="px-4 py-3">
-                <details>
-                  <summary className="cursor-pointer text-emerald-700">编辑</summary>
-                  <form action={updateMaterialCategoryAction} className="mt-3 w-[min(32rem,75vw)] space-y-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-lg">
-                    <input type="hidden" name="categoryId" value={category.id} />
-                    <CategoryFields value={category} />
-                    <button className={button}>保存修改</button>
-                  </form>
-                </details>
+                <V2DrawerForm
+                  triggerLabel="编辑"
+                  title="编辑原材料分类"
+                  description={category.name}
+                  action={updateMaterialCategoryAction}
+                  submitLabel="保存修改"
+                  size="md"
+                  triggerClassName="cursor-pointer text-sm text-emerald-700 hover:underline"
+                >
+                  <input type="hidden" name="categoryId" value={category.id} />
+                  <CategoryFields value={category} />
+                </V2DrawerForm>
                 <form action={setMaterialCategoryActiveAction} className="mt-2">
                   <input type="hidden" name="categoryId" value={category.id} />
                   <input type="hidden" name="active" value={String(!category.active)} />

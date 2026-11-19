@@ -54,6 +54,7 @@ const stubs: Record<string, string> = {
     }
     export async function createSupplierMaster(tx, scope, input) {
       record({ name: "createSupplierMaster", tx, scope, input });
+      return { id: "supplier-1", code: "SUP-20261119-TEST0001", name: input.name };
     }
     export async function updateSupplierMaster(tx, scope, supplierId, input) {
       record({ name: "updateSupplierMaster", tx, scope, supplierId, input });
@@ -165,7 +166,7 @@ async function main(): Promise<void> {
   });
   const createResult = redirectTarget();
   assert.equal(createResult.pathname, "/v2/suppliers");
-  assert.equal(createResult.message, "供应商已创建");
+  assert.equal(createResult.message, "供应商已创建，编号 SUP-20261119-TEST0001");
   assert.equal(createResult.error, null);
 
   // 2. Update: the target id is a separate argument, the rest maps the same way.

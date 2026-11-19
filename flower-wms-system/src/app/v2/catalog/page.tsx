@@ -13,6 +13,7 @@ import {
   input,
 } from "../_components/V2Ui";
 import { readV2Feedback } from "../_lib/search-params";
+import { V2DrawerForm } from "../_components/V2Drawer";
 import { V2ImageField, V2ImagePreview } from "../_components/V2Image";
 import {
   createProductAction,
@@ -169,93 +170,108 @@ function SkuFields({ sku, samples }: { sku?: CatalogSku; samples: SampleOption[]
 
 function ProductEditForm({ product }: { product: CatalogProduct }) {
   return (
-    <section className="rounded-xl border border-stone-200 bg-stone-50 p-4">
-      <h3 className="font-semibold">编辑商品</h3>
-      <form action={updateProductAction} className="mt-3 space-y-4">
-        <input type="hidden" name="productId" value={product.id} />
-        <div className="grid gap-3 md:grid-cols-2">
-          <Field label="商品名称" name="name" defaultValue={product.name} />
-          <label className="block text-sm text-stone-700">
-            系统商品编号
-            <input className={`${input} mt-1 bg-stone-100 font-mono`} value={product.code} readOnly />
-          </label>
-          <label className="block text-sm text-stone-700">
-            默认 SKU
-            <select className={`${input} mt-1`} name="defaultSkuId" defaultValue={product.defaultSkuId ?? ""}>
-              <option value="">未设置（仅停用商品允许）</option>
-              {product.skus.map((sku) => (
-                <option key={sku.id} value={sku.id}>
-                  {sku.name} · {sku.code}
-                  {sku.active ? "" : "（当前停用；需同时勾选启用）"}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
-        <V2ImageField
-          name="imageKey"
-          module="wms-product"
-          initialValue={product.imageKey}
-          label="商品主图"
-          alt="商品主图"
-          hint="商品默认展示图；SKU 图片留空时继承此图。支持 JPG、PNG、WebP，单张不超过 3MB。"
-        />
-        <label className="flex items-center gap-2 text-sm text-stone-700">
-          <input type="checkbox" name="active" defaultChecked={product.active} />
-          启用商品（至少保留一个启用的 SKU）
+    <V2DrawerForm
+      triggerLabel="编辑商品"
+      title={`编辑商品：${product.name}`}
+      description="商品编号由系统自动生成，创建后不可修改。"
+      action={updateProductAction}
+      submitLabel="保存商品"
+      size="lg"
+      triggerClassName={button}
+    >
+      <input type="hidden" name="productId" value={product.id} />
+      <div className="grid gap-3 md:grid-cols-2">
+        <Field label="商品名称" name="name" defaultValue={product.name} />
+        <label className="block text-sm text-stone-700">
+          系统商品编号
+          <input className={`${input} mt-1 bg-stone-100 font-mono`} value={product.code} readOnly />
         </label>
-        <fieldset>
-          <legend className="text-sm text-stone-700">SKU 启用范围</legend>
-          <p className="mt-1 text-xs text-stone-500">
-            勾选表示该 SKU 保持启用并包含在商品中；取消勾选会停用该 SKU。默认 SKU 必须是已勾选的 SKU。停用默认 SKU 前请先在上方选择新的默认 SKU；停用最后一个启用 SKU 前请先取消启用商品。
-          </p>
-          {product.skus.length === 0 ? (
-            <p className="mt-2 text-sm text-amber-800">该商品还没有 SKU，请先新增 SKU。</p>
-          ) : (
-            <div className="mt-2 grid gap-2 sm:grid-cols-2">
-              {product.skus.map((sku) => (
-                <label key={sku.id} className="flex items-center gap-2 rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm">
-                  <input type="checkbox" name="activeSkuIds" value={sku.id} defaultChecked={sku.active} />
-                  <span>{sku.name}</span>
-                  <span className="ml-auto font-mono text-xs text-stone-500">{sku.code}</span>
-                </label>
-              ))}
-            </div>
-          )}
-        </fieldset>
-        <button className={button}>保存商品</button>
-      </form>
-    </section>
+        <label className="block text-sm text-stone-700">
+          默认 SKU
+          <select className={`${input} mt-1`} name="defaultSkuId" defaultValue={product.defaultSkuId ?? ""}>
+            <option value="">未设置（仅停用商品允许）</option>
+            {product.skus.map((sku) => (
+              <option key={sku.id} value={sku.id}>
+                {sku.name} · {sku.code}
+                {sku.active ? "" : "（当前停用；需同时勾选启用）"}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
+      <V2ImageField
+        name="imageKey"
+        module="wms-product"
+        initialValue={product.imageKey}
+        label="商品主图"
+        alt="商品主图"
+        hint="商品默认展示图；SKU 图片留空时继承此图。支持 JPG、PNG、WebP，单张不超过 3MB。"
+      />
+      <label className="flex items-center gap-2 text-sm text-stone-700">
+        <input type="checkbox" name="active" defaultChecked={product.active} />
+        启用商品（至少保留一个启用的 SKU）
+      </label>
+      <fieldset>
+        <legend className="text-sm text-stone-700">SKU 启用范围</legend>
+        <p className="mt-1 text-xs text-stone-500">
+          勾选表示该 SKU 保持启用并包含在商品中；取消勾选会停用该 SKU。默认 SKU 必须是已勾选的 SKU。停用默认 SKU 前请先在上方选择新的默认 SKU；停用最后一个启用 SKU 前请先取消启用商品。
+        </p>
+        {product.skus.length === 0 ? (
+          <p className="mt-2 text-sm text-amber-800">该商品还没有 SKU，请先新增 SKU。</p>
+        ) : (
+          <div className="mt-2 grid gap-2 sm:grid-cols-2">
+            {product.skus.map((sku) => (
+              <label key={sku.id} className="flex items-center gap-2 rounded-lg border border-stone-200 bg-white px-3 py-2 text-sm">
+                <input type="checkbox" name="activeSkuIds" value={sku.id} defaultChecked={sku.active} />
+                <span>{sku.name}</span>
+                <span className="ml-auto font-mono text-xs text-stone-500">{sku.code}</span>
+              </label>
+            ))}
+          </div>
+        )}
+      </fieldset>
+    </V2DrawerForm>
   );
 }
 
 function SkuCreateForm({ product, samples }: { product: CatalogProduct; samples: SampleOption[] }) {
   return (
-    <details className="rounded-xl border border-stone-200 bg-white p-4">
-      <summary className="cursor-pointer font-semibold text-emerald-700">新增 SKU</summary>
-      <form action={createSkuAction} className="mt-3 space-y-4">
-        <input type="hidden" name="productId" value={product.id} />
-        <SkuFields samples={samples} />
-        <p className="text-xs text-stone-500">
-          SKU 编号由系统自动生成，无需填写。同一来源样品可以生成多个 SKU，系统不会去重。
-        </p>
-        <button className={button}>创建 SKU</button>
-      </form>
-    </details>
+    <V2DrawerForm
+      triggerLabel="新增 SKU"
+      title={`新增 SKU：${product.name}`}
+      description="SKU 编号由系统自动生成，无需填写。"
+      action={createSkuAction}
+      submitLabel="创建 SKU"
+      size="lg"
+      triggerClassName={button}
+    >
+      <input type="hidden" name="productId" value={product.id} />
+      <SkuFields samples={samples} />
+      <p className="text-xs text-stone-500">
+        SKU 编号由系统自动生成，无需填写。同一来源样品可以生成多个 SKU，系统不会去重。
+      </p>
+    </V2DrawerForm>
   );
 }
 
 function SkuEditForm({ product, sku, samples }: { product: CatalogProduct; sku: CatalogSku; samples: SampleOption[] }) {
   return (
-    <form action={updateSkuAction} className="space-y-3 rounded-xl border border-stone-200 bg-stone-50 p-4">
+    <V2DrawerForm
+      triggerLabel="编辑 SKU"
+      title={`编辑 SKU：${sku.name}`}
+      description={`SKU 编号 ${sku.code} 由系统生成，创建后不可修改。`}
+      action={updateSkuAction}
+      submitLabel="保存 SKU"
+      size="lg"
+      triggerClassName="text-xs text-emerald-700 hover:underline"
+    >
       <input type="hidden" name="skuId" value={sku.id} />
       <input type="hidden" name="productId" value={product.id} />
       <p className="text-sm text-stone-700">
         所属商品：<strong>{product.name}</strong>
       </p>
       <SkuFields sku={sku} samples={samples} />
-      <button className={button}>保存 SKU</button>
-    </form>
+    </V2DrawerForm>
   );
 }
 
@@ -278,7 +294,9 @@ function SkuList({ product, samples }: { product: CatalogProduct; samples: Sampl
                 <span className="font-medium text-zinc-900">{sku.name}</span>
                 {product.defaultSkuId === sku.id && <StatusBadge tone="info">默认</StatusBadge>}
               </div>
-              <div className="font-mono text-xs text-zinc-500">{sku.code}</div>
+              <div className="text-xs text-zinc-500">
+                编号 <span className="font-mono">{sku.code}</span>
+              </div>
             </div>
             <div>
               <div className="text-xs text-zinc-500">状态</div>
@@ -306,7 +324,7 @@ function SkuList({ product, samples }: { product: CatalogProduct; samples: Sampl
               <div className="text-xs text-zinc-500">配方状态</div>
               <RecipeBadges sku={sku} />
             </div>
-            <span className="ml-auto text-sm text-emerald-700">编辑 / 状态</span>
+            <span className="ml-auto text-sm text-emerald-700">操作</span>
           </summary>
           <div className="space-y-3 border-t border-stone-200 p-4">
             <SkuEditForm product={product} sku={sku} samples={samples} />
@@ -340,7 +358,9 @@ function ProductListItem({ product, samples }: { product: CatalogProduct; sample
         <V2ImagePreview stored={product.imageKey} alt={product.name} compact className="h-12 w-12" />
         <div className="min-w-52 flex-1">
           <div className="font-medium text-zinc-900">{product.name}</div>
-          <div className="font-mono text-xs text-zinc-500">{product.code}</div>
+          <div className="text-xs text-zinc-500">
+            编号 <span className="font-mono">{product.code}</span>
+          </div>
         </div>
         <div>
           <div className="text-xs text-zinc-500">状态</div>
@@ -366,7 +386,7 @@ function ProductListItem({ product, samples }: { product: CatalogProduct; sample
             <span className="text-xs text-zinc-500">（启用 {activeSkuCount} 个）</span>
           </div>
         </div>
-        <span className="ml-auto text-sm text-emerald-700">展开 / 收起 SKU 与编辑</span>
+        <span className="ml-auto text-sm text-emerald-700">展开 / 收起 SKU 与操作</span>
       </summary>
 
       <div className="border-t border-stone-200 p-4 md:p-5">
@@ -461,26 +481,27 @@ export default async function CatalogPage({ searchParams }: PageProps<"/v2/catal
           <Link className="rounded-lg border border-stone-300 px-3 py-2 text-sm text-stone-700" href="/v2/samples">
             样品库与转 SKU
           </Link>
-          <details className="relative">
-            <summary className={`${button} cursor-pointer list-none`}>新增商品</summary>
-            <div className="absolute right-0 z-20 mt-2 w-[min(28rem,90vw)] rounded-xl border border-stone-200 bg-white p-5 shadow-xl">
-              <form action={createProductAction} className="space-y-3">
-                <h3 className="font-semibold">新增商品</h3>
-                <Field label="商品名称" name="name" />
-                <V2ImageField
-                  name="imageKey"
-                  module="wms-product"
-                  label="商品主图"
-                  alt="商品主图"
-                  compact
-                />
-                <p className="text-xs text-stone-500">
-                  商品编号由系统自动生成。新商品默认为停用，请先添加 SKU，再在商品编辑中设置默认 SKU 并启用商品。
-                </p>
-                <button className={button}>创建商品</button>
-              </form>
-            </div>
-          </details>
+          <V2DrawerForm
+            triggerLabel="新增商品"
+            title="新增商品"
+            description="商品编号由系统自动生成，无需填写。"
+            action={createProductAction}
+            submitLabel="创建商品"
+            size="md"
+            triggerClassName={button}
+          >
+            <Field label="商品名称" name="name" />
+            <V2ImageField
+              name="imageKey"
+              module="wms-product"
+              label="商品主图"
+              alt="商品主图"
+              compact
+            />
+            <p className="text-xs text-stone-500">
+              商品编号由系统自动生成。新商品默认为停用，请先添加 SKU，再在商品编辑中设置默认 SKU 并启用商品。
+            </p>
+          </V2DrawerForm>
         </>
       }
     >

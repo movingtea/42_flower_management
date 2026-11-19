@@ -14,6 +14,7 @@ import {
   tableHead,
 } from "../_components/V2Ui";
 import { readV2Feedback } from "../_lib/search-params";
+import { V2DrawerForm } from "../_components/V2Drawer";
 import { RecipeDraftEditor } from "./RecipeDraftEditor";
 import {
   publishRecipeVersionAction,
@@ -179,17 +180,6 @@ export default async function RecipesPage({
   const missingRecipeSkuCount = skus.filter((sku) => !sku.recipe).length;
   const selectedPrefill = linePayload(currentPublished ?? selectedRecipe?.versions[0]);
 
-  const createEditor = (
-    <RecipeDraftEditor
-      key="recipe-create"
-      action={saveRecipeDraftAction}
-      materials={materialOptions}
-      skus={skuOptions}
-      initialLines={[]}
-      submitLabel="创建配方草稿"
-    />
-  );
-
   return (
     <V2ModulePage
       title="标准配方"
@@ -240,15 +230,21 @@ export default async function RecipesPage({
             </Link>
           )}
 
-          <details className="relative">
-            <summary className={`${button} w-full cursor-pointer list-none text-center`}>
-              新建配方草稿
-            </summary>
-            <div className="absolute left-0 z-30 mt-2 w-[min(44rem,90vw)] rounded-xl border border-zinc-200 bg-white p-5 shadow-xl">
-              <h3 className="mb-3 font-semibold">新建标准配方草稿</h3>
-              {createEditor}
-            </div>
-          </details>
+          <V2DrawerForm
+            triggerLabel="新建配方草稿"
+            title="新建标准配方草稿"
+            description="选择 SKU 并填写物料用量；保存后生成草稿版本，发布前可继续编辑。"
+            action={saveRecipeDraftAction}
+            submitLabel="创建配方草稿"
+            size="xl"
+            triggerClassName={`${button} w-full`}
+          >
+            <RecipeDraftEditor
+              materials={materialOptions}
+              skus={skuOptions}
+              initialLines={[]}
+            />
+          </V2DrawerForm>
           <p className="text-xs text-zinc-500">
             共 {skus.length} 个 SKU，其中 {missingRecipeSkuCount} 个尚未建立配方；可在上方直接为任意 SKU 创建第一版草稿。
           </p>
@@ -341,7 +337,21 @@ export default async function RecipesPage({
                   创建商品和 SKU。
                 </div>
               ) : (
-                createEditor
+                <V2DrawerForm
+                  triggerLabel="新建配方草稿"
+                  title="新建标准配方草稿"
+                  description="选择 SKU 并填写物料用量；保存后生成草稿版本。"
+                  action={saveRecipeDraftAction}
+                  submitLabel="创建配方草稿"
+                  size="xl"
+                  triggerClassName={button}
+                >
+                  <RecipeDraftEditor
+                    materials={materialOptions}
+                    skus={skuOptions}
+                    initialLines={[]}
+                  />
+                </V2DrawerForm>
               )}
             </div>
           ) : (
@@ -402,21 +412,21 @@ export default async function RecipesPage({
                   </div>
                 </div>
 
-                <details className="mt-4 rounded-lg border border-zinc-200 p-3">
-                  <summary className="cursor-pointer text-sm font-medium text-emerald-700">
-                    新建草稿版本
-                  </summary>
-                  <div className="mt-3">
-                    <RecipeDraftEditor
-                      key={`new-${selectedRecipe.id}`}
-                      action={saveRecipeDraftAction}
-                      materials={materialOptions}
-                      skuId={selectedRecipe.sku.id}
-                      initialLines={selectedPrefill}
-                      submitLabel="创建新草稿"
-                    />
-                  </div>
-                </details>
+                <V2DrawerForm
+                  triggerLabel="新建草稿版本"
+                  title="新建配方草稿版本"
+                  description="基于当前版本预填物料；保存后生成新的草稿版本。"
+                  action={saveRecipeDraftAction}
+                  submitLabel="创建新草稿"
+                  size="xl"
+                  triggerClassName="text-sm font-medium text-emerald-700 hover:underline"
+                >
+                  <RecipeDraftEditor
+                    materials={materialOptions}
+                    skuId={selectedRecipe.sku.id}
+                    initialLines={selectedPrefill}
+                  />
+                </V2DrawerForm>
               </div>
 
               <div className="space-y-4">
@@ -496,45 +506,57 @@ export default async function RecipesPage({
 
                       {version.state === "DRAFT" && (
                         <div className="mt-4 flex flex-wrap items-start gap-3">
-                          <details className="min-w-0 flex-1">
-                            <summary className="cursor-pointer text-sm font-medium text-emerald-700">
-                              编辑草稿
-                            </summary>
-                            <div className="mt-3 rounded-lg border border-zinc-200 bg-stone-50 p-3">
-                              <RecipeDraftEditor
-                                key={`draft-${version.id}`}
-                                action={saveRecipeDraftAction}
-                                materials={materialOptions}
-                                skuId={selectedRecipe.sku.id}
-                                versionId={version.id}
-                                initialLines={linePayload(version)}
-                                submitLabel="保存草稿"
-                              />
-                            </div>
-                          </details>
-                          <form action={publishRecipeVersionAction}>
+                          <V2DrawerForm
+                            triggerLabel="编辑草稿"
+                            title={`编辑配方草稿 v${version.versionNo}`}
+                            description="草稿保存后可继续编辑；发布后不可修改。"
+                            action={saveRecipeDraftAction}
+                            submitLabel="保存草稿"
+                            size="xl"
+                            triggerClassName="text-sm font-medium text-emerald-700 hover:underline"
+                          >
+                            <RecipeDraftEditor
+                              materials={materialOptions}
+                              skuId={selectedRecipe.sku.id}
+                              versionId={version.id}
+                              initialLines={linePayload(version)}
+                            />
+                          </V2DrawerForm>
+                          <V2DrawerForm
+                            triggerLabel="发布此版本"
+                            title={`发布配方 v${version.versionNo}`}
+                            description="发布后当前版本生效，原已发布版本会自动停用；发布版本不可再编辑。"
+                            action={publishRecipeVersionAction}
+                            submitLabel="确认发布"
+                            size="sm"
+                            triggerClassName={button}
+                          >
                             <input
                               type="hidden"
                               name="versionId"
                               value={version.id}
                             />
-                            <button className={button}>发布此版本</button>
-                          </form>
+                          </V2DrawerForm>
                         </div>
                       )}
 
                       {version.state === "PUBLISHED" && (
                         <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-zinc-100 pt-3">
-                          <form action={retireRecipeVersionAction}>
+                          <V2DrawerForm
+                            triggerLabel="停用此发布版本"
+                            title={`停用配方 v${version.versionNo}`}
+                            description="停用后该 SKU 将没有当前发布配方；已停用版本不可再次发布。"
+                            action={retireRecipeVersionAction}
+                            submitLabel="确认停用"
+                            size="sm"
+                            triggerClassName="rounded-lg border border-red-300 px-4 py-2 text-sm text-red-700 hover:bg-red-50"
+                          >
                             <input
                               type="hidden"
                               name="versionId"
                               value={version.id}
                             />
-                            <button className="rounded-lg border border-red-300 px-4 py-2 text-sm text-red-700 hover:bg-red-50">
-                              停用此发布版本
-                            </button>
-                          </form>
+                          </V2DrawerForm>
                           <p className="text-xs text-zinc-500">
                             已发布版本不可编辑；如需调整，请新建草稿并发布。
                           </p>

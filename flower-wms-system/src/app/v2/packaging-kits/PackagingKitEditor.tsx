@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { Field, button, input } from "../_components/V2Ui";
+import { Field, input } from "../_components/V2Ui";
+
+/**
+ * Fields-only packaging kit editor rendered inside `V2DrawerForm`.
+ *
+ * The drawer owns the `<form action=...>`, footer buttons and reset-on-close, so
+ * this client component only keeps the dynamic material-line state and renders
+ * the server-rendered fields. It must never render another `<form>`.
+ */
 
 type Line = { materialId: string; quantity: number };
 type Material = { id: string; label: string };
@@ -23,11 +31,9 @@ function initialRows(
 }
 
 export function PackagingKitEditor({
-  action,
   materials,
   initial,
 }: {
-  action: (data: FormData) => void | Promise<void>;
   materials: Material[];
   initial?: Initial;
 }) {
@@ -44,40 +50,24 @@ export function PackagingKitEditor({
   }
 
   return (
-    <form action={action} className="space-y-4">
+    <div className="space-y-4">
       {initial && <input type="hidden" name="id" value={initial.id} />}
       <input type="hidden" name="lines" value={JSON.stringify(lines)} />
 
+      {initial && (
+        <p className="rounded-lg bg-stone-100 px-3 py-2 text-xs text-stone-600">
+          方案编码 <span className="font-mono">{initial.code}</span>
+          （系统生成，创建后不可修改）
+        </p>
+      )}
+
       <div className="grid gap-3 md:grid-cols-2">
-        {initial ? (
-          <label className="block text-sm text-stone-700">
-            方案编码
-            <input
-              className={`${input} mt-1 bg-stone-100 text-stone-500`}
-              name="code"
-              defaultValue={initial.code}
-              readOnly
-              aria-readonly="true"
-            />
-            <span className="mt-1 block text-xs text-stone-500">
-              编码创建后不能修改
-            </span>
-          </label>
-        ) : (
-          <label className="block text-sm text-stone-700">
-            方案编码
-            <input
-              className={`${input} mt-1`}
-              name="code"
-              placeholder="例如 PKG-GIFT-A"
-              required
-            />
-            <span className="mt-1 block text-xs text-stone-500">
-              2–32 位大写字母、数字、点、下划线或短横线
-            </span>
-          </label>
-        )}
         <Field label="方案名称" name="name" defaultValue={initial?.name} />
+        {!initial && (
+          <p className="text-xs text-stone-500 md:col-span-2">
+            方案编码由系统自动生成，无需填写。
+          </p>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -165,13 +155,6 @@ export function PackagingKitEditor({
           placeholder="例如：开业季标准礼盒组合"
         />
       </label>
-
-      <button
-        className={button}
-        disabled={materials.length === 0 || lines.length === 0}
-      >
-        保存包装方案
-      </button>
-    </form>
+    </div>
   );
 }

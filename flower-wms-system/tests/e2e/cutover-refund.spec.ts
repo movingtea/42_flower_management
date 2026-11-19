@@ -65,8 +65,8 @@ import {
  */
 test.describe.serial("Sprint 3 · 多 SKU 退款交付与取消回归", () => {
   const marker = createMarker("S3CUT");
-  const roseCode = `${marker}-ROSE`;
-  const supplierCode = `${marker}-SUP`;
+  let roseCode = "";
+  let supplierCode = "";
   const productNameA = `${marker} 单支玫瑰`;
   const productNameB = `${marker} 双臂礼盒`;
   const skuNameA = `${marker} 单支规格`;
@@ -95,8 +95,7 @@ test.describe.serial("Sprint 3 · 多 SKU 退款交付与取消回归", () => {
     test.setTimeout(480_000);
     const { context, page } = await openRolePage(browser, "admin", "/v2/materials");
     try {
-      await createMaterial(page, {
-        code: roseCode,
+      roseCode = await createMaterial(page, {
         name: `${marker} 红玫瑰`,
         kind: "花材",
         color: "红",
@@ -104,8 +103,7 @@ test.describe.serial("Sprint 3 · 多 SKU 退款交付与取消回归", () => {
         baseUnit: "支",
         quantityScale: 0,
       });
-      await createSupplier(page, {
-        code: supplierCode,
+      supplierCode = await createSupplier(page, {
         name: `${marker} 花材供应商`,
         contactName: "采购联系人",
         phone: "13900000000",

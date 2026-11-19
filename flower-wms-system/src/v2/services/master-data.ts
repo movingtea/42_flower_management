@@ -1,14 +1,33 @@
 import {
+  FloralRole,
+  LossMode,
   MaterialKind,
   Prisma,
   PurchaseState,
   ReservationState,
 } from "../../generated/prisma-v2/client";
+import { toPinyinIndex } from "@/lib/pinyin-index";
 import { storageConfigToImageUrlEnv } from "@/lib/storage/config";
+import {
+  generateEntropy,
+  generateMaterialCode,
+  generateSupplierCode,
+} from "../domain/identifiers";
 import { normalizeV2ImageKey } from "../domain/media";
 import { assertMaterialQuantity } from "../domain/stock-planning";
 
 const CODE_PATTERN = /^[A-Z0-9][A-Z0-9._-]{1,31}$/;
+
+/** Caps shared by the material form, the AI completion contract and this service. */
+const MAX_COLOR_TAGS = 20;
+const MAX_COLOR_TAG_LENGTH = 20;
+const MAX_ALIASES = 20;
+const MAX_ALIAS_LENGTH = 40;
+const MAX_MORPHOLOGY_LENGTH = 200;
+const LIST_SEPARATOR = /[,，、;；\n]+/;
+
+/** Non-disclosing delete guard: a referenced material must be disabled instead. */
+export const MATERIAL_DELETE_REFERENCED_MESSAGE = "该物料已有业务引用，请改为停用";
 
 function required(value: string, label: string, max = 100): string {
   const normalized = value.trim();
@@ -31,8 +50,19 @@ export function normalizeMasterCode(value: string): string {
   return code;
 }
 
+/**
+ * A blank code means "let the system generate one". An explicit code is still
+ * accepted so imports, tests and the V1-style API keep working.
+ */
+function optionalMasterCode(value: string | null | undefined): string | null {
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw) return null;
+  return normalizeMasterCode(raw);
+}
+
 export type MaterialInput = {
-  code: string;
+  /** Optional: `MAT-YYYYMMDD-XXXXXXXX` is generated when blank. Ignored on edit. */
+  code?: string | null;
   name: string;
   kind: MaterialKind;
   color?: string | null;
@@ -63,6 +93,16 @@ export type MaterialInput = {
   imageKey?: string | null;
   safetyStockThreshold?: number | string | null;
   categoryIds?: string[];
+  /** V1 material-library parity fields (migration 0014). */
+  floralRole?: string | null;
+  /** Accepts an array or a comma/、/; separated string; blank clears the tags. */
+  colorTags?: readonly string[] | string | null;
+  morphology?: string | null;
+  /** `{ zh: [...] }` (object) or its JSON text; blank clears all aliases. */
+  aliasMap?: unknown;
+  defaultUsableRate?: number | string | null;
+  defaultLossRate?: number | string | null;
+  lossMode?: string | null;
 };
 
 function optionalNumber(
@@ -104,6 +144,95 @@ function optionalCare(value: unknown): Prisma.InputJsonValue | typeof Prisma.Jso
   return value as Prisma.InputJsonValue;
 }
 
+function optionalEnum<T extends string>(
+  value: unknown,
+  allowed: readonly T[],
+  label: string,
+): T | null {
+  if (value === undefined || value === null) return null;
+  const raw = typeof value === "string" ? value.trim() : "";
+  if (!raw) return null;
+  if (!(allowed as readonly string[]).includes(raw)) throw new Error(`${label}无效`);
+  return raw as T;
+}
+
+function normalizeFloralRole(value: unknown): FloralRole | null {
+  return optionalEnum(value, Object.values(FloralRole), "花材角色");
+}
+
+function normalizeLossMode(value: unknown): LossMode {
+  return optionalEnum(value, Object.values(LossMode), "损耗模式") ?? LossMode.STANDARD;
+}
+
+function normalizeColorTags(
+  value: readonly string[] | string | null | undefined,
+): string[] {
+  if (value === undefined || value === null) return [];
+  const raw = typeof value === "string" ? value.split(LIST_SEPARATOR) : value;
+  const tags: string[] = [];
+  for (const entry of raw) {
+    const tag = typeof entry === "string" ? entry.trim() : "";
+    if (!tag) continue;
+    if (tag.length > MAX_COLOR_TAG_LENGTH) {
+      throw new Error(`颜色标签不能超过 ${MAX_COLOR_TAG_LENGTH} 个字符`);
+    }
+    if (!tags.includes(tag)) tags.push(tag);
+  }
+  if (tags.length > MAX_COLOR_TAGS) throw new Error(`颜色标签最多 ${MAX_COLOR_TAGS} 个`);
+  return tags;
+}
+
+type AliasMap = Record<string, string[]>;
+
+function normalizeAliasMap(value: unknown): AliasMap {
+  if (value === undefined || value === null) return {};
+  let source: unknown = value;
+  if (typeof value === "string") {
+    const raw = value.trim();
+    if (!raw) return {};
+    try {
+      source = JSON.parse(raw);
+    } catch {
+      throw new Error("别名数据格式无效");
+    }
+  }
+  if (typeof source !== "object" || source === null || Array.isArray(source)) {
+    throw new Error("别名数据格式无效");
+  }
+  const aliasMap: AliasMap = {};
+  const seen = new Set<string>();
+  let total = 0;
+  for (const [rawKey, rawValue] of Object.entries(source as Record<string, unknown>)) {
+    const language = rawKey.trim().toLowerCase();
+    if (!language) continue;
+    const list = Array.isArray(rawValue)
+      ? rawValue
+      : typeof rawValue === "string"
+        ? rawValue.split(LIST_SEPARATOR)
+        : null;
+    if (list === null) throw new Error("别名数据格式无效");
+    const aliases: string[] = [];
+    for (const entry of list) {
+      const alias = typeof entry === "string" ? entry.trim() : "";
+      if (!alias) continue;
+      if (alias.length > MAX_ALIAS_LENGTH) {
+        throw new Error(`单个别名不能超过 ${MAX_ALIAS_LENGTH} 个字符`);
+      }
+      if (seen.has(alias)) continue;
+      seen.add(alias);
+      aliases.push(alias);
+      total += 1;
+      if (total > MAX_ALIASES) throw new Error(`别名最多 ${MAX_ALIASES} 个`);
+    }
+    aliasMap[language] = aliases;
+  }
+  return aliasMap;
+}
+
+function aliasTextOf(aliasMap: AliasMap): string {
+  return Object.values(aliasMap).flat().join(",");
+}
+
 function categoryIds(value: string[] | undefined): string[] | undefined {
   if (value === undefined) return undefined;
   const unique = [...new Set(value.map((id) => id.trim()).filter(Boolean))];
@@ -121,12 +250,20 @@ function validateMaterial(input: MaterialInput) {
   if (["块", "卷"].includes(baseUnit) && input.quantityScale !== 0) {
     throw new Error(`${baseUnit}必须使用整数库存`);
   }
+  const name = required(input.name, "物料名称", 80);
+  const aliasMap = normalizeAliasMap(input.aliasMap);
   return {
+    explicitCode: optionalMasterCode(input.code),
     data: {
-      code: normalizeMasterCode(input.code),
-      name: required(input.name, "物料名称", 80),
+      name,
       kind: input.kind,
       color: optional(input.color, 40, "颜色"),
+      floralRole: normalizeFloralRole(input.floralRole),
+      colorTags: normalizeColorTags(input.colorTags),
+      morphology: optional(input.morphology, MAX_MORPHOLOGY_LENGTH, "形态特征"),
+      aliasMap: aliasMap as Prisma.InputJsonValue,
+      aliasText: aliasTextOf(aliasMap),
+      pinyinIndex: toPinyinIndex(name),
       grade: optional(input.grade, 40, "品质等级"),
       gradeSpecification: optional(input.gradeSpecification, 80, "等级说明"),
       specification: optional(input.specification, 80, "规格"),
@@ -154,10 +291,68 @@ function validateMaterial(input: MaterialInput) {
       optimisticUsableRate: optionalRate(input.optimisticUsableRate, "乐观可用率"),
       standardUsableRate: optionalRate(input.standardUsableRate, "标准可用率"),
       conservativeUsableRate: optionalRate(input.conservativeUsableRate, "保守可用率"),
+      defaultUsableRate: optionalRate(input.defaultUsableRate, "默认可用率"),
+      defaultLossRate: optionalRate(input.defaultLossRate, "默认损耗率"),
+      lossMode: normalizeLossMode(input.lossMode),
       maintenanceCare: optionalCare(input.maintenanceCare),
     },
     categoryIds: categoryIds(input.categoryIds),
   };
+}
+
+function decimalNumberOf(value: Prisma.Decimal | null | undefined): number | null {
+  if (value === null || value === undefined) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+/** Any loss-model rate: the three usable rates plus the two default rates. */
+function hasAnyLossRate(data: {
+  optimisticUsableRate: string | null;
+  standardUsableRate: string | null;
+  conservativeUsableRate: string | null;
+  defaultUsableRate: string | null;
+  defaultLossRate: string | null;
+}): boolean {
+  return data.optimisticUsableRate !== null
+    || data.standardUsableRate !== null
+    || data.conservativeUsableRate !== null
+    || data.defaultUsableRate !== null
+    || data.defaultLossRate !== null;
+}
+/** True when a stored Decimal changes to the newly validated string value. */
+function storedValueChanged(
+  previous: Prisma.Decimal | null | undefined,
+  next: string | null,
+): boolean {
+  const before = decimalNumberOf(previous);
+  const after = next === null ? null : Number(next);
+  if (before === null || after === null) return before !== after;
+  return Math.abs(before - after) > 1e-9;
+}
+
+/** True when any loss-model rate changes, so `lossRateUpdatedAt` must move. */
+function rateChanged(
+  current: {
+    optimisticUsableRate: Prisma.Decimal | null;
+    standardUsableRate: Prisma.Decimal | null;
+    conservativeUsableRate: Prisma.Decimal | null;
+    defaultUsableRate: Prisma.Decimal | null;
+    defaultLossRate: Prisma.Decimal | null;
+  },
+  next: {
+    optimisticUsableRate: string | null;
+    standardUsableRate: string | null;
+    conservativeUsableRate: string | null;
+    defaultUsableRate: string | null;
+    defaultLossRate: string | null;
+  },
+): boolean {
+  return storedValueChanged(current.optimisticUsableRate, next.optimisticUsableRate)
+    || storedValueChanged(current.standardUsableRate, next.standardUsableRate)
+    || storedValueChanged(current.conservativeUsableRate, next.conservativeUsableRate)
+    || storedValueChanged(current.defaultUsableRate, next.defaultUsableRate)
+    || storedValueChanged(current.defaultLossRate, next.defaultLossRate);
 }
 
 async function assertCategories(
@@ -175,22 +370,50 @@ async function assertCategories(
 
 type Scope = { tenantId: string; storeId: string; actorStaffId: string };
 
+function materialAuditSnapshot(material: {
+  code: string;
+  name: string;
+  kind: string;
+  active: boolean;
+  pinyinIndex: string;
+  aliasText: string;
+  floralRole: string | null;
+  colorTags: string[];
+}) {
+  return {
+    code: material.code,
+    name: material.name,
+    kind: material.kind,
+    active: material.active,
+    pinyinIndex: material.pinyinIndex,
+    aliasText: material.aliasText,
+    floralRole: material.floralRole,
+    colorTags: material.colorTags,
+  };
+}
+
 export async function createMaterialMaster(
   tx: Prisma.TransactionClient,
   scope: Scope,
   input: MaterialInput,
 ) {
-  const { data, categoryIds: selectedCategoryIds } = validateMaterial(input);
+  const { data, categoryIds: selectedCategoryIds, explicitCode } = validateMaterial(input);
+  const code = explicitCode ?? generateMaterialCode(new Date(), generateEntropy());
   const duplicate = await tx.material.findFirst({
-    where: { tenantId: scope.tenantId, code: data.code },
+    where: { tenantId: scope.tenantId, code },
     select: { id: true },
   });
   if (duplicate) throw new Error("物料编码已存在");
   await assertCategories(tx, scope.tenantId, selectedCategoryIds);
+  const now = new Date();
+  const hasLossRate = hasAnyLossRate(data);
   const material = await tx.material.create({
     data: {
       tenantId: scope.tenantId,
+      code,
       ...data,
+      ...(hasLossRate ? { lossRateUpdatedAt: now } : {}),
+      ...(data.standardUnitCost !== null ? { costUpdatedAt: now } : {}),
       ...(selectedCategoryIds && selectedCategoryIds.length > 0
         ? { categories: { create: selectedCategoryIds.map((categoryId) => ({ categoryId })) } }
         : {}),
@@ -199,7 +422,14 @@ export async function createMaterialMaster(
   await tx.auditEvent.create({ data: {
     tenantId: scope.tenantId, storeId: scope.storeId, actorStaffId: scope.actorStaffId,
     action: "MATERIAL_CREATED", entityType: "Material", entityId: material.id,
-    afterSnapshot: { code: material.code, name: material.name, kind: material.kind, active: material.active, imageKey: material.imageKey, categoryIds: selectedCategoryIds ?? [] },
+    afterSnapshot: {
+      ...materialAuditSnapshot(material),
+      imageKey: material.imageKey,
+      defaultUsableRate: decimalNumberOf(material.defaultUsableRate),
+      defaultLossRate: decimalNumberOf(material.defaultLossRate),
+      lossMode: material.lossMode,
+      categoryIds: selectedCategoryIds ?? [],
+    },
   } });
   return material;
 }
@@ -214,7 +444,6 @@ export async function updateMaterialMaster(
   await tx.$queryRaw`SELECT id FROM "Material" WHERE id = ${materialId} FOR UPDATE`;
   const current = await tx.material.findFirst({ where: { id: materialId, tenantId: scope.tenantId } });
   if (!current) throw new Error("物料不存在或不属于当前租户");
-  if (data.code !== current.code) throw new Error("物料编码创建后不能修改");
   const hasStock = await tx.batchBalance.findFirst({
     where: { batch: { materialId, storeId: scope.storeId }, OR: [{ onHandQty: { not: 0 } }, { frozenQty: { not: 0 } }] },
     select: { id: true },
@@ -223,10 +452,16 @@ export async function updateMaterialMaster(
     throw new Error("存在库存时不能修改库存单位或小数位数");
   }
   await assertCategories(tx, scope.tenantId, selectedCategoryIds);
+  const now = new Date();
+  const lossRateChanged = rateChanged(current, data);
+  const costChanged = storedValueChanged(current.standardUnitCost, data.standardUnitCost);
   const material = await tx.material.update({
     where: { id: materialId },
+    // `data` never contains `code`: an edit keeps the existing identifier.
     data: {
       ...data,
+      ...(lossRateChanged ? { lossRateUpdatedAt: now } : {}),
+      ...(costChanged ? { costUpdatedAt: now } : {}),
       ...(selectedCategoryIds === undefined
         ? {}
         : {
@@ -242,10 +477,120 @@ export async function updateMaterialMaster(
   await tx.auditEvent.create({ data: {
     tenantId: scope.tenantId, storeId: scope.storeId, actorStaffId: scope.actorStaffId,
     action: "MATERIAL_UPDATED", entityType: "Material", entityId: material.id,
-    beforeSnapshot: { name: current.name, kind: current.kind, color: current.color, grade: current.grade, specification: current.specification, baseUnit: current.baseUnit, quantityScale: current.quantityScale, reservePerOrder: current.reservePerOrder, englishName: current.englishName, standardUnitCost: current.standardUnitCost, imageKey: current.imageKey, categoryIds: selectedCategoryIds ?? [] },
-    afterSnapshot: { name: material.name, kind: material.kind, color: material.color, grade: material.grade, specification: material.specification, baseUnit: material.baseUnit, quantityScale: material.quantityScale, reservePerOrder: material.reservePerOrder, englishName: material.englishName, standardUnitCost: material.standardUnitCost, imageKey: material.imageKey, categoryIds: selectedCategoryIds ?? [] },
+    beforeSnapshot: {
+      ...materialAuditSnapshot(current),
+      imageKey: current.imageKey,
+      standardUnitCost: decimalNumberOf(current.standardUnitCost),
+      defaultUsableRate: decimalNumberOf(current.defaultUsableRate),
+      defaultLossRate: decimalNumberOf(current.defaultLossRate),
+      lossMode: current.lossMode,
+      categoryIds: selectedCategoryIds ?? [],
+    },
+    afterSnapshot: {
+      ...materialAuditSnapshot(material),
+      imageKey: material.imageKey,
+      standardUnitCost: decimalNumberOf(material.standardUnitCost),
+      defaultUsableRate: decimalNumberOf(material.defaultUsableRate),
+      defaultLossRate: decimalNumberOf(material.defaultLossRate),
+      lossMode: material.lossMode,
+      categoryIds: selectedCategoryIds ?? [],
+    },
   } });
   return material;
+}
+
+/**
+ * Row-inline standard cost edit. Only the cost and its timestamp change; the
+ * change is audited while an unchanged value is an idempotent no-op.
+ */
+export async function updateMaterialStandardCost(
+  tx: Prisma.TransactionClient,
+  scope: Scope,
+  materialIdInput: string,
+  standardUnitCost: number | string | null,
+) {
+  const materialId = required(materialIdInput, "物料", 64);
+  const cost = optionalNumber(standardUnitCost, "标准单位成本", { min: 0, decimals: 4 });
+  if (cost === null) throw new Error("标准单位成本必填");
+  await tx.$queryRaw`SELECT id FROM "Material" WHERE id = ${materialId} FOR UPDATE`;
+  const current = await tx.material.findFirst({ where: { id: materialId, tenantId: scope.tenantId } });
+  if (!current) throw new Error("物料不存在或不属于当前租户");
+  if (!storedValueChanged(current.standardUnitCost, cost)) return current;
+  const material = await tx.material.update({
+    where: { id: materialId },
+    data: { standardUnitCost: cost, costUpdatedAt: new Date() },
+  });
+  await tx.auditEvent.create({ data: {
+    tenantId: scope.tenantId, storeId: scope.storeId, actorStaffId: scope.actorStaffId,
+    action: "MATERIAL_COST_UPDATED", entityType: "Material", entityId: material.id,
+    beforeSnapshot: { code: current.code, standardUnitCost: decimalNumberOf(current.standardUnitCost) },
+    afterSnapshot: { code: material.code, standardUnitCost: decimalNumberOf(material.standardUnitCost) },
+  } });
+  return material;
+}
+
+/**
+ * Every relation that makes a material part of business history. A material with
+ * any of them can only be disabled, never deleted.
+ */
+async function findMaterialReference(
+  tx: Prisma.TransactionClient,
+  materialId: string,
+): Promise<string | null> {
+  const where = { materialId };
+  const checks: Array<[string, Promise<{ id: string } | null>]> = [
+    ["InventoryBatch", tx.inventoryBatch.findFirst({ where, select: { id: true } })],
+    ["OrderMaterialRequirement", tx.orderMaterialRequirement.findFirst({ where, select: { id: true } })],
+    ["RecipeLine", tx.recipeLine.findFirst({ where, select: { id: true } })],
+    ["PurchaseOrderLine", tx.purchaseOrderLine.findFirst({ where, select: { id: true } })],
+    ["GoodsReceiptLine", tx.goodsReceiptLine.findFirst({
+      where: { acceptedMaterialId: materialId }, select: { id: true },
+    })],
+    ["SampleMaterial", tx.sampleMaterial.findFirst({ where, select: { id: true } })],
+    ["SamplePlanMaterial", tx.samplePlanMaterial.findFirst({ where, select: { id: true } })],
+    ["SamplePlanStepMaterial", tx.samplePlanStepMaterial.findFirst({ where, select: { id: true } })],
+    ["SampleDisassemblyMaterial", tx.sampleDisassemblyMaterial.findFirst({ where, select: { id: true } })],
+    ["PackagingKitLine", tx.packagingKitLine.findFirst({ where, select: { id: true } })],
+    ["LossRecord", tx.lossRecord.findFirst({ where, select: { id: true } })],
+    ["AvailabilityHoldMaterial", tx.availabilityHoldMaterial.findFirst({ where, select: { id: true } })],
+    ["SamplePlanInventorySnapshot", tx.samplePlanInventorySnapshot.findFirst({ where, select: { id: true } })],
+  ];
+  for (const [label, query] of checks) {
+    if (await query) return label;
+  }
+  return null;
+}
+
+/**
+ * Deletes a material that has never taken part in business data. Category links
+ * are removed first; the material row and the audit event are the only writes.
+ */
+export async function deleteMaterial(
+  tx: Prisma.TransactionClient,
+  scope: Scope,
+  materialIdInput: string,
+) {
+  const materialId = required(materialIdInput, "物料", 64);
+  await tx.$queryRaw`SELECT id FROM "Material" WHERE id = ${materialId} FOR UPDATE`;
+  const current = await tx.material.findFirst({ where: { id: materialId, tenantId: scope.tenantId } });
+  if (!current) throw new Error("物料不存在或不属于当前租户");
+  if (await findMaterialReference(tx, materialId)) {
+    throw new Error(MATERIAL_DELETE_REFERENCED_MESSAGE);
+  }
+  await tx.materialCategoryRelation.deleteMany({ where: { materialId } });
+  await tx.material.delete({ where: { id: materialId } });
+  await tx.auditEvent.create({ data: {
+    tenantId: scope.tenantId, storeId: scope.storeId, actorStaffId: scope.actorStaffId,
+    action: "MATERIAL_DELETED", entityType: "Material", entityId: materialId,
+    beforeSnapshot: {
+      ...materialAuditSnapshot(current),
+      imageKey: current.imageKey,
+      defaultUsableRate: decimalNumberOf(current.defaultUsableRate),
+      defaultLossRate: decimalNumberOf(current.defaultLossRate),
+      lossMode: current.lossMode,
+    },
+  } });
+  return current;
 }
 
 export async function setMaterialActive(
@@ -282,13 +627,13 @@ export async function setMaterialActive(
 }
 
 export type SupplierInput = {
-  code: string; name: string; contactName?: string | null; phone?: string | null;
+  /** Optional: `SUP-YYYYMMDD-XXXXXXXX` is generated when blank. Ignored on edit. */
+  code?: string | null; name: string; contactName?: string | null; phone?: string | null;
   wechat?: string | null; notes?: string | null;
 };
 
 function validateSupplier(input: SupplierInput) {
   return {
-    code: normalizeMasterCode(input.code),
     name: required(input.name, "供应商名称", 80),
     contactName: optional(input.contactName, 50, "联系人"),
     phone: optional(input.phone, 30, "联系电话"),
@@ -299,10 +644,11 @@ function validateSupplier(input: SupplierInput) {
 
 export async function createSupplierMaster(tx: Prisma.TransactionClient, scope: Scope, input: SupplierInput) {
   const data = validateSupplier(input);
-  if (await tx.supplier.findFirst({ where: { tenantId: scope.tenantId, code: data.code }, select: { id: true } })) {
+  const code = optionalMasterCode(input.code) ?? generateSupplierCode(new Date(), generateEntropy());
+  if (await tx.supplier.findFirst({ where: { tenantId: scope.tenantId, code }, select: { id: true } })) {
     throw new Error("供应商编码已存在");
   }
-  const supplier = await tx.supplier.create({ data: { tenantId: scope.tenantId, ...data } });
+  const supplier = await tx.supplier.create({ data: { tenantId: scope.tenantId, code, ...data } });
   await tx.auditEvent.create({ data: {
     tenantId: scope.tenantId, storeId: scope.storeId, actorStaffId: scope.actorStaffId,
     action: "SUPPLIER_CREATED", entityType: "Supplier", entityId: supplier.id,
@@ -316,7 +662,7 @@ export async function updateSupplierMaster(tx: Prisma.TransactionClient, scope: 
   await tx.$queryRaw`SELECT id FROM "Supplier" WHERE id = ${supplierId} FOR UPDATE`;
   const current = await tx.supplier.findFirst({ where: { id: supplierId, tenantId: scope.tenantId } });
   if (!current) throw new Error("供应商不存在或不属于当前租户");
-  if (current.code !== data.code) throw new Error("供应商编码创建后不能修改");
+  // The supplier code is an immutable system identifier; edit input is ignored.
   const supplier = await tx.supplier.update({ where: { id: supplierId }, data });
   await tx.auditEvent.create({ data: {
     tenantId: scope.tenantId, storeId: scope.storeId, actorStaffId: scope.actorStaffId,

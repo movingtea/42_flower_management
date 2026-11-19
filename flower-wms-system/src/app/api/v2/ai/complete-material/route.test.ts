@@ -29,6 +29,12 @@ type Completion = {
   englishName: string;
   flowerLanguage: string;
   careTable: WikiCareRow[];
+  /** Optional parity fields; older responders omit them entirely. */
+  colorTags?: string[];
+  morphology?: string;
+  supplySeason?: string;
+  floralRole?: string;
+  suggestedAliases?: string[];
 };
 
 type RouteState = {
@@ -146,6 +152,11 @@ type RouteJson = {
     englishName?: string;
     flowerLanguage?: string;
     careTable?: WikiCareRow[];
+    colorTags?: string[];
+    morphology?: string | null;
+    supplySeason?: string | null;
+    floralRole?: string | null;
+    suggestedAliases?: string[];
   };
 };
 
@@ -187,6 +198,11 @@ async function main(): Promise<void> {
       { key: "mainWater", label: "养护水位", value: "浅水养护即可" },
       { key: "frequency", label: "换水频率", value: "每2天换水" },
     ],
+    colorTags: [" 红 ", "香槟色", "红", ""],
+    morphology: "花头饱满、茎粗直",
+    supplySeason: "全年",
+    floralRole: "MAIN",
+    suggestedAliases: ["月季", "刺玫", "月季"],
   };
   const successResponse = await post(JSON.stringify({ flowerName: "  玫瑰  " }));
   assert.equal(successResponse.status, 200);
@@ -202,6 +218,30 @@ async function main(): Promise<void> {
   assert.equal(successJson.data?.careTable?.[0]?.value, "需要深水醒花");
   assert.equal(successJson.data?.careTable?.[1]?.value, "花瓶1/3至1/2");
   assert.equal(successJson.data?.careTable?.[5]?.value, "每2天换水");
+  // Parity fields are additive: trimmed, de-duplicated and bounded.
+  assert.deepEqual(successJson.data?.colorTags, ["红", "香槟色"]);
+  assert.equal(successJson.data?.morphology, "花头饱满、茎粗直");
+  assert.equal(successJson.data?.supplySeason, "全年");
+  assert.equal(successJson.data?.floralRole, "MAIN");
+  assert.deepEqual(successJson.data?.suggestedAliases, ["月季", "刺玫"]);
+
+  // 1b. An older responder that omits every parity field still succeeds.
+  resetState();
+  state.completion = {
+    latinName: "Dianthus caryophyllus",
+    englishName: "Carnation",
+    flowerLanguage: "母爱",
+    careTable: [{ key: "wakeWater", label: "醒花水位", value: "不需要深水醒花" }],
+  };
+  const legacyResponse = await post(JSON.stringify({ flowerName: "康乃馨" }));
+  assert.equal(legacyResponse.status, 200);
+  const legacyJson = (await legacyResponse.json()) as RouteJson;
+  assert.equal(legacyJson.success, true);
+  assert.deepEqual(legacyJson.data?.colorTags, []);
+  assert.deepEqual(legacyJson.data?.suggestedAliases, []);
+  assert.equal(legacyJson.data?.morphology, null);
+  assert.equal(legacyJson.data?.supplySeason, null);
+  assert.equal(legacyJson.data?.floralRole, null);
 
   // 2. Missing / blank / non-string flowerName is a 400 before DeepSeek.
   resetState();

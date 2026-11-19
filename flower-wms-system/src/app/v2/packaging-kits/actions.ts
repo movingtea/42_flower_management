@@ -69,7 +69,8 @@ export async function savePackagingKitAction(data: FormData): Promise<never> {
         { ...scope, actorStaffId: scope.staffId },
         {
           id: id || undefined,
-          code: text(data, "code"),
+          // No code field: the service generates one on create and keeps the
+          // stored code on edit.
           name: text(data, "name"),
           notes: text(data, "notes"),
           lines: parseLines(data),

@@ -231,6 +231,85 @@ function testInvalidCareTableJsonThrows() {
   );
 }
 
+function testCodeIsOptional() {
+  const generated = parseMaterialForm(materialForm({ code: "" }));
+  assert.equal(generated.code, undefined);
+
+  const withoutField = materialForm();
+  withoutField.delete("code");
+  assert.equal(parseMaterialForm(withoutField).code, undefined);
+
+  const explicit = parseMaterialForm(materialForm({ code: "  mat-import-1  " }));
+  assert.equal(explicit.code, "mat-import-1");
+}
+
+function testColorTagsAndAliases() {
+  const parsed = parseMaterialForm(
+    materialForm({
+      colorTags: " 红, 香槟色 ，红、白 ; 红 ",
+      aliases: " 月季，刺玫, 月季 ",
+    }),
+  );
+  assert.deepEqual(parsed.colorTags, ["红", "香槟色", "白"]);
+  assert.deepEqual(parsed.aliasMap, { zh: ["月季", "刺玫"] });
+
+  const hiddenJson = parseMaterialForm(
+    materialForm({
+      aliases: "忽略的别名",
+      aliasMap: JSON.stringify({ zh: ["月季"], en: ["Rose"] }),
+    }),
+  );
+  assert.deepEqual(hiddenJson.aliasMap, { zh: ["月季"], en: ["Rose"] });
+
+  const cleared = parseMaterialForm(
+    materialForm({ colorTags: "", aliases: "", aliasMap: "" }),
+  );
+  assert.deepEqual(cleared.colorTags, []);
+  assert.equal(cleared.aliasMap, null);
+
+  assert.throws(
+    () => parseMaterialForm(materialForm({ aliasMap: "{not-json" })),
+    /别名数据格式无效/,
+  );
+  assert.throws(
+    () => parseMaterialForm(materialForm({ aliasMap: JSON.stringify(["月季"]) })),
+    /别名数据格式无效/,
+  );
+}
+
+function testDefaultRatesLossModeAndParityFields() {
+  const parsed = parseMaterialForm(
+    materialForm({
+      floralRole: "MAIN",
+      morphology: "  花头饱满、茎粗直  ",
+      defaultUsableRate: "85",
+      defaultLossRate: "15%",
+      lossMode: "OPTIMISTIC",
+    }),
+  );
+  assert.equal(parsed.floralRole, "MAIN");
+  assert.equal(parsed.morphology, "花头饱满、茎粗直");
+  assert.equal(parsed.defaultUsableRate, 0.85);
+  assert.equal(parsed.defaultLossRate, 0.15);
+  assert.equal(parsed.lossMode, "OPTIMISTIC");
+
+  const blank = parseMaterialForm(materialForm({ lossMode: "" }));
+  assert.equal(blank.lossMode, "STANDARD");
+  assert.equal(blank.floralRole, null);
+  assert.equal(blank.morphology, null);
+  assert.equal(blank.defaultUsableRate, null);
+  assert.equal(blank.defaultLossRate, null);
+
+  assert.throws(
+    () => parseMaterialForm(materialForm({ defaultUsableRate: "101" })),
+    /默认可用率必须在 0–100 之间/,
+  );
+  assert.throws(
+    () => parseMaterialForm(materialForm({ defaultLossRate: "-1" })),
+    /默认损耗率必须在 0–100 之间/,
+  );
+}
+
 testBasicFieldsAndBlankOptionals();
 testConvertsPercentRates();
 testKnowledgeAndMasterPartFieldsPassThrough();
@@ -239,5 +318,8 @@ testMaintenanceTextWinsAndEmptyTablesBecomeNull();
 testCategoryIdsAreTrimmedDedupedAndFiltered();
 testInvalidPercentRatesThrowChineseErrors();
 testInvalidCareTableJsonThrows();
+testCodeIsOptional();
+testColorTagsAndAliases();
+testDefaultRatesLossModeAndParityFields();
 
 console.log("material-form.test.ts: all passed");

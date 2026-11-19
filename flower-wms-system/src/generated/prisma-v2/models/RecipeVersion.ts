@@ -459,10 +459,6 @@ export type EnumRecipeStateFieldUpdateOperationsInput = {
   set?: $Enums.RecipeState
 }
 
-export type NullableDateTimeFieldUpdateOperationsInput = {
-  set?: Date | string | null
-}
-
 export type RecipeVersionCreateNestedOneWithoutLinesInput = {
   create?: Prisma.XOR<Prisma.RecipeVersionCreateWithoutLinesInput, Prisma.RecipeVersionUncheckedCreateWithoutLinesInput>
   connectOrCreate?: Prisma.RecipeVersionCreateOrConnectWithoutLinesInput

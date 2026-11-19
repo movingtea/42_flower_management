@@ -1,11 +1,24 @@
 import { expect, type Page } from "@playwright/test";
 import { expectFeedback, futureDateTimeLocal, gotoApp, selectByText, toggle } from "./ui";
 
-/** Creates one material through the real material master form. */
+/** Opens a V2 drawer form by its trigger label and returns the dialog locator. */
+async function openDrawer(page: Page, triggerLabel: string) {
+  await page.getByRole("button", { name: triggerLabel, exact: true }).first().click();
+  const dialog = page.getByRole("dialog").last();
+  await expect(dialog).toBeVisible();
+  return dialog;
+}
+
+function readGeneratedCode(message: string, pattern: RegExp, label: string): string {
+  const match = message.match(pattern);
+  if (!match) throw new Error(`Could not read generated ${label} from feedback "${message}"`);
+  return match[1];
+}
+
+/** Creates one material through the real material master drawer; returns the generated code. */
 export async function createMaterial(
   page: Page,
   material: {
-    code: string;
     name: string;
     kind?: "花材" | "叶材" | "包装" | "耗材" | "其他";
     color?: string;
@@ -14,37 +27,38 @@ export async function createMaterial(
     baseUnit?: string;
     quantityScale?: number;
   },
-): Promise<void> {
+): Promise<string> {
   await gotoApp(page, "/v2/materials");
-  await toggle(page, "新增物料");
-  const form = page.locator("details").filter({ has: page.getByText("新增物料", { exact: true }) }).locator("form").first();
-  await form.getByLabel("物料编码").fill(material.code);
+  const dialog = await openDrawer(page, "新增物料");
+  const form = dialog.locator("form").first();
   await form.getByLabel("物料名称").fill(material.name);
   await form.getByLabel("物料类别").selectOption({ label: material.kind ?? "花材" });
-  if (material.color) await form.getByLabel("颜色").fill(material.color);
+  if (material.color) await form.getByLabel("颜色", { exact: true }).fill(material.color);
   if (material.grade) await form.getByLabel("品质等级").fill(material.grade);
   if (material.gradeSpecification) await form.getByLabel("等级说明（如长度范围）").fill(material.gradeSpecification);
   await form.getByLabel("库存单位").fill(material.baseUnit ?? "支");
   await form.getByLabel("库存小数位数").fill(String(material.quantityScale ?? 0));
   await form.getByRole("button", { name: "保存物料" }).click();
   await expectFeedback(page, "物料已创建");
-  await expect(page.getByText(material.code, { exact: false }).first()).toBeVisible();
+  const banner = await page.locator("main").getByText(/物料已创建，编号\s+\S+/).first().innerText();
+  return readGeneratedCode(banner, /物料已创建，编号\s+(\S+)/, "material code");
 }
 
-/** Creates one supplier through the real supplier form. */
+/** Creates one supplier through the real supplier drawer; returns the generated code. */
 export async function createSupplier(
   page: Page,
-  supplier: { code: string; name: string; contactName?: string; phone?: string },
-): Promise<void> {
+  supplier: { name: string; contactName?: string; phone?: string },
+): Promise<string> {
   await gotoApp(page, "/v2/suppliers");
-  await toggle(page, "新增供应商");
-  const form = page.locator("details").filter({ has: page.getByText("新增供应商", { exact: true }) }).locator("form").first();
-  await form.getByLabel("供应商编码").fill(supplier.code);
+  const dialog = await openDrawer(page, "新增供应商");
+  const form = dialog.locator("form").first();
   await form.getByLabel("供应商名称").fill(supplier.name);
   if (supplier.contactName) await form.getByLabel("联系人").fill(supplier.contactName);
   if (supplier.phone) await form.getByLabel("联系电话").fill(supplier.phone);
   await form.getByRole("button", { name: "保存供应商" }).click();
   await expectFeedback(page, "供应商已创建");
+  const banner = await page.locator("main").getByText(/供应商已创建，编号\s+\S+/).first().innerText();
+  return readGeneratedCode(banner, /供应商已创建，编号\s+(\S+)/, "supplier code");
 }
 
 async function searchCatalog(page: Page, query: string): Promise<void> {
@@ -66,56 +80,49 @@ export async function createProductSkuRecipe(
   },
 ): Promise<{ skuCode: string }> {
   await gotoApp(page, "/v2/catalog");
-  await toggle(page, "新增商品");
-  const createForm = page.locator("details").filter({ has: page.getByText("新增商品", { exact: true }) }).locator("form").first();
-  await createForm.getByLabel("商品名称").fill(input.productName);
-  await createForm.getByRole("button", { name: "创建商品" }).click();
+  const createDialog = await openDrawer(page, "新增商品");
+  await createDialog.getByLabel("商品名称").fill(input.productName);
+  await createDialog.getByRole("button", { name: "创建商品" }).click();
   await expectFeedback(page, "已创建，请添加 SKU");
 
-  await searchCatalog(page, input.productName);
-  let productDetails = page.locator("details").filter({ has: page.locator("summary", { hasText: input.productName }) }).first();
-  await productDetails.locator("summary").filter({ hasText: input.productName }).first().click();
-  await productDetails.getByText("新增 SKU", { exact: true }).click();
-  const skuDetails = productDetails.locator("details").filter({ has: page.getByText("新增 SKU", { exact: true }) }).last();
-  const skuForm = skuDetails.locator("form");
-  await skuForm.getByLabel("规格名称").fill(input.skuName);
-  await skuForm.getByLabel("售价（元）").fill(String(input.price));
-  await skuForm.getByRole("button", { name: "创建 SKU" }).click();
-  await expectFeedback(page, "已创建");
+  const openProduct = async () => {
+    await searchCatalog(page, input.productName);
+    const details = page.locator("details").filter({ has: page.locator("summary", { hasText: input.productName }) }).first();
+    await details.locator("summary").filter({ hasText: input.productName }).first().click();
+    return details;
+  };
 
-  const banner = page.locator("main").getByText(/SKU\s+\S+\s+已创建/).first();
-  const message = await banner.innerText();
-  const codeMatch = message.match(/SKU\s+(\S+)\s+已创建/);
-  if (!codeMatch) throw new Error(`Could not read generated SKU code from feedback "${message}"`);
-  const skuCode = codeMatch[1];
+  let productDetails = await openProduct();
+  await productDetails.getByRole("button", { name: "新增 SKU" }).click();
+  const skuDialog = page.getByRole("dialog").last();
+  await expect(skuDialog).toBeVisible();
+  await skuDialog.getByLabel("规格名称").fill(input.skuName);
+  await skuDialog.getByLabel("售价（元）").fill(String(input.price));
+  await skuDialog.getByRole("button", { name: "创建 SKU" }).click();
+  await expectFeedback(page, "已创建");
+  const skuBanner = await page.locator("main").getByText(/SKU\s+\S+\s+已创建/).first().innerText();
+  const skuCode = readGeneratedCode(skuBanner, /SKU\s+(\S+)\s+已创建/, "SKU code");
 
   // Set the new SKU as the default SKU (the first created SKU may already be
   // auto-promoted by the save action), then enable the product.
-  await searchCatalog(page, input.productName);
-  productDetails = page.locator("details").filter({ has: page.locator("summary", { hasText: input.productName }) }).first();
-  await productDetails.locator("summary").filter({ hasText: input.productName }).first().click();
-  const allSku = productDetails.locator("details").filter({ has: page.locator("summary", { hasText: input.skuName }) }).first();
-  await allSku.locator("summary").filter({ hasText: input.skuName }).first().click();
-  const setDefaultButton = allSku.getByRole("button", { name: "设为默认 SKU" });
+  productDetails = await openProduct();
+  const skuDetails = productDetails.locator("details").filter({ has: page.locator("summary", { hasText: input.skuName }) }).first();
+  await skuDetails.locator("summary").filter({ hasText: input.skuName }).first().click();
+  const setDefaultButton = skuDetails.getByRole("button", { name: "设为默认 SKU" });
   if ((await setDefaultButton.count()) > 0) {
-    await setDefaultButton.click();
+    await setDefaultButton.first().click();
     await expectFeedback(page, "默认 SKU 已更新");
   } else {
-    await expect(allSku.getByText("默认", { exact: true }).first()).toBeVisible();
+    await expect(skuDetails.getByText("默认", { exact: true }).first()).toBeVisible();
   }
-  await searchCatalog(page, input.productName);
-  productDetails = page.locator("details").filter({ has: page.locator("summary", { hasText: input.productName }) }).first();
-  await productDetails.locator("summary").filter({ hasText: input.productName }).first().click();
+  productDetails = await openProduct();
   await productDetails.getByRole("button", { name: "启用商品", exact: true }).click();
   await expectFeedback(page, "商品已启用");
 
   // First recipe draft + publish.
   await gotoApp(page, `/v2/recipes?q=${encodeURIComponent(skuCode)}`);
-  await toggle(page, "新建配方草稿");
-  const recipeEditor = page
-    .locator("form")
-    .filter({ has: page.getByRole("button", { name: "创建配方草稿" }), visible: true })
-    .first();
+  const recipeDialog = await openDrawer(page, "新建配方草稿");
+  const recipeEditor = recipeDialog.locator("form").first();
   await selectByText(recipeEditor.locator("select").first(), skuCode);
   for (let index = 0; index < input.recipeLines.length; index += 1) {
     if (index > 0) await recipeEditor.getByRole("button", { name: "＋ 添加物料" }).click();
@@ -125,7 +132,11 @@ export async function createProductSkuRecipe(
   }
   await recipeEditor.getByRole("button", { name: "创建配方草稿" }).click();
   await expectFeedback(page, "配方草稿 v1 已创建");
-  await page.getByRole("button", { name: "发布此版本" }).click();
+
+  await page.getByRole("button", { name: "发布此版本" }).first().click();
+  const publishDialog = page.getByRole("dialog").last();
+  await expect(publishDialog).toBeVisible();
+  await publishDialog.getByRole("button", { name: "确认发布" }).click();
   await expectFeedback(page, "配方 v1 已发布");
 
   return { skuCode };

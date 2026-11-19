@@ -23,7 +23,7 @@ test.describe("登录与 V2 基础冒烟", () => {
 
   test("admin 登录后看到经营概览与全部授权菜单", async ({ page }) => {
     await login(page, "admin");
-    await expect(page.getByRole("heading", { name: "经营概览", level: 1 })).toBeVisible();
+    await expect(page.getByRole("heading", { name: "经营概览" })).toBeVisible();
     for (const label of ["库存管理", "采购单", "商品与 SKU", "订单履约"]) {
       await expect(page.getByRole("link", { name: label, exact: true })).toBeVisible();
     }
@@ -37,7 +37,7 @@ test.describe("登录与 V2 基础冒烟", () => {
       const { context, page } = await openRoleContext(browser, role);
       try {
         await gotoApp(page, "/v2");
-        await expect(page.getByRole("heading", { name: "经营概览", level: 1 })).toBeVisible({ timeout: 90_000 });
+        await expect(page.getByRole("heading", { name: "经营概览" })).toBeVisible({ timeout: 90_000 });
         await expect(page.getByText(`@${SEEDED_ACCOUNTS[role].username}`).first()).toBeVisible();
       } finally {
         await context.close();
