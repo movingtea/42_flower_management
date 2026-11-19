@@ -51,7 +51,7 @@ jobs:
       app: ${{ steps.filter.outputs.app }}
     steps:
       - name: Checkout pull request merge commit
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
@@ -117,10 +117,10 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -132,7 +132,7 @@ jobs:
 
       - name: Upload machine-readable summary
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: knowledge-structure-summary
           path: knowledge-structure.json
@@ -160,10 +160,10 @@ jobs:
         working-directory: flower-wms-system
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -194,10 +194,10 @@ jobs:
         working-directory: flower-wms-system
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -229,10 +229,10 @@ jobs:
         working-directory: flower-wms-system
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -275,10 +275,10 @@ jobs:
         working-directory: flower-wms-system
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -330,11 +330,11 @@ jobs:
 
       - name: Checkout
         if: steps.scope.outputs.applicable == 'true'
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
         if: steps.scope.outputs.applicable == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -438,11 +438,11 @@ jobs:
 
       - name: Checkout
         if: steps.scope.outputs.applicable == 'true'
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
         if: steps.scope.outputs.applicable == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -486,7 +486,7 @@ jobs:
 
       - name: Upload Playwright failure artifacts
         if: always() && steps.scope.outputs.applicable == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: playwright-artifacts
           path: |
@@ -541,11 +541,11 @@ jobs:
 
       - name: Checkout
         if: steps.scope.outputs.applicable == 'true'
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
 
       - name: Set up Node.js
         if: steps.scope.outputs.applicable == 'true'
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: ${{ env.NODE_VERSION }}
 
@@ -558,7 +558,7 @@ jobs:
 
       - name: Upload traceability summary
         if: always() && steps.scope.outputs.applicable == 'true'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: traceability-summary
           path: traceability.json
