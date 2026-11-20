@@ -24,8 +24,13 @@ WORKDIR /app
 
 # ---------- 依赖 ----------
 FROM base AS deps
+# The lockfile carries npmjs and npmmirror URLs from maintainer machines.
+# GitHub runners use the official registry, and replace-registry-host rewrites
+# every locked URL to it (npmmirror currently serves a broken vitest package).
+ENV NPM_CONFIG_REGISTRY=https://registry.npmjs.org
+ENV NPM_CONFIG_REPLACE_REGISTRY_HOST=always
 COPY flower-wms-system/package.json flower-wms-system/package-lock.json ./
-RUN npm ci
+RUN npm ci --no-audit --no-fund
 
 # ---------- 生产依赖（prisma / bcryptjs / tsx / dotenv 供 migrate、seed、cron） ----------
 FROM deps AS prod-deps
