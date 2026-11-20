@@ -14,11 +14,51 @@
  *   share is an expected loss and its usable share feeds later steps.
  */
 
-export const SAMPLE_PLAN_ALGORITHM_VERSION = "sample-plan-v1";
+export const SAMPLE_PLAN_ALGORITHM_VERSION = "sample-plan-v2";
 export const SAMPLE_PLAN_DEFAULT_MAX_STEPS = 12;
 export const SAMPLE_PLAN_DEFAULT_MAX_SUGGESTIONS = 2;
 
 const EPSILON = 1e-9;
+
+/**
+ * Flower material three-level classification (种类 / 颜色 / 商品名).
+ * `color` reuses Material.color; the optional service fields are mapped from
+ * Material.flowerVariety / Material.color / Material.flowerProductName.
+ */
+export type SamplePlanClassification = {
+  flowerVariety: string | null;
+  flowerProductName: string | null;
+  color: string | null;
+};
+
+/**
+ * Tier of a classification overlap used for ranking only:
+ * - exact: 种类 + 颜色 + 商品名 全部相同；
+ * - varietyColor: 种类 + 颜色相同，商品名不同或缺失。
+ */
+export type SamplePlanClassificationTier = "exact" | "varietyColor";
+
+export type SamplePlanClassificationMatch = {
+  flowerVariety: string;
+  flowerProductName: string | null;
+  color: string;
+  tier: SamplePlanClassificationTier;
+};
+
+/** Why an optional sample was appended as a suggestion. Advisory only. */
+export type SamplePlanSuggestionReason = {
+  sampleId: string;
+  /** Count of candidate materials whose materialId is already required. */
+  overlap: number;
+  /** Count of candidate materials matching a required material at the exact tier. */
+  exactClass: number;
+  /** Count of candidate materials matching a required material at the varietyColor tier. */
+  varietyColor: number;
+  /** Count of candidate materials that currently have stock. */
+  inStock: number;
+  /** Shared classifications of the required materials that triggered the signal. */
+  matchedClassifications: SamplePlanClassificationMatch[];
+};
 
 export type SamplePlanningMaterial = {
   materialId: string;
@@ -32,6 +72,12 @@ export type SamplePlanningMaterial = {
   availableQty: number;
   /** Expected share of the input recoverable after disassembly, 0..1. */
   reusableRate: number;
+  /** Flower variety (种类). Optional so older callers keep working; null/empty means unknown. */
+  flowerVariety?: string | null;
+  /** Flower product name (商品名, 三级分类第三级). Only meaningful together with flowerVariety. */
+  flowerProductName?: string | null;
+  /** Flower color (颜色), reusing Material.color. */
+  color?: string | null;
 };
 
 export type SamplePlanningSample = {
@@ -105,6 +151,12 @@ export type SamplePlanRunResult = {
       sequenceNo: number;
     }[];
     suggestedSampleIds: string[];
+    /**
+     * Reason for each non-mandatory sample in the sequence. Classification
+     * signals rank recommendations only; they never change reuse quantities,
+     * cost or reservations (WMS-BR-SMP-001/002/003).
+     */
+    suggestedSampleReasons: SamplePlanSuggestionReason[];
   };
   lossPolicySnapshot: {
     defaultReusableRate: number;
@@ -175,20 +227,97 @@ function sortBySequence(selections: readonly NormalizedSelection[]): NormalizedS
   });
 }
 
+type ResolvedClassification = {
+  flowerVariety: string;
+  flowerProductName: string | null;
+  color: string | null;
+};
+
+function classificationOf(material: SamplePlanningMaterial): ResolvedClassification | null {
+  const variety = typeof material.flowerVariety === "string" ? material.flowerVariety.trim() : "";
+  if (!variety) return null;
+  const productName = typeof material.flowerProductName === "string"
+    ? material.flowerProductName.trim()
+    : "";
+  const color = typeof material.color === "string" ? material.color.trim() : "";
+  return {
+    flowerVariety: variety,
+    flowerProductName: productName || null,
+    color: color || null,
+  };
+}
+
+/**
+ * Strongest classification link between a required material and a candidate
+ * material. A missing variety or color is never treated as a wildcard, so empty
+ * classification data falls back to the other ranking signals.
+ */
+function classificationTier(
+  required: SamplePlanningMaterial,
+  candidate: SamplePlanningMaterial,
+): SamplePlanClassificationTier | null {
+  const left = classificationOf(required);
+  const right = classificationOf(candidate);
+  if (!left || !right) return null;
+  if (!left.color || !right.color) return null;
+  if (left.flowerVariety !== right.flowerVariety || left.color !== right.color) return null;
+  return left.flowerProductName && left.flowerProductName === right.flowerProductName
+    ? "exact"
+    : "varietyColor";
+}
+
+type SuggestionScore = Omit<SamplePlanSuggestionReason, "sampleId">;
+
 function suggestionScore(
   candidate: SamplePlanningSample,
   mandatory: readonly NormalizedSelection[],
-): { overlap: number; inStock: number } {
-  const requiredIds = new Set(
-    mandatory.flatMap((selection) => selection.sample.materials.map((material) => material.materialId)),
-  );
+): SuggestionScore {
+  const requiredMaterials = mandatory.flatMap((selection) => selection.sample.materials);
+  const requiredIds = new Set(requiredMaterials.map((material) => material.materialId));
+  const matches = new Map<string, SamplePlanClassificationMatch>();
   let overlap = 0;
+  let exactClass = 0;
+  let varietyColor = 0;
   let inStock = 0;
+
   for (const material of candidate.materials) {
     if (requiredIds.has(material.materialId)) overlap += 1;
     if (material.availableQty > 0) inStock += 1;
+
+    let bestTier: SamplePlanClassificationTier | null = null;
+    for (const required of requiredMaterials) {
+      const tier = classificationTier(required, material);
+      if (!tier) continue;
+      if (tier === "exact" || bestTier === null) bestTier = tier;
+      const classification = classificationOf(required);
+      if (!classification || !classification.color) continue;
+      const key = `${classification.flowerVariety}|${classification.flowerProductName ?? ""}|${classification.color ?? ""}`;
+      const existing = matches.get(key);
+      if (!existing || (tier === "exact" && existing.tier !== "exact")) {
+        matches.set(key, {
+          flowerVariety: classification.flowerVariety,
+          flowerProductName: classification.flowerProductName,
+          color: classification.color,
+          tier,
+        });
+      }
+    }
+    if (bestTier === "exact") exactClass += 1;
+    else if (bestTier === "varietyColor") varietyColor += 1;
   }
-  return { overlap, inStock };
+
+  return {
+    overlap,
+    exactClass,
+    varietyColor,
+    inStock,
+    matchedClassifications: [...matches.values()].sort((left, right) =>
+      left.flowerVariety.localeCompare(right.flowerVariety)
+      || (left.flowerProductName ?? "").localeCompare(right.flowerProductName ?? "")
+      || (left.color ?? "").localeCompare(right.color ?? "")
+      || left.tier.localeCompare(right.tier)
+    ),
+  };
 }
 
 /**
@@ -196,6 +325,11 @@ function suggestionScore(
  * - the mandatory samples only;
  * - mandatory plus the best matching optional sample;
  * - mandatory plus the best two optional samples.
+ *
+ * Ranking order: materialId overlap → exact classification (种类+颜色+商品名)
+ * → 种类+颜色 classification → in-stock count → priority → code. The
+ * classification signals only reorder suggestions; they never alter the
+ * simulated reuse quantity or cost.
  *
  * Optional suggestions are only added when exactly one mandatory sample was
  * selected, matching the confirmed rule that the algorithm may recommend a
@@ -211,20 +345,26 @@ function buildCandidateSequences(
   const sequences: NormalizedSelection[][] = [sortBySequence(base)];
   if (mandatory.length !== 1 || optional.length === 0) return sequences;
 
-  const ranked = [...optional].sort((left, right) => {
-    const leftScore = suggestionScore(left.sample, mandatory);
-    const rightScore = suggestionScore(right.sample, mandatory);
-    if (leftScore.overlap !== rightScore.overlap) {
-      return rightScore.overlap - leftScore.overlap;
-    }
-    if (leftScore.inStock !== rightScore.inStock) {
-      return rightScore.inStock - leftScore.inStock;
-    }
-    if (left.sample.priority !== right.sample.priority) {
-      return right.sample.priority - left.sample.priority;
-    }
-    return left.sample.code.localeCompare(right.sample.code);
-  });
+  const ranked = optional
+    .map((selection) => ({ selection, score: suggestionScore(selection.sample, mandatory) }))
+    .sort((left, right) => {
+      if (left.score.overlap !== right.score.overlap) {
+        return right.score.overlap - left.score.overlap;
+      }
+      if (left.score.exactClass !== right.score.exactClass) {
+        return right.score.exactClass - left.score.exactClass;
+      }
+      if (left.score.varietyColor !== right.score.varietyColor) {
+        return right.score.varietyColor - left.score.varietyColor;
+      }
+      if (left.score.inStock !== right.score.inStock) {
+        return right.score.inStock - left.score.inStock;
+      }
+      if (left.selection.sample.priority !== right.selection.sample.priority) {
+        return right.selection.sample.priority - left.selection.sample.priority;
+      }
+      return left.selection.sample.code.localeCompare(right.selection.sample.code);
+    });
 
   const availableSlots = Math.max(0, maxSteps - base.length);
   const suggestionLimit = Math.min(
@@ -232,7 +372,7 @@ function buildCandidateSequences(
     Math.max(0, Math.max(1, maxSuggestions) - 1),
   );
   for (let count = 1; count <= suggestionLimit; count += 1) {
-    const suggestions = ranked.slice(0, count);
+    const suggestions = ranked.slice(0, count).map((entry) => entry.selection);
     sequences.push([
       ...sortBySequence(base),
       ...suggestions.map((selection) => ({ ...selection, sequenceNo: 0 })),
@@ -462,6 +602,12 @@ export function calculateSamplePlan(
         suggestedSampleIds: sequence
           .filter((selection) => !selection.mandatory)
           .map((selection) => selection.sample.sampleId),
+        suggestedSampleReasons: sequence
+          .filter((selection) => !selection.mandatory)
+          .map((selection) => ({
+            sampleId: selection.sample.sampleId,
+            ...suggestionScore(selection.sample, mandatory),
+          })),
       },
       lossPolicySnapshot: {
         defaultReusableRate,

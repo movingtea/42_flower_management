@@ -88,6 +88,8 @@ async function runDatabaseTest(): Promise<void> {
         name: "测试玫瑰",
         kind: MaterialKind.FLOWER,
         color: "红",
+        flowerVariety: "玫瑰",
+        flowerProductName: "玛格丽特",
         grade: "A",
         gradeSpecification: "40-50cm",
         specification: "单头",
@@ -144,6 +146,11 @@ async function runDatabaseTest(): Promise<void> {
     assert.equal(Number(loaded.safetyStockThreshold), 3.5);
     assert.deepEqual(loaded.categories.map((row) => row.categoryId), [category.id]);
 
+    // Flower three-level classification: 种类/颜色/商品名 stored, 颜色 reuses `color`.
+    assert.equal(loaded.flowerVariety, "玫瑰");
+    assert.equal(loaded.flowerProductName, "玛格丽特");
+    assert.equal(loaded.color, "红");
+
     // Parity fields: explicit code kept, search index generated, loss policy stored.
     assert.equal(loaded.code, `MAT-${marker}`);
     assert.equal(loaded.pinyinIndex, "csmg");
@@ -181,6 +188,8 @@ async function runDatabaseTest(): Promise<void> {
         code: "IGNORED-CODE",
         name: "测试玫瑰（更名）",
         kind: MaterialKind.FLOWER,
+        flowerVariety: "玫瑰",
+        flowerProductName: "卡罗拉",
         baseUnit: "支",
         quantityScale: 0,
         reservePerOrder: true,
@@ -202,6 +211,8 @@ async function runDatabaseTest(): Promise<void> {
     );
     assert.equal(updated.name, "测试玫瑰（更名）");
     assert.equal(updated.code, loaded.code);
+    assert.equal(updated.flowerVariety, "玫瑰");
+    assert.equal(updated.flowerProductName, "卡罗拉");
     assert.equal(updated.maintenanceCare, null);
     assert.equal(Number(updated.standardUnitCost), 13.25);
     assert.equal(Number(updated.standardUsableRate), 0.8);
@@ -220,6 +231,120 @@ async function runDatabaseTest(): Promise<void> {
       "costUpdatedAt must move when the standard cost changes",
     );
     assert.equal(await db.materialCategoryRelation.count({ where: { categoryId: category.id } }), 0);
+
+    // ------------------------------------------- flower classification rules
+    // Non-flower kinds do not keep 种类/商品名 even when the payload sends them.
+    const packaging = await db.$transaction((tx) =>
+      createMaterialMaster(tx, scope, {
+        name: "测试包装纸",
+        kind: MaterialKind.PACKAGING,
+        baseUnit: "卷",
+        quantityScale: 0,
+        reservePerOrder: false,
+        flowerVariety: "玫瑰",
+        flowerProductName: "玛格丽特",
+      }),
+    );
+    assert.equal(packaging.flowerVariety, null);
+    assert.equal(packaging.flowerProductName, null);
+
+    // 商品名 without 种类 is rejected before any write.
+    await assert.rejects(
+      db.$transaction((tx) =>
+        createMaterialMaster(tx, scope, {
+          name: "缺种类的花",
+          kind: MaterialKind.FLOWER,
+          baseUnit: "支",
+          quantityScale: 0,
+          reservePerOrder: true,
+          flowerProductName: "玛格丽特",
+        }),
+      ),
+      /填写商品名前请先填写种类/,
+    );
+
+    // Caps: 种类 ≤ 30 characters, 商品名 ≤ 40 characters.
+    await assert.rejects(
+      db.$transaction((tx) =>
+        createMaterialMaster(tx, scope, {
+          name: "超长种类花",
+          kind: MaterialKind.FLOWER,
+          baseUnit: "支",
+          quantityScale: 0,
+          reservePerOrder: true,
+          flowerVariety: "玫".repeat(31),
+        }),
+      ),
+      /种类不能超过 30 个字符/,
+    );
+    await assert.rejects(
+      db.$transaction((tx) =>
+        createMaterialMaster(tx, scope, {
+          name: "超长商品名花",
+          kind: MaterialKind.FLOWER,
+          baseUnit: "支",
+          quantityScale: 0,
+          reservePerOrder: true,
+          flowerVariety: "玫瑰",
+          flowerProductName: "玛".repeat(41),
+        }),
+      ),
+      /商品名不能超过 40 个字符/,
+    );
+
+    // Flower names are optional: a blank name is generated in the 三级分类
+    // display order 种类 -> 颜色 -> 商品名.
+    const autoNamed = await db.$transaction((tx) =>
+      createMaterialMaster(tx, scope, {
+        name: "",
+        kind: MaterialKind.FLOWER,
+        flowerVariety: "玫瑰",
+        color: "粉色",
+        flowerProductName: "玛格丽特",
+        baseUnit: "支",
+        quantityScale: 0,
+        reservePerOrder: true,
+      }),
+    );
+    assert.equal(autoNamed.name, "玫瑰 · 粉色 · 玛格丽特");
+    await db.$transaction((tx) => deleteMaterial(tx, scope, autoNamed.id));
+
+    // A blank flower name still needs at least a 种类, otherwise nothing can be
+    // generated. Consumables have no classification, so their name stays required.
+    await assert.rejects(
+      db.$transaction((tx) =>
+        createMaterialMaster(tx, scope, {
+          name: "",
+          kind: MaterialKind.FLOWER,
+          baseUnit: "支",
+          quantityScale: 0,
+          reservePerOrder: true,
+        }),
+      ),
+      /花材名称留空时请至少填写种类/,
+    );
+    await assert.rejects(
+      db.$transaction((tx) =>
+        createMaterialMaster(tx, scope, {
+          name: "",
+          kind: MaterialKind.PACKAGING,
+          baseUnit: "卷",
+          quantityScale: 0,
+          reservePerOrder: false,
+        }),
+      ),
+      /物料名称必填/,
+    );
+
+    // The create audit snapshot keeps the classification for traceability.
+    const createdAudit = await db.auditEvent.findFirst({
+      where: { tenantId: tenant.id, entityId: created.id, action: "MATERIAL_CREATED" },
+      select: { afterSnapshot: true },
+    });
+    const createdSnapshot = createdAudit?.afterSnapshot as Record<string, unknown> | null;
+    assert.equal(createdSnapshot?.flowerVariety, "玫瑰");
+    assert.equal(createdSnapshot?.flowerProductName, "玛格丽特");
+    await db.$transaction((tx) => deleteMaterial(tx, scope, packaging.id));
 
     // Category lifecycle still protects references and audits the transitions.
     const renamed = await db.$transaction((tx) =>

@@ -284,6 +284,101 @@ async function run(): Promise<void> {
     assert.ok(report.summary.plannedReuseRate > 0);
     assert.ok((report.summary.actualReuseRate ?? 0) > 0);
 
+    // Flower three-level classification only reorders optional suggestions:
+    // a candidate with a different materialId but the same 种类+颜色+商品名 is
+    // recommended, yet its reusedQty stays 0 because reuse still requires the
+    // exact same material (WMS-BR-SMP-001/002).
+    const classifiedMandatoryMaterial = await db.material.create({
+      data: {
+        tenantId,
+        code: `S4-PLAN-CLASS-A-${marker}`,
+        name: "分类打样玫瑰",
+        kind: MaterialKind.FLOWER,
+        baseUnit: "支",
+        quantityScale: 0,
+        standardUnitCost: "2.0000",
+        standardUsableRate: "0.5000",
+        color: "红",
+        flowerVariety: "玫瑰",
+        flowerProductName: "玛格丽特",
+        active: true,
+      },
+    });
+    const classifiedCandidateMaterial = await db.material.create({
+      data: {
+        tenantId,
+        code: `S4-PLAN-CLASS-B-${marker}`,
+        name: "同分类另一支玫瑰",
+        kind: MaterialKind.FLOWER,
+        baseUnit: "支",
+        quantityScale: 0,
+        standardUnitCost: "2.0000",
+        standardUsableRate: "0.5000",
+        color: "红",
+        flowerVariety: "玫瑰",
+        flowerProductName: "玛格丽特",
+        active: true,
+      },
+    });
+    await makeBatch(db, {
+      storeId: store.id,
+      locationId: warehouse.id,
+      materialId: classifiedMandatoryMaterial.id,
+      batchNo: `BATCH-CLASS-${marker}`,
+      quantity: 20,
+      unitCost: 2,
+    });
+    const classifiedSampleX = await makeSample(db, {
+      code: `SMP-CLASS-X-${marker}`,
+      name: "分类样品 X",
+      materialId: classifiedMandatoryMaterial.id,
+      quantity: 10,
+    });
+    const classifiedSampleY = await makeSample(db, {
+      code: `SMP-CLASS-Y-${marker}`,
+      name: "分类样品 Y",
+      materialId: classifiedCandidateMaterial.id,
+      quantity: 5,
+    });
+    const classifiedPlan = await db.$transaction((tx) => saveSamplePlan(tx, scope, {
+      name: "分类推荐测试",
+      items: [{ sampleId: classifiedSampleX.id, quantity: 1, mandatory: true, sequenceNo: 1 }],
+    }));
+    await db.$transaction((tx) => calculatePlan(tx, scope, classifiedPlan.id), { timeout: 30_000 });
+    const classifiedRuns = await db.samplePlanRun.findMany({
+      where: { planId: classifiedPlan.id },
+      include: { steps: { include: { flows: true }, orderBy: { sequenceNo: "asc" } } },
+    });
+    const classifiedBaseRun = classifiedRuns.find((run) => {
+      const snapshot = run.candidateSnapshot as { suggestedSampleIds?: string[] };
+      return (snapshot.suggestedSampleIds?.length ?? 0) === 0;
+    });
+    assert.ok(classifiedBaseRun, "the plan must keep its mandatory-only run");
+    assert.equal(Number(classifiedBaseRun!.totalCost), 20);
+    const classifiedSuggestedRun = classifiedRuns.find((run) => {
+      const snapshot = run.candidateSnapshot as { suggestedSampleIds?: string[] };
+      return snapshot.suggestedSampleIds?.includes(classifiedSampleY.id) ?? false;
+    });
+    assert.ok(classifiedSuggestedRun, "same flower classification must suggest the candidate");
+    const classifiedSnapshot = classifiedSuggestedRun!.candidateSnapshot as {
+      suggestedSampleIds: string[];
+      suggestedSampleReasons: {
+        sampleId: string;
+        overlap: number;
+        exactClass: number;
+        varietyColor: number;
+      }[];
+    };
+    assert.deepEqual(classifiedSnapshot.suggestedSampleIds, [classifiedSampleY.id]);
+    assert.equal(classifiedSnapshot.suggestedSampleReasons[0]?.sampleId, classifiedSampleY.id);
+    assert.equal(classifiedSnapshot.suggestedSampleReasons[0]?.exactClass, 1);
+    assert.equal(classifiedSnapshot.suggestedSampleReasons[0]?.varietyColor, 0);
+    assert.equal(classifiedSnapshot.suggestedSampleReasons[0]?.overlap, 0);
+    const classifiedCandidateStep = classifiedSuggestedRun!.steps[1]!;
+    assert.equal(classifiedCandidateStep.sampleId, classifiedSampleY.id);
+    assert.equal(Number(classifiedCandidateStep.flows[0]!.reusedQty), 0);
+    assert.equal(Number(classifiedCandidateStep.flows[0]!.purchaseQty), 5);
+
     // A confirmed customer order reservation reduces what the plan may reserve.
     await db.sample.update({ where: { id: sampleB.id }, data: { state: SampleState.ARCHIVED } });
     const orderBatch = await makeBatch(db, {
@@ -608,12 +703,22 @@ async function run(): Promise<void> {
     }), "direct completion must record the auto start audit");
 
     const pausedInProgress = await db.$transaction(
-      (tx) => pausePlan(tx, scope, pauseTestPlan.id),
+      (tx) => pausePlan(tx, scope, pauseTestPlan.id, {
+        resolutions: [{
+          batchId: pauseBatch.id,
+          returnQty: 0,
+          keepQty: 5,
+          lossQty: 0,
+        }],
+      }),
       { timeout: 30_000 },
     );
     assert.equal(pausedInProgress.releasedReservations, 0);
     assert.equal(pausedInProgress.releasedQty, 0);
     assert.equal(pausedInProgress.issuedKeptQty, 5);
+    assert.equal(pausedInProgress.returnedQty, 0);
+    assert.equal(pausedInProgress.keptQty, 5);
+    assert.equal(pausedInProgress.lostQty, 0);
     assert.equal(pausedInProgress.wasStarted, true);
     const midPlan = await db.samplePlan.findUniqueOrThrow({ where: { id: pauseTestPlan.id } });
     assert.equal(midPlan.state, SamplePlanState.PAUSED);
@@ -657,6 +762,165 @@ async function run(): Promise<void> {
         where: { batchId: pauseBatch.id, locationId: warehouse.id },
       })).onHandQty),
       1,
+    );
+
+    // WMS-BR-SMP-007: pausing while a step is in progress must capture an
+    // explicit return/keep/write-off decision for the material in production.
+    const flowerPauseDispose = await db.material.create({
+      data: {
+        tenantId,
+        code: `S4-PLAN-DISPOSE-${marker}`,
+        name: "暂停处置花材",
+        kind: MaterialKind.FLOWER,
+        baseUnit: "支",
+        quantityScale: 0,
+        standardUnitCost: "2.0000",
+        standardUsableRate: "0.5000",
+        active: true,
+      },
+    });
+    const disposalBatch = await makeBatch(db, {
+      storeId: store.id,
+      locationId: warehouse.id,
+      materialId: flowerPauseDispose.id,
+      batchNo: `BATCH-DISPOSE-${marker}`,
+      quantity: 13,
+      unitCost: 2,
+    });
+    const sampleDispose = await makeSample(db, {
+      code: `SMP-DISPOSE-${marker}`,
+      name: "暂停处置样品",
+      materialId: flowerPauseDispose.id,
+      quantity: 10,
+    });
+    const disposalPlan = await db.$transaction((tx) => saveSamplePlan(tx, scope, {
+      name: "暂停制作区实物处置测试",
+      items: [{ sampleId: sampleDispose.id, quantity: 1, mandatory: true, sequenceNo: 1 }],
+    }));
+    await db.$transaction((tx) => calculatePlan(tx, scope, disposalPlan.id), { timeout: 30_000 });
+    await db.$transaction((tx) => approvePlan(tx, scope, disposalPlan.id), { timeout: 30_000 });
+    await db.$transaction((tx) => startPlan(tx, scope, disposalPlan.id), { timeout: 30_000 });
+    assert.equal(
+      Number((await db.batchBalance.findFirstOrThrow({
+        where: { batchId: disposalBatch.id, locationId: warehouse.id },
+      })).onHandQty),
+      3,
+    );
+    assert.equal(
+      Number((await db.batchBalance.findFirstOrThrow({
+        where: { batchId: disposalBatch.id, locationId: production.id },
+      })).onHandQty),
+      10,
+    );
+
+    await assert.rejects(
+      db.$transaction((tx) => pausePlan(tx, scope, disposalPlan.id, {
+        resolutions: [{
+          batchId: disposalBatch.id,
+          returnQty: 1,
+          keepQty: 1,
+          lossQty: 1,
+        }],
+      }), { timeout: 30_000 }),
+      /必须等于未处理数量/,
+    );
+    await assert.rejects(
+      db.$transaction((tx) => pausePlan(tx, scope, disposalPlan.id, {
+        resolutions: [{
+          batchId: disposalBatch.id,
+          returnQty: 4,
+          keepQty: 6,
+          lossQty: 0,
+        }],
+      }), { timeout: 30_000 }),
+      /重新验收/,
+    );
+
+    const pausedWithDisposition = await db.$transaction(
+      (tx) => pausePlan(tx, scope, disposalPlan.id, {
+        resolutions: [{
+          batchId: disposalBatch.id,
+          returnQty: 4,
+          keepQty: 4,
+          lossQty: 2,
+          reverified: true,
+          usableUntil: future,
+        }],
+      }),
+      { timeout: 30_000 },
+    );
+    assert.equal(pausedWithDisposition.returnedQty, 4);
+    assert.equal(pausedWithDisposition.keptQty, 4);
+    assert.equal(pausedWithDisposition.lostQty, 2);
+    assert.equal(pausedWithDisposition.issuedKeptQty, 4);
+    assert.equal(
+      Number((await db.batchBalance.findFirstOrThrow({
+        where: { batchId: disposalBatch.id, locationId: warehouse.id },
+      })).onHandQty),
+      7,
+    );
+    assert.equal(
+      Number((await db.batchBalance.findFirstOrThrow({
+        where: { batchId: disposalBatch.id, locationId: production.id },
+      })).onHandQty),
+      4,
+    );
+    const disposalLoss = await db.lossRecord.findFirstOrThrow({
+      where: { batchId: disposalBatch.id, storeId: store.id },
+    });
+    assert.equal(Number(disposalLoss.quantity), 2);
+    const pauseDispositionAudit = await db.auditEvent.findFirstOrThrow({
+      where: { entityId: disposalPlan.id, action: "SAMPLE_PLAN_PAUSED" },
+      orderBy: { occurredAt: "desc" },
+    });
+    const pauseSnapshot = pauseDispositionAudit.afterSnapshot as {
+      resolutions?: { batchId: string; returnQty: number; keepQty: number; lossQty: number }[];
+    } | null;
+    assert.equal(pauseSnapshot?.resolutions?.[0]?.returnQty, 4);
+    assert.equal(pauseSnapshot?.resolutions?.[0]?.keepQty, 4);
+    assert.equal(pauseSnapshot?.resolutions?.[0]?.lossQty, 2);
+
+    const resumedWithDisposition = await db.$transaction(
+      (tx) => resumePlan(tx, scope, disposalPlan.id),
+      { timeout: 30_000 },
+    );
+    assert.equal(resumedWithDisposition.state, SamplePlanState.IN_PROGRESS);
+    assert.equal(
+      resumedWithDisposition.reservedQty,
+      6,
+      "resume must re-issue the current-step quantity returned or written off during pause",
+    );
+    assert.equal(
+      Number((await db.batchBalance.findFirstOrThrow({
+        where: { batchId: disposalBatch.id, locationId: warehouse.id },
+      })).onHandQty),
+      1,
+    );
+    assert.equal(
+      Number((await db.batchBalance.findFirstOrThrow({
+        where: { batchId: disposalBatch.id, locationId: production.id },
+      })).onHandQty),
+      10,
+    );
+    const completedDisposition = await db.$transaction(
+      (tx) => completeStep(tx, scope, disposalPlan.id, {
+        materials: [{ materialId: flowerPauseDispose.id, usedQty: 10 }],
+        disassemble: false,
+      }),
+      { timeout: 30_000 },
+    );
+    assert.equal(completedDisposition.planCompleted, true);
+    assert.equal(
+      Number((await db.batchBalance.findFirstOrThrow({
+        where: { batchId: disposalBatch.id, locationId: warehouse.id },
+      })).onHandQty),
+      1,
+    );
+    assert.equal(
+      Number((await db.batchBalance.findFirstOrThrow({
+        where: { batchId: disposalBatch.id, locationId: production.id },
+      })).onHandQty),
+      0,
     );
 
     // A customer order can release an approved plan's reservations. After the

@@ -83,7 +83,7 @@ export default async function MaterialCategoriesPage({ searchParams }: {
     {categories.length === 0
       ? <ActionEmptyState
         title={query ? "没有匹配的原材料分类" : "还没有原材料分类"}
-        description={query ? "换个名称关键词再试，或清空搜索查看全部分类。" : "先创建分类，再到物料母表把物料关联到对应分类。"}
+        description={query ? "换个名称关键词再试，或清空搜索查看全部分类。" : "先创建分类，再到花材母表或耗材母表把物料关联到对应分类。"}
       />
       : <div className={tableShell}>
         <table className="w-full text-left text-sm">

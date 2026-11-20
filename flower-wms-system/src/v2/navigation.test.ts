@@ -41,6 +41,7 @@ const EXPECTED_VISIBLE_HREFS: Record<V2Role, string[]> = {
   ADMIN: [
     "/v2",
     "/v2/materials",
+    "/v2/consumables",
     "/v2/material-categories",
     "/v2/inventory",
     "/v2/operations",
@@ -60,7 +61,7 @@ const EXPECTED_VISIBLE_HREFS: Record<V2Role, string[]> = {
     "/v2/audit",
     "/v2/staff",
   ],
-  MANAGER: ["/v2", "/v2/materials", "/v2/material-categories", "/v2/inventory", "/v2/operations", "/v2/purchase-orders", "/v2/suppliers", "/v2/catalog", "/v2/recipes", "/v2/packaging-kits", "/v2/samples", "/v2/sample-plans", "/v2/orders", "/v2/reports", "/v2/sample-reports", "/v2/setup", "/v2/data-quality"],
+  MANAGER: ["/v2", "/v2/materials", "/v2/consumables", "/v2/material-categories", "/v2/inventory", "/v2/operations", "/v2/purchase-orders", "/v2/suppliers", "/v2/catalog", "/v2/recipes", "/v2/packaging-kits", "/v2/samples", "/v2/sample-plans", "/v2/orders", "/v2/reports", "/v2/sample-reports", "/v2/setup", "/v2/data-quality"],
   INVENTORY_REVIEWER: ["/v2", "/v2/inventory", "/v2/operations", "/v2/purchase-orders", "/v2/suppliers", "/v2/reports", "/v2/sample-reports", "/v2/setup", "/v2/data-quality"],
   BUYER: ["/v2", "/v2/inventory", "/v2/operations", "/v2/purchase-orders", "/v2/suppliers", "/v2/reports", "/v2/sample-reports", "/v2/setup"],
   SALES: ["/v2", "/v2/orders", "/v2/reports", "/v2/sample-reports", "/v2/setup"],
@@ -252,6 +253,18 @@ function main() {
   assert.equal(canOpenV2Href(["ADMIN"], "/v2/system-health"), true);
   assert.equal(canOpenV2Href(["MANAGER"], "/v2/system-health"), false);
   assert.equal(canOpenV2Href(["BUYER"], "/v2/materials"), false);
+  assert.equal(canOpenV2Href(["BUYER"], "/v2/consumables"), false);
+  assert.equal(canOpenV2Href(["MANAGER"], "/v2/consumables"), true);
+
+  // The split material masters share the `catalog` capability gate.
+  const materialsItem = items.find((item) => item.href === "/v2/materials");
+  const consumablesItem = items.find((item) => item.href === "/v2/consumables");
+  assert.ok(materialsItem);
+  assert.ok(consumablesItem);
+  assert.equal(materialsItem.label, "花材母表");
+  assert.equal(consumablesItem.label, "耗材母表");
+  assert.deepEqual(materialsItem.anyCapabilities, ["catalog"]);
+  assert.deepEqual(consumablesItem.anyCapabilities, ["catalog"]);
 
   console.log("v2 navigation/capability matrix tests passed");
 }

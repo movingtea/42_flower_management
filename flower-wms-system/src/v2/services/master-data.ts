@@ -24,6 +24,14 @@ const MAX_COLOR_TAG_LENGTH = 20;
 const MAX_ALIASES = 20;
 const MAX_ALIAS_LENGTH = 40;
 const MAX_MORPHOLOGY_LENGTH = 200;
+/** Flower three-level classification: 种类 -> 颜色 -> 商品名 (颜色 reuses `color`). */
+const MAX_FLOWER_VARIETY_LENGTH = 30;
+const MAX_FLOWER_PRODUCT_NAME_LENGTH = 40;
+const MAX_MATERIAL_NAME_LENGTH = 80;
+const FLOWER_MATERIAL_KINDS: readonly MaterialKind[] = [
+  MaterialKind.FLOWER,
+  MaterialKind.FOLIAGE,
+];
 const LIST_SEPARATOR = /[,，、;；\n]+/;
 
 /** Non-disclosing delete guard: a referenced material must be disabled instead. */
@@ -66,6 +74,10 @@ export type MaterialInput = {
   name: string;
   kind: MaterialKind;
   color?: string | null;
+  /** 种类, e.g. 玫瑰. Only kept for FLOWER/FOLIAGE; 商品名 requires it. */
+  flowerVariety?: string | null;
+  /** 商品名, e.g. 玛格丽特. Only kept for FLOWER/FOLIAGE. */
+  flowerProductName?: string | null;
   grade?: string | null;
   gradeSpecification?: string | null;
   specification?: string | null;
@@ -164,6 +176,59 @@ function normalizeLossMode(value: unknown): LossMode {
   return optionalEnum(value, Object.values(LossMode), "损耗模式") ?? LossMode.STANDARD;
 }
 
+/**
+ * 种类/商品名 are flower-only attributes. A non-flower kind clears both so a
+ * kind change cannot leave stale classification behind; a 商品名 without a
+ * 种类 is rejected because the list filter cascades 种类 -> 颜色 -> 商品名.
+ */
+function normalizeFlowerClassification(
+  kind: MaterialKind,
+  variety: string | null | undefined,
+  productName: string | null | undefined,
+): { flowerVariety: string | null; flowerProductName: string | null } {
+  if (!FLOWER_MATERIAL_KINDS.includes(kind)) {
+    return { flowerVariety: null, flowerProductName: null };
+  }
+  const flowerVariety = optional(variety, MAX_FLOWER_VARIETY_LENGTH, "种类");
+  const flowerProductName = optional(
+    productName,
+    MAX_FLOWER_PRODUCT_NAME_LENGTH,
+    "商品名",
+  );
+  if (flowerProductName && !flowerVariety) {
+    throw new Error("填写商品名前请先填写种类");
+  }
+  return { flowerVariety, flowerProductName };
+}
+
+/**
+ * Flower names are optional: when blank, the material is named after its
+ * three-level classification in display order 种类 -> 颜色 -> 商品名
+ * (e.g. `玫瑰 · 粉色 · 玛格丽特`). Consumables have no classification, so
+ * their name stays mandatory.
+ */
+function normalizeMaterialName(
+  kind: MaterialKind,
+  rawName: string | null | undefined,
+  classification: { flowerVariety: string | null; flowerProductName: string | null },
+  color: string | null,
+): string {
+  if (!FLOWER_MATERIAL_KINDS.includes(kind)) {
+    return required(rawName ?? "", "物料名称", MAX_MATERIAL_NAME_LENGTH);
+  }
+  const explicit = typeof rawName === "string" ? rawName.trim() : "";
+  if (explicit) return required(explicit, "物料名称", MAX_MATERIAL_NAME_LENGTH);
+  if (!classification.flowerVariety) {
+    throw new Error("花材名称留空时请至少填写种类");
+  }
+  const composed = [
+    classification.flowerVariety,
+    color,
+    classification.flowerProductName,
+  ].filter((part): part is string => Boolean(part)).join(" · ");
+  return required(composed, "物料名称", MAX_MATERIAL_NAME_LENGTH);
+}
+
 function normalizeColorTags(
   value: readonly string[] | string | null | undefined,
 ): string[] {
@@ -250,14 +315,22 @@ function validateMaterial(input: MaterialInput) {
   if (["块", "卷"].includes(baseUnit) && input.quantityScale !== 0) {
     throw new Error(`${baseUnit}必须使用整数库存`);
   }
-  const name = required(input.name, "物料名称", 80);
+  const color = optional(input.color, 40, "颜色");
+  const flowerClassification = normalizeFlowerClassification(
+    input.kind,
+    input.flowerVariety,
+    input.flowerProductName,
+  );
+  // 名称留空时由三级分类按“种类 · 颜色 · 商品名”自动生成；耗材仍必填。
+  const name = normalizeMaterialName(input.kind, input.name, flowerClassification, color);
   const aliasMap = normalizeAliasMap(input.aliasMap);
   return {
     explicitCode: optionalMasterCode(input.code),
     data: {
       name,
       kind: input.kind,
-      color: optional(input.color, 40, "颜色"),
+      color,
+      ...flowerClassification,
       floralRole: normalizeFloralRole(input.floralRole),
       colorTags: normalizeColorTags(input.colorTags),
       morphology: optional(input.morphology, MAX_MORPHOLOGY_LENGTH, "形态特征"),
@@ -379,6 +452,8 @@ function materialAuditSnapshot(material: {
   aliasText: string;
   floralRole: string | null;
   colorTags: string[];
+  flowerVariety: string | null;
+  flowerProductName: string | null;
 }) {
   return {
     code: material.code,
@@ -389,6 +464,8 @@ function materialAuditSnapshot(material: {
     aliasText: material.aliasText,
     floralRole: material.floralRole,
     colorTags: material.colorTags,
+    flowerVariety: material.flowerVariety,
+    flowerProductName: material.flowerProductName,
   };
 }
 

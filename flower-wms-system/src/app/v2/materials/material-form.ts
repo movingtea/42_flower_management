@@ -135,6 +135,8 @@ export function parseMaterialForm(data: MaterialFormReader): MaterialInput {
     name: text(data, "name"),
     kind: text(data, "kind") as MaterialKind,
     color: optionalText(data, "color"),
+    flowerVariety: optionalText(data, "flowerVariety"),
+    flowerProductName: optionalText(data, "flowerProductName"),
     floralRole: optionalText(data, "floralRole"),
     colorTags: parseListValues(text(data, "colorTags")),
     morphology: optionalText(data, "morphology"),

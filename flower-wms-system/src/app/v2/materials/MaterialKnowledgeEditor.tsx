@@ -43,6 +43,12 @@ export type MaterialKnowledgeEditorValue = {
 type Props = {
   material?: MaterialKnowledgeEditorValue;
   categories: MaterialCategoryOption[];
+  /**
+   * `flower` (default) renders the wiki knowledge/care/loss fields.
+   * `consumable` keeps cost, brand/model, safety stock, notes and categories and
+   * hides the flower-only knowledge, care and loss-rate sections.
+   */
+  variant?: "flower" | "consumable";
 };
 
 type CareMode = "table" | "text";
@@ -94,7 +100,8 @@ function rateToPercent(value: string | null | undefined): string {
   return String(Number((parsed * 100).toFixed(4)));
 }
 
-export function MaterialKnowledgeEditor({ material, categories }: Props) {
+export function MaterialKnowledgeEditor({ material, categories, variant = "flower" }: Props) {
+  const flower = variant !== "consumable";
   const [englishName, setEnglishName] = useState(material?.englishName ?? "");
   const [flowerLanguage, setFlowerLanguage] = useState(
     material?.flowerLanguage ?? "",
@@ -204,73 +211,75 @@ export function MaterialKnowledgeEditor({ material, categories }: Props) {
         alt="物料图片"
         hint="用于物料百科与商品资料展示；支持 JPG、PNG、WebP，单张不超过 3MB。"
       />
-      <div className="flex flex-wrap items-end gap-2">
-        <label className="block min-w-0 flex-1 text-sm text-zinc-700">
-          拉丁学名 / 英文名
-          <input
-            className={`${inputClass} mt-1`}
-            name="englishName"
-            value={englishName}
-            onChange={(event) => setEnglishName(event.target.value)}
-            placeholder="如 Rosa hybrida / Rose，可由 AI 补全"
-          />
-        </label>
-        <button
-          type="button"
-          className="shrink-0 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-800 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50"
-          onClick={(event) => void handleAiComplete(event)}
-          disabled={aiLoading}
-        >
-          {aiLoading ? "AI 补全中…" : "✨ AI 一键智能补全"}
-        </button>
-      </div>
-      {feedback && (
-        <p
-          role={feedback.tone === "error" ? "alert" : "status"}
-          className={`rounded-lg px-3 py-2 text-sm ${
-            feedback.tone === "error"
-              ? "bg-red-50 text-red-800"
-              : "bg-emerald-50 text-emerald-800"
-          }`}
-        >
-          {feedback.message}
-        </p>
-      )}
+      {flower && <>
+        <div className="flex flex-wrap items-end gap-2">
+          <label className="block min-w-0 flex-1 text-sm text-zinc-700">
+            拉丁学名 / 英文名
+            <input
+              className={`${inputClass} mt-1`}
+              name="englishName"
+              value={englishName}
+              onChange={(event) => setEnglishName(event.target.value)}
+              placeholder="如 Rosa hybrida / Rose，可由 AI 补全"
+            />
+          </label>
+          <button
+            type="button"
+            className="shrink-0 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-medium text-rose-800 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50"
+            onClick={(event) => void handleAiComplete(event)}
+            disabled={aiLoading}
+          >
+            {aiLoading ? "AI 补全中…" : "✨ AI 一键智能补全"}
+          </button>
+        </div>
+        {feedback && (
+          <p
+            role={feedback.tone === "error" ? "alert" : "status"}
+            className={`rounded-lg px-3 py-2 text-sm ${
+              feedback.tone === "error"
+                ? "bg-red-50 text-red-800"
+                : "bg-emerald-50 text-emerald-800"
+            }`}
+          >
+            {feedback.message}
+          </p>
+        )}
 
-      <label className="block text-sm text-zinc-700">
-        花语
-        <textarea
-          className={textareaClass}
-          name="flowerLanguage"
-          value={flowerLanguage}
-          onChange={(event) => setFlowerLanguage(event.target.value)}
-          placeholder="一句适合门店物料百科展示的中文花语"
-        />
-      </label>
+        <label className="block text-sm text-zinc-700">
+          花语
+          <textarea
+            className={textareaClass}
+            name="flowerLanguage"
+            value={flowerLanguage}
+            onChange={(event) => setFlowerLanguage(event.target.value)}
+            placeholder="一句适合门店物料百科展示的中文花语"
+          />
+        </label>
 
-      <div className="grid gap-3 md:grid-cols-2">
-        <label className="block text-sm text-zinc-700">
-          供货周期
-          <input
-            className={`${inputClass} mt-1`}
-            name="supplySeason"
-            defaultValue={material?.supplySeason ?? ""}
-            placeholder="如：全年、4-9月"
-          />
-        </label>
-        <label className="block text-sm text-zinc-700">
-          默认保质期（天）
-          <input
-            className={`${inputClass} mt-1`}
-            name="defaultShelfLifeDays"
-            type="number"
-            min={1}
-            step={1}
-            defaultValue={material?.defaultShelfLifeDays ?? ""}
-            placeholder="留空则不自动设到期"
-          />
-        </label>
-      </div>
+        <div className="grid gap-3 md:grid-cols-2">
+          <label className="block text-sm text-zinc-700">
+            供货周期
+            <input
+              className={`${inputClass} mt-1`}
+              name="supplySeason"
+              defaultValue={material?.supplySeason ?? ""}
+              placeholder="如：全年、4-9月"
+            />
+          </label>
+          <label className="block text-sm text-zinc-700">
+            默认保质期（天）
+            <input
+              className={`${inputClass} mt-1`}
+              name="defaultShelfLifeDays"
+              type="number"
+              min={1}
+              step={1}
+              defaultValue={material?.defaultShelfLifeDays ?? ""}
+              placeholder="留空则不自动设到期"
+            />
+          </label>
+        </div>
+      </>}
 
       <div className={sectionClass}>
         <p className="text-sm font-semibold text-emerald-900">标准成本（产品定价预估）</p>
@@ -311,7 +320,7 @@ export function MaterialKnowledgeEditor({ material, categories }: Props) {
         </label>
       </div>
 
-      <div className={sectionClass}>
+      {flower && <div className={sectionClass}>
         <p className="text-sm font-semibold text-sky-900">损耗成本模型</p>
         <p className="mt-1 text-xs text-sky-800">
           可用率按百分比填写（0–100）；保存时换算为 0–1。订单实际库存流水仍按真实批次扣减。
@@ -366,9 +375,9 @@ export function MaterialKnowledgeEditor({ material, categories }: Props) {
             placeholder="例如：夏季运输损耗偏高，标准按 80% 估算"
           />
         </label>
-      </div>
+      </div>}
 
-      <div className="rounded-xl border border-rose-100 bg-rose-50/30 p-3">
+      {flower && <div className="rounded-xl border border-rose-100 bg-rose-50/30 p-3">
         <div className="flex flex-wrap items-center justify-between gap-2">
           <span className="text-sm font-medium text-zinc-700">养护指南</span>
           <div className="flex flex-wrap gap-2">
@@ -423,25 +432,27 @@ export function MaterialKnowledgeEditor({ material, categories }: Props) {
             placeholder={"如：醒花水位：需要深水醒花\n养护水位：花瓶1/2\n换水频率：每2天"}
           />
         )}
-      </div>
+      </div>}
 
       <div className="grid gap-3 md:grid-cols-3">
-        <label className="block text-sm text-zinc-700">
-          品牌
-          <input
-            className={`${inputClass} mt-1`}
-            name="brand"
-            defaultValue={material?.brand ?? ""}
-          />
-        </label>
-        <label className="block text-sm text-zinc-700">
-          型号
-          <input
-            className={`${inputClass} mt-1`}
-            name="model"
-            defaultValue={material?.model ?? ""}
-          />
-        </label>
+        {!flower && <>
+          <label className="block text-sm text-zinc-700">
+            品牌
+            <input
+              className={`${inputClass} mt-1`}
+              name="brand"
+              defaultValue={material?.brand ?? ""}
+            />
+          </label>
+          <label className="block text-sm text-zinc-700">
+            型号
+            <input
+              className={`${inputClass} mt-1`}
+              name="model"
+              defaultValue={material?.model ?? ""}
+            />
+          </label>
+        </>}
         <label className="block text-sm text-zinc-700">
           安全库存阈值
           <input

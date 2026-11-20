@@ -17,7 +17,7 @@ function distinctCjk(count: number): string {
 
 describe("V2 password policy constants", () => {
   it("records the current fork without tightening it", () => {
-    expect(V2_BOOTSTRAP_PASSWORD_MIN_LENGTH).toBe(16);
+    expect(V2_BOOTSTRAP_PASSWORD_MIN_LENGTH).toBe(8);
     expect(V2_STAFF_RESET_PASSWORD_MIN_LENGTH).toBe(8);
     expect(V2_PASSWORD_MAX_BYTES).toBe(72);
     expect(V2_PASSWORD_MIN_UNIQUE_CHARS).toBe(8);
@@ -33,12 +33,12 @@ describe("V2 password policy constants", () => {
 });
 
 describe("isStrongV2Password", () => {
-  it("accepts the 16-character boundary with enough distinct characters", () => {
-    expect(isStrongV2Password("abcdefgh12345678", "admin")).toBe(true);
+  it("accepts the 8-character boundary with enough distinct characters", () => {
+    expect(isStrongV2Password("abcdefgh", "admin")).toBe(true);
   });
 
-  it("rejects 15 characters", () => {
-    expect(isStrongV2Password("abcdefgh1234567", "admin")).toBe(false);
+  it("rejects 7 characters", () => {
+    expect(isStrongV2Password("abcdefg", "admin")).toBe(false);
   });
 
   it("rejects a password containing the username (case-insensitive)", () => {

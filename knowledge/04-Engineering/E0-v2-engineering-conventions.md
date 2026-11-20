@@ -49,3 +49,12 @@ related:
 - Playwright E2E 可真实运行：`main-chain.spec.ts` 6/6 通过；全量 23 通过 / 2 失败 / 1 跳过，失败为既有 smoke 标题层级断言（已修正），修正后 smoke 复跑通过。
 - 业务数据重置已在本机 `flower_v2_test` 执行：备份写入 `.runtime/db-backups/`，业务表清空、6 个用户与 1 租户/1 门店/2 库位/门店设置保留。
 
+## 5. 花材/耗材双页面与花材三级分类（2026-11-19）
+
+- 页面拆分：`/v2/materials` 为花材母表（`MaterialKind.FLOWER`、`FOLIAGE`），新增 `/v2/consumables` 为耗材母表（`PACKAGING`、`CONSUMABLE`、`OTHER`）。两页共用 `src/app/v2/materials/_components/` 的查询、表格、抽屉与行内表单，`page.tsx` 只传 scope 配置；仍只有一个 `Material` 数据模型，配方、库存、采购不受影响。
+- 返回路径：两页共用 `src/app/v2/materials/actions.ts`。表单提交 hidden `returnTo`，服务端用 `MATERIAL_RETURN_TO_PATHS` 白名单限定 `/v2/materials` 与 `/v2/consumables`，非法值回落花材母表，禁止开放重定向。
+- 三级分类：花材按 `Material.flowerVariety`（种类，如玫瑰）→ `Material.color`（颜色，如粉色）→ `Material.flowerProductName`（商品名，如玛格丽特）维护，表单与列表筛选都按此顺序级联。两个新增字段可空、仅 FLOWER/FOLIAGE 保留，商品名非空时必须有种类；存量数据不强制回填。颜色仍复用既有 `color` 字段，`colorTags` 仅作辅助标签、不参与三级筛选。
+- 名称选填：花材的 `Material.name` 允许留空，服务端按“种类 · 颜色 · 商品名”自动生成（如 `玫瑰 · 粉色 · 玛格丽特`），仍允许手填覆盖；耗材没有三级分类，名称保持必填。数据库列保持非空，不做删列迁移。
+- 打样复用建议：`sample-planning` 以“三级全同优先、其次种类+颜色相同”作为推荐样品的排序信号，并写入 `candidateSnapshot.suggestedSampleReasons`；分类匹配只影响排序与提示，不改变实际复用量、成本与预留（WMS-BR-SMP-001/002/003）。旧快照无该字段时页面不显示徽标。
+- 已放弃/待评审：花材编辑隐藏品牌/型号字段，历史上若有值会在保存时清空（V1 FlowerWiki 无此字段，暂无生产数据）；花材三级分类目前是自由文本 + 级联联想，未建字典表，是否需要规范化分类树待业务确认。
+

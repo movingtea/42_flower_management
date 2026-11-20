@@ -148,6 +148,78 @@ function outstandingByBatch(
     .filter((row) => row.quantity > 1e-8);
 }
 
+type ClassificationMatchNote = {
+  flowerVariety: string;
+  flowerProductName: string | null;
+  color: string;
+  tier: "exact" | "varietyColor";
+};
+
+type SuggestedClassificationNote = {
+  sampleId: string;
+  sampleName: string;
+  exactClass: number;
+  varietyColor: number;
+  matches: ClassificationMatchNote[];
+};
+
+/**
+ * Reads the advisory classification reasons written by the domain algorithm.
+ * Older runs have no `suggestedSampleReasons`, so they simply render no badge.
+ * These notes never stand in for actual reuse, cost or reservations.
+ */
+function parseSuggestedClassificationNotes(value: Prisma.JsonValue | null): SuggestedClassificationNote[] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return [];
+  const raw = value as Record<string, unknown>;
+  const names = new Map<string, string>();
+  if (Array.isArray(raw.samples)) {
+    for (const entry of raw.samples) {
+      if (!entry || typeof entry !== "object" || Array.isArray(entry)) continue;
+      const row = entry as Record<string, unknown>;
+      if (typeof row.sampleId === "string" && typeof row.name === "string") {
+        names.set(row.sampleId, row.name);
+      }
+    }
+  }
+  if (!Array.isArray(raw.suggestedSampleReasons)) return [];
+  const notes: SuggestedClassificationNote[] = [];
+  for (const entry of raw.suggestedSampleReasons) {
+    if (!entry || typeof entry !== "object" || Array.isArray(entry)) continue;
+    const row = entry as Record<string, unknown>;
+    if (typeof row.sampleId !== "string") continue;
+    const exactClass = typeof row.exactClass === "number" ? row.exactClass : 0;
+    const varietyColor = typeof row.varietyColor === "number" ? row.varietyColor : 0;
+    if (exactClass + varietyColor <= 0) continue;
+    const matches: ClassificationMatchNote[] = [];
+    if (Array.isArray(row.matchedClassifications)) {
+      for (const match of row.matchedClassifications) {
+        if (!match || typeof match !== "object" || Array.isArray(match)) continue;
+        const item = match as Record<string, unknown>;
+        if (typeof item.flowerVariety !== "string" || typeof item.color !== "string") continue;
+        if (item.tier !== "exact" && item.tier !== "varietyColor") continue;
+        matches.push({
+          flowerVariety: item.flowerVariety,
+          flowerProductName: typeof item.flowerProductName === "string" ? item.flowerProductName : null,
+          color: item.color,
+          tier: item.tier,
+        });
+      }
+    }
+    notes.push({
+      sampleId: row.sampleId,
+      sampleName: names.get(row.sampleId) ?? row.sampleId,
+      exactClass,
+      varietyColor,
+      matches,
+    });
+  }
+  return notes;
+}
+
+function classificationMatchLabel(match: ClassificationMatchNote): string {
+  return `${match.flowerVariety} / ${match.color}${match.flowerProductName ? ` / ${match.flowerProductName}` : ""}（${match.tier === "exact" ? "三级全同" : "种类+颜色相同"}）`;
+}
+
 function PlanRunList({
   plan,
   canEdit,
@@ -160,11 +232,14 @@ function PlanRunList({
   }
   return (
     <div className="space-y-2">
-      {plan.runs.map((run) => (
+      {plan.runs.map((run) => {
+        const classificationNotes = parseSuggestedClassificationNotes(run.candidateSnapshot);
+        return (
         <details key={run.id} className="rounded-lg border border-stone-200 bg-white">
           <summary className="flex cursor-pointer list-none flex-wrap items-center gap-x-5 gap-y-2 px-3 py-2 text-sm">
             <span className="font-medium">方案 #{run.rank}</span>
             {plan.selectedRunId === run.id && <StatusBadge tone="success">当前选择</StatusBadge>}
+            {classificationNotes.length > 0 && <StatusBadge tone="info">分类推荐搭配</StatusBadge>}
             <span>总成本 {money(run.totalCost)}</span>
             <span>预计节省 {money(run.estimatedSaving)}</span>
             <span>复用率 {rate(run.reuseRate)}</span>
@@ -178,6 +253,21 @@ function PlanRunList({
                 <input type="hidden" name="runId" value={run.id} />
                 <button className="rounded-lg border border-emerald-300 px-3 py-1 text-xs text-emerald-800">选择此方案</button>
               </form>
+            )}
+            {classificationNotes.length > 0 && (
+              <div className="space-y-1 rounded-lg border border-emerald-200 bg-emerald-50 p-2 text-xs text-emerald-900">
+                <p className="font-medium">分类推荐搭配（仅用于推荐排序与提示，不代表已确认实物复用）</p>
+                {classificationNotes.map((note) => (
+                  <p key={note.sampleId}>
+                    {note.sampleName}
+                    {note.matches.length > 0 ? `：${note.matches.map(classificationMatchLabel).join("；")}` : ""}
+                    {` · 匹配花材 ${note.exactClass + note.varietyColor} 项`}
+                  </p>
+                ))}
+                <p className="text-emerald-800">
+                  实际复用数量、成本与预留仍按同一种物料及拆解后重新验收确认的可用量计算（WMS-BR-SMP-001/002/003）。
+                </p>
+              </div>
             )}
             {run.steps.map((step) => (
               <div key={step.id} className="rounded-lg bg-stone-50 p-2">
@@ -198,7 +288,8 @@ function PlanRunList({
             ))}
           </div>
         </details>
-      ))}
+        );
+      })}
     </div>
   );
 }
@@ -297,19 +388,59 @@ function ExecutionPanel({
       )}
 
       {plan.state === SamplePlanState.IN_PROGRESS && (
-        <form action={pauseSamplePlanAction} className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+        <form action={pauseSamplePlanAction} className="space-y-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
           <input type="hidden" name="planId" value={plan.id} />
+          <div>
+            <h4 className="text-sm font-semibold text-amber-900">暂停打样（释放未领用预留）</h4>
+            <p className="mt-1 text-xs text-amber-900">
+              进入制作区的物料必须由员工确认处置。回库、留用、报损三项合计必须等于该批次未处理数量；
+              留用会保留在制作区供恢复后继续使用，回库必须重新验收，报损会登记损耗。
+            </p>
+          </div>
+          {outstanding.length > 0 && (
+            <div className="space-y-2">
+              {outstanding.map((row) => (
+                <div key={row.batchId} className="grid gap-1 rounded border border-amber-200 bg-white p-2 text-xs sm:grid-cols-[1fr_4rem_4rem_4rem_7rem_auto]">
+                  <input type="hidden" name="resolutionBatchId" value={row.batchId} />
+                  <div>
+                    {row.materialName}
+                    <div className="font-mono text-[10px] text-stone-500">{row.batchId} · 未处理 {row.quantity}{row.baseUnit}</div>
+                  </div>
+                  <label>
+                    回库
+                    <input className={`${input} mt-1`} type="number" min="0" step="0.001" name={`resolutionReturnQty_${row.batchId}`} defaultValue={0} />
+                  </label>
+                  <label>
+                    留用
+                    <input className={`${input} mt-1`} type="number" min="0" step="0.001" name={`resolutionKeepQty_${row.batchId}`} defaultValue={row.quantity} />
+                  </label>
+                  <label>
+                    报损
+                    <input className={`${input} mt-1`} type="number" min="0" step="0.001" name={`resolutionLossQty_${row.batchId}`} defaultValue={0} />
+                  </label>
+                  <label>
+                    最晚可用
+                    <input className={`${input} mt-1`} type="date" name={`resolutionUsableUntil_${row.batchId}`} />
+                  </label>
+                  <label className="flex items-end gap-1 pb-2">
+                    <input type="checkbox" name={`resolutionReverified_${row.batchId}`} />
+                    已验收
+                  </label>
+                </div>
+              ))}
+            </div>
+          )}
           <button className="rounded-lg border border-amber-400 bg-white px-3 py-1.5 text-sm text-amber-900">
-            暂停打样（释放未领用预留）
+            确认暂停并处置制作区物料
           </button>
-          <p className="mt-1 text-xs text-amber-900">制作区已领用物料保留；恢复后继续当前步骤。</p>
         </form>
       )}
 
       {plan.state === SamplePlanState.PAUSED && (
         <div className="space-y-2 rounded-lg border border-amber-300 bg-amber-50 p-3 text-sm">
           <p className="text-amber-900">
-            计划已暂停：未领用预留已释放，制作区已领用物料保留。恢复时会重新检查现货。
+            计划已暂停：未领用预留已释放，制作区物料已按暂停时的确认处置（回库、留用或报损）。
+            恢复时会重新检查现货，并补领当前步骤已被回库或报损的物料。
           </p>
           <form action={resumeSamplePlanAction}>
             <input type="hidden" name="planId" value={plan.id} />
@@ -393,9 +524,9 @@ function ExecutionPanel({
           </label>
           {outstanding.length > 0 && (
             <div className="space-y-2">
-              <p className="text-xs text-red-900">以下为仍在制作区的物料，请确认回库或报损数量；回库必须重新验收。</p>
+              <p className="text-xs text-red-900">以下为仍在制作区的物料，请确认回库、留用或报损数量；三项合计必须等于未处理数量，回库必须重新验收。</p>
               {outstanding.map((row) => (
-                <div key={row.batchId} className="grid gap-1 rounded border border-red-200 bg-white p-2 text-xs sm:grid-cols-[1fr_5rem_5rem_7rem_auto]">
+                <div key={row.batchId} className="grid gap-1 rounded border border-red-200 bg-white p-2 text-xs sm:grid-cols-[1fr_4rem_4rem_4rem_7rem_auto]">
                   <input type="hidden" name="resolutionBatchId" value={row.batchId} />
                   <div>
                     {row.materialName}
@@ -404,6 +535,10 @@ function ExecutionPanel({
                   <label>
                     回库
                     <input className={`${input} mt-1`} type="number" min="0" step="0.001" name={`resolutionReturnQty_${row.batchId}`} defaultValue={0} />
+                  </label>
+                  <label>
+                    留用
+                    <input className={`${input} mt-1`} type="number" min="0" step="0.001" name={`resolutionKeepQty_${row.batchId}`} defaultValue={0} />
                   </label>
                   <label>
                     报损
@@ -490,7 +625,16 @@ export default async function SamplePlansPage({
     }),
     v2db.sample.findMany({
       where: { tenantId: scope.tenantId, state: { not: "ARCHIVED" } },
-      include: { _count: { select: { materials: true } } },
+      include: {
+        _count: { select: { materials: true } },
+        materials: {
+          include: {
+            material: {
+              select: { flowerVariety: true, flowerProductName: true, color: true },
+            },
+          },
+        },
+      },
       orderBy: [{ state: "asc" }, { code: "asc" }],
     }),
   ]);
@@ -554,6 +698,11 @@ export default async function SamplePlansPage({
       state: sample.state,
       materialCount: sample._count.materials,
       priority: sample.priority,
+      classifications: sample.materials.map((line) => ({
+        flowerVariety: line.material.flowerVariety,
+        flowerProductName: line.material.flowerProductName,
+        color: line.material.color,
+      })),
     }));
 
   const feedback = readV2Feedback(params);

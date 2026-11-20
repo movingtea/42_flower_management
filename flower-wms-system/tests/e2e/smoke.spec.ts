@@ -27,7 +27,7 @@ test.describe("登录与 V2 基础冒烟", () => {
     for (const label of ["库存管理", "采购单", "商品与 SKU", "订单履约"]) {
       await expect(page.getByRole("link", { name: label, exact: true })).toBeVisible();
     }
-    for (const label of ["物料母表", "供应商", "标准配方", "包装方案", "仓储日常", "员工与权限"]) {
+    for (const label of ["花材母表", "耗材母表", "供应商", "标准配方", "包装方案", "仓储日常", "员工与权限"]) {
       await expect(page.getByRole("link", { name: label, exact: true })).toBeVisible();
     }
   });

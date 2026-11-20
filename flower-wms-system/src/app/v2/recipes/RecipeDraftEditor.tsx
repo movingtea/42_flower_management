@@ -117,7 +117,7 @@ export function RecipeDraftEditor({
         <p className="text-sm font-medium text-stone-700">物料明细</p>
         {materials.length === 0 ? (
           <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-            当前租户还没有物料，请先到物料母表新增物料。
+            当前租户还没有物料，请先到花材母表或耗材母表新增物料。
           </p>
         ) : rows.length === 0 ? (
           <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">

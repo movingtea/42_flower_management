@@ -176,8 +176,14 @@ export const V2_NAV_GROUPS: readonly V2NavGroup[] = [
     items: [
       {
         href: "/v2/materials",
-        label: "物料母表",
+        label: "花材母表",
         icon: "🌸",
+        anyCapabilities: ["catalog"],
+      },
+      {
+        href: "/v2/consumables",
+        label: "耗材母表",
+        icon: "🧴",
         anyCapabilities: ["catalog"],
       },
       {

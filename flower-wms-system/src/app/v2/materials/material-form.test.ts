@@ -46,6 +46,8 @@ function testBasicFieldsAndBlankOptionals() {
   assert.equal(parsed.name, "玫瑰");
   assert.equal(parsed.kind, "FLOWER");
   assert.equal(parsed.color, "红");
+  assert.equal(parsed.flowerVariety, null);
+  assert.equal(parsed.flowerProductName, null);
   assert.equal(parsed.baseUnit, "支");
   assert.equal(parsed.quantityScale, 0);
   assert.equal(parsed.reservePerOrder, true);
@@ -72,6 +74,25 @@ function testBasicFieldsAndBlankOptionals() {
   const withoutCheckbox = materialForm();
   withoutCheckbox.delete("reservePerOrder");
   assert.equal(parseMaterialForm(withoutCheckbox).reservePerOrder, false);
+}
+
+function testFlowerClassificationFieldsPassThrough() {
+  const parsed = parseMaterialForm(
+    materialForm({
+      flowerVariety: "  玫瑰  ",
+      flowerProductName: " 玛格丽特 ",
+    }),
+  );
+  assert.equal(parsed.flowerVariety, "玫瑰");
+  assert.equal(parsed.flowerProductName, "玛格丽特");
+  // 颜色 is the existing `color` column, not a fourth form field.
+  assert.equal(parsed.color, "红");
+
+  const cleared = parseMaterialForm(
+    materialForm({ flowerVariety: "", flowerProductName: "" }),
+  );
+  assert.equal(cleared.flowerVariety, null);
+  assert.equal(cleared.flowerProductName, null);
 }
 
 function testConvertsPercentRates() {
@@ -311,6 +332,7 @@ function testDefaultRatesLossModeAndParityFields() {
 }
 
 testBasicFieldsAndBlankOptionals();
+testFlowerClassificationFieldsPassThrough();
 testConvertsPercentRates();
 testKnowledgeAndMasterPartFieldsPassThrough();
 testCareTableJsonDerivesMaintenance();

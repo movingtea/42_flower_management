@@ -60,9 +60,9 @@ const stubs: Record<string, string> = {
       record("startNextStep", [tx, scope, planId]);
       return { stepId: "step-2", issuedQty: 1, reusedQty: 5 };
     }
-    export async function pausePlan(tx, scope, planId) {
-      record("pausePlan", [tx, scope, planId]);
-      return { planId, releasedReservations: 4, releasedQty: 10, issuedKeptQty: 6, wasStarted: true };
+    export async function pausePlan(tx, scope, planId, input) {
+      record("pausePlan", [tx, scope, planId, input]);
+      return { planId, releasedReservations: 4, releasedQty: 10, issuedKeptQty: 6, returnedQty: 2, keptQty: 6, lostQty: 2, wasStarted: true };
     }
     export async function resumePlan(tx, scope, planId) {
       record("resumePlan", [tx, scope, planId]);
@@ -78,7 +78,7 @@ const stubs: Record<string, string> = {
     }
     export async function cancelPlan(tx, scope, planId, input) {
       record("cancelPlan", [tx, scope, planId, input]);
-      return { planId, releasedReservations: 1, returnedQty: 0, lostQty: 2 };
+      return { planId, releasedReservations: 1, returnedQty: 0, keptQty: 0, lostQty: 2 };
     }
   `,
 };
@@ -226,11 +226,28 @@ async function main(): Promise<void> {
   assert.match(feedback().message ?? "", /复用 5/);
 
   reset();
-  await pauseSamplePlanAction(planForm({ planId: "plan-9" }));
+  await pauseSamplePlanAction(planForm({
+    planId: "plan-9",
+    resolutionBatchId: "batch-1",
+    "resolutionReturnQty_batch-1": "2",
+    "resolutionKeepQty_batch-1": "6",
+    "resolutionLossQty_batch-1": "2",
+    "resolutionReverified_batch-1": "on",
+  }));
   assert.equal(state.capability, "production");
   assert.equal(state.calls[0]?.name, "pausePlan");
   assert.equal(state.calls[0]?.args[2], "plan-9");
+  const pauseInput = state.calls[0]?.args[3] as unknown as {
+    resolutions: { batchId: string; returnQty: number; keepQty: number; lossQty: number; reverified: boolean }[];
+  };
+  assert.equal(pauseInput.resolutions[0]?.batchId, "batch-1");
+  assert.equal(pauseInput.resolutions[0]?.returnQty, 2);
+  assert.equal(pauseInput.resolutions[0]?.keepQty, 6);
+  assert.equal(pauseInput.resolutions[0]?.lossQty, 2);
+  assert.equal(pauseInput.resolutions[0]?.reverified, true);
   assert.match(feedback().message ?? "", /释放未领用预留 10/);
+  assert.match(feedback().message ?? "", /回库 2/);
+  assert.match(feedback().message ?? "", /留用 6/);
 
   reset();
   await resumeSamplePlanAction(planForm({ planId: "plan-9" }));
@@ -270,15 +287,17 @@ async function main(): Promise<void> {
     reason: "改期",
     resolutionBatchId: "batch-1",
     "resolutionReturnQty_batch-1": "0",
+    "resolutionKeepQty_batch-1": "1",
     "resolutionLossQty_batch-1": "2",
   }));
   const cancelInput = state.calls[0]?.args[3] as unknown as {
     reason: string;
-    resolutions: { batchId: string; returnQty: number; lossQty: number; reverified: boolean }[];
+    resolutions: { batchId: string; returnQty: number; keepQty: number; lossQty: number; reverified: boolean }[];
   };
   assert.equal(cancelInput.reason, "改期");
   assert.equal(cancelInput.resolutions[0]?.batchId, "batch-1");
   assert.equal(cancelInput.resolutions[0]?.returnQty, 0);
+  assert.equal(cancelInput.resolutions[0]?.keepQty, 1);
   assert.equal(cancelInput.resolutions[0]?.lossQty, 2);
   assert.equal(cancelInput.resolutions[0]?.reverified, false);
 

@@ -63,9 +63,12 @@ export const LEGACY_WMS_ROUTE_TARGETS = [
   { source: "/wms/operations", destination: "/v2/operations" },
   { source: "/wms/purchase-orders", destination: "/v2/purchase-orders" },
   { source: "/wms/suppliers", destination: "/v2/suppliers" },
-  // V2 merged the V1 wiki and master-part identities into the material master.
+  // V2 split the material master into a flower page and a consumable page:
+  // V1 FlowerWiki (flowers/foliage) maps to `/v2/materials`, while the V1
+  // generic master-parts list (packaging/consumables/other) maps to
+  // `/v2/consumables`. Both are backed by the same V2 `Material` model.
   { source: "/wms/wiki", destination: "/v2/materials" },
-  { source: "/wms/master-parts", destination: "/v2/materials" },
+  { source: "/wms/master-parts", destination: "/v2/consumables" },
   { source: "/wms/material-categories", destination: "/v2/material-categories" },
   { source: "/wms/recipes", destination: "/v2/recipes" },
   { source: "/wms/packaging-kits", destination: "/v2/packaging-kits" },

@@ -11,6 +11,12 @@ export type MaterialOption = {
   availableQty: number;
   standardUnitCost: number | null;
   active: boolean;
+  /** Flower three-level classification: 种类. Optional for non-flower materials. */
+  flowerVariety?: string | null;
+  /** Flower product name (商品名). */
+  flowerProductName?: string | null;
+  /** Flower color (颜色), reusing Material.color. */
+  color?: string | null;
 };
 
 export type MaterialLine = { materialId: string; quantity: number };
@@ -20,7 +26,12 @@ const inputClass = "w-full rounded-lg border border-stone-300 bg-white px-3 py-2
 function materialLabel(material: MaterialOption): string {
   const stock = material.availableQty > 0 ? `可用 ${material.availableQty}${material.baseUnit}` : "无现货";
   const cost = material.standardUnitCost === null ? "未设成本" : `¥${material.standardUnitCost.toFixed(2)}/${material.baseUnit}`;
-  return `${material.code} · ${material.name}${material.active ? "" : "（停用）"}（${stock}，${cost}）`;
+  const classification = classificationLabel({
+    flowerVariety: material.flowerVariety ?? null,
+    flowerProductName: material.flowerProductName ?? null,
+    color: material.color ?? null,
+  });
+  return `${material.code} · ${material.name}${material.active ? "" : "（停用）"}${classification ? ` · ${classification}` : ""}（${stock}，${cost}）`;
 }
 
 export function MaterialLinesEditor({
@@ -109,6 +120,12 @@ export function MaterialLinesEditor({
   );
 }
 
+export type SampleClassificationSummary = {
+  flowerVariety: string | null;
+  flowerProductName: string | null;
+  color: string | null;
+};
+
 export type SampleOption = {
   id: string;
   code: string;
@@ -116,7 +133,91 @@ export type SampleOption = {
   state: string;
   materialCount: number;
   priority: number;
+  /** Classifications of this sample's flower materials, used for recommendation hints only. */
+  classifications?: SampleClassificationSummary[];
 };
+
+function classificationLabel(classification: SampleClassificationSummary): string | null {
+  const variety = classification.flowerVariety?.trim() ?? "";
+  const color = classification.color?.trim() ?? "";
+  if (!variety || !color) return null;
+  const productName = classification.flowerProductName?.trim() ?? "";
+  return productName ? `${variety} / ${color} / ${productName}` : `${variety} / ${color}`;
+}
+
+function sampleClassificationSummary(sample: SampleOption): string {
+  const labels = [...new Set(
+    (sample.classifications ?? [])
+      .map(classificationLabel)
+      .filter((label): label is string => Boolean(label)),
+  )];
+  return labels.slice(0, 2).join("、");
+}
+
+type ReuseSuggestion = {
+  key: string;
+  tier: "exact" | "varietyColor";
+  variety: string;
+  productName: string | null;
+  color: string;
+  sampleNames: string[];
+};
+
+/**
+ * Cross-sample classification hints for the plan editor. Only samples that are
+ * currently included in the plan are compared. A shared 种类+颜色 pair is the
+ * grouping key; the group is "exact" only when every involved sample also has
+ * the same non-empty 商品名.
+ */
+function buildReuseSuggestions(items: PlanItem[], samples: SampleOption[]): ReuseSuggestion[] {
+  const optionById = new Map(samples.map((sample) => [sample.id, sample]));
+  const groups = new Map<string, {
+    variety: string;
+    color: string;
+    entries: { name: string; productName: string | null }[];
+  }>();
+  for (const item of items) {
+    const sample = optionById.get(item.sampleId);
+    if (!sample) continue;
+    const seen = new Set<string>();
+    for (const classification of sample.classifications ?? []) {
+      const variety = classification.flowerVariety?.trim() ?? "";
+      const color = classification.color?.trim() ?? "";
+      const productName = classification.flowerProductName?.trim() || null;
+      if (!variety || !color) continue;
+      const key = `${variety}|${color}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const group = groups.get(key) ?? { variety, color, entries: [] };
+      group.entries.push({ name: sample.name, productName });
+      groups.set(key, group);
+    }
+  }
+
+  const suggestions: ReuseSuggestion[] = [];
+  for (const [key, group] of groups) {
+    const sampleNames = [...new Set(group.entries.map((entry) => entry.name))];
+    if (sampleNames.length < 2) continue;
+    const products = new Set(
+      group.entries
+        .map((entry) => entry.productName)
+        .filter((value): value is string => Boolean(value)),
+    );
+    const exact = group.entries.every((entry) => Boolean(entry.productName)) && products.size === 1;
+    suggestions.push({
+      key,
+      tier: exact ? "exact" : "varietyColor",
+      variety: group.variety,
+      productName: exact ? [...products][0] ?? null : null,
+      color: group.color,
+      sampleNames,
+    });
+  }
+  return suggestions.sort((left, right) => {
+    if (left.tier !== right.tier) return left.tier === "exact" ? -1 : 1;
+    return left.variety.localeCompare(right.variety) || left.color.localeCompare(right.color);
+  });
+}
 
 export type PlanItem = {
   sampleId: string;
@@ -144,6 +245,8 @@ export function SamplePlanItemsEditor({
     setItems((current) => current.map((item, row) => row === index ? { ...item, ...patch } : item));
   };
 
+  const reuseSuggestions = useMemo(() => buildReuseSuggestions(items, samples), [items, samples]);
+
   return (
     <div className="space-y-2">
       <input type="hidden" name="itemsJson" value={JSON.stringify(items)} />
@@ -161,11 +264,14 @@ export function SamplePlanItemsEditor({
               value={item.sampleId}
               onChange={(event) => update(index, { sampleId: event.target.value })}
             >
-              {samples.map((sample) => (
-                <option key={sample.id} value={sample.id}>
-                  {sample.code} · {sample.name}（{sample.materialCount} 项物料）
-                </option>
-              ))}
+              {samples.map((sample) => {
+                const summary = sampleClassificationSummary(sample);
+                return (
+                  <option key={sample.id} value={sample.id}>
+                    {sample.code} · {sample.name}（{sample.materialCount} 项物料{summary ? ` · ${summary}` : ""}）
+                  </option>
+                );
+              })}
             </select>
           </label>
           <label className="text-xs text-stone-600">
@@ -223,6 +329,26 @@ export function SamplePlanItemsEditor({
       >
         + 添加样品
       </button>
+      {reuseSuggestions.length > 0 && (
+        <div className="space-y-1 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-xs text-emerald-900">
+          <p className="font-medium">可复用花材建议（按种类 / 颜色 / 商品名）</p>
+          {reuseSuggestions.map((suggestion) => (
+            <p key={suggestion.key}>
+              {suggestion.tier === "exact"
+                ? "三级全同"
+                : "种类 + 颜色相同（商品名不同或缺失）"}
+              ：{suggestion.variety}
+              {" / "}
+              {suggestion.color}
+              {suggestion.productName ? ` / ${suggestion.productName}` : ""}
+              <span className="text-emerald-800"> · {suggestion.sampleNames.join("、")}</span>
+            </p>
+          ))}
+          <p className="text-emerald-800">
+            仅为分类搭配提示，不代表已确认复用，也不改变实际复用数量、成本与预留；实际复用以同一物料拆解后重新验收确认的可用量为准。
+          </p>
+        </div>
+      )}
       <p className="text-xs text-stone-500">
         只选择一个必选样品时，计算会从其余已完成样品中推荐搭配；多个必选样品按顺序制作。拆解后的复用数量在每步完成后按实际确认。
       </p>

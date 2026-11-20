@@ -3,8 +3,10 @@
  *
  * Sprint E3.5 only names the existing constants; it does not tighten them. The
  * current rules stay:
- * - bootstrap / first-login change: at least 16 characters, at most 72 UTF-8
+ * - bootstrap / first-login change: at least 8 characters, at most 72 UTF-8
  *   bytes, must not contain the username, at least 8 distinct characters.
+ *   The minimum length was lowered from 16 to 8 per the store's request on
+ *   2026-11-19; every other strength rule is unchanged.
  * - administrator reset for a normal V2 staff member: at least 8 characters
  *   (`V2_STAFF_RESET_PASSWORD_MIN_LENGTH`). The reset implementation still
  *   lives in `src/v2/services/staff-management.ts`; this export records the
@@ -17,7 +19,7 @@
  * sync so the credential checks cannot silently drift apart.
  */
 
-export const V2_BOOTSTRAP_PASSWORD_MIN_LENGTH = 16;
+export const V2_BOOTSTRAP_PASSWORD_MIN_LENGTH = 8;
 
 /** Administrator reset minimum for normal (non-bootstrap) V2 staff. */
 export const V2_STAFF_RESET_PASSWORD_MIN_LENGTH = 8;
