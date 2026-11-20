@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { StaffAppShell } from "@/components/shared/StaffAppShell";
+import { V2Topbar } from "@/components/v2/V2Topbar";
 import { V2Sidebar } from "@/components/v2/sidebar";
 import { requireV2Context, V2PasswordChangeRequired, type V2AccessContext } from "@/v2/auth";
 
@@ -46,6 +47,7 @@ export default async function V2Layout({
             username={session.user.username ?? "当前账号"}
           />
         }
+        topbar={<V2Topbar />}
         showFooter
       >
         <section className="mx-auto max-w-xl rounded-2xl border border-rose-200 bg-rose-50 p-6 text-rose-950 shadow-sm">
@@ -72,6 +74,9 @@ export default async function V2Layout({
           username={context.username}
         />
       }
+      topbar={<V2Topbar />}
+      shellClassName="bg-[#f7f7f2]"
+      mainClassName="min-h-full p-0"
       showFooter
     >
       {children}

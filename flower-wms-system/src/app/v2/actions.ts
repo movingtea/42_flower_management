@@ -4,15 +4,13 @@ import { redirect } from "next/navigation";
 import { MaterialKind, RecipeState } from "@/generated/prisma-v2/client";
 import { requireV2Store } from "@/v2/auth";
 import { v2db } from "@/v2/db";
-import { generateBatchNumber, generateProductCode, generateSkuCode } from "@/v2/domain/identifiers";
+import { generateProductCode, generateSkuCode } from "@/v2/domain/identifiers";
 import { assertMaterialQuantity } from "@/v2/domain/stock-planning";
 import { completeDelivery } from "@/v2/services/complete-delivery";
 import { completeProduction, type ActualMaterialUsageInput } from "@/v2/services/complete-production";
 import { allocatePurchaseDemand as allocatePurchaseDemandService } from "@/v2/services/allocate-purchase-demand";
 import { confirmManualOrder, createManualOrder } from "@/v2/services/manual-order";
-import { receivePurchaseLine } from "@/v2/services/receive-purchase-line";
-import { recheckSupplyAfterReceipt } from "@/v2/services/recheck-supply";
-import { rejectPurchaseLine } from "@/v2/services/reject-purchase-line";
+import { receivePurchaseFromForm, rejectPurchaseFromForm } from "@/v2/services/purchase-receipt";
 import { reviseManualOrder } from "@/v2/services/revise-order";
 import { substituteOrderMaterial as substituteOrderMaterialService } from "@/v2/services/substitute-order-material";
 
@@ -163,44 +161,7 @@ export async function createPurchase(data: FormData) {
 }
 
 export async function receivePurchase(data: FormData) {
-  await submit(async () => {
-    const { tenantId, storeId, staffId } = await requireV2Store("purchase");
-    const location = await v2db.inventoryLocation.findFirst({ where: { storeId, kind: "WAREHOUSE" } });
-    if (!location) throw new Error("缺少仓库库位");
-    const purchaseLineId = field(data, "purchaseLineId");
-    const disposition = field(data, "disposition") === "DOWNGRADED" ? "DOWNGRADED" as const : "ACCEPTED" as const;
-    const batchId = await v2db.$transaction(async (tx) => {
-      const line = await tx.purchaseOrderLine.findUnique({
-        where: { id: purchaseLineId },
-        select: {
-          materialId: true,
-          purchaseOrder: { select: { tenantId: true, storeId: true } },
-        },
-      });
-      if (!line ||
-          line.purchaseOrder.tenantId !== tenantId ||
-          line.purchaseOrder.storeId !== storeId) {
-        throw new Error("采购明细不存在或不属于当前门店");
-      }
-      return receivePurchaseLine(tx, {
-        tenantId,
-        actorStaffId: staffId,
-        purchaseLineId,
-        locationId: location.id,
-        // ACCEPTED always receives the ordered material; only a downgrade may name another one.
-        acceptedMaterialId: disposition === "ACCEPTED" ? line.materialId : field(data, "acceptedMaterialId"),
-        quantity: number(data, "quantity"),
-        batchNo: generateBatchNumber(new Date(), crypto.randomUUID()),
-        disposition,
-        gradeChangeReason: field(data, "gradeChangeReason") || undefined,
-        finalUnitCost: number(data, "finalUnitCost"),
-        usableUntil: field(data, "usableUntil") ? new Date(field(data, "usableUntil")) : undefined,
-        idempotencyKey: formIdempotencyKey(data, "RECEIPT"),
-      });
-    });
-    const batch = await v2db.inventoryBatch.findUniqueOrThrow({ where: { id: batchId } });
-    await recheckSupplyAfterReceipt(v2db, tenantId, storeId, batch.materialId, { purchaseLineId });
-  }, "验收入库完成", "/v2/purchase-orders");
+  await submit(() => receivePurchaseFromForm(data), "验收入库完成", "/v2/purchase-orders");
 }
 
 export async function allocatePurchaseDemand(data: FormData) {
@@ -220,49 +181,8 @@ export async function allocatePurchaseDemand(data: FormData) {
   }, "采购需求分配已保存", "/v2/orders");
 }
 
-const PURCHASE_STATE_LABELS: Record<string, string> = {
-  DRAFT: "草稿",
-  ORDERED: "已下单",
-  PARTIALLY_RECEIVED: "部分验收",
-  RECEIVED: "已收货",
-  CANCELLED: "已取消",
-  CLOSED: "已关闭",
-};
-
-function purchaseStateText(state: string): string {
-  return PURCHASE_STATE_LABELS[state] ?? state;
-}
-
-function quantityText(value: number): string {
-  return String(Number(value.toFixed(3)));
-}
-
 export async function rejectPurchase(data: FormData) {
-  await submit(async () => {
-    const { tenantId, storeId, staffId } = await requireV2Store("purchase");
-    const purchaseLineId = field(data, "purchaseLineId");
-    const quantity = number(data, "quantity");
-    const result = await v2db.$transaction((tx) => rejectPurchaseLine(tx, {
-      tenantId,
-      storeId,
-      purchaseLineId,
-      quantity,
-      reason: field(data, "reason"),
-      actorStaffId: staffId,
-      idempotencyKey: formIdempotencyKey(data, "REJECT"),
-    }));
-    const line = await v2db.purchaseOrderLine.findUnique({
-      where: { id: purchaseLineId },
-      select: { material: { select: { baseUnit: true } } },
-    });
-    const unit = line?.material.baseUnit ?? "";
-    const { progress } = result;
-    const remaining = progress.remainingQty > 1e-8
-      ? `剩余 ${quantityText(progress.remainingQty)}${unit} 待验收，仍可继续验收或拒收`
-      : "该采购行已全部处理，不能继续验收";
-    return `已拒收 ${quantityText(quantity)}${unit}，累计拒收 ${quantityText(progress.rejectedQty)}${unit}；` +
-      `采购单状态：${purchaseStateText(result.purchaseState)}，${remaining}`;
-  }, "拒收已记录，可用库存未增加", "/v2/purchase-orders");
+  await submit(() => rejectPurchaseFromForm(data), "拒收已记录，可用库存未增加", "/v2/purchase-orders");
 }
 
 export async function createProduct(data: FormData) {

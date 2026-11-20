@@ -7,6 +7,7 @@ import {
   savePackagingKit,
   setPackagingKitActive,
 } from "@/v2/services/packaging-kit";
+import { runV2DrawerAction } from "../_lib/action-result";
 
 function text(data: FormData, key: string): string {
   const value = data.get(key);
@@ -59,9 +60,9 @@ async function run(operation: () => Promise<void>, success: string): Promise<nev
   }
 }
 
-export async function savePackagingKitAction(data: FormData): Promise<never> {
+export async function savePackagingKitAction(data: FormData) {
   const id = text(data, "id");
-  return run(async () => {
+  return runV2DrawerAction(async () => {
     const scope = await requireV2Store("catalog");
     await v2db.$transaction((tx) =>
       savePackagingKit(

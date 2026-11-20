@@ -10,6 +10,7 @@ import { adjustInventory, transferInventory } from "@/v2/services/inventory-oper
 import { confirmStocktake, createStocktakeDraft, reviewStocktake } from "@/v2/services/stocktake";
 import { recordLoss, reviewUnknownBatchLoss, submitUnknownBatchLoss } from "@/v2/services/loss-management";
 import { LOSS_REASON_LABELS, LOSS_REASON_OPTIONS } from "./labels";
+import { runV2DrawerAction } from "../_lib/action-result";
 
 const STOCKTAKE_LINE_LIMIT = 3;
 
@@ -325,7 +326,7 @@ export async function recordLossAction(data: FormData) {
 }
 
 export async function submitUnknownBatchLossAction(data: FormData) {
-  return run(async () => {
+  return runV2DrawerAction(async () => {
     const scope = await requireV2Store("purchase");
     const reasonValue = text(data, "reason");
     if (!LOSS_REASON_OPTIONS.includes(reasonValue as LossReason)) throw new Error("请选择有效的损耗原因");
@@ -335,7 +336,7 @@ export async function submitUnknownBatchLossAction(data: FormData) {
       note: text(data, "note"), idempotencyKey: idempotencyKey(data, "UNKNOWN-LOSS"),
     }));
     return `批次不明损耗 ${result.lossRecordId} 已提交复核；复核前不会扣减库存。`;
-  });
+  }, "批次不明损耗已提交复核");
 }
 
 export async function reviewUnknownBatchLossAction(data: FormData) {

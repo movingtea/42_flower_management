@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { requireV2Store } from "@/v2/auth";
@@ -7,8 +8,22 @@ import {
 } from "@/generated/prisma-v2/client";
 import { calculatePurchaseProgress } from "@/v2/domain/purchase-progress";
 import { receivePurchase, rejectPurchase, finalizeBatchCost } from "../actions";
-import { ActionEmptyState, Field, StatusBadge, V2ModulePage, button, card, input, tableHead, tableShell } from "../_components/V2Ui";
+import {
+  ActionEmptyState,
+  Field,
+  StatusBadge,
+  V2ModulePage,
+  V2Table,
+  button,
+  card,
+  dataTableBody,
+  dataTableHead,
+  input,
+  secondaryButton,
+  stickyActionHead,
+} from "../_components/V2Ui";
 import { V2DrawerForm } from "../_components/V2Drawer";
+import { materialPickerClass, materialPickerLabel } from "../_components/material-option-label";
 import { readV2Feedback } from "../_lib/search-params";
 import {
   PURCHASE_EPSILON, baseQuantityStep, describeProgressState, formatPurchaseDateTime, formatQuantity,
@@ -26,6 +41,8 @@ import { PurchaseOrderEditor } from "./PurchaseOrderEditor";
 export const dynamic = "force-dynamic";
 
 const STATE_LABEL: Record<string, string> = { DRAFT: "草稿", ORDERED: "已下单", PARTIALLY_RECEIVED: "部分验收", RECEIVED: "已处理", CANCELLED: "已取消" };
+/** Sticky action cell matching the shared 14rem action field width. */
+const STICKY_ACTION = "sticky right-0 z-10 w-56 border-l border-stone-200 bg-white px-4 py-3 align-middle";
 const STATE_TONE: Record<string, "neutral" | "info" | "warning" | "success" | "danger"> = { DRAFT: "neutral", ORDERED: "info", PARTIALLY_RECEIVED: "warning", RECEIVED: "success", CANCELLED: "danger" };
 type Search = { q?: string | string[]; state?: string | string[]; message?: string | string[]; error?: string | string[]; requirementId?: string | string[]; supplierId?: string | string[] };
 function dateTimeLocal(value: Date | null) { if (!value) return ""; const offset = value.getTimezoneOffset() * 60000; return new Date(value.getTime() - offset).toISOString().slice(0, 16); }
@@ -203,7 +220,13 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
   ]);
   const feedback = readV2Feedback(params);
   const supplierOptions = activeSuppliers.map((supplier) => ({ id: supplier.id, label: `${supplier.code} · ${supplier.name}` }));
-  const materialOptions = materials.map((material) => ({ id: material.id, label: `${material.code} · ${material.name}`, unit: material.baseUnit }));
+  const materialOptions = materials.map((material) => ({
+    id: material.id,
+    code: material.code,
+    name: material.name,
+    baseUnit: material.baseUnit,
+    active: material.active,
+  }));
   const openLines = buildOpenLines(openPurchases);
   const targetQuantities = targetRequirement ? summarizeShortageQuantities({
     plannedQty: targetRequirement.plannedQty,
@@ -232,17 +255,20 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
     }
   }
 
-  return <V2ModulePage title="采购单管理" description="创建多明细采购草稿、下单、验收、拒收和追踪关联订单缺料；缺料补货与采购关联均在此完成。" message={feedback.message} error={feedback.error} actions={<div id="new-purchase-order" className="scroll-mt-24"><V2DrawerForm
-    triggerLabel="新建采购单"
-    title="新建采购草稿"
-    description="选择供应商、录入明细与费用；采购单号由系统自动生成。"
-    action={createPurchaseDraftAction}
-    submitLabel="创建采购草稿"
-    size="xl"
-    triggerClassName={button}
-  >
-    <PurchaseOrderEditor suppliers={supplierOptions} materials={materialOptions} />
-  </V2DrawerForm></div>}>
+  return <V2ModulePage title="采购单管理" description="创建多明细采购草稿、下单、验收、拒收和追踪关联订单缺料；到货验收也可在独立收货页完成。" message={feedback.message} error={feedback.error} actions={<div className="flex flex-wrap items-center gap-2">
+    <Link href="/v2/receiving" className={secondaryButton}>采购收货</Link>
+    <div id="new-purchase-order" className="scroll-mt-24"><V2DrawerForm
+      triggerLabel="新建采购单"
+      title="新建采购草稿"
+      description="选择供应商、录入明细与费用；采购单号由系统自动生成。"
+      action={createPurchaseDraftAction}
+      submitLabel="创建采购草稿"
+      size="xl"
+      triggerClassName={button}
+    >
+      <PurchaseOrderEditor suppliers={supplierOptions} materials={materialOptions} />
+    </V2DrawerForm></div>
+  </div>}>
     {requirementId && <section className={`${card} border-amber-300`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div><h2 className="text-xl font-semibold">为订单缺料补货</h2><p className="mt-1 text-sm text-stone-600">为当前缺料需求创建一张正式的采购单，并在同一事务内关联到该需求；重复提交不会创建第二张采购单。</p></div>
@@ -392,17 +418,35 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
 
     {orders.length === 0
       ? <ActionEmptyState title="还没有采购单" description="创建采购草稿，确认明细和费用后再正式下单。" />
-      : <div className={tableShell}><table className="w-full text-left text-sm"><thead className={tableHead}><tr><th className="px-4 py-3">采购单</th><th>供应商</th><th>明细</th><th>预计金额</th><th>预计到货</th><th>状态</th><th className="px-4">操作</th></tr></thead><tbody className="divide-y divide-zinc-100">{orders.map((order) => {
+      : <V2Table
+        label="采购单列表"
+        fields={["code", "name", "text", "numeric", "date", "status", "action"]}
+        minWidthClass="min-w-[68rem]"
+      >
+        <caption className="sr-only">采购单列表</caption>
+        <thead className={dataTableHead}><tr>
+          <th scope="col" className="px-4 py-3 whitespace-nowrap">采购单</th>
+          <th scope="col" className="px-4 py-3 whitespace-nowrap">供应商</th>
+          <th scope="col" className="px-4 py-3 whitespace-nowrap">明细</th>
+          <th scope="col" className="px-4 py-3 text-right whitespace-nowrap">预计金额</th>
+          <th scope="col" className="px-4 py-3 whitespace-nowrap">预计到货</th>
+          <th scope="col" className="px-4 py-3 whitespace-nowrap">状态</th>
+          <th scope="col" className={`${stickyActionHead} whitespace-nowrap`}>操作</th>
+        </tr></thead>
+        <tbody className={dataTableBody}>{orders.map((order) => {
         const lineTotal = order.lines.reduce((sum, line) => sum + Number(line.orderedQty) * Number(line.unitPrice), 0);
         const total = lineTotal + Number(order.freightCost) + Number(order.packagingCost) + Number(order.otherCost);
-        return <tr key={order.id} className="align-top hover:bg-zinc-50">
-          <td className="px-4 py-3"><div className="font-medium">{order.number}</div><div className="text-xs text-zinc-500">{order.createdAt.toLocaleString("zh-CN")}</div></td>
-          <td><a className="text-emerald-700 hover:underline" href={`/v2/suppliers/${order.supplierId}`}>{order.supplier.name}</a></td>
-          <td>{order.lines.length} 项<div className="text-xs text-zinc-500">{order.lines.slice(0, 2).map((line) => line.material.name).join("、")}{order.lines.length > 2 ? "…" : ""}</div></td>
-          <td>¥{total.toFixed(2)}<div className="text-xs text-zinc-500">费用 ¥{(total - lineTotal).toFixed(2)}</div></td>
-          <td>{order.expectedAt?.toLocaleString("zh-CN") ?? "未设置"}</td>
-          <td><StatusBadge tone={STATE_TONE[order.state]}>{STATE_LABEL[order.state]}</StatusBadge></td>
-          <td className="px-4"><details><summary className="cursor-pointer text-emerald-700">查看详情</summary><div className="fixed inset-y-0 right-0 z-40 w-[min(48rem,95vw)] overflow-auto border-l border-zinc-200 bg-white p-6 shadow-2xl">
+        return <tr key={order.id} className="align-middle hover:bg-stone-50/70">
+          <td className="px-4 py-3 align-middle">
+            <div className="whitespace-nowrap font-medium">{order.number}</div>
+            <div className="whitespace-nowrap text-xs text-stone-500">{order.createdAt.toLocaleString("zh-CN")}</div>
+          </td>
+          <td className="px-4 py-3 align-middle"><a className="text-emerald-700 hover:underline" href={`/v2/suppliers/${order.supplierId}`}>{order.supplier.name}</a></td>
+          <td className="px-4 py-3 align-middle">{order.lines.length} 项<div className="text-xs text-stone-500">{order.lines.slice(0, 2).map((line) => line.material.name).join("、")}{order.lines.length > 2 ? "…" : ""}</div></td>
+          <td className="whitespace-nowrap px-4 py-3 text-right align-middle tabular-nums">¥{total.toFixed(2)}<div className="text-xs text-stone-500">费用 ¥{(total - lineTotal).toFixed(2)}</div></td>
+          <td className="px-4 py-3 align-middle">{order.expectedAt?.toLocaleString("zh-CN") ?? "未设置"}</td>
+          <td className="px-4 py-3 align-middle"><StatusBadge tone={STATE_TONE[order.state]}>{STATE_LABEL[order.state]}</StatusBadge></td>
+          <td className={STICKY_ACTION}><details><summary className="cursor-pointer text-emerald-700">查看详情</summary><div className="fixed inset-y-0 right-0 z-40 w-[min(48rem,95vw)] overflow-auto border-l border-zinc-200 bg-white p-6 shadow-2xl">
             <div className="flex items-center justify-between"><h3 className="text-xl font-semibold">{order.number}</h3><span className="text-xs text-zinc-500">点击页面其他位置或再次点击“查看详情”关闭</span></div>
             <div className="mt-4 grid gap-3 rounded-lg bg-zinc-50 p-4 text-sm md:grid-cols-3">
               <div>供应商<br /><strong>{order.supplier.name}</strong></div>
@@ -434,7 +478,7 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
                     <input type="hidden" name="purchaseLineId" value={line.id} />
                     <input type="hidden" name="idempotencyKey" value={`RECEIVE-${crypto.randomUUID()}`} />
                     <label className="text-xs">验收结果<select className={`${input} mt-1`} name="disposition"><option value="ACCEPTED">合格（原等级）</option><option value="DOWNGRADED">降级</option></select></label>
-                    <label className="text-xs">降级后的物料<select className={`${input} mt-1`} name="acceptedMaterialId">{materials.map((material) => <option key={material.id} value={material.id}>{material.code} · {material.name}</option>)}</select></label>
+                    <label className="text-xs">降级后的物料<select className={`${input} ${materialPickerClass} mt-1`} name="acceptedMaterialId">{materialOptions.map((material) => <option key={material.id} value={material.id}>{materialPickerLabel(material)}</option>)}</select></label>
                     <Field label="数量" name="quantity" type="number" defaultValue={progress.remainingQty} />
                     <Field label="最终单位成本" name="finalUnitCost" type="number" defaultValue={Number(line.unitPrice)} />
                     <Field label="最晚可用时间" name="usableUntil" type="datetime-local" required={false} />
@@ -480,7 +524,7 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
             {["DRAFT", "ORDERED"].includes(order.state) && <form action={cancelPurchaseOrderAction} className="mt-4 flex gap-2 border-t border-zinc-200 pt-4"><input type="hidden" name="purchaseOrderId" value={order.id} /><input className={input} name="reason" placeholder="填写取消原因" required /><button className="whitespace-nowrap rounded-lg border border-red-700 px-4 py-2 text-sm text-red-800">取消采购单</button></form>}
           </div></details></td>
         </tr>;
-      })}</tbody></table></div>}
+      })}</tbody></V2Table>}
 
     <section className={card}>
       <div className="flex flex-wrap items-start justify-between gap-3">

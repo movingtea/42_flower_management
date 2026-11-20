@@ -57,6 +57,8 @@ export type MaterialMinAggregateOutputType = {
   name: string | null
   kind: $Enums.MaterialKind | null
   color: string | null
+  flowerVariety: string | null
+  flowerProductName: string | null
   grade: string | null
   gradeSpecification: string | null
   specification: string | null
@@ -101,6 +103,8 @@ export type MaterialMaxAggregateOutputType = {
   name: string | null
   kind: $Enums.MaterialKind | null
   color: string | null
+  flowerVariety: string | null
+  flowerProductName: string | null
   grade: string | null
   gradeSpecification: string | null
   specification: string | null
@@ -145,6 +149,8 @@ export type MaterialCountAggregateOutputType = {
   name: number
   kind: number
   color: number
+  flowerVariety: number
+  flowerProductName: number
   grade: number
   gradeSpecification: number
   specification: number
@@ -218,6 +224,8 @@ export type MaterialMinAggregateInputType = {
   name?: true
   kind?: true
   color?: true
+  flowerVariety?: true
+  flowerProductName?: true
   grade?: true
   gradeSpecification?: true
   specification?: true
@@ -262,6 +270,8 @@ export type MaterialMaxAggregateInputType = {
   name?: true
   kind?: true
   color?: true
+  flowerVariety?: true
+  flowerProductName?: true
   grade?: true
   gradeSpecification?: true
   specification?: true
@@ -306,6 +316,8 @@ export type MaterialCountAggregateInputType = {
   name?: true
   kind?: true
   color?: true
+  flowerVariety?: true
+  flowerProductName?: true
   grade?: true
   gradeSpecification?: true
   specification?: true
@@ -440,6 +452,8 @@ export type MaterialGroupByOutputType = {
   name: string
   kind: $Enums.MaterialKind
   color: string | null
+  flowerVariety: string | null
+  flowerProductName: string | null
   grade: string | null
   gradeSpecification: string | null
   specification: string | null
@@ -510,6 +524,8 @@ export type MaterialWhereInput = {
   name?: Prisma.StringFilter<"Material"> | string
   kind?: Prisma.EnumMaterialKindFilter<"Material"> | $Enums.MaterialKind
   color?: Prisma.StringNullableFilter<"Material"> | string | null
+  flowerVariety?: Prisma.StringNullableFilter<"Material"> | string | null
+  flowerProductName?: Prisma.StringNullableFilter<"Material"> | string | null
   grade?: Prisma.StringNullableFilter<"Material"> | string | null
   gradeSpecification?: Prisma.StringNullableFilter<"Material"> | string | null
   specification?: Prisma.StringNullableFilter<"Material"> | string | null
@@ -572,6 +588,8 @@ export type MaterialOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   kind?: Prisma.SortOrder
   color?: Prisma.SortOrderInput | Prisma.SortOrder
+  flowerVariety?: Prisma.SortOrderInput | Prisma.SortOrder
+  flowerProductName?: Prisma.SortOrderInput | Prisma.SortOrder
   grade?: Prisma.SortOrderInput | Prisma.SortOrder
   gradeSpecification?: Prisma.SortOrderInput | Prisma.SortOrder
   specification?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -639,6 +657,8 @@ export type MaterialWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Material"> | string
   kind?: Prisma.EnumMaterialKindFilter<"Material"> | $Enums.MaterialKind
   color?: Prisma.StringNullableFilter<"Material"> | string | null
+  flowerVariety?: Prisma.StringNullableFilter<"Material"> | string | null
+  flowerProductName?: Prisma.StringNullableFilter<"Material"> | string | null
   grade?: Prisma.StringNullableFilter<"Material"> | string | null
   gradeSpecification?: Prisma.StringNullableFilter<"Material"> | string | null
   specification?: Prisma.StringNullableFilter<"Material"> | string | null
@@ -701,6 +721,8 @@ export type MaterialOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   kind?: Prisma.SortOrder
   color?: Prisma.SortOrderInput | Prisma.SortOrder
+  flowerVariety?: Prisma.SortOrderInput | Prisma.SortOrder
+  flowerProductName?: Prisma.SortOrderInput | Prisma.SortOrder
   grade?: Prisma.SortOrderInput | Prisma.SortOrder
   gradeSpecification?: Prisma.SortOrderInput | Prisma.SortOrder
   specification?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -756,6 +778,8 @@ export type MaterialScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Material"> | string
   kind?: Prisma.EnumMaterialKindWithAggregatesFilter<"Material"> | $Enums.MaterialKind
   color?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
+  flowerVariety?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
+  flowerProductName?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
   grade?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
   gradeSpecification?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
   specification?: Prisma.StringNullableWithAggregatesFilter<"Material"> | string | null
@@ -802,6 +826,8 @@ export type MaterialCreateInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -864,6 +890,8 @@ export type MaterialUncheckedCreateInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -924,6 +952,8 @@ export type MaterialUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -986,6 +1016,8 @@ export type MaterialUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1047,6 +1079,8 @@ export type MaterialCreateManyInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -1093,6 +1127,8 @@ export type MaterialUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1140,6 +1176,8 @@ export type MaterialUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1215,6 +1253,8 @@ export type MaterialCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   kind?: Prisma.SortOrder
   color?: Prisma.SortOrder
+  flowerVariety?: Prisma.SortOrder
+  flowerProductName?: Prisma.SortOrder
   grade?: Prisma.SortOrder
   gradeSpecification?: Prisma.SortOrder
   specification?: Prisma.SortOrder
@@ -1274,6 +1314,8 @@ export type MaterialMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   kind?: Prisma.SortOrder
   color?: Prisma.SortOrder
+  flowerVariety?: Prisma.SortOrder
+  flowerProductName?: Prisma.SortOrder
   grade?: Prisma.SortOrder
   gradeSpecification?: Prisma.SortOrder
   specification?: Prisma.SortOrder
@@ -1318,6 +1360,8 @@ export type MaterialMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   kind?: Prisma.SortOrder
   color?: Prisma.SortOrder
+  flowerVariety?: Prisma.SortOrder
+  flowerProductName?: Prisma.SortOrder
   grade?: Prisma.SortOrder
   gradeSpecification?: Prisma.SortOrder
   specification?: Prisma.SortOrder
@@ -1694,6 +1738,8 @@ export type MaterialCreateWithoutTenantInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -1754,6 +1800,8 @@ export type MaterialUncheckedCreateWithoutTenantInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -1844,6 +1892,8 @@ export type MaterialScalarWhereInput = {
   name?: Prisma.StringFilter<"Material"> | string
   kind?: Prisma.EnumMaterialKindFilter<"Material"> | $Enums.MaterialKind
   color?: Prisma.StringNullableFilter<"Material"> | string | null
+  flowerVariety?: Prisma.StringNullableFilter<"Material"> | string | null
+  flowerProductName?: Prisma.StringNullableFilter<"Material"> | string | null
   grade?: Prisma.StringNullableFilter<"Material"> | string | null
   gradeSpecification?: Prisma.StringNullableFilter<"Material"> | string | null
   specification?: Prisma.StringNullableFilter<"Material"> | string | null
@@ -1890,6 +1940,8 @@ export type MaterialCreateWithoutRecipeLinesInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -1951,6 +2003,8 @@ export type MaterialUncheckedCreateWithoutRecipeLinesInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -2026,6 +2080,8 @@ export type MaterialUpdateWithoutRecipeLinesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2087,6 +2143,8 @@ export type MaterialUncheckedUpdateWithoutRecipeLinesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2146,6 +2204,8 @@ export type MaterialCreateWithoutPackagingKitLinesInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -2207,6 +2267,8 @@ export type MaterialUncheckedCreateWithoutPackagingKitLinesInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -2282,6 +2344,8 @@ export type MaterialUpdateWithoutPackagingKitLinesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2343,6 +2407,8 @@ export type MaterialUncheckedUpdateWithoutPackagingKitLinesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2402,6 +2468,8 @@ export type MaterialCreateWithoutRequirementsInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -2463,6 +2531,8 @@ export type MaterialUncheckedCreateWithoutRequirementsInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -2538,6 +2608,8 @@ export type MaterialUpdateWithoutRequirementsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2599,6 +2671,8 @@ export type MaterialUncheckedUpdateWithoutRequirementsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2658,6 +2732,8 @@ export type MaterialCreateWithoutHoldMaterialsInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -2719,6 +2795,8 @@ export type MaterialUncheckedCreateWithoutHoldMaterialsInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -2794,6 +2872,8 @@ export type MaterialUpdateWithoutHoldMaterialsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2855,6 +2935,8 @@ export type MaterialUncheckedUpdateWithoutHoldMaterialsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -2914,6 +2996,8 @@ export type MaterialCreateWithoutOrderedLinesInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -2975,6 +3059,8 @@ export type MaterialUncheckedCreateWithoutOrderedLinesInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -3050,6 +3136,8 @@ export type MaterialUpdateWithoutOrderedLinesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3111,6 +3199,8 @@ export type MaterialUncheckedUpdateWithoutOrderedLinesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3170,6 +3260,8 @@ export type MaterialCreateWithoutReceivedLinesInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -3231,6 +3323,8 @@ export type MaterialUncheckedCreateWithoutReceivedLinesInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -3306,6 +3400,8 @@ export type MaterialUpdateWithoutReceivedLinesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3367,6 +3463,8 @@ export type MaterialUncheckedUpdateWithoutReceivedLinesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3426,6 +3524,8 @@ export type MaterialCreateWithoutBatchesInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -3487,6 +3587,8 @@ export type MaterialUncheckedCreateWithoutBatchesInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -3562,6 +3664,8 @@ export type MaterialUpdateWithoutBatchesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3623,6 +3727,8 @@ export type MaterialUncheckedUpdateWithoutBatchesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3682,6 +3788,8 @@ export type MaterialCreateWithoutSampleMaterialsInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -3743,6 +3851,8 @@ export type MaterialUncheckedCreateWithoutSampleMaterialsInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -3818,6 +3928,8 @@ export type MaterialUpdateWithoutSampleMaterialsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3879,6 +3991,8 @@ export type MaterialUncheckedUpdateWithoutSampleMaterialsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3938,6 +4052,8 @@ export type MaterialCreateWithoutSamplePlanMaterialsInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -3999,6 +4115,8 @@ export type MaterialUncheckedCreateWithoutSamplePlanMaterialsInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -4074,6 +4192,8 @@ export type MaterialUpdateWithoutSamplePlanMaterialsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4135,6 +4255,8 @@ export type MaterialUncheckedUpdateWithoutSamplePlanMaterialsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4194,6 +4316,8 @@ export type MaterialCreateWithoutSampleInventorySnapshotsInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -4255,6 +4379,8 @@ export type MaterialUncheckedCreateWithoutSampleInventorySnapshotsInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -4330,6 +4456,8 @@ export type MaterialUpdateWithoutSampleInventorySnapshotsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4391,6 +4519,8 @@ export type MaterialUncheckedUpdateWithoutSampleInventorySnapshotsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4450,6 +4580,8 @@ export type MaterialCreateWithoutSampleStepMaterialsInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -4511,6 +4643,8 @@ export type MaterialUncheckedCreateWithoutSampleStepMaterialsInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -4586,6 +4720,8 @@ export type MaterialUpdateWithoutSampleStepMaterialsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4647,6 +4783,8 @@ export type MaterialUncheckedUpdateWithoutSampleStepMaterialsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4706,6 +4844,8 @@ export type MaterialCreateWithoutDisassemblyMaterialsInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -4767,6 +4907,8 @@ export type MaterialUncheckedCreateWithoutDisassemblyMaterialsInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -4842,6 +4984,8 @@ export type MaterialUpdateWithoutDisassemblyMaterialsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4903,6 +5047,8 @@ export type MaterialUncheckedUpdateWithoutDisassemblyMaterialsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -4962,6 +5108,8 @@ export type MaterialCreateWithoutUnverifiedLossesInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -5023,6 +5171,8 @@ export type MaterialUncheckedCreateWithoutUnverifiedLossesInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -5098,6 +5248,8 @@ export type MaterialUpdateWithoutUnverifiedLossesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5159,6 +5311,8 @@ export type MaterialUncheckedUpdateWithoutUnverifiedLossesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5218,6 +5372,8 @@ export type MaterialCreateWithoutCategoriesInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -5279,6 +5435,8 @@ export type MaterialUncheckedCreateWithoutCategoriesInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -5354,6 +5512,8 @@ export type MaterialUpdateWithoutCategoriesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5415,6 +5575,8 @@ export type MaterialUncheckedUpdateWithoutCategoriesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5474,6 +5636,8 @@ export type MaterialCreateManyTenantInput = {
   name: string
   kind: $Enums.MaterialKind
   color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
   grade?: string | null
   gradeSpecification?: string | null
   specification?: string | null
@@ -5520,6 +5684,8 @@ export type MaterialUpdateWithoutTenantInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5580,6 +5746,8 @@ export type MaterialUncheckedUpdateWithoutTenantInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5640,6 +5808,8 @@ export type MaterialUncheckedUpdateManyWithoutTenantInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
   color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -5835,6 +6005,8 @@ export type MaterialSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   name?: boolean
   kind?: boolean
   color?: boolean
+  flowerVariety?: boolean
+  flowerProductName?: boolean
   grade?: boolean
   gradeSpecification?: boolean
   specification?: boolean
@@ -5898,6 +6070,8 @@ export type MaterialSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Exte
   name?: boolean
   kind?: boolean
   color?: boolean
+  flowerVariety?: boolean
+  flowerProductName?: boolean
   grade?: boolean
   gradeSpecification?: boolean
   specification?: boolean
@@ -5946,6 +6120,8 @@ export type MaterialSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Exte
   name?: boolean
   kind?: boolean
   color?: boolean
+  flowerVariety?: boolean
+  flowerProductName?: boolean
   grade?: boolean
   gradeSpecification?: boolean
   specification?: boolean
@@ -5994,6 +6170,8 @@ export type MaterialSelectScalar = {
   name?: boolean
   kind?: boolean
   color?: boolean
+  flowerVariety?: boolean
+  flowerProductName?: boolean
   grade?: boolean
   gradeSpecification?: boolean
   specification?: boolean
@@ -6034,7 +6212,7 @@ export type MaterialSelectScalar = {
   updatedAt?: boolean
 }
 
-export type MaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "code" | "name" | "kind" | "color" | "grade" | "gradeSpecification" | "specification" | "baseUnit" | "quantityScale" | "reservePerOrder" | "englishName" | "flowerLanguage" | "maintenance" | "maintenanceCare" | "supplySeason" | "defaultShelfLifeDays" | "standardUnitCost" | "costUnit" | "costNote" | "optimisticUsableRate" | "standardUsableRate" | "conservativeUsableRate" | "lossRateNote" | "pinyinIndex" | "aliasText" | "aliasMap" | "floralRole" | "colorTags" | "morphology" | "defaultUsableRate" | "defaultLossRate" | "lossMode" | "lossRateUpdatedAt" | "costUpdatedAt" | "brand" | "model" | "notes" | "imageKey" | "safetyStockThreshold" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["material"]>
+export type MaterialOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "code" | "name" | "kind" | "color" | "flowerVariety" | "flowerProductName" | "grade" | "gradeSpecification" | "specification" | "baseUnit" | "quantityScale" | "reservePerOrder" | "englishName" | "flowerLanguage" | "maintenance" | "maintenanceCare" | "supplySeason" | "defaultShelfLifeDays" | "standardUnitCost" | "costUnit" | "costNote" | "optimisticUsableRate" | "standardUsableRate" | "conservativeUsableRate" | "lossRateNote" | "pinyinIndex" | "aliasText" | "aliasMap" | "floralRole" | "colorTags" | "morphology" | "defaultUsableRate" | "defaultLossRate" | "lossMode" | "lossRateUpdatedAt" | "costUpdatedAt" | "brand" | "model" | "notes" | "imageKey" | "safetyStockThreshold" | "active" | "createdAt" | "updatedAt", ExtArgs["result"]["material"]>
 export type MaterialInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   unverifiedLosses?: boolean | Prisma.Material$unverifiedLossesArgs<ExtArgs>
@@ -6086,6 +6264,8 @@ export type $MaterialPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     name: string
     kind: $Enums.MaterialKind
     color: string | null
+    flowerVariety: string | null
+    flowerProductName: string | null
     grade: string | null
     gradeSpecification: string | null
     specification: string | null
@@ -6568,6 +6748,8 @@ export interface MaterialFieldRefs {
   readonly name: Prisma.FieldRef<"Material", 'String'>
   readonly kind: Prisma.FieldRef<"Material", 'MaterialKind'>
   readonly color: Prisma.FieldRef<"Material", 'String'>
+  readonly flowerVariety: Prisma.FieldRef<"Material", 'String'>
+  readonly flowerProductName: Prisma.FieldRef<"Material", 'String'>
   readonly grade: Prisma.FieldRef<"Material", 'String'>
   readonly gradeSpecification: Prisma.FieldRef<"Material", 'String'>
   readonly specification: Prisma.FieldRef<"Material", 'String'>

@@ -9,9 +9,10 @@ import ts from "typescript";
  * Run with: npx tsx src/app/v2/suppliers/actions.test.ts
  *
  * Action-layer test for the supplier write entries: capability enforcement,
- * FormData mapping, service arguments and redirect feedback. It proves the
- * E1.1 permission gap (read-only roles cannot submit) without a database or a
- * browser. The service and database invariants stay in layer-3 tests.
+ * FormData mapping, service arguments and the drawer result contract. Create
+ * and update are drawer actions and return explicit results; the row-inline
+ * enable/disable action keeps the URL feedback redirect until that migration.
+ * The service and database invariants stay in layer-3 tests.
  */
 type ServiceCall = {
   name: string;
@@ -45,6 +46,17 @@ const stubs: Record<string, string> = {
     return { tenantId: "tenant-1", storeId: "store-1", staffId: "staff-1" };
   }`,
   "@/v2/db": `export const v2db = { $transaction: async (fn) => fn({ __fakeTx: true }) };`,
+  "../_lib/action-result": `
+    export async function runV2DrawerAction(operation, fallbackMessage) {
+      try {
+        const message = await operation();
+        return { ok: true, message: message || fallbackMessage };
+      } catch (cause) {
+        if (cause && typeof cause === "object" && "digest" in cause) throw cause;
+        return { ok: false, error: cause instanceof Error ? cause.message : "操作失败" };
+      }
+    }
+  `,
   "@/v2/services/master-data": `
     function record(entry) {
       const shared = globalThis.__supplierActionTest;
@@ -100,9 +112,15 @@ const actionsSource = ts.transpileModule(
   },
 ).outputText;
 
+type SupplierActionResult = {
+  ok: boolean;
+  message?: string;
+  error?: string;
+};
+
 type SupplierActions = {
-  createSupplierAction: (data: FormData) => Promise<never>;
-  updateSupplierAction: (data: FormData) => Promise<never>;
+  createSupplierAction: (data: FormData) => Promise<SupplierActionResult>;
+  updateSupplierAction: (data: FormData) => Promise<SupplierActionResult>;
   setSupplierActiveAction: (data: FormData) => Promise<never>;
 };
 
@@ -142,9 +160,9 @@ async function main(): Promise<void> {
     `data:text/javascript;base64,${Buffer.from(actionsSource).toString("base64")}`
   ) as SupplierActions;
 
-  // 1. Create: purchase capability, exact FormData mapping and success feedback.
+  // 1. Create: purchase capability, exact FormData mapping and success result.
   resetState();
-  await createSupplierAction(supplierForm());
+  const createResult = await createSupplierAction(supplierForm());
   assert.equal(state.capability, "purchase");
   assert.equal(state.serviceCalls.length, 1);
   const createCall = state.serviceCalls[0]!;
@@ -164,19 +182,23 @@ async function main(): Promise<void> {
     wechat: "wx-test",
     notes: "E1.3 走读",
   });
-  const createResult = redirectTarget();
-  assert.equal(createResult.pathname, "/v2/suppliers");
-  assert.equal(createResult.message, "供应商已创建，编号 SUP-20261119-TEST0001");
-  assert.equal(createResult.error, null);
+  assert.deepEqual(createResult, {
+    ok: true,
+    message: "供应商已创建，编号 SUP-20261119-TEST0001",
+  });
+  assert.equal(state.redirect, undefined, "drawer success must not redirect");
 
   // 2. Update: the target id is a separate argument, the rest maps the same way.
   resetState();
-  await updateSupplierAction(supplierForm({ supplierId: "supplier-9", name: "测试供应商（更新）" }));
+  const updateResult = await updateSupplierAction(
+    supplierForm({ supplierId: "supplier-9", name: "测试供应商（更新）" }),
+  );
   assert.equal(state.capability, "purchase");
   assert.equal(state.serviceCalls[0]?.name, "updateSupplierMaster");
   assert.equal(state.serviceCalls[0]?.supplierId, "supplier-9");
   assert.equal((state.serviceCalls[0]?.input as { name?: string }).name, "测试供应商（更新）");
-  assert.equal(redirectTarget().message, "供应商已更新");
+  assert.deepEqual(updateResult, { ok: true, message: "供应商已更新" });
+  assert.equal(state.redirect, undefined, "drawer success must not redirect");
 
   // 3. Enable/disable: the checkbox string becomes a boolean, each with its feedback.
   resetState();
@@ -190,25 +212,24 @@ async function main(): Promise<void> {
   assert.equal(state.serviceCalls[0]?.active, false);
   assert.equal(redirectTarget().message, "供应商已停用");
 
-  // 4. Read-only role: the action must stop before the service and redirect an error.
+  // 4. Read-only role: the action must stop before the service and return an
+  //    inline error result so the drawer stays open.
   resetState();
   state.authDenied = true;
-  await createSupplierAction(supplierForm());
+  const deniedResult = await createSupplierAction(supplierForm());
   assert.equal(state.capability, "purchase", "capability is checked before the service");
   assert.equal(state.serviceCalls.length, 0, "denied capability must not reach the service");
-  const deniedResult = redirectTarget();
-  assert.equal(deniedResult.pathname, "/v2/suppliers");
-  assert.equal(deniedResult.message, null);
+  assert.equal(deniedResult.ok, false);
   assert.match(deniedResult.error ?? "", /没有采购权限/);
+  assert.equal(state.redirect, undefined, "drawer failure must not redirect");
 
-  // 5. Service rejection: the message is surfaced in the error banner.
+  // 5. Service rejection: the message is surfaced as an inline drawer error.
   resetState();
   state.serviceFailure = new Error("供应商编码已存在");
-  await createSupplierAction(supplierForm());
+  const failedResult = await createSupplierAction(supplierForm());
   assert.equal(state.serviceCalls.length, 1);
-  const failedResult = redirectTarget();
-  assert.equal(failedResult.error, "供应商编码已存在");
-  assert.equal(failedResult.message, null);
+  assert.deepEqual(failedResult, { ok: false, error: "供应商编码已存在" });
+  assert.equal(state.redirect, undefined, "drawer failure must not redirect");
 
   // 6. NEXT_REDIRECT (or any digest control flow) must be rethrown, never converted
   //    into a ?error banner, otherwise a nested redirect would be swallowed.

@@ -15,6 +15,7 @@ import {
 } from "../_components/V2Ui";
 import { readV2Feedback } from "../_lib/search-params";
 import { V2DrawerForm } from "../_components/V2Drawer";
+import { materialPickerLabel } from "../_components/material-option-label";
 import { RecipeDraftEditor } from "./RecipeDraftEditor";
 import {
   publishRecipeVersionAction,
@@ -153,9 +154,7 @@ export default async function RecipesPage({
 
   const materialOptions = materials.map((material) => ({
     id: material.id,
-    label: `${material.code} · ${material.name} · ${material.baseUnit}${
-      material.active ? "" : "（已停用）"
-    }`,
+    label: materialPickerLabel(material),
     baseUnit: material.baseUnit,
     quantityScale: material.quantityScale,
   }));

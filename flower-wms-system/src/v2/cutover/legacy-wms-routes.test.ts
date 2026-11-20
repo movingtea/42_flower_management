@@ -79,7 +79,7 @@ const EXPECTED_WMS_TARGETS = [
   ["/wms/purchase-orders", "/v2/purchase-orders"],
   ["/wms/suppliers", "/v2/suppliers"],
   ["/wms/wiki", "/v2/materials"],
-  ["/wms/master-parts", "/v2/materials"],
+  ["/wms/master-parts", "/v2/consumables"],
   ["/wms/material-categories", "/v2/material-categories"],
   ["/wms/recipes", "/v2/recipes"],
   ["/wms/packaging-kits", "/v2/packaging-kits"],

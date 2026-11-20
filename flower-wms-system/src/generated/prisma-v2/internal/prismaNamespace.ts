@@ -5953,6 +5953,8 @@ export const MaterialScalarFieldEnum = {
   name: 'name',
   kind: 'kind',
   color: 'color',
+  flowerVariety: 'flowerVariety',
+  flowerProductName: 'flowerProductName',
   grade: 'grade',
   gradeSpecification: 'gradeSpecification',
   specification: 'specification',

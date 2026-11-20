@@ -15,6 +15,9 @@ function readGeneratedCode(message: string, pattern: RegExp, label: string): str
   return match[1];
 }
 
+/** Material kinds rendered by the consumable master (`/v2/consumables`). */
+const CONSUMABLE_KIND_LABELS = ["包装", "耗材", "其他"] as const;
+
 /** Creates one material through the real material master drawer; returns the generated code. */
 export async function createMaterial(
   page: Page,
@@ -28,17 +31,22 @@ export async function createMaterial(
     quantityScale?: number;
   },
 ): Promise<string> {
-  await gotoApp(page, "/v2/materials");
-  const dialog = await openDrawer(page, "新增物料");
+  const kind = material.kind ?? "花材";
+  // V2 splits the material master into a flower page and a consumable page.
+  const consumable = (CONSUMABLE_KIND_LABELS as readonly string[]).includes(kind);
+  await gotoApp(page, consumable ? "/v2/consumables" : "/v2/materials");
+  const dialog = await openDrawer(page, consumable ? "新增耗材" : "新增花材");
   const form = dialog.locator("form").first();
   await form.getByLabel("物料名称").fill(material.name);
-  await form.getByLabel("物料类别").selectOption({ label: material.kind ?? "花材" });
-  if (material.color) await form.getByLabel("颜色", { exact: true }).fill(material.color);
-  if (material.grade) await form.getByLabel("品质等级").fill(material.grade);
-  if (material.gradeSpecification) await form.getByLabel("等级说明（如长度范围）").fill(material.gradeSpecification);
-  await form.getByLabel("库存单位").fill(material.baseUnit ?? "支");
+  await form.getByLabel("物料类别").selectOption({ label: kind });
+  if (!consumable) {
+    if (material.color) await form.getByLabel("颜色（三级分类）", { exact: true }).fill(material.color);
+    if (material.grade) await form.getByLabel("品质等级").fill(material.grade);
+    if (material.gradeSpecification) await form.getByLabel("等级说明（如长度范围）").fill(material.gradeSpecification);
+  }
+  await form.getByLabel("库存单位").fill(material.baseUnit ?? (consumable ? "个" : "支"));
   await form.getByLabel("库存小数位数").fill(String(material.quantityScale ?? 0));
-  await form.getByRole("button", { name: "保存物料" }).click();
+  await form.getByRole("button", { name: consumable ? "保存耗材" : "保存花材" }).click();
   await expectFeedback(page, "物料已创建");
   const banner = await page.locator("main").getByText(/物料已创建，编号\s+\S+/).first().innerText();
   return readGeneratedCode(banner, /物料已创建，编号\s+(\S+)/, "material code");

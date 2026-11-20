@@ -8,10 +8,12 @@ import {
   Field,
   StatusBadge,
   V2ModulePage,
+  V2Table,
   button,
+  dataTableBody,
+  dataTableHead,
   input,
-  tableHead,
-  tableShell,
+  stickyActionHead,
 } from "../_components/V2Ui";
 import { V2DrawerForm } from "../_components/V2Drawer";
 import { readV2Feedback } from "../_lib/search-params";
@@ -22,6 +24,9 @@ import {
 } from "./actions";
 
 export const dynamic = "force-dynamic";
+
+/** Sticky action cell matching the shared 14rem action field width. */
+const STICKY_ACTION = "sticky right-0 z-10 w-56 border-l border-stone-200 px-4 py-3 align-middle";
 
 type SupplierFieldsValue = {
   code: string;
@@ -164,67 +169,72 @@ export default async function SuppliersPage({
           description="新增供应商后即可创建采购单并保留采购历史。"
         />
       ) : (
-        <div className={tableShell}>
-          <table className="w-full text-left text-sm">
-            <thead className={tableHead}>
-              <tr>
-                <th className="px-4 py-3">编号</th>
-                <th>名称</th>
-                <th>联系人</th>
-                <th>最近采购</th>
-                <th>状态</th>
-                <th className="px-4">操作</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100">
-              {suppliers.map((item) => (
-                <tr
-                  key={item.id}
-                  className={item.active ? "hover:bg-zinc-50" : "bg-zinc-50 text-zinc-500"}
-                >
-                  <td className="px-4 py-3">
-                    <span className="font-mono text-xs text-zinc-600">{item.code}</span>
-                  </td>
-                  <td>
-                    <Link
-                      href={`/v2/suppliers/${item.id}`}
-                      className="font-medium text-zinc-900 hover:text-emerald-700 hover:underline"
-                    >
-                      {item.name}
-                    </Link>
-                    {item.notes && (
-                      <div className="mt-1 max-w-xs truncate text-xs text-zinc-400">
-                        {item.notes}
-                      </div>
-                    )}
-                  </td>
-                  <td>
-                    {item.contactName || "—"}
-                    <div className="text-xs text-zinc-500">
-                      {[item.phone, item.wechat].filter(Boolean).join(" · ") ||
-                        "暂无联系方式"}
+        <V2Table
+          label="供应商列表"
+          fields={["code", "name", "text", "text", "status", "action"]}
+          minWidthClass="min-w-[62rem]"
+        >
+          <caption className="sr-only">供应商列表</caption>
+          <thead className={dataTableHead}>
+            <tr>
+              <th scope="col" className="px-4 py-3 whitespace-nowrap">编号</th>
+              <th scope="col" className="px-4 py-3 whitespace-nowrap">名称</th>
+              <th scope="col" className="px-4 py-3 whitespace-nowrap">联系人</th>
+              <th scope="col" className="px-4 py-3 whitespace-nowrap">最近采购</th>
+              <th scope="col" className="px-4 py-3 whitespace-nowrap">状态</th>
+              <th scope="col" className={`${stickyActionHead} whitespace-nowrap`}>操作</th>
+            </tr>
+          </thead>
+          <tbody className={dataTableBody}>
+            {suppliers.map((item) => (
+              <tr
+                key={item.id}
+                className={`align-middle ${item.active ? "hover:bg-stone-50/70" : "bg-stone-50 text-stone-500"}`}
+              >
+                <td className="px-4 py-3 align-middle whitespace-nowrap">
+                  <span className="font-mono text-xs text-stone-600">{item.code}</span>
+                </td>
+                <td className="px-4 py-3 align-middle">
+                  <Link
+                    href={`/v2/suppliers/${item.id}`}
+                    className="font-medium text-stone-900 hover:text-emerald-700 hover:underline"
+                  >
+                    {item.name}
+                  </Link>
+                  {item.notes && (
+                    <div className="mt-1 max-w-xs truncate text-xs text-stone-400">
+                      {item.notes}
                     </div>
-                  </td>
-                  <td>
-                    {item.purchases.length ? (
-                      <>
-                        <span>{item.purchases.length} 条最近记录</span>
-                        <div className="text-xs text-zinc-500">
-                          最新：{item.purchases[0]?.state}
-                        </div>
-                      </>
-                    ) : (
-                      "暂无采购"
-                    )}
-                  </td>
-                  <td>
-                    <StatusBadge tone={item.active ? "success" : "neutral"}>
-                      {item.active ? "启用" : "停用"}
-                    </StatusBadge>
-                  </td>
-                  <td className="px-4">
+                  )}
+                </td>
+                <td className="px-4 py-3 align-middle">
+                  <div className="whitespace-nowrap">{item.contactName || "—"}</div>
+                  <div className="text-xs text-stone-500">
+                    {[item.phone, item.wechat].filter(Boolean).join(" · ") ||
+                      "暂无联系方式"}
+                  </div>
+                </td>
+                <td className="px-4 py-3 align-middle">
+                  {item.purchases.length ? (
+                    <>
+                      <span className="whitespace-nowrap">{item.purchases.length} 条最近记录</span>
+                      <div className="text-xs text-stone-500">
+                        最新：{item.purchases[0]?.state}
+                      </div>
+                    </>
+                  ) : (
+                    "暂无采购"
+                  )}
+                </td>
+                <td className="px-4 py-3 align-middle">
+                  <StatusBadge tone={item.active ? "success" : "neutral"}>
+                    {item.active ? "启用" : "停用"}
+                  </StatusBadge>
+                </td>
+                <td className={`${STICKY_ACTION} ${item.active ? "bg-white" : "bg-stone-50"}`}>
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                     <Link
-                      className="mr-3 text-xs text-emerald-700 hover:underline"
+                      className="text-xs font-medium text-emerald-700 underline underline-offset-2"
                       href={`/v2/suppliers/${item.id}`}
                     >
                       查看详情
@@ -236,28 +246,28 @@ export default async function SuppliersPage({
                       action={updateSupplierAction}
                       submitLabel="保存修改"
                       size="lg"
-                      triggerClassName="mr-3 text-xs text-emerald-700 hover:underline"
+                      triggerClassName="text-xs font-medium text-emerald-700 underline underline-offset-2"
                     >
                       <input type="hidden" name="supplierId" value={item.id} />
                       <SupplierFields value={item} />
                     </V2DrawerForm>
-                    <form action={setSupplierActiveAction} className="mt-2">
+                    <form action={setSupplierActiveAction}>
                       <input type="hidden" name="supplierId" value={item.id} />
                       <input
                         type="hidden"
                         name="active"
                         value={String(!item.active)}
                       />
-                      <button className="text-xs text-zinc-600 underline">
+                      <button className="text-xs text-stone-600 underline underline-offset-2">
                         {item.active ? "停用" : "重新启用"}
                       </button>
                     </form>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </V2Table>
       )}
     </V2ModulePage>
   );

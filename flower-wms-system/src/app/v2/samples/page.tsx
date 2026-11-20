@@ -505,6 +505,9 @@ export default async function SamplesPage({
         baseUnit: true,
         standardUnitCost: true,
         active: true,
+        flowerVariety: true,
+        flowerProductName: true,
+        color: true,
       },
       orderBy: [{ active: "desc" }, { kind: "asc" }, { code: "asc" }],
     }),
@@ -540,6 +543,9 @@ export default async function SamplesPage({
     availableQty: availability.get(material.id)?.availableQty ?? 0,
     standardUnitCost: material.standardUnitCost === null ? null : Number(material.standardUnitCost),
     active: material.active,
+    flowerVariety: material.flowerVariety,
+    flowerProductName: material.flowerProductName,
+    color: material.color,
   }));
 
   const versionEvents = await v2db.auditEvent.findMany({

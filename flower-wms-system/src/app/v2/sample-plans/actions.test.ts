@@ -26,6 +26,17 @@ const stubs: Record<string, string> = {
     return { tenantId: "tenant-1", storeId: "store-1", staffId: "staff-1" };
   }`,
   "@/v2/db": `export const v2db = { $transaction: async (fn, options) => fn({ __fakeTx: true, options }) };`,
+  "../_lib/action-result": `
+    export async function runV2DrawerAction(operation, fallbackMessage) {
+      try {
+        const message = await operation();
+        return { ok: true, message: message || fallbackMessage };
+      } catch (cause) {
+        if (cause && typeof cause === "object" && "digest" in cause) throw cause;
+        return { ok: false, error: cause instanceof Error ? cause.message : "操作失败" };
+      }
+    }
+  `,
   "@/v2/services/sample-planning": `
     function record(name, args) {
       const shared = globalThis.__samplePlanActionTest;
@@ -60,9 +71,9 @@ const stubs: Record<string, string> = {
       record("startNextStep", [tx, scope, planId]);
       return { stepId: "step-2", issuedQty: 1, reusedQty: 5 };
     }
-    export async function pausePlan(tx, scope, planId) {
-      record("pausePlan", [tx, scope, planId]);
-      return { planId, releasedReservations: 4, releasedQty: 10, issuedKeptQty: 6, wasStarted: true };
+    export async function pausePlan(tx, scope, planId, input) {
+      record("pausePlan", [tx, scope, planId, input]);
+      return { planId, releasedReservations: 4, releasedQty: 10, issuedKeptQty: 6, returnedQty: 2, keptQty: 6, lostQty: 2, wasStarted: true };
     }
     export async function resumePlan(tx, scope, planId) {
       record("resumePlan", [tx, scope, planId]);
@@ -78,7 +89,7 @@ const stubs: Record<string, string> = {
     }
     export async function cancelPlan(tx, scope, planId, input) {
       record("cancelPlan", [tx, scope, planId, input]);
-      return { planId, releasedReservations: 1, returnedQty: 0, lostQty: 2 };
+      return { planId, releasedReservations: 1, returnedQty: 0, keptQty: 0, lostQty: 2 };
     }
   `,
 };
@@ -117,9 +128,15 @@ const actionsSource = ts.transpileModule(
   },
 ).outputText;
 
+type ActionResult = {
+  ok: boolean;
+  message?: string;
+  error?: string;
+};
+
 type Actions = {
-  createSamplePlanAction: (data: FormData) => Promise<never>;
-  updateSamplePlanAction: (data: FormData) => Promise<never>;
+  createSamplePlanAction: (data: FormData) => Promise<ActionResult>;
+  updateSamplePlanAction: (data: FormData) => Promise<ActionResult>;
   copySamplePlanAction: (data: FormData) => Promise<never>;
   calculateSamplePlanAction: (data: FormData) => Promise<never>;
   selectSamplePlanRunAction: (data: FormData) => Promise<never>;
@@ -180,18 +197,21 @@ async function main(): Promise<void> {
   } = await import(`data:text/javascript;base64,${Buffer.from(actionsSource).toString("base64")}`) as Actions;
 
   reset();
-  await createSamplePlanAction(planForm());
+  const createResult = await createSamplePlanAction(planForm());
   assert.equal(state.capability, "production");
   assert.equal(state.calls[0]?.name, "saveSamplePlan");
   const items = (state.calls[0]?.args[2] as { items: unknown[] }).items;
   assert.equal(items.length, 2);
-  assert.equal(feedback().path, "/v2/sample-plans");
-  assert.match(feedback().message ?? "", /已创建/);
+  assert.equal(createResult.ok, true);
+  assert.match(createResult.message ?? "", /已创建/);
+  assert.equal(state.redirect, undefined, "drawer success must not redirect");
 
   reset();
-  await updateSamplePlanAction(planForm({ planId: "plan-9" }));
+  const updateResult = await updateSamplePlanAction(planForm({ planId: "plan-9" }));
   assert.equal(state.calls[0]?.name, "saveSamplePlan");
   assert.equal((state.calls[0]?.args[2] as { id?: string }).id, "plan-9");
+  assert.equal(updateResult.ok, true);
+  assert.equal(state.redirect, undefined, "drawer success must not redirect");
 
   reset();
   await copySamplePlanAction(planForm({ planId: "plan-9" }));
@@ -226,11 +246,28 @@ async function main(): Promise<void> {
   assert.match(feedback().message ?? "", /复用 5/);
 
   reset();
-  await pauseSamplePlanAction(planForm({ planId: "plan-9" }));
+  await pauseSamplePlanAction(planForm({
+    planId: "plan-9",
+    resolutionBatchId: "batch-1",
+    "resolutionReturnQty_batch-1": "2",
+    "resolutionKeepQty_batch-1": "6",
+    "resolutionLossQty_batch-1": "2",
+    "resolutionReverified_batch-1": "on",
+  }));
   assert.equal(state.capability, "production");
   assert.equal(state.calls[0]?.name, "pausePlan");
   assert.equal(state.calls[0]?.args[2], "plan-9");
+  const pauseInput = state.calls[0]?.args[3] as unknown as {
+    resolutions: { batchId: string; returnQty: number; keepQty: number; lossQty: number; reverified: boolean }[];
+  };
+  assert.equal(pauseInput.resolutions[0]?.batchId, "batch-1");
+  assert.equal(pauseInput.resolutions[0]?.returnQty, 2);
+  assert.equal(pauseInput.resolutions[0]?.keepQty, 6);
+  assert.equal(pauseInput.resolutions[0]?.lossQty, 2);
+  assert.equal(pauseInput.resolutions[0]?.reverified, true);
   assert.match(feedback().message ?? "", /释放未领用预留 10/);
+  assert.match(feedback().message ?? "", /回库 2/);
+  assert.match(feedback().message ?? "", /留用 6/);
 
   reset();
   await resumeSamplePlanAction(planForm({ planId: "plan-9" }));
@@ -270,23 +307,27 @@ async function main(): Promise<void> {
     reason: "改期",
     resolutionBatchId: "batch-1",
     "resolutionReturnQty_batch-1": "0",
+    "resolutionKeepQty_batch-1": "1",
     "resolutionLossQty_batch-1": "2",
   }));
   const cancelInput = state.calls[0]?.args[3] as unknown as {
     reason: string;
-    resolutions: { batchId: string; returnQty: number; lossQty: number; reverified: boolean }[];
+    resolutions: { batchId: string; returnQty: number; keepQty: number; lossQty: number; reverified: boolean }[];
   };
   assert.equal(cancelInput.reason, "改期");
   assert.equal(cancelInput.resolutions[0]?.batchId, "batch-1");
   assert.equal(cancelInput.resolutions[0]?.returnQty, 0);
+  assert.equal(cancelInput.resolutions[0]?.keepQty, 1);
   assert.equal(cancelInput.resolutions[0]?.lossQty, 2);
   assert.equal(cancelInput.resolutions[0]?.reverified, false);
 
   reset();
   state.authDenied = true;
-  await createSamplePlanAction(planForm());
+  const deniedResult = await createSamplePlanAction(planForm());
   assert.equal(state.calls.length, 0);
-  assert.match(feedback().error ?? "", /没有打样权限/);
+  assert.equal(deniedResult.ok, false);
+  assert.match(deniedResult.error ?? "", /没有打样权限/);
+  assert.equal(state.redirect, undefined, "drawer failure must not redirect");
 
   reset();
   state.serviceFailure = new Error("打样计划名称必填");

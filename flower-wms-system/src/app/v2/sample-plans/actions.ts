@@ -20,6 +20,7 @@ import {
   type SamplePlanItemInput,
   type SamplePlanStepActualInput,
 } from "@/v2/services/sample-planning";
+import { runV2DrawerAction } from "../_lib/action-result";
 
 type ActionScope = {
   tenantId: string;
@@ -73,8 +74,19 @@ function transactionOptions() {
   return { timeout: 30_000 };
 }
 
+/** Drawer form entries return their outcome instead of redirecting. */
+async function authorizedResult(
+  capability: V2Capability,
+  operation: (scope: ActionScope) => Promise<string>,
+) {
+  return runV2DrawerAction(async () => {
+    const scope = await requireV2Store(capability);
+    return operation({ ...scope, actorStaffId: scope.staffId });
+  }, "操作成功");
+}
+
 export async function createSamplePlanAction(data: FormData) {
-  return authorized("production", async (scope) => {
+  return authorizedResult("production", async (scope) => {
     const items = parseJsonArray<SamplePlanItemInput>(data, "itemsJson", "打样样品");
     const result = await v2db.$transaction((tx) =>
       saveSamplePlan(tx, scope, {
@@ -87,7 +99,7 @@ export async function createSamplePlanAction(data: FormData) {
 }
 
 export async function updateSamplePlanAction(data: FormData) {
-  return authorized("production", async (scope) => {
+  return authorizedResult("production", async (scope) => {
     const items = parseJsonArray<SamplePlanItemInput>(data, "itemsJson", "打样样品");
     const result = await v2db.$transaction((tx) =>
       saveSamplePlan(tx, scope, {
@@ -170,11 +182,18 @@ export async function startNextSampleStepAction(data: FormData) {
 export async function pauseSamplePlanAction(data: FormData) {
   return authorized("production", async (scope) => {
     const result = await v2db.$transaction((tx) =>
-      pausePlan(tx, scope, requiredText(data, "planId", "打样计划标识")),
+      pausePlan(tx, scope, requiredText(data, "planId", "打样计划标识"), {
+        resolutions: parseMaterialResolutions(data),
+      }),
       transactionOptions(),
     );
+    const handled = [
+      result.returnedQty > 0 ? `回库 ${result.returnedQty}` : null,
+      result.keptQty > 0 ? `留用 ${result.keptQty}` : null,
+      result.lostQty > 0 ? `报损 ${result.lostQty}` : null,
+    ].filter((part): part is string => Boolean(part));
     return result.wasStarted
-      ? `打样已暂停：释放未领用预留 ${result.releasedQty}，制作区保留 ${result.issuedKeptQty}；恢复后可继续`
+      ? `打样已暂停：释放未领用预留 ${result.releasedQty}${handled.length > 0 ? `，制作区${handled.join("、")}` : ""}；恢复后可继续`
       : `打样已暂停：释放预留 ${result.releasedQty}；恢复时会重新检查现货`;
   });
 }
@@ -221,11 +240,12 @@ export async function completeSampleStepAction(data: FormData) {
   });
 }
 
-function parseCancelResolutions(data: FormData): CancelSamplePlanInput["resolutions"] {
+function parseMaterialResolutions(data: FormData): CancelSamplePlanInput["resolutions"] {
   const batchIds = data.getAll("resolutionBatchId")
     .filter((value): value is string => typeof value === "string" && value.length > 0);
   return batchIds.map((batchId) => {
     const returnQty = Number(text(data, `resolutionReturnQty_${batchId}`) || 0);
+    const keepQty = Number(text(data, `resolutionKeepQty_${batchId}`) || 0);
     const lossQty = Number(text(data, `resolutionLossQty_${batchId}`) || 0);
     const rawUsableUntil = text(data, `resolutionUsableUntil_${batchId}`);
     const usableUntil = rawUsableUntil ? new Date(rawUsableUntil) : null;
@@ -235,6 +255,7 @@ function parseCancelResolutions(data: FormData): CancelSamplePlanInput["resoluti
     return {
       batchId,
       returnQty,
+      keepQty,
       lossQty,
       reverified: data.get(`resolutionReverified_${batchId}`) !== null,
       usableUntil,
@@ -247,10 +268,10 @@ export async function cancelSamplePlanAction(data: FormData) {
     const result = await v2db.$transaction((tx) =>
       cancelPlan(tx, scope, requiredText(data, "planId", "打样计划标识"), {
         reason: requiredText(data, "reason", "取消原因"),
-        resolutions: parseCancelResolutions(data),
+        resolutions: parseMaterialResolutions(data),
       }),
       transactionOptions(),
     );
-    return `计划已取消：释放预留 ${result.releasedReservations}，回库 ${result.returnedQty}，报损 ${result.lostQty}`;
+    return `计划已取消：释放预留 ${result.releasedReservations}，回库 ${result.returnedQty}，留用 ${result.keptQty}，报损 ${result.lostQty}`;
   });
 }

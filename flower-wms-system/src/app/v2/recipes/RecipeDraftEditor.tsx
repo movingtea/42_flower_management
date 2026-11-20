@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { input } from "../_components/V2Ui";
+import { materialPickerClass } from "../_components/material-option-label";
 
 /**
  * Fields-only recipe draft editor rendered inside `V2DrawerForm`.
@@ -117,7 +118,7 @@ export function RecipeDraftEditor({
         <p className="text-sm font-medium text-stone-700">物料明细</p>
         {materials.length === 0 ? (
           <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
-            当前租户还没有物料，请先到物料母表新增物料。
+            当前租户还没有物料，请先到花材母表或耗材母表新增物料。
           </p>
         ) : rows.length === 0 ? (
           <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
@@ -136,7 +137,7 @@ export function RecipeDraftEditor({
                 <label className="min-w-0 flex-1 text-xs text-stone-600">
                   物料
                   <select
-                    className={`${input} mt-1`}
+                    className={`${input} ${materialPickerClass} mt-1`}
                     value={row.materialId}
                     onChange={(event) =>
                       updateRow(index, { materialId: event.target.value })

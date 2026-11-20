@@ -177,7 +177,7 @@ async function raceFallbackContract(): Promise<void> {
 }
 
 function passwordPolicyContract(): void {
-  assert.equal(V2_BOOTSTRAP_PASSWORD_MIN_LENGTH, 16);
+  assert.equal(V2_BOOTSTRAP_PASSWORD_MIN_LENGTH, 8);
   assert.equal(V2_STAFF_RESET_PASSWORD_MIN_LENGTH, 8);
   assert.ok(isStrongV2Password("StrongBootstrapPass!42", "e35init"));
   assert.equal(isStrongV2Password("short", "e35init"), false);

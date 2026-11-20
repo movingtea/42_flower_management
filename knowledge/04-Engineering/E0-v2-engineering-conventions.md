@@ -3,12 +3,15 @@ title: V2 工程约定 · 编号、抽屉与数据重置
 type: engineering-convention
 module: platform
 status: draft
-version: 1
+version: 2
 owner: engineering
-updated: 2026-11-19
+updated: 2026-11-20
 sources:
   - "flower-wms-system/src/v2/domain/identifiers.ts"
   - "flower-wms-system/src/app/v2/_components/V2Drawer.tsx"
+  - "flower-wms-system/src/app/v2/_components/V2Ui.tsx"
+  - "flower-wms-system/src/app/v2/_components/table-columns.ts"
+  - "flower-wms-system/src/app/v2/_components/material-option-label.ts"
   - "flower-wms-system/scripts/v2/reset-business-data.mjs"
   - "docs/flower-studio-2.0-local-run.md"
 related:
@@ -33,7 +36,8 @@ related:
 
 - 组件：`src/app/v2/_components/V2Drawer.tsx` 的 `V2DrawerForm`，从右侧滑出，固定页脚“取消/保存”，支持遮罩与 Escape 关闭、body 锁滚和焦点恢复。
 - 用法：页面传入 `triggerLabel`、`title`、`action`（现有 server action）与服务端渲染的表单字段；抽屉不复制业务逻辑。
-- 关闭时机：server action 以 `redirect(?message=…)` 结束时，组件监听查询串变化自动关闭，避免保存后残留旧面板。
+- 关闭时机（2026-11-20 修正）：抽屉 action 返回显式结果 `{ok:true,message}` 或 `{ok:false,error}`。仅当当前表单本次提交返回成功结果时关闭抽屉，随后 `router.refresh()` 刷新列表并显示成功提示；失败时保持抽屉打开、保留本次输入，并在抽屉内显示错误。组件不再监听 URL 查询串变化，避免筛选、行内提示或其他导航误关抽屉。
+- 待后续：全局消息机制，以及行内操作（非抽屉）从 `?message=` / `?error=` 重定向迁移到同一消息通道，尚未包含在本次修正内；这些操作仍保持原有 URL 提示行为。
 - 覆盖范围：物料、供应商、商品/SKU、配方草稿/发布/停用、包装方案、样品/打样计划、原材料分类、采购草稿、批次不明损耗等新增/编辑入口；行内业务操作（验收、拒收、补单、盘点、制作转移等）保持原布局。
 
 ## 3. V2 数据库业务数据重置
@@ -48,4 +52,21 @@ related:
 - `npx tsc --noEmit`、`npm run lint`、`npm run test:unit`、`npm run build`、`npm run db:v2:migrate:check` 全部通过。
 - Playwright E2E 可真实运行：`main-chain.spec.ts` 6/6 通过；全量 23 通过 / 2 失败 / 1 跳过，失败为既有 smoke 标题层级断言（已修正），修正后 smoke 复跑通过。
 - 业务数据重置已在本机 `flower_v2_test` 执行：备份写入 `.runtime/db-backups/`，业务表清空、6 个用户与 1 租户/1 门店/2 库位/门店设置保留。
+
+## 5. 花材/耗材双页面与花材三级分类（2026-11-19）
+
+- 页面拆分：`/v2/materials` 为花材母表（`MaterialKind.FLOWER`、`FOLIAGE`），新增 `/v2/consumables` 为耗材母表（`PACKAGING`、`CONSUMABLE`、`OTHER`）。两页共用 `src/app/v2/materials/_components/` 的查询、表格、抽屉与行内表单，`page.tsx` 只传 scope 配置；仍只有一个 `Material` 数据模型，配方、库存、采购不受影响。
+- 返回路径：两页共用 `src/app/v2/materials/actions.ts`。表单提交 hidden `returnTo`，服务端用 `MATERIAL_RETURN_TO_PATHS` 白名单限定 `/v2/materials` 与 `/v2/consumables`，非法值回落花材母表，禁止开放重定向。
+- 三级分类：花材按 `Material.flowerVariety`（种类，如玫瑰）→ `Material.color`（颜色，如粉色）→ `Material.flowerProductName`（商品名，如玛格丽特）维护，表单与列表筛选都按此顺序级联。两个新增字段可空、仅 FLOWER/FOLIAGE 保留，商品名非空时必须有种类；存量数据不强制回填。颜色仍复用既有 `color` 字段，`colorTags` 仅作辅助标签、不参与三级筛选。
+- 名称选填：花材的 `Material.name` 允许留空，服务端按“种类 · 颜色 · 商品名”自动生成（如 `玫瑰 · 粉色 · 玛格丽特`），仍允许手填覆盖；耗材没有三级分类，名称保持必填。数据库列保持非空，不做删列迁移。
+- 打样复用建议：`sample-planning` 以“三级全同优先、其次种类+颜色相同”作为推荐样品的排序信号，并写入 `candidateSnapshot.suggestedSampleReasons`；分类匹配只影响排序与提示，不改变实际复用量、成本与预留（WMS-BR-SMP-001/002/003）。旧快照无该字段时页面不显示徽标。
+- 已放弃/待评审：花材编辑隐藏品牌/型号字段，历史上若有值会在保存时清空（V1 FlowerWiki 无此字段，暂无生产数据）；花材三级分类目前是自由文本 + 级联联想，未建字典表，是否需要规范化分类树待业务确认。
+
+## 6. 业务列表字段列宽与物料选择器（2026-11-20）
+
+- 表格基元：`V2Table` 接受按列顺序声明的 `fields`，并渲染带 `data-field` 的 `<colgroup>`；列宽来自 `table-columns.ts` 的 `V2_COLUMN_WIDTH`，不再使用统一宽度。
+- 列宽口径：通用文本字段至少保证 10 个汉字同行（`calc(10em + 2rem)`，`2rem` 为左右单元格内边距）；名称列 `16em`、编号列 `12em`；图片 `5.5rem`、数字 `8em`、操作列 `14rem`。物料母表中类别、角色、颜色与库存单位使用紧凑列 `short`（5 个汉字），种类、商品名、规格、品牌与型号使用 `medium`（7 个汉字）并允许换行，避免短值按 10 个汉字占宽而把名称、成本、操作列挤出屏幕。不可断的长内容仍可撑宽，表格横向滚动而不压缩文字。
+- 覆盖范围（2026-11-20）：花材母表、耗材母表、原材料分类、订单列表、采购收货两张列表、供应商列表、采购单列表、库存列表。两张母表统一使用紧凑的“查看/编辑/删除”行操作与服务端确认的状态开关，标准成本只在编辑抽屉修改。
+- 物料选择器：业务表单统一使用 `materialPickerLabel`（`名称（单位）`，停用物料追加“（已停用）”，不显示系统生成的物料编号）与 `materialPickerClass`（桌面最小 18rem、窄屏自适应）；编号仍保留在物料母表列表与详情抽屉中供审计。订单人工替换使用 `materialPickerDetailLabel`（`名称（单位） · 等级/颜色/规格`），同样不显示编号；样品编辑器继续使用带可用量和标准成本的 `materialOptionLabel`。覆盖采购单、采购收货、标准配方、包装方案、样品、库存作业、人工替换与旧 SKU/配方编辑器。
+- 待评审：配方/包装方案/样品卡片内的明细表，以及仓储日常的历史流水表，尚未改用 `V2Table.fields`；它们不是本次实体列表的覆盖范围。字段列宽只影响展示，不改变任何业务规则、接口或库存口径。
 

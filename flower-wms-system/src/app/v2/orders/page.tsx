@@ -21,7 +21,9 @@ import { createOrder } from "./actions";
 import { OrderBoard } from "./OrderBoard";
 import { OrderDetailDrawer, type OpenPurchaseLine } from "./OrderDetailDrawer";
 import { OrderFilters } from "./OrderFilters";
+import { OrderList } from "./OrderList";
 import { OrderPagination } from "./OrderPagination";
+import { OrderViewToggle, type OrderView } from "./OrderViewToggle";
 import { orderDetailInclude, orderBoardInclude, type OrderAuditEvent, type OrderDetailData } from "./order-query";
 import {
   ORDER_PAGE_SIZE,
@@ -58,6 +60,7 @@ type OrdersSearchParams = {
   fulfillment?: SearchParamValue;
   orderId?: SearchParamValue;
   page?: SearchParamValue;
+  view?: SearchParamValue;
   message?: SearchParamValue;
   error?: SearchParamValue;
 };
@@ -151,6 +154,7 @@ export default async function OrdersPage({ searchParams }: PageProps<"/v2/orders
   const { tenantId, storeId } = await requireV2AnyStore(["order", "production", "delivery"]);
   const params = await searchParams as OrdersSearchParams;
   const filters = normalizeFilters(params);
+  const view: OrderView = single(params.view) === "list" ? "list" : "board";
   const requestedOrderId = single(params.orderId)?.trim() || undefined;
   const feedback = readV2Feedback(params);
 
@@ -294,8 +298,9 @@ export default async function OrdersPage({ searchParams }: PageProps<"/v2/orders
     }));
   }
 
-  const currentFilterQuery = buildOrderQuery(filters, page);
-  const closeHref = pageHref(page, filters);
+  const queryFilters = { ...filters, ...(view === "list" ? { view: "list" } : {}) };
+  const currentFilterQuery = buildOrderQuery(queryFilters, page);
+  const closeHref = pageHref(page, queryFilters);
   const selectedAudits: OrderAuditEvent[] = audits.map((audit) => ({
     id: audit.id,
     action: audit.action,
@@ -310,7 +315,7 @@ export default async function OrdersPage({ searchParams }: PageProps<"/v2/orders
     error={feedback.error}
     actions={<Link className="rounded-lg border border-stone-300 px-4 py-2 text-sm font-medium text-stone-700 hover:bg-white" href="/v2/purchase-orders">查看采购单</Link>}
   >
-    {canManageOrders && <details className={`${card} border-emerald-200`}>
+    {canManageOrders && <details id="new-order" className={`${card} scroll-mt-24 border-emerald-200`}>
       <summary className="cursor-pointer text-lg font-semibold text-stone-900">新建后台订单</summary>
       <form action={createOrder} className="mt-4 grid gap-3 md:grid-cols-2">
         <div className="md:col-span-2">
@@ -363,21 +368,32 @@ export default async function OrdersPage({ searchParams }: PageProps<"/v2/orders
       </div>
     </section>
 
-    <OrderFilters values={filters} resultCount={totalOrderCount} />
+    <div className="flex flex-wrap items-center justify-between gap-3">
+      <OrderViewToggle view={view} filters={filters} page={page} />
+      <p className="text-xs text-stone-500">
+        {view === "list"
+          ? "列表视图按订单逐行展示，点击查看详情；筛选和翻页保持当前视图。"
+          : "看板视图按履约阶段分组，可直接在卡片上推进状态。"}
+      </p>
+    </div>
 
-    <OrderPagination page={page} pages={orderPageCount} total={totalOrderCount} filters={filters} />
+    <OrderFilters key={JSON.stringify(filters)} values={filters} resultCount={totalOrderCount} view={view} />
+
+    <OrderPagination page={page} pages={orderPageCount} total={totalOrderCount} filters={queryFilters} />
 
     {totalOrderCount === 0 && <p className="rounded-xl border border-dashed border-stone-300 bg-white px-5 py-4 text-sm text-stone-500">
       当前筛选下没有订单。
     </p>}
 
-    <OrderBoard
-      orders={orders}
-      filterQuery={currentFilterQuery}
-      canManageOrders={canManageOrders}
-      canManageProduction={canManageProduction}
-      canManageDelivery={canManageDelivery}
-    />
+    {view === "list"
+      ? <OrderList orders={orders} filterQuery={currentFilterQuery} />
+      : <OrderBoard
+          orders={orders}
+          filterQuery={currentFilterQuery}
+          canManageOrders={canManageOrders}
+          canManageProduction={canManageProduction}
+          canManageDelivery={canManageDelivery}
+        />}
 
     {requestedOrderId && <OrderDetailDrawer
       order={selectedOrder as OrderDetailData | null}

@@ -15,6 +15,7 @@ import {
   convertSamplesToProduct,
   type SampleConversionLineInput,
 } from "@/v2/services/sample-conversion";
+import { runV2DrawerAction } from "../_lib/action-result";
 
 type ActionScope = {
   tenantId: string;
@@ -91,8 +92,22 @@ async function authorized(
   }
 }
 
+/**
+ * Drawer form entries return their outcome instead of redirecting, so a failed
+ * submit keeps the drawer (and the user's input) open with an inline error.
+ */
+async function authorizedResult(
+  capability: V2Capability,
+  operation: (scope: ActionScope) => Promise<string>,
+) {
+  return runV2DrawerAction(async () => {
+    const scope = await requireV2Store(capability);
+    return operation({ ...scope, actorStaffId: scope.staffId });
+  }, "操作成功");
+}
+
 export async function createSampleAction(data: FormData) {
-  return authorized("catalog", async (scope) => {
+  return authorizedResult("catalog", async (scope) => {
     const materials = parseJsonArray<SampleMaterialInput>(data, "materialsJson", "样品物料");
     const result = await v2db.$transaction((tx) =>
       saveSample(tx, scope, {
@@ -110,7 +125,7 @@ export async function createSampleAction(data: FormData) {
 }
 
 export async function updateSampleAction(data: FormData) {
-  return authorized("catalog", async (scope) => {
+  return authorizedResult("catalog", async (scope) => {
     const sampleId = requiredText(data, "sampleId", "样品标识");
     const materials = parseJsonArray<SampleMaterialInput>(data, "materialsJson", "样品物料");
     const result = await v2db.$transaction((tx) =>
@@ -149,7 +164,7 @@ export async function setSampleStateAction(data: FormData) {
 }
 
 export async function convertSampleAction(data: FormData) {
-  return authorized("catalog", async (scope) => {
+  return authorizedResult("catalog", async (scope) => {
     const lines = parseJsonArray<SampleConversionLineInput>(data, "linesJson", "SKU 配方");
     const result = await v2db.$transaction((tx) =>
       convertSampleToSku(tx, scope, {
@@ -168,7 +183,7 @@ export async function convertSampleAction(data: FormData) {
 }
 
 export async function convertSamplesAction(data: FormData) {
-  return authorized("catalog", async (scope) => {
+  return authorizedResult("catalog", async (scope) => {
     const sampleIds = data.getAll("sampleIds")
       .filter((value): value is string => typeof value === "string" && value.length > 0);
     const results = await v2db.$transaction((tx) =>

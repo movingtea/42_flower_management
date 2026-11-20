@@ -176,8 +176,14 @@ export const V2_NAV_GROUPS: readonly V2NavGroup[] = [
     items: [
       {
         href: "/v2/materials",
-        label: "物料母表",
+        label: "花材母表",
         icon: "🌸",
+        anyCapabilities: ["catalog"],
+      },
+      {
+        href: "/v2/consumables",
+        label: "耗材母表",
+        icon: "🧴",
         anyCapabilities: ["catalog"],
       },
       {
@@ -202,6 +208,12 @@ export const V2_NAV_GROUPS: readonly V2NavGroup[] = [
         href: "/v2/purchase-orders",
         label: "采购单",
         icon: "🧾",
+        anyCapabilities: ["purchase"],
+      },
+      {
+        href: "/v2/receiving",
+        label: "采购收货",
+        icon: "✅",
         anyCapabilities: ["purchase"],
       },
       {

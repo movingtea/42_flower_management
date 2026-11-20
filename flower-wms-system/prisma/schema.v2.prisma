@@ -315,6 +315,10 @@ model Material {
   name                     String
   kind                     MaterialKind
   color                    String?
+  // Flower three-level classification: 品种 (variety) -> 商品名 (product name)
+  // -> 颜色 (the existing `color` column).
+  flowerVariety            String?
+  flowerProductName        String?
   grade                    String?
   gradeSpecification       String?
   specification            String?
@@ -377,6 +381,7 @@ model Material {
   @@unique([id, tenantId])
   @@index([tenantId, active, name])
   @@index([tenantId, pinyinIndex])
+  @@index([tenantId, kind, flowerVariety, flowerProductName])
 }
 
 model Supplier {

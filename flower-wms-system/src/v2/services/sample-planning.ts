@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import {
   LocationKind,
   LossReason,
@@ -78,15 +79,22 @@ export type CompleteSamplePlanStepInput = {
   lossReason?: string | null;
 };
 
+export type SamplePlanMaterialResolutionInput = {
+  batchId: string;
+  returnQty: number;
+  keepQty?: number;
+  lossQty: number;
+  reverified?: boolean;
+  usableUntil?: Date | null;
+};
+
+export type PauseSamplePlanInput = {
+  resolutions?: SamplePlanMaterialResolutionInput[];
+};
+
 export type CancelSamplePlanInput = {
   reason: string;
-  resolutions?: {
-    batchId: string;
-    returnQty: number;
-    lossQty: number;
-    reverified?: boolean;
-    usableUntil?: Date | null;
-  }[];
+  resolutions?: SamplePlanMaterialResolutionInput[];
 };
 
 const EPSILON = 1e-8;
@@ -237,6 +245,9 @@ function buildPlanningSample(
         quantityScale: number;
         standardUsableRate: Prisma.Decimal | null;
         optimisticUsableRate: Prisma.Decimal | null;
+        flowerVariety: string | null;
+        flowerProductName: string | null;
+        color: string | null;
       };
     }[];
   },
@@ -255,6 +266,10 @@ function buildPlanningSample(
       unitCost: costs.get(line.materialId) ?? 0,
       availableQty: available?.availableQty ?? 0,
       reusableRate: Number(line.material.standardUsableRate ?? line.material.optimisticUsableRate ?? 0),
+      // Advisory recommendation signal only: it never changes quantity or cost.
+      flowerVariety: line.material.flowerVariety,
+      flowerProductName: line.material.flowerProductName,
+      color: line.material.color,
     };
   });
   return {
@@ -494,6 +509,9 @@ export async function calculatePlan(
               quantityScale: true,
               standardUsableRate: true,
               optimisticUsableRate: true,
+              flowerVariety: true,
+              flowerProductName: true,
+              color: true,
             },
           },
         },
@@ -518,6 +536,9 @@ export async function calculatePlan(
               quantityScale: true,
               standardUsableRate: true,
               optimisticUsableRate: true,
+              flowerVariety: true,
+              flowerProductName: true,
+              color: true,
             },
           },
         },
@@ -1351,28 +1372,423 @@ async function ensureCurrentStepStarted(
   };
 }
 
+type OutstandingProductionRow = {
+  batchId: string;
+  materialId: string;
+  quantity: number;
+};
+
+/**
+ * Material that is still physically attributable to an execution in the
+ * production area: issued reservations minus normal production consumption.
+ * Pause/cancel returns and losses are not subtracted here because they also
+ * reduce the issued reservation quantities, so each fact is counted once.
+ */
+async function outstandingProductionByBatch(
+  tx: Prisma.TransactionClient,
+  executionId: string,
+): Promise<Map<string, OutstandingProductionRow>> {
+  const outstanding = new Map<string, OutstandingProductionRow>();
+  const issuedRows = await tx.sampleInventoryReservation.findMany({
+    where: {
+      executionId,
+      state: { in: [ReservationState.ISSUED, ReservationState.CONSUMED] },
+    },
+    select: {
+      batchId: true,
+      quantity: true,
+      batch: { select: { materialId: true } },
+    },
+    orderBy: { id: "asc" },
+  });
+  for (const row of issuedRows) {
+    const current = outstanding.get(row.batchId) ?? {
+      batchId: row.batchId,
+      materialId: row.batch.materialId,
+      quantity: 0,
+    };
+    current.quantity = roundQty(current.quantity + Number(row.quantity));
+    outstanding.set(row.batchId, current);
+  }
+  const consumedRows = await tx.inventoryTransaction.groupBy({
+    by: ["batchId"],
+    where: {
+      referenceType: "SAMPLE_PLAN_EXECUTION",
+      referenceId: executionId,
+      kind: TransactionKind.CONSUME,
+    },
+    _sum: { quantity: true },
+  });
+  for (const row of consumedRows) {
+    const current = outstanding.get(row.batchId);
+    if (!current) continue;
+    current.quantity = roundQty(Math.max(0, current.quantity - Number(row._sum.quantity ?? 0)));
+  }
+  for (const [batchId, row] of outstanding) {
+    if (row.quantity <= EPSILON) outstanding.delete(batchId);
+  }
+  return outstanding;
+}
+
+type ProductionDispositionOptions = {
+  referenceType: string;
+  lossNote: string;
+  eventKey: string;
+  reduceReservations: boolean;
+  adjustDisassemblyPool: boolean;
+};
+
+type ProductionDispositionResult = {
+  returnedQty: number;
+  keptQty: number;
+  lostQty: number;
+  resolutions: {
+    batchId: string;
+    materialId: string;
+    returnQty: number;
+    keepQty: number;
+    lossQty: number;
+    reverified: boolean;
+    usableUntil: string | null;
+  }[];
+};
+
+/**
+ * Reduces the issued reservation quantities that back the material being
+ * returned or written off. The aggregate issued quantity then matches what is
+ * still physically attached to the execution, so a later pause/cancel does not
+ * ask the employee to dispose of the same stock twice. The current execution
+ * step is reduced first; leftover reusable material from completed steps is
+ * reduced afterwards.
+ */
+async function reduceReservationsForDisposal(
+  tx: Prisma.TransactionClient,
+  executionId: string,
+  batchId: string,
+  quantity: number,
+): Promise<number> {
+  if (quantity <= EPSILON) return 0;
+  const rows = await tx.sampleInventoryReservation.findMany({
+    where: {
+      executionId,
+      batchId,
+      state: { in: [ReservationState.ISSUED, ReservationState.CONSUMED] },
+    },
+    orderBy: { id: "asc" },
+  });
+  rows.sort((left, right) => {
+    const rank = (state: ReservationState) => state === ReservationState.ISSUED ? 0 : 1;
+    return rank(left.state) - rank(right.state) || left.id.localeCompare(right.id);
+  });
+  let remaining = quantity;
+  let consumedReduced = 0;
+  for (const row of rows) {
+    if (remaining <= EPSILON) break;
+    const current = Number(row.quantity);
+    const take = roundQty(Math.min(current, remaining));
+    if (take <= EPSILON) continue;
+    const next = roundQty(current - take);
+    await tx.sampleInventoryReservation.update({
+      where: { id: row.id },
+      data: {
+        quantity: next,
+        state: next <= EPSILON ? ReservationState.RELEASED : row.state,
+      },
+    });
+    if (row.state === ReservationState.CONSUMED) {
+      consumedReduced = roundQty(consumedReduced + take);
+    }
+    remaining = roundQty(remaining - take);
+  }
+  return consumedReduced;
+}
+
+/**
+ * Returning or writing off leftover reusable material must also remove it from
+ * the reuse pool used by the next sample step. Without this adjustment the next
+ * step would plan to reuse material that is no longer in the production area.
+ */
+async function reduceDisassemblyPool(
+  tx: Prisma.TransactionClient,
+  executionId: string,
+  materialId: string,
+  quantity: number,
+): Promise<void> {
+  if (quantity <= EPSILON) return;
+  const steps = await tx.samplePlanExecutionStep.findMany({
+    where: { executionId },
+    select: { actualReusableSnapshot: true },
+  });
+  let reusedQty = 0;
+  for (const step of steps) {
+    reusedQty = roundQty(reusedQty + (snapshotReusedByMaterial(step.actualReusableSnapshot)[materialId] ?? 0));
+  }
+  const rows = await tx.sampleDisassemblyMaterial.findMany({
+    where: { executionStep: { executionId }, materialId },
+    orderBy: [{ checkedAt: "asc" }, { id: "asc" }],
+  });
+  const totalUsable = roundQty(rows.reduce((sum, row) => sum + Number(row.usableQty), 0));
+  const available = roundQty(Math.max(0, totalUsable - reusedQty));
+  let remaining = roundQty(Math.min(quantity, available));
+  for (const row of rows) {
+    if (remaining <= EPSILON) break;
+    const current = Number(row.usableQty);
+    const take = roundQty(Math.min(current, remaining));
+    if (take <= EPSILON) continue;
+    await tx.sampleDisassemblyMaterial.update({
+      where: { id: row.id },
+      data: { usableQty: roundQty(current - take) },
+    });
+    remaining = roundQty(remaining - take);
+  }
+}
+
+/**
+ * Applies the employee's explicit production-area decision (return, keep or
+ * write off) for every outstanding batch. WMS-BR-SMP-007 requires an explicit
+ * decision instead of assuming material is still usable.
+ */
+async function resolveProductionDisposition(
+  tx: Prisma.TransactionClient,
+  scope: SamplePlanScope,
+  executionId: string,
+  outstanding: Map<string, OutstandingProductionRow>,
+  resolutions: readonly SamplePlanMaterialResolutionInput[] | undefined,
+  options: ProductionDispositionOptions,
+): Promise<ProductionDispositionResult> {
+  const resolutionByBatch = new Map<string, SamplePlanMaterialResolutionInput>();
+  for (const resolution of resolutions ?? []) {
+    const batchId = typeof resolution?.batchId === "string" ? resolution.batchId.trim() : "";
+    if (!batchId) throw new Error("处置批次不能为空");
+    if (resolutionByBatch.has(batchId)) throw new Error(`批次 ${batchId} 的处置重复`);
+    if (!outstanding.has(batchId)) {
+      throw new Error(`批次 ${batchId} 不在当前制作区待处置范围内`);
+    }
+    resolutionByBatch.set(batchId, resolution);
+  }
+  for (const row of outstanding.values()) {
+    if (!resolutionByBatch.has(row.batchId)) {
+      throw new Error(`批次 ${row.batchId} 还有 ${row.quantity} 未处理，请确认回库、留用或报损数量`);
+    }
+  }
+
+  type Validated = {
+    row: OutstandingProductionRow;
+    returnQty: number;
+    keepQty: number;
+    lossQty: number;
+    reverified: boolean;
+    usableUntil: Date | null;
+  };
+  const validated: Validated[] = [];
+  for (const row of outstanding.values()) {
+    const resolution = resolutionByBatch.get(row.batchId)!;
+    const returnQty = decimal(resolution.returnQty ?? 0, "回库数量");
+    const keepQty = decimal(resolution.keepQty ?? 0, "留用数量");
+    const lossQty = decimal(resolution.lossQty ?? 0, "报损数量");
+    if (Math.abs(returnQty + keepQty + lossQty - row.quantity) > EPSILON) {
+      throw new Error(
+        `批次 ${row.batchId} 的回库、留用与报损数量必须等于未处理数量 ${row.quantity}`,
+      );
+    }
+    const usableUntil = resolution.usableUntil ? new Date(resolution.usableUntil) : null;
+    if (usableUntil && Number.isNaN(usableUntil.getTime())) {
+      throw new Error("回库最晚可用时间无效");
+    }
+    if (returnQty > EPSILON) {
+      if (!resolution.reverified) throw new Error("回库前必须重新验收等级和最晚可用时间");
+      if (usableUntil && usableUntil.getTime() < Date.now()) {
+        throw new Error("回库花材的最晚可用时间不能早于当前时间");
+      }
+    }
+    validated.push({
+      row,
+      returnQty,
+      keepQty,
+      lossQty,
+      reverified: Boolean(resolution.reverified),
+      usableUntil,
+    });
+  }
+
+  const needsWarehouse = validated.some((row) => row.returnQty > EPSILON);
+  const needsProduction = validated.some((row) => row.returnQty > EPSILON || row.lossQty > EPSILON);
+  const production = needsProduction ? await productionLocation(tx, scope.storeId) : null;
+  const warehouse = needsWarehouse ? await warehouseLocation(tx, scope.storeId) : null;
+
+  let returnedQty = 0;
+  let keptQty = 0;
+  let lostQty = 0;
+  const auditRows: ProductionDispositionResult["resolutions"] = [];
+  for (const entry of validated) {
+    const { row, returnQty, keepQty, lossQty } = entry;
+    if (returnQty > EPSILON) {
+      await lockBatchRow(tx, row.batchId);
+      await lockBatchBalances(tx, row.batchId);
+      const debits = await debitBalances(tx, row.batchId, LocationKind.PRODUCTION, returnQty);
+      for (const debit of debits) {
+        await creditBalance(tx, row.batchId, warehouse!.id, debit.quantity);
+        await tx.inventoryTransaction.create({
+          data: {
+            batchId: row.batchId,
+            kind: TransactionKind.TRANSFER,
+            quantity: debit.quantity,
+            fromLocationId: debit.locationId,
+            toLocationId: warehouse!.id,
+            referenceType: options.referenceType,
+            referenceId: executionId,
+            idempotencyKey: `v2-sample-${options.eventKey}-return-${executionId}-${row.batchId}-${debit.locationId}`,
+          },
+        });
+      }
+      if (entry.usableUntil) {
+        const batch = await tx.inventoryBatch.findUnique({
+          where: { id: row.batchId },
+          select: { usableUntil: true },
+        });
+        if (batch && (!batch.usableUntil || entry.usableUntil < batch.usableUntil)) {
+          await tx.inventoryBatch.update({
+            where: { id: row.batchId },
+            data: { usableUntil: entry.usableUntil },
+          });
+        }
+      }
+      returnedQty = roundQty(returnedQty + returnQty);
+    }
+    if (lossQty > EPSILON) {
+      await lockBatchRow(tx, row.batchId);
+      await lockBatchBalances(tx, row.batchId);
+      await debitBalances(tx, row.batchId, LocationKind.PRODUCTION, lossQty);
+      await tx.inventoryTransaction.create({
+        data: {
+          batchId: row.batchId,
+          kind: TransactionKind.CONSUME,
+          quantity: lossQty,
+          fromLocationId: production!.id,
+          referenceType: options.referenceType,
+          referenceId: executionId,
+          idempotencyKey: `v2-sample-${options.eventKey}-loss-${executionId}-${row.batchId}`,
+        },
+      });
+      await tx.lossRecord.create({
+        data: {
+          storeId: scope.storeId,
+          batchId: row.batchId,
+          materialId: row.materialId,
+          reason: LossReason.OTHER,
+          quantity: lossQty,
+          note: options.lossNote,
+          submittedById: scope.actorStaffId,
+        },
+      });
+      lostQty = roundQty(lostQty + lossQty);
+    }
+    if (options.reduceReservations && returnQty + lossQty > EPSILON) {
+      const consumedReduced = await reduceReservationsForDisposal(
+        tx,
+        executionId,
+        row.batchId,
+        roundQty(returnQty + lossQty),
+      );
+      if (options.adjustDisassemblyPool && consumedReduced > EPSILON) {
+        await reduceDisassemblyPool(tx, executionId, row.materialId, consumedReduced);
+      }
+    }
+    keptQty = roundQty(keptQty + keepQty);
+    auditRows.push({
+      batchId: row.batchId,
+      materialId: row.materialId,
+      returnQty,
+      keepQty,
+      lossQty,
+      reverified: entry.reverified,
+      usableUntil: entry.usableUntil?.toISOString() ?? null,
+    });
+  }
+  return { returnedQty, keptQty, lostQty, resolutions: auditRows };
+}
+
+async function topUpStartedStep(
+  tx: Prisma.TransactionClient,
+  scope: SamplePlanScope,
+  execution: Awaited<ReturnType<typeof loadExecution>>,
+): Promise<{ reissuedQty: number; shortageQty: number; shortage: string[] }> {
+  const step = execution.steps.find((row) => row.startedAt && !row.completedAt);
+  if (!step) return { reissuedQty: 0, shortageQty: 0, shortage: [] };
+  const issuedByMaterial = new Map<string, number>();
+  for (const reservation of step.reservations) {
+    if (reservation.state !== ReservationState.ISSUED) continue;
+    const materialId = reservation.batch.materialId;
+    issuedByMaterial.set(
+      materialId,
+      roundQty((issuedByMaterial.get(materialId) ?? 0) + Number(reservation.quantity)),
+    );
+  }
+  const reusedByMaterial = snapshotReusedByMaterial(step.actualReusableSnapshot);
+  const scales = await materialScales(
+    tx,
+    scope.tenantId,
+    step.plannedStep.flows.map((flow) => flow.materialId),
+  );
+  const requirements = step.plannedStep.flows
+    .filter((flow) => Number(flow.requiredQty) > EPSILON)
+    .map((flow) => {
+      const scale = scales.get(flow.materialId);
+      return {
+        materialId: flow.materialId,
+        quantity: roundQty(
+          Math.max(
+            0,
+            Number(flow.requiredQty)
+              - (reusedByMaterial[flow.materialId] ?? 0)
+              - (issuedByMaterial.get(flow.materialId) ?? 0),
+          ),
+        ),
+        quantityScale: scale?.quantityScale ?? 0,
+        baseUnit: scale?.baseUnit ?? "",
+      };
+    })
+    .filter((requirement) => requirement.quantity > EPSILON);
+  if (requirements.length === 0) {
+    return { reissuedQty: 0, shortageQty: 0, shortage: [] };
+  }
+  const reserved = await reserveStepMaterials(tx, scope, execution.id, step.id, requirements);
+  if (reserved.shortageQty > EPSILON) {
+    return { reissuedQty: 0, shortageQty: reserved.shortageQty, shortage: reserved.shortage };
+  }
+  const issued = await issueStepReservations(tx, scope, execution.id, step.id);
+  return { reissuedQty: issued.issuedQty, shortageQty: 0, shortage: [] };
+}
+
 export type PauseSamplePlanResult = {
   planId: string;
   releasedReservations: number;
   releasedQty: number;
   issuedKeptQty: number;
+  returnedQty: number;
+  keptQty: number;
+  lostQty: number;
   wasStarted: boolean;
 };
 
 /**
  * WMS-BR-SMP-007: pausing releases only reservations that were not issued yet.
- * Material already transferred to the production area stays there so the same
- * execution can be resumed; it is returned or written off only on cancellation.
+ * Material already transferred to the production area needs an explicit
+ * employee decision: return it to the warehouse, keep it in production for a
+ * later resume, or write it off. The system records the decision and never
+ * assumes the material is still usable.
  */
 export async function pausePlan(
   tx: Prisma.TransactionClient,
   scope: SamplePlanScope,
   planId: string,
+  input: PauseSamplePlanInput = {},
 ): Promise<PauseSamplePlanResult> {
   assertScope(scope);
   const id = typeof planId === "string" ? planId.trim() : "";
   if (!id) throw new Error("打样计划标识不能为空");
   await lockPlan(tx, id);
+  await lockStoreRow(tx, scope.storeId);
   const plan = await loadPlan(tx, scope, id);
   if (plan.state !== SamplePlanState.APPROVED && plan.state !== SamplePlanState.IN_PROGRESS) {
     throw new Error("只有已批准或制作中的打样计划可以暂停");
@@ -1391,40 +1807,20 @@ export async function pausePlan(
     where: { executionId: execution.id, state: ReservationState.ACTIVE },
     data: { state: ReservationState.RELEASED },
   });
-  const issuedRows = await tx.sampleInventoryReservation.findMany({
-    where: {
-      executionId: execution.id,
-      state: { in: [ReservationState.ISSUED, ReservationState.CONSUMED] },
+  const outstanding = await outstandingProductionByBatch(tx, execution.id);
+  const disposition = await resolveProductionDisposition(
+    tx,
+    scope,
+    execution.id,
+    outstanding,
+    input.resolutions,
+    {
+      referenceType: "SAMPLE_PLAN_PAUSE",
+      lossNote: "打样暂停处置",
+      eventKey: `pause-${randomUUID()}`,
+      reduceReservations: true,
+      adjustDisassemblyPool: true,
     },
-    select: { batchId: true, quantity: true },
-  });
-  const outstandingByBatch = new Map<string, number>();
-  for (const row of issuedRows) {
-    outstandingByBatch.set(
-      row.batchId,
-      roundQty((outstandingByBatch.get(row.batchId) ?? 0) + Number(row.quantity)),
-    );
-  }
-  const consumedRows = await tx.inventoryTransaction.groupBy({
-    by: ["batchId"],
-    where: {
-      referenceType: "SAMPLE_PLAN_EXECUTION",
-      referenceId: execution.id,
-      kind: TransactionKind.CONSUME,
-    },
-    _sum: { quantity: true },
-  });
-  for (const row of consumedRows) {
-    outstandingByBatch.set(
-      row.batchId,
-      roundQty(Math.max(
-        0,
-        (outstandingByBatch.get(row.batchId) ?? 0) - Number(row._sum.quantity ?? 0),
-      )),
-    );
-  }
-  const issuedKeptQty = roundQty(
-    [...outstandingByBatch.values()].reduce((sum, quantity) => sum + quantity, 0),
   );
   await tx.samplePlan.update({
     where: { id },
@@ -1435,13 +1831,20 @@ export async function pausePlan(
     wasStarted: Boolean(execution.startedAt),
     releasedReservations: released.count,
     releasedQty,
-    issuedKeptQty,
+    issuedKeptQty: disposition.keptQty,
+    returnedQty: disposition.returnedQty,
+    keptQty: disposition.keptQty,
+    lostQty: disposition.lostQty,
+    resolutions: disposition.resolutions,
   });
   return {
     planId: id,
     releasedReservations: released.count,
     releasedQty,
-    issuedKeptQty,
+    issuedKeptQty: disposition.keptQty,
+    returnedQty: disposition.returnedQty,
+    keptQty: disposition.keptQty,
+    lostQty: disposition.lostQty,
     wasStarted: Boolean(execution.startedAt),
   };
 }
@@ -1456,7 +1859,9 @@ export type ResumeSamplePlanResult = {
 /**
  * Resuming a plan that never started re-checks current stock and re-creates the
  * first-step reservations released by pause. A plan paused while making samples
- * keeps its issued production stock and returns to IN_PROGRESS.
+ * re-issues any current-step material that was returned or written off during
+ * the pause, then returns to IN_PROGRESS. Kept material stays in the production
+ * area and is not reserved twice.
  */
 export async function resumePlan(
   tx: Prisma.TransactionClient,
@@ -1474,6 +1879,12 @@ export async function resumePlan(
   }
   const execution = await loadExecution(tx, scope, id);
   if (execution.startedAt) {
+    const topUp = await topUpStartedStep(tx, scope, execution);
+    if (topUp.shortageQty > EPSILON) {
+      throw new Error(
+        `恢复打样缺料 ${topUp.shortageQty}，请补购或取消后重算（${topUp.shortage.join("；")}）`,
+      );
+    }
     await tx.samplePlan.update({
       where: { id },
       data: { state: SamplePlanState.IN_PROGRESS },
@@ -1481,13 +1892,14 @@ export async function resumePlan(
     await recordAudit(tx, scope, "SAMPLE_PLAN_RESUMED", "SamplePlan", id, undefined, {
       executionId: execution.id,
       resumedState: SamplePlanState.IN_PROGRESS,
-      reservedQty: 0,
+      reservedQty: topUp.reissuedQty,
+      reissuedQty: topUp.reissuedQty,
       shortageQty: 0,
     });
     return {
       planId: id,
       state: SamplePlanState.IN_PROGRESS,
-      reservedQty: 0,
+      reservedQty: topUp.reissuedQty,
       shortageQty: 0,
     };
   }
@@ -2020,6 +2432,7 @@ export type CancelSamplePlanResult = {
   planId: string;
   releasedReservations: number;
   returnedQty: number;
+  keptQty: number;
   lostQty: number;
 };
 
@@ -2042,9 +2455,7 @@ export async function cancelPlan(
   const execution = await tx.samplePlanExecution.findFirst({
     where: { planId: id, cancelledAt: null },
     orderBy: { approvedAt: "desc" },
-    include: {
-      steps: { include: { reservations: { include: { batch: true } } } },
-    },
+    select: { id: true, startedAt: true },
   });
   if (!execution) {
     await tx.samplePlan.update({
@@ -2055,118 +2466,41 @@ export async function cancelPlan(
       reason,
       releasedReservations: 0,
       returnedQty: 0,
+      keptQty: 0,
       lostQty: 0,
     });
-    return { planId: id, releasedReservations: 0, returnedQty: 0, lostQty: 0 };
+    return { planId: id, releasedReservations: 0, returnedQty: 0, keptQty: 0, lostQty: 0 };
   }
 
-  const reservations = execution.steps.flatMap((step) => step.reservations);
   const released = await tx.sampleInventoryReservation.updateMany({
     where: { executionId: execution.id, state: ReservationState.ACTIVE },
     data: { state: ReservationState.RELEASED },
   });
 
   let returnedQty = 0;
+  let keptQty = 0;
   let lostQty = 0;
+  let resolutionRows: ProductionDispositionResult["resolutions"] = [];
   if (execution.startedAt) {
-    const issued = new Map<string, number>();
-    for (const reservation of reservations) {
-      if (reservation.state !== ReservationState.ISSUED && reservation.state !== ReservationState.CONSUMED) continue;
-      issued.set(reservation.batchId, roundQty((issued.get(reservation.batchId) ?? 0) + Number(reservation.quantity)));
-    }
-    const consumed = await tx.inventoryTransaction.groupBy({
-      by: ["batchId"],
-      where: {
-        referenceType: "SAMPLE_PLAN_EXECUTION",
-        referenceId: execution.id,
-        kind: TransactionKind.CONSUME,
+    const outstanding = await outstandingProductionByBatch(tx, execution.id);
+    const disposition = await resolveProductionDisposition(
+      tx,
+      scope,
+      execution.id,
+      outstanding,
+      input.resolutions,
+      {
+        referenceType: "SAMPLE_PLAN_CANCELLATION",
+        lossNote: reason,
+        eventKey: `cancel-${randomUUID()}`,
+        reduceReservations: false,
+        adjustDisassemblyPool: false,
       },
-      _sum: { quantity: true },
-    });
-    for (const row of consumed) {
-      issued.set(row.batchId, roundQty(Math.max(0, (issued.get(row.batchId) ?? 0) - Number(row._sum.quantity ?? 0))));
-    }
-    const outstanding = [...issued.entries()].filter(([, quantity]) => quantity > EPSILON);
-    if (outstanding.length > 0) {
-      const resolutions = new Map(
-        (input.resolutions ?? []).map((resolution) => [resolution.batchId, resolution]),
-      );
-      const production = await productionLocation(tx, scope.storeId);
-      const warehouse = await warehouseLocation(tx, scope.storeId);
-      for (const [batchId, quantity] of outstanding) {
-        const resolution = resolutions.get(batchId);
-        if (!resolution) {
-          throw new Error(`批次 ${batchId} 还有 ${quantity} 未处理，请确认回库或报损数量`);
-        }
-        const returnQty = decimal(resolution.returnQty, "回库数量");
-        const lossQtyValue = decimal(resolution.lossQty, "报损数量");
-        if (Math.abs(returnQty + lossQtyValue - quantity) > EPSILON) {
-          throw new Error(`批次 ${batchId} 的回库与报损数量必须等于未处理数量 ${quantity}`);
-        }
-        if (returnQty > EPSILON) {
-          if (!resolution.reverified) throw new Error("回库前必须重新验收等级和最晚可用时间");
-          if (resolution.usableUntil && resolution.usableUntil.getTime() < Date.now()) {
-            throw new Error("回库花材的最晚可用时间不能早于当前时间");
-          }
-          await lockBatchRow(tx, batchId);
-          await lockBatchBalances(tx, batchId);
-          const debits = await debitBalances(tx, batchId, LocationKind.PRODUCTION, returnQty);
-          for (const debit of debits) {
-            await creditBalance(tx, batchId, warehouse.id, debit.quantity);
-            await tx.inventoryTransaction.create({
-              data: {
-                batchId,
-                kind: TransactionKind.TRANSFER,
-                quantity: debit.quantity,
-                fromLocationId: production.id,
-                toLocationId: warehouse.id,
-                referenceType: "SAMPLE_PLAN_CANCELLATION",
-                referenceId: execution.id,
-                idempotencyKey: `v2-sample-cancel-return-${execution.id}-${batchId}-${debit.locationId}`,
-              },
-            });
-          }
-          if (resolution.usableUntil) {
-            const batch = await tx.inventoryBatch.findUnique({ where: { id: batchId }, select: { usableUntil: true } });
-            if (batch && (!batch.usableUntil || resolution.usableUntil < batch.usableUntil)) {
-              await tx.inventoryBatch.update({
-                where: { id: batchId },
-                data: { usableUntil: resolution.usableUntil },
-              });
-            }
-          }
-          returnedQty = roundQty(returnedQty + returnQty);
-        }
-        if (lossQtyValue > EPSILON) {
-          await lockBatchRow(tx, batchId);
-          await lockBatchBalances(tx, batchId);
-          await debitBalances(tx, batchId, LocationKind.PRODUCTION, lossQtyValue);
-          await tx.inventoryTransaction.create({
-            data: {
-              batchId,
-              kind: TransactionKind.CONSUME,
-              quantity: lossQtyValue,
-              fromLocationId: production.id,
-              referenceType: "SAMPLE_PLAN_CANCELLATION",
-              referenceId: execution.id,
-              idempotencyKey: `v2-sample-cancel-loss-${execution.id}-${batchId}`,
-            },
-          });
-          await tx.lossRecord.create({
-            data: {
-              storeId: scope.storeId,
-              batchId,
-              materialId: reservations.find((row) => row.batchId === batchId)?.batch.materialId ?? null,
-              reason: LossReason.OTHER,
-              quantity: lossQtyValue,
-              note: reason,
-              submittedById: scope.actorStaffId,
-            },
-          });
-          lostQty = roundQty(lostQty + lossQtyValue);
-        }
-      }
-    }
+    );
+    returnedQty = disposition.returnedQty;
+    keptQty = disposition.keptQty;
+    lostQty = disposition.lostQty;
+    resolutionRows = disposition.resolutions;
     await tx.sampleInventoryReservation.updateMany({
       where: { executionId: execution.id, state: { in: [ReservationState.ISSUED, ReservationState.CONSUMED] } },
       data: { state: ReservationState.RELEASED },
@@ -2186,8 +2520,10 @@ export async function cancelPlan(
     executionId: execution.id,
     releasedReservations: released.count,
     returnedQty,
+    keptQty,
     lostQty,
     resolutionCount: input.resolutions?.length ?? 0,
+    resolutions: resolutionRows,
   });
-  return { planId: id, releasedReservations: released.count, returnedQty, lostQty };
+  return { planId: id, releasedReservations: released.count, returnedQty, keptQty, lostQty };
 }

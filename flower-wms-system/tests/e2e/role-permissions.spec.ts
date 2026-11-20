@@ -17,28 +17,28 @@ type RoleFixture = {
 const ROLES: readonly RoleFixture[] = [
   {
     role: "admin",
-    visible: ["物料母表", "采购单", "订单履约", "员工与权限"],
+    visible: ["花材母表", "耗材母表", "采购单", "订单履约", "员工与权限"],
     hidden: [],
   },
   {
     role: "manager",
-    visible: ["物料母表", "采购单", "仓储日常", "订单履约"],
+    visible: ["花材母表", "耗材母表", "采购单", "仓储日常", "订单履约"],
     hidden: ["员工与权限"],
   },
   {
     role: "buyer",
     visible: ["采购单", "供应商", "仓储日常", "库存管理"],
-    hidden: ["物料母表", "商品与 SKU", "标准配方", "包装方案", "订单履约"],
+    hidden: ["花材母表", "耗材母表", "商品与 SKU", "标准配方", "包装方案", "订单履约"],
   },
   {
     role: "sales",
     visible: ["订单履约"],
-    hidden: ["物料母表", "采购单", "仓储日常", "商品与 SKU"],
+    hidden: ["花材母表", "耗材母表", "采购单", "仓储日常", "商品与 SKU"],
   },
   {
     role: "florist",
     visible: ["订单履约"],
-    hidden: ["物料母表", "采购单", "仓储日常", "商品与 SKU", "标准配方"],
+    hidden: ["花材母表", "耗材母表", "采购单", "仓储日常", "商品与 SKU", "标准配方"],
   },
 ];
 
@@ -79,7 +79,8 @@ test.describe("独立用例 · 角色与门店权限（E11-AUTH-01）", () => {
     const denials: { role: "buyer" | "sales" | "florist"; path: string; heading: string }[] = [
       { role: "buyer", path: "/v2/orders", heading: "订单看板" },
       { role: "sales", path: "/v2/purchase-orders", heading: "采购单管理" },
-      { role: "florist", path: "/v2/materials", heading: "物料母表" },
+      { role: "florist", path: "/v2/materials", heading: "花材母表" },
+      { role: "florist", path: "/v2/consumables", heading: "耗材母表" },
     ];
 
     for (const denial of denials) {

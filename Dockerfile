@@ -18,7 +18,7 @@
 # flower-cron-worker：compose 覆盖 entrypoint 为 cron-inventory-daemon.ts
 # ---------------------------------------------------------------------------
 
-FROM node:22-alpine AS base
+FROM node:26-alpine AS base
 RUN apk add --no-cache libc6-compat openssl wget
 WORKDIR /app
 

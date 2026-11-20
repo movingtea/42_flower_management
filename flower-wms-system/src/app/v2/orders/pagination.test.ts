@@ -64,6 +64,13 @@ function testBuildQueryAndHref() {
   assert.equal(buildOrderQuery({ q: "x" }, 1), "q=x");
   // A stale page key must not leak into the new query.
   assert.equal(new URLSearchParams(buildOrderQuery({ q: "x", page: "9" }, 2)).get("page"), "2");
+
+  // The list presentation is a view of the same filtered dataset and must
+  // survive pagination.
+  const listPage = query(pageHref(3, { ...filters, view: "list" }));
+  assert.equal(listPage.get("view"), "list");
+  assert.equal(listPage.get("q"), "A 001");
+  assert.equal(listPage.get("page"), "3");
 }
 
 function testVisiblePageNumbers() {

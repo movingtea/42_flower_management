@@ -1,9 +1,10 @@
 "use client";
 import { useMemo, useState } from "react";
 import { input } from "../_components/V2Ui";
+import { materialPickerClass, materialPickerLabel } from "../_components/material-option-label";
 import { allocatePurchaseFees, type FeeAllocationMethod } from "./fee-allocation";
 
-type MaterialOption = { id: string; label: string; unit: string };
+type MaterialOption = { id: string; code: string; name: string; baseUnit: string; active: boolean };
 type SupplierOption = { id: string; label: string };
 type Line = { materialId: string; quantity: number; unitPrice: number };
 
@@ -43,7 +44,7 @@ export function PurchaseOrderEditor({ suppliers, materials, initial }: {
         const preview = allocation.lines[index];
         return <div key={index} className="space-y-2 rounded-lg border border-zinc-200 p-3">
           <div className="grid gap-2 md:grid-cols-[2fr_1fr_1fr_auto] md:items-end">
-            <label className="block text-xs text-stone-600">物料<select className={`${input} mt-1`} value={line.materialId} onChange={(event) => setLines((current) => current.map((row, i) => i === index ? { ...row, materialId: event.target.value } : row))}>{materials.map((item) => <option key={item.id} value={item.id}>{item.label} · {item.unit}</option>)}</select></label>
+            <label className="block text-xs text-stone-600">物料<select className={`${input} ${materialPickerClass} mt-1`} value={line.materialId} onChange={(event) => setLines((current) => current.map((row, i) => i === index ? { ...row, materialId: event.target.value } : row))}>{materials.map((item) => <option key={item.id} value={item.id}>{materialPickerLabel(item)}</option>)}</select></label>
             <label className="block text-xs text-stone-600">采购数量<input className={`${input} mt-1`} type="number" min="0" step="0.001" value={line.quantity} onChange={(event) => setLines((current) => current.map((row, i) => i === index ? { ...row, quantity: Number(event.target.value) } : row))} aria-label="采购数量" /></label>
             <label className="block text-xs text-stone-600">采购单价（元）<input className={`${input} mt-1`} type="number" min="0" step="0.0001" value={line.unitPrice} onChange={(event) => setLines((current) => current.map((row, i) => i === index ? { ...row, unitPrice: Number(event.target.value) } : row))} aria-label="采购单价" /></label>
             <button type="button" className="self-end text-sm text-red-700 disabled:text-zinc-300" disabled={lines.length === 1} onClick={() => setLines((current) => current.filter((_, i) => i !== index))}>删除</button>
