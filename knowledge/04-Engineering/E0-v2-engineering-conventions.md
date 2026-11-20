@@ -3,9 +3,9 @@ title: V2 工程约定 · 编号、抽屉与数据重置
 type: engineering-convention
 module: platform
 status: draft
-version: 1
+version: 2
 owner: engineering
-updated: 2026-11-19
+updated: 2026-11-20
 sources:
   - "flower-wms-system/src/v2/domain/identifiers.ts"
   - "flower-wms-system/src/app/v2/_components/V2Drawer.tsx"
@@ -33,7 +33,8 @@ related:
 
 - 组件：`src/app/v2/_components/V2Drawer.tsx` 的 `V2DrawerForm`，从右侧滑出，固定页脚“取消/保存”，支持遮罩与 Escape 关闭、body 锁滚和焦点恢复。
 - 用法：页面传入 `triggerLabel`、`title`、`action`（现有 server action）与服务端渲染的表单字段；抽屉不复制业务逻辑。
-- 关闭时机：server action 以 `redirect(?message=…)` 结束时，组件监听查询串变化自动关闭，避免保存后残留旧面板。
+- 关闭时机（2026-11-20 修正）：抽屉 action 返回显式结果 `{ok:true,message}` 或 `{ok:false,error}`。仅当当前表单本次提交返回成功结果时关闭抽屉，随后 `router.refresh()` 刷新列表并显示成功提示；失败时保持抽屉打开、保留本次输入，并在抽屉内显示错误。组件不再监听 URL 查询串变化，避免筛选、行内提示或其他导航误关抽屉。
+- 待后续：全局消息机制，以及行内操作（非抽屉）从 `?message=` / `?error=` 重定向迁移到同一消息通道，尚未包含在本次修正内；这些操作仍保持原有 URL 提示行为。
 - 覆盖范围：物料、供应商、商品/SKU、配方草稿/发布/停用、包装方案、样品/打样计划、原材料分类、采购草稿、批次不明损耗等新增/编辑入口；行内业务操作（验收、拒收、补单、盘点、制作转移等）保持原布局。
 
 ## 3. V2 数据库业务数据重置

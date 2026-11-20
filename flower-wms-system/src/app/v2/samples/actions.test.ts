@@ -27,6 +27,17 @@ const stubs: Record<string, string> = {
     return { tenantId: "tenant-1", storeId: "store-1", staffId: "staff-1" };
   }`,
   "@/v2/db": `export const v2db = { $transaction: async (fn, options) => fn({ __fakeTx: true, options }) };`,
+  "../_lib/action-result": `
+    export async function runV2DrawerAction(operation, fallbackMessage) {
+      try {
+        const message = await operation();
+        return { ok: true, message: message || fallbackMessage };
+      } catch (cause) {
+        if (cause && typeof cause === "object" && "digest" in cause) throw cause;
+        return { ok: false, error: cause instanceof Error ? cause.message : "操作失败" };
+      }
+    }
+  `,
   "@/generated/prisma-v2/client": `export const SampleState = { DRAFT: "DRAFT", READY: "READY", ARCHIVED: "ARCHIVED" };`,
   "@/v2/services/sample-management": `
     function record(name, args) {
@@ -100,12 +111,18 @@ const actionsSource = ts.transpileModule(
 ).outputText;
 
 type Actions = {
-  createSampleAction: (data: FormData) => Promise<never>;
-  updateSampleAction: (data: FormData) => Promise<never>;
+  createSampleAction: (data: FormData) => Promise<ActionResult>;
+  updateSampleAction: (data: FormData) => Promise<ActionResult>;
   copySampleAction: (data: FormData) => Promise<never>;
   setSampleStateAction: (data: FormData) => Promise<never>;
-  convertSampleAction: (data: FormData) => Promise<never>;
-  convertSamplesAction: (data: FormData) => Promise<never>;
+  convertSampleAction: (data: FormData) => Promise<ActionResult>;
+  convertSamplesAction: (data: FormData) => Promise<ActionResult>;
+};
+
+type ActionResult = {
+  ok: boolean;
+  message?: string;
+  error?: string;
 };
 
 function reset(): void {
@@ -148,7 +165,7 @@ async function main(): Promise<void> {
   } = await import(`data:text/javascript;base64,${Buffer.from(actionsSource).toString("base64")}`) as Actions;
 
   reset();
-  await createSampleAction(sampleForm());
+  const createResult = await createSampleAction(sampleForm());
   assert.equal(state.capability, "catalog");
   const createCall = state.calls[0]!;
   assert.equal(createCall.name, "saveSample");
@@ -162,15 +179,20 @@ async function main(): Promise<void> {
   assert.equal(createInput.state, "READY");
   assert.equal(createInput.targetMarginRate, 0.5);
   assert.deepEqual(createInput.materials, [{ materialId: "material-1", quantity: 10 }]);
-  assert.equal(feedback().path, "/v2/samples");
-  assert.match(feedback().message ?? "", /SMP-/);
+  assert.equal(createResult.ok, true);
+  assert.match(createResult.message ?? "", /SMP-/);
+  assert.equal(state.redirect, undefined, "drawer success must not redirect");
 
   reset();
-  await updateSampleAction(sampleForm({ sampleId: "sample-9", name: "更新样品", state: "DRAFT" }));
+  const updateResult = await updateSampleAction(
+    sampleForm({ sampleId: "sample-9", name: "更新样品", state: "DRAFT" }),
+  );
   assert.equal(state.calls[0]?.name, "saveSample");
   assert.equal((state.calls[0]?.args[2] as { id?: string }).id, "sample-9");
   assert.equal((state.calls[0]?.args[2] as { state?: string }).state, "DRAFT");
-  assert.match(feedback().message ?? "", /已保存/);
+  assert.equal(updateResult.ok, true);
+  assert.match(updateResult.message ?? "", /已保存/);
+  assert.equal(state.redirect, undefined, "drawer success must not redirect");
 
   reset();
   await copySampleAction(sampleForm({ sampleId: "sample-9" }));
@@ -184,7 +206,7 @@ async function main(): Promise<void> {
   assert.equal(state.calls[0]?.args[3], "ARCHIVED");
 
   reset();
-  await convertSampleAction(sampleForm({
+  const convertResult = await convertSampleAction(sampleForm({
     sampleId: "sample-9",
     productId: "product-9",
     skuName: "标准款",
@@ -211,7 +233,9 @@ async function main(): Promise<void> {
   assert.equal(convertInput.laborCost, 12);
   assert.equal(convertInput.consumableCost, 9);
   assert.deepEqual(convertInput.lines, [{ materialId: "material-1", quantity: 8 }]);
-  assert.match(feedback().message ?? "", /SKU/);
+  assert.equal(convertResult.ok, true);
+  assert.match(convertResult.message ?? "", /SKU/);
+  assert.equal(state.redirect, undefined, "drawer success must not redirect");
 
   reset();
   const batchForm = new FormData();
@@ -220,25 +244,30 @@ async function main(): Promise<void> {
   batchForm.set("newProductName", "批量商品");
   batchForm.set("targetMarginPercent", "40");
   batchForm.set("laborCost", "5");
-  await convertSamplesAction(batchForm);
+  const batchResult = await convertSamplesAction(batchForm);
   const batchCall = state.calls[0]!;
   assert.equal(batchCall.name, "convertSamplesToProduct");
   const batchInput = batchCall.args[2] as { sampleIds: string[]; newProductName: string; targetMarginRate: number };
   assert.deepEqual(batchInput.sampleIds, ["sample-1", "sample-2"]);
   assert.equal(batchInput.newProductName, "批量商品");
   assert.equal(batchInput.targetMarginRate, 0.4);
-  assert.match(feedback().message ?? "", /2 个 SKU/);
+  assert.equal(batchResult.ok, true);
+  assert.match(batchResult.message ?? "", /2 个 SKU/);
+  assert.equal(state.redirect, undefined, "drawer success must not redirect");
 
   reset();
   state.authDenied = true;
-  await createSampleAction(sampleForm());
+  const deniedResult = await createSampleAction(sampleForm());
   assert.equal(state.calls.length, 0);
-  assert.match(feedback().error ?? "", /没有商品权限/);
+  assert.equal(deniedResult.ok, false);
+  assert.match(deniedResult.error ?? "", /没有商品权限/);
+  assert.equal(state.redirect, undefined, "drawer failure must not redirect");
 
   reset();
   state.serviceFailure = new Error("样品名称必填");
-  await createSampleAction(sampleForm());
-  assert.equal(feedback().error, "样品名称必填");
+  const failedResult = await createSampleAction(sampleForm());
+  assert.deepEqual(failedResult, { ok: false, error: "样品名称必填" });
+  assert.equal(state.redirect, undefined, "drawer failure must not redirect");
 
   reset();
   state.digestFailure = { digest: "NEXT_REDIRECT;replace;/v2;307" };

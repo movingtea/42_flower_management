@@ -1,6 +1,5 @@
 "use server";
 
-import { redirect } from "next/navigation";
 import { requireV2Store } from "@/v2/auth";
 import { v2db } from "@/v2/db";
 import {
@@ -8,6 +7,7 @@ import {
   retireRecipeVersion,
   saveRecipeDraft,
 } from "@/v2/services/recipe-management";
+import { runV2DrawerAction } from "../_lib/action-result";
 
 function text(data: FormData, key: string): string {
   const value = data.get(key);
@@ -38,43 +38,10 @@ function parseLines(data: FormData): ParsedLine[] {
   });
 }
 
-function isFrameworkRedirect(cause: unknown): boolean {
-  return typeof cause === "object" && cause !== null && "digest" in cause;
-}
-
-async function redirectWith(
-  recipeId: string | undefined,
-  key: "message" | "error",
-  value: string,
-): Promise<never> {
-  const search = new URLSearchParams();
-  if (recipeId) search.set("recipeId", recipeId);
-  search.set(key, value);
-  redirect(`/v2/recipes?${search.toString()}`);
-}
-
-async function run(
-  operation: () => Promise<{ recipeId: string; message: string }>,
-): Promise<never> {
-  let recipeId: string | undefined;
-  try {
-    const result = await operation();
-    recipeId = result.recipeId;
-    return await redirectWith(recipeId, "message", result.message);
-  } catch (cause) {
-    if (isFrameworkRedirect(cause)) throw cause;
-    return await redirectWith(
-      recipeId,
-      "error",
-      cause instanceof Error ? cause.message : "操作失败",
-    );
-  }
-}
-
-export async function saveRecipeDraftAction(data: FormData): Promise<never> {
-  const scope = await requireV2Store("catalog");
+export async function saveRecipeDraftAction(data: FormData) {
   const versionId = text(data, "versionId");
-  return run(async () => {
+  return runV2DrawerAction(async () => {
+    const scope = await requireV2Store("catalog");
     const result = await v2db.$transaction((tx) =>
       saveRecipeDraft(
         tx,
@@ -86,18 +53,15 @@ export async function saveRecipeDraftAction(data: FormData): Promise<never> {
         },
       ),
     );
-    return {
-      recipeId: result.recipeId,
-      message: versionId
-        ? `配方草稿 v${result.versionNo} 已保存`
-        : `配方草稿 v${result.versionNo} 已创建`,
-    };
-  });
+    return versionId
+      ? `配方草稿 v${result.versionNo} 已保存`
+      : `配方草稿 v${result.versionNo} 已创建`;
+  }, versionId ? "配方草稿已保存" : "配方草稿已创建");
 }
 
-export async function publishRecipeVersionAction(data: FormData): Promise<never> {
-  const scope = await requireV2Store("catalog");
-  return run(async () => {
+export async function publishRecipeVersionAction(data: FormData) {
+  return runV2DrawerAction(async () => {
+    const scope = await requireV2Store("catalog");
     const result = await v2db.$transaction((tx) =>
       publishRecipeVersion(
         tx,
@@ -105,18 +69,15 @@ export async function publishRecipeVersionAction(data: FormData): Promise<never>
         text(data, "versionId"),
       ),
     );
-    return {
-      recipeId: result.recipeId,
-      message: `配方 v${result.versionNo} 已发布${
-        result.retiredVersionIds.length > 0 ? "，原发布版本已停用" : ""
-      }`,
-    };
-  });
+    return `配方 v${result.versionNo} 已发布${
+      result.retiredVersionIds.length > 0 ? "，原发布版本已停用" : ""
+    }`;
+  }, "配方版本已发布");
 }
 
-export async function retireRecipeVersionAction(data: FormData): Promise<never> {
-  const scope = await requireV2Store("catalog");
-  return run(async () => {
+export async function retireRecipeVersionAction(data: FormData) {
+  return runV2DrawerAction(async () => {
+    const scope = await requireV2Store("catalog");
     const result = await v2db.$transaction((tx) =>
       retireRecipeVersion(
         tx,
@@ -124,9 +85,6 @@ export async function retireRecipeVersionAction(data: FormData): Promise<never> 
         text(data, "versionId"),
       ),
     );
-    return {
-      recipeId: result.recipeId,
-      message: `配方 v${result.versionNo} 已停用`,
-    };
-  });
+    return `配方 v${result.versionNo} 已停用`;
+  }, "配方版本已停用");
 }

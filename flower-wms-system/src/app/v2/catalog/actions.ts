@@ -10,6 +10,7 @@ import {
   setProductActive,
   setSkuActive,
 } from "@/v2/services/catalog-management";
+import { runV2DrawerAction } from "../_lib/action-result";
 
 function text(data: FormData, key: string): string {
   const value = data.get(key);
@@ -54,19 +55,19 @@ async function finish(operation: () => Promise<string>): Promise<never> {
 }
 
 export async function createProductAction(data: FormData) {
-  const scope = await requireV2Store("catalog");
-  return finish(async () => {
+  return runV2DrawerAction(async () => {
+    const scope = await requireV2Store("catalog");
     const name = requiredText(data, "name", "商品名称");
     const result = await v2db.$transaction((tx) =>
       saveProduct(tx, { ...scope, actorStaffId: scope.staffId }, { name, active: false, imageKey: text(data, "imageKey") || null }),
     );
     return `商品 ${result.code} 已创建，请添加 SKU 后再启用`;
-  });
+  }, "商品已创建");
 }
 
 export async function updateProductAction(data: FormData) {
-  const scope = await requireV2Store("catalog");
-  return finish(async () => {
+  return runV2DrawerAction(async () => {
+    const scope = await requireV2Store("catalog");
     const productId = requiredText(data, "productId", "商品标识");
     const name = requiredText(data, "name", "商品名称");
     const defaultSkuId = text(data, "defaultSkuId") || null;
@@ -82,12 +83,12 @@ export async function updateProductAction(data: FormData) {
       }),
     );
     return "商品已保存";
-  });
+  }, "商品已保存");
 }
 
 export async function createSkuAction(data: FormData) {
-  const scope = await requireV2Store("catalog");
-  return finish(async () => {
+  return runV2DrawerAction(async () => {
+    const scope = await requireV2Store("catalog");
     const productId = requiredText(data, "productId", "商品标识");
     const result = await v2db.$transaction((tx) =>
       saveSku(tx, { ...scope, actorStaffId: scope.staffId }, {
@@ -102,12 +103,12 @@ export async function createSkuAction(data: FormData) {
       }),
     );
     return `SKU ${result.code} 已创建`;
-  });
+  }, "SKU 已创建");
 }
 
 export async function updateSkuAction(data: FormData) {
-  const scope = await requireV2Store("catalog");
-  return finish(async () => {
+  return runV2DrawerAction(async () => {
+    const scope = await requireV2Store("catalog");
     const skuId = requiredText(data, "skuId", "SKU 标识");
     const productId = requiredText(data, "productId", "商品标识");
     const result = await v2db.$transaction((tx) =>
@@ -124,7 +125,7 @@ export async function updateSkuAction(data: FormData) {
       }),
     );
     return `SKU ${result.code} 已更新`;
-  });
+  }, "SKU 已更新");
 }
 
 export async function setDefaultSkuAction(data: FormData) {

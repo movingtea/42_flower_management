@@ -20,6 +20,7 @@ import {
   type SamplePlanItemInput,
   type SamplePlanStepActualInput,
 } from "@/v2/services/sample-planning";
+import { runV2DrawerAction } from "../_lib/action-result";
 
 type ActionScope = {
   tenantId: string;
@@ -73,8 +74,19 @@ function transactionOptions() {
   return { timeout: 30_000 };
 }
 
+/** Drawer form entries return their outcome instead of redirecting. */
+async function authorizedResult(
+  capability: V2Capability,
+  operation: (scope: ActionScope) => Promise<string>,
+) {
+  return runV2DrawerAction(async () => {
+    const scope = await requireV2Store(capability);
+    return operation({ ...scope, actorStaffId: scope.staffId });
+  }, "操作成功");
+}
+
 export async function createSamplePlanAction(data: FormData) {
-  return authorized("production", async (scope) => {
+  return authorizedResult("production", async (scope) => {
     const items = parseJsonArray<SamplePlanItemInput>(data, "itemsJson", "打样样品");
     const result = await v2db.$transaction((tx) =>
       saveSamplePlan(tx, scope, {
@@ -87,7 +99,7 @@ export async function createSamplePlanAction(data: FormData) {
 }
 
 export async function updateSamplePlanAction(data: FormData) {
-  return authorized("production", async (scope) => {
+  return authorizedResult("production", async (scope) => {
     const items = parseJsonArray<SamplePlanItemInput>(data, "itemsJson", "打样样品");
     const result = await v2db.$transaction((tx) =>
       saveSamplePlan(tx, scope, {

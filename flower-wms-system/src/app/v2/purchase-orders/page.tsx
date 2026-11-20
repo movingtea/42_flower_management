@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { requireV2Store } from "@/v2/auth";
@@ -7,7 +8,7 @@ import {
 } from "@/generated/prisma-v2/client";
 import { calculatePurchaseProgress } from "@/v2/domain/purchase-progress";
 import { receivePurchase, rejectPurchase, finalizeBatchCost } from "../actions";
-import { ActionEmptyState, Field, StatusBadge, V2ModulePage, button, card, input, tableHead, tableShell } from "../_components/V2Ui";
+import { ActionEmptyState, Field, StatusBadge, V2ModulePage, button, card, input, secondaryButton, tableHead, tableShell } from "../_components/V2Ui";
 import { V2DrawerForm } from "../_components/V2Drawer";
 import { readV2Feedback } from "../_lib/search-params";
 import {
@@ -232,17 +233,20 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
     }
   }
 
-  return <V2ModulePage title="采购单管理" description="创建多明细采购草稿、下单、验收、拒收和追踪关联订单缺料；缺料补货与采购关联均在此完成。" message={feedback.message} error={feedback.error} actions={<div id="new-purchase-order" className="scroll-mt-24"><V2DrawerForm
-    triggerLabel="新建采购单"
-    title="新建采购草稿"
-    description="选择供应商、录入明细与费用；采购单号由系统自动生成。"
-    action={createPurchaseDraftAction}
-    submitLabel="创建采购草稿"
-    size="xl"
-    triggerClassName={button}
-  >
-    <PurchaseOrderEditor suppliers={supplierOptions} materials={materialOptions} />
-  </V2DrawerForm></div>}>
+  return <V2ModulePage title="采购单管理" description="创建多明细采购草稿、下单、验收、拒收和追踪关联订单缺料；到货验收也可在独立收货页完成。" message={feedback.message} error={feedback.error} actions={<div className="flex flex-wrap items-center gap-2">
+    <Link href="/v2/receiving" className={secondaryButton}>采购收货</Link>
+    <div id="new-purchase-order" className="scroll-mt-24"><V2DrawerForm
+      triggerLabel="新建采购单"
+      title="新建采购草稿"
+      description="选择供应商、录入明细与费用；采购单号由系统自动生成。"
+      action={createPurchaseDraftAction}
+      submitLabel="创建采购草稿"
+      size="xl"
+      triggerClassName={button}
+    >
+      <PurchaseOrderEditor suppliers={supplierOptions} materials={materialOptions} />
+    </V2DrawerForm></div>
+  </div>}>
     {requirementId && <section className={`${card} border-amber-300`}>
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div><h2 className="text-xl font-semibold">为订单缺料补货</h2><p className="mt-1 text-sm text-stone-600">为当前缺料需求创建一张正式的采购单，并在同一事务内关联到该需求；重复提交不会创建第二张采购单。</p></div>

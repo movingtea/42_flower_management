@@ -1,6 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import {
+  duplicateMaterialNames,
+  materialOptionLabel,
+} from "../../_components/material-option-label";
 
 export type MaterialOption = {
   id: string;
@@ -23,17 +27,6 @@ export type MaterialLine = { materialId: string; quantity: number };
 
 const inputClass = "w-full rounded-lg border border-stone-300 bg-white px-3 py-2 text-sm text-stone-900";
 
-function materialLabel(material: MaterialOption): string {
-  const stock = material.availableQty > 0 ? `可用 ${material.availableQty}${material.baseUnit}` : "无现货";
-  const cost = material.standardUnitCost === null ? "未设成本" : `¥${material.standardUnitCost.toFixed(2)}/${material.baseUnit}`;
-  const classification = classificationLabel({
-    flowerVariety: material.flowerVariety ?? null,
-    flowerProductName: material.flowerProductName ?? null,
-    color: material.color ?? null,
-  });
-  return `${material.code} · ${material.name}${material.active ? "" : "（停用）"}${classification ? ` · ${classification}` : ""}（${stock}，${cost}）`;
-}
-
 export function MaterialLinesEditor({
   materials,
   initialLines,
@@ -53,6 +46,8 @@ export function MaterialLinesEditor({
     () => new Map(materials.map((material) => [material.id, material])),
     [materials],
   );
+
+  const duplicateNames = useMemo(() => duplicateMaterialNames(materials), [materials]);
 
   const update = (index: number, patch: Partial<MaterialLine>) => {
     setLines((current) => current.map((line, row) => row === index ? { ...line, ...patch } : line));
@@ -74,7 +69,7 @@ export function MaterialLinesEditor({
               >
                 {materials.map((material) => (
                   <option key={material.id} value={material.id}>
-                    {materialLabel(material)}
+                    {materialOptionLabel(material, duplicateNames)}
                   </option>
                 ))}
               </select>

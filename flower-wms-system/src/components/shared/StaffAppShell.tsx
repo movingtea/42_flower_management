@@ -8,6 +8,8 @@ type StaffAppShellProps = {
   children: React.ReactNode;
   variant?: "wms" | "cms" | "admin";
   topbarTitle?: string;
+  /** Optional product-specific topbar; defaults to the shared StaffTopbar. */
+  topbar?: React.ReactNode;
   showFooter?: boolean;
   mainClassName?: string;
   shellClassName?: string;
@@ -18,6 +20,7 @@ export function StaffAppShell({
   children,
   variant = "wms",
   topbarTitle,
+  topbar,
   showFooter = false,
   mainClassName = "p-4 md:p-8",
   shellClassName = "bg-zinc-50/80",
@@ -26,7 +29,7 @@ export function StaffAppShell({
     <div className={`flex h-screen overflow-hidden ${shellClassName}`}>
       {sidebar}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        <StaffTopbar variant={variant} title={topbarTitle} />
+        {topbar ?? <StaffTopbar variant={variant} title={topbarTitle} />}
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className={mainClassName}>
             {children}

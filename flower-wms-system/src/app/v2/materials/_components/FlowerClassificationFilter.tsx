@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { input } from "../../_components/V2Ui";
+import { V2FilterField, input } from "../../_components/V2Ui";
 import type { FlowerColorOption, FlowerProductOption } from "./FlowerClassificationFields";
 
 /**
@@ -47,43 +47,49 @@ export function FlowerClassificationFilter({
   )].sort((left, right) => left.localeCompare(right, "zh"));
 
   return <>
-    <select
-      className={`${input} w-36`}
-      name="variety"
-      value={variety}
-      onChange={(event) => {
-        setVariety(event.target.value);
-        // A colour/product from another 种类 would not match the narrowed lists.
-        setColor("");
-        setProductName("");
-      }}
-      aria-label="种类筛选"
-    >
-      <option value="">全部种类</option>
-      {varieties.map((value) => <option key={value} value={value}>{value}</option>)}
-    </select>
-    <select
-      className={`${input} w-36`}
-      name="color"
-      value={color}
-      onChange={(event) => {
-        setColor(event.target.value);
-        setProductName("");
-      }}
-      aria-label="颜色筛选"
-    >
-      <option value="">全部颜色</option>
-      {colorCandidates.map((value) => <option key={value} value={value}>{value}</option>)}
-    </select>
-    <select
-      className={`${input} w-36`}
-      name="productName"
-      value={productName}
-      onChange={(event) => setProductName(event.target.value)}
-      aria-label="商品名筛选"
-    >
-      <option value="">全部商品名</option>
-      {productNames.map((value) => <option key={value} value={value}>{value}</option>)}
-    </select>
+    <V2FilterField label="种类" className="w-36">
+      <select
+        className={`${input} w-full`}
+        name="variety"
+        value={variety}
+        onChange={(event) => {
+          setVariety(event.target.value);
+          // A colour/product from another 种类 would not match the narrowed lists.
+          setColor("");
+          setProductName("");
+        }}
+        aria-label="种类筛选"
+      >
+        <option value="">全部种类</option>
+        {varieties.map((value) => <option key={value} value={value}>{value}</option>)}
+      </select>
+    </V2FilterField>
+    <V2FilterField label="颜色" className="w-36">
+      <select
+        className={`${input} w-full`}
+        name="color"
+        value={color}
+        onChange={(event) => {
+          setColor(event.target.value);
+          setProductName("");
+        }}
+        aria-label="颜色筛选"
+      >
+        <option value="">全部颜色</option>
+        {colorCandidates.map((value) => <option key={value} value={value}>{value}</option>)}
+      </select>
+    </V2FilterField>
+    <V2FilterField label="商品名" className="w-36">
+      <select
+        className={`${input} w-full`}
+        name="productName"
+        value={productName}
+        onChange={(event) => setProductName(event.target.value)}
+        aria-label="商品名筛选"
+      >
+        <option value="">全部商品名</option>
+        {productNames.map((value) => <option key={value} value={value}>{value}</option>)}
+      </select>
+    </V2FilterField>
   </>;
 }

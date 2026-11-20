@@ -8,6 +8,7 @@ import {
   setMaterialCategoryActive,
   updateMaterialCategory,
 } from "@/v2/services/material-category";
+import { runV2DrawerAction } from "../_lib/action-result";
 
 function text(data: FormData, key: string): string {
   const value = data.get(key);
@@ -32,8 +33,8 @@ async function run(operation: () => Promise<void>, success: string): Promise<nev
   }
 }
 
-export async function createMaterialCategoryAction(data: FormData): Promise<never> {
-  return run(async () => {
+export async function createMaterialCategoryAction(data: FormData) {
+  return runV2DrawerAction(async () => {
     const scope = await requireV2Store("catalog");
     await v2db.$transaction((tx) =>
       createMaterialCategory(tx, { ...scope, actorStaffId: scope.staffId }, {
@@ -44,8 +45,8 @@ export async function createMaterialCategoryAction(data: FormData): Promise<neve
   }, "原材料分类已创建");
 }
 
-export async function updateMaterialCategoryAction(data: FormData): Promise<never> {
-  return run(async () => {
+export async function updateMaterialCategoryAction(data: FormData) {
+  return runV2DrawerAction(async () => {
     const scope = await requireV2Store("catalog");
     await v2db.$transaction((tx) =>
       updateMaterialCategory(tx, { ...scope, actorStaffId: scope.staffId }, text(data, "categoryId"), categoryInput(data)),

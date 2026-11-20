@@ -4,7 +4,7 @@ import { FloralRole } from "@/generated/prisma-v2/client";
 import { requireV2Store } from "@/v2/auth";
 import { v2db } from "@/v2/db";
 import { V2DrawerForm } from "../../_components/V2Drawer";
-import { V2ModulePage, button, input } from "../../_components/V2Ui";
+import { V2FilterBar, V2FilterField, V2Meta, V2ModulePage, button, input } from "../../_components/V2Ui";
 import { readV2Feedback } from "../../_lib/search-params";
 import { createMaterialAction } from "../actions";
 import { MaterialKnowledgeEditor } from "../MaterialKnowledgeEditor";
@@ -138,6 +138,16 @@ export async function MaterialMasterPage({
   const hasFilters = Boolean(
     query || category || floralRoleFilter || color || variety || productName || state !== "active",
   );
+  const activeCount = materials.filter((material) => material.active).length;
+  const inactiveCount = materials.length - activeCount;
+  const roleCounts = scope.showFlowerFields
+    ? Object.values(FloralRole)
+        .map((value) => ({
+          value,
+          count: materials.filter((material) => material.floralRole === value).length,
+        }))
+        .filter((entry) => entry.count > 0)
+    : [];
 
   return <V2ModulePage
     title={scope.title}
@@ -164,10 +174,22 @@ export async function MaterialMasterPage({
       <MaterialKnowledgeEditor categories={categories} variant={scope.showFlowerFields ? "flower" : "consumable"} />
     </V2DrawerForm>}
   >
-    <form className="flex flex-wrap gap-2 rounded-xl border border-zinc-200 bg-white p-4">
-      <input className={`${input} max-w-sm`} name="q" defaultValue={query} placeholder={scope.searchPlaceholder} />
+    <V2FilterBar
+      key={`${query}|${state}|${category}|${floralRoleFilter}|${variety}|${color}|${productName}`}
+      action={scope.basePath}
+      label={`${scope.title}筛选`}
+      keyword={{ defaultValue: query, placeholder: scope.searchPlaceholder }}
+      resetHref={hasFilters ? scope.basePath : undefined}
+    >
       {scope.showFlowerFields && <>
-        <select className={`${input} w-40`} name="role" defaultValue={floralRoleFilter}><option value="">全部角色</option>{Object.values(FloralRole).map((value) => <option key={value} value={value}>{FLORAL_ROLE_LABEL[value] ?? value}</option>)}</select>
+        <V2FilterField label="花材角色" className="w-40">
+          <select className={`${input} w-full`} name="role" defaultValue={floralRoleFilter}>
+            <option value="">全部角色</option>
+            {Object.values(FloralRole).map((value) => (
+              <option key={value} value={value}>{FLORAL_ROLE_LABEL[value] ?? value}</option>
+            ))}
+          </select>
+        </V2FilterField>
         <FlowerClassificationFilter
           varieties={classification.varieties}
           products={classification.products}
@@ -177,10 +199,29 @@ export async function MaterialMasterPage({
           defaultColor={color}
         />
       </>}
-      <select className={`${input} w-44`} name="category" defaultValue={category}><option value="">全部分类</option>{categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}</select>
-      <select className={`${input} w-36`} name="state" defaultValue={state}><option value="active">启用</option><option value="inactive">已停用</option><option value="all">全部</option></select>
-      <button className={button}>查询</button>
-    </form>
+      <V2FilterField label="分类" className="w-44">
+        <select className={`${input} w-full`} name="category" defaultValue={category}>
+          <option value="">全部分类</option>
+          {categories.map((item) => <option key={item.id} value={item.id}>{item.name}</option>)}
+        </select>
+      </V2FilterField>
+      <V2FilterField label="状态" className="w-36">
+        <select className={`${input} w-full`} name="state" defaultValue={state}>
+          <option value="active">启用</option>
+          <option value="inactive">已停用</option>
+          <option value="all">全部</option>
+        </select>
+      </V2FilterField>
+    </V2FilterBar>
+
+    <div className="flex flex-wrap items-center gap-2">
+      <V2Meta label="结果">{materials.length} 条</V2Meta>
+      <V2Meta label="启用">{activeCount}</V2Meta>
+      <V2Meta label="停用">{inactiveCount}</V2Meta>
+      {roleCounts.map((entry) => (
+        <V2Meta key={entry.value} label={FLORAL_ROLE_LABEL[entry.value] ?? entry.value}>{entry.count}</V2Meta>
+      ))}
+    </div>
 
     <MaterialTable
       scope={scope}
@@ -190,6 +231,6 @@ export async function MaterialMasterPage({
       classification={classification}
     />
 
-    <p className="text-xs text-zinc-400">{scope.countNote(materials.length)}</p>
+    <p className="text-xs text-stone-500">{scope.countNote(materials.length)}</p>
   </V2ModulePage>;
 }

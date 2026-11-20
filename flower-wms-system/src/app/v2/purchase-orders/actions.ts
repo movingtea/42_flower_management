@@ -6,6 +6,7 @@ import { PurchaseLineRelationKind } from "@/generated/prisma-v2/client";
 import { allocatePurchaseDemand } from "@/v2/services/allocate-purchase-demand";
 import { cancelPurchaseOrder, createLinkedPurchaseOrder, createPurchaseDraft, createPurchaseSupplementLine, submitPurchaseOrder, updatePurchaseDraft, type PurchaseDraftLine } from "@/v2/services/purchase-order-management";
 import { formatQuantity } from "../_lib/purchase-ui";
+import { runV2DrawerAction } from "../_lib/action-result";
 function text(data: FormData, key: string) { const value = data.get(key); return typeof value === "string" ? value.trim() : ""; }
 function number(data: FormData, key: string) { const value = Number(text(data, key) || 0); if (!Number.isFinite(value)) throw new Error(`${key} 必须为数字`); return value; }
 function optionalDate(data: FormData, key: string) { const value = text(data, key); if (!value) return undefined; const date = new Date(value); if (!Number.isFinite(date.getTime())) throw new Error(`${key} 时间无效`); return date; }
@@ -24,8 +25,8 @@ async function runAt(path: string, operation: () => Promise<string>, success: st
   }
   redirect(appendFeedback(path, "message", message));
 }
-export async function createPurchaseDraftAction(data: FormData) { return run(async () => { const scope = await requireV2Store("purchase"); await v2db.$transaction((tx) => createPurchaseDraft(tx, { ...scope, actorStaffId: scope.staffId }, `PO-${Date.now()}-${crypto.randomUUID().slice(0, 6)}`, input(data))); }, "采购草稿已创建"); }
-export async function updatePurchaseDraftAction(data: FormData) { return run(async () => { const scope = await requireV2Store("purchase"); await v2db.$transaction((tx) => updatePurchaseDraft(tx, { ...scope, actorStaffId: scope.staffId }, text(data, "purchaseOrderId"), input(data))); }, "采购草稿已更新"); }
+export async function createPurchaseDraftAction(data: FormData) { return runV2DrawerAction(async () => { const scope = await requireV2Store("purchase"); await v2db.$transaction((tx) => createPurchaseDraft(tx, { ...scope, actorStaffId: scope.staffId }, `PO-${Date.now()}-${crypto.randomUUID().slice(0, 6)}`, input(data))); }, "采购草稿已创建"); }
+export async function updatePurchaseDraftAction(data: FormData) { return runV2DrawerAction(async () => { const scope = await requireV2Store("purchase"); await v2db.$transaction((tx) => updatePurchaseDraft(tx, { ...scope, actorStaffId: scope.staffId }, text(data, "purchaseOrderId"), input(data))); }, "采购草稿已更新"); }
 export async function submitPurchaseOrderAction(data: FormData) { return run(async () => { const scope = await requireV2Store("purchase"); await v2db.$transaction((tx) => submitPurchaseOrder(tx, { ...scope, actorStaffId: scope.staffId }, text(data, "purchaseOrderId"))); }, "采购单已下单"); }
 export async function cancelPurchaseOrderAction(data: FormData) { return run(async () => { const scope = await requireV2Store("purchase"); await v2db.$transaction((tx) => cancelPurchaseOrder(tx, { ...scope, actorStaffId: scope.staffId }, text(data, "purchaseOrderId"), text(data, "reason"))); }, "采购单已取消"); }
 export async function createPurchaseSupplementAction(data: FormData) {

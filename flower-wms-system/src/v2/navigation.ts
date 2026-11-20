@@ -211,6 +211,12 @@ export const V2_NAV_GROUPS: readonly V2NavGroup[] = [
         anyCapabilities: ["purchase"],
       },
       {
+        href: "/v2/receiving",
+        label: "采购收货",
+        icon: "✅",
+        anyCapabilities: ["purchase"],
+      },
+      {
         href: "/v2/suppliers",
         label: "供应商",
         icon: "🚚",
