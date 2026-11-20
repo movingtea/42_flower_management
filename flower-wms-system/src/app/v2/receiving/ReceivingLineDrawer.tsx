@@ -15,6 +15,7 @@ import {
   materialIdentityLabel,
   purchaseOrderStateLabel,
 } from "../_lib/purchase-ui";
+import { materialPickerClass, materialPickerLabel } from "../_components/material-option-label";
 import { isReceivingLineActionable, receivingLineStatus } from "./receiving-query";
 import { receivePurchaseAction, rejectPurchaseAction } from "./actions";
 
@@ -236,9 +237,9 @@ export function ReceivingLineDrawer({
             </select>
           </label>
           <label className="block text-sm text-stone-700">降级后的物料
-            <select className={`${input} mt-1`} name="acceptedMaterialId" defaultValue={line.material.id}>
+            <select className={`${input} ${materialPickerClass} mt-1`} name="acceptedMaterialId" defaultValue={line.material.id}>
               {materialOptions.map((material) => (
-                <option key={material.id} value={material.id}>{material.code} · {material.name}（{material.baseUnit}）</option>
+                <option key={material.id} value={material.id}>{materialPickerLabel(material)}</option>
               ))}
             </select>
             <span className="mt-1 block text-xs text-stone-500">仅“降级”时生效；合格验收始终入库原物料。</span>

@@ -7,10 +7,12 @@ import {
   Field,
   StatusBadge,
   V2ModulePage,
+  V2Table,
   button,
+  dataTableBody,
+  dataTableHead,
   input,
-  tableHead,
-  tableShell,
+  stickyActionHead,
 } from "../_components/V2Ui";
 import { V2DrawerForm } from "../_components/V2Drawer";
 import { readV2Feedback } from "../_lib/search-params";
@@ -22,6 +24,9 @@ import {
 } from "./actions";
 
 export const dynamic = "force-dynamic";
+
+/** Sticky action cell matching the shared 14rem action field width. */
+const STICKY_ACTION = "sticky right-0 z-10 w-56 border-l border-stone-200 px-4 py-3 align-middle";
 
 type CategoryFieldsValue = {
   name: string;
@@ -85,29 +90,34 @@ export default async function MaterialCategoriesPage({ searchParams }: {
         title={query ? "没有匹配的原材料分类" : "还没有原材料分类"}
         description={query ? "换个名称关键词再试，或清空搜索查看全部分类。" : "先创建分类，再到花材母表或耗材母表把物料关联到对应分类。"}
       />
-      : <div className={tableShell}>
-        <table className="w-full text-left text-sm">
-          <thead className={tableHead}>
-            <tr>
-              <th className="px-4 py-3">分类</th>
-              <th>说明</th>
-              <th>排序</th>
-              <th>关联物料</th>
-              <th>状态</th>
-              <th className="px-4">操作</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-100">
-            {categories.map((category) => <tr key={category.id} className={category.active ? "align-top hover:bg-zinc-50" : "align-top bg-zinc-50 text-zinc-500"}>
-              <td className="px-4 py-3">
-                <div className="font-medium text-zinc-900">{category.name}</div>
-                <div className="text-xs text-zinc-500">{category.code}</div>
-              </td>
-              <td className="max-w-xs py-3 text-xs text-zinc-600">{category.description || "—"}</td>
-              <td>{category.sortOrder}</td>
-              <td>{category._count.materials}</td>
-              <td><StatusBadge tone={category.active ? "success" : "neutral"}>{category.active ? "启用" : "停用"}</StatusBadge></td>
-              <td className="px-4 py-3">
+      : <V2Table
+        label="原材料分类列表"
+        fields={["name", "text", "numeric", "numeric", "status", "action"]}
+        minWidthClass="min-w-[62rem]"
+      >
+        <caption className="sr-only">原材料分类列表</caption>
+        <thead className={dataTableHead}>
+          <tr>
+            <th scope="col" className="px-4 py-3 whitespace-nowrap">分类</th>
+            <th scope="col" className="px-4 py-3 whitespace-nowrap">说明</th>
+            <th scope="col" className="px-4 py-3 text-right whitespace-nowrap">排序</th>
+            <th scope="col" className="px-4 py-3 text-right whitespace-nowrap">关联物料</th>
+            <th scope="col" className="px-4 py-3 whitespace-nowrap">状态</th>
+            <th scope="col" className={`${stickyActionHead} whitespace-nowrap`}>操作</th>
+          </tr>
+        </thead>
+        <tbody className={dataTableBody}>
+          {categories.map((category) => <tr key={category.id} className={`align-middle ${category.active ? "hover:bg-stone-50/70" : "bg-stone-50 text-stone-500"}`}>
+            <td className="px-4 py-3 align-middle">
+              <div className="font-medium text-stone-900">{category.name}</div>
+              <div className="font-mono text-xs text-stone-500">{category.code}</div>
+            </td>
+            <td className="px-4 py-3 align-middle text-xs text-stone-600">{category.description || "—"}</td>
+            <td className="px-4 py-3 text-right align-middle tabular-nums whitespace-nowrap">{category.sortOrder}</td>
+            <td className="px-4 py-3 text-right align-middle tabular-nums whitespace-nowrap">{category._count.materials}</td>
+            <td className="px-4 py-3 align-middle"><StatusBadge tone={category.active ? "success" : "neutral"}>{category.active ? "启用" : "停用"}</StatusBadge></td>
+            <td className={`${STICKY_ACTION} ${category.active ? "bg-white" : "bg-stone-50"}`}>
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
                 <V2DrawerForm
                   triggerLabel="编辑"
                   title="编辑原材料分类"
@@ -115,30 +125,30 @@ export default async function MaterialCategoriesPage({ searchParams }: {
                   action={updateMaterialCategoryAction}
                   submitLabel="保存修改"
                   size="md"
-                  triggerClassName="cursor-pointer text-sm text-emerald-700 hover:underline"
+                  triggerClassName="cursor-pointer text-xs font-medium text-emerald-700 underline underline-offset-2"
                 >
                   <input type="hidden" name="categoryId" value={category.id} />
                   <CategoryFields value={category} />
                 </V2DrawerForm>
-                <form action={setMaterialCategoryActiveAction} className="mt-2">
+                <form action={setMaterialCategoryActiveAction}>
                   <input type="hidden" name="categoryId" value={category.id} />
                   <input type="hidden" name="active" value={String(!category.active)} />
-                  <button className="text-xs text-zinc-600 underline">{category.active ? "停用" : "重新启用"}</button>
+                  <button className="text-xs text-stone-600 underline underline-offset-2">{category.active ? "停用" : "重新启用"}</button>
                 </form>
-                <form action={deleteMaterialCategoryAction} className="mt-1">
+                <form action={deleteMaterialCategoryAction}>
                   <input type="hidden" name="categoryId" value={category.id} />
                   <button
-                    className="text-xs text-red-700 underline disabled:cursor-not-allowed disabled:text-zinc-400 disabled:no-underline"
+                    className="text-xs text-red-700 underline underline-offset-2 disabled:cursor-not-allowed disabled:text-stone-400 disabled:no-underline"
                     disabled={category._count.materials > 0}
                     title={category._count.materials > 0 ? "该分类仍有关联物料，需先调整物料分类" : "删除分类"}
                   >删除</button>
                 </form>
-                {category._count.materials > 0 && <p className="mt-1 max-w-[12rem] text-xs text-zinc-400">有关联物料，不能删除</p>}
-              </td>
-            </tr>)}
-          </tbody>
-        </table>
-      </div>}
+              </div>
+              {category._count.materials > 0 && <p className="mt-1 text-[11px] text-stone-400">有关联物料，不能删除</p>}
+            </td>
+          </tr>)}
+        </tbody>
+      </V2Table>}
 
     <p className="text-xs text-zinc-400">共 {categories.length} 个分类；排序值相同时按名称排列。删除分类前需先解除它与全部物料的关联。</p>
   </V2ModulePage>;

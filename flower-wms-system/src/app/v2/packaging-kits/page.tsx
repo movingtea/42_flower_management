@@ -14,6 +14,7 @@ import {
 } from "../_components/V2Ui";
 import { readV2Feedback } from "../_lib/search-params";
 import { V2DrawerForm } from "../_components/V2Drawer";
+import { materialPickerLabel } from "../_components/material-option-label";
 import { PackagingKitEditor } from "./PackagingKitEditor";
 import {
   savePackagingKitAction,
@@ -105,7 +106,7 @@ export default async function PackagingKitsPage({
 
   const materialOptions = materials.map((material) => ({
     id: material.id,
-    label: `${material.code} · ${material.name} · ${material.baseUnit}`,
+    label: materialPickerLabel(material),
   }));
   const totalLines = kits.reduce((sum, kit) => sum + kit.lines.length, 0);
 

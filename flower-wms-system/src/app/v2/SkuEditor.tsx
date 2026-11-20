@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { createSku } from "./actions";
+import { materialPickerClass } from "./_components/material-option-label";
 
 type Option = { id: string; label: string };
 
@@ -16,7 +17,7 @@ export function SkuEditor({ products, materials }: { products: Option[]; materia
     <label className="block text-sm">售价<input className={`${input} mt-1`} name="price" type="number" min="0" step="0.01" required /></label>
     <div className="grid grid-cols-2 gap-2"><label className="block text-sm">每件耗材估算<input className={`${input} mt-1`} name="estimatedConsumableCost" type="number" min="0" step="0.01" defaultValue="0" required /></label><label className="block text-sm">每件人工估算<input className={`${input} mt-1`} name="estimatedLaborCost" type="number" min="0" step="0.01" defaultValue="0" required /></label></div>
     <div><p className="text-sm font-medium">每件配方用料</p>{rows.map((row) => <div key={row.id} className="mt-2 flex gap-2">
-      <select className={input} value={row.materialId} onChange={(event) => setRows((current) => current.map((item) => item.id === row.id ? { ...item, materialId: event.target.value } : item))}>{materials.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select>
+      <select className={`${input} ${materialPickerClass}`} value={row.materialId} onChange={(event) => setRows((current) => current.map((item) => item.id === row.id ? { ...item, materialId: event.target.value } : item))}>{materials.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select>
       <input className={`${input} w-24 shrink-0`} aria-label="每件用量" type="number" min="0.001" step="0.001" value={row.quantity} onChange={(event) => setRows((current) => current.map((item) => item.id === row.id ? { ...item, quantity: event.target.value } : item))} />
       {rows.length > 1 && <button type="button" className="text-sm text-red-700" onClick={() => setRows((current) => current.filter((item) => item.id !== row.id))}>删除</button>}
     </div>)}</div>

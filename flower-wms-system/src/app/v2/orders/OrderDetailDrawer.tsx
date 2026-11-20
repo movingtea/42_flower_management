@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { input } from "../_components/V2Ui";
+import { materialPickerClass, materialPickerDetailLabel } from "../_components/material-option-label";
 import {
   describeProgressState,
   formatPurchaseDateTime,
@@ -647,9 +648,9 @@ function OrderDetailBody({
                     <input type="hidden" name="orderId" value={order.id} />
                     <input type="hidden" name="requirementId" value={requirement.id} />
                     <label className="block text-[11px] text-stone-600 sm:col-span-2">替换为同单位物料
-                      <select className={`${input} mt-0.5`} name="replacementMaterialId" required>
+                      <select className={`${input} ${materialPickerClass} mt-0.5`} name="replacementMaterialId" required>
                         {replacementOptions.map((option) => <option key={option.material.id} value={option.material.id}>
-                          {materialIdentityLabel(option.material)} · 可用 {formatQuantity(option.availableQty)}{option.material.baseUnit}
+                          {materialPickerDetailLabel(option.material)} · 可用 {formatQuantity(option.availableQty)}
                         </option>)}
                       </select>
                     </label>

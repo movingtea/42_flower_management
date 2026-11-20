@@ -4,7 +4,18 @@ import { auth } from "@/auth";
 import { requireV2AnyStore } from "@/v2/auth";
 import { v2db } from "@/v2/db";
 import { summarizeBatchStock } from "@/v2/domain/inventory-summary";
-import { ActionEmptyState, StatusBadge, V2ModulePage, button, card, input, tableHead, tableShell } from "../_components/V2Ui";
+import {
+  ActionEmptyState,
+  StatusBadge,
+  V2ModulePage,
+  V2Table,
+  button,
+  card,
+  dataTableBody,
+  dataTableHead,
+  input,
+  stickyActionHead,
+} from "../_components/V2Ui";
 
 export const dynamic = "force-dynamic";
 
@@ -59,7 +70,50 @@ export default async function InventoryPage({ searchParams }: { searchParams: Pr
       </div>
     </section>
     <form className="flex flex-wrap gap-2 rounded-xl border border-zinc-200 bg-white p-4"><input className={`${input} max-w-sm`} name="q" defaultValue={query} placeholder="搜索物料编码或名称" /><select className={`${input} w-40`} name="stock" defaultValue={stock}><option value="positive">有库存</option><option value="zero">零库存</option><option value="all">全部</option></select><button className={button}>查询</button></form>
-    {rows.length === 0 ? <ActionEmptyState title="还没有符合条件的库存" description="可先创建采购单并验收入库，或通过仓储日常登记紧急现采和其他来源入库。" actionHref="/v2/purchase-orders" actionLabel="创建采购单" /> : <div className={tableShell}><table className="w-full text-left text-sm"><thead className={tableHead}><tr><th className="px-4 py-3">原材料名称</th><th>单位</th><th>实存</th><th>冻结</th><th>预留</th><th>可用</th><th>安全库存</th><th>库存状态</th><th className="px-4">操作</th></tr></thead><tbody className="divide-y divide-zinc-100">{rows.map((row) => <tr key={row.material.id} className={row.lowStock ? "bg-red-50/60" : row.expiring ? "bg-amber-50/60" : "hover:bg-zinc-50"}><td className="px-4 py-3"><div className="font-medium">{row.material.name}</div><div className="text-xs text-zinc-500">{row.material.code}</div></td><td>{row.material.baseUnit}</td><td>{row.onHandQty}</td><td>{row.frozenQty}</td><td>{row.reservedQty}</td><td className="font-semibold">{row.availableQty}</td><td>{row.threshold > 0 ? row.threshold : "—"}</td><td><div className="flex flex-wrap gap-1">{row.lowStock ? <StatusBadge tone="danger">低库存</StatusBadge> : <StatusBadge tone="success">库存正常</StatusBadge>}{!row.lowStock && row.availableQty <= 0 && <StatusBadge tone="danger">无可用库存</StatusBadge>}{row.expiring > 0 && <StatusBadge tone="warning">临期 {row.expiring} 批</StatusBadge>}</div></td><td className="px-4"><Link className="text-emerald-700 hover:underline" href={`/v2/inventory/${row.material.id}`}>库存详情 / FIFO</Link></td></tr>)}</tbody></table></div>}
+    {rows.length === 0
+      ? <ActionEmptyState title="还没有符合条件的库存" description="可先创建采购单并验收入库，或通过仓储日常登记紧急现采和其他来源入库。" actionHref="/v2/purchase-orders" actionLabel="创建采购单" />
+      : <V2Table
+        label="库存列表"
+        fields={["name", "text", "numeric", "numeric", "numeric", "numeric", "numeric", "status", "action"]}
+        minWidthClass="min-w-[72rem]"
+      >
+        <caption className="sr-only">库存列表</caption>
+        <thead className={dataTableHead}><tr>
+          <th scope="col" className="px-4 py-3 whitespace-nowrap">原材料名称</th>
+          <th scope="col" className="px-4 py-3 whitespace-nowrap">单位</th>
+          <th scope="col" className="px-4 py-3 text-right whitespace-nowrap">实存</th>
+          <th scope="col" className="px-4 py-3 text-right whitespace-nowrap">冻结</th>
+          <th scope="col" className="px-4 py-3 text-right whitespace-nowrap">预留</th>
+          <th scope="col" className="px-4 py-3 text-right whitespace-nowrap">可用</th>
+          <th scope="col" className="px-4 py-3 text-right whitespace-nowrap">安全库存</th>
+          <th scope="col" className="px-4 py-3 whitespace-nowrap">库存状态</th>
+          <th scope="col" className={`${stickyActionHead} whitespace-nowrap`}>操作</th>
+        </tr></thead>
+        <tbody className={dataTableBody}>{rows.map((row) => (
+          <tr key={row.material.id} className={`align-middle ${row.lowStock ? "bg-red-50/60" : row.expiring ? "bg-amber-50/60" : "hover:bg-stone-50/70"}`}>
+            <td className="px-4 py-3 align-middle">
+              <div className="font-medium">{row.material.name}</div>
+              <div className="font-mono text-xs text-stone-500">{row.material.code}</div>
+            </td>
+            <td className="px-4 py-3 align-middle whitespace-nowrap">{row.material.baseUnit}</td>
+            <td className="px-4 py-3 text-right align-middle tabular-nums whitespace-nowrap">{row.onHandQty}</td>
+            <td className="px-4 py-3 text-right align-middle tabular-nums whitespace-nowrap">{row.frozenQty}</td>
+            <td className="px-4 py-3 text-right align-middle tabular-nums whitespace-nowrap">{row.reservedQty}</td>
+            <td className="px-4 py-3 text-right align-middle font-semibold tabular-nums whitespace-nowrap">{row.availableQty}</td>
+            <td className="px-4 py-3 text-right align-middle tabular-nums whitespace-nowrap">{row.threshold > 0 ? row.threshold : "—"}</td>
+            <td className="px-4 py-3 align-middle">
+              <div className="flex flex-wrap gap-1">
+                {row.lowStock ? <StatusBadge tone="danger">低库存</StatusBadge> : <StatusBadge tone="success">库存正常</StatusBadge>}
+                {!row.lowStock && row.availableQty <= 0 && <StatusBadge tone="danger">无可用库存</StatusBadge>}
+                {row.expiring > 0 && <StatusBadge tone="warning">临期 {row.expiring} 批</StatusBadge>}
+              </div>
+            </td>
+            <td className="sticky right-0 z-10 w-56 border-l border-stone-200 bg-white px-4 py-3 align-middle">
+              <Link className="whitespace-nowrap text-emerald-700 hover:underline" href={`/v2/inventory/${row.material.id}`}>库存详情 / FIFO</Link>
+            </td>
+          </tr>
+        ))}</tbody>
+      </V2Table>}
     <p className="text-xs text-zinc-400">共 {rows.length} 种物料，其中 {rows.filter((row) => row.lowStock).length} 种低库存；可用量 = 实存 − 冻结 − 有效预留，按批次最低为 0。低库存规则：安全库存大于 0 时实存低于安全库存，否则实存小于或等于 0。</p>
   </V2ModulePage>;
 }

@@ -6,6 +6,7 @@ import { requireV2Context } from "@/v2/auth";
 import { v2db } from "@/v2/db";
 import { Field, StatusBadge, V2ModulePage, button, card, input, tableHead, tableShell } from "../_components/V2Ui";
 import { V2DrawerForm } from "../_components/V2Drawer";
+import { materialPickerClass, materialPickerLabel } from "../_components/material-option-label";
 import { readV2Feedback } from "../_lib/search-params";
 import {
   LOSS_REASON_LABELS,
@@ -556,7 +557,7 @@ export default async function OperationsPage({ searchParams }: { searchParams: P
                 triggerClassName="rounded-lg border border-amber-400 bg-white px-3 py-1.5 text-sm font-medium text-amber-900 hover:bg-amber-100"
               >
                 <input type="hidden" name="idempotencyKey" value={`UNKNOWN-LOSS-${crypto.randomUUID()}`} />
-                <label className="block text-sm text-stone-700">物料<select className={`${input} mt-1`} name="materialId" required>{materials.map((material) => <option key={material.id} value={material.id}>{material.code} · {material.name}</option>)}</select></label>
+                <label className="block text-sm text-stone-700">物料<select className={`${input} ${materialPickerClass} mt-1`} name="materialId" required>{materials.map((material) => <option key={material.id} value={material.id}>{materialPickerLabel(material)}</option>)}</select></label>
                 <label className="block text-sm text-stone-700">发现库位<select className={`${input} mt-1`} name="locationId" required><LocationOptions locations={locations} totals={locationTotals} /></select></label>
                 <Field label="损耗数量" name="quantity" type="number" />
                 <label className="block text-sm text-stone-700">损耗原因<select className={`${input} mt-1`} name="reason">{LOSS_REASON_OPTIONS.map((reason) => <option key={reason} value={reason}>{LOSS_REASON_LABELS[reason]}</option>)}</select></label>
@@ -583,8 +584,8 @@ export default async function OperationsPage({ searchParams }: { searchParams: P
           <input type="hidden" name="idempotencyKey" value={`MANUAL-${crypto.randomUUID()}`} />
           <label className="block text-sm text-stone-700">
             物料
-            <select className={`${input} mt-1`} name="materialId" required>
-              {materials.map((material) => <option key={material.id} value={material.id}>{material.code} · {material.name} · {material.baseUnit}</option>)}
+            <select className={`${input} ${materialPickerClass} mt-1`} name="materialId" required>
+              {materials.map((material) => <option key={material.id} value={material.id}>{materialPickerLabel(material)}</option>)}
             </select>
           </label>
           <label className="block text-sm text-stone-700">

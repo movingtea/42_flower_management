@@ -7,22 +7,19 @@ import {
   V2Table,
   dataTableBody,
   dataTableHead,
-  numericCell,
   numericHead,
-  stickyActionCell,
-  stickyActionCellMuted,
   stickyActionHead,
 } from "../../_components/V2Ui";
 import {
   deleteMaterialAction,
-  setMaterialActiveAction,
   updateMaterialAction,
-  updateMaterialStandardCostAction,
 } from "../actions";
 import { MaterialKnowledgeEditor } from "../MaterialKnowledgeEditor";
 import { FlowerClassificationFields, type FlowerColorOption, type FlowerProductOption } from "./FlowerClassificationFields";
 import { KnowledgeDetails } from "./KnowledgeDetails";
 import { MaterialIdentityFields } from "./MaterialIdentityFields";
+import { MaterialStatusSwitch } from "./MaterialStatusSwitch";
+import { materialColumnFields } from "./material-columns";
 import { FLORAL_ROLE_LABEL, KIND_LABEL, decimalText, formatMoney, toKnowledgeValue } from "./material-format";
 import type { MaterialScopeConfig } from "./material-scope";
 import type { MaterialCategoryOption, MaterialRow } from "./material-types";
@@ -44,10 +41,26 @@ type MaterialTableProps = {
   classification: FlowerClassificationOptions;
 };
 
-const ACTION_TRIGGER =
-  "rounded-md px-1.5 py-1 text-xs font-medium text-emerald-800 transition hover:bg-emerald-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-700";
-const ROW_ACTION =
-  "text-xs underline underline-offset-2 transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-700";
+const CELL = "px-4 py-3 align-middle";
+/** `medium` columns wrap; `anywhere` also stops a long Latin token forcing the column wider. */
+const WRAP_CELL = `${CELL} [overflow-wrap:anywhere]`;
+const HEAD_CELL = "px-4 py-3 align-middle whitespace-nowrap";
+const NUMERIC_HEAD = `${numericHead} whitespace-nowrap`;
+const NUMERIC_CELL = "px-4 py-3 text-right align-middle tabular-nums whitespace-nowrap";
+const ROW_BUTTON =
+  "inline-flex items-center justify-center rounded-md border border-stone-300 bg-white px-2 py-1 text-xs font-medium text-stone-700 transition hover:bg-stone-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-700";
+const ROW_DELETE =
+  "inline-flex items-center justify-center rounded-md border border-red-200 bg-white px-2 py-1 text-xs font-medium text-red-700 transition hover:bg-red-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-red-700";
+/**
+ * Action cells use their own sticky classes so `align-middle` wins over the
+ * shared `align-top`; the three compact buttons stay on one horizontal line and
+ * are vertically centered in the row. The `action` field in `V2_COLUMN_WIDTH`
+ * fixes the width at the same 14rem.
+ */
+const ACTION_CELL =
+  "sticky right-0 z-10 w-56 whitespace-nowrap border-l border-stone-200 bg-white px-4 py-3 align-middle";
+const ACTION_CELL_MUTED =
+  "sticky right-0 z-10 w-56 whitespace-nowrap border-l border-stone-200 bg-stone-50 px-4 py-3 align-middle";
 
 function display(value: string | null | undefined): string {
   const trimmed = value?.trim();
@@ -119,13 +132,17 @@ function MaterialReadOnly({ item, scope }: { item: MaterialRow; scope: MaterialS
  * brand/model and safety stock instead. Both use the same server actions and
  * the same `Material` data model.
  *
- * This is the first real integration of the shared V2 table pattern: each
- * column renders one data field, numeric cells align right, and the rightmost
- * action header/cells opt in to sticky positioning inside the table's own
- * horizontal scroll container.
+ * This uses the shared V2 table pattern: one field per column, field-based
+ * widths declared once on `V2Table`, numeric cells aligned right, a compact
+ * three-button row action cell, and a server-confirmed status switch. Standard
+ * cost remains a read-only column; the edit drawer's existing update action
+ * already accepts `standardUnitCost`, stamps `costUpdatedAt` and audits the
+ * before/after value, so cost editing moved there without adding a second
+ * backend path or a nested form.
  */
 export function MaterialTable({ scope, materials, categories, hasFilters, classification }: MaterialTableProps) {
   const flower = scope.showFlowerFields;
+  const fields = materialColumnFields(flower);
 
   if (materials.length === 0) {
     return <div className="rounded-xl border border-dashed border-zinc-300 bg-white px-6 py-12 text-center">
@@ -134,73 +151,79 @@ export function MaterialTable({ scope, materials, categories, hasFilters, classi
     </div>;
   }
 
-  return <V2Table label={`${scope.title}列表`} minWidthClass="min-w-[68rem]">
+  return <V2Table label={`${scope.title}列表`} fields={fields} minWidthClass="min-w-[68rem]">
     <caption className="sr-only">{scope.title}列表</caption>
     <thead className={dataTableHead}><tr>
-      <th scope="col" className="px-3 py-3">图片</th>
-      <th scope="col" className="px-4 py-3">编号</th>
-      <th scope="col" className="px-4 py-3">名称</th>
-      <th scope="col" className="px-4 py-3">类别</th>
+      <th scope="col" className="px-3 py-3 whitespace-nowrap">图片</th>
+      <th scope="col" className={HEAD_CELL}>编号</th>
+      <th scope="col" className={HEAD_CELL}>名称</th>
+      <th scope="col" className={HEAD_CELL}>类别</th>
       {flower
         ? <>
-          <th scope="col" className="px-4 py-3">角色</th>
-          <th scope="col" className="px-4 py-3">种类</th>
-          <th scope="col" className="px-4 py-3">颜色</th>
-          <th scope="col" className="px-4 py-3">商品名</th>
+          <th scope="col" className={HEAD_CELL}>角色</th>
+          <th scope="col" className={HEAD_CELL}>种类</th>
+          <th scope="col" className={HEAD_CELL}>颜色</th>
+          <th scope="col" className={HEAD_CELL}>商品名</th>
         </>
         : <>
-          <th scope="col" className="px-4 py-3">规格</th>
-          <th scope="col" className="px-4 py-3">品牌</th>
-          <th scope="col" className="px-4 py-3">型号</th>
+          <th scope="col" className={HEAD_CELL}>规格</th>
+          <th scope="col" className={HEAD_CELL}>品牌</th>
+          <th scope="col" className={HEAD_CELL}>型号</th>
         </>}
-      <th scope="col" className="px-4 py-3">库存单位</th>
-      {!flower && <th scope="col" className={numericHead}>安全库存</th>}
-      <th scope="col" className={numericHead}>标准成本</th>
-      <th scope="col" className="px-4 py-3">状态</th>
-      <th scope="col" className={stickyActionHead}>操作</th>
+      <th scope="col" className={HEAD_CELL}>库存单位</th>
+      {!flower && <th scope="col" className={NUMERIC_HEAD}>安全库存</th>}
+      <th scope="col" className={NUMERIC_HEAD}>标准成本</th>
+      <th scope="col" className={HEAD_CELL}>状态</th>
+      <th scope="col" className={`${stickyActionHead} whitespace-nowrap`}>操作</th>
     </tr></thead>
     <tbody className={dataTableBody}>
       {materials.map((item) => {
         const inactive = !item.active;
-        return <tr key={item.id} className={`group align-top ${inactive ? "bg-stone-50 text-stone-500" : "hover:bg-stone-50/70"}`}>
-          <td className="px-3 py-3"><V2ImagePreview stored={item.imageKey} alt={item.name} compact className="h-14 w-14" /></td>
-          <td className="px-4 py-3"><span className="font-mono text-xs text-stone-600">{item.code}</span></td>
-          <td className="px-4 py-3"><span className="font-medium text-stone-900">{item.name}</span></td>
-          <td className="px-4 py-3">{KIND_LABEL[item.kind] ?? item.kind}</td>
+        return <tr key={item.id} className={`group align-middle ${inactive ? "bg-stone-50 text-stone-500" : "hover:bg-stone-50/70"}`}>
+          <td className="px-3 py-3 align-middle whitespace-nowrap"><V2ImagePreview stored={item.imageKey} alt={item.name} compact className="h-14 w-14" /></td>
+          <td className={`${CELL} whitespace-nowrap`}><span className="font-mono text-xs text-stone-600">{item.code}</span></td>
+          <td className={CELL}><span className="font-medium break-words text-stone-900">{item.name}</span></td>
+          <td className={`${CELL} whitespace-nowrap`}>{KIND_LABEL[item.kind] ?? item.kind}</td>
           {flower
             ? <>
-              <td className="px-4 py-3">
+              <td className={`${CELL} whitespace-nowrap`}>
                 {item.floralRole
                   ? <StatusBadge tone="info">{FLORAL_ROLE_LABEL[item.floralRole] ?? item.floralRole}</StatusBadge>
                   : <span className="text-xs text-stone-400">未设置</span>}
               </td>
-              <td className="px-4 py-3">{display(item.flowerVariety)}</td>
-              <td className="px-4 py-3">{display(item.color)}</td>
-              <td className="px-4 py-3">{display(item.flowerProductName)}</td>
+              <td className={WRAP_CELL}>{display(item.flowerVariety)}</td>
+              <td className={`${CELL} whitespace-nowrap`}>{display(item.color)}</td>
+              <td className={WRAP_CELL}>{display(item.flowerProductName)}</td>
             </>
             : <>
-              <td className="px-4 py-3">{display(item.specification)}</td>
-              <td className="px-4 py-3">{display(item.brand)}</td>
-              <td className="px-4 py-3">{display(item.model)}</td>
+              <td className={WRAP_CELL}>{display(item.specification)}</td>
+              <td className={WRAP_CELL}>{display(item.brand)}</td>
+              <td className={WRAP_CELL}>{display(item.model)}</td>
             </>}
-          <td className="px-4 py-3">{item.baseUnit}</td>
-          {!flower && <td className={numericCell}>{decimalText(item.safetyStockThreshold) ?? "0"}</td>}
-          <td className={numericCell}>{formatMoney(item)}</td>
-          <td className="px-4 py-3"><StatusBadge tone={item.active ? "success" : "neutral"}>{item.active ? "启用" : "停用"}</StatusBadge></td>
-          <td className={`${inactive ? stickyActionCellMuted : stickyActionCell} ${inactive ? "" : "group-hover:bg-stone-50"}`}>
-            <div className="flex items-center gap-1">
+          <td className={`${CELL} whitespace-nowrap`}>{item.baseUnit}</td>
+          {!flower && <td className={NUMERIC_CELL}>{decimalText(item.safetyStockThreshold) ?? "0"}</td>}
+          <td className={NUMERIC_CELL}>{formatMoney(item)}</td>
+          <td className={CELL}>
+            <MaterialStatusSwitch
+              materialId={item.id}
+              materialName={item.name}
+              active={item.active}
+              returnTo={scope.basePath}
+            />
+          </td>
+          <td className={`${inactive ? ACTION_CELL_MUTED : ACTION_CELL} ${inactive ? "" : "group-hover:bg-stone-50"}`}>
+            <div className="flex items-center justify-start gap-1.5">
               <V2Drawer
                 triggerLabel="查看"
                 triggerAriaLabel={`查看 ${item.name}`}
                 title={`${scope.editDescriptionPrefix}详情`}
                 description={`${item.code} · ${item.name}`}
                 size="lg"
-                triggerClassName={ACTION_TRIGGER}
+                triggerClassName={ROW_BUTTON}
                 footerNote="只读预览，不会修改数据。"
               >
                 <MaterialReadOnly item={item} scope={scope} />
               </V2Drawer>
-              <span aria-hidden className="text-stone-300">|</span>
               <V2DrawerForm
                 triggerLabel="编辑"
                 triggerAriaLabel={`编辑 ${item.name}`}
@@ -209,8 +232,8 @@ export function MaterialTable({ scope, materials, categories, hasFilters, classi
                 action={updateMaterialAction}
                 submitLabel="保存修改"
                 size="xl"
-                triggerClassName={ACTION_TRIGGER}
-                footerNote="编号由系统生成，编辑时不会修改。"
+                triggerClassName={ROW_BUTTON}
+                footerNote="编号由系统生成，编辑时不会修改；标准成本可在「标准成本」区修改。"
               >
                 <input type="hidden" name="materialId" value={item.id} />
                 <input type="hidden" name="returnTo" value={scope.basePath} />
@@ -227,37 +250,18 @@ export function MaterialTable({ scope, materials, categories, hasFilters, classi
                   variant={flower ? "flower" : "consumable"}
                 />
               </V2DrawerForm>
-            </div>
-
-            <div className="mt-2 flex flex-wrap items-start gap-x-3 gap-y-1 border-t border-stone-100 pt-2">
-              <form action={setMaterialActiveAction}>
+              <form action={deleteMaterialAction} className="inline-flex">
                 <input type="hidden" name="materialId" value={item.id} />
                 <input type="hidden" name="returnTo" value={scope.basePath} />
-                <input type="hidden" name="active" value={String(!item.active)} />
-                <button className={`${ROW_ACTION} text-stone-600 hover:text-stone-900`}>{item.active ? "停用" : "重新启用"}</button>
-              </form>
-              <form action={updateMaterialStandardCostAction} className="flex items-center gap-1">
-                <input type="hidden" name="materialId" value={item.id} />
-                <input type="hidden" name="returnTo" value={scope.basePath} />
-                <input
-                  className="w-16 rounded border border-stone-300 px-1.5 py-1 text-xs tabular-nums text-stone-900"
-                  name="standardUnitCost"
-                  type="number"
-                  min={0}
-                  step={0.0001}
-                  defaultValue={decimalText(item.standardUnitCost) ?? ""}
-                  placeholder="成本"
-                  aria-label={`${item.name} 标准单位成本`}
-                />
-                <button className={`${ROW_ACTION} text-emerald-800 hover:text-emerald-900`}>改成本</button>
-              </form>
-              <form action={deleteMaterialAction}>
-                <input type="hidden" name="materialId" value={item.id} />
-                <input type="hidden" name="returnTo" value={scope.basePath} />
-                <button className={`${ROW_ACTION} text-red-700 hover:text-red-900`} aria-label={`删除 ${item.name}`}>删除</button>
+                <button
+                  className={ROW_DELETE}
+                  aria-label={`删除 ${item.name}`}
+                  title="有业务引用时无法删除"
+                >
+                  删除
+                </button>
               </form>
             </div>
-            {item.active && <p className="mt-1 max-w-[12rem] text-[11px] leading-4 text-stone-400">有业务引用时只能停用</p>}
           </td>
         </tr>;
       })}

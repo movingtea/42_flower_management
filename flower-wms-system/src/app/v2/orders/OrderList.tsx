@@ -81,7 +81,11 @@ export function OrderList({
     </div>;
   }
 
-  return <V2Table label="订单列表" minWidthClass="min-w-[62rem]">
+  return <V2Table
+    label="订单列表"
+    fields={["code", "name", "text", "numeric", "status", "action"]}
+    minWidthClass="min-w-[62rem]"
+  >
     <caption className="sr-only">订单列表</caption>
     <thead className={dataTableHead}>
       <tr>
@@ -103,10 +107,10 @@ export function OrderList({
             : "未安排";
         return <tr key={order.id} className="align-top transition hover:bg-stone-50/70">
           <td className="px-4 py-3">
-            <Link href={href} className="font-medium text-stone-900 hover:text-emerald-800">
+            <Link href={href} className="whitespace-nowrap font-medium text-stone-900 hover:text-emerald-800">
               {order.number}
             </Link>
-            <div className="mt-0.5 text-xs text-stone-500">
+            <div className="mt-0.5 whitespace-nowrap text-xs text-stone-500">
               第 {order.version} 版{order.revisions[0] ? ` · 修订 ${order.revisions[0].number}` : ""}
             </div>
           </td>
@@ -119,7 +123,7 @@ export function OrderList({
           <td className="max-w-[18rem] px-4 py-3 text-xs leading-5 text-stone-600">
             {itemSummary(order)}
           </td>
-          <td className="px-4 py-3 text-right text-sm font-medium tabular-nums text-stone-900">
+          <td className="whitespace-nowrap px-4 py-3 text-right text-sm font-medium tabular-nums text-stone-900">
             ¥{formatCents(orderTotalCents(order))}
           </td>
           <td className="px-4 py-3">

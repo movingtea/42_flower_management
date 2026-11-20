@@ -9,6 +9,9 @@ updated: 2026-11-20
 sources:
   - "flower-wms-system/src/v2/domain/identifiers.ts"
   - "flower-wms-system/src/app/v2/_components/V2Drawer.tsx"
+  - "flower-wms-system/src/app/v2/_components/V2Ui.tsx"
+  - "flower-wms-system/src/app/v2/_components/table-columns.ts"
+  - "flower-wms-system/src/app/v2/_components/material-option-label.ts"
   - "flower-wms-system/scripts/v2/reset-business-data.mjs"
   - "docs/flower-studio-2.0-local-run.md"
 related:
@@ -58,4 +61,12 @@ related:
 - 名称选填：花材的 `Material.name` 允许留空，服务端按“种类 · 颜色 · 商品名”自动生成（如 `玫瑰 · 粉色 · 玛格丽特`），仍允许手填覆盖；耗材没有三级分类，名称保持必填。数据库列保持非空，不做删列迁移。
 - 打样复用建议：`sample-planning` 以“三级全同优先、其次种类+颜色相同”作为推荐样品的排序信号，并写入 `candidateSnapshot.suggestedSampleReasons`；分类匹配只影响排序与提示，不改变实际复用量、成本与预留（WMS-BR-SMP-001/002/003）。旧快照无该字段时页面不显示徽标。
 - 已放弃/待评审：花材编辑隐藏品牌/型号字段，历史上若有值会在保存时清空（V1 FlowerWiki 无此字段，暂无生产数据）；花材三级分类目前是自由文本 + 级联联想，未建字典表，是否需要规范化分类树待业务确认。
+
+## 6. 业务列表字段列宽与物料选择器（2026-11-20）
+
+- 表格基元：`V2Table` 接受按列顺序声明的 `fields`，并渲染带 `data-field` 的 `<colgroup>`；列宽来自 `table-columns.ts` 的 `V2_COLUMN_WIDTH`，不再使用统一宽度。
+- 列宽口径：通用文本字段至少保证 10 个汉字同行（`calc(10em + 2rem)`，`2rem` 为左右单元格内边距）；名称列 `16em`、编号列 `12em`；图片 `5.5rem`、数字 `8em`、操作列 `14rem`。物料母表中类别、角色、颜色与库存单位使用紧凑列 `short`（5 个汉字），种类、商品名、规格、品牌与型号使用 `medium`（7 个汉字）并允许换行，避免短值按 10 个汉字占宽而把名称、成本、操作列挤出屏幕。不可断的长内容仍可撑宽，表格横向滚动而不压缩文字。
+- 覆盖范围（2026-11-20）：花材母表、耗材母表、原材料分类、订单列表、采购收货两张列表、供应商列表、采购单列表、库存列表。两张母表统一使用紧凑的“查看/编辑/删除”行操作与服务端确认的状态开关，标准成本只在编辑抽屉修改。
+- 物料选择器：业务表单统一使用 `materialPickerLabel`（`名称（单位）`，停用物料追加“（已停用）”，不显示系统生成的物料编号）与 `materialPickerClass`（桌面最小 18rem、窄屏自适应）；编号仍保留在物料母表列表与详情抽屉中供审计。订单人工替换使用 `materialPickerDetailLabel`（`名称（单位） · 等级/颜色/规格`），同样不显示编号；样品编辑器继续使用带可用量和标准成本的 `materialOptionLabel`。覆盖采购单、采购收货、标准配方、包装方案、样品、库存作业、人工替换与旧 SKU/配方编辑器。
+- 待评审：配方/包装方案/样品卡片内的明细表，以及仓储日常的历史流水表，尚未改用 `V2Table.fields`；它们不是本次实体列表的覆盖范围。字段列宽只影响展示，不改变任何业务规则、接口或库存口径。
 

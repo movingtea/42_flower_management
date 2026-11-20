@@ -353,7 +353,11 @@ export default async function ReceivingPage({
           actionLabel="前往采购单管理"
         />
       ) : (
-        <V2Table label="采购收货明细" minWidthClass="min-w-[70rem]">
+        <V2Table
+          label="采购收货明细"
+          fields={["code", "name", "date", "numeric", "numeric", "numeric", "status", "action"]}
+          minWidthClass="min-w-[70rem]"
+        >
           <caption className="sr-only">采购收货明细</caption>
           <thead className={dataTableHead}>
             <tr>
@@ -432,7 +436,11 @@ export default async function ReceivingPage({
             还没有采购收货记录。
           </p>
         ) : (
-          <V2Table label="最近采购收货记录" minWidthClass="min-w-[58rem]">
+          <V2Table
+            label="最近采购收货记录"
+            fields={["date", "code", "name", "status", "numeric", "numeric", "text"]}
+            minWidthClass="min-w-[58rem]"
+          >
             <thead className={dataTableHead}>
               <tr>
                 <th scope="col" className="px-4 py-3">收货时间</th>

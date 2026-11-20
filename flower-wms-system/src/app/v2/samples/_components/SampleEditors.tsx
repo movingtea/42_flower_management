@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import {
   duplicateMaterialNames,
   materialOptionLabel,
+  materialPickerClass,
 } from "../../_components/material-option-label";
 
 export type MaterialOption = {
@@ -63,7 +64,7 @@ export function MaterialLinesEditor({
             <label className="text-xs text-stone-600">
               物料
               <select
-                className={`${inputClass} mt-1`}
+                className={`${inputClass} ${materialPickerClass} mt-1`}
                 value={line.materialId}
                 onChange={(event) => update(index, { materialId: event.target.value })}
               >

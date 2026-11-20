@@ -288,13 +288,21 @@ export function V2FilterField({ label, children, className = "" }: {
   </label>;
 }
 
+export { V2_COLUMN_WIDTH, v2ColumnWidth, type V2ColumnField } from "./table-columns";
+import { V2_COLUMN_WIDTH, type V2ColumnField } from "./table-columns";
+
 /**
  * Server-rendered table scroll container for the shared V2 table pattern.
- * The rightmost action column opts in to sticky styling; nothing here targets
- * every table globally.
+ * Pass `fields` in column order to opt in to field-based widths; the generated
+ * `<colgroup>` carries a `data-field` marker so the width contract stays
+ * inspectable in the browser. The rightmost action column still opts in to
+ * sticky styling; nothing here targets every table globally.
  */
-export function V2Table({ label, minWidthClass = "min-w-[68rem]", children }: {
-  label: string; minWidthClass?: string; children: ReactNode;
+export function V2Table({ label, fields, minWidthClass = "min-w-[68rem]", children }: {
+  label: string;
+  fields?: readonly V2ColumnField[];
+  minWidthClass?: string;
+  children: ReactNode;
 }) {
   return <div
     role="region"
@@ -302,7 +310,16 @@ export function V2Table({ label, minWidthClass = "min-w-[68rem]", children }: {
     tabIndex={0}
     className="max-w-full min-w-0 overflow-x-auto rounded-xl border border-stone-200 bg-white shadow-sm focus-visible:outline focus-visible:outline-2 focus-visible:outline-emerald-700"
   >
-    <table className={`w-full border-collapse text-left text-sm ${minWidthClass}`}>{children}</table>
+    <table className={`w-full border-collapse text-left text-sm ${minWidthClass}`}>
+      {fields && fields.length > 0 ? <colgroup>
+        {fields.map((field, index) => <col
+          key={`${index}-${field}`}
+          data-field={field}
+          style={{ width: V2_COLUMN_WIDTH[field] }}
+        />)}
+      </colgroup> : null}
+      {children}
+    </table>
   </div>;
 }
 

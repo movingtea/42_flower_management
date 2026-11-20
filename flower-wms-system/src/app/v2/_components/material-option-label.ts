@@ -1,12 +1,59 @@
 /**
- * Pure label formatting for material pickers in the samples editor.
+ * Shared formatting for material pickers.
  *
- * The submitted value stays the material id; this helper only decides what
- * staff read in the closed select and its option list. It deliberately omits
- * the material code, avoids repeating a classification part already present in
- * an auto-generated name, and adds an available descriptor when two materials
- * share the same name.
+ * The submitted value always stays the material id; these helpers only decide
+ * what staff read in the closed select and its option list. `materialPickerLabel`
+ * is the compact identity form used by business forms (name · unit). The
+ * system-generated material code is intentionally not displayed here: staff
+ * choose materials by name and unit, and the code stays visible in the material
+ * master table and detail drawer where it is needed for auditing.
+ *
+ * `materialPickerDetailLabel` adds grade/colour/specification for replacement
+ * pickers. `materialOptionLabel` below is the richer samples label that adds
+ * stock and cost context and resolves duplicate names.
+ *
+ * `materialPickerClass` keeps the control wide enough for a realistic material
+ * name on desktop and lets it shrink on narrow screens; the option text is never
+ * truncated by a fixed width.
  */
+
+export type MaterialPickerIdentity = {
+  name: string;
+  baseUnit: string;
+  active?: boolean;
+};
+
+/** Field width for material pickers, shared by every business form. */
+export const materialPickerClass = "min-w-0 w-full sm:min-w-[18rem]";
+
+export function materialPickerLabel(material: MaterialPickerIdentity): string {
+  const name = material.name.trim() || "未命名物料";
+  const unit = material.baseUnit.trim();
+  const inactive = material.active === false ? "（已停用）" : "";
+  return `${name}${inactive}${unit ? `（${unit}）` : ""}`;
+}
+
+export type MaterialPickerDetail = MaterialPickerIdentity & {
+  grade?: string | null;
+  color?: string | null;
+  specification?: string | null;
+};
+
+/**
+ * Picker label for replacement/alternative materials. It keeps the grade,
+ * colour and specification that distinguish similar materials, but still omits
+ * the system-generated code. Details already present in the (auto-generated)
+ * name are not repeated.
+ */
+export function materialPickerDetailLabel(material: MaterialPickerDetail): string {
+  const identity = materialPickerLabel(material);
+  const lowerName = (material.name.trim() || "未命名物料").toLocaleLowerCase("zh-CN");
+  const details = [material.grade, material.color, material.specification]
+    .map((part) => part?.trim() ?? "")
+    .filter((part) => part.length > 0 && !lowerName.includes(part.toLocaleLowerCase("zh-CN")));
+  return details.length > 0 ? `${identity} · ${details.join(" · ")}` : identity;
+}
+
 export type MaterialOptionLabelInput = {
   name: string;
   kind: string;

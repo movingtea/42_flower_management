@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Field, input } from "../_components/V2Ui";
+import { materialPickerClass } from "../_components/material-option-label";
 
 /**
  * Fields-only packaging kit editor rendered inside `V2DrawerForm`.
@@ -85,7 +86,7 @@ export function PackagingKitEditor({
               <label className="min-w-0 flex-1 text-xs text-stone-600">
                 物料
                 <select
-                  className={`${input} mt-1`}
+                  className={`${input} ${materialPickerClass} mt-1`}
                   value={line.materialId}
                   onChange={(event) =>
                     updateLine(index, { materialId: event.target.value })
