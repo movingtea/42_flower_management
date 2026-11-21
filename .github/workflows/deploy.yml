@@ -68,24 +68,40 @@ jobs:
           echo "$SSH_KEY" > /tmp/id_rsa
           chmod 600 /tmp/id_rsa
 
+          # The remote script is staged to a file and executed from that file.
+          # Feeding it to `bash -s` on stdin is unsafe: any command that reads
+          # stdin (`docker compose run`, `docker compose exec`, ...) swallows the
+          # rest of the script, bash then hits EOF and exits 0, so the step goes
+          # green while everything after that command never ran (observed
+          # 2026-11-21: Actions success, production stack stayed on the old SHA).
+          # Running from a file keeps the script intact regardless of stdin use.
           ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no "root@${HOST_IP}" \
-            "REMOTE_PLATFORM_DIR=${REMOTE_PLATFORM_DIR} IMAGE_SHA=${{ github.sha }} bash -s" <<'REMOTE'
+            "umask 077; cat > /tmp/flower-deploy-remote.sh" <<'REMOTE'
           set -euo pipefail
           cd "${REMOTE_PLATFORM_DIR}"
 
           image="crpi-bp5b6vut8l4d7ebv.cn-hangzhou.personal.cr.aliyuncs.com/universe42/flower-platform-app:${IMAGE_SHA}"
           override="$(mktemp)"
-          trap 'rm -f "$override"' EXIT
+
+          # Belt and braces for the stdin class of bugs: a successful exit is only
+          # accepted once the new image is confirmed running, and the staged script
+          # removes itself. A silent early exit becomes a failed step instead of a
+          # false green.
+          deploy_complete=0
+          trap 'rc=$?; rm -f "$override"; case "$0" in /tmp/flower-deploy-remote.sh) rm -f "$0";; esac; if [ "$rc" -eq 0 ] && [ "$deploy_complete" -ne 1 ]; then echo "[deploy] ERROR: remote script exited before the new image was confirmed running (early exit or truncation)"; rc=1; fi; exit "$rc"' EXIT
           printf 'services:\n  flower-web:\n    image: "%s"\n  flower-cron-worker:\n    image: "%s"\n' "$image" "$image" > "$override"
           compose() { docker compose -f docker-compose.yml -f "$override" "$@"; }
 
           echo "[deploy] pull SHA image from ACR..."
           compose pull flower-web flower-cron-worker
-          compose run --rm --no-deps --entrypoint sh flower-web -ec '
+          # `docker compose run` reads stdin by default. Without `-T` and an explicit
+          # /dev/null stdin it consumes the rest of this script and the deploy stops
+          # here with exit code 0 (observed 2026-11-21: Actions green, stack stale).
+          compose run -T --rm --no-deps --entrypoint sh flower-web -ec '
             : "${DATABASE_URL:?DATABASE_URL is required}"
             : "${V2_DATABASE_URL:?V2_DATABASE_URL is required}"
             node scripts/check-v2-database-target.mjs --connect
-          '
+          ' < /dev/null
 
           echo "[deploy] restart app stack (db container untouched)..."
           compose stop flower-nginx flower-web flower-cron-worker || true
@@ -117,6 +133,7 @@ jobs:
             exit 1
           fi
           echo "[deploy] running image: ${running_image}"
+          deploy_complete=1
 
           echo "[deploy] prisma migrate status:"
           compose exec -T flower-web npx prisma migrate status
@@ -146,5 +163,10 @@ jobs:
 
           echo "[deploy] done."
           REMOTE
+
+          # Execute the staged script. Its stdin is empty, so no command inside can
+          # truncate it; the script deletes itself on exit.
+          ssh -i /tmp/id_rsa -o StrictHostKeyChecking=no "root@${HOST_IP}" \
+            "REMOTE_PLATFORM_DIR=${REMOTE_PLATFORM_DIR} IMAGE_SHA=${{ github.sha }} bash /tmp/flower-deploy-remote.sh"
 
           rm -f /tmp/id_rsa
