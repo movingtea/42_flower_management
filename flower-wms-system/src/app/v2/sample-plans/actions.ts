@@ -9,6 +9,8 @@ import {
   cancelPlan,
   completeStep,
   copySamplePlan,
+  createPlanFromRecommendation,
+  loadSamplePlanRecommendations,
   pausePlan,
   recalculatePlan,
   resumePlan,
@@ -20,7 +22,7 @@ import {
   type SamplePlanItemInput,
   type SamplePlanStepActualInput,
 } from "@/v2/services/sample-planning";
-import { runV2DrawerAction } from "../_lib/action-result";
+import { isV2ControlFlowError, runV2DrawerAction } from "../_lib/action-result";
 
 type ActionScope = {
   tenantId: string;
@@ -95,6 +97,62 @@ export async function createSamplePlanAction(data: FormData) {
       })
     );
     return `打样计划 ${result.name} 已创建，请计算方案`;
+  });
+}
+
+/**
+ * Recommendation lookup for the creation drawer. It is read-only, returns a
+ * typed result (not the redirect feedback contract), and never persists a plan.
+ */
+export async function recommendSamplePlanSamplesAction(input: {
+  mainSampleId: string;
+  plannedCount: number;
+}) {
+  try {
+    const scope = await requireV2Store("production");
+    const result = await v2db.$transaction((tx) =>
+      loadSamplePlanRecommendations(tx, {
+        tenantId: scope.tenantId,
+        storeId: scope.storeId,
+        actorStaffId: scope.staffId,
+      }, {
+        mainSampleId: typeof input?.mainSampleId === "string" ? input.mainSampleId : "",
+        plannedCount: Number(input?.plannedCount),
+      })
+    );
+    return {
+      ok: true as const,
+      candidates: result.candidates,
+      eligibleCount: result.eligibleCount,
+      requestedCount: result.requestedCount,
+    };
+  } catch (cause) {
+    if (isV2ControlFlowError(cause)) throw cause;
+    return {
+      ok: false as const,
+      error: cause instanceof Error ? cause.message : "获取推荐失败",
+    };
+  }
+}
+
+export async function createSamplePlanFromRecommendationAction(data: FormData) {
+  return authorizedResult("production", async (scope) => {
+    const rawSelected = parseJsonArray<unknown>(data, "selectedSampleIds", "推荐样品");
+    if (rawSelected.some((value) => typeof value !== "string")) {
+      throw new Error("推荐样品格式无效");
+    }
+    const plannedCount = Number(requiredText(data, "plannedCount", "计划制作样品数"));
+    const result = await v2db.$transaction((tx) =>
+      createPlanFromRecommendation(tx, scope, {
+        name: requiredText(data, "name", "打样计划名称"),
+        mainSampleId: requiredText(data, "mainSampleId", "主样品"),
+        plannedCount,
+        selectedSampleIds: rawSelected as string[],
+      }),
+      transactionOptions(),
+    );
+    const top = result.calculation.runs[0];
+    return `打样计划「${result.plan.name}」已计算：${result.calculation.runs.length} 个方案${top ? `，首选总成本 ¥${top.totalCost.toFixed(2)}` : ""}${result.calculation.warnings.length > 0 ? `；${result.calculation.warnings.join("；")}` : ""}`;
   });
 }
 

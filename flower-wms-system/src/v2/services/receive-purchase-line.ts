@@ -11,6 +11,10 @@ import {
   type PurchaseReceiptRow,
 } from "../domain/purchase-progress";
 import { assertMaterialQuantity } from "../domain/stock-planning";
+import {
+  applyProcurementLoss,
+  resolveProcurementLossRate,
+} from "../domain/procurement-loss";
 
 export type ReceivePurchaseLineInput = {
   /** Tenant that owns the purchase order, accepted material and audit event. */
@@ -143,7 +147,10 @@ export async function receivePurchaseLine(
   // Re-read only after both locks; ownership and quantities must not rely on the pre-lock read.
   const line = await tx.purchaseOrderLine.findUnique({
     where: { id: input.purchaseLineId },
-    include: { purchaseOrder: true, material: true },
+    include: {
+      purchaseOrder: { include: { supplier: true } },
+      material: true,
+    },
   });
   if (!line) throw new Error("采购明细不存在或不属于当前门店");
   const order = line.purchaseOrder;
@@ -228,6 +235,26 @@ export async function receivePurchaseLine(
     throw new Error("收货处置类型无效");
   }
 
+  // The channel loss rate is snapshotted on the purchase line. Legacy lines
+  // without a snapshot fall back to the supplier's current channel rate, then
+  // to the material default. Physical quantity and inventory movement below
+  // stay unchanged; only cost per usable unit is loss-adjusted.
+  const channelLossRate = resolveProcurementLossRate({
+    supplierRate: line.channelLossRate === null
+      ? (line.purchaseOrder.supplier.defaultLossRate === null
+          ? null
+          : Number(line.purchaseOrder.supplier.defaultLossRate))
+      : Number(line.channelLossRate),
+    materialRate: line.material.defaultLossRate === null
+      ? null
+      : Number(line.material.defaultLossRate),
+  });
+  const loss = applyProcurementLoss({
+    quantity: input.quantity,
+    unitCost: input.finalUnitCost,
+    lossRate: channelLossRate,
+  });
+
   const expectedBaseQty = resolveExpectedBaseQty(
     line.expectedBaseQty === null ? null : decimal(line.expectedBaseQty),
     decimal(line.orderedQty),
@@ -266,6 +293,7 @@ export async function receivePurchaseLine(
         ? input.gradeChangeReason?.trim()
         : undefined,
       finalUnitCost: input.finalUnitCost,
+      channelLossRate,
     },
   });
   const batch = await tx.inventoryBatch.create({
@@ -276,6 +304,8 @@ export async function receivePurchaseLine(
       batchNo,
       usableUntil: input.usableUntil,
       unitCost: input.finalUnitCost,
+      channelLossRate,
+      lossAdjustedUnitCost: loss.lossAdjustedUnitCost,
       costEstimated: false,
     },
   });
@@ -311,6 +341,7 @@ export async function receivePurchaseLine(
     disposition: input.disposition,
     quantity: input.quantity,
     expectedBaseQty,
+    channelLossRate,
     priorPurchaseState,
     nextPurchaseState: nextPurchaseStateValue,
     idempotencyKey,
@@ -334,6 +365,10 @@ export async function receivePurchaseLine(
         ...progressSnapshot(afterProgress, nextPurchaseStateValue),
         batchId: batch.id,
         batchNo,
+        channelLossRate,
+        expectedUsableQty: loss.usableQty,
+        expectedLossQty: loss.expectedLossQty,
+        lossAdjustedUnitCost: loss.lossAdjustedUnitCost,
       },
     },
   });

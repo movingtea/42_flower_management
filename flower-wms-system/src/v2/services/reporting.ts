@@ -344,7 +344,7 @@ export async function loadLossReport(
       },
       include: {
         material: true,
-        batch: { select: { batchNo: true, unitCost: true } },
+        batch: { select: { batchNo: true, unitCost: true, lossAdjustedUnitCost: true } },
         order: { select: { id: true, number: true } },
       },
       orderBy: { occurredAt: "desc" },
@@ -373,7 +373,12 @@ export async function loadLossReport(
 
   const loss = buildLossReport(
     lossRecords.map((record) => {
-      const unitCost = Number(record.batch?.unitCost ?? record.material?.standardUnitCost ?? 0);
+      const unitCost = Number(
+        record.batch?.lossAdjustedUnitCost
+        ?? record.batch?.unitCost
+        ?? record.material?.standardUnitCost
+        ?? 0,
+      );
       return {
         id: record.id,
         occurredAt: record.occurredAt,
@@ -394,7 +399,7 @@ export async function loadLossReport(
       usedQty: Number(usage.usedQty),
       lostQty: Number(usage.lostQty),
       returnedQty: Number(usage.returnedQty),
-      unitCost: Number(usage.batch.unitCost),
+      unitCost: Number(usage.batch.lossAdjustedUnitCost ?? usage.batch.unitCost),
       orderId: usage.task.orderItem.orderId,
     })),
   );
@@ -405,7 +410,7 @@ export async function loadLossReport(
       materialId: usage.batch.materialId,
       materialName: usage.batch.material.name,
       usedQty: Number(usage.usedQty),
-      unitCost: Number(usage.batch.unitCost),
+      unitCost: Number(usage.batch.lossAdjustedUnitCost ?? usage.batch.unitCost),
       usableRate: usage.batch.material.standardUsableRate == null
         ? usage.batch.material.optimisticUsableRate == null
           ? null
@@ -489,7 +494,7 @@ export async function loadPurchaseReport(
           ? {
               id: receiptLine.batch.id,
               batchNo: receiptLine.batch.batchNo,
-              unitCost: Number(receiptLine.batch.unitCost),
+              unitCost: Number(receiptLine.batch.lossAdjustedUnitCost ?? receiptLine.batch.unitCost),
               onHandQty: receiptLine.batch.balances.reduce((sum, balance) => sum + Number(balance.onHandQty), 0),
               usedQty: receiptLine.batch.usages.reduce((sum, usage) => sum + Number(usage.usedQty), 0),
             }

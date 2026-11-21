@@ -35,6 +35,8 @@ type SupplierFieldsValue = {
   phone: string | null;
   wechat: string | null;
   notes: string | null;
+  defaultLossRate: unknown;
+  lossRateNote: string | null;
 };
 
 /**
@@ -70,6 +72,24 @@ function SupplierFields({ value }: { value?: SupplierFieldsValue }) {
           name="wechat"
           required={false}
           defaultValue={value?.wechat ?? ""}
+        />
+        <label className="text-sm text-zinc-700">
+          采购渠道损耗率（0–0.99）
+          <input
+            className={`${input} mt-1`}
+            name="defaultLossRate"
+            type="number"
+            min={0}
+            max={0.99}
+            step={0.0001}
+            defaultValue={value?.defaultLossRate == null ? "" : String(value.defaultLossRate)}
+          />
+        </label>
+        <Field
+          label="损耗说明"
+          name="lossRateNote"
+          required={false}
+          defaultValue={value?.lossRateNote ?? ""}
         />
         <label className="text-sm text-zinc-700 md:col-span-2">
           备注
@@ -171,8 +191,8 @@ export default async function SuppliersPage({
       ) : (
         <V2Table
           label="供应商列表"
-          fields={["code", "name", "text", "text", "status", "action"]}
-          minWidthClass="min-w-[62rem]"
+          fields={["code", "name", "text", "text", "text", "status", "action"]}
+          minWidthClass="min-w-[68rem]"
         >
           <caption className="sr-only">供应商列表</caption>
           <thead className={dataTableHead}>
@@ -180,6 +200,7 @@ export default async function SuppliersPage({
               <th scope="col" className="px-4 py-3 whitespace-nowrap">编号</th>
               <th scope="col" className="px-4 py-3 whitespace-nowrap">名称</th>
               <th scope="col" className="px-4 py-3 whitespace-nowrap">联系人</th>
+              <th scope="col" className="px-4 py-3 whitespace-nowrap">渠道损耗</th>
               <th scope="col" className="px-4 py-3 whitespace-nowrap">最近采购</th>
               <th scope="col" className="px-4 py-3 whitespace-nowrap">状态</th>
               <th scope="col" className={`${stickyActionHead} whitespace-nowrap`}>操作</th>
@@ -213,6 +234,14 @@ export default async function SuppliersPage({
                     {[item.phone, item.wechat].filter(Boolean).join(" · ") ||
                       "暂无联系方式"}
                   </div>
+                </td>
+                <td className="px-4 py-3 align-middle">
+                  {item.defaultLossRate === null
+                    ? "未设置"
+                    : `${(Number(item.defaultLossRate) * 100).toFixed(2)}%`}
+                  {item.lossRateNote && (
+                    <div className="max-w-40 truncate text-xs text-stone-400">{item.lossRateNote}</div>
+                  )}
                 </td>
                 <td className="px-4 py-3 align-middle">
                   {item.purchases.length ? (

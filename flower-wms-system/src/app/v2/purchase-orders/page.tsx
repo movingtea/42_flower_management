@@ -472,7 +472,18 @@ export default async function PurchaseOrdersPage({ searchParams }: { searchParam
                 {progress && expected !== null
                   ? <div className="mt-1 text-xs text-zinc-600">采购 {formatQuantity(expected)}{line.material.baseUnit} · 原级合格 {formatQuantity(progress.acceptedOriginalQty)} · 降级 {formatQuantity(progress.downgradedQty)} · 拒收 {formatQuantity(progress.rejectedQty)} · 已处理 {formatQuantity(progress.processedQty)} · 剩余 {formatQuantity(progress.remainingQty)}</div>
                   : <div className="mt-1 text-xs text-amber-800">采购行缺少有效基础数量，无法计算进度。</div>}
-                {line.allocations.length > 0 && <div className="mt-1 text-xs text-emerald-800">关联订单：{[...new Set(line.allocations.map((allocation) => allocation.requirement.orderItem.order.number))].join("、")}</div>}
+                {line.channelLossRate !== null && (
+                <div className="mt-1 text-xs text-amber-800">
+                  渠道损耗 {formatQuantity(Number(line.channelLossRate) * 100)}%
+                  {line.expectedUsableQty !== null
+                    ? ` · 预计可用 ${formatQuantity(Number(line.expectedUsableQty))}${line.material.baseUnit}`
+                    : ""}
+                  {line.lossAdjustedUnitCost !== null
+                    ? ` · 调整单价 ¥${Number(line.lossAdjustedUnitCost).toFixed(4)}`
+                    : ""}
+                </div>
+              )}
+              {line.allocations.length > 0 && <div className="mt-1 text-xs text-emerald-800">关联订单：{[...new Set(line.allocations.map((allocation) => allocation.requirement.orderItem.order.number))].join("、")}</div>}
                 {open && progress && progress.remainingQty > PURCHASE_EPSILON && <div className="mt-3 grid gap-3 border-t border-zinc-100 pt-3 md:grid-cols-2">
                   <form action={receivePurchase} className="space-y-2">
                     <input type="hidden" name="purchaseLineId" value={line.id} />

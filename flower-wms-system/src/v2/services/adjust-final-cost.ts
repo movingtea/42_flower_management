@@ -1,6 +1,7 @@
 import {
   CostKind, CostStage, Prisma, type PrismaClient,
 } from "../../generated/prisma-v2/client";
+import { applyProcurementLoss } from "../domain/procurement-loss";
 
 /**
  * Finalizes an estimated inventory batch unit cost and reconciles every already recorded
@@ -303,9 +304,24 @@ export async function adjustFinalCost(
       }
     }
 
+    const adjustedFinalMicros = batch.channelLossRate === null
+      ? finalMicros
+      : BigInt(Math.round(
+          applyProcurementLoss({
+            quantity: 1,
+            unitCost: microsToUnitCost(finalMicros),
+            lossRate: Number(batch.channelLossRate),
+          }).lossAdjustedUnitCost * 10_000,
+        ));
     await tx.inventoryBatch.update({
       where: { id: batchId },
-      data: { unitCost: microsToUnitCostStorage(finalMicros), costEstimated: false },
+      data: {
+        unitCost: microsToUnitCostStorage(finalMicros),
+        lossAdjustedUnitCost: batch.channelLossRate === null
+          ? null
+          : microsToUnitCostStorage(adjustedFinalMicros),
+        costEstimated: false,
+      },
     });
 
     const deltaMicros = finalMicros - currentMicros;
@@ -364,7 +380,9 @@ export async function adjustFinalCost(
         // The task query happens before the batch update, so use the requested final cost for this
         // batch and the stored cost for every other batch in the task.
         const isFinalizedBatch = usage.batchId === batchId;
-        const unitMicros = isFinalizedBatch ? finalMicros : decimalToMicros(usage.batch.unitCost);
+        const unitMicros = isFinalizedBatch
+          ? adjustedFinalMicros
+          : decimalToMicros(usage.batch.lossAdjustedUnitCost ?? usage.batch.unitCost);
         materialMicroMilli += unitMicros * quantityToMilli(usage.usedQty);
         lossMicroMilli += unitMicros * quantityToMilli(usage.lostQty);
         estimated ||= !isFinalizedBatch && usage.batch.costEstimated;

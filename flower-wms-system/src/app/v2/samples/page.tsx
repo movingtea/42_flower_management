@@ -5,6 +5,11 @@ import { Prisma, SampleState } from "@/generated/prisma-v2/client";
 import { requireV2Store } from "@/v2/auth";
 import { v2db } from "@/v2/db";
 import { calculateSamplePricing } from "@/v2/domain/sample-pricing";
+import {
+  SAMPLE_SUBSTITUTION_TIER_LABELS,
+  proposeSampleSubstitutions,
+  type SampleSubstitutionProposal,
+} from "@/v2/domain/sample-substitution";
 import { getMaterialAvailableQuantities } from "@/v2/services/material-availability";
 import {
   ActionEmptyState,
@@ -27,6 +32,7 @@ import {
   copySampleAction,
   createSampleAction,
   setSampleStateAction,
+  substituteSampleMaterialAction,
   updateSampleAction,
 } from "./actions";
 
@@ -57,6 +63,12 @@ function decimal(value: Prisma.Decimal | null | undefined): number {
 
 function money(value: number): string {
   return `¥${value.toFixed(2)}`;
+}
+
+function localDateTime(value: Date | null | undefined): string {
+  if (!value) return "";
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}T${pad(value.getHours())}:${pad(value.getMinutes())}`;
 }
 
 function sampleCost(
@@ -125,7 +137,7 @@ function VersionHistory({ events }: { events: { id: string; action: string; occu
             <span className="font-mono text-[11px] text-stone-500">
               {event.occurredAt.toISOString().slice(0, 16).replace("T", " ")}
             </span>
-            <span>{event.action === "SAMPLE_CREATED" ? "创建" : event.action === "SAMPLE_UPDATED" ? "编辑" : event.action === "SAMPLE_COPIED" ? "复制" : event.action === "SAMPLE_STATE_CHANGED" ? "状态变更" : "转 SKU"}</span>
+            <span>{event.action === "SAMPLE_CREATED" ? "创建" : event.action === "SAMPLE_UPDATED" ? "编辑" : event.action === "SAMPLE_COPIED" ? "复制" : event.action === "SAMPLE_STATE_CHANGED" ? "状态变更" : event.action === "SAMPLE_MATERIAL_SUBSTITUTED" ? "确认换料" : "转 SKU"}</span>
             {versionNo !== null && <StatusBadge tone="info">v{versionNo}</StatusBadge>}
             {materialCount !== null && <span>{materialCount} 项物料</span>}
           </li>
@@ -141,12 +153,14 @@ function SampleDetail({
   products,
   batchCost,
   versions,
+  substitutions,
 }: {
   sample: SampleRow;
   materialOptions: MaterialOption[];
   products: { id: string; code: string; name: string; active: boolean }[];
   batchCost: Map<string, number>;
   versions: { id: string; action: string; occurredAt: Date; afterSnapshot: unknown }[];
+  substitutions: SampleSubstitutionProposal[];
 }) {
   const cost = sampleCost(sample, batchCost);
   const initialLines: MaterialLine[] = sample.materials.map((line) => ({
@@ -226,6 +240,24 @@ function SampleDetail({
                     优先级
                     <input className={`${input} mt-1`} name="priority" type="number" min="0" step="1" defaultValue={sample.priority} />
                   </label>
+                  <label className="text-sm text-stone-700">
+                    默认拍摄截止
+                    <input
+                      className={`${input} mt-1`}
+                      name="photoDueAt"
+                      type="datetime-local"
+                      defaultValue={localDateTime(sample.photoDueAt)}
+                    />
+                  </label>
+                  <label className="text-sm text-stone-700">
+                    默认留样截止
+                    <input
+                      className={`${input} mt-1`}
+                      name="retentionUntil"
+                      type="datetime-local"
+                      defaultValue={localDateTime(sample.retentionUntil)}
+                    />
+                  </label>
                 </div>
                 <label className="block text-sm text-stone-700">
                   说明
@@ -251,6 +283,14 @@ function SampleDetail({
                 <dt className="text-xs text-stone-500">优先级</dt>
                 <dd>{sample.priority}</dd>
               </div>
+              <div>
+                <dt className="text-xs text-stone-500">默认拍摄截止</dt>
+                <dd>{sample.photoDueAt ? sample.photoDueAt.toLocaleString("zh-CN") : "未设置"}</dd>
+              </div>
+              <div>
+                <dt className="text-xs text-stone-500">默认留样截止</dt>
+                <dd>{sample.retentionUntil ? sample.retentionUntil.toLocaleString("zh-CN") : "未设置"}</dd>
+              </div>
             </dl>
             <div>
               <h4 className="text-xs font-medium text-stone-500">物料清单</h4>
@@ -267,6 +307,46 @@ function SampleDetail({
                 </div>
               )}
             </div>
+            {substitutions.length > 0 && (
+              <div className="space-y-2 rounded-xl border border-amber-200 bg-amber-50 p-3">
+                <h4 className="text-xs font-medium text-amber-900">缺料换料建议（需员工确认）</h4>
+                {substitutions.map((proposal) => (
+                  <div key={proposal.fromMaterialId} className="space-y-1 text-xs text-amber-900">
+                    <p>
+                      {proposal.fromMaterialName} 需求 {proposal.requiredQty}{proposal.baseUnit}，
+                      当前可用 {proposal.availableQty}{proposal.baseUnit}
+                    </p>
+                    {proposal.options.length === 0 ? (
+                      <p className="text-amber-800">暂无同类型、同单位且可用量足够的分类匹配物料。</p>
+                    ) : (
+                      proposal.options.map((option) => (
+                        <form
+                          key={option.materialId}
+                          action={substituteSampleMaterialAction}
+                          className="flex flex-wrap items-center gap-2 rounded-lg border border-amber-200 bg-white px-2 py-1"
+                        >
+                          <input type="hidden" name="sampleId" value={sample.id} />
+                          <input type="hidden" name="fromMaterialId" value={proposal.fromMaterialId} />
+                          <input type="hidden" name="toMaterialId" value={option.materialId} />
+                          <input type="hidden" name="quantity" value={proposal.requiredQty} />
+                          <input type="hidden" name="confirmed" value="true" />
+                          <span className="font-medium">{option.code} · {option.name}</span>
+                          <StatusBadge tone="info">{SAMPLE_SUBSTITUTION_TIER_LABELS[option.tier]}</StatusBadge>
+                          <span>可用 {option.availableQty}{option.baseUnit}</span>
+                          <span>标准成本 {money(option.unitCost)}</span>
+                          <button className="ml-auto rounded-lg border border-amber-400 px-2 py-1 text-amber-900">
+                            确认换料
+                          </button>
+                        </form>
+                      ))
+                    )}
+                  </div>
+                ))}
+                <p className="text-amber-800">
+                  换料会改写样品配方并保留原物料、数量、匹配级别和确认人；不会自动改变已生成 SKU 的配方。
+                </p>
+              </div>
+            )}
             <p className="text-xs text-stone-500">每次保存都会写入版本记录；后续样品变更不会自动修改已生成 SKU 的配方。</p>
           </section>
 
@@ -527,11 +607,45 @@ export default async function SamplesPage({
   const batches = await v2db.inventoryBatch.findMany({
     where: { storeId: scope.storeId, materialId: { in: materialIds } },
     orderBy: [{ receivedAt: "desc" }, { id: "desc" }],
-    select: { materialId: true, unitCost: true },
+    select: { materialId: true, unitCost: true, lossAdjustedUnitCost: true },
   });
   const batchCost = new Map<string, number>();
   for (const batch of batches) {
-    if (!batchCost.has(batch.materialId)) batchCost.set(batch.materialId, Number(batch.unitCost));
+    if (!batchCost.has(batch.materialId)) {
+      batchCost.set(batch.materialId, Number(batch.lossAdjustedUnitCost ?? batch.unitCost));
+    }
+  }
+
+  const substitutionsBySample = new Map<string, SampleSubstitutionProposal[]>();
+  const candidateMaterials = materials.map((material) => ({
+    materialId: material.id,
+    code: material.code,
+    name: material.name,
+    kind: material.kind,
+    baseUnit: material.baseUnit,
+    flowerVariety: material.flowerVariety,
+    flowerProductName: material.flowerProductName,
+    color: material.color,
+    availableQty: availability.get(material.id)?.availableQty ?? 0,
+    unitCost: batchCost.get(material.id) ?? Number(material.standardUnitCost ?? 0),
+    active: material.active,
+  }));
+  for (const sample of samples) {
+    if (sample.state === "ARCHIVED") continue;
+    substitutionsBySample.set(sample.id, proposeSampleSubstitutions({
+      requirements: sample.materials.map((line) => ({
+        materialId: line.materialId,
+        name: line.material.name,
+        quantity: Number(line.quantity),
+        availableQty: availability.get(line.materialId)?.availableQty ?? 0,
+        kind: line.material.kind,
+        baseUnit: line.material.baseUnit,
+        flowerVariety: line.material.flowerVariety,
+        flowerProductName: line.material.flowerProductName,
+        color: line.material.color,
+      })),
+      candidates: candidateMaterials,
+    }));
   }
 
   const materialOptions: MaterialOption[] = materials.map((material) => ({
@@ -608,6 +722,14 @@ export default async function SamplesPage({
             </label>
             <Field label="目标毛利率（%）" name="targetMarginPercent" type="number" required={false} />
             <Field label="优先级" name="priority" type="number" required={false} defaultValue={0} />
+            <label className="block text-sm text-stone-700">
+              默认拍摄截止
+              <input className={`${input} mt-1`} name="photoDueAt" type="datetime-local" />
+            </label>
+            <label className="block text-sm text-stone-700">
+              默认留样截止
+              <input className={`${input} mt-1`} name="retentionUntil" type="datetime-local" />
+            </label>
           </div>
           <label className="block text-sm text-stone-700">
             说明
@@ -733,6 +855,7 @@ export default async function SamplesPage({
               products={products}
               batchCost={batchCost}
               versions={versionsBySample.get(sample.id) ?? []}
+              substitutions={substitutionsBySample.get(sample.id) ?? []}
             />
           ))}
         </div>

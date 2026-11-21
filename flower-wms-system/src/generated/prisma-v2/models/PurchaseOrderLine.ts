@@ -30,12 +30,18 @@ export type PurchaseOrderLineAvgAggregateOutputType = {
   orderedQty: runtime.Decimal | null
   expectedBaseQty: runtime.Decimal | null
   unitPrice: runtime.Decimal | null
+  channelLossRate: runtime.Decimal | null
+  expectedUsableQty: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
 }
 
 export type PurchaseOrderLineSumAggregateOutputType = {
   orderedQty: runtime.Decimal | null
   expectedBaseQty: runtime.Decimal | null
   unitPrice: runtime.Decimal | null
+  channelLossRate: runtime.Decimal | null
+  expectedUsableQty: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
 }
 
 export type PurchaseOrderLineMinAggregateOutputType = {
@@ -46,6 +52,9 @@ export type PurchaseOrderLineMinAggregateOutputType = {
   purchaseUnit: string | null
   expectedBaseQty: runtime.Decimal | null
   unitPrice: runtime.Decimal | null
+  channelLossRate: runtime.Decimal | null
+  expectedUsableQty: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
   supplierConfirmedAt: Date | null
   relationKind: $Enums.PurchaseLineRelationKind | null
   sourceLineId: string | null
@@ -62,6 +71,9 @@ export type PurchaseOrderLineMaxAggregateOutputType = {
   purchaseUnit: string | null
   expectedBaseQty: runtime.Decimal | null
   unitPrice: runtime.Decimal | null
+  channelLossRate: runtime.Decimal | null
+  expectedUsableQty: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
   supplierConfirmedAt: Date | null
   relationKind: $Enums.PurchaseLineRelationKind | null
   sourceLineId: string | null
@@ -78,6 +90,9 @@ export type PurchaseOrderLineCountAggregateOutputType = {
   purchaseUnit: number
   expectedBaseQty: number
   unitPrice: number
+  channelLossRate: number
+  expectedUsableQty: number
+  lossAdjustedUnitCost: number
   supplierConfirmedAt: number
   relationKind: number
   sourceLineId: number
@@ -92,12 +107,18 @@ export type PurchaseOrderLineAvgAggregateInputType = {
   orderedQty?: true
   expectedBaseQty?: true
   unitPrice?: true
+  channelLossRate?: true
+  expectedUsableQty?: true
+  lossAdjustedUnitCost?: true
 }
 
 export type PurchaseOrderLineSumAggregateInputType = {
   orderedQty?: true
   expectedBaseQty?: true
   unitPrice?: true
+  channelLossRate?: true
+  expectedUsableQty?: true
+  lossAdjustedUnitCost?: true
 }
 
 export type PurchaseOrderLineMinAggregateInputType = {
@@ -108,6 +129,9 @@ export type PurchaseOrderLineMinAggregateInputType = {
   purchaseUnit?: true
   expectedBaseQty?: true
   unitPrice?: true
+  channelLossRate?: true
+  expectedUsableQty?: true
+  lossAdjustedUnitCost?: true
   supplierConfirmedAt?: true
   relationKind?: true
   sourceLineId?: true
@@ -124,6 +148,9 @@ export type PurchaseOrderLineMaxAggregateInputType = {
   purchaseUnit?: true
   expectedBaseQty?: true
   unitPrice?: true
+  channelLossRate?: true
+  expectedUsableQty?: true
+  lossAdjustedUnitCost?: true
   supplierConfirmedAt?: true
   relationKind?: true
   sourceLineId?: true
@@ -140,6 +167,9 @@ export type PurchaseOrderLineCountAggregateInputType = {
   purchaseUnit?: true
   expectedBaseQty?: true
   unitPrice?: true
+  channelLossRate?: true
+  expectedUsableQty?: true
+  lossAdjustedUnitCost?: true
   supplierConfirmedAt?: true
   relationKind?: true
   sourceLineId?: true
@@ -243,6 +273,9 @@ export type PurchaseOrderLineGroupByOutputType = {
   purchaseUnit: string
   expectedBaseQty: runtime.Decimal | null
   unitPrice: runtime.Decimal
+  channelLossRate: runtime.Decimal | null
+  expectedUsableQty: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
   supplierConfirmedAt: Date | null
   relationKind: $Enums.PurchaseLineRelationKind
   sourceLineId: string | null
@@ -282,6 +315,9 @@ export type PurchaseOrderLineWhereInput = {
   purchaseUnit?: Prisma.StringFilter<"PurchaseOrderLine"> | string
   expectedBaseQty?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.DateTimeNullableFilter<"PurchaseOrderLine"> | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFilter<"PurchaseOrderLine"> | $Enums.PurchaseLineRelationKind
   sourceLineId?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
@@ -305,6 +341,9 @@ export type PurchaseOrderLineOrderByWithRelationInput = {
   purchaseUnit?: Prisma.SortOrder
   expectedBaseQty?: Prisma.SortOrderInput | Prisma.SortOrder
   unitPrice?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  expectedUsableQty?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrderInput | Prisma.SortOrder
   supplierConfirmedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   relationKind?: Prisma.SortOrder
   sourceLineId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -332,6 +371,9 @@ export type PurchaseOrderLineWhereUniqueInput = Prisma.AtLeast<{
   purchaseUnit?: Prisma.StringFilter<"PurchaseOrderLine"> | string
   expectedBaseQty?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.DateTimeNullableFilter<"PurchaseOrderLine"> | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFilter<"PurchaseOrderLine"> | $Enums.PurchaseLineRelationKind
   sourceLineId?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
@@ -354,6 +396,9 @@ export type PurchaseOrderLineOrderByWithAggregationInput = {
   purchaseUnit?: Prisma.SortOrder
   expectedBaseQty?: Prisma.SortOrderInput | Prisma.SortOrder
   unitPrice?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  expectedUsableQty?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrderInput | Prisma.SortOrder
   supplierConfirmedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   relationKind?: Prisma.SortOrder
   sourceLineId?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -378,6 +423,9 @@ export type PurchaseOrderLineScalarWhereWithAggregatesInput = {
   purchaseUnit?: Prisma.StringWithAggregatesFilter<"PurchaseOrderLine"> | string
   expectedBaseQty?: Prisma.DecimalNullableWithAggregatesFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalWithAggregatesFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.DecimalNullableWithAggregatesFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.DecimalNullableWithAggregatesFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.DecimalNullableWithAggregatesFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"PurchaseOrderLine"> | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindWithAggregatesFilter<"PurchaseOrderLine"> | $Enums.PurchaseLineRelationKind
   sourceLineId?: Prisma.StringNullableWithAggregatesFilter<"PurchaseOrderLine"> | string | null
@@ -392,6 +440,9 @@ export type PurchaseOrderLineCreateInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   relationKey?: string | null
@@ -414,6 +465,9 @@ export type PurchaseOrderLineUncheckedCreateInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   sourceLineId?: string | null
@@ -432,6 +486,9 @@ export type PurchaseOrderLineUpdateInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   relationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -454,6 +511,9 @@ export type PurchaseOrderLineUncheckedUpdateInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   sourceLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -474,6 +534,9 @@ export type PurchaseOrderLineCreateManyInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   sourceLineId?: string | null
@@ -488,6 +551,9 @@ export type PurchaseOrderLineUpdateManyMutationInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   relationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -503,6 +569,9 @@ export type PurchaseOrderLineUncheckedUpdateManyInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   sourceLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -534,6 +603,9 @@ export type PurchaseOrderLineCountOrderByAggregateInput = {
   purchaseUnit?: Prisma.SortOrder
   expectedBaseQty?: Prisma.SortOrder
   unitPrice?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrder
+  expectedUsableQty?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
   supplierConfirmedAt?: Prisma.SortOrder
   relationKind?: Prisma.SortOrder
   sourceLineId?: Prisma.SortOrder
@@ -546,6 +618,9 @@ export type PurchaseOrderLineAvgOrderByAggregateInput = {
   orderedQty?: Prisma.SortOrder
   expectedBaseQty?: Prisma.SortOrder
   unitPrice?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrder
+  expectedUsableQty?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
 }
 
 export type PurchaseOrderLineMaxOrderByAggregateInput = {
@@ -556,6 +631,9 @@ export type PurchaseOrderLineMaxOrderByAggregateInput = {
   purchaseUnit?: Prisma.SortOrder
   expectedBaseQty?: Prisma.SortOrder
   unitPrice?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrder
+  expectedUsableQty?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
   supplierConfirmedAt?: Prisma.SortOrder
   relationKind?: Prisma.SortOrder
   sourceLineId?: Prisma.SortOrder
@@ -572,6 +650,9 @@ export type PurchaseOrderLineMinOrderByAggregateInput = {
   purchaseUnit?: Prisma.SortOrder
   expectedBaseQty?: Prisma.SortOrder
   unitPrice?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrder
+  expectedUsableQty?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
   supplierConfirmedAt?: Prisma.SortOrder
   relationKind?: Prisma.SortOrder
   sourceLineId?: Prisma.SortOrder
@@ -584,6 +665,9 @@ export type PurchaseOrderLineSumOrderByAggregateInput = {
   orderedQty?: Prisma.SortOrder
   expectedBaseQty?: Prisma.SortOrder
   unitPrice?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrder
+  expectedUsableQty?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
 }
 
 export type PurchaseOrderLineScalarRelationFilter = {
@@ -787,6 +871,9 @@ export type PurchaseOrderLineCreateWithoutMaterialInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   relationKey?: string | null
@@ -807,6 +894,9 @@ export type PurchaseOrderLineUncheckedCreateWithoutMaterialInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   sourceLineId?: string | null
@@ -856,6 +946,9 @@ export type PurchaseOrderLineScalarWhereInput = {
   purchaseUnit?: Prisma.StringFilter<"PurchaseOrderLine"> | string
   expectedBaseQty?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.DecimalNullableFilter<"PurchaseOrderLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.DateTimeNullableFilter<"PurchaseOrderLine"> | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFilter<"PurchaseOrderLine"> | $Enums.PurchaseLineRelationKind
   sourceLineId?: Prisma.StringNullableFilter<"PurchaseOrderLine"> | string | null
@@ -870,6 +963,9 @@ export type PurchaseOrderLineCreateWithoutPurchaseOrderInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   relationKey?: string | null
@@ -890,6 +986,9 @@ export type PurchaseOrderLineUncheckedCreateWithoutPurchaseOrderInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   sourceLineId?: string | null
@@ -934,6 +1033,9 @@ export type PurchaseOrderLineCreateWithoutSupplementLinesInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   relationKey?: string | null
@@ -955,6 +1057,9 @@ export type PurchaseOrderLineUncheckedCreateWithoutSupplementLinesInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   sourceLineId?: string | null
@@ -977,6 +1082,9 @@ export type PurchaseOrderLineCreateWithoutSourceLineInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   relationKey?: string | null
@@ -998,6 +1106,9 @@ export type PurchaseOrderLineUncheckedCreateWithoutSourceLineInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   relationKey?: string | null
@@ -1036,6 +1147,9 @@ export type PurchaseOrderLineUpdateWithoutSupplementLinesInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   relationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1057,6 +1171,9 @@ export type PurchaseOrderLineUncheckedUpdateWithoutSupplementLinesInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   sourceLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1090,6 +1207,9 @@ export type PurchaseOrderLineCreateWithoutFutureAllocationsInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   relationKey?: string | null
@@ -1111,6 +1231,9 @@ export type PurchaseOrderLineUncheckedCreateWithoutFutureAllocationsInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   sourceLineId?: string | null
@@ -1144,6 +1267,9 @@ export type PurchaseOrderLineUpdateWithoutFutureAllocationsInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   relationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1165,6 +1291,9 @@ export type PurchaseOrderLineUncheckedUpdateWithoutFutureAllocationsInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   sourceLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1182,6 +1311,9 @@ export type PurchaseOrderLineCreateWithoutAllocationsInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   relationKey?: string | null
@@ -1203,6 +1335,9 @@ export type PurchaseOrderLineUncheckedCreateWithoutAllocationsInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   sourceLineId?: string | null
@@ -1236,6 +1371,9 @@ export type PurchaseOrderLineUpdateWithoutAllocationsInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   relationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1257,6 +1395,9 @@ export type PurchaseOrderLineUncheckedUpdateWithoutAllocationsInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   sourceLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1274,6 +1415,9 @@ export type PurchaseOrderLineCreateWithoutReceiptLinesInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   relationKey?: string | null
@@ -1295,6 +1439,9 @@ export type PurchaseOrderLineUncheckedCreateWithoutReceiptLinesInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   sourceLineId?: string | null
@@ -1328,6 +1475,9 @@ export type PurchaseOrderLineUpdateWithoutReceiptLinesInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   relationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1349,6 +1499,9 @@ export type PurchaseOrderLineUncheckedUpdateWithoutReceiptLinesInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   sourceLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1367,6 +1520,9 @@ export type PurchaseOrderLineCreateManyMaterialInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   sourceLineId?: string | null
@@ -1381,6 +1537,9 @@ export type PurchaseOrderLineUpdateWithoutMaterialInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   relationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1401,6 +1560,9 @@ export type PurchaseOrderLineUncheckedUpdateWithoutMaterialInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   sourceLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1420,6 +1582,9 @@ export type PurchaseOrderLineUncheckedUpdateManyWithoutMaterialInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   sourceLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1435,6 +1600,9 @@ export type PurchaseOrderLineCreateManyPurchaseOrderInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   sourceLineId?: string | null
@@ -1449,6 +1617,9 @@ export type PurchaseOrderLineUpdateWithoutPurchaseOrderInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   relationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1469,6 +1640,9 @@ export type PurchaseOrderLineUncheckedUpdateWithoutPurchaseOrderInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   sourceLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1488,6 +1662,9 @@ export type PurchaseOrderLineUncheckedUpdateManyWithoutPurchaseOrderInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   sourceLineId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1504,6 +1681,9 @@ export type PurchaseOrderLineCreateManySourceLineInput = {
   purchaseUnit: string
   expectedBaseQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Date | string | null
   relationKind?: $Enums.PurchaseLineRelationKind
   relationKey?: string | null
@@ -1517,6 +1697,9 @@ export type PurchaseOrderLineUpdateWithoutSourceLineInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   relationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1538,6 +1721,9 @@ export type PurchaseOrderLineUncheckedUpdateWithoutSourceLineInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   relationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1557,6 +1743,9 @@ export type PurchaseOrderLineUncheckedUpdateManyWithoutSourceLineInput = {
   purchaseUnit?: Prisma.StringFieldUpdateOperationsInput | string
   expectedBaseQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   unitPrice?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  expectedUsableQty?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   supplierConfirmedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   relationKind?: Prisma.EnumPurchaseLineRelationKindFieldUpdateOperationsInput | $Enums.PurchaseLineRelationKind
   relationKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -1630,6 +1819,9 @@ export type PurchaseOrderLineSelect<ExtArgs extends runtime.Types.Extensions.Int
   purchaseUnit?: boolean
   expectedBaseQty?: boolean
   unitPrice?: boolean
+  channelLossRate?: boolean
+  expectedUsableQty?: boolean
+  lossAdjustedUnitCost?: boolean
   supplierConfirmedAt?: boolean
   relationKind?: boolean
   sourceLineId?: boolean
@@ -1654,6 +1846,9 @@ export type PurchaseOrderLineSelectCreateManyAndReturn<ExtArgs extends runtime.T
   purchaseUnit?: boolean
   expectedBaseQty?: boolean
   unitPrice?: boolean
+  channelLossRate?: boolean
+  expectedUsableQty?: boolean
+  lossAdjustedUnitCost?: boolean
   supplierConfirmedAt?: boolean
   relationKind?: boolean
   sourceLineId?: boolean
@@ -1673,6 +1868,9 @@ export type PurchaseOrderLineSelectUpdateManyAndReturn<ExtArgs extends runtime.T
   purchaseUnit?: boolean
   expectedBaseQty?: boolean
   unitPrice?: boolean
+  channelLossRate?: boolean
+  expectedUsableQty?: boolean
+  lossAdjustedUnitCost?: boolean
   supplierConfirmedAt?: boolean
   relationKind?: boolean
   sourceLineId?: boolean
@@ -1692,6 +1890,9 @@ export type PurchaseOrderLineSelectScalar = {
   purchaseUnit?: boolean
   expectedBaseQty?: boolean
   unitPrice?: boolean
+  channelLossRate?: boolean
+  expectedUsableQty?: boolean
+  lossAdjustedUnitCost?: boolean
   supplierConfirmedAt?: boolean
   relationKind?: boolean
   sourceLineId?: boolean
@@ -1700,7 +1901,7 @@ export type PurchaseOrderLineSelectScalar = {
   updatedAt?: boolean
 }
 
-export type PurchaseOrderLineOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "purchaseOrderId" | "materialId" | "orderedQty" | "purchaseUnit" | "expectedBaseQty" | "unitPrice" | "supplierConfirmedAt" | "relationKind" | "sourceLineId" | "relationKey" | "createdAt" | "updatedAt", ExtArgs["result"]["purchaseOrderLine"]>
+export type PurchaseOrderLineOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "purchaseOrderId" | "materialId" | "orderedQty" | "purchaseUnit" | "expectedBaseQty" | "unitPrice" | "channelLossRate" | "expectedUsableQty" | "lossAdjustedUnitCost" | "supplierConfirmedAt" | "relationKind" | "sourceLineId" | "relationKey" | "createdAt" | "updatedAt", ExtArgs["result"]["purchaseOrderLine"]>
 export type PurchaseOrderLineInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   purchaseOrder?: boolean | Prisma.PurchaseOrderDefaultArgs<ExtArgs>
   material?: boolean | Prisma.MaterialDefaultArgs<ExtArgs>
@@ -1741,6 +1942,9 @@ export type $PurchaseOrderLinePayload<ExtArgs extends runtime.Types.Extensions.I
     purchaseUnit: string
     expectedBaseQty: runtime.Decimal | null
     unitPrice: runtime.Decimal
+    channelLossRate: runtime.Decimal | null
+    expectedUsableQty: runtime.Decimal | null
+    lossAdjustedUnitCost: runtime.Decimal | null
     supplierConfirmedAt: Date | null
     relationKind: $Enums.PurchaseLineRelationKind
     sourceLineId: string | null
@@ -2184,6 +2388,9 @@ export interface PurchaseOrderLineFieldRefs {
   readonly purchaseUnit: Prisma.FieldRef<"PurchaseOrderLine", 'String'>
   readonly expectedBaseQty: Prisma.FieldRef<"PurchaseOrderLine", 'Decimal'>
   readonly unitPrice: Prisma.FieldRef<"PurchaseOrderLine", 'Decimal'>
+  readonly channelLossRate: Prisma.FieldRef<"PurchaseOrderLine", 'Decimal'>
+  readonly expectedUsableQty: Prisma.FieldRef<"PurchaseOrderLine", 'Decimal'>
+  readonly lossAdjustedUnitCost: Prisma.FieldRef<"PurchaseOrderLine", 'Decimal'>
   readonly supplierConfirmedAt: Prisma.FieldRef<"PurchaseOrderLine", 'DateTime'>
   readonly relationKind: Prisma.FieldRef<"PurchaseOrderLine", 'PurchaseLineRelationKind'>
   readonly sourceLineId: Prisma.FieldRef<"PurchaseOrderLine", 'String'>

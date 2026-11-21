@@ -5,7 +5,25 @@ import { v2db } from "@/v2/db";
 import { createSupplierMaster, setSupplierActive, updateSupplierMaster } from "@/v2/services/master-data";
 import { runV2DrawerAction } from "../_lib/action-result";
 function text(data: FormData, key: string) { const value = data.get(key); return typeof value === "string" ? value : ""; }
-function supplierInput(data: FormData) { return { code: text(data, "code"), name: text(data, "name"), contactName: text(data, "contactName"), phone: text(data, "phone"), wechat: text(data, "wechat"), notes: text(data, "notes") }; }
+function numberOrNull(data: FormData, key: string): number | null {
+  const raw = text(data, key).trim();
+  if (!raw) return null;
+  const value = Number(raw);
+  if (!Number.isFinite(value)) throw new Error("渠道损耗率必须为数字");
+  return value;
+}
+function supplierInput(data: FormData) {
+  return {
+    code: text(data, "code"),
+    name: text(data, "name"),
+    contactName: text(data, "contactName"),
+    phone: text(data, "phone"),
+    wechat: text(data, "wechat"),
+    notes: text(data, "notes"),
+    defaultLossRate: numberOrNull(data, "defaultLossRate"),
+    lossRateNote: text(data, "lossRateNote"),
+  };
+}
 async function run(operation: () => Promise<string | void>, success: string): Promise<never> { let message = success; try { message = (await operation()) ?? success; } catch (cause) { if (cause && typeof cause === "object" && "digest" in cause) throw cause; return redirect(`/v2/suppliers?error=${encodeURIComponent(cause instanceof Error ? cause.message : "操作失败")}`); } return redirect(`/v2/suppliers?message=${encodeURIComponent(message)}`); }
 export async function createSupplierAction(data: FormData) { return runV2DrawerAction(async () => { const scope = await requireV2Store("purchase"); const supplier = await v2db.$transaction((tx) => createSupplierMaster(tx, { ...scope, actorStaffId: scope.staffId }, supplierInput(data))); return `供应商已创建，编号 ${supplier.code}`; }, "供应商已创建"); }
 export async function updateSupplierAction(data: FormData) { return runV2DrawerAction(async () => { const scope = await requireV2Store("purchase"); await v2db.$transaction((tx) => updateSupplierMaster(tx, { ...scope, actorStaffId: scope.staffId }, text(data, "supplierId"), supplierInput(data))); }, "供应商已更新"); }

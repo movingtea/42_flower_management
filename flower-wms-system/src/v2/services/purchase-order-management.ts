@@ -3,6 +3,10 @@ import {
   Prisma, PurchaseLineRelationKind, PurchaseState, ReceiptDisposition, ReservationState,
 } from "../../generated/prisma-v2/client";
 import { assertMaterialQuantity } from "../domain/stock-planning";
+import {
+  applyProcurementLoss,
+  resolveProcurementLossRate,
+} from "../domain/procurement-loss";
 import { allocatePurchaseDemand } from "./allocate-purchase-demand";
 
 export type PurchaseDraftLine = { materialId: string; quantity: number; unitPrice: number };
@@ -23,7 +27,27 @@ async function validateDraft(tx: Prisma.TransactionClient, scope: Scope, input: 
   if (uniqueIds.length !== input.lines.length) throw new Error("同一物料不能重复添加，请合并数量");
   const materials = await tx.material.findMany({ where: { id: { in: uniqueIds }, tenantId: scope.tenantId, active: true } });
   if (materials.length !== uniqueIds.length) throw new Error("采购明细包含不存在或已停用的物料");
-  const lines = input.lines.map((line) => { const material = materials.find((item) => item.id === line.materialId)!; assertMaterialQuantity(line.quantity, material.quantityScale); if (line.quantity <= 0) throw new Error(`${material.name} 的采购数量必须大于零`); return { materialId: material.id, orderedQty: line.quantity, purchaseUnit: material.baseUnit, expectedBaseQty: line.quantity, unitPrice: money(line.unitPrice, `${material.name} 的采购单价`) }; });
+  const lines = input.lines.map((line) => {
+    const material = materials.find((item) => item.id === line.materialId)!;
+    assertMaterialQuantity(line.quantity, material.quantityScale);
+    if (line.quantity <= 0) throw new Error(`${material.name} 的采购数量必须大于零`);
+    const unitPrice = money(line.unitPrice, `${material.name} 的采购单价`);
+    const lossRate = resolveProcurementLossRate({
+      supplierRate: supplier.defaultLossRate === null ? null : Number(supplier.defaultLossRate),
+      materialRate: material.defaultLossRate === null ? null : Number(material.defaultLossRate),
+    });
+    const loss = applyProcurementLoss({ quantity: line.quantity, unitCost: unitPrice, lossRate });
+    return {
+      materialId: material.id,
+      orderedQty: line.quantity,
+      purchaseUnit: material.baseUnit,
+      expectedBaseQty: line.quantity,
+      unitPrice,
+      channelLossRate: lossRate,
+      expectedUsableQty: loss.usableQty,
+      lossAdjustedUnitCost: loss.lossAdjustedUnitCost,
+    };
+  });
   return { supplier, lines, freightCost: money(input.freightCost, "运费"), packagingCost: money(input.packagingCost, "包装费"), otherCost: money(input.otherCost, "其他费用"), notes: validateText(input.notes, 500, "备注") };
 }
 
@@ -157,6 +181,14 @@ export async function createPurchaseSupplementLine(
     }
   }
 
+  const lossRate = resolveProcurementLossRate({
+    supplierRate: source.channelLossRate === null ? null : Number(source.channelLossRate),
+    materialRate: source.material.defaultLossRate === null
+      ? null
+      : Number(source.material.defaultLossRate),
+  });
+  const loss = applyProcurementLoss({ quantity, unitCost: unitPrice, lossRate });
+
   const line = await tx.purchaseOrderLine.create({ data: {
     purchaseOrderId: source.purchaseOrderId,
     materialId: source.materialId,
@@ -164,6 +196,9 @@ export async function createPurchaseSupplementLine(
     purchaseUnit: source.purchaseUnit,
     expectedBaseQty: quantity,
     unitPrice,
+    channelLossRate: lossRate,
+    expectedUsableQty: loss.usableQty,
+    lossAdjustedUnitCost: loss.lossAdjustedUnitCost,
     relationKind: input.kind,
     sourceLineId: source.id,
     relationKey,

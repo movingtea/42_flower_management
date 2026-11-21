@@ -8,6 +8,7 @@ import {
 } from "@/generated/prisma-v2/client";
 import { requireV2Context } from "@/v2/auth";
 import { v2db } from "@/v2/db";
+import { isIdealReuseAlgorithmVersion } from "@/v2/domain/sample-planning";
 import {
   ActionEmptyState,
   StatusBadge,
@@ -24,14 +25,16 @@ import {
   type SampleOption,
   type StepMaterialInput,
 } from "../samples/_components/SampleEditors";
+import { SamplePlanCreateDrawer } from "./_components/SamplePlanCreateDrawer";
 import {
   approveSamplePlanAction,
   calculateSamplePlanAction,
   cancelSamplePlanAction,
   completeSampleStepAction,
   copySamplePlanAction,
-  createSamplePlanAction,
+  createSamplePlanFromRecommendationAction,
   pauseSamplePlanAction,
+  recommendSamplePlanSamplesAction,
   recalculateSamplePlanAction,
   resumeSamplePlanAction,
   selectSamplePlanRunAction,
@@ -67,6 +70,21 @@ function money(value: number | Prisma.Decimal | null | undefined): string {
 
 function rate(value: number | Prisma.Decimal | null | undefined): string {
   return `${(Number(value ?? 0) * 100).toFixed(1)}%`;
+}
+
+function toDateTimeLocal(value: Date): string {
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}T${pad(value.getHours())}:${pad(value.getMinutes())}`;
+}
+
+function shortDateTime(value: Date | null | undefined): string {
+  if (!value) return "—";
+  return value.toLocaleString("zh-CN", {
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 function parseReusedByMaterial(value: Prisma.JsonValue | null): Record<string, number> {
@@ -151,15 +169,18 @@ function outstandingByBatch(
 type ClassificationMatchNote = {
   flowerVariety: string;
   flowerProductName: string | null;
-  color: string;
-  tier: "exact" | "varietyColor";
+  color: string | null;
+  tier: "exact" | "varietyColor" | "variety";
 };
 
 type SuggestedClassificationNote = {
   sampleId: string;
   sampleName: string;
+  masterSampleId: string | null;
+  masterSampleName: string | null;
   exactClass: number;
   varietyColor: number;
+  varietyClass: number;
   matches: ClassificationMatchNote[];
 };
 
@@ -189,27 +210,32 @@ function parseSuggestedClassificationNotes(value: Prisma.JsonValue | null): Sugg
     if (typeof row.sampleId !== "string") continue;
     const exactClass = typeof row.exactClass === "number" ? row.exactClass : 0;
     const varietyColor = typeof row.varietyColor === "number" ? row.varietyColor : 0;
-    if (exactClass + varietyColor <= 0) continue;
+    const varietyClass = typeof row.varietyClass === "number" ? row.varietyClass : 0;
+    if (exactClass + varietyColor + varietyClass <= 0) continue;
     const matches: ClassificationMatchNote[] = [];
     if (Array.isArray(row.matchedClassifications)) {
       for (const match of row.matchedClassifications) {
         if (!match || typeof match !== "object" || Array.isArray(match)) continue;
         const item = match as Record<string, unknown>;
-        if (typeof item.flowerVariety !== "string" || typeof item.color !== "string") continue;
-        if (item.tier !== "exact" && item.tier !== "varietyColor") continue;
+        if (typeof item.flowerVariety !== "string") continue;
+        if (item.tier !== "exact" && item.tier !== "varietyColor" && item.tier !== "variety") continue;
         matches.push({
           flowerVariety: item.flowerVariety,
           flowerProductName: typeof item.flowerProductName === "string" ? item.flowerProductName : null,
-          color: item.color,
+          color: typeof item.color === "string" ? item.color : null,
           tier: item.tier,
         });
       }
     }
+    const masterSampleId = typeof row.masterSampleId === "string" ? row.masterSampleId : null;
     notes.push({
       sampleId: row.sampleId,
       sampleName: names.get(row.sampleId) ?? row.sampleId,
+      masterSampleId,
+      masterSampleName: masterSampleId ? names.get(masterSampleId) ?? masterSampleId : null,
       exactClass,
       varietyColor,
+      varietyClass,
       matches,
     });
   }
@@ -217,7 +243,12 @@ function parseSuggestedClassificationNotes(value: Prisma.JsonValue | null): Sugg
 }
 
 function classificationMatchLabel(match: ClassificationMatchNote): string {
-  return `${match.flowerVariety} / ${match.color}${match.flowerProductName ? ` / ${match.flowerProductName}` : ""}（${match.tier === "exact" ? "三级全同" : "种类+颜色相同"}）`;
+  const tierLabel = match.tier === "exact"
+    ? "三级全同"
+    : match.tier === "varietyColor"
+      ? "种类+颜色相同"
+      : "种类相同";
+  return `${match.flowerVariety} / ${match.color ?? "颜色未填"}${match.flowerProductName ? ` / ${match.flowerProductName}` : ""}（${tierLabel}）`;
 }
 
 function PlanRunList({
@@ -234,16 +265,23 @@ function PlanRunList({
     <div className="space-y-2">
       {plan.runs.map((run) => {
         const classificationNotes = parseSuggestedClassificationNotes(run.candidateSnapshot);
+        const idealReuse = isIdealReuseAlgorithmVersion(run.algorithmVersion);
+        const steps = [...run.steps].sort((left, right) => left.sequenceNo - right.sequenceNo);
+        const lastSequenceNo = steps[steps.length - 1]?.sequenceNo ?? 0;
         return (
         <details key={run.id} className="rounded-lg border border-stone-200 bg-white">
           <summary className="flex cursor-pointer list-none flex-wrap items-center gap-x-5 gap-y-2 px-3 py-2 text-sm">
             <span className="font-medium">方案 #{run.rank}</span>
             {plan.selectedRunId === run.id && <StatusBadge tone="success">当前选择</StatusBadge>}
+            {idealReuse && <StatusBadge tone="info">理想复用</StatusBadge>}
+            {steps.some((step) => Array.isArray(step.scheduleWarnings) && step.scheduleWarnings.length > 0) && (
+              <StatusBadge tone="warning">排程冲突</StatusBadge>
+            )}
             {classificationNotes.length > 0 && <StatusBadge tone="info">分类推荐搭配</StatusBadge>}
             <span>总成本 {money(run.totalCost)}</span>
             <span>预计节省 {money(run.estimatedSaving)}</span>
             <span>复用率 {rate(run.reuseRate)}</span>
-            <span>{run.steps.length} 步</span>
+            <span>{steps.length} 步</span>
             <span className="ml-auto text-xs text-emerald-700">展开步骤</span>
           </summary>
           <div className="space-y-2 border-t border-stone-100 p-3">
@@ -260,8 +298,9 @@ function PlanRunList({
                 {classificationNotes.map((note) => (
                   <p key={note.sampleId}>
                     {note.sampleName}
+                    {note.masterSampleName ? `（匹配主样品 ${note.masterSampleName}）` : ""}
                     {note.matches.length > 0 ? `：${note.matches.map(classificationMatchLabel).join("；")}` : ""}
-                    {` · 匹配花材 ${note.exactClass + note.varietyColor} 项`}
+                    {` · 匹配花材 ${note.exactClass + note.varietyColor + note.varietyClass} 项`}
                   </p>
                 ))}
                 <p className="text-emerald-800">
@@ -269,17 +308,52 @@ function PlanRunList({
                 </p>
               </div>
             )}
-            {run.steps.map((step) => (
+            {idealReuse && (
+              <div className="space-y-1 rounded-lg border border-sky-200 bg-sky-50 p-2 text-xs text-sky-900">
+                <p className="font-medium">理想复用估算</p>
+                <p>
+                  制作与拆解预计损耗均为 0；非末步拆解后，本步投入的同一物料 100% 进入后续复用池。
+                  需补足量按合格可用花材计算，执行时以实际拆解验收数量为准。
+                </p>
+              </div>
+            )}
+            {steps.map((step) => (
               <div key={step.id} className="rounded-lg bg-stone-50 p-2">
-                <div className="text-sm font-medium">第 {step.sequenceNo} 步 · {step.sampleNameSnapshot} × {step.plannedQuantity}</div>
+                <div className="flex flex-wrap items-center gap-2 text-sm font-medium">
+                  <span>第 {step.sequenceNo} 步 · {step.sampleNameSnapshot} × {step.plannedQuantity}</span>
+                  {step.retained && <StatusBadge tone="info">末步留存</StatusBadge>}
+                  {step.photoDueAt && <StatusBadge tone="warning">拍摄 {shortDateTime(step.photoDueAt)}</StatusBadge>}
+                  {step.retentionUntil && (
+                    <StatusBadge tone="success">留样至 {shortDateTime(step.retentionUntil)}</StatusBadge>
+                  )}
+                </div>
+                <div className="mt-1 text-xs text-stone-500">
+                  计划 {shortDateTime(step.plannedStartAt)} → {shortDateTime(step.plannedEndAt)}
+                  {step.photoDueAt ? ` · 拍摄截止 ${shortDateTime(step.photoDueAt)}` : ""}
+                  {step.retentionUntil ? ` · 留样截止 ${shortDateTime(step.retentionUntil)}` : ""}
+                </div>
+                {Array.isArray(step.scheduleWarnings) && step.scheduleWarnings.length > 0 && (
+                  <ul className="mt-1 list-disc pl-4 text-xs text-amber-800">
+                    {(step.scheduleWarnings as string[]).map((warning) => (
+                      <li key={warning}>{warning}</li>
+                    ))}
+                  </ul>
+                )}
                 <div className="mt-1 grid gap-1 text-xs text-stone-600 md:grid-cols-2">
                   {step.flows.map((flow) => (
                     <div key={flow.id} className="flex flex-wrap items-center gap-x-3 gap-y-1">
                       <span className="font-medium">{flow.materialNameSnapshot}</span>
                       <span>需求 {Number(flow.requiredQty)}</span>
                       <span>现货 {Number(flow.stockQty)}</span>
-                      <span>复用 {Number(flow.reusedQty)}</span>
-                      <span>采购 {Number(flow.purchaseQty)}</span>
+                      <span>预计复用 {Number(flow.reusedQty)}</span>
+                      <span title="按合格可用花材计算的缺口">需补足 {Number(flow.purchaseQty)}</span>
+                      {idealReuse && (
+                        <span>
+                          {step.sequenceNo === lastSequenceNo
+                            ? "末步留存"
+                            : `拆解释放 ${Number(flow.reusableAfterDisassemblyQty)}`}
+                        </span>
+                      )}
                       <span>预计损耗 {Number(flow.lossQty)}</span>
                     </div>
                   ))}
@@ -630,7 +704,15 @@ export default async function SamplePlansPage({
         materials: {
           include: {
             material: {
-              select: { flowerVariety: true, flowerProductName: true, color: true },
+              select: {
+                id: true,
+                name: true,
+                kind: true,
+                baseUnit: true,
+                flowerVariety: true,
+                flowerProductName: true,
+                color: true,
+              },
             },
           },
         },
@@ -698,6 +780,13 @@ export default async function SamplePlansPage({
       state: sample.state,
       materialCount: sample._count.materials,
       priority: sample.priority,
+      recipe: sample.materials.map((line) => ({
+        materialId: line.materialId,
+        name: line.material.name,
+        kind: line.material.kind,
+        baseUnit: line.material.baseUnit,
+        quantity: Number(line.quantity),
+      })),
       classifications: sample.materials.map((line) => ({
         flowerVariety: line.material.flowerVariety,
         flowerProductName: line.material.flowerProductName,
@@ -711,25 +800,15 @@ export default async function SamplePlansPage({
   return (
     <V2ModulePage
       title="打样计划"
-      description="选择样品、模拟拆解复用与补购，批准后按步骤领用、记录实际用量与损耗，并将完成样品转为 SKU。"
+      description="新建计划以单个主样品为基准推荐搭配样品，按三级分类与预计复用排序；计划仍按拍摄/留样截止自动排程，按理想复用模拟拆解释放、现货覆盖与合格花材需补足量。批准后按步骤领用、记录实际用量与损耗，并将完成样品转为 SKU。"
       message={feedback.message}
       error={feedback.error}
       actions={
-        <V2DrawerForm
-          triggerLabel="新建打样计划"
-          title="新建打样计划"
-          description="选择样品与制作顺序；创建后再计算现货覆盖、复用与补购方案。"
-          action={createSamplePlanAction}
-          submitLabel="创建并稍后计算"
-          size="xl"
-          triggerClassName={button}
-        >
-          <label className="block text-sm text-stone-700">
-            计划名称
-            <input className={`${input} mt-1`} name="name" maxLength={100} required />
-          </label>
-          <SamplePlanItemsEditor samples={sampleOptions} />
-        </V2DrawerForm>
+        <SamplePlanCreateDrawer
+          samples={sampleOptions}
+          createAction={createSamplePlanFromRecommendationAction}
+          recommendAction={recommendSamplePlanSamplesAction}
+        />
       }
     >
       <p className="text-xs text-stone-500">
@@ -739,7 +818,7 @@ export default async function SamplePlansPage({
       {plans.length === 0 ? (
         <ActionEmptyState
           title="还没有打样计划"
-          description="点击右上角“新建打样计划”，选择一个或多个已完成样品，计算现货覆盖、复用与补购方案。"
+          description="点击右上角“新建打样计划”，选择一个主样品和计划制作样品数，获取推荐后按理想复用计算拆解释放、现货覆盖与合格花材需补足量。"
         />
       ) : (
         <div className="space-y-3">
@@ -754,6 +833,9 @@ export default async function SamplePlansPage({
               quantity: item.quantity,
               mandatory: item.mandatory,
               sequenceNo: item.sequenceNo ?? 1,
+              photoDueAt: item.photoDueAt ? toDateTimeLocal(item.photoDueAt) : null,
+              retentionUntil: item.retentionUntil ? toDateTimeLocal(item.retentionUntil) : null,
+              autoSchedule: item.autoSchedule,
             }));
             const riskEvent = riskByPlan.get(plan.id);
             const recalcEvent = recalcByPlan.get(plan.id);
@@ -826,7 +908,14 @@ export default async function SamplePlansPage({
                             <span className="font-mono text-xs text-stone-500">{item.sequenceNo ?? "—"}</span>
                             <span>{item.sample.name}</span>
                             <span className="text-xs text-stone-500">× {item.quantity}</span>
-                            <StatusBadge tone={item.mandatory ? "info" : "neutral"}>{item.mandatory ? "必选" : "可选"}</StatusBadge>
+                            <StatusBadge tone={item.mandatory ? "info" : "neutral"}>{item.mandatory ? "主样品" : "可选"}</StatusBadge>
+                            {item.photoDueAt && (
+                              <span className="text-xs text-amber-700">拍摄 {shortDateTime(item.photoDueAt)}</span>
+                            )}
+                            {item.retentionUntil && (
+                              <span className="text-xs text-emerald-700">留样 {shortDateTime(item.retentionUntil)}</span>
+                            )}
+                            {item.autoSchedule && <span className="text-xs text-stone-400">自动排程</span>}
                           </div>
                         ))}
                       </div>
@@ -872,7 +961,7 @@ export default async function SamplePlansPage({
                     </section>
 
                     <section className="rounded-xl border border-stone-200 bg-white p-4">
-                      <h3 className="font-semibold">推荐方案（成本、复用与补购）</h3>
+                      <h3 className="font-semibold">推荐方案（成本、理想复用与需补足）</h3>
                       <div className="mt-2">
                         <PlanRunList plan={plan} canEdit={canSelectRun} />
                       </div>

@@ -4,6 +4,7 @@ import { generateSampleCode } from "../domain/identifiers";
 import { normalizeV2ImageKey } from "../domain/media";
 import { calculateSamplePricing, type SamplePricingResult } from "../domain/sample-pricing";
 import { assertMaterialQuantity } from "../domain/stock-planning";
+import { applyProcurementLoss } from "../domain/procurement-loss";
 
 export type SampleScope = { tenantId: string; storeId: string; actorStaffId: string };
 
@@ -20,6 +21,10 @@ export type SaveSampleInput = {
   priority?: number;
   state?: SampleState;
   targetMarginRate?: number | null;
+  /** Default photography deadline inherited by new plan items. */
+  photoDueAt?: Date | null;
+  /** Default retention deadline inherited by new plan items. */
+  retentionUntil?: Date | null;
   materials: SampleMaterialInput[];
 };
 
@@ -99,6 +104,14 @@ function normalizePriority(value: number | undefined): number {
   return value;
 }
 
+function optionalDate(value: Date | null | undefined, label: string): Date | null {
+  if (value === null || value === undefined) return null;
+  if (!(value instanceof Date) || !Number.isFinite(value.getTime())) {
+    throw new Error(`${label}无效`);
+  }
+  return value;
+}
+
 async function recordAudit(
   tx: Prisma.TransactionClient,
   scope: SampleScope,
@@ -136,6 +149,8 @@ type StoredSample = {
   description: string | null;
   priority: number;
   targetMarginRate: Prisma.Decimal | null;
+  photoDueAt: Date | null;
+  retentionUntil: Date | null;
   materials: {
     id: string;
     materialId: string;
@@ -183,6 +198,8 @@ function sampleSnapshot(sample: StoredSample): AuditSnapshot {
     imageKey: sample.imageKey,
     priority: sample.priority,
     targetMarginRate: sample.targetMarginRate === null ? null : Number(sample.targetMarginRate),
+    photoDueAt: sample.photoDueAt?.toISOString() ?? null,
+    retentionUntil: sample.retentionUntil?.toISOString() ?? null,
     materials: materialSnapshot(sample.materials),
   };
 }
@@ -256,6 +273,8 @@ export async function saveSample(
   const imageKey = input.imageKey === undefined ? undefined : normalizedImageKey(input.imageKey);
   const priority = normalizePriority(input.priority);
   const targetMarginRate = normalizeMargin(input.targetMarginRate);
+  const photoDueAt = optionalDate(input.photoDueAt, "拍摄截止时间");
+  const retentionUntil = optionalDate(input.retentionUntil, "留样截止时间");
   const materials = await validateMaterials(tx, scope, input.materials ?? []);
   const requestedState = publicState(input.state, SampleState.DRAFT);
   if (requestedState === SampleState.READY && materials.length === 0) {
@@ -273,6 +292,8 @@ export async function saveSample(
         imageKey: imageKey ?? null,
         priority,
         targetMarginRate,
+        photoDueAt,
+        retentionUntil,
         materials: { create: materials },
       },
       select: { id: true, code: true, state: true },
@@ -296,6 +317,8 @@ export async function saveSample(
           imageKey: imageKey ?? null,
           priority,
           targetMarginRate: targetMarginRate === null ? null : new Prisma.Decimal(targetMarginRate),
+          photoDueAt,
+          retentionUntil,
           materials: [],
         }),
         versionNo,
@@ -322,6 +345,8 @@ export async function saveSample(
       description,
       priority,
       targetMarginRate,
+      photoDueAt,
+      retentionUntil,
       ...(imageKey === undefined ? {} : { imageKey }),
       materials: {
         deleteMany: {},
@@ -345,6 +370,8 @@ export async function saveSample(
       imageKey: imageKey === undefined ? current.imageKey : imageKey,
       priority,
       targetMarginRate,
+      photoDueAt: photoDueAt?.toISOString() ?? null,
+      retentionUntil: retentionUntil?.toISOString() ?? null,
       materials,
       versionNo,
     },
@@ -369,6 +396,8 @@ export async function copySample(
       imageKey: source.imageKey,
       priority: source.priority,
       targetMarginRate: source.targetMarginRate,
+      photoDueAt: source.photoDueAt,
+      retentionUntil: source.retentionUntil,
       materials: {
         create: source.materials.map((line) => ({
           materialId: line.materialId,
@@ -435,15 +464,31 @@ async function latestUnitCost(
   const batch = await tx.inventoryBatch.findFirst({
     where: { storeId: scope.storeId, materialId },
     orderBy: [{ receivedAt: "desc" }, { id: "desc" }],
-    select: { unitCost: true },
+    select: { unitCost: true, lossAdjustedUnitCost: true, channelLossRate: true },
   });
-  if (batch) return { unitCost: Number(batch.unitCost), source: "BATCH" };
+  if (batch) {
+    const unitCost = batch.lossAdjustedUnitCost !== null
+      ? Number(batch.lossAdjustedUnitCost)
+      : batch.channelLossRate !== null
+        ? applyProcurementLoss({
+            quantity: 1,
+            unitCost: Number(batch.unitCost),
+            lossRate: Number(batch.channelLossRate),
+          }).lossAdjustedUnitCost
+        : Number(batch.unitCost);
+    return { unitCost, source: "BATCH" };
+  }
   const material = await tx.material.findFirst({
     where: { id: materialId, tenantId: scope.tenantId },
-    select: { standardUnitCost: true },
+    select: { standardUnitCost: true, defaultLossRate: true },
   });
   if (material?.standardUnitCost !== null && material?.standardUnitCost !== undefined) {
-    return { unitCost: Number(material.standardUnitCost), source: "STANDARD" };
+    const unitCost = applyProcurementLoss({
+      quantity: 1,
+      unitCost: Number(material.standardUnitCost),
+      lossRate: material.defaultLossRate === null ? 0 : Number(material.defaultLossRate),
+    }).lossAdjustedUnitCost;
+    return { unitCost, source: "STANDARD" };
   }
   return { unitCost: 0, source: "NONE" };
 }
@@ -585,9 +630,10 @@ export async function listSampleVersionHistory(
       tenantId: scope.tenantId,
       entityType: "Sample",
       entityId: sampleId,
-      action: { in: [...SAMPLE_VERSION_ACTIONS, "SAMPLE_STATE_CHANGED", "SAMPLE_COPIED", "SAMPLE_CONVERTED_TO_SKU"] },
+      action: { in: [...SAMPLE_VERSION_ACTIONS, "SAMPLE_STATE_CHANGED", "SAMPLE_COPIED", "SAMPLE_CONVERTED_TO_SKU", "SAMPLE_MATERIAL_SUBSTITUTED"] },
     },
     orderBy: { occurredAt: "desc" },
     take,
   });
 }
+

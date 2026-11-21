@@ -572,6 +572,8 @@ export type MaterialWhereInput = {
   receivedLines?: Prisma.GoodsReceiptLineListRelationFilter
   batches?: Prisma.InventoryBatchListRelationFilter
   sampleMaterials?: Prisma.SampleMaterialListRelationFilter
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionListRelationFilter
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionListRelationFilter
   samplePlanMaterials?: Prisma.SamplePlanMaterialListRelationFilter
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotListRelationFilter
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialListRelationFilter
@@ -636,6 +638,8 @@ export type MaterialOrderByWithRelationInput = {
   receivedLines?: Prisma.GoodsReceiptLineOrderByRelationAggregateInput
   batches?: Prisma.InventoryBatchOrderByRelationAggregateInput
   sampleMaterials?: Prisma.SampleMaterialOrderByRelationAggregateInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionOrderByRelationAggregateInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionOrderByRelationAggregateInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialOrderByRelationAggregateInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotOrderByRelationAggregateInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialOrderByRelationAggregateInput
@@ -705,6 +709,8 @@ export type MaterialWhereUniqueInput = Prisma.AtLeast<{
   receivedLines?: Prisma.GoodsReceiptLineListRelationFilter
   batches?: Prisma.InventoryBatchListRelationFilter
   sampleMaterials?: Prisma.SampleMaterialListRelationFilter
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionListRelationFilter
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionListRelationFilter
   samplePlanMaterials?: Prisma.SamplePlanMaterialListRelationFilter
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotListRelationFilter
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialListRelationFilter
@@ -874,6 +880,8 @@ export type MaterialCreateInput = {
   receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutMaterialInput
@@ -937,6 +945,8 @@ export type MaterialUncheckedCreateInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchUncheckedCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutMaterialInput
@@ -1000,6 +1010,8 @@ export type MaterialUpdateInput = {
   receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUpdateManyWithoutMaterialNestedInput
@@ -1063,6 +1075,8 @@ export type MaterialUncheckedUpdateInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUncheckedUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
@@ -1646,6 +1660,34 @@ export type MaterialUpdateOneRequiredWithoutSampleMaterialsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.MaterialUpdateToOneWithWhereWithoutSampleMaterialsInput, Prisma.MaterialUpdateWithoutSampleMaterialsInput>, Prisma.MaterialUncheckedUpdateWithoutSampleMaterialsInput>
 }
 
+export type MaterialCreateNestedOneWithoutSubstitutionsFromInput = {
+  create?: Prisma.XOR<Prisma.MaterialCreateWithoutSubstitutionsFromInput, Prisma.MaterialUncheckedCreateWithoutSubstitutionsFromInput>
+  connectOrCreate?: Prisma.MaterialCreateOrConnectWithoutSubstitutionsFromInput
+  connect?: Prisma.MaterialWhereUniqueInput
+}
+
+export type MaterialCreateNestedOneWithoutSubstitutionsToInput = {
+  create?: Prisma.XOR<Prisma.MaterialCreateWithoutSubstitutionsToInput, Prisma.MaterialUncheckedCreateWithoutSubstitutionsToInput>
+  connectOrCreate?: Prisma.MaterialCreateOrConnectWithoutSubstitutionsToInput
+  connect?: Prisma.MaterialWhereUniqueInput
+}
+
+export type MaterialUpdateOneRequiredWithoutSubstitutionsFromNestedInput = {
+  create?: Prisma.XOR<Prisma.MaterialCreateWithoutSubstitutionsFromInput, Prisma.MaterialUncheckedCreateWithoutSubstitutionsFromInput>
+  connectOrCreate?: Prisma.MaterialCreateOrConnectWithoutSubstitutionsFromInput
+  upsert?: Prisma.MaterialUpsertWithoutSubstitutionsFromInput
+  connect?: Prisma.MaterialWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MaterialUpdateToOneWithWhereWithoutSubstitutionsFromInput, Prisma.MaterialUpdateWithoutSubstitutionsFromInput>, Prisma.MaterialUncheckedUpdateWithoutSubstitutionsFromInput>
+}
+
+export type MaterialUpdateOneRequiredWithoutSubstitutionsToNestedInput = {
+  create?: Prisma.XOR<Prisma.MaterialCreateWithoutSubstitutionsToInput, Prisma.MaterialUncheckedCreateWithoutSubstitutionsToInput>
+  connectOrCreate?: Prisma.MaterialCreateOrConnectWithoutSubstitutionsToInput
+  upsert?: Prisma.MaterialUpsertWithoutSubstitutionsToInput
+  connect?: Prisma.MaterialWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.MaterialUpdateToOneWithWhereWithoutSubstitutionsToInput, Prisma.MaterialUpdateWithoutSubstitutionsToInput>, Prisma.MaterialUncheckedUpdateWithoutSubstitutionsToInput>
+}
+
 export type MaterialCreateNestedOneWithoutSamplePlanMaterialsInput = {
   create?: Prisma.XOR<Prisma.MaterialCreateWithoutSamplePlanMaterialsInput, Prisma.MaterialUncheckedCreateWithoutSamplePlanMaterialsInput>
   connectOrCreate?: Prisma.MaterialCreateOrConnectWithoutSamplePlanMaterialsInput
@@ -1785,6 +1827,8 @@ export type MaterialCreateWithoutTenantInput = {
   receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutMaterialInput
@@ -1847,6 +1891,8 @@ export type MaterialUncheckedCreateWithoutTenantInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchUncheckedCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutMaterialInput
@@ -1987,6 +2033,8 @@ export type MaterialCreateWithoutRecipeLinesInput = {
   receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutMaterialInput
@@ -2049,6 +2097,8 @@ export type MaterialUncheckedCreateWithoutRecipeLinesInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchUncheckedCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutMaterialInput
@@ -2127,6 +2177,8 @@ export type MaterialUpdateWithoutRecipeLinesInput = {
   receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUpdateManyWithoutMaterialNestedInput
@@ -2189,6 +2241,8 @@ export type MaterialUncheckedUpdateWithoutRecipeLinesInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUncheckedUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
@@ -2252,6 +2306,8 @@ export type MaterialCreateWithoutPackagingKitLinesInput = {
   receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutMaterialInput
@@ -2314,6 +2370,8 @@ export type MaterialUncheckedCreateWithoutPackagingKitLinesInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchUncheckedCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutMaterialInput
@@ -2392,6 +2450,8 @@ export type MaterialUpdateWithoutPackagingKitLinesInput = {
   receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUpdateManyWithoutMaterialNestedInput
@@ -2454,6 +2514,8 @@ export type MaterialUncheckedUpdateWithoutPackagingKitLinesInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUncheckedUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
@@ -2515,6 +2577,8 @@ export type MaterialCreateWithoutRequirementsInput = {
   receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutMaterialInput
@@ -2577,6 +2641,8 @@ export type MaterialUncheckedCreateWithoutRequirementsInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchUncheckedCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutMaterialInput
@@ -2655,6 +2721,8 @@ export type MaterialUpdateWithoutRequirementsInput = {
   receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUpdateManyWithoutMaterialNestedInput
@@ -2717,6 +2785,8 @@ export type MaterialUncheckedUpdateWithoutRequirementsInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUncheckedUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
@@ -2780,6 +2850,8 @@ export type MaterialCreateWithoutHoldMaterialsInput = {
   receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutMaterialInput
@@ -2842,6 +2914,8 @@ export type MaterialUncheckedCreateWithoutHoldMaterialsInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchUncheckedCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutMaterialInput
@@ -2920,6 +2994,8 @@ export type MaterialUpdateWithoutHoldMaterialsInput = {
   receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUpdateManyWithoutMaterialNestedInput
@@ -2982,6 +3058,8 @@ export type MaterialUncheckedUpdateWithoutHoldMaterialsInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUncheckedUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
@@ -3043,6 +3121,8 @@ export type MaterialCreateWithoutOrderedLinesInput = {
   receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutMaterialInput
@@ -3105,6 +3185,8 @@ export type MaterialUncheckedCreateWithoutOrderedLinesInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchUncheckedCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutMaterialInput
@@ -3183,6 +3265,8 @@ export type MaterialUpdateWithoutOrderedLinesInput = {
   receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUpdateManyWithoutMaterialNestedInput
@@ -3245,6 +3329,8 @@ export type MaterialUncheckedUpdateWithoutOrderedLinesInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUncheckedUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
@@ -3307,6 +3393,8 @@ export type MaterialCreateWithoutReceivedLinesInput = {
   orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
   batches?: Prisma.InventoryBatchCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutMaterialInput
@@ -3369,6 +3457,8 @@ export type MaterialUncheckedCreateWithoutReceivedLinesInput = {
   orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
   batches?: Prisma.InventoryBatchUncheckedCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutMaterialInput
@@ -3447,6 +3537,8 @@ export type MaterialUpdateWithoutReceivedLinesInput = {
   orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
   batches?: Prisma.InventoryBatchUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUpdateManyWithoutMaterialNestedInput
@@ -3509,6 +3601,8 @@ export type MaterialUncheckedUpdateWithoutReceivedLinesInput = {
   orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
   batches?: Prisma.InventoryBatchUncheckedUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
@@ -3571,6 +3665,8 @@ export type MaterialCreateWithoutBatchesInput = {
   orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
   receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
   sampleMaterials?: Prisma.SampleMaterialCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutMaterialInput
@@ -3633,6 +3729,8 @@ export type MaterialUncheckedCreateWithoutBatchesInput = {
   orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
   receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutMaterialInput
@@ -3711,6 +3809,8 @@ export type MaterialUpdateWithoutBatchesInput = {
   orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
   receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUpdateManyWithoutMaterialNestedInput
@@ -3773,6 +3873,8 @@ export type MaterialUncheckedUpdateWithoutBatchesInput = {
   orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
   receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
@@ -3835,6 +3937,8 @@ export type MaterialCreateWithoutSampleMaterialsInput = {
   orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
   receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutMaterialInput
@@ -3897,6 +4001,8 @@ export type MaterialUncheckedCreateWithoutSampleMaterialsInput = {
   orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
   receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchUncheckedCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutMaterialInput
@@ -3975,6 +4081,8 @@ export type MaterialUpdateWithoutSampleMaterialsInput = {
   orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
   receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUpdateManyWithoutMaterialNestedInput
@@ -4037,6 +4145,552 @@ export type MaterialUncheckedUpdateWithoutSampleMaterialsInput = {
   orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
   receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUncheckedUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutToMaterialNestedInput
+  samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
+  sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  disassemblyMaterials?: Prisma.SampleDisassemblyMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  categories?: Prisma.MaterialCategoryRelationUncheckedUpdateManyWithoutMaterialNestedInput
+  holdMaterials?: Prisma.AvailabilityHoldMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  packagingKitLines?: Prisma.PackagingKitLineUncheckedUpdateManyWithoutMaterialNestedInput
+}
+
+export type MaterialCreateWithoutSubstitutionsFromInput = {
+  id?: string
+  code: string
+  name: string
+  kind: $Enums.MaterialKind
+  color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
+  grade?: string | null
+  gradeSpecification?: string | null
+  specification?: string | null
+  baseUnit: string
+  quantityScale?: number
+  reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  imageKey?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  active?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMaterialsInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutMaterialInput
+  recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutMaterialInput
+  requirements?: Prisma.OrderMaterialRequirementCreateNestedManyWithoutMaterialInput
+  orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
+  receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
+  batches?: Prisma.InventoryBatchCreateNestedManyWithoutMaterialInput
+  sampleMaterials?: Prisma.SampleMaterialCreateNestedManyWithoutMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutToMaterialInput
+  samplePlanMaterials?: Prisma.SamplePlanMaterialCreateNestedManyWithoutMaterialInput
+  sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotCreateNestedManyWithoutMaterialInput
+  sampleStepMaterials?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutMaterialInput
+  disassemblyMaterials?: Prisma.SampleDisassemblyMaterialCreateNestedManyWithoutMaterialInput
+  categories?: Prisma.MaterialCategoryRelationCreateNestedManyWithoutMaterialInput
+  holdMaterials?: Prisma.AvailabilityHoldMaterialCreateNestedManyWithoutMaterialInput
+  packagingKitLines?: Prisma.PackagingKitLineCreateNestedManyWithoutMaterialInput
+}
+
+export type MaterialUncheckedCreateWithoutSubstitutionsFromInput = {
+  id?: string
+  tenantId: string
+  code: string
+  name: string
+  kind: $Enums.MaterialKind
+  color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
+  grade?: string | null
+  gradeSpecification?: string | null
+  specification?: string | null
+  baseUnit: string
+  quantityScale?: number
+  reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  imageKey?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  active?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutMaterialInput
+  recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutMaterialInput
+  requirements?: Prisma.OrderMaterialRequirementUncheckedCreateNestedManyWithoutMaterialInput
+  orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
+  receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
+  batches?: Prisma.InventoryBatchUncheckedCreateNestedManyWithoutMaterialInput
+  sampleMaterials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutToMaterialInput
+  samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedCreateNestedManyWithoutMaterialInput
+  sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  disassemblyMaterials?: Prisma.SampleDisassemblyMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  categories?: Prisma.MaterialCategoryRelationUncheckedCreateNestedManyWithoutMaterialInput
+  holdMaterials?: Prisma.AvailabilityHoldMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  packagingKitLines?: Prisma.PackagingKitLineUncheckedCreateNestedManyWithoutMaterialInput
+}
+
+export type MaterialCreateOrConnectWithoutSubstitutionsFromInput = {
+  where: Prisma.MaterialWhereUniqueInput
+  create: Prisma.XOR<Prisma.MaterialCreateWithoutSubstitutionsFromInput, Prisma.MaterialUncheckedCreateWithoutSubstitutionsFromInput>
+}
+
+export type MaterialCreateWithoutSubstitutionsToInput = {
+  id?: string
+  code: string
+  name: string
+  kind: $Enums.MaterialKind
+  color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
+  grade?: string | null
+  gradeSpecification?: string | null
+  specification?: string | null
+  baseUnit: string
+  quantityScale?: number
+  reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  imageKey?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  active?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  tenant: Prisma.TenantCreateNestedOneWithoutMaterialsInput
+  unverifiedLosses?: Prisma.LossRecordCreateNestedManyWithoutMaterialInput
+  recipeLines?: Prisma.RecipeLineCreateNestedManyWithoutMaterialInput
+  requirements?: Prisma.OrderMaterialRequirementCreateNestedManyWithoutMaterialInput
+  orderedLines?: Prisma.PurchaseOrderLineCreateNestedManyWithoutMaterialInput
+  receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
+  batches?: Prisma.InventoryBatchCreateNestedManyWithoutMaterialInput
+  sampleMaterials?: Prisma.SampleMaterialCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutFromMaterialInput
+  samplePlanMaterials?: Prisma.SamplePlanMaterialCreateNestedManyWithoutMaterialInput
+  sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotCreateNestedManyWithoutMaterialInput
+  sampleStepMaterials?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutMaterialInput
+  disassemblyMaterials?: Prisma.SampleDisassemblyMaterialCreateNestedManyWithoutMaterialInput
+  categories?: Prisma.MaterialCategoryRelationCreateNestedManyWithoutMaterialInput
+  holdMaterials?: Prisma.AvailabilityHoldMaterialCreateNestedManyWithoutMaterialInput
+  packagingKitLines?: Prisma.PackagingKitLineCreateNestedManyWithoutMaterialInput
+}
+
+export type MaterialUncheckedCreateWithoutSubstitutionsToInput = {
+  id?: string
+  tenantId: string
+  code: string
+  name: string
+  kind: $Enums.MaterialKind
+  color?: string | null
+  flowerVariety?: string | null
+  flowerProductName?: string | null
+  grade?: string | null
+  gradeSpecification?: string | null
+  specification?: string | null
+  baseUnit: string
+  quantityScale?: number
+  reservePerOrder?: boolean
+  englishName?: string | null
+  flowerLanguage?: string | null
+  maintenance?: string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: string | null
+  defaultShelfLifeDays?: number | null
+  standardUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: string | null
+  costNote?: string | null
+  optimisticUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: string | null
+  pinyinIndex?: string
+  aliasText?: string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialCreatecolorTagsInput | string[]
+  morphology?: string | null
+  defaultUsableRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: $Enums.LossMode
+  lossRateUpdatedAt?: Date | string | null
+  costUpdatedAt?: Date | string | null
+  brand?: string | null
+  model?: string | null
+  notes?: string | null
+  imageKey?: string | null
+  safetyStockThreshold?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  active?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedCreateNestedManyWithoutMaterialInput
+  recipeLines?: Prisma.RecipeLineUncheckedCreateNestedManyWithoutMaterialInput
+  requirements?: Prisma.OrderMaterialRequirementUncheckedCreateNestedManyWithoutMaterialInput
+  orderedLines?: Prisma.PurchaseOrderLineUncheckedCreateNestedManyWithoutMaterialInput
+  receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
+  batches?: Prisma.InventoryBatchUncheckedCreateNestedManyWithoutMaterialInput
+  sampleMaterials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutFromMaterialInput
+  samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedCreateNestedManyWithoutMaterialInput
+  sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  disassemblyMaterials?: Prisma.SampleDisassemblyMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  categories?: Prisma.MaterialCategoryRelationUncheckedCreateNestedManyWithoutMaterialInput
+  holdMaterials?: Prisma.AvailabilityHoldMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  packagingKitLines?: Prisma.PackagingKitLineUncheckedCreateNestedManyWithoutMaterialInput
+}
+
+export type MaterialCreateOrConnectWithoutSubstitutionsToInput = {
+  where: Prisma.MaterialWhereUniqueInput
+  create: Prisma.XOR<Prisma.MaterialCreateWithoutSubstitutionsToInput, Prisma.MaterialUncheckedCreateWithoutSubstitutionsToInput>
+}
+
+export type MaterialUpsertWithoutSubstitutionsFromInput = {
+  update: Prisma.XOR<Prisma.MaterialUpdateWithoutSubstitutionsFromInput, Prisma.MaterialUncheckedUpdateWithoutSubstitutionsFromInput>
+  create: Prisma.XOR<Prisma.MaterialCreateWithoutSubstitutionsFromInput, Prisma.MaterialUncheckedCreateWithoutSubstitutionsFromInput>
+  where?: Prisma.MaterialWhereInput
+}
+
+export type MaterialUpdateToOneWithWhereWithoutSubstitutionsFromInput = {
+  where?: Prisma.MaterialWhereInput
+  data: Prisma.XOR<Prisma.MaterialUpdateWithoutSubstitutionsFromInput, Prisma.MaterialUncheckedUpdateWithoutSubstitutionsFromInput>
+}
+
+export type MaterialUpdateWithoutSubstitutionsFromInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
+  quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
+  reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialsNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutMaterialNestedInput
+  recipeLines?: Prisma.RecipeLineUpdateManyWithoutMaterialNestedInput
+  requirements?: Prisma.OrderMaterialRequirementUpdateManyWithoutMaterialNestedInput
+  orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
+  receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
+  batches?: Prisma.InventoryBatchUpdateManyWithoutMaterialNestedInput
+  sampleMaterials?: Prisma.SampleMaterialUpdateManyWithoutMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutToMaterialNestedInput
+  samplePlanMaterials?: Prisma.SamplePlanMaterialUpdateManyWithoutMaterialNestedInput
+  sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUpdateManyWithoutMaterialNestedInput
+  sampleStepMaterials?: Prisma.SamplePlanStepMaterialUpdateManyWithoutMaterialNestedInput
+  disassemblyMaterials?: Prisma.SampleDisassemblyMaterialUpdateManyWithoutMaterialNestedInput
+  categories?: Prisma.MaterialCategoryRelationUpdateManyWithoutMaterialNestedInput
+  holdMaterials?: Prisma.AvailabilityHoldMaterialUpdateManyWithoutMaterialNestedInput
+  packagingKitLines?: Prisma.PackagingKitLineUpdateManyWithoutMaterialNestedInput
+}
+
+export type MaterialUncheckedUpdateWithoutSubstitutionsFromInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
+  quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
+  reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutMaterialNestedInput
+  recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutMaterialNestedInput
+  requirements?: Prisma.OrderMaterialRequirementUncheckedUpdateManyWithoutMaterialNestedInput
+  orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
+  receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
+  batches?: Prisma.InventoryBatchUncheckedUpdateManyWithoutMaterialNestedInput
+  sampleMaterials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutToMaterialNestedInput
+  samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
+  sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  disassemblyMaterials?: Prisma.SampleDisassemblyMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  categories?: Prisma.MaterialCategoryRelationUncheckedUpdateManyWithoutMaterialNestedInput
+  holdMaterials?: Prisma.AvailabilityHoldMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  packagingKitLines?: Prisma.PackagingKitLineUncheckedUpdateManyWithoutMaterialNestedInput
+}
+
+export type MaterialUpsertWithoutSubstitutionsToInput = {
+  update: Prisma.XOR<Prisma.MaterialUpdateWithoutSubstitutionsToInput, Prisma.MaterialUncheckedUpdateWithoutSubstitutionsToInput>
+  create: Prisma.XOR<Prisma.MaterialCreateWithoutSubstitutionsToInput, Prisma.MaterialUncheckedCreateWithoutSubstitutionsToInput>
+  where?: Prisma.MaterialWhereInput
+}
+
+export type MaterialUpdateToOneWithWhereWithoutSubstitutionsToInput = {
+  where?: Prisma.MaterialWhereInput
+  data: Prisma.XOR<Prisma.MaterialUpdateWithoutSubstitutionsToInput, Prisma.MaterialUncheckedUpdateWithoutSubstitutionsToInput>
+}
+
+export type MaterialUpdateWithoutSubstitutionsToInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
+  quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
+  reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutMaterialsNestedInput
+  unverifiedLosses?: Prisma.LossRecordUpdateManyWithoutMaterialNestedInput
+  recipeLines?: Prisma.RecipeLineUpdateManyWithoutMaterialNestedInput
+  requirements?: Prisma.OrderMaterialRequirementUpdateManyWithoutMaterialNestedInput
+  orderedLines?: Prisma.PurchaseOrderLineUpdateManyWithoutMaterialNestedInput
+  receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
+  batches?: Prisma.InventoryBatchUpdateManyWithoutMaterialNestedInput
+  sampleMaterials?: Prisma.SampleMaterialUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutFromMaterialNestedInput
+  samplePlanMaterials?: Prisma.SamplePlanMaterialUpdateManyWithoutMaterialNestedInput
+  sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUpdateManyWithoutMaterialNestedInput
+  sampleStepMaterials?: Prisma.SamplePlanStepMaterialUpdateManyWithoutMaterialNestedInput
+  disassemblyMaterials?: Prisma.SampleDisassemblyMaterialUpdateManyWithoutMaterialNestedInput
+  categories?: Prisma.MaterialCategoryRelationUpdateManyWithoutMaterialNestedInput
+  holdMaterials?: Prisma.AvailabilityHoldMaterialUpdateManyWithoutMaterialNestedInput
+  packagingKitLines?: Prisma.PackagingKitLineUpdateManyWithoutMaterialNestedInput
+}
+
+export type MaterialUncheckedUpdateWithoutSubstitutionsToInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  kind?: Prisma.EnumMaterialKindFieldUpdateOperationsInput | $Enums.MaterialKind
+  color?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerVariety?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerProductName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  grade?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  gradeSpecification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  specification?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  baseUnit?: Prisma.StringFieldUpdateOperationsInput | string
+  quantityScale?: Prisma.IntFieldUpdateOperationsInput | number
+  reservePerOrder?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  englishName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  flowerLanguage?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenance?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  maintenanceCare?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
+  supplySeason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultShelfLifeDays?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  standardUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  costUnit?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  costNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  optimisticUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  standardUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  conservativeUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossRateNote?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  pinyinIndex?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasText?: Prisma.StringFieldUpdateOperationsInput | string
+  aliasMap?: Prisma.JsonNullValueInput | runtime.InputJsonValue
+  floralRole?: Prisma.NullableEnumFloralRoleFieldUpdateOperationsInput | $Enums.FloralRole | null
+  colorTags?: Prisma.MaterialUpdatecolorTagsInput | string[]
+  morphology?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  defaultUsableRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  defaultLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossMode?: Prisma.EnumLossModeFieldUpdateOperationsInput | $Enums.LossMode
+  lossRateUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  costUpdatedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  brand?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  model?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  notes?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  safetyStockThreshold?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  active?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  unverifiedLosses?: Prisma.LossRecordUncheckedUpdateManyWithoutMaterialNestedInput
+  recipeLines?: Prisma.RecipeLineUncheckedUpdateManyWithoutMaterialNestedInput
+  requirements?: Prisma.OrderMaterialRequirementUncheckedUpdateManyWithoutMaterialNestedInput
+  orderedLines?: Prisma.PurchaseOrderLineUncheckedUpdateManyWithoutMaterialNestedInput
+  receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
+  batches?: Prisma.InventoryBatchUncheckedUpdateManyWithoutMaterialNestedInput
+  sampleMaterials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutFromMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
@@ -4100,6 +4754,8 @@ export type MaterialCreateWithoutSamplePlanMaterialsInput = {
   receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutToMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutMaterialInput
   disassemblyMaterials?: Prisma.SampleDisassemblyMaterialCreateNestedManyWithoutMaterialInput
@@ -4162,6 +4818,8 @@ export type MaterialUncheckedCreateWithoutSamplePlanMaterialsInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchUncheckedCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutToMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutMaterialInput
   disassemblyMaterials?: Prisma.SampleDisassemblyMaterialUncheckedCreateNestedManyWithoutMaterialInput
@@ -4240,6 +4898,8 @@ export type MaterialUpdateWithoutSamplePlanMaterialsInput = {
   receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutToMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUpdateManyWithoutMaterialNestedInput
   disassemblyMaterials?: Prisma.SampleDisassemblyMaterialUpdateManyWithoutMaterialNestedInput
@@ -4302,6 +4962,8 @@ export type MaterialUncheckedUpdateWithoutSamplePlanMaterialsInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUncheckedUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutToMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   disassemblyMaterials?: Prisma.SampleDisassemblyMaterialUncheckedUpdateManyWithoutMaterialNestedInput
@@ -4364,6 +5026,8 @@ export type MaterialCreateWithoutSampleInventorySnapshotsInput = {
   receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutMaterialInput
   disassemblyMaterials?: Prisma.SampleDisassemblyMaterialCreateNestedManyWithoutMaterialInput
@@ -4426,6 +5090,8 @@ export type MaterialUncheckedCreateWithoutSampleInventorySnapshotsInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchUncheckedCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutMaterialInput
   disassemblyMaterials?: Prisma.SampleDisassemblyMaterialUncheckedCreateNestedManyWithoutMaterialInput
@@ -4504,6 +5170,8 @@ export type MaterialUpdateWithoutSampleInventorySnapshotsInput = {
   receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUpdateManyWithoutMaterialNestedInput
   disassemblyMaterials?: Prisma.SampleDisassemblyMaterialUpdateManyWithoutMaterialNestedInput
@@ -4566,6 +5234,8 @@ export type MaterialUncheckedUpdateWithoutSampleInventorySnapshotsInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUncheckedUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   disassemblyMaterials?: Prisma.SampleDisassemblyMaterialUncheckedUpdateManyWithoutMaterialNestedInput
@@ -4628,6 +5298,8 @@ export type MaterialCreateWithoutSampleStepMaterialsInput = {
   receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotCreateNestedManyWithoutMaterialInput
   disassemblyMaterials?: Prisma.SampleDisassemblyMaterialCreateNestedManyWithoutMaterialInput
@@ -4690,6 +5362,8 @@ export type MaterialUncheckedCreateWithoutSampleStepMaterialsInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchUncheckedCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedCreateNestedManyWithoutMaterialInput
   disassemblyMaterials?: Prisma.SampleDisassemblyMaterialUncheckedCreateNestedManyWithoutMaterialInput
@@ -4768,6 +5442,8 @@ export type MaterialUpdateWithoutSampleStepMaterialsInput = {
   receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUpdateManyWithoutMaterialNestedInput
   disassemblyMaterials?: Prisma.SampleDisassemblyMaterialUpdateManyWithoutMaterialNestedInput
@@ -4830,6 +5506,8 @@ export type MaterialUncheckedUpdateWithoutSampleStepMaterialsInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUncheckedUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
   disassemblyMaterials?: Prisma.SampleDisassemblyMaterialUncheckedUpdateManyWithoutMaterialNestedInput
@@ -4892,6 +5570,8 @@ export type MaterialCreateWithoutDisassemblyMaterialsInput = {
   receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutMaterialInput
@@ -4954,6 +5634,8 @@ export type MaterialUncheckedCreateWithoutDisassemblyMaterialsInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchUncheckedCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutMaterialInput
@@ -5032,6 +5714,8 @@ export type MaterialUpdateWithoutDisassemblyMaterialsInput = {
   receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUpdateManyWithoutMaterialNestedInput
@@ -5094,6 +5778,8 @@ export type MaterialUncheckedUpdateWithoutDisassemblyMaterialsInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUncheckedUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
@@ -5155,6 +5841,8 @@ export type MaterialCreateWithoutUnverifiedLossesInput = {
   receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutMaterialInput
@@ -5217,6 +5905,8 @@ export type MaterialUncheckedCreateWithoutUnverifiedLossesInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchUncheckedCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutMaterialInput
@@ -5295,6 +5985,8 @@ export type MaterialUpdateWithoutUnverifiedLossesInput = {
   receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUpdateManyWithoutMaterialNestedInput
@@ -5357,6 +6049,8 @@ export type MaterialUncheckedUpdateWithoutUnverifiedLossesInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUncheckedUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
@@ -5420,6 +6114,8 @@ export type MaterialCreateWithoutCategoriesInput = {
   receivedLines?: Prisma.GoodsReceiptLineCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutMaterialInput
@@ -5482,6 +6178,8 @@ export type MaterialUncheckedCreateWithoutCategoriesInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedCreateNestedManyWithoutAcceptedMaterialInput
   batches?: Prisma.InventoryBatchUncheckedCreateNestedManyWithoutMaterialInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutMaterialInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutFromMaterialInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutToMaterialInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedCreateNestedManyWithoutMaterialInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedCreateNestedManyWithoutMaterialInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutMaterialInput
@@ -5560,6 +6258,8 @@ export type MaterialUpdateWithoutCategoriesInput = {
   receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUpdateManyWithoutMaterialNestedInput
@@ -5622,6 +6322,8 @@ export type MaterialUncheckedUpdateWithoutCategoriesInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUncheckedUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
@@ -5731,6 +6433,8 @@ export type MaterialUpdateWithoutTenantInput = {
   receivedLines?: Prisma.GoodsReceiptLineUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUpdateManyWithoutMaterialNestedInput
@@ -5793,6 +6497,8 @@ export type MaterialUncheckedUpdateWithoutTenantInput = {
   receivedLines?: Prisma.GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialNestedInput
   batches?: Prisma.InventoryBatchUncheckedUpdateManyWithoutMaterialNestedInput
   sampleMaterials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutMaterialNestedInput
+  substitutionsFrom?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutFromMaterialNestedInput
+  substitutionsTo?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutToMaterialNestedInput
   samplePlanMaterials?: Prisma.SamplePlanMaterialUncheckedUpdateManyWithoutMaterialNestedInput
   sampleInventorySnapshots?: Prisma.SamplePlanInventorySnapshotUncheckedUpdateManyWithoutMaterialNestedInput
   sampleStepMaterials?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutMaterialNestedInput
@@ -5863,6 +6569,8 @@ export type MaterialCountOutputType = {
   receivedLines: number
   batches: number
   sampleMaterials: number
+  substitutionsFrom: number
+  substitutionsTo: number
   samplePlanMaterials: number
   sampleInventorySnapshots: number
   sampleStepMaterials: number
@@ -5880,6 +6588,8 @@ export type MaterialCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensio
   receivedLines?: boolean | MaterialCountOutputTypeCountReceivedLinesArgs
   batches?: boolean | MaterialCountOutputTypeCountBatchesArgs
   sampleMaterials?: boolean | MaterialCountOutputTypeCountSampleMaterialsArgs
+  substitutionsFrom?: boolean | MaterialCountOutputTypeCountSubstitutionsFromArgs
+  substitutionsTo?: boolean | MaterialCountOutputTypeCountSubstitutionsToArgs
   samplePlanMaterials?: boolean | MaterialCountOutputTypeCountSamplePlanMaterialsArgs
   sampleInventorySnapshots?: boolean | MaterialCountOutputTypeCountSampleInventorySnapshotsArgs
   sampleStepMaterials?: boolean | MaterialCountOutputTypeCountSampleStepMaterialsArgs
@@ -5946,6 +6656,20 @@ export type MaterialCountOutputTypeCountBatchesArgs<ExtArgs extends runtime.Type
  */
 export type MaterialCountOutputTypeCountSampleMaterialsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.SampleMaterialWhereInput
+}
+
+/**
+ * MaterialCountOutputType without action
+ */
+export type MaterialCountOutputTypeCountSubstitutionsFromArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SampleMaterialSubstitutionWhereInput
+}
+
+/**
+ * MaterialCountOutputType without action
+ */
+export type MaterialCountOutputTypeCountSubstitutionsToArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SampleMaterialSubstitutionWhereInput
 }
 
 /**
@@ -6053,6 +6777,8 @@ export type MaterialSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs
   receivedLines?: boolean | Prisma.Material$receivedLinesArgs<ExtArgs>
   batches?: boolean | Prisma.Material$batchesArgs<ExtArgs>
   sampleMaterials?: boolean | Prisma.Material$sampleMaterialsArgs<ExtArgs>
+  substitutionsFrom?: boolean | Prisma.Material$substitutionsFromArgs<ExtArgs>
+  substitutionsTo?: boolean | Prisma.Material$substitutionsToArgs<ExtArgs>
   samplePlanMaterials?: boolean | Prisma.Material$samplePlanMaterialsArgs<ExtArgs>
   sampleInventorySnapshots?: boolean | Prisma.Material$sampleInventorySnapshotsArgs<ExtArgs>
   sampleStepMaterials?: boolean | Prisma.Material$sampleStepMaterialsArgs<ExtArgs>
@@ -6222,6 +6948,8 @@ export type MaterialInclude<ExtArgs extends runtime.Types.Extensions.InternalArg
   receivedLines?: boolean | Prisma.Material$receivedLinesArgs<ExtArgs>
   batches?: boolean | Prisma.Material$batchesArgs<ExtArgs>
   sampleMaterials?: boolean | Prisma.Material$sampleMaterialsArgs<ExtArgs>
+  substitutionsFrom?: boolean | Prisma.Material$substitutionsFromArgs<ExtArgs>
+  substitutionsTo?: boolean | Prisma.Material$substitutionsToArgs<ExtArgs>
   samplePlanMaterials?: boolean | Prisma.Material$samplePlanMaterialsArgs<ExtArgs>
   sampleInventorySnapshots?: boolean | Prisma.Material$sampleInventorySnapshotsArgs<ExtArgs>
   sampleStepMaterials?: boolean | Prisma.Material$sampleStepMaterialsArgs<ExtArgs>
@@ -6249,6 +6977,8 @@ export type $MaterialPayload<ExtArgs extends runtime.Types.Extensions.InternalAr
     receivedLines: Prisma.$GoodsReceiptLinePayload<ExtArgs>[]
     batches: Prisma.$InventoryBatchPayload<ExtArgs>[]
     sampleMaterials: Prisma.$SampleMaterialPayload<ExtArgs>[]
+    substitutionsFrom: Prisma.$SampleMaterialSubstitutionPayload<ExtArgs>[]
+    substitutionsTo: Prisma.$SampleMaterialSubstitutionPayload<ExtArgs>[]
     samplePlanMaterials: Prisma.$SamplePlanMaterialPayload<ExtArgs>[]
     sampleInventorySnapshots: Prisma.$SamplePlanInventorySnapshotPayload<ExtArgs>[]
     sampleStepMaterials: Prisma.$SamplePlanStepMaterialPayload<ExtArgs>[]
@@ -6706,6 +7436,8 @@ export interface Prisma__MaterialClient<T, Null = never, ExtArgs extends runtime
   receivedLines<T extends Prisma.Material$receivedLinesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Material$receivedLinesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$GoodsReceiptLinePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   batches<T extends Prisma.Material$batchesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Material$batchesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$InventoryBatchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sampleMaterials<T extends Prisma.Material$sampleMaterialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Material$sampleMaterialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SampleMaterialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  substitutionsFrom<T extends Prisma.Material$substitutionsFromArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Material$substitutionsFromArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SampleMaterialSubstitutionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  substitutionsTo<T extends Prisma.Material$substitutionsToArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Material$substitutionsToArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SampleMaterialSubstitutionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   samplePlanMaterials<T extends Prisma.Material$samplePlanMaterialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Material$samplePlanMaterialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SamplePlanMaterialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sampleInventorySnapshots<T extends Prisma.Material$sampleInventorySnapshotsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Material$sampleInventorySnapshotsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SamplePlanInventorySnapshotPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   sampleStepMaterials<T extends Prisma.Material$sampleStepMaterialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Material$sampleStepMaterialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SamplePlanStepMaterialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -7354,6 +8086,54 @@ export type Material$sampleMaterialsArgs<ExtArgs extends runtime.Types.Extension
   take?: number
   skip?: number
   distinct?: Prisma.SampleMaterialScalarFieldEnum | Prisma.SampleMaterialScalarFieldEnum[]
+}
+
+/**
+ * Material.substitutionsFrom
+ */
+export type Material$substitutionsFromArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SampleMaterialSubstitution
+   */
+  select?: Prisma.SampleMaterialSubstitutionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SampleMaterialSubstitution
+   */
+  omit?: Prisma.SampleMaterialSubstitutionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SampleMaterialSubstitutionInclude<ExtArgs> | null
+  where?: Prisma.SampleMaterialSubstitutionWhereInput
+  orderBy?: Prisma.SampleMaterialSubstitutionOrderByWithRelationInput | Prisma.SampleMaterialSubstitutionOrderByWithRelationInput[]
+  cursor?: Prisma.SampleMaterialSubstitutionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SampleMaterialSubstitutionScalarFieldEnum | Prisma.SampleMaterialSubstitutionScalarFieldEnum[]
+}
+
+/**
+ * Material.substitutionsTo
+ */
+export type Material$substitutionsToArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SampleMaterialSubstitution
+   */
+  select?: Prisma.SampleMaterialSubstitutionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SampleMaterialSubstitution
+   */
+  omit?: Prisma.SampleMaterialSubstitutionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SampleMaterialSubstitutionInclude<ExtArgs> | null
+  where?: Prisma.SampleMaterialSubstitutionWhereInput
+  orderBy?: Prisma.SampleMaterialSubstitutionOrderByWithRelationInput | Prisma.SampleMaterialSubstitutionOrderByWithRelationInput[]
+  cursor?: Prisma.SampleMaterialSubstitutionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SampleMaterialSubstitutionScalarFieldEnum | Prisma.SampleMaterialSubstitutionScalarFieldEnum[]
 }
 
 /**

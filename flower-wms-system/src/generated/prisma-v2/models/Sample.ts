@@ -46,6 +46,8 @@ export type SampleMinAggregateOutputType = {
   description: string | null
   priority: number | null
   targetMarginRate: runtime.Decimal | null
+  photoDueAt: Date | null
+  retentionUntil: Date | null
 }
 
 export type SampleMaxAggregateOutputType = {
@@ -58,6 +60,8 @@ export type SampleMaxAggregateOutputType = {
   description: string | null
   priority: number | null
   targetMarginRate: runtime.Decimal | null
+  photoDueAt: Date | null
+  retentionUntil: Date | null
 }
 
 export type SampleCountAggregateOutputType = {
@@ -70,6 +74,8 @@ export type SampleCountAggregateOutputType = {
   description: number
   priority: number
   targetMarginRate: number
+  photoDueAt: number
+  retentionUntil: number
   _all: number
 }
 
@@ -94,6 +100,8 @@ export type SampleMinAggregateInputType = {
   description?: true
   priority?: true
   targetMarginRate?: true
+  photoDueAt?: true
+  retentionUntil?: true
 }
 
 export type SampleMaxAggregateInputType = {
@@ -106,6 +114,8 @@ export type SampleMaxAggregateInputType = {
   description?: true
   priority?: true
   targetMarginRate?: true
+  photoDueAt?: true
+  retentionUntil?: true
 }
 
 export type SampleCountAggregateInputType = {
@@ -118,6 +128,8 @@ export type SampleCountAggregateInputType = {
   description?: true
   priority?: true
   targetMarginRate?: true
+  photoDueAt?: true
+  retentionUntil?: true
   _all?: true
 }
 
@@ -217,6 +229,8 @@ export type SampleGroupByOutputType = {
   description: string | null
   priority: number
   targetMarginRate: runtime.Decimal | null
+  photoDueAt: Date | null
+  retentionUntil: Date | null
   _count: SampleCountAggregateOutputType | null
   _avg: SampleAvgAggregateOutputType | null
   _sum: SampleSumAggregateOutputType | null
@@ -252,9 +266,12 @@ export type SampleWhereInput = {
   description?: Prisma.StringNullableFilter<"Sample"> | string | null
   priority?: Prisma.IntFilter<"Sample"> | number
   targetMarginRate?: Prisma.DecimalNullableFilter<"Sample"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.DateTimeNullableFilter<"Sample"> | Date | string | null
+  retentionUntil?: Prisma.DateTimeNullableFilter<"Sample"> | Date | string | null
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   sourceSkus?: Prisma.ProductSkuListRelationFilter
   materials?: Prisma.SampleMaterialListRelationFilter
+  substitutions?: Prisma.SampleMaterialSubstitutionListRelationFilter
   planItems?: Prisma.SamplePlanItemListRelationFilter
   planSteps?: Prisma.SamplePlanStepListRelationFilter
 }
@@ -269,9 +286,12 @@ export type SampleOrderByWithRelationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   priority?: Prisma.SortOrder
   targetMarginRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  photoDueAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  retentionUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   tenant?: Prisma.TenantOrderByWithRelationInput
   sourceSkus?: Prisma.ProductSkuOrderByRelationAggregateInput
   materials?: Prisma.SampleMaterialOrderByRelationAggregateInput
+  substitutions?: Prisma.SampleMaterialSubstitutionOrderByRelationAggregateInput
   planItems?: Prisma.SamplePlanItemOrderByRelationAggregateInput
   planSteps?: Prisma.SamplePlanStepOrderByRelationAggregateInput
 }
@@ -290,9 +310,12 @@ export type SampleWhereUniqueInput = Prisma.AtLeast<{
   description?: Prisma.StringNullableFilter<"Sample"> | string | null
   priority?: Prisma.IntFilter<"Sample"> | number
   targetMarginRate?: Prisma.DecimalNullableFilter<"Sample"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.DateTimeNullableFilter<"Sample"> | Date | string | null
+  retentionUntil?: Prisma.DateTimeNullableFilter<"Sample"> | Date | string | null
   tenant?: Prisma.XOR<Prisma.TenantScalarRelationFilter, Prisma.TenantWhereInput>
   sourceSkus?: Prisma.ProductSkuListRelationFilter
   materials?: Prisma.SampleMaterialListRelationFilter
+  substitutions?: Prisma.SampleMaterialSubstitutionListRelationFilter
   planItems?: Prisma.SamplePlanItemListRelationFilter
   planSteps?: Prisma.SamplePlanStepListRelationFilter
 }, "id" | "tenantId_code">
@@ -307,6 +330,8 @@ export type SampleOrderByWithAggregationInput = {
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   priority?: Prisma.SortOrder
   targetMarginRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  photoDueAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  retentionUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.SampleCountOrderByAggregateInput
   _avg?: Prisma.SampleAvgOrderByAggregateInput
   _max?: Prisma.SampleMaxOrderByAggregateInput
@@ -327,6 +352,8 @@ export type SampleScalarWhereWithAggregatesInput = {
   description?: Prisma.StringNullableWithAggregatesFilter<"Sample"> | string | null
   priority?: Prisma.IntWithAggregatesFilter<"Sample"> | number
   targetMarginRate?: Prisma.DecimalNullableWithAggregatesFilter<"Sample"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Sample"> | Date | string | null
+  retentionUntil?: Prisma.DateTimeNullableWithAggregatesFilter<"Sample"> | Date | string | null
 }
 
 export type SampleCreateInput = {
@@ -338,9 +365,12 @@ export type SampleCreateInput = {
   description?: string | null
   priority?: number
   targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
   tenant: Prisma.TenantCreateNestedOneWithoutSamplesInput
   sourceSkus?: Prisma.ProductSkuCreateNestedManyWithoutSourceSampleInput
   materials?: Prisma.SampleMaterialCreateNestedManyWithoutSampleInput
+  substitutions?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutSampleInput
   planItems?: Prisma.SamplePlanItemCreateNestedManyWithoutSampleInput
   planSteps?: Prisma.SamplePlanStepCreateNestedManyWithoutSampleInput
 }
@@ -355,8 +385,11 @@ export type SampleUncheckedCreateInput = {
   description?: string | null
   priority?: number
   targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSourceSampleInput
   materials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutSampleInput
+  substitutions?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutSampleInput
   planItems?: Prisma.SamplePlanItemUncheckedCreateNestedManyWithoutSampleInput
   planSteps?: Prisma.SamplePlanStepUncheckedCreateNestedManyWithoutSampleInput
 }
@@ -370,9 +403,12 @@ export type SampleUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenant?: Prisma.TenantUpdateOneRequiredWithoutSamplesNestedInput
   sourceSkus?: Prisma.ProductSkuUpdateManyWithoutSourceSampleNestedInput
   materials?: Prisma.SampleMaterialUpdateManyWithoutSampleNestedInput
+  substitutions?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutSampleNestedInput
   planItems?: Prisma.SamplePlanItemUpdateManyWithoutSampleNestedInput
   planSteps?: Prisma.SamplePlanStepUpdateManyWithoutSampleNestedInput
 }
@@ -387,8 +423,11 @@ export type SampleUncheckedUpdateInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSourceSampleNestedInput
   materials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutSampleNestedInput
+  substitutions?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutSampleNestedInput
   planItems?: Prisma.SamplePlanItemUncheckedUpdateManyWithoutSampleNestedInput
   planSteps?: Prisma.SamplePlanStepUncheckedUpdateManyWithoutSampleNestedInput
 }
@@ -403,6 +442,8 @@ export type SampleCreateManyInput = {
   description?: string | null
   priority?: number
   targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
 }
 
 export type SampleUpdateManyMutationInput = {
@@ -414,6 +455,8 @@ export type SampleUpdateManyMutationInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type SampleUncheckedUpdateManyInput = {
@@ -426,6 +469,8 @@ export type SampleUncheckedUpdateManyInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 export type SampleListRelationFilter = {
@@ -458,6 +503,8 @@ export type SampleCountOrderByAggregateInput = {
   description?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   targetMarginRate?: Prisma.SortOrder
+  photoDueAt?: Prisma.SortOrder
+  retentionUntil?: Prisma.SortOrder
 }
 
 export type SampleAvgOrderByAggregateInput = {
@@ -475,6 +522,8 @@ export type SampleMaxOrderByAggregateInput = {
   description?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   targetMarginRate?: Prisma.SortOrder
+  photoDueAt?: Prisma.SortOrder
+  retentionUntil?: Prisma.SortOrder
 }
 
 export type SampleMinOrderByAggregateInput = {
@@ -487,6 +536,8 @@ export type SampleMinOrderByAggregateInput = {
   description?: Prisma.SortOrder
   priority?: Prisma.SortOrder
   targetMarginRate?: Prisma.SortOrder
+  photoDueAt?: Prisma.SortOrder
+  retentionUntil?: Prisma.SortOrder
 }
 
 export type SampleSumOrderByAggregateInput = {
@@ -575,6 +626,20 @@ export type SampleUpdateOneRequiredWithoutMaterialsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.SampleUpdateToOneWithWhereWithoutMaterialsInput, Prisma.SampleUpdateWithoutMaterialsInput>, Prisma.SampleUncheckedUpdateWithoutMaterialsInput>
 }
 
+export type SampleCreateNestedOneWithoutSubstitutionsInput = {
+  create?: Prisma.XOR<Prisma.SampleCreateWithoutSubstitutionsInput, Prisma.SampleUncheckedCreateWithoutSubstitutionsInput>
+  connectOrCreate?: Prisma.SampleCreateOrConnectWithoutSubstitutionsInput
+  connect?: Prisma.SampleWhereUniqueInput
+}
+
+export type SampleUpdateOneRequiredWithoutSubstitutionsNestedInput = {
+  create?: Prisma.XOR<Prisma.SampleCreateWithoutSubstitutionsInput, Prisma.SampleUncheckedCreateWithoutSubstitutionsInput>
+  connectOrCreate?: Prisma.SampleCreateOrConnectWithoutSubstitutionsInput
+  upsert?: Prisma.SampleUpsertWithoutSubstitutionsInput
+  connect?: Prisma.SampleWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.SampleUpdateToOneWithWhereWithoutSubstitutionsInput, Prisma.SampleUpdateWithoutSubstitutionsInput>, Prisma.SampleUncheckedUpdateWithoutSubstitutionsInput>
+}
+
 export type SampleCreateNestedOneWithoutPlanItemsInput = {
   create?: Prisma.XOR<Prisma.SampleCreateWithoutPlanItemsInput, Prisma.SampleUncheckedCreateWithoutPlanItemsInput>
   connectOrCreate?: Prisma.SampleCreateOrConnectWithoutPlanItemsInput
@@ -612,8 +677,11 @@ export type SampleCreateWithoutTenantInput = {
   description?: string | null
   priority?: number
   targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
   sourceSkus?: Prisma.ProductSkuCreateNestedManyWithoutSourceSampleInput
   materials?: Prisma.SampleMaterialCreateNestedManyWithoutSampleInput
+  substitutions?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutSampleInput
   planItems?: Prisma.SamplePlanItemCreateNestedManyWithoutSampleInput
   planSteps?: Prisma.SamplePlanStepCreateNestedManyWithoutSampleInput
 }
@@ -627,8 +695,11 @@ export type SampleUncheckedCreateWithoutTenantInput = {
   description?: string | null
   priority?: number
   targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSourceSampleInput
   materials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutSampleInput
+  substitutions?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutSampleInput
   planItems?: Prisma.SamplePlanItemUncheckedCreateNestedManyWithoutSampleInput
   planSteps?: Prisma.SamplePlanStepUncheckedCreateNestedManyWithoutSampleInput
 }
@@ -672,6 +743,8 @@ export type SampleScalarWhereInput = {
   description?: Prisma.StringNullableFilter<"Sample"> | string | null
   priority?: Prisma.IntFilter<"Sample"> | number
   targetMarginRate?: Prisma.DecimalNullableFilter<"Sample"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.DateTimeNullableFilter<"Sample"> | Date | string | null
+  retentionUntil?: Prisma.DateTimeNullableFilter<"Sample"> | Date | string | null
 }
 
 export type SampleCreateWithoutSourceSkusInput = {
@@ -683,8 +756,11 @@ export type SampleCreateWithoutSourceSkusInput = {
   description?: string | null
   priority?: number
   targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
   tenant: Prisma.TenantCreateNestedOneWithoutSamplesInput
   materials?: Prisma.SampleMaterialCreateNestedManyWithoutSampleInput
+  substitutions?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutSampleInput
   planItems?: Prisma.SamplePlanItemCreateNestedManyWithoutSampleInput
   planSteps?: Prisma.SamplePlanStepCreateNestedManyWithoutSampleInput
 }
@@ -699,7 +775,10 @@ export type SampleUncheckedCreateWithoutSourceSkusInput = {
   description?: string | null
   priority?: number
   targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
   materials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutSampleInput
+  substitutions?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutSampleInput
   planItems?: Prisma.SamplePlanItemUncheckedCreateNestedManyWithoutSampleInput
   planSteps?: Prisma.SamplePlanStepUncheckedCreateNestedManyWithoutSampleInput
 }
@@ -729,8 +808,11 @@ export type SampleUpdateWithoutSourceSkusInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenant?: Prisma.TenantUpdateOneRequiredWithoutSamplesNestedInput
   materials?: Prisma.SampleMaterialUpdateManyWithoutSampleNestedInput
+  substitutions?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutSampleNestedInput
   planItems?: Prisma.SamplePlanItemUpdateManyWithoutSampleNestedInput
   planSteps?: Prisma.SamplePlanStepUpdateManyWithoutSampleNestedInput
 }
@@ -745,7 +827,10 @@ export type SampleUncheckedUpdateWithoutSourceSkusInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   materials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutSampleNestedInput
+  substitutions?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutSampleNestedInput
   planItems?: Prisma.SamplePlanItemUncheckedUpdateManyWithoutSampleNestedInput
   planSteps?: Prisma.SamplePlanStepUncheckedUpdateManyWithoutSampleNestedInput
 }
@@ -759,8 +844,11 @@ export type SampleCreateWithoutMaterialsInput = {
   description?: string | null
   priority?: number
   targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
   tenant: Prisma.TenantCreateNestedOneWithoutSamplesInput
   sourceSkus?: Prisma.ProductSkuCreateNestedManyWithoutSourceSampleInput
+  substitutions?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutSampleInput
   planItems?: Prisma.SamplePlanItemCreateNestedManyWithoutSampleInput
   planSteps?: Prisma.SamplePlanStepCreateNestedManyWithoutSampleInput
 }
@@ -775,7 +863,10 @@ export type SampleUncheckedCreateWithoutMaterialsInput = {
   description?: string | null
   priority?: number
   targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSourceSampleInput
+  substitutions?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutSampleInput
   planItems?: Prisma.SamplePlanItemUncheckedCreateNestedManyWithoutSampleInput
   planSteps?: Prisma.SamplePlanStepUncheckedCreateNestedManyWithoutSampleInput
 }
@@ -805,8 +896,11 @@ export type SampleUpdateWithoutMaterialsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenant?: Prisma.TenantUpdateOneRequiredWithoutSamplesNestedInput
   sourceSkus?: Prisma.ProductSkuUpdateManyWithoutSourceSampleNestedInput
+  substitutions?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutSampleNestedInput
   planItems?: Prisma.SamplePlanItemUpdateManyWithoutSampleNestedInput
   planSteps?: Prisma.SamplePlanStepUpdateManyWithoutSampleNestedInput
 }
@@ -821,7 +915,98 @@ export type SampleUncheckedUpdateWithoutMaterialsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSourceSampleNestedInput
+  substitutions?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutSampleNestedInput
+  planItems?: Prisma.SamplePlanItemUncheckedUpdateManyWithoutSampleNestedInput
+  planSteps?: Prisma.SamplePlanStepUncheckedUpdateManyWithoutSampleNestedInput
+}
+
+export type SampleCreateWithoutSubstitutionsInput = {
+  id?: string
+  code: string
+  name: string
+  state?: $Enums.SampleState
+  imageKey?: string | null
+  description?: string | null
+  priority?: number
+  targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  tenant: Prisma.TenantCreateNestedOneWithoutSamplesInput
+  sourceSkus?: Prisma.ProductSkuCreateNestedManyWithoutSourceSampleInput
+  materials?: Prisma.SampleMaterialCreateNestedManyWithoutSampleInput
+  planItems?: Prisma.SamplePlanItemCreateNestedManyWithoutSampleInput
+  planSteps?: Prisma.SamplePlanStepCreateNestedManyWithoutSampleInput
+}
+
+export type SampleUncheckedCreateWithoutSubstitutionsInput = {
+  id?: string
+  tenantId: string
+  code: string
+  name: string
+  state?: $Enums.SampleState
+  imageKey?: string | null
+  description?: string | null
+  priority?: number
+  targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  sourceSkus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSourceSampleInput
+  materials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutSampleInput
+  planItems?: Prisma.SamplePlanItemUncheckedCreateNestedManyWithoutSampleInput
+  planSteps?: Prisma.SamplePlanStepUncheckedCreateNestedManyWithoutSampleInput
+}
+
+export type SampleCreateOrConnectWithoutSubstitutionsInput = {
+  where: Prisma.SampleWhereUniqueInput
+  create: Prisma.XOR<Prisma.SampleCreateWithoutSubstitutionsInput, Prisma.SampleUncheckedCreateWithoutSubstitutionsInput>
+}
+
+export type SampleUpsertWithoutSubstitutionsInput = {
+  update: Prisma.XOR<Prisma.SampleUpdateWithoutSubstitutionsInput, Prisma.SampleUncheckedUpdateWithoutSubstitutionsInput>
+  create: Prisma.XOR<Prisma.SampleCreateWithoutSubstitutionsInput, Prisma.SampleUncheckedCreateWithoutSubstitutionsInput>
+  where?: Prisma.SampleWhereInput
+}
+
+export type SampleUpdateToOneWithWhereWithoutSubstitutionsInput = {
+  where?: Prisma.SampleWhereInput
+  data: Prisma.XOR<Prisma.SampleUpdateWithoutSubstitutionsInput, Prisma.SampleUncheckedUpdateWithoutSubstitutionsInput>
+}
+
+export type SampleUpdateWithoutSubstitutionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  state?: Prisma.EnumSampleStateFieldUpdateOperationsInput | $Enums.SampleState
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  priority?: Prisma.IntFieldUpdateOperationsInput | number
+  targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  tenant?: Prisma.TenantUpdateOneRequiredWithoutSamplesNestedInput
+  sourceSkus?: Prisma.ProductSkuUpdateManyWithoutSourceSampleNestedInput
+  materials?: Prisma.SampleMaterialUpdateManyWithoutSampleNestedInput
+  planItems?: Prisma.SamplePlanItemUpdateManyWithoutSampleNestedInput
+  planSteps?: Prisma.SamplePlanStepUpdateManyWithoutSampleNestedInput
+}
+
+export type SampleUncheckedUpdateWithoutSubstitutionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  tenantId?: Prisma.StringFieldUpdateOperationsInput | string
+  code?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  state?: Prisma.EnumSampleStateFieldUpdateOperationsInput | $Enums.SampleState
+  imageKey?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  priority?: Prisma.IntFieldUpdateOperationsInput | number
+  targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  sourceSkus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSourceSampleNestedInput
+  materials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutSampleNestedInput
   planItems?: Prisma.SamplePlanItemUncheckedUpdateManyWithoutSampleNestedInput
   planSteps?: Prisma.SamplePlanStepUncheckedUpdateManyWithoutSampleNestedInput
 }
@@ -835,9 +1020,12 @@ export type SampleCreateWithoutPlanItemsInput = {
   description?: string | null
   priority?: number
   targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
   tenant: Prisma.TenantCreateNestedOneWithoutSamplesInput
   sourceSkus?: Prisma.ProductSkuCreateNestedManyWithoutSourceSampleInput
   materials?: Prisma.SampleMaterialCreateNestedManyWithoutSampleInput
+  substitutions?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutSampleInput
   planSteps?: Prisma.SamplePlanStepCreateNestedManyWithoutSampleInput
 }
 
@@ -851,8 +1039,11 @@ export type SampleUncheckedCreateWithoutPlanItemsInput = {
   description?: string | null
   priority?: number
   targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSourceSampleInput
   materials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutSampleInput
+  substitutions?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutSampleInput
   planSteps?: Prisma.SamplePlanStepUncheckedCreateNestedManyWithoutSampleInput
 }
 
@@ -881,9 +1072,12 @@ export type SampleUpdateWithoutPlanItemsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenant?: Prisma.TenantUpdateOneRequiredWithoutSamplesNestedInput
   sourceSkus?: Prisma.ProductSkuUpdateManyWithoutSourceSampleNestedInput
   materials?: Prisma.SampleMaterialUpdateManyWithoutSampleNestedInput
+  substitutions?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutSampleNestedInput
   planSteps?: Prisma.SamplePlanStepUpdateManyWithoutSampleNestedInput
 }
 
@@ -897,8 +1091,11 @@ export type SampleUncheckedUpdateWithoutPlanItemsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSourceSampleNestedInput
   materials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutSampleNestedInput
+  substitutions?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutSampleNestedInput
   planSteps?: Prisma.SamplePlanStepUncheckedUpdateManyWithoutSampleNestedInput
 }
 
@@ -911,9 +1108,12 @@ export type SampleCreateWithoutPlanStepsInput = {
   description?: string | null
   priority?: number
   targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
   tenant: Prisma.TenantCreateNestedOneWithoutSamplesInput
   sourceSkus?: Prisma.ProductSkuCreateNestedManyWithoutSourceSampleInput
   materials?: Prisma.SampleMaterialCreateNestedManyWithoutSampleInput
+  substitutions?: Prisma.SampleMaterialSubstitutionCreateNestedManyWithoutSampleInput
   planItems?: Prisma.SamplePlanItemCreateNestedManyWithoutSampleInput
 }
 
@@ -927,8 +1127,11 @@ export type SampleUncheckedCreateWithoutPlanStepsInput = {
   description?: string | null
   priority?: number
   targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedCreateNestedManyWithoutSourceSampleInput
   materials?: Prisma.SampleMaterialUncheckedCreateNestedManyWithoutSampleInput
+  substitutions?: Prisma.SampleMaterialSubstitutionUncheckedCreateNestedManyWithoutSampleInput
   planItems?: Prisma.SamplePlanItemUncheckedCreateNestedManyWithoutSampleInput
 }
 
@@ -957,9 +1160,12 @@ export type SampleUpdateWithoutPlanStepsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   tenant?: Prisma.TenantUpdateOneRequiredWithoutSamplesNestedInput
   sourceSkus?: Prisma.ProductSkuUpdateManyWithoutSourceSampleNestedInput
   materials?: Prisma.SampleMaterialUpdateManyWithoutSampleNestedInput
+  substitutions?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutSampleNestedInput
   planItems?: Prisma.SamplePlanItemUpdateManyWithoutSampleNestedInput
 }
 
@@ -973,8 +1179,11 @@ export type SampleUncheckedUpdateWithoutPlanStepsInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSourceSampleNestedInput
   materials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutSampleNestedInput
+  substitutions?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutSampleNestedInput
   planItems?: Prisma.SamplePlanItemUncheckedUpdateManyWithoutSampleNestedInput
 }
 
@@ -987,6 +1196,8 @@ export type SampleCreateManyTenantInput = {
   description?: string | null
   priority?: number
   targetMarginRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
 }
 
 export type SampleUpdateWithoutTenantInput = {
@@ -998,8 +1209,11 @@ export type SampleUpdateWithoutTenantInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sourceSkus?: Prisma.ProductSkuUpdateManyWithoutSourceSampleNestedInput
   materials?: Prisma.SampleMaterialUpdateManyWithoutSampleNestedInput
+  substitutions?: Prisma.SampleMaterialSubstitutionUpdateManyWithoutSampleNestedInput
   planItems?: Prisma.SamplePlanItemUpdateManyWithoutSampleNestedInput
   planSteps?: Prisma.SamplePlanStepUpdateManyWithoutSampleNestedInput
 }
@@ -1013,8 +1227,11 @@ export type SampleUncheckedUpdateWithoutTenantInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   sourceSkus?: Prisma.ProductSkuUncheckedUpdateManyWithoutSourceSampleNestedInput
   materials?: Prisma.SampleMaterialUncheckedUpdateManyWithoutSampleNestedInput
+  substitutions?: Prisma.SampleMaterialSubstitutionUncheckedUpdateManyWithoutSampleNestedInput
   planItems?: Prisma.SamplePlanItemUncheckedUpdateManyWithoutSampleNestedInput
   planSteps?: Prisma.SamplePlanStepUncheckedUpdateManyWithoutSampleNestedInput
 }
@@ -1028,6 +1245,8 @@ export type SampleUncheckedUpdateManyWithoutTenantInput = {
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   priority?: Prisma.IntFieldUpdateOperationsInput | number
   targetMarginRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
 }
 
 
@@ -1038,6 +1257,7 @@ export type SampleUncheckedUpdateManyWithoutTenantInput = {
 export type SampleCountOutputType = {
   sourceSkus: number
   materials: number
+  substitutions: number
   planItems: number
   planSteps: number
 }
@@ -1045,6 +1265,7 @@ export type SampleCountOutputType = {
 export type SampleCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   sourceSkus?: boolean | SampleCountOutputTypeCountSourceSkusArgs
   materials?: boolean | SampleCountOutputTypeCountMaterialsArgs
+  substitutions?: boolean | SampleCountOutputTypeCountSubstitutionsArgs
   planItems?: boolean | SampleCountOutputTypeCountPlanItemsArgs
   planSteps?: boolean | SampleCountOutputTypeCountPlanStepsArgs
 }
@@ -1076,6 +1297,13 @@ export type SampleCountOutputTypeCountMaterialsArgs<ExtArgs extends runtime.Type
 /**
  * SampleCountOutputType without action
  */
+export type SampleCountOutputTypeCountSubstitutionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.SampleMaterialSubstitutionWhereInput
+}
+
+/**
+ * SampleCountOutputType without action
+ */
 export type SampleCountOutputTypeCountPlanItemsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   where?: Prisma.SamplePlanItemWhereInput
 }
@@ -1098,9 +1326,12 @@ export type SampleSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   description?: boolean
   priority?: boolean
   targetMarginRate?: boolean
+  photoDueAt?: boolean
+  retentionUntil?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   sourceSkus?: boolean | Prisma.Sample$sourceSkusArgs<ExtArgs>
   materials?: boolean | Prisma.Sample$materialsArgs<ExtArgs>
+  substitutions?: boolean | Prisma.Sample$substitutionsArgs<ExtArgs>
   planItems?: boolean | Prisma.Sample$planItemsArgs<ExtArgs>
   planSteps?: boolean | Prisma.Sample$planStepsArgs<ExtArgs>
   _count?: boolean | Prisma.SampleCountOutputTypeDefaultArgs<ExtArgs>
@@ -1116,6 +1347,8 @@ export type SampleSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   description?: boolean
   priority?: boolean
   targetMarginRate?: boolean
+  photoDueAt?: boolean
+  retentionUntil?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sample"]>
 
@@ -1129,6 +1362,8 @@ export type SampleSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   description?: boolean
   priority?: boolean
   targetMarginRate?: boolean
+  photoDueAt?: boolean
+  retentionUntil?: boolean
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["sample"]>
 
@@ -1142,13 +1377,16 @@ export type SampleSelectScalar = {
   description?: boolean
   priority?: boolean
   targetMarginRate?: boolean
+  photoDueAt?: boolean
+  retentionUntil?: boolean
 }
 
-export type SampleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "code" | "name" | "state" | "imageKey" | "description" | "priority" | "targetMarginRate", ExtArgs["result"]["sample"]>
+export type SampleOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "tenantId" | "code" | "name" | "state" | "imageKey" | "description" | "priority" | "targetMarginRate" | "photoDueAt" | "retentionUntil", ExtArgs["result"]["sample"]>
 export type SampleInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   tenant?: boolean | Prisma.TenantDefaultArgs<ExtArgs>
   sourceSkus?: boolean | Prisma.Sample$sourceSkusArgs<ExtArgs>
   materials?: boolean | Prisma.Sample$materialsArgs<ExtArgs>
+  substitutions?: boolean | Prisma.Sample$substitutionsArgs<ExtArgs>
   planItems?: boolean | Prisma.Sample$planItemsArgs<ExtArgs>
   planSteps?: boolean | Prisma.Sample$planStepsArgs<ExtArgs>
   _count?: boolean | Prisma.SampleCountOutputTypeDefaultArgs<ExtArgs>
@@ -1166,6 +1404,7 @@ export type $SamplePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     tenant: Prisma.$TenantPayload<ExtArgs>
     sourceSkus: Prisma.$ProductSkuPayload<ExtArgs>[]
     materials: Prisma.$SampleMaterialPayload<ExtArgs>[]
+    substitutions: Prisma.$SampleMaterialSubstitutionPayload<ExtArgs>[]
     planItems: Prisma.$SamplePlanItemPayload<ExtArgs>[]
     planSteps: Prisma.$SamplePlanStepPayload<ExtArgs>[]
   }
@@ -1179,6 +1418,8 @@ export type $SamplePayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     description: string | null
     priority: number
     targetMarginRate: runtime.Decimal | null
+    photoDueAt: Date | null
+    retentionUntil: Date | null
   }, ExtArgs["result"]["sample"]>
   composites: {}
 }
@@ -1576,6 +1817,7 @@ export interface Prisma__SampleClient<T, Null = never, ExtArgs extends runtime.T
   tenant<T extends Prisma.TenantDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.TenantDefaultArgs<ExtArgs>>): Prisma.Prisma__TenantClient<runtime.Types.Result.GetResult<Prisma.$TenantPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   sourceSkus<T extends Prisma.Sample$sourceSkusArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Sample$sourceSkusArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductSkuPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   materials<T extends Prisma.Sample$materialsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Sample$materialsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SampleMaterialPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  substitutions<T extends Prisma.Sample$substitutionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Sample$substitutionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SampleMaterialSubstitutionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   planItems<T extends Prisma.Sample$planItemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Sample$planItemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SamplePlanItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   planSteps<T extends Prisma.Sample$planStepsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Sample$planStepsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SamplePlanStepPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
@@ -1616,6 +1858,8 @@ export interface SampleFieldRefs {
   readonly description: Prisma.FieldRef<"Sample", 'String'>
   readonly priority: Prisma.FieldRef<"Sample", 'Int'>
   readonly targetMarginRate: Prisma.FieldRef<"Sample", 'Decimal'>
+  readonly photoDueAt: Prisma.FieldRef<"Sample", 'DateTime'>
+  readonly retentionUntil: Prisma.FieldRef<"Sample", 'DateTime'>
 }
     
 
@@ -2062,6 +2306,30 @@ export type Sample$materialsArgs<ExtArgs extends runtime.Types.Extensions.Intern
   take?: number
   skip?: number
   distinct?: Prisma.SampleMaterialScalarFieldEnum | Prisma.SampleMaterialScalarFieldEnum[]
+}
+
+/**
+ * Sample.substitutions
+ */
+export type Sample$substitutionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the SampleMaterialSubstitution
+   */
+  select?: Prisma.SampleMaterialSubstitutionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the SampleMaterialSubstitution
+   */
+  omit?: Prisma.SampleMaterialSubstitutionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.SampleMaterialSubstitutionInclude<ExtArgs> | null
+  where?: Prisma.SampleMaterialSubstitutionWhereInput
+  orderBy?: Prisma.SampleMaterialSubstitutionOrderByWithRelationInput | Prisma.SampleMaterialSubstitutionOrderByWithRelationInput[]
+  cursor?: Prisma.SampleMaterialSubstitutionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.SampleMaterialSubstitutionScalarFieldEnum | Prisma.SampleMaterialSubstitutionScalarFieldEnum[]
 }
 
 /**

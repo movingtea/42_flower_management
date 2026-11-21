@@ -10,9 +10,11 @@ import { confirmManualOrder, createManualOrder } from "./manual-order";
 import { receivePurchaseLine } from "./receive-purchase-line";
 import {
   createLinkedPurchaseOrder,
+  createPurchaseDraft,
   createPurchaseSupplementLine,
   linkedPurchaseOrderNumber,
   purchaseDraftTotal,
+  submitPurchaseOrder,
 } from "./purchase-order-management";
 
 config({ quiet: true });
@@ -252,6 +254,68 @@ async function runDatabaseTest(): Promise<void> {
     );
     assert.equal(await db.purchaseOrder.count({ where: { tenantId } }), 2);
     assert.equal(await db.purchaseOrder.count({ where: { tenantId, number: linkedPurchaseOrderNumber(lateKey) } }), 0);
+
+    // Batch 2 procurement-channel loss model: the supplier rate is snapshotted
+    // on the line, and receiving writes the adjusted cost onto the batch without
+    // changing the physical quantity.
+    const lossSupplier = await db.supplier.create({
+      data: {
+        tenantId,
+        code: `LOSS-SUP-${marker}`,
+        name: "渠道损耗测试供应商",
+        defaultLossRate: "0.2000",
+        lossRateNote: "远途渠道预计 20% 不可用",
+        active: true,
+      },
+    });
+    const lossMaterial = await db.material.create({
+      data: {
+        tenantId,
+        code: `LOSS-MAT-${marker}`,
+        name: "渠道损耗测试花材",
+        kind: MaterialKind.FLOWER,
+        baseUnit: "支",
+        quantityScale: 0,
+        active: true,
+      },
+    });
+    const lossDraft = await db.$transaction((tx) => createPurchaseDraft(
+      tx,
+      scope,
+      `PO-LOSS-${marker}`,
+      {
+        supplierId: lossSupplier.id,
+        freightCost: 0,
+        packagingCost: 0,
+        otherCost: 0,
+        lines: [{ materialId: lossMaterial.id, quantity: 10, unitPrice: 2 }],
+      },
+    ));
+    const lossLine = lossDraft.lines[0]!;
+    assert.equal(Number(lossLine.channelLossRate), 0.2);
+    assert.equal(Number(lossLine.expectedUsableQty), 8);
+    assert.equal(Number(lossLine.lossAdjustedUnitCost), 2.5);
+    await db.$transaction((tx) => submitPurchaseOrder(tx, scope, lossDraft.id));
+    const lossBatchId = await db.$transaction((tx) => receivePurchaseLine(tx, {
+      tenantId: scope.tenantId,
+      actorStaffId: scope.actorStaffId,
+      purchaseLineId: lossLine.id,
+      locationId: warehouse.id,
+      acceptedMaterialId: lossMaterial.id,
+      quantity: 10,
+      batchNo: `B-LOSS-${marker}`,
+      disposition: ReceiptDisposition.ACCEPTED,
+      finalUnitCost: 2,
+      idempotencyKey: `RECEIPT-LOSS-${marker}`,
+    }));
+    const lossBatch = await db.inventoryBatch.findUniqueOrThrow({
+      where: { id: lossBatchId },
+      include: { receiptLine: true },
+    });
+    assert.equal(Number(lossBatch.channelLossRate), 0.2);
+    assert.equal(Number(lossBatch.lossAdjustedUnitCost), 2.5);
+    assert.equal(Number(lossBatch.receiptLine?.channelLossRate), 0.2);
+    assert.equal(Number(lossBatch.unitCost), 2);
 
     console.log("v2 linked purchase order DB test passed");
   } finally {

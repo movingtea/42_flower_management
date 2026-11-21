@@ -13,6 +13,7 @@ import {
   input,
 } from "../_components/V2Ui";
 import { readV2Feedback } from "../_lib/search-params";
+import { sampleDisplayName } from "../_lib/sample-display";
 import { V2DrawerForm } from "../_components/V2Drawer";
 import { V2ImageField, V2ImagePreview } from "../_components/V2Image";
 import {
@@ -83,7 +84,7 @@ function SourceSampleSelect({ samples, defaultValue }: { samples: SampleOption[]
       <option value="">无来源样品</option>
       {samples.map((sample) => (
         <option key={sample.id} value={sample.id}>
-          {sample.code} · {sample.name}
+          {sampleDisplayName(sample)}
         </option>
       ))}
     </select>

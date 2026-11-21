@@ -46,6 +46,11 @@ export type SamplePlanStepMinAggregateOutputType = {
   sampleNameSnapshot: string | null
   plannedQuantity: number | null
   incrementalCost: runtime.Decimal | null
+  plannedStartAt: Date | null
+  plannedEndAt: Date | null
+  photoDueAt: Date | null
+  retentionUntil: Date | null
+  retained: boolean | null
 }
 
 export type SamplePlanStepMaxAggregateOutputType = {
@@ -56,6 +61,11 @@ export type SamplePlanStepMaxAggregateOutputType = {
   sampleNameSnapshot: string | null
   plannedQuantity: number | null
   incrementalCost: runtime.Decimal | null
+  plannedStartAt: Date | null
+  plannedEndAt: Date | null
+  photoDueAt: Date | null
+  retentionUntil: Date | null
+  retained: boolean | null
 }
 
 export type SamplePlanStepCountAggregateOutputType = {
@@ -66,6 +76,12 @@ export type SamplePlanStepCountAggregateOutputType = {
   sampleNameSnapshot: number
   plannedQuantity: number
   incrementalCost: number
+  plannedStartAt: number
+  plannedEndAt: number
+  photoDueAt: number
+  retentionUntil: number
+  retained: number
+  scheduleWarnings: number
   _all: number
 }
 
@@ -90,6 +106,11 @@ export type SamplePlanStepMinAggregateInputType = {
   sampleNameSnapshot?: true
   plannedQuantity?: true
   incrementalCost?: true
+  plannedStartAt?: true
+  plannedEndAt?: true
+  photoDueAt?: true
+  retentionUntil?: true
+  retained?: true
 }
 
 export type SamplePlanStepMaxAggregateInputType = {
@@ -100,6 +121,11 @@ export type SamplePlanStepMaxAggregateInputType = {
   sampleNameSnapshot?: true
   plannedQuantity?: true
   incrementalCost?: true
+  plannedStartAt?: true
+  plannedEndAt?: true
+  photoDueAt?: true
+  retentionUntil?: true
+  retained?: true
 }
 
 export type SamplePlanStepCountAggregateInputType = {
@@ -110,6 +136,12 @@ export type SamplePlanStepCountAggregateInputType = {
   sampleNameSnapshot?: true
   plannedQuantity?: true
   incrementalCost?: true
+  plannedStartAt?: true
+  plannedEndAt?: true
+  photoDueAt?: true
+  retentionUntil?: true
+  retained?: true
+  scheduleWarnings?: true
   _all?: true
 }
 
@@ -207,6 +239,12 @@ export type SamplePlanStepGroupByOutputType = {
   sampleNameSnapshot: string
   plannedQuantity: number
   incrementalCost: runtime.Decimal
+  plannedStartAt: Date | null
+  plannedEndAt: Date | null
+  photoDueAt: Date | null
+  retentionUntil: Date | null
+  retained: boolean
+  scheduleWarnings: runtime.JsonValue | null
   _count: SamplePlanStepCountAggregateOutputType | null
   _avg: SamplePlanStepAvgAggregateOutputType | null
   _sum: SamplePlanStepSumAggregateOutputType | null
@@ -240,6 +278,12 @@ export type SamplePlanStepWhereInput = {
   sampleNameSnapshot?: Prisma.StringFilter<"SamplePlanStep"> | string
   plannedQuantity?: Prisma.IntFilter<"SamplePlanStep"> | number
   incrementalCost?: Prisma.DecimalFilter<"SamplePlanStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Prisma.DateTimeNullableFilter<"SamplePlanStep"> | Date | string | null
+  plannedEndAt?: Prisma.DateTimeNullableFilter<"SamplePlanStep"> | Date | string | null
+  photoDueAt?: Prisma.DateTimeNullableFilter<"SamplePlanStep"> | Date | string | null
+  retentionUntil?: Prisma.DateTimeNullableFilter<"SamplePlanStep"> | Date | string | null
+  retained?: Prisma.BoolFilter<"SamplePlanStep"> | boolean
+  scheduleWarnings?: Prisma.JsonNullableFilter<"SamplePlanStep">
   run?: Prisma.XOR<Prisma.SamplePlanRunScalarRelationFilter, Prisma.SamplePlanRunWhereInput>
   sample?: Prisma.XOR<Prisma.SampleScalarRelationFilter, Prisma.SampleWhereInput>
   flows?: Prisma.SamplePlanStepMaterialListRelationFilter
@@ -254,6 +298,12 @@ export type SamplePlanStepOrderByWithRelationInput = {
   sampleNameSnapshot?: Prisma.SortOrder
   plannedQuantity?: Prisma.SortOrder
   incrementalCost?: Prisma.SortOrder
+  plannedStartAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  plannedEndAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  photoDueAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  retentionUntil?: Prisma.SortOrderInput | Prisma.SortOrder
+  retained?: Prisma.SortOrder
+  scheduleWarnings?: Prisma.SortOrderInput | Prisma.SortOrder
   run?: Prisma.SamplePlanRunOrderByWithRelationInput
   sample?: Prisma.SampleOrderByWithRelationInput
   flows?: Prisma.SamplePlanStepMaterialOrderByRelationAggregateInput
@@ -272,6 +322,12 @@ export type SamplePlanStepWhereUniqueInput = Prisma.AtLeast<{
   sampleNameSnapshot?: Prisma.StringFilter<"SamplePlanStep"> | string
   plannedQuantity?: Prisma.IntFilter<"SamplePlanStep"> | number
   incrementalCost?: Prisma.DecimalFilter<"SamplePlanStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Prisma.DateTimeNullableFilter<"SamplePlanStep"> | Date | string | null
+  plannedEndAt?: Prisma.DateTimeNullableFilter<"SamplePlanStep"> | Date | string | null
+  photoDueAt?: Prisma.DateTimeNullableFilter<"SamplePlanStep"> | Date | string | null
+  retentionUntil?: Prisma.DateTimeNullableFilter<"SamplePlanStep"> | Date | string | null
+  retained?: Prisma.BoolFilter<"SamplePlanStep"> | boolean
+  scheduleWarnings?: Prisma.JsonNullableFilter<"SamplePlanStep">
   run?: Prisma.XOR<Prisma.SamplePlanRunScalarRelationFilter, Prisma.SamplePlanRunWhereInput>
   sample?: Prisma.XOR<Prisma.SampleScalarRelationFilter, Prisma.SampleWhereInput>
   flows?: Prisma.SamplePlanStepMaterialListRelationFilter
@@ -286,6 +342,12 @@ export type SamplePlanStepOrderByWithAggregationInput = {
   sampleNameSnapshot?: Prisma.SortOrder
   plannedQuantity?: Prisma.SortOrder
   incrementalCost?: Prisma.SortOrder
+  plannedStartAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  plannedEndAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  photoDueAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  retentionUntil?: Prisma.SortOrderInput | Prisma.SortOrder
+  retained?: Prisma.SortOrder
+  scheduleWarnings?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.SamplePlanStepCountOrderByAggregateInput
   _avg?: Prisma.SamplePlanStepAvgOrderByAggregateInput
   _max?: Prisma.SamplePlanStepMaxOrderByAggregateInput
@@ -304,6 +366,12 @@ export type SamplePlanStepScalarWhereWithAggregatesInput = {
   sampleNameSnapshot?: Prisma.StringWithAggregatesFilter<"SamplePlanStep"> | string
   plannedQuantity?: Prisma.IntWithAggregatesFilter<"SamplePlanStep"> | number
   incrementalCost?: Prisma.DecimalWithAggregatesFilter<"SamplePlanStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SamplePlanStep"> | Date | string | null
+  plannedEndAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SamplePlanStep"> | Date | string | null
+  photoDueAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SamplePlanStep"> | Date | string | null
+  retentionUntil?: Prisma.DateTimeNullableWithAggregatesFilter<"SamplePlanStep"> | Date | string | null
+  retained?: Prisma.BoolWithAggregatesFilter<"SamplePlanStep"> | boolean
+  scheduleWarnings?: Prisma.JsonNullableWithAggregatesFilter<"SamplePlanStep">
 }
 
 export type SamplePlanStepCreateInput = {
@@ -312,6 +380,12 @@ export type SamplePlanStepCreateInput = {
   sampleNameSnapshot: string
   plannedQuantity: number
   incrementalCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Date | string | null
+  plannedEndAt?: Date | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  retained?: boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   run: Prisma.SamplePlanRunCreateNestedOneWithoutStepsInput
   sample: Prisma.SampleCreateNestedOneWithoutPlanStepsInput
   flows?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutStepInput
@@ -326,6 +400,12 @@ export type SamplePlanStepUncheckedCreateInput = {
   sampleNameSnapshot: string
   plannedQuantity: number
   incrementalCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Date | string | null
+  plannedEndAt?: Date | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  retained?: boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flows?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutStepInput
   executions?: Prisma.SamplePlanExecutionStepUncheckedCreateNestedManyWithoutPlannedStepInput
 }
@@ -336,6 +416,12 @@ export type SamplePlanStepUpdateInput = {
   sampleNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   plannedQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   incrementalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  plannedEndAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retained?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   run?: Prisma.SamplePlanRunUpdateOneRequiredWithoutStepsNestedInput
   sample?: Prisma.SampleUpdateOneRequiredWithoutPlanStepsNestedInput
   flows?: Prisma.SamplePlanStepMaterialUpdateManyWithoutStepNestedInput
@@ -350,6 +436,12 @@ export type SamplePlanStepUncheckedUpdateInput = {
   sampleNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   plannedQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   incrementalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  plannedEndAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retained?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flows?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutStepNestedInput
   executions?: Prisma.SamplePlanExecutionStepUncheckedUpdateManyWithoutPlannedStepNestedInput
 }
@@ -362,6 +454,12 @@ export type SamplePlanStepCreateManyInput = {
   sampleNameSnapshot: string
   plannedQuantity: number
   incrementalCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Date | string | null
+  plannedEndAt?: Date | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  retained?: boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type SamplePlanStepUpdateManyMutationInput = {
@@ -370,6 +468,12 @@ export type SamplePlanStepUpdateManyMutationInput = {
   sampleNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   plannedQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   incrementalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  plannedEndAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retained?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type SamplePlanStepUncheckedUpdateManyInput = {
@@ -380,6 +484,12 @@ export type SamplePlanStepUncheckedUpdateManyInput = {
   sampleNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   plannedQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   incrementalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  plannedEndAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retained?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type SamplePlanStepListRelationFilter = {
@@ -405,6 +515,12 @@ export type SamplePlanStepCountOrderByAggregateInput = {
   sampleNameSnapshot?: Prisma.SortOrder
   plannedQuantity?: Prisma.SortOrder
   incrementalCost?: Prisma.SortOrder
+  plannedStartAt?: Prisma.SortOrder
+  plannedEndAt?: Prisma.SortOrder
+  photoDueAt?: Prisma.SortOrder
+  retentionUntil?: Prisma.SortOrder
+  retained?: Prisma.SortOrder
+  scheduleWarnings?: Prisma.SortOrder
 }
 
 export type SamplePlanStepAvgOrderByAggregateInput = {
@@ -421,6 +537,11 @@ export type SamplePlanStepMaxOrderByAggregateInput = {
   sampleNameSnapshot?: Prisma.SortOrder
   plannedQuantity?: Prisma.SortOrder
   incrementalCost?: Prisma.SortOrder
+  plannedStartAt?: Prisma.SortOrder
+  plannedEndAt?: Prisma.SortOrder
+  photoDueAt?: Prisma.SortOrder
+  retentionUntil?: Prisma.SortOrder
+  retained?: Prisma.SortOrder
 }
 
 export type SamplePlanStepMinOrderByAggregateInput = {
@@ -431,6 +552,11 @@ export type SamplePlanStepMinOrderByAggregateInput = {
   sampleNameSnapshot?: Prisma.SortOrder
   plannedQuantity?: Prisma.SortOrder
   incrementalCost?: Prisma.SortOrder
+  plannedStartAt?: Prisma.SortOrder
+  plannedEndAt?: Prisma.SortOrder
+  photoDueAt?: Prisma.SortOrder
+  retentionUntil?: Prisma.SortOrder
+  retained?: Prisma.SortOrder
 }
 
 export type SamplePlanStepSumOrderByAggregateInput = {
@@ -562,6 +688,12 @@ export type SamplePlanStepCreateWithoutSampleInput = {
   sampleNameSnapshot: string
   plannedQuantity: number
   incrementalCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Date | string | null
+  plannedEndAt?: Date | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  retained?: boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   run: Prisma.SamplePlanRunCreateNestedOneWithoutStepsInput
   flows?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutStepInput
   executions?: Prisma.SamplePlanExecutionStepCreateNestedManyWithoutPlannedStepInput
@@ -574,6 +706,12 @@ export type SamplePlanStepUncheckedCreateWithoutSampleInput = {
   sampleNameSnapshot: string
   plannedQuantity: number
   incrementalCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Date | string | null
+  plannedEndAt?: Date | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  retained?: boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flows?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutStepInput
   executions?: Prisma.SamplePlanExecutionStepUncheckedCreateNestedManyWithoutPlannedStepInput
 }
@@ -615,6 +753,12 @@ export type SamplePlanStepScalarWhereInput = {
   sampleNameSnapshot?: Prisma.StringFilter<"SamplePlanStep"> | string
   plannedQuantity?: Prisma.IntFilter<"SamplePlanStep"> | number
   incrementalCost?: Prisma.DecimalFilter<"SamplePlanStep"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Prisma.DateTimeNullableFilter<"SamplePlanStep"> | Date | string | null
+  plannedEndAt?: Prisma.DateTimeNullableFilter<"SamplePlanStep"> | Date | string | null
+  photoDueAt?: Prisma.DateTimeNullableFilter<"SamplePlanStep"> | Date | string | null
+  retentionUntil?: Prisma.DateTimeNullableFilter<"SamplePlanStep"> | Date | string | null
+  retained?: Prisma.BoolFilter<"SamplePlanStep"> | boolean
+  scheduleWarnings?: Prisma.JsonNullableFilter<"SamplePlanStep">
 }
 
 export type SamplePlanStepCreateWithoutRunInput = {
@@ -623,6 +767,12 @@ export type SamplePlanStepCreateWithoutRunInput = {
   sampleNameSnapshot: string
   plannedQuantity: number
   incrementalCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Date | string | null
+  plannedEndAt?: Date | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  retained?: boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   sample: Prisma.SampleCreateNestedOneWithoutPlanStepsInput
   flows?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutStepInput
   executions?: Prisma.SamplePlanExecutionStepCreateNestedManyWithoutPlannedStepInput
@@ -635,6 +785,12 @@ export type SamplePlanStepUncheckedCreateWithoutRunInput = {
   sampleNameSnapshot: string
   plannedQuantity: number
   incrementalCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Date | string | null
+  plannedEndAt?: Date | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  retained?: boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flows?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutStepInput
   executions?: Prisma.SamplePlanExecutionStepUncheckedCreateNestedManyWithoutPlannedStepInput
 }
@@ -671,6 +827,12 @@ export type SamplePlanStepCreateWithoutFlowsInput = {
   sampleNameSnapshot: string
   plannedQuantity: number
   incrementalCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Date | string | null
+  plannedEndAt?: Date | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  retained?: boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   run: Prisma.SamplePlanRunCreateNestedOneWithoutStepsInput
   sample: Prisma.SampleCreateNestedOneWithoutPlanStepsInput
   executions?: Prisma.SamplePlanExecutionStepCreateNestedManyWithoutPlannedStepInput
@@ -684,6 +846,12 @@ export type SamplePlanStepUncheckedCreateWithoutFlowsInput = {
   sampleNameSnapshot: string
   plannedQuantity: number
   incrementalCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Date | string | null
+  plannedEndAt?: Date | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  retained?: boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   executions?: Prisma.SamplePlanExecutionStepUncheckedCreateNestedManyWithoutPlannedStepInput
 }
 
@@ -709,6 +877,12 @@ export type SamplePlanStepUpdateWithoutFlowsInput = {
   sampleNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   plannedQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   incrementalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  plannedEndAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retained?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   run?: Prisma.SamplePlanRunUpdateOneRequiredWithoutStepsNestedInput
   sample?: Prisma.SampleUpdateOneRequiredWithoutPlanStepsNestedInput
   executions?: Prisma.SamplePlanExecutionStepUpdateManyWithoutPlannedStepNestedInput
@@ -722,6 +896,12 @@ export type SamplePlanStepUncheckedUpdateWithoutFlowsInput = {
   sampleNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   plannedQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   incrementalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  plannedEndAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retained?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   executions?: Prisma.SamplePlanExecutionStepUncheckedUpdateManyWithoutPlannedStepNestedInput
 }
 
@@ -731,6 +911,12 @@ export type SamplePlanStepCreateWithoutExecutionsInput = {
   sampleNameSnapshot: string
   plannedQuantity: number
   incrementalCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Date | string | null
+  plannedEndAt?: Date | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  retained?: boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   run: Prisma.SamplePlanRunCreateNestedOneWithoutStepsInput
   sample: Prisma.SampleCreateNestedOneWithoutPlanStepsInput
   flows?: Prisma.SamplePlanStepMaterialCreateNestedManyWithoutStepInput
@@ -744,6 +930,12 @@ export type SamplePlanStepUncheckedCreateWithoutExecutionsInput = {
   sampleNameSnapshot: string
   plannedQuantity: number
   incrementalCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Date | string | null
+  plannedEndAt?: Date | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  retained?: boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flows?: Prisma.SamplePlanStepMaterialUncheckedCreateNestedManyWithoutStepInput
 }
 
@@ -769,6 +961,12 @@ export type SamplePlanStepUpdateWithoutExecutionsInput = {
   sampleNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   plannedQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   incrementalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  plannedEndAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retained?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   run?: Prisma.SamplePlanRunUpdateOneRequiredWithoutStepsNestedInput
   sample?: Prisma.SampleUpdateOneRequiredWithoutPlanStepsNestedInput
   flows?: Prisma.SamplePlanStepMaterialUpdateManyWithoutStepNestedInput
@@ -782,6 +980,12 @@ export type SamplePlanStepUncheckedUpdateWithoutExecutionsInput = {
   sampleNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   plannedQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   incrementalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  plannedEndAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retained?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flows?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutStepNestedInput
 }
 
@@ -792,6 +996,12 @@ export type SamplePlanStepCreateManySampleInput = {
   sampleNameSnapshot: string
   plannedQuantity: number
   incrementalCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Date | string | null
+  plannedEndAt?: Date | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  retained?: boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type SamplePlanStepUpdateWithoutSampleInput = {
@@ -800,6 +1010,12 @@ export type SamplePlanStepUpdateWithoutSampleInput = {
   sampleNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   plannedQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   incrementalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  plannedEndAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retained?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   run?: Prisma.SamplePlanRunUpdateOneRequiredWithoutStepsNestedInput
   flows?: Prisma.SamplePlanStepMaterialUpdateManyWithoutStepNestedInput
   executions?: Prisma.SamplePlanExecutionStepUpdateManyWithoutPlannedStepNestedInput
@@ -812,6 +1028,12 @@ export type SamplePlanStepUncheckedUpdateWithoutSampleInput = {
   sampleNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   plannedQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   incrementalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  plannedEndAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retained?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flows?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutStepNestedInput
   executions?: Prisma.SamplePlanExecutionStepUncheckedUpdateManyWithoutPlannedStepNestedInput
 }
@@ -823,6 +1045,12 @@ export type SamplePlanStepUncheckedUpdateManyWithoutSampleInput = {
   sampleNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   plannedQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   incrementalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  plannedEndAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retained?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type SamplePlanStepCreateManyRunInput = {
@@ -832,6 +1060,12 @@ export type SamplePlanStepCreateManyRunInput = {
   sampleNameSnapshot: string
   plannedQuantity: number
   incrementalCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Date | string | null
+  plannedEndAt?: Date | string | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  retained?: boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 export type SamplePlanStepUpdateWithoutRunInput = {
@@ -840,6 +1074,12 @@ export type SamplePlanStepUpdateWithoutRunInput = {
   sampleNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   plannedQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   incrementalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  plannedEndAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retained?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   sample?: Prisma.SampleUpdateOneRequiredWithoutPlanStepsNestedInput
   flows?: Prisma.SamplePlanStepMaterialUpdateManyWithoutStepNestedInput
   executions?: Prisma.SamplePlanExecutionStepUpdateManyWithoutPlannedStepNestedInput
@@ -852,6 +1092,12 @@ export type SamplePlanStepUncheckedUpdateWithoutRunInput = {
   sampleNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   plannedQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   incrementalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  plannedEndAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retained?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
   flows?: Prisma.SamplePlanStepMaterialUncheckedUpdateManyWithoutStepNestedInput
   executions?: Prisma.SamplePlanExecutionStepUncheckedUpdateManyWithoutPlannedStepNestedInput
 }
@@ -863,6 +1109,12 @@ export type SamplePlanStepUncheckedUpdateManyWithoutRunInput = {
   sampleNameSnapshot?: Prisma.StringFieldUpdateOperationsInput | string
   plannedQuantity?: Prisma.IntFieldUpdateOperationsInput | number
   incrementalCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  plannedStartAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  plannedEndAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retained?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  scheduleWarnings?: Prisma.NullableJsonNullValueInput | runtime.InputJsonValue
 }
 
 
@@ -913,6 +1165,12 @@ export type SamplePlanStepSelect<ExtArgs extends runtime.Types.Extensions.Intern
   sampleNameSnapshot?: boolean
   plannedQuantity?: boolean
   incrementalCost?: boolean
+  plannedStartAt?: boolean
+  plannedEndAt?: boolean
+  photoDueAt?: boolean
+  retentionUntil?: boolean
+  retained?: boolean
+  scheduleWarnings?: boolean
   run?: boolean | Prisma.SamplePlanRunDefaultArgs<ExtArgs>
   sample?: boolean | Prisma.SampleDefaultArgs<ExtArgs>
   flows?: boolean | Prisma.SamplePlanStep$flowsArgs<ExtArgs>
@@ -928,6 +1186,12 @@ export type SamplePlanStepSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   sampleNameSnapshot?: boolean
   plannedQuantity?: boolean
   incrementalCost?: boolean
+  plannedStartAt?: boolean
+  plannedEndAt?: boolean
+  photoDueAt?: boolean
+  retentionUntil?: boolean
+  retained?: boolean
+  scheduleWarnings?: boolean
   run?: boolean | Prisma.SamplePlanRunDefaultArgs<ExtArgs>
   sample?: boolean | Prisma.SampleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["samplePlanStep"]>
@@ -940,6 +1204,12 @@ export type SamplePlanStepSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   sampleNameSnapshot?: boolean
   plannedQuantity?: boolean
   incrementalCost?: boolean
+  plannedStartAt?: boolean
+  plannedEndAt?: boolean
+  photoDueAt?: boolean
+  retentionUntil?: boolean
+  retained?: boolean
+  scheduleWarnings?: boolean
   run?: boolean | Prisma.SamplePlanRunDefaultArgs<ExtArgs>
   sample?: boolean | Prisma.SampleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["samplePlanStep"]>
@@ -952,9 +1222,15 @@ export type SamplePlanStepSelectScalar = {
   sampleNameSnapshot?: boolean
   plannedQuantity?: boolean
   incrementalCost?: boolean
+  plannedStartAt?: boolean
+  plannedEndAt?: boolean
+  photoDueAt?: boolean
+  retentionUntil?: boolean
+  retained?: boolean
+  scheduleWarnings?: boolean
 }
 
-export type SamplePlanStepOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "runId" | "sequenceNo" | "sampleId" | "sampleNameSnapshot" | "plannedQuantity" | "incrementalCost", ExtArgs["result"]["samplePlanStep"]>
+export type SamplePlanStepOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "runId" | "sequenceNo" | "sampleId" | "sampleNameSnapshot" | "plannedQuantity" | "incrementalCost" | "plannedStartAt" | "plannedEndAt" | "photoDueAt" | "retentionUntil" | "retained" | "scheduleWarnings", ExtArgs["result"]["samplePlanStep"]>
 export type SamplePlanStepInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   run?: boolean | Prisma.SamplePlanRunDefaultArgs<ExtArgs>
   sample?: boolean | Prisma.SampleDefaultArgs<ExtArgs>
@@ -987,6 +1263,12 @@ export type $SamplePlanStepPayload<ExtArgs extends runtime.Types.Extensions.Inte
     sampleNameSnapshot: string
     plannedQuantity: number
     incrementalCost: runtime.Decimal
+    plannedStartAt: Date | null
+    plannedEndAt: Date | null
+    photoDueAt: Date | null
+    retentionUntil: Date | null
+    retained: boolean
+    scheduleWarnings: runtime.JsonValue | null
   }, ExtArgs["result"]["samplePlanStep"]>
   composites: {}
 }
@@ -1421,6 +1703,12 @@ export interface SamplePlanStepFieldRefs {
   readonly sampleNameSnapshot: Prisma.FieldRef<"SamplePlanStep", 'String'>
   readonly plannedQuantity: Prisma.FieldRef<"SamplePlanStep", 'Int'>
   readonly incrementalCost: Prisma.FieldRef<"SamplePlanStep", 'Decimal'>
+  readonly plannedStartAt: Prisma.FieldRef<"SamplePlanStep", 'DateTime'>
+  readonly plannedEndAt: Prisma.FieldRef<"SamplePlanStep", 'DateTime'>
+  readonly photoDueAt: Prisma.FieldRef<"SamplePlanStep", 'DateTime'>
+  readonly retentionUntil: Prisma.FieldRef<"SamplePlanStep", 'DateTime'>
+  readonly retained: Prisma.FieldRef<"SamplePlanStep", 'Boolean'>
+  readonly scheduleWarnings: Prisma.FieldRef<"SamplePlanStep", 'Json'>
 }
     
 

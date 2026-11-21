@@ -417,6 +417,7 @@ export const ModelName = {
   MaterialUsage: 'MaterialUsage',
   Sample: 'Sample',
   SampleMaterial: 'SampleMaterial',
+  SampleMaterialSubstitution: 'SampleMaterialSubstitution',
   SamplePlan: 'SamplePlan',
   SamplePlanItem: 'SamplePlanItem',
   SamplePlanMaterial: 'SamplePlanMaterial',
@@ -472,7 +473,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "tenant" | "store" | "inventoryLocation" | "material" | "supplier" | "product" | "productSku" | "recipe" | "recipeVersion" | "recipeLine" | "packagingKit" | "packagingKitLine" | "order" | "orderItem" | "orderRevision" | "orderMaterialRequirement" | "availabilityHold" | "availabilityHoldMaterial" | "purchaseOrder" | "purchaseOrderLine" | "futureSupplyAllocation" | "purchaseDemandAllocation" | "goodsReceipt" | "goodsReceiptLine" | "inventoryBatch" | "batchBalance" | "consumableRoll" | "inventoryReservation" | "inventoryTransaction" | "productionTask" | "materialUsage" | "sample" | "sampleMaterial" | "samplePlan" | "samplePlanItem" | "samplePlanMaterial" | "samplePlanRun" | "samplePlanInventorySnapshot" | "samplePlanStep" | "samplePlanStepMaterial" | "samplePlanExecution" | "samplePlanExecutionStep" | "sampleDisassemblyMaterial" | "sampleInventoryReservation" | "paymentTransaction" | "refundTransaction" | "fulfillment" | "deliveryAttempt" | "costEntry" | "orderCostSnapshot" | "costAdjustment" | "staffUser" | "tenantMember" | "storeMember" | "miniProgramIdentity" | "customer" | "recipient" | "customerRecipientRelation" | "giftOccasion" | "customerReminder" | "stocktake" | "stocktakeLine" | "lossRecord" | "storeSettings" | "auditEvent" | "productCategory" | "productCategoryRelation" | "materialCategory" | "materialCategoryRelation" | "banner" | "recommendationSlot" | "recommendationItem" | "homeSceneEntry"
+    modelProps: "tenant" | "store" | "inventoryLocation" | "material" | "supplier" | "product" | "productSku" | "recipe" | "recipeVersion" | "recipeLine" | "packagingKit" | "packagingKitLine" | "order" | "orderItem" | "orderRevision" | "orderMaterialRequirement" | "availabilityHold" | "availabilityHoldMaterial" | "purchaseOrder" | "purchaseOrderLine" | "futureSupplyAllocation" | "purchaseDemandAllocation" | "goodsReceipt" | "goodsReceiptLine" | "inventoryBatch" | "batchBalance" | "consumableRoll" | "inventoryReservation" | "inventoryTransaction" | "productionTask" | "materialUsage" | "sample" | "sampleMaterial" | "sampleMaterialSubstitution" | "samplePlan" | "samplePlanItem" | "samplePlanMaterial" | "samplePlanRun" | "samplePlanInventorySnapshot" | "samplePlanStep" | "samplePlanStepMaterial" | "samplePlanExecution" | "samplePlanExecutionStep" | "sampleDisassemblyMaterial" | "sampleInventoryReservation" | "paymentTransaction" | "refundTransaction" | "fulfillment" | "deliveryAttempt" | "costEntry" | "orderCostSnapshot" | "costAdjustment" | "staffUser" | "tenantMember" | "storeMember" | "miniProgramIdentity" | "customer" | "recipient" | "customerRecipientRelation" | "giftOccasion" | "customerReminder" | "stocktake" | "stocktakeLine" | "lossRecord" | "storeSettings" | "auditEvent" | "productCategory" | "productCategoryRelation" | "materialCategory" | "materialCategoryRelation" | "banner" | "recommendationSlot" | "recommendationItem" | "homeSceneEntry"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2915,6 +2916,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         count: {
           args: Prisma.SampleMaterialCountArgs<ExtArgs>
           result: runtime.Types.Utils.Optional<Prisma.SampleMaterialCountAggregateOutputType> | number
+        }
+      }
+    }
+    SampleMaterialSubstitution: {
+      payload: Prisma.$SampleMaterialSubstitutionPayload<ExtArgs>
+      fields: Prisma.SampleMaterialSubstitutionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.SampleMaterialSubstitutionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SampleMaterialSubstitutionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.SampleMaterialSubstitutionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SampleMaterialSubstitutionPayload>
+        }
+        findFirst: {
+          args: Prisma.SampleMaterialSubstitutionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SampleMaterialSubstitutionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.SampleMaterialSubstitutionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SampleMaterialSubstitutionPayload>
+        }
+        findMany: {
+          args: Prisma.SampleMaterialSubstitutionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SampleMaterialSubstitutionPayload>[]
+        }
+        create: {
+          args: Prisma.SampleMaterialSubstitutionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SampleMaterialSubstitutionPayload>
+        }
+        createMany: {
+          args: Prisma.SampleMaterialSubstitutionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.SampleMaterialSubstitutionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SampleMaterialSubstitutionPayload>[]
+        }
+        delete: {
+          args: Prisma.SampleMaterialSubstitutionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SampleMaterialSubstitutionPayload>
+        }
+        update: {
+          args: Prisma.SampleMaterialSubstitutionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SampleMaterialSubstitutionPayload>
+        }
+        deleteMany: {
+          args: Prisma.SampleMaterialSubstitutionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.SampleMaterialSubstitutionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.SampleMaterialSubstitutionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SampleMaterialSubstitutionPayload>[]
+        }
+        upsert: {
+          args: Prisma.SampleMaterialSubstitutionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$SampleMaterialSubstitutionPayload>
+        }
+        aggregate: {
+          args: Prisma.SampleMaterialSubstitutionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateSampleMaterialSubstitution>
+        }
+        groupBy: {
+          args: Prisma.SampleMaterialSubstitutionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SampleMaterialSubstitutionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.SampleMaterialSubstitutionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.SampleMaterialSubstitutionCountAggregateOutputType> | number
         }
       }
     }
@@ -6007,6 +6082,9 @@ export const SupplierScalarFieldEnum = {
   phone: 'phone',
   wechat: 'wechat',
   notes: 'notes',
+  defaultLossRate: 'defaultLossRate',
+  lossRateNote: 'lossRateNote',
+  lossRateUpdatedAt: 'lossRateUpdatedAt',
   active: 'active',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -6219,6 +6297,9 @@ export const PurchaseOrderLineScalarFieldEnum = {
   purchaseUnit: 'purchaseUnit',
   expectedBaseQty: 'expectedBaseQty',
   unitPrice: 'unitPrice',
+  channelLossRate: 'channelLossRate',
+  expectedUsableQty: 'expectedUsableQty',
+  lossAdjustedUnitCost: 'lossAdjustedUnitCost',
   supplierConfirmedAt: 'supplierConfirmedAt',
   relationKind: 'relationKind',
   sourceLineId: 'sourceLineId',
@@ -6272,7 +6353,8 @@ export const GoodsReceiptLineScalarFieldEnum = {
   baseUnit: 'baseUnit',
   gradeChangeReason: 'gradeChangeReason',
   rejectionReason: 'rejectionReason',
-  finalUnitCost: 'finalUnitCost'
+  finalUnitCost: 'finalUnitCost',
+  channelLossRate: 'channelLossRate'
 } as const
 
 export type GoodsReceiptLineScalarFieldEnum = (typeof GoodsReceiptLineScalarFieldEnum)[keyof typeof GoodsReceiptLineScalarFieldEnum]
@@ -6287,6 +6369,8 @@ export const InventoryBatchScalarFieldEnum = {
   receivedAt: 'receivedAt',
   usableUntil: 'usableUntil',
   unitCost: 'unitCost',
+  channelLossRate: 'channelLossRate',
+  lossAdjustedUnitCost: 'lossAdjustedUnitCost',
   costEstimated: 'costEstimated'
 } as const
 
@@ -6378,7 +6462,9 @@ export const SampleScalarFieldEnum = {
   imageKey: 'imageKey',
   description: 'description',
   priority: 'priority',
-  targetMarginRate: 'targetMarginRate'
+  targetMarginRate: 'targetMarginRate',
+  photoDueAt: 'photoDueAt',
+  retentionUntil: 'retentionUntil'
 } as const
 
 export type SampleScalarFieldEnum = (typeof SampleScalarFieldEnum)[keyof typeof SampleScalarFieldEnum]
@@ -6392,6 +6478,22 @@ export const SampleMaterialScalarFieldEnum = {
 } as const
 
 export type SampleMaterialScalarFieldEnum = (typeof SampleMaterialScalarFieldEnum)[keyof typeof SampleMaterialScalarFieldEnum]
+
+
+export const SampleMaterialSubstitutionScalarFieldEnum = {
+  id: 'id',
+  sampleId: 'sampleId',
+  fromMaterialId: 'fromMaterialId',
+  toMaterialId: 'toMaterialId',
+  quantity: 'quantity',
+  tier: 'tier',
+  reason: 'reason',
+  confirmedById: 'confirmedById',
+  confirmedAt: 'confirmedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type SampleMaterialSubstitutionScalarFieldEnum = (typeof SampleMaterialSubstitutionScalarFieldEnum)[keyof typeof SampleMaterialSubstitutionScalarFieldEnum]
 
 
 export const SamplePlanScalarFieldEnum = {
@@ -6417,7 +6519,10 @@ export const SamplePlanItemScalarFieldEnum = {
   quantity: 'quantity',
   mandatory: 'mandatory',
   candidateState: 'candidateState',
-  sequenceNo: 'sequenceNo'
+  sequenceNo: 'sequenceNo',
+  photoDueAt: 'photoDueAt',
+  retentionUntil: 'retentionUntil',
+  autoSchedule: 'autoSchedule'
 } as const
 
 export type SamplePlanItemScalarFieldEnum = (typeof SamplePlanItemScalarFieldEnum)[keyof typeof SamplePlanItemScalarFieldEnum]
@@ -6477,7 +6582,13 @@ export const SamplePlanStepScalarFieldEnum = {
   sampleId: 'sampleId',
   sampleNameSnapshot: 'sampleNameSnapshot',
   plannedQuantity: 'plannedQuantity',
-  incrementalCost: 'incrementalCost'
+  incrementalCost: 'incrementalCost',
+  plannedStartAt: 'plannedStartAt',
+  plannedEndAt: 'plannedEndAt',
+  photoDueAt: 'photoDueAt',
+  retentionUntil: 'retentionUntil',
+  retained: 'retained',
+  scheduleWarnings: 'scheduleWarnings'
 } as const
 
 export type SamplePlanStepScalarFieldEnum = (typeof SamplePlanStepScalarFieldEnum)[keyof typeof SamplePlanStepScalarFieldEnum]
@@ -7703,6 +7814,7 @@ export type GlobalOmitConfig = {
   materialUsage?: Prisma.MaterialUsageOmit
   sample?: Prisma.SampleOmit
   sampleMaterial?: Prisma.SampleMaterialOmit
+  sampleMaterialSubstitution?: Prisma.SampleMaterialSubstitutionOmit
   samplePlan?: Prisma.SamplePlanOmit
   samplePlanItem?: Prisma.SamplePlanItemOmit
   samplePlanMaterial?: Prisma.SamplePlanMaterialOmit

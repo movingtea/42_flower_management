@@ -229,6 +229,11 @@ export default async function ReceivingPage({
         remainingQty: progress.remainingQty,
         rejectedQty: progress.rejectedQty,
         unitPrice: Number(line.unitPrice),
+        channelLossRate: line.channelLossRate === null ? null : Number(line.channelLossRate),
+        expectedUsableQty: line.expectedUsableQty === null ? null : Number(line.expectedUsableQty),
+        lossAdjustedUnitCost: line.lossAdjustedUnitCost === null
+          ? null
+          : Number(line.lossAdjustedUnitCost),
         relationKind: line.relationKind,
         receipts,
       });

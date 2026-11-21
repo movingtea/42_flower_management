@@ -456,7 +456,7 @@ export async function completeProduction(
           } });
         }
 
-        const unitCost = Number(batch.unitCost);
+        const unitCost = Number(batch.lossAdjustedUnitCost ?? batch.unitCost);
         materialCost += row.usedQty * unitCost;
         materialCostEstimated ||= batch.costEstimated;
         lossCost += row.lostQty * unitCost;

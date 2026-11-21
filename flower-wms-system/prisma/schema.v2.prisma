@@ -369,6 +369,8 @@ model Material {
   receivedLines            GoodsReceiptLine[]
   batches                  InventoryBatch[]
   sampleMaterials          SampleMaterial[]
+  substitutionsFrom        SampleMaterialSubstitution[] @relation("SampleSubstitutionFromMaterial")
+  substitutionsTo          SampleMaterialSubstitution[] @relation("SampleSubstitutionToMaterial")
   samplePlanMaterials      SamplePlanMaterial[]
   sampleInventorySnapshots SamplePlanInventorySnapshot[]
   sampleStepMaterials      SamplePlanStepMaterial[]
@@ -394,6 +396,11 @@ model Supplier {
   phone             String?
   wechat            String?
   notes             String?
+  // Procurement-channel loss model. The rate is the expected unusable share
+  // for this channel and is snapshotted onto purchase lines and receipts.
+  defaultLossRate   Decimal?        @db.Decimal(7, 4)
+  lossRateNote      String?         @db.Text
+  lossRateUpdatedAt DateTime?
   active            Boolean         @default(true)
   createdAt         DateTime        @default(now())
   updatedAt         DateTime        @default(now()) @updatedAt
@@ -665,6 +672,12 @@ model PurchaseOrderLine {
   purchaseUnit        String
   expectedBaseQty     Decimal?                   @db.Decimal(14, 3)
   unitPrice           Decimal                    @db.Decimal(14, 4)
+  // Snapshot of the supplier channel loss rate at order time. The expected
+  // usable quantity and loss-adjusted unit cost are advisory planning values;
+  // physical received quantity and inventory movement remain unchanged.
+  channelLossRate     Decimal?                   @db.Decimal(7, 4)
+  expectedUsableQty   Decimal?                   @db.Decimal(14, 3)
+  lossAdjustedUnitCost Decimal?                  @db.Decimal(14, 4)
   supplierConfirmedAt DateTime?
   relationKind        PurchaseLineRelationKind   @default(ORIGINAL)
   sourceLineId        String?
@@ -728,6 +741,7 @@ model GoodsReceiptLine {
   gradeChangeReason  String?
   rejectionReason    String?
   finalUnitCost      Decimal?           @db.Decimal(14, 4)
+  channelLossRate    Decimal?           @db.Decimal(7, 4)
   receipt            GoodsReceipt       @relation(fields: [receiptId], references: [id])
   purchaseLine       PurchaseOrderLine? @relation(fields: [purchaseLineId], references: [id])
   acceptedMaterial   Material?          @relation(fields: [acceptedMaterialId], references: [id])
@@ -743,6 +757,9 @@ model InventoryBatch {
   receivedAt         DateTime                     @default(now())
   usableUntil        DateTime?
   unitCost           Decimal                      @db.Decimal(14, 4)
+  // Cost per physically usable base unit after the channel loss rate.
+  channelLossRate    Decimal?                     @db.Decimal(7, 4)
+  lossAdjustedUnitCost Decimal?                   @db.Decimal(14, 4)
   costEstimated      Boolean                      @default(true)
   store              Store                        @relation(fields: [storeId], references: [id])
   material           Material                     @relation(fields: [materialId], references: [id])
@@ -851,9 +868,14 @@ model Sample {
   priority         Int              @default(0)
   // Target gross margin used by the sample cost / target price calculator.
   targetMarginRate Decimal?         @db.Decimal(7, 4)
+  // Photography / retention constraints used by batch-2 auto scheduling.
+  // The plan item can override either timestamp for a specific production run.
+  photoDueAt       DateTime?
+  retentionUntil   DateTime?
   tenant           Tenant           @relation(fields: [tenantId], references: [id])
   sourceSkus       ProductSku[]
   materials        SampleMaterial[]
+  substitutions    SampleMaterialSubstitution[]
   planItems        SamplePlanItem[]
   planSteps        SamplePlanStep[]
 
@@ -869,6 +891,29 @@ model SampleMaterial {
   material   Material @relation(fields: [materialId], references: [id])
 
   @@unique([sampleId, materialId])
+}
+
+// Immutable record of an employee-confirmed sample material substitution.
+// The sample recipe points at `toMaterial` after confirmation; this row keeps
+// the original material and the confirmation evidence for audit and reporting.
+model SampleMaterialSubstitution {
+  id             String   @id @default(uuid())
+  sampleId       String
+  fromMaterialId String
+  toMaterialId   String
+  quantity       Decimal  @db.Decimal(14, 3)
+  tier           String
+  reason         String?  @db.Text
+  confirmedById  String?
+  confirmedAt    DateTime @default(now())
+  createdAt      DateTime @default(now())
+  sample         Sample   @relation(fields: [sampleId], references: [id])
+  fromMaterial   Material @relation("SampleSubstitutionFromMaterial", fields: [fromMaterialId], references: [id])
+  toMaterial     Material @relation("SampleSubstitutionToMaterial", fields: [toMaterialId], references: [id])
+
+  @@index([sampleId, confirmedAt])
+  @@index([fromMaterialId])
+  @@index([toMaterialId])
 }
 
 // A draft plan is simulation only. Approval may create reservations via an explicit service action.
@@ -900,6 +945,10 @@ model SamplePlanItem {
   mandatory      Boolean                  @default(false)
   candidateState SamplePlanCandidateState @default(OPTIONAL)
   sequenceNo     Int?
+  // Per-plan overrides. When null the sample's own photoDueAt/retentionUntil apply.
+  photoDueAt     DateTime?
+  retentionUntil DateTime?
+  autoSchedule   Boolean                  @default(true)
   plan           SamplePlan               @relation(fields: [planId], references: [id])
   sample         Sample                   @relation(fields: [sampleId], references: [id])
 
@@ -970,6 +1019,13 @@ model SamplePlanStep {
   sampleNameSnapshot String
   plannedQuantity    Int
   incrementalCost    Decimal                   @db.Decimal(14, 2)
+  // Batch-2 auto schedule snapshot. All timestamps are nullable for legacy runs.
+  plannedStartAt     DateTime?
+  plannedEndAt       DateTime?
+  photoDueAt         DateTime?
+  retentionUntil     DateTime?
+  retained           Boolean                   @default(false)
+  scheduleWarnings   Json?
   run                SamplePlanRun             @relation(fields: [runId], references: [id])
   sample             Sample                    @relation(fields: [sampleId], references: [id])
   flows              SamplePlanStepMaterial[]
