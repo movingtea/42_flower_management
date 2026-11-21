@@ -18,15 +18,22 @@ import {
   calculatePlan,
   cancelPlan,
   completeStep,
+  createPlanFromRecommendation,
+  loadSamplePlanRecommendations,
   pausePlan,
   recalculatePlan,
   resumePlan,
   saveSamplePlan,
+  selectPlanRun,
   startNextStep,
   startPlan,
   type SamplePlanScope,
 } from "./sample-planning";
 import { getSampleReport } from "./sample-reporting";
+import {
+  confirmSampleMaterialSubstitution,
+  loadSampleSubstitutionProposals,
+} from "./sample-substitution";
 import { reserveOrderMaterial } from "./reserve-order-material";
 
 config({ quiet: true });
@@ -65,6 +72,7 @@ async function cleanup(db: PrismaClient): Promise<void> {
   await db.samplePlanMaterial.deleteMany({ where: { plan: tenants } });
   await db.samplePlanItem.deleteMany({ where: { plan: tenants } });
   await db.samplePlan.deleteMany({ where: tenants });
+  await db.sampleMaterialSubstitution.deleteMany({ where: { sample: tenants } });
   await db.sampleMaterial.deleteMany({ where: { sample: tenants } });
   await db.sample.deleteMany({ where: tenants });
   await db.orderMaterialRequirement.deleteMany({
@@ -185,17 +193,25 @@ async function run(): Promise<void> {
     }));
     const calculated = await db.$transaction((tx) => calculatePlan(tx, scope, plan.id), { timeout: 30_000 });
     assert.equal(calculated.runs.length, 1);
-    assert.equal(calculated.runs[0]!.totalCost, 22);
-    assert.equal(calculated.runs[0]!.estimatedSaving, 10);
+    assert.equal(calculated.runs[0]!.totalCost, 20);
+    assert.equal(calculated.runs[0]!.estimatedSaving, 12);
     const storedPlan = await db.samplePlan.findUniqueOrThrow({
       where: { id: plan.id },
-      include: { runs: { include: { steps: { include: { flows: true } } } } },
+      include: {
+        runs: {
+          include: {
+            steps: { include: { flows: true }, orderBy: { sequenceNo: "asc" } },
+          },
+        },
+      },
     });
     assert.equal(storedPlan.state, SamplePlanState.PROPOSED);
     assert.equal(storedPlan.runs.length, 1);
     assert.ok(storedPlan.selectedRunId);
     const selectedRun = storedPlan.runs[0]!;
-    assert.equal(Number(selectedRun.steps[1]!.flows[0]!.reusedQty), 5);
+    assert.equal(selectedRun.algorithmVersion, "sample-plan-v4-batch2");
+    assert.equal(Number(selectedRun.steps[1]!.flows[0]!.reusedQty), 6);
+    assert.equal(Number(selectedRun.steps[1]!.flows[0]!.purchaseQty), 0);
 
     const approved = await db.$transaction((tx) => approvePlan(tx, scope, plan.id), { timeout: 30_000 });
     assert.equal(approved.reservedQty, 10);
@@ -279,7 +295,7 @@ async function run(): Promise<void> {
     const report = await getSampleReport(db, { tenantId, storeId: store.id });
     assert.equal(report.summary.planCount, 1);
     assert.equal(report.summary.completedPlanCount, 1);
-    assert.equal(report.summary.plannedCost, 22);
+    assert.equal(report.summary.plannedCost, 20);
     assert.equal(report.summary.actualCost, 22);
     assert.ok(report.summary.plannedReuseRate > 0);
     assert.ok((report.summary.actualReuseRate ?? 0) > 0);
@@ -1092,6 +1108,455 @@ async function run(): Promise<void> {
       db.$transaction((tx) => recalculatePlan(tx, scope, riskPlan.id), { timeout: 30_000 }),
       /已开始制作/,
     );
+
+    // Ideal-reuse first batch: same material, zero stock, 15 then 20. Standard
+    // and optimistic usable rates are null; the plan must still reuse 15 and
+    // show a 5-stem qualified-material shortfall. Execution is still driven by
+    // the actual disassembly confirmation.
+    const idealFlower = await db.material.create({
+      data: {
+        tenantId,
+        code: `S4-IDEAL-${marker}`,
+        name: "理想复用高原红",
+        kind: MaterialKind.FLOWER,
+        baseUnit: "支",
+        quantityScale: 0,
+        standardUnitCost: "2.0000",
+        standardUsableRate: null,
+        optimisticUsableRate: null,
+        active: true,
+      },
+    });
+    const idealSampleA = await makeSample(db, {
+      code: `SMP-IDEAL-003-${marker}`,
+      name: "理想复用 003",
+      materialId: idealFlower.id,
+      quantity: 15,
+    });
+    const idealSampleB = await makeSample(db, {
+      code: `SMP-IDEAL-059-${marker}`,
+      name: "理想复用 059",
+      materialId: idealFlower.id,
+      quantity: 20,
+    });
+    const idealPlan = await db.$transaction((tx) => saveSamplePlan(tx, scope, {
+      name: "理想复用 003→059",
+      items: [
+        { sampleId: idealSampleA.id, quantity: 1, mandatory: true, sequenceNo: 1 },
+        { sampleId: idealSampleB.id, quantity: 1, mandatory: true, sequenceNo: 2 },
+      ],
+    }));
+    const idealCalculated = await db.$transaction(
+      (tx) => calculatePlan(tx, scope, idealPlan.id),
+      { timeout: 30_000 },
+    );
+    // Batch 2 multi-master plans may also offer an optional companion sample.
+    // Select the exact two-step base run for the execution assertions below.
+    const idealBase = idealCalculated.runs.find((run) => run.stepCount === 2);
+    assert.ok(idealBase);
+    await db.$transaction((tx) => selectPlanRun(tx, scope, idealPlan.id, idealBase.id), {
+      timeout: 30_000,
+    });
+    const idealRun = await db.samplePlanRun.findFirstOrThrow({
+      where: { planId: idealPlan.id, id: idealBase.id },
+      include: { steps: { include: { flows: true }, orderBy: { sequenceNo: "asc" } } },
+    });
+    assert.equal(idealRun.algorithmVersion, "sample-plan-v4-batch2");
+    assert.equal(Number(idealRun.totalCost), 40);
+    assert.equal(Number(idealRun.estimatedSaving), 30);
+    assert.deepEqual(idealRun.lossPolicySnapshot, {
+      defaultReusableRate: 1,
+      byMaterialId: { [idealFlower.id]: 1 },
+    });
+    const idealFirst = idealRun.steps[0]!;
+    const idealSecond = idealRun.steps[1]!;
+    assert.equal(Number(idealFirst.flows[0]!.requiredQty), 15);
+    assert.equal(Number(idealFirst.flows[0]!.stockQty), 0);
+    assert.equal(Number(idealFirst.flows[0]!.purchaseQty), 15);
+    assert.equal(Number(idealFirst.flows[0]!.reusableAfterDisassemblyQty), 15);
+    assert.equal(Number(idealFirst.flows[0]!.lossQty), 0);
+    assert.equal(Number(idealSecond.flows[0]!.reusedQty), 15);
+    assert.equal(Number(idealSecond.flows[0]!.purchaseQty), 5);
+    assert.equal(Number(idealSecond.flows[0]!.reusableAfterDisassemblyQty), 0);
+    assert.equal(Number(idealSecond.flows[0]!.lossQty), 0);
+
+    // Purchase only the first-step quantity, then report 12 actually reusable
+    // stems. The second step must see an 8-stem shortfall instead of trusting
+    // the earlier 15-stem forecast.
+    await makeBatch(db, {
+      storeId: store.id,
+      locationId: warehouse.id,
+      materialId: idealFlower.id,
+      batchNo: `BATCH-IDEAL-${marker}`,
+      quantity: 15,
+      unitCost: 2,
+    });
+    await db.$transaction((tx) => approvePlan(tx, scope, idealPlan.id), { timeout: 30_000 });
+    await db.$transaction((tx) => startPlan(tx, scope, idealPlan.id), { timeout: 30_000 });
+    await db.$transaction((tx) => completeStep(tx, scope, idealPlan.id, {
+      materials: [{ materialId: idealFlower.id, usedQty: 15, reusableQty: 12 }],
+      disassemble: true,
+      lossReason: "实际拆解仅 12 支可复用",
+    }), { timeout: 30_000 });
+    await assert.rejects(
+      db.$transaction((tx) => startNextStep(tx, scope, idealPlan.id), { timeout: 30_000 }),
+      /缺料 8/,
+    );
+
+    // Batch 2: confirmed sample material substitution. A shortage proposes a
+    // three-level match; nothing changes until `confirmed` is true and the
+    // replacement covers the whole requirement with enough availability.
+    const fromMaterial = await db.material.create({
+      data: {
+        tenantId,
+        code: `S4-SUB-FROM-${marker}`,
+        name: "换料前高原红",
+        kind: MaterialKind.FLOWER,
+        baseUnit: "支",
+        quantityScale: 0,
+        standardUnitCost: "2.0000",
+        flowerVariety: "玫瑰",
+        flowerProductName: "高原红",
+        color: "红",
+        active: true,
+      },
+    });
+    const toMaterial = await db.material.create({
+      data: {
+        tenantId,
+        code: `S4-SUB-TO-${marker}`,
+        name: "换料后高原红",
+        kind: MaterialKind.FLOWER,
+        baseUnit: "支",
+        quantityScale: 0,
+        standardUnitCost: "3.0000",
+        flowerVariety: "玫瑰",
+        flowerProductName: "高原红",
+        color: "红",
+        active: true,
+      },
+    });
+    const otherVariety = await db.material.create({
+      data: {
+        tenantId,
+        code: `S4-SUB-TULIP-${marker}`,
+        name: "换料郁金香",
+        kind: MaterialKind.FLOWER,
+        baseUnit: "支",
+        quantityScale: 0,
+        standardUnitCost: "1.0000",
+        flowerVariety: "郁金香",
+        flowerProductName: "黄",
+        color: "黄",
+        active: true,
+      },
+    });
+    await makeBatch(db, {
+      storeId: store.id,
+      locationId: warehouse.id,
+      materialId: toMaterial.id,
+      batchNo: `BATCH-SUB-${marker}`,
+      quantity: 20,
+      unitCost: 3,
+    });
+    const substitutionSample = await makeSample(db, {
+      code: `SMP-SUB-${marker}`,
+      name: "换料测试样品",
+      materialId: fromMaterial.id,
+      quantity: 5,
+    });
+    const proposals = await loadSampleSubstitutionProposals(db, scope, substitutionSample.id);
+    assert.equal(proposals.length, 1);
+    assert.equal(proposals[0]!.fromMaterialId, fromMaterial.id);
+    assert.equal(proposals[0]!.options[0]!.materialId, toMaterial.id);
+    assert.equal(proposals[0]!.options[0]!.tier, "exact");
+    assert.ok(!proposals[0]!.options.some((option) => option.materialId === otherVariety.id));
+
+    await assert.rejects(
+      db.$transaction((tx) => confirmSampleMaterialSubstitution(tx, scope, {
+        sampleId: substitutionSample.id,
+        fromMaterialId: fromMaterial.id,
+        toMaterialId: toMaterial.id,
+        quantity: 4,
+        confirmed: true,
+      })),
+      /换料数量必须等于原需求/,
+    );
+    await assert.rejects(
+      db.$transaction((tx) => confirmSampleMaterialSubstitution(tx, scope, {
+        sampleId: substitutionSample.id,
+        fromMaterialId: fromMaterial.id,
+        toMaterialId: toMaterial.id,
+        confirmed: false,
+      })),
+      /必须由员工明确确认/,
+    );
+    await assert.rejects(
+      db.$transaction((tx) => confirmSampleMaterialSubstitution(tx, scope, {
+        sampleId: substitutionSample.id,
+        fromMaterialId: fromMaterial.id,
+        toMaterialId: otherVariety.id,
+        confirmed: true,
+      })),
+      /三级分类匹配/,
+    );
+
+    const confirmed = await db.$transaction((tx) => confirmSampleMaterialSubstitution(tx, scope, {
+      sampleId: substitutionSample.id,
+      fromMaterialId: fromMaterial.id,
+      toMaterialId: toMaterial.id,
+      quantity: 5,
+      reason: "原物料缺货，同三级分类替代",
+      confirmed: true,
+    }));
+    assert.equal(confirmed.tier, "exact");
+    assert.equal(confirmed.quantity, 5);
+    const replaced = await db.sampleMaterial.findFirstOrThrow({
+      where: { sampleId: substitutionSample.id },
+    });
+    assert.equal(replaced.materialId, toMaterial.id);
+    const substitutionRecord = await db.sampleMaterialSubstitution.findFirstOrThrow({
+      where: { sampleId: substitutionSample.id },
+    });
+    assert.equal(substitutionRecord.fromMaterialId, fromMaterial.id);
+    assert.equal(substitutionRecord.toMaterialId, toMaterial.id);
+    assert.equal(substitutionRecord.confirmedById, scope.actorStaffId);
+    const substitutionAudit = await db.auditEvent.findFirst({
+      where: {
+        tenantId,
+        entityType: "Sample",
+        entityId: substitutionSample.id,
+        action: "SAMPLE_MATERIAL_SUBSTITUTED",
+      },
+    });
+    assert.ok(substitutionAudit);
+
+    // A shortage larger than the candidate's availability is rejected and the
+    // original recipe stays unchanged.
+    const tooLargeSample = await makeSample(db, {
+      code: `SMP-SUB-BIG-${marker}`,
+      name: "换料缺口样品",
+      materialId: fromMaterial.id,
+      quantity: 50,
+    });
+    await assert.rejects(
+      db.$transaction((tx) => confirmSampleMaterialSubstitution(tx, scope, {
+        sampleId: tooLargeSample.id,
+        fromMaterialId: fromMaterial.id,
+        toMaterialId: toMaterial.id,
+        quantity: 50,
+        confirmed: true,
+      })),
+      /可用量不足/,
+    );
+    const unchanged = await db.sampleMaterial.findFirstOrThrow({
+      where: { sampleId: tooLargeSample.id },
+    });
+    assert.equal(unchanged.materialId, fromMaterial.id);
+
+    // Batch 2: photo/retention constraints are persisted on plan items and
+    // drive the auto schedule order and step snapshots.
+    const scheduleFlower = await db.material.create({
+      data: {
+        tenantId,
+        code: `S4-SCHEDULE-${marker}`,
+        name: "排程测试花材",
+        kind: MaterialKind.FLOWER,
+        baseUnit: "支",
+        quantityScale: 0,
+        standardUnitCost: "1.0000",
+        active: true,
+      },
+    });
+    const schedulePhoto = await makeSample(db, {
+      code: `SMP-SCHEDULE-PHOTO-${marker}`,
+      name: "先拍摄样品",
+      materialId: scheduleFlower.id,
+      quantity: 2,
+    });
+    const scheduleRetain = await makeSample(db, {
+      code: `SMP-SCHEDULE-RETAIN-${marker}`,
+      name: "留样样品",
+      materialId: scheduleFlower.id,
+      quantity: 3,
+    });
+    const schedulePlan = await db.$transaction((tx) => saveSamplePlan(tx, scope, {
+      name: "拍摄与留样排程",
+      items: [
+        {
+          sampleId: schedulePhoto.id,
+          quantity: 1,
+          mandatory: true,
+          sequenceNo: 1,
+          photoDueAt: new Date(Date.now() + 2 * 60 * 60 * 1000),
+        },
+        {
+          sampleId: scheduleRetain.id,
+          quantity: 1,
+          mandatory: true,
+          sequenceNo: 2,
+          retentionUntil: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+        },
+      ],
+    }));
+    const scheduleCalculated = await db.$transaction(
+      (tx) => calculatePlan(tx, scope, schedulePlan.id),
+      { timeout: 30_000 },
+    );
+    const scheduleBase = scheduleCalculated.runs.find((run) => run.stepCount === 2);
+    assert.ok(scheduleBase);
+    await db.$transaction((tx) => selectPlanRun(tx, scope, schedulePlan.id, scheduleBase.id), {
+      timeout: 30_000,
+    });
+    const scheduleRun = await db.samplePlanRun.findFirstOrThrow({
+      where: { planId: schedulePlan.id, id: scheduleBase.id },
+      include: { steps: { orderBy: { sequenceNo: "asc" } } },
+    });
+    assert.equal(scheduleRun.steps[0]!.sampleId, schedulePhoto.id);
+    assert.ok(scheduleRun.steps[0]!.photoDueAt);
+    assert.ok(scheduleRun.steps[0]!.plannedStartAt);
+    assert.ok(scheduleRun.steps[0]!.plannedEndAt);
+    assert.equal(scheduleRun.steps[1]!.sampleId, scheduleRetain.id);
+    assert.equal(scheduleRun.steps[1]!.retained, true);
+    assert.ok(scheduleRun.steps[1]!.retentionUntil);
+
+    // Single-main creation drawer: recommendations are ranked by the trial
+    // reuse rate, and create+calculate persists exactly the selected samples
+    // (maxSuggestions: 1 prevents an extra automatic companion step).
+    const recommendationFlower = await db.material.create({
+      data: {
+        tenantId,
+        code: `S4-RECOMMEND-ROSE-${marker}`,
+        name: "打样推荐玫瑰",
+        kind: MaterialKind.FLOWER,
+        baseUnit: "支",
+        quantityScale: 0,
+        standardUnitCost: "2.0000",
+        active: true,
+      },
+    });
+    const recommendationExtra = await db.material.create({
+      data: {
+        tenantId,
+        code: `S4-RECOMMEND-EXTRA-${marker}`,
+        name: "打样推荐配材",
+        kind: MaterialKind.FLOWER,
+        baseUnit: "支",
+        quantityScale: 0,
+        standardUnitCost: "1.0000",
+        active: true,
+      },
+    });
+    const recommendationMain = await makeSample(db, {
+      code: `SMP-REC-MAIN-${marker}`,
+      name: "推荐主样品",
+      materialId: recommendationFlower.id,
+      quantity: 10,
+    });
+    const recommendationFull = await makeSample(db, {
+      code: `SMP-REC-FULL-${marker}`,
+      name: "推荐全复用样品",
+      materialId: recommendationFlower.id,
+      quantity: 6,
+    });
+    const recommendationShort = await makeSample(db, {
+      code: `SMP-REC-SHORT-${marker}`,
+      name: "推荐复用不足样品",
+      materialId: recommendationFlower.id,
+      quantity: 20,
+    });
+    const recommendationMixed = await db.sample.create({
+      data: {
+        tenantId,
+        code: `SMP-REC-MIXED-${marker}`,
+        name: "推荐换料样品",
+        state: SampleState.READY,
+        materials: {
+          create: [
+            { materialId: recommendationFlower.id, quantity: 10 },
+            { materialId: recommendationExtra.id, quantity: 2 },
+          ],
+        },
+      },
+    });
+
+    const recommendations = await db.$transaction((tx) =>
+      loadSamplePlanRecommendations(tx, scope, {
+        mainSampleId: recommendationMain.id,
+        plannedCount: 4,
+      })
+    );
+    assert.equal(recommendations.requestedCount, 3);
+    assert.ok(recommendations.eligibleCount >= 3);
+    assert.deepEqual(
+      recommendations.candidates.map((row) => row.sampleId),
+      [recommendationFull.id, recommendationMixed.id, recommendationShort.id],
+    );
+    assert.equal(recommendations.candidates[0]!.reuseRate, 1);
+    assert.equal(recommendations.candidates[0]!.requiresSubstitution, false);
+    assert.equal(recommendations.candidates[1]!.reuseRate, 0.8333);
+    assert.equal(recommendations.candidates[1]!.requiresSubstitution, true);
+    assert.equal(recommendations.candidates[2]!.reuseRate, 0.5);
+
+    // Expandable per-material detail comes from the same trial and keeps the
+    // candidate's requirement, the reused share and the uncovered remainder.
+    assert.deepEqual(recommendations.candidates[0]!.materials, [
+      {
+        materialId: recommendationFlower.id,
+        name: "打样推荐玫瑰",
+        baseUnit: "支",
+        requiredQty: 6,
+        reusedQty: 6,
+        remainingQty: 0,
+      },
+    ]);
+    assert.deepEqual(
+      recommendations.candidates[1]!.materials.map((material) => ({
+        materialId: material.materialId,
+        requiredQty: material.requiredQty,
+        reusedQty: material.reusedQty,
+        remainingQty: material.remainingQty,
+      })),
+      [
+        { materialId: recommendationFlower.id, requiredQty: 10, reusedQty: 10, remainingQty: 0 },
+        { materialId: recommendationExtra.id, requiredQty: 2, reusedQty: 0, remainingQty: 2 },
+      ],
+    );
+
+    const createdFromRecommendation = await db.$transaction((tx) =>
+      createPlanFromRecommendation(tx, scope, {
+        name: "推荐主样品打样计划",
+        mainSampleId: recommendationMain.id,
+        plannedCount: 4,
+        selectedSampleIds: [recommendationFull.id, recommendationMixed.id],
+      }), { timeout: 30_000 });
+    assert.equal(createdFromRecommendation.plan.name, "推荐主样品打样计划");
+    assert.equal(createdFromRecommendation.calculation.runs.length, 1);
+    assert.equal(createdFromRecommendation.calculation.runs[0]!.stepCount, 3);
+    const storedRecommendationPlan = await db.samplePlan.findUniqueOrThrow({
+      where: { id: createdFromRecommendation.plan.id },
+      include: { items: { orderBy: { sequenceNo: "asc" } } },
+    });
+    assert.equal(storedRecommendationPlan.state, SamplePlanState.PROPOSED);
+    assert.deepEqual(
+      storedRecommendationPlan.items.map((item) => item.sampleId),
+      [recommendationMain.id, recommendationFull.id, recommendationMixed.id],
+    );
+    assert.deepEqual(
+      storedRecommendationPlan.items.map((item) => item.mandatory),
+      [true, false, false],
+    );
+
+    // The drawer may supply a user-entered plan name; it replaces the fallback
+    // generated from the main sample.
+    const customNamedPlan = await db.$transaction((tx) =>
+      createPlanFromRecommendation(tx, scope, {
+        name: "自定义推荐打样计划",
+        mainSampleId: recommendationMain.id,
+        plannedCount: 2,
+        selectedSampleIds: [recommendationFull.id],
+      }), { timeout: 30_000 });
+    assert.equal(customNamedPlan.plan.name, "自定义推荐打样计划");
 
     console.log("v2 sample planning DB tests passed");
   } finally {

@@ -39,6 +39,7 @@ const SIZE_CLASS = {
   md: "max-w-[560px]",
   lg: "max-w-[680px]",
   xl: "max-w-[820px]",
+  "2xl": "max-w-[1040px]",
 } as const;
 
 export type V2DrawerSize = keyof typeof SIZE_CLASS;
@@ -288,12 +289,20 @@ export type V2DrawerFormProps = {
   triggerClassName?: string;
   /** Optional hint shown on the left side of the footer. */
   footerNote?: string;
+  /** Disables submit for a client-side prerequisite (for example, no main sample). */
+  submitDisabled?: boolean;
+  /** Called after an explicit success result, before the refreshed list appears. */
+  onSuccess?: () => void;
   children: ReactNode;
 };
 
-function SubmitButton({ label, pending }: { label: string; pending: boolean }) {
+function SubmitButton({ label, pending, disabled = false }: {
+  label: string;
+  pending: boolean;
+  disabled?: boolean;
+}) {
   return (
-    <button type="submit" className={SUBMIT_BASE} disabled={pending}>
+    <button type="submit" className={SUBMIT_BASE} disabled={pending || disabled}>
       {pending ? "保存中…" : label}
     </button>
   );
@@ -309,6 +318,8 @@ export function V2DrawerForm({
   triggerAriaLabel,
   triggerClassName,
   footerNote,
+  submitDisabled = false,
+  onSuccess,
   children,
 }: V2DrawerFormProps) {
   const [open, setOpen] = useState(false);
@@ -344,6 +355,7 @@ export function V2DrawerForm({
           // first so the refreshed list is visible behind the success notice.
           setOpen(false);
           setSuccessMessage(result.message);
+          onSuccess?.();
           router.refresh();
           return;
         }
@@ -421,7 +433,7 @@ export function V2DrawerForm({
               >
                 取消
               </button>
-              <SubmitButton label={submitLabel} pending={pending} />
+              <SubmitButton label={submitLabel} pending={pending} disabled={submitDisabled} />
             </div>
           </footer>
         </form>

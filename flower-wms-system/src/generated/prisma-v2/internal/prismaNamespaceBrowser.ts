@@ -84,6 +84,7 @@ export const ModelName = {
   MaterialUsage: 'MaterialUsage',
   Sample: 'Sample',
   SampleMaterial: 'SampleMaterial',
+  SampleMaterialSubstitution: 'SampleMaterialSubstitution',
   SamplePlan: 'SamplePlan',
   SamplePlanItem: 'SamplePlanItem',
   SamplePlanMaterial: 'SamplePlanMaterial',
@@ -232,6 +233,9 @@ export const SupplierScalarFieldEnum = {
   phone: 'phone',
   wechat: 'wechat',
   notes: 'notes',
+  defaultLossRate: 'defaultLossRate',
+  lossRateNote: 'lossRateNote',
+  lossRateUpdatedAt: 'lossRateUpdatedAt',
   active: 'active',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -444,6 +448,9 @@ export const PurchaseOrderLineScalarFieldEnum = {
   purchaseUnit: 'purchaseUnit',
   expectedBaseQty: 'expectedBaseQty',
   unitPrice: 'unitPrice',
+  channelLossRate: 'channelLossRate',
+  expectedUsableQty: 'expectedUsableQty',
+  lossAdjustedUnitCost: 'lossAdjustedUnitCost',
   supplierConfirmedAt: 'supplierConfirmedAt',
   relationKind: 'relationKind',
   sourceLineId: 'sourceLineId',
@@ -497,7 +504,8 @@ export const GoodsReceiptLineScalarFieldEnum = {
   baseUnit: 'baseUnit',
   gradeChangeReason: 'gradeChangeReason',
   rejectionReason: 'rejectionReason',
-  finalUnitCost: 'finalUnitCost'
+  finalUnitCost: 'finalUnitCost',
+  channelLossRate: 'channelLossRate'
 } as const
 
 export type GoodsReceiptLineScalarFieldEnum = (typeof GoodsReceiptLineScalarFieldEnum)[keyof typeof GoodsReceiptLineScalarFieldEnum]
@@ -512,6 +520,8 @@ export const InventoryBatchScalarFieldEnum = {
   receivedAt: 'receivedAt',
   usableUntil: 'usableUntil',
   unitCost: 'unitCost',
+  channelLossRate: 'channelLossRate',
+  lossAdjustedUnitCost: 'lossAdjustedUnitCost',
   costEstimated: 'costEstimated'
 } as const
 
@@ -603,7 +613,9 @@ export const SampleScalarFieldEnum = {
   imageKey: 'imageKey',
   description: 'description',
   priority: 'priority',
-  targetMarginRate: 'targetMarginRate'
+  targetMarginRate: 'targetMarginRate',
+  photoDueAt: 'photoDueAt',
+  retentionUntil: 'retentionUntil'
 } as const
 
 export type SampleScalarFieldEnum = (typeof SampleScalarFieldEnum)[keyof typeof SampleScalarFieldEnum]
@@ -617,6 +629,22 @@ export const SampleMaterialScalarFieldEnum = {
 } as const
 
 export type SampleMaterialScalarFieldEnum = (typeof SampleMaterialScalarFieldEnum)[keyof typeof SampleMaterialScalarFieldEnum]
+
+
+export const SampleMaterialSubstitutionScalarFieldEnum = {
+  id: 'id',
+  sampleId: 'sampleId',
+  fromMaterialId: 'fromMaterialId',
+  toMaterialId: 'toMaterialId',
+  quantity: 'quantity',
+  tier: 'tier',
+  reason: 'reason',
+  confirmedById: 'confirmedById',
+  confirmedAt: 'confirmedAt',
+  createdAt: 'createdAt'
+} as const
+
+export type SampleMaterialSubstitutionScalarFieldEnum = (typeof SampleMaterialSubstitutionScalarFieldEnum)[keyof typeof SampleMaterialSubstitutionScalarFieldEnum]
 
 
 export const SamplePlanScalarFieldEnum = {
@@ -642,7 +670,10 @@ export const SamplePlanItemScalarFieldEnum = {
   quantity: 'quantity',
   mandatory: 'mandatory',
   candidateState: 'candidateState',
-  sequenceNo: 'sequenceNo'
+  sequenceNo: 'sequenceNo',
+  photoDueAt: 'photoDueAt',
+  retentionUntil: 'retentionUntil',
+  autoSchedule: 'autoSchedule'
 } as const
 
 export type SamplePlanItemScalarFieldEnum = (typeof SamplePlanItemScalarFieldEnum)[keyof typeof SamplePlanItemScalarFieldEnum]
@@ -702,7 +733,13 @@ export const SamplePlanStepScalarFieldEnum = {
   sampleId: 'sampleId',
   sampleNameSnapshot: 'sampleNameSnapshot',
   plannedQuantity: 'plannedQuantity',
-  incrementalCost: 'incrementalCost'
+  incrementalCost: 'incrementalCost',
+  plannedStartAt: 'plannedStartAt',
+  plannedEndAt: 'plannedEndAt',
+  photoDueAt: 'photoDueAt',
+  retentionUntil: 'retentionUntil',
+  retained: 'retained',
+  scheduleWarnings: 'scheduleWarnings'
 } as const
 
 export type SamplePlanStepScalarFieldEnum = (typeof SamplePlanStepScalarFieldEnum)[keyof typeof SamplePlanStepScalarFieldEnum]

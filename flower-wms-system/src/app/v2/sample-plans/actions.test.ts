@@ -27,6 +27,9 @@ const stubs: Record<string, string> = {
   }`,
   "@/v2/db": `export const v2db = { $transaction: async (fn, options) => fn({ __fakeTx: true, options }) };`,
   "../_lib/action-result": `
+    export function isV2ControlFlowError(cause) {
+      return typeof cause === "object" && cause !== null && "digest" in cause;
+    }
     export async function runV2DrawerAction(operation, fallbackMessage) {
       try {
         const message = await operation();
@@ -51,9 +54,51 @@ const stubs: Record<string, string> = {
       record("copySamplePlan", [tx, scope, planId]);
       return { id: "plan-2", name: "复制计划", state: "DRAFT" };
     }
-    export async function calculatePlan(tx, scope, planId) {
-      record("calculatePlan", [tx, scope, planId]);
+    export async function calculatePlan(tx, scope, planId, options) {
+      record("calculatePlan", [tx, scope, planId, options]);
       return { planId, calculationGroupId: "group-1", warnings: [], runs: [{ rank: 1, totalCost: 22, estimatedSaving: 10, id: "run-1", requestedSampleCount: 2, independentCost: 32, reuseRate: 0.3, stepCount: 2, purchaseQty: 0, createdAt: new Date(), selected: true }] };
+    }
+    export async function loadSamplePlanRecommendations(tx, scope, input) {
+      record("loadSamplePlanRecommendations", [tx, scope, input]);
+      return {
+        candidates: [
+          {
+            sampleId: "sample-2",
+            code: "SMP-2",
+            name: "搭配样品",
+            requiredQty: 10,
+            reusedQty: 9,
+            reuseRate: 0.9,
+            requiresSubstitution: false,
+            classificationTier: "exact",
+            baseUnit: "支",
+            materials: [
+              {
+                materialId: "material-1",
+                name: "高原红",
+                baseUnit: "支",
+                requiredQty: 10,
+                reusedQty: 9,
+                remainingQty: 1,
+              },
+            ],
+          },
+        ],
+        eligibleCount: 1,
+        requestedCount: 1,
+      };
+    }
+    export async function createPlanFromRecommendation(tx, scope, input) {
+      record("createPlanFromRecommendation", [tx, scope, input]);
+      return {
+        plan: { id: "plan-3", name: "SMP-1 · 主样品 打样计划", state: "DRAFT" },
+        calculation: {
+          planId: "plan-3",
+          calculationGroupId: "group-3",
+          warnings: [],
+          runs: [{ rank: 1, totalCost: 20, estimatedSaving: 0, id: "run-3", requestedSampleCount: 2, independentCost: 20, reuseRate: 0.5, stepCount: 2, purchaseQty: 0, createdAt: new Date(), selected: true }],
+        },
+      };
     }
     export async function selectPlanRun(tx, scope, planId, runId) {
       record("selectPlanRun", [tx, scope, planId, runId]);
@@ -134,8 +179,40 @@ type ActionResult = {
   error?: string;
 };
 
+type RecommendationResult =
+  | {
+    ok: true;
+    candidates: {
+      sampleId: string;
+      code: string;
+      name: string;
+      requiredQty: number;
+      reusedQty: number;
+      reuseRate: number;
+      requiresSubstitution: boolean;
+      classificationTier: string | null;
+      baseUnit: string | null;
+      materials: {
+        materialId: string;
+        name: string;
+        baseUnit: string;
+        requiredQty: number;
+        reusedQty: number;
+        remainingQty: number;
+      }[];
+    }[];
+    eligibleCount: number;
+    requestedCount: number;
+  }
+  | { ok: false; error: string };
+
 type Actions = {
   createSamplePlanAction: (data: FormData) => Promise<ActionResult>;
+  recommendSamplePlanSamplesAction: (input: {
+    mainSampleId: string;
+    plannedCount: number;
+  }) => Promise<RecommendationResult>;
+  createSamplePlanFromRecommendationAction: (data: FormData) => Promise<ActionResult>;
   updateSamplePlanAction: (data: FormData) => Promise<ActionResult>;
   copySamplePlanAction: (data: FormData) => Promise<never>;
   calculateSamplePlanAction: (data: FormData) => Promise<never>;
@@ -182,6 +259,8 @@ function planForm(overrides: Record<string, string> = {}): FormData {
 async function main(): Promise<void> {
   const {
     createSamplePlanAction,
+    recommendSamplePlanSamplesAction,
+    createSamplePlanFromRecommendationAction,
     updateSamplePlanAction,
     copySamplePlanAction,
     calculateSamplePlanAction,
@@ -205,6 +284,79 @@ async function main(): Promise<void> {
   assert.equal(createResult.ok, true);
   assert.match(createResult.message ?? "", /已创建/);
   assert.equal(state.redirect, undefined, "drawer success must not redirect");
+
+  reset();
+  const recommendation = await recommendSamplePlanSamplesAction({
+    mainSampleId: "sample-1",
+    plannedCount: 3,
+  });
+  assert.equal(state.capability, "production");
+  assert.equal(state.calls[0]?.name, "loadSamplePlanRecommendations");
+  const recommendationInput = state.calls[0]?.args[2] as { mainSampleId: string; plannedCount: number };
+  assert.equal(recommendationInput.mainSampleId, "sample-1");
+  assert.equal(recommendationInput.plannedCount, 3);
+  assert.equal(recommendation.ok, true);
+  if (recommendation.ok) {
+    assert.equal(recommendation.candidates[0]?.sampleId, "sample-2");
+    assert.equal(recommendation.candidates[0]?.reuseRate, 0.9);
+    // The expandable detail is part of the action's read-only result contract.
+    assert.deepEqual(recommendation.candidates[0]?.materials, [
+      {
+        materialId: "material-1",
+        name: "高原红",
+        baseUnit: "支",
+        requiredQty: 10,
+        reusedQty: 9,
+        remainingQty: 1,
+      },
+    ]);
+  }
+
+  reset();
+  const createFromRecommendationForm = new FormData();
+  createFromRecommendationForm.set("name", "自定义打样计划");
+  createFromRecommendationForm.set("mainSampleId", "sample-1");
+  createFromRecommendationForm.set("plannedCount", "3");
+  createFromRecommendationForm.set("selectedSampleIds", JSON.stringify(["sample-2", "sample-3"]));
+  const createFromRecommendation = await createSamplePlanFromRecommendationAction(
+    createFromRecommendationForm,
+  );
+  assert.equal(state.calls[0]?.name, "createPlanFromRecommendation");
+  const createFromRecommendationInput = state.calls[0]?.args[2] as {
+    name: string;
+    mainSampleId: string;
+    plannedCount: number;
+    selectedSampleIds: string[];
+  };
+  assert.equal(createFromRecommendationInput.name, "自定义打样计划");
+  assert.equal(createFromRecommendationInput.mainSampleId, "sample-1");
+  assert.equal(createFromRecommendationInput.plannedCount, 3);
+  assert.deepEqual(createFromRecommendationInput.selectedSampleIds, ["sample-2", "sample-3"]);
+  assert.equal(createFromRecommendation.ok, true);
+  assert.match(createFromRecommendation.message ?? "", /已计算/);
+  assert.equal(state.redirect, undefined, "drawer success must not redirect");
+
+  reset();
+  const missingNameForm = new FormData();
+  missingNameForm.set("mainSampleId", "sample-1");
+  missingNameForm.set("plannedCount", "3");
+  missingNameForm.set("selectedSampleIds", JSON.stringify([]));
+  const missingNameResult = await createSamplePlanFromRecommendationAction(missingNameForm);
+  assert.equal(state.calls.length, 0);
+  assert.equal(missingNameResult.ok, false);
+  assert.match(missingNameResult.error ?? "", /打样计划名称必填/);
+
+  reset();
+  const invalidRecommendationSelection = new FormData();
+  invalidRecommendationSelection.set("mainSampleId", "sample-1");
+  invalidRecommendationSelection.set("plannedCount", "3");
+  invalidRecommendationSelection.set("selectedSampleIds", JSON.stringify([1]));
+  const invalidSelectionResult = await createSamplePlanFromRecommendationAction(
+    invalidRecommendationSelection,
+  );
+  assert.equal(state.calls.length, 0);
+  assert.equal(invalidSelectionResult.ok, false);
+  assert.match(invalidSelectionResult.error ?? "", /格式无效/);
 
   reset();
   const updateResult = await updateSamplePlanAction(planForm({ planId: "plan-9" }));

@@ -6,6 +6,7 @@ import {
   materialOptionLabel,
   materialPickerClass,
 } from "../../_components/material-option-label";
+import { sampleDisplayName } from "../../_lib/sample-display";
 
 export type MaterialOption = {
   id: string;
@@ -122,6 +123,15 @@ export type SampleClassificationSummary = {
   color: string | null;
 };
 
+export type SampleRecipeItem = {
+  materialId: string;
+  name: string;
+  /** `MaterialKind`; used only to pick the flower/foliage icon in the preview. */
+  kind: string;
+  baseUnit: string;
+  quantity: number;
+};
+
 export type SampleOption = {
   id: string;
   code: string;
@@ -129,6 +139,8 @@ export type SampleOption = {
   state: string;
   materialCount: number;
   priority: number;
+  /** Full recipe, used by the sample-plan creation drawer's recipe preview. */
+  recipe?: SampleRecipeItem[];
   /** Classifications of this sample's flower materials, used for recommendation hints only. */
   classifications?: SampleClassificationSummary[];
 };
@@ -220,6 +232,12 @@ export type PlanItem = {
   quantity: number;
   mandatory: boolean;
   sequenceNo: number;
+  /** Photography deadline (datetime-local value) for this plan item. */
+  photoDueAt?: string | null;
+  /** Retention deadline (datetime-local value) for this plan item. */
+  retentionUntil?: string | null;
+  /** Batch-2 auto ordering may reorder this item by photo/retention dates. */
+  autoSchedule?: boolean;
 };
 
 export function SamplePlanItemsEditor({
@@ -233,8 +251,7 @@ export function SamplePlanItemsEditor({
     initialItems && initialItems.length > 0
       ? initialItems
       : samples[0]
-        ? [{ sampleId: samples[0].id, quantity: 1, mandatory: true, sequenceNo: 1 }]
-        : [],
+        ? [{ sampleId: samples[0].id, quantity: 1, mandatory: true, sequenceNo: 1 }]        : [],
   );
 
   const update = (index: number, patch: Partial<PlanItem>) => {
@@ -252,61 +269,91 @@ export function SamplePlanItemsEditor({
         </p>
       )}
       {items.map((item, index) => (
-        <div key={`${index}-${item.sampleId}`} className="grid gap-2 rounded-lg border border-stone-200 bg-white p-2 sm:grid-cols-[1fr_5rem_5rem_auto_auto]">
-          <label className="text-xs text-stone-600">
-            样品
-            <select
-              className={`${inputClass} mt-1`}
-              value={item.sampleId}
-              onChange={(event) => update(index, { sampleId: event.target.value })}
+        <div key={`${index}-${item.sampleId}`} className="rounded-lg border border-stone-200 bg-white p-2">
+          <div className="grid gap-2 sm:grid-cols-[1fr_5rem_5rem_auto_auto]">
+            <label className="text-xs text-stone-600">
+              样品
+              <select
+                className={`${inputClass} mt-1`}
+                value={item.sampleId}
+                onChange={(event) => update(index, { sampleId: event.target.value })}
+              >
+                {samples.map((sample) => {
+                  const summary = sampleClassificationSummary(sample);
+                  return (
+                    <option key={sample.id} value={sample.id}>
+                      {sampleDisplayName(sample)} · {sample.materialCount} 项物料{summary ? ` · ${summary}` : ""}
+                    </option>
+                  );
+                })}
+              </select>
+            </label>
+            <label className="text-xs text-stone-600">
+              数量
+              <input
+                className={`${inputClass} mt-1`}
+                type="number"
+                min="1"
+                step="1"
+                value={item.quantity}
+                onChange={(event) => update(index, { quantity: Number(event.target.value) })}
+              />
+            </label>
+            <label className="text-xs text-stone-600">
+              顺序
+              <input
+                className={`${inputClass} mt-1`}
+                type="number"
+                min="1"
+                step="1"
+                value={item.sequenceNo}
+                onChange={(event) => update(index, { sequenceNo: Number(event.target.value) })}
+              />
+            </label>
+            <label className="flex items-end gap-1 pb-2 text-xs text-stone-600">
+              <input
+                type="checkbox"
+                checked={item.mandatory}
+                onChange={(event) => update(index, { mandatory: event.target.checked })}
+              />
+              必选
+            </label>
+            <button
+              type="button"
+              className="self-end rounded-lg border border-stone-300 px-3 py-2 text-xs text-stone-600"
+              onClick={() => setItems((current) => current.filter((_, row) => row !== index))}
             >
-              {samples.map((sample) => {
-                const summary = sampleClassificationSummary(sample);
-                return (
-                  <option key={sample.id} value={sample.id}>
-                    {sample.code} · {sample.name}（{sample.materialCount} 项物料{summary ? ` · ${summary}` : ""}）
-                  </option>
-                );
-              })}
-            </select>
-          </label>
-          <label className="text-xs text-stone-600">
-            数量
-            <input
-              className={`${inputClass} mt-1`}
-              type="number"
-              min="1"
-              step="1"
-              value={item.quantity}
-              onChange={(event) => update(index, { quantity: Number(event.target.value) })}
-            />
-          </label>
-          <label className="text-xs text-stone-600">
-            顺序
-            <input
-              className={`${inputClass} mt-1`}
-              type="number"
-              min="1"
-              step="1"
-              value={item.sequenceNo}
-              onChange={(event) => update(index, { sequenceNo: Number(event.target.value) })}
-            />
-          </label>
-          <label className="flex items-end gap-1 pb-2 text-xs text-stone-600">
-            <input
-              type="checkbox"
-              checked={item.mandatory}
-              onChange={(event) => update(index, { mandatory: event.target.checked })}
-            />
-            必选
-          </label>
-          <button
-            type="button"
-            className="self-end rounded-lg border border-stone-300 px-3 py-2 text-xs text-stone-600"
-            onClick={() => setItems((current) => current.filter((_, row) => row !== index))}
-          >
-            删除
-          </button>
+              删除
+            </button>
+          </div>
+          <div className="mt-2 grid gap-2 sm:grid-cols-[1fr_1fr_auto]">
+            <label className="text-xs text-stone-600">
+              拍摄截止
+              <input
+                className={`${inputClass} mt-1`}
+                type="datetime-local"
+                value={item.photoDueAt ?? ""}
+                onChange={(event) => update(index, { photoDueAt: event.target.value || null })}
+              />
+            </label>
+            <label className="text-xs text-stone-600">
+              留样截止
+              <input
+                className={`${inputClass} mt-1`}
+                type="datetime-local"
+                value={item.retentionUntil ?? ""}
+                onChange={(event) => update(index, { retentionUntil: event.target.value || null })}
+              />
+            </label>
+            <label className="flex items-end gap-1 pb-2 text-xs text-stone-600">
+              <input
+                type="checkbox"
+                checked={item.autoSchedule !== false}
+                onChange={(event) => update(index, { autoSchedule: event.target.checked })}
+              />
+              自动排程（全部开启时生效）
+            </label>
+          </div>
         </div>
       ))}
       <button
@@ -319,6 +366,7 @@ export function SamplePlanItemsEditor({
             quantity: 1,
             mandatory: current.length === 0,
             sequenceNo: current.length + 1,
+            autoSchedule: true,
           },
         ])}
         disabled={samples.length === 0}
@@ -346,7 +394,7 @@ export function SamplePlanItemsEditor({
         </div>
       )}
       <p className="text-xs text-stone-500">
-        只选择一个必选样品时，计算会从其余已完成样品中推荐搭配；多个必选样品按顺序制作。拆解后的复用数量在每步完成后按实际确认。
+        编辑历史计划时可保留多个必选（主）样品；新建计划使用单个主样品并在创建抽屉中获取搭配推荐。填写拍摄/留样截止后，开启自动排程会先安排拍摄早的样品，并把留样样品放在末步，避免拆解掉需要保留的样品。
       </p>
     </div>
   );

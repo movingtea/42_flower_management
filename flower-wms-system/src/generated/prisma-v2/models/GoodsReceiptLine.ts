@@ -29,11 +29,13 @@ export type AggregateGoodsReceiptLine = {
 export type GoodsReceiptLineAvgAggregateOutputType = {
   quantity: runtime.Decimal | null
   finalUnitCost: runtime.Decimal | null
+  channelLossRate: runtime.Decimal | null
 }
 
 export type GoodsReceiptLineSumAggregateOutputType = {
   quantity: runtime.Decimal | null
   finalUnitCost: runtime.Decimal | null
+  channelLossRate: runtime.Decimal | null
 }
 
 export type GoodsReceiptLineMinAggregateOutputType = {
@@ -47,6 +49,7 @@ export type GoodsReceiptLineMinAggregateOutputType = {
   gradeChangeReason: string | null
   rejectionReason: string | null
   finalUnitCost: runtime.Decimal | null
+  channelLossRate: runtime.Decimal | null
 }
 
 export type GoodsReceiptLineMaxAggregateOutputType = {
@@ -60,6 +63,7 @@ export type GoodsReceiptLineMaxAggregateOutputType = {
   gradeChangeReason: string | null
   rejectionReason: string | null
   finalUnitCost: runtime.Decimal | null
+  channelLossRate: runtime.Decimal | null
 }
 
 export type GoodsReceiptLineCountAggregateOutputType = {
@@ -73,6 +77,7 @@ export type GoodsReceiptLineCountAggregateOutputType = {
   gradeChangeReason: number
   rejectionReason: number
   finalUnitCost: number
+  channelLossRate: number
   _all: number
 }
 
@@ -80,11 +85,13 @@ export type GoodsReceiptLineCountAggregateOutputType = {
 export type GoodsReceiptLineAvgAggregateInputType = {
   quantity?: true
   finalUnitCost?: true
+  channelLossRate?: true
 }
 
 export type GoodsReceiptLineSumAggregateInputType = {
   quantity?: true
   finalUnitCost?: true
+  channelLossRate?: true
 }
 
 export type GoodsReceiptLineMinAggregateInputType = {
@@ -98,6 +105,7 @@ export type GoodsReceiptLineMinAggregateInputType = {
   gradeChangeReason?: true
   rejectionReason?: true
   finalUnitCost?: true
+  channelLossRate?: true
 }
 
 export type GoodsReceiptLineMaxAggregateInputType = {
@@ -111,6 +119,7 @@ export type GoodsReceiptLineMaxAggregateInputType = {
   gradeChangeReason?: true
   rejectionReason?: true
   finalUnitCost?: true
+  channelLossRate?: true
 }
 
 export type GoodsReceiptLineCountAggregateInputType = {
@@ -124,6 +133,7 @@ export type GoodsReceiptLineCountAggregateInputType = {
   gradeChangeReason?: true
   rejectionReason?: true
   finalUnitCost?: true
+  channelLossRate?: true
   _all?: true
 }
 
@@ -224,6 +234,7 @@ export type GoodsReceiptLineGroupByOutputType = {
   gradeChangeReason: string | null
   rejectionReason: string | null
   finalUnitCost: runtime.Decimal | null
+  channelLossRate: runtime.Decimal | null
   _count: GoodsReceiptLineCountAggregateOutputType | null
   _avg: GoodsReceiptLineAvgAggregateOutputType | null
   _sum: GoodsReceiptLineSumAggregateOutputType | null
@@ -260,6 +271,7 @@ export type GoodsReceiptLineWhereInput = {
   gradeChangeReason?: Prisma.StringNullableFilter<"GoodsReceiptLine"> | string | null
   rejectionReason?: Prisma.StringNullableFilter<"GoodsReceiptLine"> | string | null
   finalUnitCost?: Prisma.DecimalNullableFilter<"GoodsReceiptLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.DecimalNullableFilter<"GoodsReceiptLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   receipt?: Prisma.XOR<Prisma.GoodsReceiptScalarRelationFilter, Prisma.GoodsReceiptWhereInput>
   purchaseLine?: Prisma.XOR<Prisma.PurchaseOrderLineNullableScalarRelationFilter, Prisma.PurchaseOrderLineWhereInput> | null
   acceptedMaterial?: Prisma.XOR<Prisma.MaterialNullableScalarRelationFilter, Prisma.MaterialWhereInput> | null
@@ -277,6 +289,7 @@ export type GoodsReceiptLineOrderByWithRelationInput = {
   gradeChangeReason?: Prisma.SortOrderInput | Prisma.SortOrder
   rejectionReason?: Prisma.SortOrderInput | Prisma.SortOrder
   finalUnitCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrderInput | Prisma.SortOrder
   receipt?: Prisma.GoodsReceiptOrderByWithRelationInput
   purchaseLine?: Prisma.PurchaseOrderLineOrderByWithRelationInput
   acceptedMaterial?: Prisma.MaterialOrderByWithRelationInput
@@ -297,6 +310,7 @@ export type GoodsReceiptLineWhereUniqueInput = Prisma.AtLeast<{
   gradeChangeReason?: Prisma.StringNullableFilter<"GoodsReceiptLine"> | string | null
   rejectionReason?: Prisma.StringNullableFilter<"GoodsReceiptLine"> | string | null
   finalUnitCost?: Prisma.DecimalNullableFilter<"GoodsReceiptLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.DecimalNullableFilter<"GoodsReceiptLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   receipt?: Prisma.XOR<Prisma.GoodsReceiptScalarRelationFilter, Prisma.GoodsReceiptWhereInput>
   purchaseLine?: Prisma.XOR<Prisma.PurchaseOrderLineNullableScalarRelationFilter, Prisma.PurchaseOrderLineWhereInput> | null
   acceptedMaterial?: Prisma.XOR<Prisma.MaterialNullableScalarRelationFilter, Prisma.MaterialWhereInput> | null
@@ -314,6 +328,7 @@ export type GoodsReceiptLineOrderByWithAggregationInput = {
   gradeChangeReason?: Prisma.SortOrderInput | Prisma.SortOrder
   rejectionReason?: Prisma.SortOrderInput | Prisma.SortOrder
   finalUnitCost?: Prisma.SortOrderInput | Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.GoodsReceiptLineCountOrderByAggregateInput
   _avg?: Prisma.GoodsReceiptLineAvgOrderByAggregateInput
   _max?: Prisma.GoodsReceiptLineMaxOrderByAggregateInput
@@ -335,6 +350,7 @@ export type GoodsReceiptLineScalarWhereWithAggregatesInput = {
   gradeChangeReason?: Prisma.StringNullableWithAggregatesFilter<"GoodsReceiptLine"> | string | null
   rejectionReason?: Prisma.StringNullableWithAggregatesFilter<"GoodsReceiptLine"> | string | null
   finalUnitCost?: Prisma.DecimalNullableWithAggregatesFilter<"GoodsReceiptLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.DecimalNullableWithAggregatesFilter<"GoodsReceiptLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type GoodsReceiptLineCreateInput = {
@@ -345,6 +361,7 @@ export type GoodsReceiptLineCreateInput = {
   gradeChangeReason?: string | null
   rejectionReason?: string | null
   finalUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   receipt: Prisma.GoodsReceiptCreateNestedOneWithoutLinesInput
   purchaseLine?: Prisma.PurchaseOrderLineCreateNestedOneWithoutReceiptLinesInput
   acceptedMaterial?: Prisma.MaterialCreateNestedOneWithoutReceivedLinesInput
@@ -362,6 +379,7 @@ export type GoodsReceiptLineUncheckedCreateInput = {
   gradeChangeReason?: string | null
   rejectionReason?: string | null
   finalUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   batch?: Prisma.InventoryBatchUncheckedCreateNestedOneWithoutReceiptLineInput
 }
 
@@ -373,6 +391,7 @@ export type GoodsReceiptLineUpdateInput = {
   gradeChangeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   finalUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   receipt?: Prisma.GoodsReceiptUpdateOneRequiredWithoutLinesNestedInput
   purchaseLine?: Prisma.PurchaseOrderLineUpdateOneWithoutReceiptLinesNestedInput
   acceptedMaterial?: Prisma.MaterialUpdateOneWithoutReceivedLinesNestedInput
@@ -390,6 +409,7 @@ export type GoodsReceiptLineUncheckedUpdateInput = {
   gradeChangeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   finalUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   batch?: Prisma.InventoryBatchUncheckedUpdateOneWithoutReceiptLineNestedInput
 }
 
@@ -404,6 +424,7 @@ export type GoodsReceiptLineCreateManyInput = {
   gradeChangeReason?: string | null
   rejectionReason?: string | null
   finalUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type GoodsReceiptLineUpdateManyMutationInput = {
@@ -414,6 +435,7 @@ export type GoodsReceiptLineUpdateManyMutationInput = {
   gradeChangeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   finalUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type GoodsReceiptLineUncheckedUpdateManyInput = {
@@ -427,6 +449,7 @@ export type GoodsReceiptLineUncheckedUpdateManyInput = {
   gradeChangeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   finalUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type GoodsReceiptLineListRelationFilter = {
@@ -450,11 +473,13 @@ export type GoodsReceiptLineCountOrderByAggregateInput = {
   gradeChangeReason?: Prisma.SortOrder
   rejectionReason?: Prisma.SortOrder
   finalUnitCost?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrder
 }
 
 export type GoodsReceiptLineAvgOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   finalUnitCost?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrder
 }
 
 export type GoodsReceiptLineMaxOrderByAggregateInput = {
@@ -468,6 +493,7 @@ export type GoodsReceiptLineMaxOrderByAggregateInput = {
   gradeChangeReason?: Prisma.SortOrder
   rejectionReason?: Prisma.SortOrder
   finalUnitCost?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrder
 }
 
 export type GoodsReceiptLineMinOrderByAggregateInput = {
@@ -481,11 +507,13 @@ export type GoodsReceiptLineMinOrderByAggregateInput = {
   gradeChangeReason?: Prisma.SortOrder
   rejectionReason?: Prisma.SortOrder
   finalUnitCost?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrder
 }
 
 export type GoodsReceiptLineSumOrderByAggregateInput = {
   quantity?: Prisma.SortOrder
   finalUnitCost?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrder
 }
 
 export type GoodsReceiptLineNullableScalarRelationFilter = {
@@ -647,6 +675,7 @@ export type GoodsReceiptLineCreateWithoutAcceptedMaterialInput = {
   gradeChangeReason?: string | null
   rejectionReason?: string | null
   finalUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   receipt: Prisma.GoodsReceiptCreateNestedOneWithoutLinesInput
   purchaseLine?: Prisma.PurchaseOrderLineCreateNestedOneWithoutReceiptLinesInput
   batch?: Prisma.InventoryBatchCreateNestedOneWithoutReceiptLineInput
@@ -662,6 +691,7 @@ export type GoodsReceiptLineUncheckedCreateWithoutAcceptedMaterialInput = {
   gradeChangeReason?: string | null
   rejectionReason?: string | null
   finalUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   batch?: Prisma.InventoryBatchUncheckedCreateNestedOneWithoutReceiptLineInput
 }
 
@@ -705,6 +735,7 @@ export type GoodsReceiptLineScalarWhereInput = {
   gradeChangeReason?: Prisma.StringNullableFilter<"GoodsReceiptLine"> | string | null
   rejectionReason?: Prisma.StringNullableFilter<"GoodsReceiptLine"> | string | null
   finalUnitCost?: Prisma.DecimalNullableFilter<"GoodsReceiptLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.DecimalNullableFilter<"GoodsReceiptLine"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type GoodsReceiptLineCreateWithoutPurchaseLineInput = {
@@ -715,6 +746,7 @@ export type GoodsReceiptLineCreateWithoutPurchaseLineInput = {
   gradeChangeReason?: string | null
   rejectionReason?: string | null
   finalUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   receipt: Prisma.GoodsReceiptCreateNestedOneWithoutLinesInput
   acceptedMaterial?: Prisma.MaterialCreateNestedOneWithoutReceivedLinesInput
   batch?: Prisma.InventoryBatchCreateNestedOneWithoutReceiptLineInput
@@ -730,6 +762,7 @@ export type GoodsReceiptLineUncheckedCreateWithoutPurchaseLineInput = {
   gradeChangeReason?: string | null
   rejectionReason?: string | null
   finalUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   batch?: Prisma.InventoryBatchUncheckedCreateNestedOneWithoutReceiptLineInput
 }
 
@@ -767,6 +800,7 @@ export type GoodsReceiptLineCreateWithoutReceiptInput = {
   gradeChangeReason?: string | null
   rejectionReason?: string | null
   finalUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   purchaseLine?: Prisma.PurchaseOrderLineCreateNestedOneWithoutReceiptLinesInput
   acceptedMaterial?: Prisma.MaterialCreateNestedOneWithoutReceivedLinesInput
   batch?: Prisma.InventoryBatchCreateNestedOneWithoutReceiptLineInput
@@ -782,6 +816,7 @@ export type GoodsReceiptLineUncheckedCreateWithoutReceiptInput = {
   gradeChangeReason?: string | null
   rejectionReason?: string | null
   finalUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   batch?: Prisma.InventoryBatchUncheckedCreateNestedOneWithoutReceiptLineInput
 }
 
@@ -819,6 +854,7 @@ export type GoodsReceiptLineCreateWithoutBatchInput = {
   gradeChangeReason?: string | null
   rejectionReason?: string | null
   finalUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   receipt: Prisma.GoodsReceiptCreateNestedOneWithoutLinesInput
   purchaseLine?: Prisma.PurchaseOrderLineCreateNestedOneWithoutReceiptLinesInput
   acceptedMaterial?: Prisma.MaterialCreateNestedOneWithoutReceivedLinesInput
@@ -835,6 +871,7 @@ export type GoodsReceiptLineUncheckedCreateWithoutBatchInput = {
   gradeChangeReason?: string | null
   rejectionReason?: string | null
   finalUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type GoodsReceiptLineCreateOrConnectWithoutBatchInput = {
@@ -861,6 +898,7 @@ export type GoodsReceiptLineUpdateWithoutBatchInput = {
   gradeChangeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   finalUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   receipt?: Prisma.GoodsReceiptUpdateOneRequiredWithoutLinesNestedInput
   purchaseLine?: Prisma.PurchaseOrderLineUpdateOneWithoutReceiptLinesNestedInput
   acceptedMaterial?: Prisma.MaterialUpdateOneWithoutReceivedLinesNestedInput
@@ -877,6 +915,7 @@ export type GoodsReceiptLineUncheckedUpdateWithoutBatchInput = {
   gradeChangeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   finalUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type GoodsReceiptLineCreateManyAcceptedMaterialInput = {
@@ -889,6 +928,7 @@ export type GoodsReceiptLineCreateManyAcceptedMaterialInput = {
   gradeChangeReason?: string | null
   rejectionReason?: string | null
   finalUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type GoodsReceiptLineUpdateWithoutAcceptedMaterialInput = {
@@ -899,6 +939,7 @@ export type GoodsReceiptLineUpdateWithoutAcceptedMaterialInput = {
   gradeChangeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   finalUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   receipt?: Prisma.GoodsReceiptUpdateOneRequiredWithoutLinesNestedInput
   purchaseLine?: Prisma.PurchaseOrderLineUpdateOneWithoutReceiptLinesNestedInput
   batch?: Prisma.InventoryBatchUpdateOneWithoutReceiptLineNestedInput
@@ -914,6 +955,7 @@ export type GoodsReceiptLineUncheckedUpdateWithoutAcceptedMaterialInput = {
   gradeChangeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   finalUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   batch?: Prisma.InventoryBatchUncheckedUpdateOneWithoutReceiptLineNestedInput
 }
 
@@ -927,6 +969,7 @@ export type GoodsReceiptLineUncheckedUpdateManyWithoutAcceptedMaterialInput = {
   gradeChangeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   finalUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type GoodsReceiptLineCreateManyPurchaseLineInput = {
@@ -939,6 +982,7 @@ export type GoodsReceiptLineCreateManyPurchaseLineInput = {
   gradeChangeReason?: string | null
   rejectionReason?: string | null
   finalUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type GoodsReceiptLineUpdateWithoutPurchaseLineInput = {
@@ -949,6 +993,7 @@ export type GoodsReceiptLineUpdateWithoutPurchaseLineInput = {
   gradeChangeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   finalUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   receipt?: Prisma.GoodsReceiptUpdateOneRequiredWithoutLinesNestedInput
   acceptedMaterial?: Prisma.MaterialUpdateOneWithoutReceivedLinesNestedInput
   batch?: Prisma.InventoryBatchUpdateOneWithoutReceiptLineNestedInput
@@ -964,6 +1009,7 @@ export type GoodsReceiptLineUncheckedUpdateWithoutPurchaseLineInput = {
   gradeChangeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   finalUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   batch?: Prisma.InventoryBatchUncheckedUpdateOneWithoutReceiptLineNestedInput
 }
 
@@ -977,6 +1023,7 @@ export type GoodsReceiptLineUncheckedUpdateManyWithoutPurchaseLineInput = {
   gradeChangeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   finalUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type GoodsReceiptLineCreateManyReceiptInput = {
@@ -989,6 +1036,7 @@ export type GoodsReceiptLineCreateManyReceiptInput = {
   gradeChangeReason?: string | null
   rejectionReason?: string | null
   finalUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 export type GoodsReceiptLineUpdateWithoutReceiptInput = {
@@ -999,6 +1047,7 @@ export type GoodsReceiptLineUpdateWithoutReceiptInput = {
   gradeChangeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   finalUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   purchaseLine?: Prisma.PurchaseOrderLineUpdateOneWithoutReceiptLinesNestedInput
   acceptedMaterial?: Prisma.MaterialUpdateOneWithoutReceivedLinesNestedInput
   batch?: Prisma.InventoryBatchUpdateOneWithoutReceiptLineNestedInput
@@ -1014,6 +1063,7 @@ export type GoodsReceiptLineUncheckedUpdateWithoutReceiptInput = {
   gradeChangeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   finalUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   batch?: Prisma.InventoryBatchUncheckedUpdateOneWithoutReceiptLineNestedInput
 }
 
@@ -1027,6 +1077,7 @@ export type GoodsReceiptLineUncheckedUpdateManyWithoutReceiptInput = {
   gradeChangeReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   rejectionReason?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   finalUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
 }
 
 
@@ -1042,6 +1093,7 @@ export type GoodsReceiptLineSelect<ExtArgs extends runtime.Types.Extensions.Inte
   gradeChangeReason?: boolean
   rejectionReason?: boolean
   finalUnitCost?: boolean
+  channelLossRate?: boolean
   receipt?: boolean | Prisma.GoodsReceiptDefaultArgs<ExtArgs>
   purchaseLine?: boolean | Prisma.GoodsReceiptLine$purchaseLineArgs<ExtArgs>
   acceptedMaterial?: boolean | Prisma.GoodsReceiptLine$acceptedMaterialArgs<ExtArgs>
@@ -1059,6 +1111,7 @@ export type GoodsReceiptLineSelectCreateManyAndReturn<ExtArgs extends runtime.Ty
   gradeChangeReason?: boolean
   rejectionReason?: boolean
   finalUnitCost?: boolean
+  channelLossRate?: boolean
   receipt?: boolean | Prisma.GoodsReceiptDefaultArgs<ExtArgs>
   purchaseLine?: boolean | Prisma.GoodsReceiptLine$purchaseLineArgs<ExtArgs>
   acceptedMaterial?: boolean | Prisma.GoodsReceiptLine$acceptedMaterialArgs<ExtArgs>
@@ -1075,6 +1128,7 @@ export type GoodsReceiptLineSelectUpdateManyAndReturn<ExtArgs extends runtime.Ty
   gradeChangeReason?: boolean
   rejectionReason?: boolean
   finalUnitCost?: boolean
+  channelLossRate?: boolean
   receipt?: boolean | Prisma.GoodsReceiptDefaultArgs<ExtArgs>
   purchaseLine?: boolean | Prisma.GoodsReceiptLine$purchaseLineArgs<ExtArgs>
   acceptedMaterial?: boolean | Prisma.GoodsReceiptLine$acceptedMaterialArgs<ExtArgs>
@@ -1091,9 +1145,10 @@ export type GoodsReceiptLineSelectScalar = {
   gradeChangeReason?: boolean
   rejectionReason?: boolean
   finalUnitCost?: boolean
+  channelLossRate?: boolean
 }
 
-export type GoodsReceiptLineOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "receiptId" | "purchaseLineId" | "acceptedMaterialId" | "disposition" | "quantity" | "baseUnit" | "gradeChangeReason" | "rejectionReason" | "finalUnitCost", ExtArgs["result"]["goodsReceiptLine"]>
+export type GoodsReceiptLineOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "receiptId" | "purchaseLineId" | "acceptedMaterialId" | "disposition" | "quantity" | "baseUnit" | "gradeChangeReason" | "rejectionReason" | "finalUnitCost" | "channelLossRate", ExtArgs["result"]["goodsReceiptLine"]>
 export type GoodsReceiptLineInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   receipt?: boolean | Prisma.GoodsReceiptDefaultArgs<ExtArgs>
   purchaseLine?: boolean | Prisma.GoodsReceiptLine$purchaseLineArgs<ExtArgs>
@@ -1130,6 +1185,7 @@ export type $GoodsReceiptLinePayload<ExtArgs extends runtime.Types.Extensions.In
     gradeChangeReason: string | null
     rejectionReason: string | null
     finalUnitCost: runtime.Decimal | null
+    channelLossRate: runtime.Decimal | null
   }, ExtArgs["result"]["goodsReceiptLine"]>
   composites: {}
 }
@@ -1567,6 +1623,7 @@ export interface GoodsReceiptLineFieldRefs {
   readonly gradeChangeReason: Prisma.FieldRef<"GoodsReceiptLine", 'String'>
   readonly rejectionReason: Prisma.FieldRef<"GoodsReceiptLine", 'String'>
   readonly finalUnitCost: Prisma.FieldRef<"GoodsReceiptLine", 'Decimal'>
+  readonly channelLossRate: Prisma.FieldRef<"GoodsReceiptLine", 'Decimal'>
 }
     
 

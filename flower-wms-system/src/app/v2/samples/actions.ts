@@ -10,6 +10,7 @@ import {
   setSampleState,
   type SampleMaterialInput,
 } from "@/v2/services/sample-management";
+import { confirmSampleMaterialSubstitution } from "@/v2/services/sample-substitution";
 import {
   convertSampleToSku,
   convertSamplesToProduct,
@@ -106,6 +107,14 @@ async function authorizedResult(
   }, "操作成功");
 }
 
+function optionalDate(data: FormData, key: string, label: string): Date | null {
+  const raw = text(data, key);
+  if (!raw) return null;
+  const parsed = new Date(raw);
+  if (!Number.isFinite(parsed.getTime())) throw new Error(`${label}无效`);
+  return parsed;
+}
+
 export async function createSampleAction(data: FormData) {
   return authorizedResult("catalog", async (scope) => {
     const materials = parseJsonArray<SampleMaterialInput>(data, "materialsJson", "样品物料");
@@ -116,6 +125,8 @@ export async function createSampleAction(data: FormData) {
         priority: Number(text(data, "priority") || 0),
         state: parseSampleState(text(data, "state") || "DRAFT"),
         targetMarginRate: optionalMarginPercent(data, "targetMarginPercent"),
+        photoDueAt: optionalDate(data, "photoDueAt", "拍摄截止时间"),
+        retentionUntil: optionalDate(data, "retentionUntil", "留样截止时间"),
         imageKey: text(data, "imageKey") || null,
         materials,
       })
@@ -136,6 +147,8 @@ export async function updateSampleAction(data: FormData) {
         priority: Number(text(data, "priority") || 0),
         state: parseSampleState(text(data, "state") || "DRAFT"),
         targetMarginRate: optionalMarginPercent(data, "targetMarginPercent"),
+        photoDueAt: optionalDate(data, "photoDueAt", "拍摄截止时间"),
+        retentionUntil: optionalDate(data, "retentionUntil", "留样截止时间"),
         imageKey: text(data, "imageKey") || null,
         materials,
       })
@@ -153,13 +166,28 @@ export async function copySampleAction(data: FormData) {
   });
 }
 
-export async function setSampleStateAction(data: FormData) {
-  return authorized("catalog", async (scope) => {
+export async function setSampleStateAction(data: FormData) {  return authorized("catalog", async (scope) => {
     const state = parseSampleState(requiredText(data, "state", "样品状态"));
     const result = await v2db.$transaction((tx) =>
       setSampleState(tx, scope, requiredText(data, "sampleId", "样品标识"), state)
     );
     return `样品 ${result.code} 已更新为 ${state}`;
+  });
+}
+
+export async function substituteSampleMaterialAction(data: FormData) {
+  return authorized("catalog", async (scope) => {
+    const result = await v2db.$transaction((tx) =>
+      confirmSampleMaterialSubstitution(tx, scope, {
+        sampleId: requiredText(data, "sampleId", "样品标识"),
+        fromMaterialId: requiredText(data, "fromMaterialId", "原物料"),
+        toMaterialId: requiredText(data, "toMaterialId", "替代物料"),
+        quantity: optionalNumber(data, "quantity", "换料数量") ?? undefined,
+        reason: text(data, "reason") || null,
+        confirmed: data.get("confirmed") !== null,
+      })
+    );
+    return `已确认换料（${result.tier}），数量 ${result.quantity}${result.requiresRecalculation ? "；相关打样计划需要重新计算" : ""}`;
   });
 }
 

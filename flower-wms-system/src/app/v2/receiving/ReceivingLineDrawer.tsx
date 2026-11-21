@@ -51,6 +51,10 @@ export type ReceivingLineData = {
   remainingQty: number;
   rejectedQty: number;
   unitPrice: number;
+  /** Procurement-channel loss snapshot; null for legacy lines. */
+  channelLossRate: number | null;
+  expectedUsableQty: number | null;
+  lossAdjustedUnitCost: number | null;
   relationKind: string;
   receipts: ReceivingReceiptRow[];
 };
@@ -128,6 +132,17 @@ function ReceivingSummary({ line }: { line: ReceivingLineData }) {
         </span>
       </DetailItem>
       <DetailItem label="采购单价">¥{Number(line.unitPrice).toFixed(4)}</DetailItem>
+      {line.channelLossRate !== null && (
+        <>
+          <DetailItem label="渠道损耗率">{(line.channelLossRate * 100).toFixed(2)}%</DetailItem>
+          <DetailItem label="预计可用量">
+            {line.expectedUsableQty === null ? "—" : `${formatQuantity(line.expectedUsableQty)} ${line.material.baseUnit}`}
+          </DetailItem>
+          <DetailItem label="损耗调整后单价">
+            {line.lossAdjustedUnitCost === null ? "—" : `¥${line.lossAdjustedUnitCost.toFixed(4)}`}
+          </DetailItem>
+        </>
+      )}
       <DetailItem label="关联类型">
         {line.relationKind === "ORIGINAL" ? "原始采购明细" : line.relationKind === "EXTRA_ORDER" ? "关联补单 / 额外到货" : "拒收后关联补送"}
       </DetailItem>

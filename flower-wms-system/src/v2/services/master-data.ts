@@ -14,6 +14,7 @@ import {
   generateSupplierCode,
 } from "../domain/identifiers";
 import { normalizeV2ImageKey } from "../domain/media";
+import { normalizeProcurementLossRate } from "../domain/procurement-loss";
 import { assertMaterialQuantity } from "../domain/stock-planning";
 
 const CODE_PATTERN = /^[A-Z0-9][A-Z0-9._-]{1,31}$/;
@@ -707,15 +708,21 @@ export type SupplierInput = {
   /** Optional: `SUP-YYYYMMDD-XXXXXXXX` is generated when blank. Ignored on edit. */
   code?: string | null; name: string; contactName?: string | null; phone?: string | null;
   wechat?: string | null; notes?: string | null;
+  /** Expected unusable share for this procurement channel, 0..0.99. */
+  defaultLossRate?: number | null; lossRateNote?: string | null;
 };
 
 function validateSupplier(input: SupplierInput) {
+  const lossRate = normalizeProcurementLossRate(input.defaultLossRate);
   return {
     name: required(input.name, "供应商名称", 80),
     contactName: optional(input.contactName, 50, "联系人"),
     phone: optional(input.phone, 30, "联系电话"),
     wechat: optional(input.wechat, 50, "微信"),
     notes: optional(input.notes, 500, "备注"),
+    defaultLossRate: lossRate,
+    lossRateNote: optional(input.lossRateNote, 200, "损耗说明"),
+    lossRateUpdatedAt: lossRate === null ? null : new Date(),
   };
 }
 
@@ -729,7 +736,13 @@ export async function createSupplierMaster(tx: Prisma.TransactionClient, scope: 
   await tx.auditEvent.create({ data: {
     tenantId: scope.tenantId, storeId: scope.storeId, actorStaffId: scope.actorStaffId,
     action: "SUPPLIER_CREATED", entityType: "Supplier", entityId: supplier.id,
-    afterSnapshot: { code: supplier.code, name: supplier.name, active: supplier.active },
+    afterSnapshot: {
+      code: supplier.code,
+      name: supplier.name,
+      active: supplier.active,
+      defaultLossRate: supplier.defaultLossRate === null ? null : Number(supplier.defaultLossRate),
+      lossRateNote: supplier.lossRateNote,
+    },
   } });
   return supplier;
 }
@@ -744,8 +757,24 @@ export async function updateSupplierMaster(tx: Prisma.TransactionClient, scope: 
   await tx.auditEvent.create({ data: {
     tenantId: scope.tenantId, storeId: scope.storeId, actorStaffId: scope.actorStaffId,
     action: "SUPPLIER_UPDATED", entityType: "Supplier", entityId: supplier.id,
-    beforeSnapshot: { name: current.name, contactName: current.contactName, phone: current.phone, wechat: current.wechat, notes: current.notes },
-    afterSnapshot: { name: supplier.name, contactName: supplier.contactName, phone: supplier.phone, wechat: supplier.wechat, notes: supplier.notes },
+    beforeSnapshot: {
+      name: current.name,
+      contactName: current.contactName,
+      phone: current.phone,
+      wechat: current.wechat,
+      notes: current.notes,
+      defaultLossRate: current.defaultLossRate === null ? null : Number(current.defaultLossRate),
+      lossRateNote: current.lossRateNote,
+    },
+    afterSnapshot: {
+      name: supplier.name,
+      contactName: supplier.contactName,
+      phone: supplier.phone,
+      wechat: supplier.wechat,
+      notes: supplier.notes,
+      defaultLossRate: supplier.defaultLossRate === null ? null : Number(supplier.defaultLossRate),
+      lossRateNote: supplier.lossRateNote,
+    },
   } });
   return supplier;
 }

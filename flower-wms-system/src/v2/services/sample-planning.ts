@@ -10,12 +10,17 @@ import {
   TransactionKind,
 } from "../../generated/prisma-v2/client";
 import {
+  SAMPLE_PLAN_DEFAULT_MAX_STEPS,
+  SAMPLE_PLAN_IDEAL_REUSE_RATE,
   calculateSamplePlan,
+  recommendSamplePlanCompanions,
   type SamplePlanCalculationResult,
+  type SamplePlanCompanionRecommendationResult,
   type SamplePlanningMaterial,
   type SamplePlanningSample,
 } from "../domain/sample-planning";
 import { assertMaterialQuantity } from "../domain/stock-planning";
+import { applyProcurementLoss } from "../domain/procurement-loss";
 import {
   lockBatchBalances,
   lockBatchRow,
@@ -30,6 +35,12 @@ export type SamplePlanItemInput = {
   quantity: number;
   mandatory: boolean;
   sequenceNo?: number | null;
+  /** Per-plan photography deadline override. */
+  photoDueAt?: Date | string | null;
+  /** Per-plan retention deadline override. */
+  retentionUntil?: Date | string | null;
+  /** Allow batch-2 photo/retention constrained ordering for this item. */
+  autoSchedule?: boolean;
 };
 
 export type SaveSamplePlanInput = {
@@ -125,6 +136,16 @@ function normalizedName(value: string): string {
   return name;
 }
 
+function optionalDate(
+  value: Date | string | null | undefined,
+  label: string,
+): Date | null {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = value instanceof Date ? value : new Date(value);
+  if (!Number.isFinite(parsed.getTime())) throw new Error(`${label}无效`);
+  return parsed;
+}
+
 function normalizeItems(items: readonly SamplePlanItemInput[]): SamplePlanItemInput[] {
   if (!Array.isArray(items) || items.length === 0) throw new Error("打样计划至少需要一个样品");
   const ids = items.map((item) => {
@@ -152,6 +173,9 @@ function normalizeItems(items: readonly SamplePlanItemInput[]): SamplePlanItemIn
       quantity: item.quantity,
       mandatory: Boolean(item.mandatory),
       sequenceNo,
+      photoDueAt: optionalDate(item.photoDueAt, "拍摄截止时间"),
+      retentionUntil: optionalDate(item.retentionUntil, "留样截止时间"),
+      autoSchedule: item.autoSchedule !== false,
     };
   });
 }
@@ -209,20 +233,47 @@ async function loadMaterialCosts(
   if (materialIds.length === 0) return result;
   const materials = await tx.material.findMany({
     where: { id: { in: [...materialIds] }, tenantId: scope.tenantId },
-    select: { id: true, standardUnitCost: true },
+    select: { id: true, standardUnitCost: true, defaultLossRate: true },
   });
   const batches = await tx.inventoryBatch.findMany({
     where: { storeId: scope.storeId, materialId: { in: [...materialIds] } },
     orderBy: [{ receivedAt: "desc" }, { id: "desc" }],
-    select: { materialId: true, unitCost: true },
+    select: {
+      materialId: true,
+      unitCost: true,
+      lossAdjustedUnitCost: true,
+      channelLossRate: true,
+    },
   });
   const batchCost = new Map<string, number>();
   for (const batch of batches) {
-    if (!batchCost.has(batch.materialId)) batchCost.set(batch.materialId, Number(batch.unitCost));
+    if (!batchCost.has(batch.materialId)) {
+      const adjusted = batch.lossAdjustedUnitCost === null
+        ? (batch.channelLossRate === null
+            ? Number(batch.unitCost)
+            : applyProcurementLoss({
+                quantity: 1,
+                unitCost: Number(batch.unitCost),
+                lossRate: Number(batch.channelLossRate),
+              }).lossAdjustedUnitCost)
+        : Number(batch.lossAdjustedUnitCost);
+      batchCost.set(batch.materialId, adjusted);
+    }
   }
   for (const material of materials) {
-    const cost = batchCost.get(material.id)
-      ?? (material.standardUnitCost === null ? 0 : Number(material.standardUnitCost));
+    const standard = material.standardUnitCost === null
+      ? null
+      : Number(material.standardUnitCost);
+    const standardAdjusted = standard === null
+      ? 0
+      : applyProcurementLoss({
+          quantity: 1,
+          unitCost: standard,
+          lossRate: material.defaultLossRate === null
+            ? 0
+            : Number(material.defaultLossRate),
+        }).lossAdjustedUnitCost;
+    const cost = batchCost.get(material.id) ?? standardAdjusted;
     result.set(material.id, cost);
   }
   return result;
@@ -234,6 +285,8 @@ function buildPlanningSample(
     code: string;
     name: string;
     priority: number;
+    photoDueAt?: Date | null;
+    retentionUntil?: Date | null;
     materials: {
       materialId: string;
       quantity: Prisma.Decimal;
@@ -243,8 +296,6 @@ function buildPlanningSample(
         grade: string | null;
         baseUnit: string;
         quantityScale: number;
-        standardUsableRate: Prisma.Decimal | null;
-        optimisticUsableRate: Prisma.Decimal | null;
         flowerVariety: string | null;
         flowerProductName: string | null;
         color: string | null;
@@ -265,9 +316,10 @@ function buildPlanningSample(
       quantity: Number(line.quantity),
       unitCost: costs.get(line.materialId) ?? 0,
       availableQty: available?.availableQty ?? 0,
-      reusableRate: Number(line.material.standardUsableRate ?? line.material.optimisticUsableRate ?? 0),
-      // Advisory recommendation signal only: it never changes quantity or cost.
+      // Ideal-reuse forecast: material usable-rate fields are intentionally not
+      // read here. Disassembled steps release 100% in the domain calculation.
       flowerVariety: line.material.flowerVariety,
+      // Advisory recommendation signal only: it never changes quantity or cost.
       flowerProductName: line.material.flowerProductName,
       color: line.material.color,
     };
@@ -277,6 +329,8 @@ function buildPlanningSample(
     code: sample.code,
     name: sample.name,
     priority: sample.priority,
+    photoDueAt: sample.photoDueAt ?? null,
+    retentionUntil: sample.retentionUntil ?? null,
     materials,
   };
 }
@@ -316,6 +370,9 @@ export async function saveSamplePlan(
               ? SamplePlanCandidateState.REQUIRED
               : SamplePlanCandidateState.OPTIONAL,
             sequenceNo: item.sequenceNo,
+            photoDueAt: item.photoDueAt,
+            retentionUntil: item.retentionUntil,
+            autoSchedule: item.autoSchedule !== false,
           })),
         },
       },
@@ -362,6 +419,9 @@ export async function saveSamplePlan(
             ? SamplePlanCandidateState.REQUIRED
             : SamplePlanCandidateState.OPTIONAL,
           sequenceNo: item.sequenceNo,
+          photoDueAt: item.photoDueAt,
+          retentionUntil: item.retentionUntil,
+          autoSchedule: item.autoSchedule !== false,
         })),
       },
       materials: { deleteMany: {} },
@@ -410,6 +470,9 @@ export async function copySamplePlan(
           mandatory: item.mandatory,
           candidateState: item.candidateState,
           sequenceNo: item.sequenceNo,
+          photoDueAt: item.photoDueAt,
+          retentionUntil: item.retentionUntil,
+          autoSchedule: item.autoSchedule,
         })),
       },
     },
@@ -477,10 +540,20 @@ async function persistPlanMaterialSummary(
   });
 }
 
+export type CalculateSamplePlanOptions = {
+  /**
+   * Set to 1 for the single-main creation flow so the calculated run contains
+   * exactly the selected samples. The default keeps the batch-2 progressive
+   * optional-suggestion runs used elsewhere on the page.
+   */
+  maxSuggestions?: number;
+};
+
 export async function calculatePlan(
   tx: Prisma.TransactionClient,
   scope: SamplePlanScope,
   planId: string,
+  options: CalculateSamplePlanOptions = {},
 ): Promise<CalculateSamplePlanResult> {
   assertScope(scope);
   const id = typeof planId === "string" ? planId.trim() : "";
@@ -507,8 +580,6 @@ export async function calculatePlan(
               grade: true,
               baseUnit: true,
               quantityScale: true,
-              standardUsableRate: true,
-              optimisticUsableRate: true,
               flowerVariety: true,
               flowerProductName: true,
               color: true,
@@ -534,8 +605,6 @@ export async function calculatePlan(
               grade: true,
               baseUnit: true,
               quantityScale: true,
-              standardUsableRate: true,
-              optimisticUsableRate: true,
               flowerVariety: true,
               flowerProductName: true,
               color: true,
@@ -572,14 +641,21 @@ export async function calculatePlan(
     quantity: item.quantity,
     mandatory: item.mandatory,
     sequenceNo: item.sequenceNo,
+    photoDueAt: item.photoDueAt,
+    retentionUntil: item.retentionUntil,
   }));
+  const calculationNow = new Date();
   const calculated = calculateSamplePlan({
     samples: planningSamples,
     selections,
-    defaultReusableRate: 0,
+    autoSchedule: plan.items.every((item) => item.autoSchedule),
+    now: calculationNow,
+    ...(options.maxSuggestions === undefined
+      ? {}
+      : { maxSuggestions: options.maxSuggestions }),
   });
 
-  const now = new Date();
+  const now = calculationNow;
   const calculationGroupId = crypto.randomUUID();
   const latest = await tx.samplePlanRun.findFirst({
     where: { planId: id },
@@ -621,12 +697,18 @@ export async function calculatePlan(
             sampleNameSnapshot: step.sampleNameSnapshot,
             plannedQuantity: step.plannedQuantity,
             incrementalCost: step.incrementalCost,
+            plannedStartAt: new Date(step.plannedStartAt),
+            plannedEndAt: new Date(step.plannedEndAt),
+            photoDueAt: step.photoDueAt === null ? null : new Date(step.photoDueAt),
+            retentionUntil: step.retentionUntil === null ? null : new Date(step.retentionUntil),
+            retained: step.retained,
+            scheduleWarnings: step.scheduleWarnings,
             flows: {
               create: step.materials.map((material) => ({
                 materialId: material.materialId,
                 materialNameSnapshot: material.materialNameSnapshot,
                 gradeSnapshot: material.gradeSnapshot,
-                unitSnapshot: `${material.baseUnit} / 可用 ${material.availableQty} / 复用率 ${(material.reusableRate * 100).toFixed(0)}%`,
+                unitSnapshot: `${material.baseUnit} / 可用 ${material.availableQty} / 理想复用 ${(SAMPLE_PLAN_IDEAL_REUSE_RATE * 100).toFixed(0)}%`,
                 requiredQty: material.requiredQty,
                 stockQty: material.stockQty,
                 reusedQty: material.reusedQty,
@@ -697,6 +779,178 @@ export async function calculatePlan(
       selected: run.id === topRun.id,
     })),
   };
+}
+
+export type SamplePlanRecommendationInput = {
+  mainSampleId: string;
+  plannedCount: number;
+};
+
+/**
+ * Read-only companion recommendations for the single-main creation drawer.
+ *
+ * The main sample is fixed by the user and the requested plan size controls the
+ * number of companion slots (`plannedCount - 1`). Recommendations read current
+ * stock/cost only to build the same planning snapshot as a real calculation;
+ * they never reserve stock or persist a plan.
+ */
+export async function loadSamplePlanRecommendations(
+  tx: Prisma.TransactionClient,
+  scope: SamplePlanScope,
+  input: SamplePlanRecommendationInput,
+): Promise<SamplePlanCompanionRecommendationResult> {
+  assertScope(scope);
+  const mainSampleId = typeof input.mainSampleId === "string" ? input.mainSampleId.trim() : "";
+  if (!mainSampleId) throw new Error("主样品不能为空");
+  const plannedCount = input.plannedCount;
+  if (!Number.isInteger(plannedCount) || plannedCount < 1) {
+    throw new Error("计划制作样品数必须为正整数");
+  }
+  if (plannedCount > SAMPLE_PLAN_DEFAULT_MAX_STEPS) {
+    throw new Error(`计划制作样品数不能超过 ${SAMPLE_PLAN_DEFAULT_MAX_STEPS}`);
+  }
+  const limit = plannedCount - 1;
+  if (limit === 0) {
+    return { candidates: [], eligibleCount: 0, requestedCount: 0 };
+  }
+
+  const materialSelect = {
+    id: true,
+    name: true,
+    grade: true,
+    baseUnit: true,
+    quantityScale: true,
+    flowerVariety: true,
+    flowerProductName: true,
+    color: true,
+  } as const;
+  const main = await tx.sample.findFirst({
+    where: { id: mainSampleId, tenantId: scope.tenantId },
+    include: { materials: { include: { material: { select: materialSelect } } } },
+  });
+  if (!main) throw new Error("主样品不存在或不属于当前租户");
+  if (main.state === SampleState.ARCHIVED) throw new Error(`${main.name} 已归档，不能作为主样品`);
+  if (main.materials.length === 0) throw new Error(`${main.name} 还没有花材搭配`);
+
+  const candidates = await tx.sample.findMany({
+    where: {
+      tenantId: scope.tenantId,
+      id: { not: mainSampleId },
+      state: SampleState.READY,
+      materials: { some: {} },
+    },
+    include: { materials: { include: { material: { select: materialSelect } } } },
+    orderBy: [{ priority: "desc" }, { code: "asc" }],
+    take: 100,
+  });
+  if (candidates.length === 0) {
+    return { candidates: [], eligibleCount: 0, requestedCount: limit };
+  }
+
+  const allSamples = [main, ...candidates];
+  const materialIds = [...new Set(
+    allSamples.flatMap((sample) => sample.materials.map((line) => line.materialId)),
+  )];
+  const availability = await getMaterialAvailableQuantities(tx, {
+    tenantId: scope.tenantId,
+    storeId: scope.storeId,
+    materialIds,
+  });
+  const costs = await loadMaterialCosts(tx, scope, materialIds);
+  const availabilityInput = new Map(
+    [...availability.entries()].map(([materialId, value]) => [materialId, {
+      availableQty: value.availableQty,
+      baseUnit: value.baseUnit,
+      quantityScale: value.quantityScale,
+    }]),
+  );
+  const planningSamples = allSamples.map((sample) =>
+    buildPlanningSample(sample, availabilityInput, costs)
+  );
+  return recommendSamplePlanCompanions({
+    main: planningSamples[0]!,
+    candidates: planningSamples.slice(1),
+    limit,
+  });
+}
+
+export type CreatePlanFromRecommendationInput = {
+  /** User-entered plan name; required and validated by saveSamplePlan. */
+  name: string;
+  mainSampleId: string;
+  plannedCount: number;
+  selectedSampleIds: readonly string[];
+};
+
+export type CreatePlanFromRecommendationResult = {
+  plan: SaveSamplePlanResult;
+  calculation: CalculateSamplePlanResult;
+};
+
+/**
+ * Creates one single-main plan from the drawer selection and calculates it in
+ * the same transaction. The main sample is always the first mandatory step;
+ * selected recommendations become optional quantity-1 steps. Calculation uses
+ * `maxSuggestions: 1` so the run contains exactly the user's selection instead
+ * of appending an extra automatic companion.
+ */
+export async function createPlanFromRecommendation(
+  tx: Prisma.TransactionClient,
+  scope: SamplePlanScope,
+  input: CreatePlanFromRecommendationInput,
+): Promise<CreatePlanFromRecommendationResult> {
+  assertScope(scope);
+  const mainSampleId = typeof input.mainSampleId === "string" ? input.mainSampleId.trim() : "";
+  if (!mainSampleId) throw new Error("主样品不能为空");
+  const plannedCount = input.plannedCount;
+  if (!Number.isInteger(plannedCount) || plannedCount < 1) {
+    throw new Error("计划制作样品数必须为正整数");
+  }
+  if (plannedCount > SAMPLE_PLAN_DEFAULT_MAX_STEPS) {
+    throw new Error(`计划制作样品数不能超过 ${SAMPLE_PLAN_DEFAULT_MAX_STEPS}`);
+  }
+  const selectedSampleIds = [...new Set(
+    (Array.isArray(input.selectedSampleIds) ? input.selectedSampleIds : [])
+      .map((sampleId) => typeof sampleId === "string" ? sampleId.trim() : "")
+      .filter(Boolean),
+  )];
+  if (selectedSampleIds.includes(mainSampleId)) {
+    throw new Error("主样品不能重复作为推荐样品");
+  }
+  const maxCompanions = plannedCount - 1;
+  if (selectedSampleIds.length > maxCompanions) {
+    throw new Error(`推荐样品不能超过 ${maxCompanions} 个`);
+  }
+
+  const main = await tx.sample.findFirst({
+    where: {
+      id: mainSampleId,
+      tenantId: scope.tenantId,
+      state: { not: SampleState.ARCHIVED },
+    },
+    select: { id: true },
+  });
+  if (!main) throw new Error("主样品不存在、已归档或不属于当前租户");
+
+  const items: SamplePlanItemInput[] = [
+    {
+      sampleId: main.id,
+      quantity: 1,
+      mandatory: true,
+      sequenceNo: 1,
+      autoSchedule: true,
+    },
+    ...selectedSampleIds.map((sampleId, index) => ({
+      sampleId,
+      quantity: 1,
+      mandatory: false,
+      sequenceNo: index + 2,
+      autoSchedule: true,
+    })),
+  ];
+  const plan = await saveSamplePlan(tx, scope, { name: input.name, items });
+  const calculation = await calculatePlan(tx, scope, plan.id, { maxSuggestions: 1 });
+  return { plan, calculation };
 }
 
 export async function selectPlanRun(
@@ -2108,7 +2362,7 @@ async function consumeProductionAcrossBatches(
     rows.push({
       batchId,
       quantity: take,
-      unitCost: Number(batch.unitCost),
+      unitCost: Number(batch.lossAdjustedUnitCost ?? batch.unitCost),
       costEstimated: batch.costEstimated,
       usableUntil: batch.usableUntil,
     });
@@ -2323,7 +2577,7 @@ export async function completeStep(
     for (const reservation of step.reservations) {
       if (reservation.batch.materialId !== materialId) continue;
       if (reservation.state !== ReservationState.ISSUED && reservation.state !== ReservationState.CONSUMED) continue;
-      actualCost = roundMoney(actualCost + Number(reservation.quantity) * Number(reservation.batch.unitCost));
+      actualCost = roundMoney(actualCost + Number(reservation.quantity) * Number(reservation.batch.lossAdjustedUnitCost ?? reservation.batch.unitCost));
       costEstimated ||= reservation.batch.costEstimated;
     }
     totalUsed = roundQty(totalUsed + actual.usedQty);

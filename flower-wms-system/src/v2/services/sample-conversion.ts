@@ -5,6 +5,7 @@ import {
   SampleState,
 } from "../../generated/prisma-v2/client";
 import { assertMaterialQuantity } from "../domain/stock-planning";
+import { applyProcurementLoss } from "../domain/procurement-loss";
 import { calculateSamplePricing } from "../domain/sample-pricing";
 import { saveProduct, saveSku } from "./catalog-management";
 import { saveRecipeDraft } from "./recipe-management";
@@ -188,17 +189,28 @@ async function lineCosts(
   const [materials, batches] = await Promise.all([
     tx.material.findMany({
       where: { id: { in: ids }, tenantId: scope.tenantId },
-      select: { id: true, name: true, kind: true, standardUnitCost: true },
+      select: { id: true, name: true, kind: true, standardUnitCost: true, defaultLossRate: true },
     }),
     tx.inventoryBatch.findMany({
       where: { storeId: scope.storeId, materialId: { in: ids } },
       orderBy: [{ receivedAt: "desc" }, { id: "desc" }],
-      select: { materialId: true, unitCost: true },
+      select: { materialId: true, unitCost: true, lossAdjustedUnitCost: true, channelLossRate: true },
     }),
   ]);
   const batchCost = new Map<string, number>();
   for (const batch of batches) {
-    if (!batchCost.has(batch.materialId)) batchCost.set(batch.materialId, Number(batch.unitCost));
+    if (!batchCost.has(batch.materialId)) {
+      const adjusted = batch.lossAdjustedUnitCost === null
+        ? (batch.channelLossRate === null
+            ? Number(batch.unitCost)
+            : applyProcurementLoss({
+                quantity: 1,
+                unitCost: Number(batch.unitCost),
+                lossRate: Number(batch.channelLossRate),
+              }).lossAdjustedUnitCost)
+        : Number(batch.lossAdjustedUnitCost);
+      batchCost.set(batch.materialId, adjusted);
+    }
   }
   let materialCost = 0;
   let packagingCost = 0;
@@ -206,7 +218,15 @@ async function lineCosts(
     const material = materials.find((row) => row.id === line.materialId);
     if (!material) throw new Error("SKU 配方物料不存在或不属于当前租户");
     const unitCost = batchCost.get(material.id)
-      ?? (material.standardUnitCost === null ? 0 : Number(material.standardUnitCost));
+      ?? (material.standardUnitCost === null
+        ? 0
+        : applyProcurementLoss({
+            quantity: 1,
+            unitCost: Number(material.standardUnitCost),
+            lossRate: material.defaultLossRate === null
+              ? 0
+              : Number(material.defaultLossRate),
+          }).lossAdjustedUnitCost);
     const lineCost = Math.round((line.quantity * unitCost + 1e-9) * 100) / 100;
     if (material.kind === MaterialKind.PACKAGING || material.kind === MaterialKind.CONSUMABLE) {
       packagingCost += lineCost;

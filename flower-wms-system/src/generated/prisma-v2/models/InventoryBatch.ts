@@ -28,10 +28,14 @@ export type AggregateInventoryBatch = {
 
 export type InventoryBatchAvgAggregateOutputType = {
   unitCost: runtime.Decimal | null
+  channelLossRate: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
 }
 
 export type InventoryBatchSumAggregateOutputType = {
   unitCost: runtime.Decimal | null
+  channelLossRate: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
 }
 
 export type InventoryBatchMinAggregateOutputType = {
@@ -43,6 +47,8 @@ export type InventoryBatchMinAggregateOutputType = {
   receivedAt: Date | null
   usableUntil: Date | null
   unitCost: runtime.Decimal | null
+  channelLossRate: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
   costEstimated: boolean | null
 }
 
@@ -55,6 +61,8 @@ export type InventoryBatchMaxAggregateOutputType = {
   receivedAt: Date | null
   usableUntil: Date | null
   unitCost: runtime.Decimal | null
+  channelLossRate: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
   costEstimated: boolean | null
 }
 
@@ -67,6 +75,8 @@ export type InventoryBatchCountAggregateOutputType = {
   receivedAt: number
   usableUntil: number
   unitCost: number
+  channelLossRate: number
+  lossAdjustedUnitCost: number
   costEstimated: number
   _all: number
 }
@@ -74,10 +84,14 @@ export type InventoryBatchCountAggregateOutputType = {
 
 export type InventoryBatchAvgAggregateInputType = {
   unitCost?: true
+  channelLossRate?: true
+  lossAdjustedUnitCost?: true
 }
 
 export type InventoryBatchSumAggregateInputType = {
   unitCost?: true
+  channelLossRate?: true
+  lossAdjustedUnitCost?: true
 }
 
 export type InventoryBatchMinAggregateInputType = {
@@ -89,6 +103,8 @@ export type InventoryBatchMinAggregateInputType = {
   receivedAt?: true
   usableUntil?: true
   unitCost?: true
+  channelLossRate?: true
+  lossAdjustedUnitCost?: true
   costEstimated?: true
 }
 
@@ -101,6 +117,8 @@ export type InventoryBatchMaxAggregateInputType = {
   receivedAt?: true
   usableUntil?: true
   unitCost?: true
+  channelLossRate?: true
+  lossAdjustedUnitCost?: true
   costEstimated?: true
 }
 
@@ -113,6 +131,8 @@ export type InventoryBatchCountAggregateInputType = {
   receivedAt?: true
   usableUntil?: true
   unitCost?: true
+  channelLossRate?: true
+  lossAdjustedUnitCost?: true
   costEstimated?: true
   _all?: true
 }
@@ -212,6 +232,8 @@ export type InventoryBatchGroupByOutputType = {
   receivedAt: Date
   usableUntil: Date | null
   unitCost: runtime.Decimal
+  channelLossRate: runtime.Decimal | null
+  lossAdjustedUnitCost: runtime.Decimal | null
   costEstimated: boolean
   _count: InventoryBatchCountAggregateOutputType | null
   _avg: InventoryBatchAvgAggregateOutputType | null
@@ -247,6 +269,8 @@ export type InventoryBatchWhereInput = {
   receivedAt?: Prisma.DateTimeFilter<"InventoryBatch"> | Date | string
   usableUntil?: Prisma.DateTimeNullableFilter<"InventoryBatch"> | Date | string | null
   unitCost?: Prisma.DecimalFilter<"InventoryBatch"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.DecimalNullableFilter<"InventoryBatch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.DecimalNullableFilter<"InventoryBatch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFilter<"InventoryBatch"> | boolean
   store?: Prisma.XOR<Prisma.StoreScalarRelationFilter, Prisma.StoreWhereInput>
   material?: Prisma.XOR<Prisma.MaterialScalarRelationFilter, Prisma.MaterialWhereInput>
@@ -270,6 +294,8 @@ export type InventoryBatchOrderByWithRelationInput = {
   receivedAt?: Prisma.SortOrder
   usableUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   unitCost?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrderInput | Prisma.SortOrder
   costEstimated?: Prisma.SortOrder
   store?: Prisma.StoreOrderByWithRelationInput
   material?: Prisma.MaterialOrderByWithRelationInput
@@ -297,6 +323,8 @@ export type InventoryBatchWhereUniqueInput = Prisma.AtLeast<{
   receivedAt?: Prisma.DateTimeFilter<"InventoryBatch"> | Date | string
   usableUntil?: Prisma.DateTimeNullableFilter<"InventoryBatch"> | Date | string | null
   unitCost?: Prisma.DecimalFilter<"InventoryBatch"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.DecimalNullableFilter<"InventoryBatch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.DecimalNullableFilter<"InventoryBatch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFilter<"InventoryBatch"> | boolean
   store?: Prisma.XOR<Prisma.StoreScalarRelationFilter, Prisma.StoreWhereInput>
   material?: Prisma.XOR<Prisma.MaterialScalarRelationFilter, Prisma.MaterialWhereInput>
@@ -320,6 +348,8 @@ export type InventoryBatchOrderByWithAggregationInput = {
   receivedAt?: Prisma.SortOrder
   usableUntil?: Prisma.SortOrderInput | Prisma.SortOrder
   unitCost?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrderInput | Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrderInput | Prisma.SortOrder
   costEstimated?: Prisma.SortOrder
   _count?: Prisma.InventoryBatchCountOrderByAggregateInput
   _avg?: Prisma.InventoryBatchAvgOrderByAggregateInput
@@ -340,6 +370,8 @@ export type InventoryBatchScalarWhereWithAggregatesInput = {
   receivedAt?: Prisma.DateTimeWithAggregatesFilter<"InventoryBatch"> | Date | string
   usableUntil?: Prisma.DateTimeNullableWithAggregatesFilter<"InventoryBatch"> | Date | string | null
   unitCost?: Prisma.DecimalWithAggregatesFilter<"InventoryBatch"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.DecimalNullableWithAggregatesFilter<"InventoryBatch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.DecimalNullableWithAggregatesFilter<"InventoryBatch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolWithAggregatesFilter<"InventoryBatch"> | boolean
 }
 
@@ -349,6 +381,8 @@ export type InventoryBatchCreateInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   store: Prisma.StoreCreateNestedOneWithoutBatchesInput
   material: Prisma.MaterialCreateNestedOneWithoutBatchesInput
@@ -372,6 +406,8 @@ export type InventoryBatchUncheckedCreateInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   balances?: Prisma.BatchBalanceUncheckedCreateNestedManyWithoutBatchInput
   reservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutBatchInput
@@ -389,6 +425,8 @@ export type InventoryBatchUpdateInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   store?: Prisma.StoreUpdateOneRequiredWithoutBatchesNestedInput
   material?: Prisma.MaterialUpdateOneRequiredWithoutBatchesNestedInput
@@ -412,6 +450,8 @@ export type InventoryBatchUncheckedUpdateInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   balances?: Prisma.BatchBalanceUncheckedUpdateManyWithoutBatchNestedInput
   reservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutBatchNestedInput
@@ -432,6 +472,8 @@ export type InventoryBatchCreateManyInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
 }
 
@@ -441,6 +483,8 @@ export type InventoryBatchUpdateManyMutationInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -453,6 +497,8 @@ export type InventoryBatchUncheckedUpdateManyInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -485,11 +531,15 @@ export type InventoryBatchCountOrderByAggregateInput = {
   receivedAt?: Prisma.SortOrder
   usableUntil?: Prisma.SortOrder
   unitCost?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
   costEstimated?: Prisma.SortOrder
 }
 
 export type InventoryBatchAvgOrderByAggregateInput = {
   unitCost?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
 }
 
 export type InventoryBatchMaxOrderByAggregateInput = {
@@ -501,6 +551,8 @@ export type InventoryBatchMaxOrderByAggregateInput = {
   receivedAt?: Prisma.SortOrder
   usableUntil?: Prisma.SortOrder
   unitCost?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
   costEstimated?: Prisma.SortOrder
 }
 
@@ -513,11 +565,15 @@ export type InventoryBatchMinOrderByAggregateInput = {
   receivedAt?: Prisma.SortOrder
   usableUntil?: Prisma.SortOrder
   unitCost?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
   costEstimated?: Prisma.SortOrder
 }
 
 export type InventoryBatchSumOrderByAggregateInput = {
   unitCost?: Prisma.SortOrder
+  channelLossRate?: Prisma.SortOrder
+  lossAdjustedUnitCost?: Prisma.SortOrder
 }
 
 export type InventoryBatchScalarRelationFilter = {
@@ -761,6 +817,8 @@ export type InventoryBatchCreateWithoutStoreInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   material: Prisma.MaterialCreateNestedOneWithoutBatchesInput
   receiptLine?: Prisma.GoodsReceiptLineCreateNestedOneWithoutBatchInput
@@ -782,6 +840,8 @@ export type InventoryBatchUncheckedCreateWithoutStoreInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   balances?: Prisma.BatchBalanceUncheckedCreateNestedManyWithoutBatchInput
   reservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutBatchInput
@@ -831,6 +891,8 @@ export type InventoryBatchScalarWhereInput = {
   receivedAt?: Prisma.DateTimeFilter<"InventoryBatch"> | Date | string
   usableUntil?: Prisma.DateTimeNullableFilter<"InventoryBatch"> | Date | string | null
   unitCost?: Prisma.DecimalFilter<"InventoryBatch"> | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.DecimalNullableFilter<"InventoryBatch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.DecimalNullableFilter<"InventoryBatch"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFilter<"InventoryBatch"> | boolean
 }
 
@@ -840,6 +902,8 @@ export type InventoryBatchCreateWithoutMaterialInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   store: Prisma.StoreCreateNestedOneWithoutBatchesInput
   receiptLine?: Prisma.GoodsReceiptLineCreateNestedOneWithoutBatchInput
@@ -861,6 +925,8 @@ export type InventoryBatchUncheckedCreateWithoutMaterialInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   balances?: Prisma.BatchBalanceUncheckedCreateNestedManyWithoutBatchInput
   reservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutBatchInput
@@ -904,6 +970,8 @@ export type InventoryBatchCreateWithoutReceiptLineInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   store: Prisma.StoreCreateNestedOneWithoutBatchesInput
   material: Prisma.MaterialCreateNestedOneWithoutBatchesInput
@@ -925,6 +993,8 @@ export type InventoryBatchUncheckedCreateWithoutReceiptLineInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   balances?: Prisma.BatchBalanceUncheckedCreateNestedManyWithoutBatchInput
   reservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutBatchInput
@@ -958,6 +1028,8 @@ export type InventoryBatchUpdateWithoutReceiptLineInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   store?: Prisma.StoreUpdateOneRequiredWithoutBatchesNestedInput
   material?: Prisma.MaterialUpdateOneRequiredWithoutBatchesNestedInput
@@ -979,6 +1051,8 @@ export type InventoryBatchUncheckedUpdateWithoutReceiptLineInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   balances?: Prisma.BatchBalanceUncheckedUpdateManyWithoutBatchNestedInput
   reservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutBatchNestedInput
@@ -996,6 +1070,8 @@ export type InventoryBatchCreateWithoutBalancesInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   store: Prisma.StoreCreateNestedOneWithoutBatchesInput
   material: Prisma.MaterialCreateNestedOneWithoutBatchesInput
@@ -1018,6 +1094,8 @@ export type InventoryBatchUncheckedCreateWithoutBalancesInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   reservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutBatchInput
   transactions?: Prisma.InventoryTransactionUncheckedCreateNestedManyWithoutBatchInput
@@ -1050,6 +1128,8 @@ export type InventoryBatchUpdateWithoutBalancesInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   store?: Prisma.StoreUpdateOneRequiredWithoutBatchesNestedInput
   material?: Prisma.MaterialUpdateOneRequiredWithoutBatchesNestedInput
@@ -1072,6 +1152,8 @@ export type InventoryBatchUncheckedUpdateWithoutBalancesInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   reservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutBatchNestedInput
   transactions?: Prisma.InventoryTransactionUncheckedUpdateManyWithoutBatchNestedInput
@@ -1088,6 +1170,8 @@ export type InventoryBatchCreateWithoutConsumableRollsInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   store: Prisma.StoreCreateNestedOneWithoutBatchesInput
   material: Prisma.MaterialCreateNestedOneWithoutBatchesInput
@@ -1110,6 +1194,8 @@ export type InventoryBatchUncheckedCreateWithoutConsumableRollsInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   balances?: Prisma.BatchBalanceUncheckedCreateNestedManyWithoutBatchInput
   reservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutBatchInput
@@ -1142,6 +1228,8 @@ export type InventoryBatchUpdateWithoutConsumableRollsInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   store?: Prisma.StoreUpdateOneRequiredWithoutBatchesNestedInput
   material?: Prisma.MaterialUpdateOneRequiredWithoutBatchesNestedInput
@@ -1164,6 +1252,8 @@ export type InventoryBatchUncheckedUpdateWithoutConsumableRollsInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   balances?: Prisma.BatchBalanceUncheckedUpdateManyWithoutBatchNestedInput
   reservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutBatchNestedInput
@@ -1180,6 +1270,8 @@ export type InventoryBatchCreateWithoutReservationsInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   store: Prisma.StoreCreateNestedOneWithoutBatchesInput
   material: Prisma.MaterialCreateNestedOneWithoutBatchesInput
@@ -1202,6 +1294,8 @@ export type InventoryBatchUncheckedCreateWithoutReservationsInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   balances?: Prisma.BatchBalanceUncheckedCreateNestedManyWithoutBatchInput
   transactions?: Prisma.InventoryTransactionUncheckedCreateNestedManyWithoutBatchInput
@@ -1234,6 +1328,8 @@ export type InventoryBatchUpdateWithoutReservationsInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   store?: Prisma.StoreUpdateOneRequiredWithoutBatchesNestedInput
   material?: Prisma.MaterialUpdateOneRequiredWithoutBatchesNestedInput
@@ -1256,6 +1352,8 @@ export type InventoryBatchUncheckedUpdateWithoutReservationsInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   balances?: Prisma.BatchBalanceUncheckedUpdateManyWithoutBatchNestedInput
   transactions?: Prisma.InventoryTransactionUncheckedUpdateManyWithoutBatchNestedInput
@@ -1272,6 +1370,8 @@ export type InventoryBatchCreateWithoutTransactionsInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   store: Prisma.StoreCreateNestedOneWithoutBatchesInput
   material: Prisma.MaterialCreateNestedOneWithoutBatchesInput
@@ -1294,6 +1394,8 @@ export type InventoryBatchUncheckedCreateWithoutTransactionsInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   balances?: Prisma.BatchBalanceUncheckedCreateNestedManyWithoutBatchInput
   reservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutBatchInput
@@ -1326,6 +1428,8 @@ export type InventoryBatchUpdateWithoutTransactionsInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   store?: Prisma.StoreUpdateOneRequiredWithoutBatchesNestedInput
   material?: Prisma.MaterialUpdateOneRequiredWithoutBatchesNestedInput
@@ -1348,6 +1452,8 @@ export type InventoryBatchUncheckedUpdateWithoutTransactionsInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   balances?: Prisma.BatchBalanceUncheckedUpdateManyWithoutBatchNestedInput
   reservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutBatchNestedInput
@@ -1364,6 +1470,8 @@ export type InventoryBatchCreateWithoutUsagesInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   store: Prisma.StoreCreateNestedOneWithoutBatchesInput
   material: Prisma.MaterialCreateNestedOneWithoutBatchesInput
@@ -1386,6 +1494,8 @@ export type InventoryBatchUncheckedCreateWithoutUsagesInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   balances?: Prisma.BatchBalanceUncheckedCreateNestedManyWithoutBatchInput
   reservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutBatchInput
@@ -1418,6 +1528,8 @@ export type InventoryBatchUpdateWithoutUsagesInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   store?: Prisma.StoreUpdateOneRequiredWithoutBatchesNestedInput
   material?: Prisma.MaterialUpdateOneRequiredWithoutBatchesNestedInput
@@ -1440,6 +1552,8 @@ export type InventoryBatchUncheckedUpdateWithoutUsagesInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   balances?: Prisma.BatchBalanceUncheckedUpdateManyWithoutBatchNestedInput
   reservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutBatchNestedInput
@@ -1456,6 +1570,8 @@ export type InventoryBatchCreateWithoutSampleReservationsInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   store: Prisma.StoreCreateNestedOneWithoutBatchesInput
   material: Prisma.MaterialCreateNestedOneWithoutBatchesInput
@@ -1478,6 +1594,8 @@ export type InventoryBatchUncheckedCreateWithoutSampleReservationsInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   balances?: Prisma.BatchBalanceUncheckedCreateNestedManyWithoutBatchInput
   reservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutBatchInput
@@ -1510,6 +1628,8 @@ export type InventoryBatchUpdateWithoutSampleReservationsInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   store?: Prisma.StoreUpdateOneRequiredWithoutBatchesNestedInput
   material?: Prisma.MaterialUpdateOneRequiredWithoutBatchesNestedInput
@@ -1532,6 +1652,8 @@ export type InventoryBatchUncheckedUpdateWithoutSampleReservationsInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   balances?: Prisma.BatchBalanceUncheckedUpdateManyWithoutBatchNestedInput
   reservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutBatchNestedInput
@@ -1548,6 +1670,8 @@ export type InventoryBatchCreateWithoutStocktakeLinesInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   store: Prisma.StoreCreateNestedOneWithoutBatchesInput
   material: Prisma.MaterialCreateNestedOneWithoutBatchesInput
@@ -1570,6 +1694,8 @@ export type InventoryBatchUncheckedCreateWithoutStocktakeLinesInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   balances?: Prisma.BatchBalanceUncheckedCreateNestedManyWithoutBatchInput
   reservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutBatchInput
@@ -1602,6 +1728,8 @@ export type InventoryBatchUpdateWithoutStocktakeLinesInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   store?: Prisma.StoreUpdateOneRequiredWithoutBatchesNestedInput
   material?: Prisma.MaterialUpdateOneRequiredWithoutBatchesNestedInput
@@ -1624,6 +1752,8 @@ export type InventoryBatchUncheckedUpdateWithoutStocktakeLinesInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   balances?: Prisma.BatchBalanceUncheckedUpdateManyWithoutBatchNestedInput
   reservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutBatchNestedInput
@@ -1640,6 +1770,8 @@ export type InventoryBatchCreateWithoutLossesInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   store: Prisma.StoreCreateNestedOneWithoutBatchesInput
   material: Prisma.MaterialCreateNestedOneWithoutBatchesInput
@@ -1662,6 +1794,8 @@ export type InventoryBatchUncheckedCreateWithoutLossesInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
   balances?: Prisma.BatchBalanceUncheckedCreateNestedManyWithoutBatchInput
   reservations?: Prisma.InventoryReservationUncheckedCreateNestedManyWithoutBatchInput
@@ -1694,6 +1828,8 @@ export type InventoryBatchUpdateWithoutLossesInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   store?: Prisma.StoreUpdateOneRequiredWithoutBatchesNestedInput
   material?: Prisma.MaterialUpdateOneRequiredWithoutBatchesNestedInput
@@ -1716,6 +1852,8 @@ export type InventoryBatchUncheckedUpdateWithoutLossesInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   balances?: Prisma.BatchBalanceUncheckedUpdateManyWithoutBatchNestedInput
   reservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutBatchNestedInput
@@ -1734,6 +1872,8 @@ export type InventoryBatchCreateManyStoreInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
 }
 
@@ -1743,6 +1883,8 @@ export type InventoryBatchUpdateWithoutStoreInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   material?: Prisma.MaterialUpdateOneRequiredWithoutBatchesNestedInput
   receiptLine?: Prisma.GoodsReceiptLineUpdateOneWithoutBatchNestedInput
@@ -1764,6 +1906,8 @@ export type InventoryBatchUncheckedUpdateWithoutStoreInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   balances?: Prisma.BatchBalanceUncheckedUpdateManyWithoutBatchNestedInput
   reservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutBatchNestedInput
@@ -1783,6 +1927,8 @@ export type InventoryBatchUncheckedUpdateManyWithoutStoreInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -1794,6 +1940,8 @@ export type InventoryBatchCreateManyMaterialInput = {
   receivedAt?: Date | string
   usableUntil?: Date | string | null
   unitCost: runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: boolean
 }
 
@@ -1803,6 +1951,8 @@ export type InventoryBatchUpdateWithoutMaterialInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   store?: Prisma.StoreUpdateOneRequiredWithoutBatchesNestedInput
   receiptLine?: Prisma.GoodsReceiptLineUpdateOneWithoutBatchNestedInput
@@ -1824,6 +1974,8 @@ export type InventoryBatchUncheckedUpdateWithoutMaterialInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
   balances?: Prisma.BatchBalanceUncheckedUpdateManyWithoutBatchNestedInput
   reservations?: Prisma.InventoryReservationUncheckedUpdateManyWithoutBatchNestedInput
@@ -1843,6 +1995,8 @@ export type InventoryBatchUncheckedUpdateManyWithoutMaterialInput = {
   receivedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   usableUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   unitCost?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  channelLossRate?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  lossAdjustedUnitCost?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
   costEstimated?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
@@ -1949,6 +2103,8 @@ export type InventoryBatchSelect<ExtArgs extends runtime.Types.Extensions.Intern
   receivedAt?: boolean
   usableUntil?: boolean
   unitCost?: boolean
+  channelLossRate?: boolean
+  lossAdjustedUnitCost?: boolean
   costEstimated?: boolean
   store?: boolean | Prisma.StoreDefaultArgs<ExtArgs>
   material?: boolean | Prisma.MaterialDefaultArgs<ExtArgs>
@@ -1973,6 +2129,8 @@ export type InventoryBatchSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   receivedAt?: boolean
   usableUntil?: boolean
   unitCost?: boolean
+  channelLossRate?: boolean
+  lossAdjustedUnitCost?: boolean
   costEstimated?: boolean
   store?: boolean | Prisma.StoreDefaultArgs<ExtArgs>
   material?: boolean | Prisma.MaterialDefaultArgs<ExtArgs>
@@ -1988,6 +2146,8 @@ export type InventoryBatchSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   receivedAt?: boolean
   usableUntil?: boolean
   unitCost?: boolean
+  channelLossRate?: boolean
+  lossAdjustedUnitCost?: boolean
   costEstimated?: boolean
   store?: boolean | Prisma.StoreDefaultArgs<ExtArgs>
   material?: boolean | Prisma.MaterialDefaultArgs<ExtArgs>
@@ -2003,10 +2163,12 @@ export type InventoryBatchSelectScalar = {
   receivedAt?: boolean
   usableUntil?: boolean
   unitCost?: boolean
+  channelLossRate?: boolean
+  lossAdjustedUnitCost?: boolean
   costEstimated?: boolean
 }
 
-export type InventoryBatchOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "storeId" | "materialId" | "receiptLineId" | "batchNo" | "receivedAt" | "usableUntil" | "unitCost" | "costEstimated", ExtArgs["result"]["inventoryBatch"]>
+export type InventoryBatchOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "storeId" | "materialId" | "receiptLineId" | "batchNo" | "receivedAt" | "usableUntil" | "unitCost" | "channelLossRate" | "lossAdjustedUnitCost" | "costEstimated", ExtArgs["result"]["inventoryBatch"]>
 export type InventoryBatchInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   store?: boolean | Prisma.StoreDefaultArgs<ExtArgs>
   material?: boolean | Prisma.MaterialDefaultArgs<ExtArgs>
@@ -2056,6 +2218,8 @@ export type $InventoryBatchPayload<ExtArgs extends runtime.Types.Extensions.Inte
     receivedAt: Date
     usableUntil: Date | null
     unitCost: runtime.Decimal
+    channelLossRate: runtime.Decimal | null
+    lossAdjustedUnitCost: runtime.Decimal | null
     costEstimated: boolean
   }, ExtArgs["result"]["inventoryBatch"]>
   composites: {}
@@ -2499,6 +2663,8 @@ export interface InventoryBatchFieldRefs {
   readonly receivedAt: Prisma.FieldRef<"InventoryBatch", 'DateTime'>
   readonly usableUntil: Prisma.FieldRef<"InventoryBatch", 'DateTime'>
   readonly unitCost: Prisma.FieldRef<"InventoryBatch", 'Decimal'>
+  readonly channelLossRate: Prisma.FieldRef<"InventoryBatch", 'Decimal'>
+  readonly lossAdjustedUnitCost: Prisma.FieldRef<"InventoryBatch", 'Decimal'>
   readonly costEstimated: Prisma.FieldRef<"InventoryBatch", 'Boolean'>
 }
     

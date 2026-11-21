@@ -44,6 +44,9 @@ export type SamplePlanItemMinAggregateOutputType = {
   mandatory: boolean | null
   candidateState: $Enums.SamplePlanCandidateState | null
   sequenceNo: number | null
+  photoDueAt: Date | null
+  retentionUntil: Date | null
+  autoSchedule: boolean | null
 }
 
 export type SamplePlanItemMaxAggregateOutputType = {
@@ -54,6 +57,9 @@ export type SamplePlanItemMaxAggregateOutputType = {
   mandatory: boolean | null
   candidateState: $Enums.SamplePlanCandidateState | null
   sequenceNo: number | null
+  photoDueAt: Date | null
+  retentionUntil: Date | null
+  autoSchedule: boolean | null
 }
 
 export type SamplePlanItemCountAggregateOutputType = {
@@ -64,6 +70,9 @@ export type SamplePlanItemCountAggregateOutputType = {
   mandatory: number
   candidateState: number
   sequenceNo: number
+  photoDueAt: number
+  retentionUntil: number
+  autoSchedule: number
   _all: number
 }
 
@@ -86,6 +95,9 @@ export type SamplePlanItemMinAggregateInputType = {
   mandatory?: true
   candidateState?: true
   sequenceNo?: true
+  photoDueAt?: true
+  retentionUntil?: true
+  autoSchedule?: true
 }
 
 export type SamplePlanItemMaxAggregateInputType = {
@@ -96,6 +108,9 @@ export type SamplePlanItemMaxAggregateInputType = {
   mandatory?: true
   candidateState?: true
   sequenceNo?: true
+  photoDueAt?: true
+  retentionUntil?: true
+  autoSchedule?: true
 }
 
 export type SamplePlanItemCountAggregateInputType = {
@@ -106,6 +121,9 @@ export type SamplePlanItemCountAggregateInputType = {
   mandatory?: true
   candidateState?: true
   sequenceNo?: true
+  photoDueAt?: true
+  retentionUntil?: true
+  autoSchedule?: true
   _all?: true
 }
 
@@ -203,6 +221,9 @@ export type SamplePlanItemGroupByOutputType = {
   mandatory: boolean
   candidateState: $Enums.SamplePlanCandidateState
   sequenceNo: number | null
+  photoDueAt: Date | null
+  retentionUntil: Date | null
+  autoSchedule: boolean
   _count: SamplePlanItemCountAggregateOutputType | null
   _avg: SamplePlanItemAvgAggregateOutputType | null
   _sum: SamplePlanItemSumAggregateOutputType | null
@@ -236,6 +257,9 @@ export type SamplePlanItemWhereInput = {
   mandatory?: Prisma.BoolFilter<"SamplePlanItem"> | boolean
   candidateState?: Prisma.EnumSamplePlanCandidateStateFilter<"SamplePlanItem"> | $Enums.SamplePlanCandidateState
   sequenceNo?: Prisma.IntNullableFilter<"SamplePlanItem"> | number | null
+  photoDueAt?: Prisma.DateTimeNullableFilter<"SamplePlanItem"> | Date | string | null
+  retentionUntil?: Prisma.DateTimeNullableFilter<"SamplePlanItem"> | Date | string | null
+  autoSchedule?: Prisma.BoolFilter<"SamplePlanItem"> | boolean
   plan?: Prisma.XOR<Prisma.SamplePlanScalarRelationFilter, Prisma.SamplePlanWhereInput>
   sample?: Prisma.XOR<Prisma.SampleScalarRelationFilter, Prisma.SampleWhereInput>
 }
@@ -248,6 +272,9 @@ export type SamplePlanItemOrderByWithRelationInput = {
   mandatory?: Prisma.SortOrder
   candidateState?: Prisma.SortOrder
   sequenceNo?: Prisma.SortOrderInput | Prisma.SortOrder
+  photoDueAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  retentionUntil?: Prisma.SortOrderInput | Prisma.SortOrder
+  autoSchedule?: Prisma.SortOrder
   plan?: Prisma.SamplePlanOrderByWithRelationInput
   sample?: Prisma.SampleOrderByWithRelationInput
 }
@@ -265,6 +292,9 @@ export type SamplePlanItemWhereUniqueInput = Prisma.AtLeast<{
   mandatory?: Prisma.BoolFilter<"SamplePlanItem"> | boolean
   candidateState?: Prisma.EnumSamplePlanCandidateStateFilter<"SamplePlanItem"> | $Enums.SamplePlanCandidateState
   sequenceNo?: Prisma.IntNullableFilter<"SamplePlanItem"> | number | null
+  photoDueAt?: Prisma.DateTimeNullableFilter<"SamplePlanItem"> | Date | string | null
+  retentionUntil?: Prisma.DateTimeNullableFilter<"SamplePlanItem"> | Date | string | null
+  autoSchedule?: Prisma.BoolFilter<"SamplePlanItem"> | boolean
   plan?: Prisma.XOR<Prisma.SamplePlanScalarRelationFilter, Prisma.SamplePlanWhereInput>
   sample?: Prisma.XOR<Prisma.SampleScalarRelationFilter, Prisma.SampleWhereInput>
 }, "id" | "planId_sampleId" | "planId_sequenceNo">
@@ -277,6 +307,9 @@ export type SamplePlanItemOrderByWithAggregationInput = {
   mandatory?: Prisma.SortOrder
   candidateState?: Prisma.SortOrder
   sequenceNo?: Prisma.SortOrderInput | Prisma.SortOrder
+  photoDueAt?: Prisma.SortOrderInput | Prisma.SortOrder
+  retentionUntil?: Prisma.SortOrderInput | Prisma.SortOrder
+  autoSchedule?: Prisma.SortOrder
   _count?: Prisma.SamplePlanItemCountOrderByAggregateInput
   _avg?: Prisma.SamplePlanItemAvgOrderByAggregateInput
   _max?: Prisma.SamplePlanItemMaxOrderByAggregateInput
@@ -295,6 +328,9 @@ export type SamplePlanItemScalarWhereWithAggregatesInput = {
   mandatory?: Prisma.BoolWithAggregatesFilter<"SamplePlanItem"> | boolean
   candidateState?: Prisma.EnumSamplePlanCandidateStateWithAggregatesFilter<"SamplePlanItem"> | $Enums.SamplePlanCandidateState
   sequenceNo?: Prisma.IntNullableWithAggregatesFilter<"SamplePlanItem"> | number | null
+  photoDueAt?: Prisma.DateTimeNullableWithAggregatesFilter<"SamplePlanItem"> | Date | string | null
+  retentionUntil?: Prisma.DateTimeNullableWithAggregatesFilter<"SamplePlanItem"> | Date | string | null
+  autoSchedule?: Prisma.BoolWithAggregatesFilter<"SamplePlanItem"> | boolean
 }
 
 export type SamplePlanItemCreateInput = {
@@ -303,6 +339,9 @@ export type SamplePlanItemCreateInput = {
   mandatory?: boolean
   candidateState?: $Enums.SamplePlanCandidateState
   sequenceNo?: number | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  autoSchedule?: boolean
   plan: Prisma.SamplePlanCreateNestedOneWithoutItemsInput
   sample: Prisma.SampleCreateNestedOneWithoutPlanItemsInput
 }
@@ -315,6 +354,9 @@ export type SamplePlanItemUncheckedCreateInput = {
   mandatory?: boolean
   candidateState?: $Enums.SamplePlanCandidateState
   sequenceNo?: number | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  autoSchedule?: boolean
 }
 
 export type SamplePlanItemUpdateInput = {
@@ -323,6 +365,9 @@ export type SamplePlanItemUpdateInput = {
   mandatory?: Prisma.BoolFieldUpdateOperationsInput | boolean
   candidateState?: Prisma.EnumSamplePlanCandidateStateFieldUpdateOperationsInput | $Enums.SamplePlanCandidateState
   sequenceNo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  autoSchedule?: Prisma.BoolFieldUpdateOperationsInput | boolean
   plan?: Prisma.SamplePlanUpdateOneRequiredWithoutItemsNestedInput
   sample?: Prisma.SampleUpdateOneRequiredWithoutPlanItemsNestedInput
 }
@@ -335,6 +380,9 @@ export type SamplePlanItemUncheckedUpdateInput = {
   mandatory?: Prisma.BoolFieldUpdateOperationsInput | boolean
   candidateState?: Prisma.EnumSamplePlanCandidateStateFieldUpdateOperationsInput | $Enums.SamplePlanCandidateState
   sequenceNo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  autoSchedule?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type SamplePlanItemCreateManyInput = {
@@ -345,6 +393,9 @@ export type SamplePlanItemCreateManyInput = {
   mandatory?: boolean
   candidateState?: $Enums.SamplePlanCandidateState
   sequenceNo?: number | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  autoSchedule?: boolean
 }
 
 export type SamplePlanItemUpdateManyMutationInput = {
@@ -353,6 +404,9 @@ export type SamplePlanItemUpdateManyMutationInput = {
   mandatory?: Prisma.BoolFieldUpdateOperationsInput | boolean
   candidateState?: Prisma.EnumSamplePlanCandidateStateFieldUpdateOperationsInput | $Enums.SamplePlanCandidateState
   sequenceNo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  autoSchedule?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type SamplePlanItemUncheckedUpdateManyInput = {
@@ -363,6 +417,9 @@ export type SamplePlanItemUncheckedUpdateManyInput = {
   mandatory?: Prisma.BoolFieldUpdateOperationsInput | boolean
   candidateState?: Prisma.EnumSamplePlanCandidateStateFieldUpdateOperationsInput | $Enums.SamplePlanCandidateState
   sequenceNo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  autoSchedule?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type SamplePlanItemListRelationFilter = {
@@ -393,6 +450,9 @@ export type SamplePlanItemCountOrderByAggregateInput = {
   mandatory?: Prisma.SortOrder
   candidateState?: Prisma.SortOrder
   sequenceNo?: Prisma.SortOrder
+  photoDueAt?: Prisma.SortOrder
+  retentionUntil?: Prisma.SortOrder
+  autoSchedule?: Prisma.SortOrder
 }
 
 export type SamplePlanItemAvgOrderByAggregateInput = {
@@ -408,6 +468,9 @@ export type SamplePlanItemMaxOrderByAggregateInput = {
   mandatory?: Prisma.SortOrder
   candidateState?: Prisma.SortOrder
   sequenceNo?: Prisma.SortOrder
+  photoDueAt?: Prisma.SortOrder
+  retentionUntil?: Prisma.SortOrder
+  autoSchedule?: Prisma.SortOrder
 }
 
 export type SamplePlanItemMinOrderByAggregateInput = {
@@ -418,6 +481,9 @@ export type SamplePlanItemMinOrderByAggregateInput = {
   mandatory?: Prisma.SortOrder
   candidateState?: Prisma.SortOrder
   sequenceNo?: Prisma.SortOrder
+  photoDueAt?: Prisma.SortOrder
+  retentionUntil?: Prisma.SortOrder
+  autoSchedule?: Prisma.SortOrder
 }
 
 export type SamplePlanItemSumOrderByAggregateInput = {
@@ -519,6 +585,9 @@ export type SamplePlanItemCreateWithoutSampleInput = {
   mandatory?: boolean
   candidateState?: $Enums.SamplePlanCandidateState
   sequenceNo?: number | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  autoSchedule?: boolean
   plan: Prisma.SamplePlanCreateNestedOneWithoutItemsInput
 }
 
@@ -529,6 +598,9 @@ export type SamplePlanItemUncheckedCreateWithoutSampleInput = {
   mandatory?: boolean
   candidateState?: $Enums.SamplePlanCandidateState
   sequenceNo?: number | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  autoSchedule?: boolean
 }
 
 export type SamplePlanItemCreateOrConnectWithoutSampleInput = {
@@ -568,6 +640,9 @@ export type SamplePlanItemScalarWhereInput = {
   mandatory?: Prisma.BoolFilter<"SamplePlanItem"> | boolean
   candidateState?: Prisma.EnumSamplePlanCandidateStateFilter<"SamplePlanItem"> | $Enums.SamplePlanCandidateState
   sequenceNo?: Prisma.IntNullableFilter<"SamplePlanItem"> | number | null
+  photoDueAt?: Prisma.DateTimeNullableFilter<"SamplePlanItem"> | Date | string | null
+  retentionUntil?: Prisma.DateTimeNullableFilter<"SamplePlanItem"> | Date | string | null
+  autoSchedule?: Prisma.BoolFilter<"SamplePlanItem"> | boolean
 }
 
 export type SamplePlanItemCreateWithoutPlanInput = {
@@ -576,6 +651,9 @@ export type SamplePlanItemCreateWithoutPlanInput = {
   mandatory?: boolean
   candidateState?: $Enums.SamplePlanCandidateState
   sequenceNo?: number | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  autoSchedule?: boolean
   sample: Prisma.SampleCreateNestedOneWithoutPlanItemsInput
 }
 
@@ -586,6 +664,9 @@ export type SamplePlanItemUncheckedCreateWithoutPlanInput = {
   mandatory?: boolean
   candidateState?: $Enums.SamplePlanCandidateState
   sequenceNo?: number | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  autoSchedule?: boolean
 }
 
 export type SamplePlanItemCreateOrConnectWithoutPlanInput = {
@@ -621,6 +702,9 @@ export type SamplePlanItemCreateManySampleInput = {
   mandatory?: boolean
   candidateState?: $Enums.SamplePlanCandidateState
   sequenceNo?: number | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  autoSchedule?: boolean
 }
 
 export type SamplePlanItemUpdateWithoutSampleInput = {
@@ -629,6 +713,9 @@ export type SamplePlanItemUpdateWithoutSampleInput = {
   mandatory?: Prisma.BoolFieldUpdateOperationsInput | boolean
   candidateState?: Prisma.EnumSamplePlanCandidateStateFieldUpdateOperationsInput | $Enums.SamplePlanCandidateState
   sequenceNo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  autoSchedule?: Prisma.BoolFieldUpdateOperationsInput | boolean
   plan?: Prisma.SamplePlanUpdateOneRequiredWithoutItemsNestedInput
 }
 
@@ -639,6 +726,9 @@ export type SamplePlanItemUncheckedUpdateWithoutSampleInput = {
   mandatory?: Prisma.BoolFieldUpdateOperationsInput | boolean
   candidateState?: Prisma.EnumSamplePlanCandidateStateFieldUpdateOperationsInput | $Enums.SamplePlanCandidateState
   sequenceNo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  autoSchedule?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type SamplePlanItemUncheckedUpdateManyWithoutSampleInput = {
@@ -648,6 +738,9 @@ export type SamplePlanItemUncheckedUpdateManyWithoutSampleInput = {
   mandatory?: Prisma.BoolFieldUpdateOperationsInput | boolean
   candidateState?: Prisma.EnumSamplePlanCandidateStateFieldUpdateOperationsInput | $Enums.SamplePlanCandidateState
   sequenceNo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  autoSchedule?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type SamplePlanItemCreateManyPlanInput = {
@@ -657,6 +750,9 @@ export type SamplePlanItemCreateManyPlanInput = {
   mandatory?: boolean
   candidateState?: $Enums.SamplePlanCandidateState
   sequenceNo?: number | null
+  photoDueAt?: Date | string | null
+  retentionUntil?: Date | string | null
+  autoSchedule?: boolean
 }
 
 export type SamplePlanItemUpdateWithoutPlanInput = {
@@ -665,6 +761,9 @@ export type SamplePlanItemUpdateWithoutPlanInput = {
   mandatory?: Prisma.BoolFieldUpdateOperationsInput | boolean
   candidateState?: Prisma.EnumSamplePlanCandidateStateFieldUpdateOperationsInput | $Enums.SamplePlanCandidateState
   sequenceNo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  autoSchedule?: Prisma.BoolFieldUpdateOperationsInput | boolean
   sample?: Prisma.SampleUpdateOneRequiredWithoutPlanItemsNestedInput
 }
 
@@ -675,6 +774,9 @@ export type SamplePlanItemUncheckedUpdateWithoutPlanInput = {
   mandatory?: Prisma.BoolFieldUpdateOperationsInput | boolean
   candidateState?: Prisma.EnumSamplePlanCandidateStateFieldUpdateOperationsInput | $Enums.SamplePlanCandidateState
   sequenceNo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  autoSchedule?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 export type SamplePlanItemUncheckedUpdateManyWithoutPlanInput = {
@@ -684,6 +786,9 @@ export type SamplePlanItemUncheckedUpdateManyWithoutPlanInput = {
   mandatory?: Prisma.BoolFieldUpdateOperationsInput | boolean
   candidateState?: Prisma.EnumSamplePlanCandidateStateFieldUpdateOperationsInput | $Enums.SamplePlanCandidateState
   sequenceNo?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  photoDueAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  retentionUntil?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  autoSchedule?: Prisma.BoolFieldUpdateOperationsInput | boolean
 }
 
 
@@ -696,6 +801,9 @@ export type SamplePlanItemSelect<ExtArgs extends runtime.Types.Extensions.Intern
   mandatory?: boolean
   candidateState?: boolean
   sequenceNo?: boolean
+  photoDueAt?: boolean
+  retentionUntil?: boolean
+  autoSchedule?: boolean
   plan?: boolean | Prisma.SamplePlanDefaultArgs<ExtArgs>
   sample?: boolean | Prisma.SampleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["samplePlanItem"]>
@@ -708,6 +816,9 @@ export type SamplePlanItemSelectCreateManyAndReturn<ExtArgs extends runtime.Type
   mandatory?: boolean
   candidateState?: boolean
   sequenceNo?: boolean
+  photoDueAt?: boolean
+  retentionUntil?: boolean
+  autoSchedule?: boolean
   plan?: boolean | Prisma.SamplePlanDefaultArgs<ExtArgs>
   sample?: boolean | Prisma.SampleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["samplePlanItem"]>
@@ -720,6 +831,9 @@ export type SamplePlanItemSelectUpdateManyAndReturn<ExtArgs extends runtime.Type
   mandatory?: boolean
   candidateState?: boolean
   sequenceNo?: boolean
+  photoDueAt?: boolean
+  retentionUntil?: boolean
+  autoSchedule?: boolean
   plan?: boolean | Prisma.SamplePlanDefaultArgs<ExtArgs>
   sample?: boolean | Prisma.SampleDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["samplePlanItem"]>
@@ -732,9 +846,12 @@ export type SamplePlanItemSelectScalar = {
   mandatory?: boolean
   candidateState?: boolean
   sequenceNo?: boolean
+  photoDueAt?: boolean
+  retentionUntil?: boolean
+  autoSchedule?: boolean
 }
 
-export type SamplePlanItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "planId" | "sampleId" | "quantity" | "mandatory" | "candidateState" | "sequenceNo", ExtArgs["result"]["samplePlanItem"]>
+export type SamplePlanItemOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "planId" | "sampleId" | "quantity" | "mandatory" | "candidateState" | "sequenceNo" | "photoDueAt" | "retentionUntil" | "autoSchedule", ExtArgs["result"]["samplePlanItem"]>
 export type SamplePlanItemInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   plan?: boolean | Prisma.SamplePlanDefaultArgs<ExtArgs>
   sample?: boolean | Prisma.SampleDefaultArgs<ExtArgs>
@@ -762,6 +879,9 @@ export type $SamplePlanItemPayload<ExtArgs extends runtime.Types.Extensions.Inte
     mandatory: boolean
     candidateState: $Enums.SamplePlanCandidateState
     sequenceNo: number | null
+    photoDueAt: Date | null
+    retentionUntil: Date | null
+    autoSchedule: boolean
   }, ExtArgs["result"]["samplePlanItem"]>
   composites: {}
 }
@@ -1194,6 +1314,9 @@ export interface SamplePlanItemFieldRefs {
   readonly mandatory: Prisma.FieldRef<"SamplePlanItem", 'Boolean'>
   readonly candidateState: Prisma.FieldRef<"SamplePlanItem", 'SamplePlanCandidateState'>
   readonly sequenceNo: Prisma.FieldRef<"SamplePlanItem", 'Int'>
+  readonly photoDueAt: Prisma.FieldRef<"SamplePlanItem", 'DateTime'>
+  readonly retentionUntil: Prisma.FieldRef<"SamplePlanItem", 'DateTime'>
+  readonly autoSchedule: Prisma.FieldRef<"SamplePlanItem", 'Boolean'>
 }
     
 

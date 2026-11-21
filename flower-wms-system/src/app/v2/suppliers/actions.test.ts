@@ -151,6 +151,8 @@ function supplierForm(overrides: Record<string, string> = {}): FormData {
   form.set("phone", "13800000000");
   form.set("wechat", "wx-test");
   form.set("notes", "E1.3 走读");
+  form.set("defaultLossRate", "0.20");
+  form.set("lossRateNote", "远途渠道");
   for (const [key, value] of Object.entries(overrides)) form.set(key, value);
   return form;
 }
@@ -181,6 +183,8 @@ async function main(): Promise<void> {
     phone: "13800000000",
     wechat: "wx-test",
     notes: "E1.3 走读",
+    defaultLossRate: 0.2,
+    lossRateNote: "远途渠道",
   });
   assert.deepEqual(createResult, {
     ok: true,
